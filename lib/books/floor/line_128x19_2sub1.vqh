@@ -20,8 +20,8 @@
 #include "codebook.h"
 
 static long _huff_lengthlist_line_128x19_2sub1[] = {
-	 0, 2, 3, 3, 3, 3, 4, 3, 5, 9, 9, 8, 8, 8, 8, 8,
-	 8, 8,
+	 0, 3, 4, 4, 4, 4, 5, 4, 5, 4, 5, 4, 4, 4, 4, 4,
+	 5, 4,
 };
 
 static static_codebook _huff_book_line_128x19_2sub1 = {

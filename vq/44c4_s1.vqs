@@ -7,7 +7,7 @@ GO
 haux _44c4_short.vqd 0,16,2
 
 >_44c4 noninterleaved
-haux _44c4_long.vqd 0,60,2
+haux _44c4_long.vqd 0,64,2
 	
 #iter 0
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.2 2001/12/12 09:45:24 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.3 2001/12/14 07:21:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -95,10 +95,6 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
     bm->avg_sampledesired=bi->queue_avg_time*vi->rate;
     bm->avg_centerdesired=bi->queue_avg_time*vi->rate*bi->queue_avg_center;
     bm->minmax_sampledesired=bi->queue_minmax_time*vi->rate;
-    
-    if(bm->avg_sampledesired<0)bm->avg_sampledesired=0;
-    if(bm->avg_centerdesired<0)bm->avg_centerdesired=0;
-    if(bm->minmax_sampledesired<0)bm->minmax_sampledesired=0;
     
     /* first find the max possible needed queue size */
     maxlatency=max(bm->avg_sampledesired-bm->avg_centerdesired,

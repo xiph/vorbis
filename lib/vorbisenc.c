@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.19 2001/12/12 09:45:26 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.20 2001/12/14 07:21:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -559,7 +559,7 @@ static int vorbis_encode_lowpass_init(vorbis_info *vi,double q,int block,...){
   }
   
   freq=(x[iq]*(1.-dq)+x[iq+1]*dq)*1000.;
-
+  if(freq>vi->rate/2)freq=vi->rate/2;
   /* lowpass needs to be set in the floor and the residue. */
 
   /* in the floor, the granularity can be very fine; it doesn't alter
@@ -572,10 +572,10 @@ static int vorbis_encode_lowpass_init(vorbis_info *vi,double q,int block,...){
      here to next boundary, or the vorbis spec will round it *down* to
      previous boundary in encode/decode */
   if(ci->residue_type[block]==2)
-    r->end=rint((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
+    r->end=((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
       r->grouping;
   else
-    r->end=rint((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
+    r->end=((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
       r->grouping;
   return(0);
 }
@@ -591,7 +591,9 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   ){
   int ret=0;
 
-  base_quality=.4;
+  base_quality+=.001;
+  if(base_quality<0.)base_quality=0.;
+  if(base_quality>.999)base_quality=.999;
 
   if(rate>40000){
     ret|=vorbis_encode_toplevel_init(vi,256,2048,channels,rate);
@@ -661,7 +663,7 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				      0, /* no residue backfill */
 				      _residue_template_44_stereo,
 				      4,  3,  2,  2,   1,  0,  0,  0,  0,  0,  0,
-				      4., 6., 6., 6., 10., 6., 6., 6., 6., 6., 6.);
+				      4., 6., 6., 6., 10., 6., 6., 4., 4., 4., 4.);
       
       ret|=vorbis_encode_residue_init(vi,base_quality,1,
 				      1, /* coupled */
@@ -669,7 +671,7 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				      0, /* no residue backfill */
 				      _residue_template_44_stereo,
 				      4,  3,  2,   2,   1,  0,  0,  0,  0,  0,  0,
-				      6., 6., 6., 10., 10., 6., 6., 6., 6., 6., 6.);      
+				      6., 6., 6., 10., 10., 6., 6., 4., 4., 4., 4.);      
 
       ret|=vorbis_encode_lowpass_init(vi,base_quality,0,
 				      15.1,15.8,16.5,17.9,20.5,
@@ -705,7 +707,31 @@ int vorbis_encode_init(vorbis_info *vi,
 		       long min_bitrate){
 
   /* it's temporary while I do the merge; relax */
-  return(vorbis_encode_init_vbr(vi,channels,rate, .4));
+  if(rate>40000){
+    if(nominal_bitrate>360){
+      return(vorbis_encode_init_vbr(vi,channels,rate, 1.));
+    }else if(nominal_bitrate>270){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .9));
+    }else if(nominal_bitrate>230){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .8));
+    }else if(nominal_bitrate>200){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .7));
+    }else if(nominal_bitrate>180){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .6));
+    }else if(nominal_bitrate>140){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .5));
+    }else if(nominal_bitrate>120){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .4));
+    }else if(nominal_bitrate>100){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .3));
+    }else if(nominal_bitrate>90){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .2));
+    }else if(nominal_bitrate>75){
+      return(vorbis_encode_init_vbr(vi,channels,rate, .1));
+    }else{
+      return(vorbis_encode_init_vbr(vi,channels,rate, .0));
+    }
+  }
 
   return(OV_EIMPL);
 }

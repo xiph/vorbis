@@ -38,7 +38,7 @@ haux _44c3_long.vqd 0,52,2
 :_s1_p5_0 res_long_part5_it0.vqd, 4, nonseq cull, 0 +- 1
 :_s2_p6_0 res_long_part6_it0.vqd, 2, nonseq cull, 0 +- 1 2 3 4
 
-:_s2_p7_0 res_long_part7_it0.vqd, 2, nonseq, 0 +- 67 134 201	
+:_s2_p7_0 res_long_part7_it0.vqd, 2, nonseq, 0 +- 67 134 201 268 335 402
 +_s2_p7_1, 2, nonseq, 0 +- 3 6 9 12 15 18 21 24 27 30 33
 +_s2_p7_2, 4, nonseq, 0 +- 1 
 
