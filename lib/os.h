@@ -13,12 +13,14 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.30 2002/06/28 22:19:37 xiphmont Exp $
+ last mod: $Id: os.h,v 1.31 2002/07/01 06:43:33 msmith Exp $
 
  ********************************************************************/
 
 #include <math.h>
 #include <ogg/os_types.h>
+
+#include "misc.h"
 
 #ifndef _V_IFDEFJAIL_H_
 #  define _V_IFDEFJAIL_H_
@@ -101,7 +103,7 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
 #endif
 
 
-#if defined(_WIN32) && !defined(__GNUC__)
+#if defined(_WIN32) && !defined(__GNUC__) && !defined(__BORLANDC__)
 #  define VORBIS_FPU_CONTROL
 
 typedef ogg_int16_t vorbis_fpu_control;
