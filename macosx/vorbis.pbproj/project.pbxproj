@@ -85,19 +85,11 @@
 		};
 		0867D69AFE84028FC02AAC07 = {
 			children = (
-				1058C7B0FEA5585E11CA2CBB,
-				1058C7B2FEA5585E11CA2CBB,
-				F552F5F60192892D01000105,
+				F58E51480199A96A01A802FE,
 			);
 			isa = PBXGroup;
 			name = "External Frameworks and Libraries";
 			refType = 4;
-		};
-		0867D69BFE84028FC02AAC07 = {
-			isa = PBXFrameworkReference;
-			name = Foundation.framework;
-			path = /System/Library/Frameworks/Foundation.framework;
-			refType = 0;
 		};
 		0867D69CFE84028FC02AAC07 = {
 			buildPhases = (
@@ -106,15 +98,14 @@
 				0867D69FFE84028FC02AAC07,
 				0867D6A0FE84028FC02AAC07,
 				0867D6A2FE84028FC02AAC07,
-				F586EB550191D88901A802FE,
 			);
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "\"$(HOME)/Library/Frameworks\"";
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				FRAMEWORK_VERSION = A;
-				HEADER_SEARCH_PATHS = "\"$(HOME)/Library/Frameworks/ogg.framework/Headers\"";
-				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				HEADER_SEARCH_PATHS = "";
+				INSTALL_PATH = /Library/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
 				OTHER_CFLAGS = "-D__MACOSX__";
 				OTHER_LDFLAGS = "";
@@ -126,8 +117,8 @@
 			dependencies = (
 			);
 			isa = PBXFrameworkTarget;
-			name = vorbis;
-			productInstallPath = "$(HOME)/Library/Frameworks";
+			name = Vorbis;
+			productInstallPath = /Library/Frameworks;
 			productName = vorbis;
 			productReference = 034768E0FF38A50411DB9C8B;
 			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
@@ -147,7 +138,7 @@
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleSignature</key>
-	<string>????</string>
+	<string>Vrbs</string>
 	<key>CFBundleVersion</key>
 	<string>0.0.1d1</string>
 	<key>NSPrincipalClass</key>
@@ -387,7 +378,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F58523380191D28601A802FE,
-				F58523390191D28601A802FE,
 				F585233A0191D28601A802FE,
 				F585233B0191D28601A802FE,
 				F585233C0191D28601A802FE,
@@ -418,6 +408,7 @@
 		0867D6A0FE84028FC02AAC07 = {
 			buildActionMask = 2147483647;
 			files = (
+				F58E51490199A96A01A802FE,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -428,12 +419,6 @@
 			);
 			isa = PBXRezBuildPhase;
 			name = "ResourceManager Resources";
-		};
-		0867D6A5FE840307C02AAC07 = {
-			isa = PBXFrameworkReference;
-			name = AppKit.framework;
-			path = /System/Library/Frameworks/AppKit.framework;
-			refType = 0;
 		};
 		089C1665FE841158C02AAC07 = {
 			children = (
@@ -469,50 +454,11 @@
 //082
 //083
 //084
-//100
-//101
-//102
-//103
-//104
-		1058C7B0FEA5585E11CA2CBB = {
-			children = (
-				1058C7B1FEA5585E11CA2CBB,
-			);
-			isa = PBXGroup;
-			name = "Linked Frameworks";
-			refType = 4;
-		};
-		1058C7B1FEA5585E11CA2CBB = {
-			isa = PBXFrameworkReference;
-			name = Cocoa.framework;
-			path = /System/Library/Frameworks/Cocoa.framework;
-			refType = 0;
-		};
-		1058C7B2FEA5585E11CA2CBB = {
-			children = (
-				0867D69BFE84028FC02AAC07,
-				0867D6A5FE840307C02AAC07,
-			);
-			isa = PBXGroup;
-			name = "Other Frameworks";
-			refType = 4;
-		};
-//100
-//101
-//102
-//103
-//104
 //F50
 //F51
 //F52
 //F53
 //F54
-		F552F5F60192892D01000105 = {
-			isa = PBXFrameworkReference;
-			name = ogg.framework;
-			path = /Users/giles/Library/Frameworks/ogg.framework;
-			refType = 0;
-		};
 		F58520B70191D12B01A802FE = {
 			children = (
 				F58520B80191D12B01A802FE,
@@ -934,18 +880,13 @@
 			children = (
 				F585211D0191D28501A802FE,
 				F58521FD0191D28601A802FE,
-				F58521DF0191D28601A802FE,
-				F58521E00191D28601A802FE,
-				F58521E10191D28601A802FE,
 				F58521E70191D28601A802FE,
-				F58521F00191D28601A802FE,
 				F58521F10191D28601A802FE,
-				F58521F20191D28601A802FE,
 				F585221B0191D28601A802FE,
 				F58522310191D28601A802FE,
+				F58521150191D28501A802FE,
 				F58521DA0191D28601A802FE,
 				F58521DB0191D28601A802FE,
-				F58521150191D28501A802FE,
 				F58521110191D28501A802FE,
 				F58521140191D28501A802FE,
 				F58521160191D28501A802FE,
@@ -1026,6 +967,7 @@
 		};
 		F585211D0191D28501A802FE = {
 			children = (
+				F58521460191D28501A802FE,
 				F585211F0191D28501A802FE,
 				F58521200191D28501A802FE,
 				F58521210191D28501A802FE,
@@ -1064,9 +1006,6 @@
 				F58521420191D28501A802FE,
 				F58521430191D28501A802FE,
 				F58521440191D28501A802FE,
-				F58521450191D28501A802FE,
-				F58521460191D28501A802FE,
-				F58521470191D28501A802FE,
 				F58521480191D28501A802FE,
 				F58521490191D28501A802FE,
 				F585214A0191D28501A802FE,
@@ -1393,19 +1332,9 @@
 			path = lsp9_1.vqh;
 			refType = 4;
 		};
-		F58521450191D28501A802FE = {
-			isa = PBXFileReference;
-			path = Makefile;
-			refType = 4;
-		};
 		F58521460191D28501A802FE = {
 			isa = PBXFileReference;
 			path = Makefile.am;
-			refType = 4;
-		};
-		F58521470191D28501A802FE = {
-			isa = PBXFileReference;
-			path = Makefile.in;
 			refType = 4;
 		};
 		F58521480191D28501A802FE = {
@@ -2113,21 +2042,6 @@
 			path = info.c;
 			refType = 4;
 		};
-		F58521DF0191D28601A802FE = {
-			isa = PBXFileReference;
-			path = libvorbis.la;
-			refType = 4;
-		};
-		F58521E00191D28601A802FE = {
-			isa = PBXFileReference;
-			path = libvorbisenc.la;
-			refType = 4;
-		};
-		F58521E10191D28601A802FE = {
-			isa = PBXFileReference;
-			path = libvorbisfile.la;
-			refType = 4;
-		};
 		F58521E20191D28601A802FE = {
 			isa = PBXFileReference;
 			path = lookup.c;
@@ -2168,19 +2082,9 @@
 			path = lsp.h;
 			refType = 4;
 		};
-		F58521F00191D28601A802FE = {
-			isa = PBXFileReference;
-			path = Makefile;
-			refType = 4;
-		};
 		F58521F10191D28601A802FE = {
 			isa = PBXFileReference;
 			path = Makefile.am;
-			refType = 4;
-		};
-		F58521F20191D28601A802FE = {
-			isa = PBXFileReference;
-			path = Makefile.in;
 			refType = 4;
 		};
 		F58521F30191D28601A802FE = {
@@ -2215,9 +2119,7 @@
 		};
 		F58521FD0191D28601A802FE = {
 			children = (
-				F58521FF0191D28601A802FE,
 				F58522000191D28601A802FE,
-				F58522010191D28601A802FE,
 				F58522020191D28601A802FE,
 				F58522030191D28601A802FE,
 				F58522040191D28601A802FE,
@@ -2243,19 +2145,9 @@
 			path = modes;
 			refType = 4;
 		};
-		F58521FF0191D28601A802FE = {
-			isa = PBXFileReference;
-			path = Makefile;
-			refType = 4;
-		};
 		F58522000191D28601A802FE = {
 			isa = PBXFileReference;
 			path = Makefile.am;
-			refType = 4;
-		};
-		F58522010191D28601A802FE = {
-			isa = PBXFileReference;
-			path = Makefile.in;
 			refType = 4;
 		};
 		F58522020191D28601A802FE = {
@@ -3702,12 +3594,6 @@
 			settings = {
 			};
 		};
-		F58523390191D28601A802FE = {
-			fileRef = F58521150191D28501A802FE;
-			isa = PBXBuildFile;
-			settings = {
-			};
-		};
 		F585233A0191D28601A802FE = {
 			fileRef = F58521160191D28501A802FE;
 			isa = PBXBuildFile;
@@ -3846,18 +3732,17 @@
 			settings = {
 			};
 		};
-		F586EB550191D88901A802FE = {
-			buildActionMask = 2147483647;
-			files = (
-			);
-			generatedFileNames = (
-			);
-			isa = PBXShellScriptBuildPhase;
-			name = "Shell Script";
-			neededFileNames = (
-			);
-			shellPath = /bin/sh;
-			shellScript = "installDir=\"${HOME}/Library/Frameworks\"\nfw=\"vorbis.framework\"\n\nmkdir -p \"${installDir}\"\nrm -rf \"${installDir}/${fw}\"\nditto build/${fw} \"${installDir}/${fw}\"\n## /usr/bin/cc -precomp \"${installDir}/${fw}/Headers/codec.h\" -o \"${installDir}/${fw}/Headers/codec.p\"\n";
+		F58E51480199A96A01A802FE = {
+			isa = PBXFrameworkReference;
+			name = Ogg.framework;
+			path = /Library/Frameworks/Ogg.framework;
+			refType = 0;
+		};
+		F58E51490199A96A01A802FE = {
+			fileRef = F58E51480199A96A01A802FE;
+			isa = PBXBuildFile;
+			settings = {
+			};
 		};
 	};
 	rootObject = 0867D690FE84028FC02AAC07;
