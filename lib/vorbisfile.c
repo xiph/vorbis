@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.27.2.3 2000/09/27 06:21:00 jack Exp $
+ last mod: $Id: vorbisfile.c,v 1.27.2.4 2000/10/11 01:05:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -202,19 +202,22 @@ static void _bisect_forward_serialno(OggVorbis_File *vf,
 /* uses the local ogg_stream storage in vf; this is important for
    non-streaming input sources */
 static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
-			  long *serialno){
+			  long *serialno,ogg_page *og_ptr){
   ogg_page og;
   ogg_packet op;
   int i,ret;
-
-  ret=_get_next_page(vf,&og,CHUNKSIZE);
-  if(ret==-1){
-    fprintf(stderr,"Did not find initial header for bitstream.\n");
-    return -1;
-  }
   
-  if(serialno)*serialno=ogg_page_serialno(&og);
-  ogg_stream_init(&vf->os,ogg_page_serialno(&og));
+  if(!og_ptr){
+    ret=_get_next_page(vf,&og,CHUNKSIZE);
+    if(ret==-1){
+      fprintf(stderr,"Did not find initial header for bitstream.\n");
+      return -1;
+    }
+    og_ptr=&og;
+  }
+
+  if(serialno)*serialno=ogg_page_serialno(og_ptr);
+  ogg_stream_init(&vf->os,ogg_page_serialno(og_ptr));
   
   /* extract the initial header from the first page and verify that the
      Ogg bitstream is in fact Vorbis data */
@@ -224,7 +227,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
   
   i=0;
   while(i<3){
-    ogg_stream_pagein(&vf->os,&og);
+    ogg_stream_pagein(&vf->os,og_ptr);
     while(i<3){
       int result=ogg_stream_packetout(&vf->os,&op);
       if(result==0)break;
@@ -239,7 +242,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
       i++;
     }
     if(i<3)
-      if(_get_next_page(vf,&og,1)<0){
+      if(_get_next_page(vf,og_ptr,1)<0){
 	fprintf(stderr,"Missing header in logical bitstream.\n");
 	goto bail_header;
       }
@@ -281,7 +284,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
       /* seek to the location of the initial header */
 
       _seek_helper(vf,vf->offsets[i]);
-      if(_fetch_headers(vf,vf->vi+i,vf->vc+i,NULL)==-1){
+      if(_fetch_headers(vf,vf->vi+i,vf->vc+i,NULL,NULL)==-1){
 	fprintf(stderr,"Error opening logical bitstream #%d.\n\n",i+1);
     	vf->dataoffsets[i]=-1;
       }else{
@@ -318,7 +321,11 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
 
 static int _make_decode_ready(OggVorbis_File *vf){
   if(vf->decode_ready)exit(1);
-  vorbis_synthesis_init(&vf->vd,vf->vi);
+  if(vf->seekable){
+    vorbis_synthesis_init(&vf->vd,vf->vi+vf->current_link);
+  }else{
+    vorbis_synthesis_init(&vf->vd,vf->vi);
+  }    
   vorbis_block_init(&vf->vd,&vf->vb);
   vf->decode_ready=1;
   return(0);
@@ -333,7 +340,7 @@ static int _open_seekable(OggVorbis_File *vf){
   ogg_page og;
   
   /* is this even vorbis...? */
-  ret=_fetch_headers(vf,&initial_i,&initial_c,&serialno);
+  ret=_fetch_headers(vf,&initial_i,&initial_c,&serialno,NULL);
   dataoffset=vf->offset;
   ogg_stream_clear(&vf->os);
   if(ret==-1)return(-1);
@@ -373,7 +380,7 @@ static int _open_nonseekable(OggVorbis_File *vf){
   vf->vc=calloc(vf->links,sizeof(vorbis_info));
 
   /* Try to fetch the headers, maintaining all the storage */
-  if(_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno)==-1)return(-1);
+  if(_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,NULL)==-1)return(-1);
   _make_decode_ready(vf);
 
   return 0;
@@ -515,7 +522,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	/* we're streaming */
 	/* fetch the three header packets, build the info struct */
 	
-	_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno);
+	_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,&og);
 	vf->current_link++;
 	link=0;
       }
