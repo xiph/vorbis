@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder using vorbisfile
- last mod: $Id: vorbisfile_example.c,v 1.5 2001/02/26 03:50:38 xiphmont Exp $
+ last mod: $Id: vorbisfile_example.c,v 1.6 2001/09/15 04:47:48 cwolf Exp $
 
  ********************************************************************/
 
@@ -36,6 +36,9 @@ int main(int argc, char **argv){
   OggVorbis_File vf;
   int eof=0;
   int current_section;
+  FILE *fpin=NULL;
+  FILE *fpout=NULL;
+  char msg[512];
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
   /* Beware the evil ifdef. We avoid these where we can, but this one we 
@@ -44,7 +47,29 @@ int main(int argc, char **argv){
   _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
-  if(ov_open(stdin, &vf, NULL, 0) < 0) {
+  if (argc == 3)
+  {
+    if ((fpin = fopen(argv[1], "rb")) == (FILE*)NULL)
+    {
+      (void)sprintf(msg, "Can't open %s for reading.", argv[1]);
+      perror(msg);
+      return 1;
+    }
+
+    if ((fpout = fopen(argv[2], "wb")) == (FILE*)NULL)
+    {
+      (void)sprintf(msg, "Can't open %s for writing.", argv[2]);
+      perror(msg);
+      return 1;
+    }
+  }
+  else
+  {
+    fpin = stdin;
+    fpout = stdout;
+  }
+
+  if(ov_open(fpin, &vf, NULL, 0) < 0) {
       fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
       exit(1);
   }
@@ -75,7 +100,7 @@ int main(int argc, char **argv){
     } else {
       /* we don't bother dealing with sample rate changes, etc, but
 	 you'll have to*/
-      fwrite(pcmout,1,ret,stdout);
+      fwrite(pcmout,1,ret,fpout);
     }
   }
 

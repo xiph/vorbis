@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.20 2001/05/27 20:33:18 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.21 2001/09/15 04:47:48 cwolf Exp $
 
  ********************************************************************/
 
@@ -53,6 +53,9 @@ int main(int argc, char **argv){
   
   char *buffer;
   int  bytes;
+  FILE *fpin=NULL;
+  FILE *fpout=NULL;
+  char msg[512];
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
   /* Beware the evil ifdef. We avoid these where we can, but this one we 
@@ -67,6 +70,29 @@ int main(int argc, char **argv){
                           /* this also lets the user set stdin and stdout */
 #endif
 
+  /* If command line args were supplied, open the named file(s)
+     for i/o, else maintain use of stdin/stdout.*/
+  if (argc == 3)
+  {
+    if ((fpin = fopen(argv[1], "rb")) == (FILE*)NULL)
+    {
+      (void)sprintf(msg, "Can't open %s for reading.", argv[1]);
+      perror(msg);
+      return 1;
+    }
+
+    if ((fpout = fopen(argv[2], "wb")) == (FILE*)NULL)
+    {
+      (void)sprintf(msg, "Can't open %s for writing.", argv[2]);
+      perror(msg);
+      return 1;
+    }
+  }
+  else
+  {
+    fpin = stdin;
+    fpout = stdout;
+  }
   /********** Decode setup ************/
 
   ogg_sync_init(&oy); /* Now we can read pages */
@@ -82,7 +108,7 @@ int main(int argc, char **argv){
 
     /* submit a 4k block to libvorbis' Ogg layer */
     buffer=ogg_sync_buffer(&oy,4096);
-    bytes=fread(buffer,1,4096,stdin);
+    bytes=fread(buffer,1,4096,fpin);
     ogg_sync_wrote(&oy,bytes);
     
     /* Get the first page. */
@@ -165,7 +191,7 @@ int main(int argc, char **argv){
       }
       /* no harm in not checking before adding more */
       buffer=ogg_sync_buffer(&oy,4096);
-      bytes=fread(buffer,1,4096,stdin);
+      bytes=fread(buffer,1,4096,fpin);
       if(bytes==0 && i<2){
 	fprintf(stderr,"End of file before finding all Vorbis headers!\n");
 	exit(1);
@@ -261,7 +287,7 @@ int main(int argc, char **argv){
 		  fprintf(stderr,"Clipping in frame %ld\n",(long)(vd.sequence));
 		
 		
-		fwrite(convbuffer,2*vi.channels,bout,stdout);
+		fwrite(convbuffer,2*vi.channels,bout,fpout);
 		
 		vorbis_synthesis_read(&vd,bout); /* tell libvorbis how
 						   many samples we
@@ -274,7 +300,7 @@ int main(int argc, char **argv){
       }
       if(!eos){
 	buffer=ogg_sync_buffer(&oy,4096);
-	bytes=fread(buffer,1,4096,stdin);
+	bytes=fread(buffer,1,4096,fpin);
 	ogg_sync_wrote(&oy,bytes);
 	if(bytes==0)eos=1;
       }

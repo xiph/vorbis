@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.23 2001/08/13 11:40:43 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.24 2001/09/15 04:47:48 cwolf Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
 #include <vorbis/vorbisenc.h>
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
@@ -38,7 +39,7 @@
 #define READ 1024
 signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 
-int main(){
+int main(int argc, char *argv[]){
   ogg_stream_state os; /* take physical pages, weld into a logical
 			  stream of packets */
   ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
@@ -52,17 +53,17 @@ int main(){
   vorbis_block     vb; /* local working space for packet->PCM decode */
 
   int eos=0;
+  FILE *fpin=NULL;
+  FILE *fpout=NULL;
+  char msg[512];
+  int i, founddata;
 
 #if defined(macintosh) && defined(__MWERKS__)
-  int argc = 0;
-  char **argv = NULL;
-  argc = ccommand(&argv); /* get a "command line" from the Mac user */
-                          /* this also lets the user set stdin and stdout */
+  int ac = 0;
+  char **av = NULL;
+  ac = ccommand(&av); /* get a "command line" from the Mac user */
+                      /* this also lets the user set stdin and stdout */
 #endif
-
-  /* we cheat on the WAV header; we just bypass 44 bytes and never
-     verify that it matches 16bit/stereo/44.1kHz.  This is just an
-     example, after all. */
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
   /* Beware the evil ifdef. We avoid these where we can, but this one we 
@@ -71,8 +72,57 @@ int main(){
   _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
+  /* If command line args were supplied, open the named file(s)
+     for i/o, else maintain use of stdin/stdout.*/
+  if (argc == 3)
+  {
+    if ((fpin = fopen(argv[1], "rb")) == (FILE*)NULL)
+    {
+      (void)sprintf(msg, "Can't open %s for reading.", argv[1]);
+      perror(msg);
+      return 1;
+    }
 
-  fread(readbuffer,1,44,stdin);
+    if ((fpout = fopen(argv[2], "wb")) == (FILE*)NULL)
+    {
+      (void)sprintf(msg, "Can't open %s for writing.", argv[2]);
+      perror(msg);
+      return 1;
+    }
+  }
+  else
+  {
+    fpin = stdin;
+    fpout = stdout;
+  }
+
+  /* we cheat on the WAV header; we just bypass the header and never
+     verify that it matches 16bit/stereo/44.1kHz.  This is just an
+     example, after all. */
+
+  readbuffer[0] = '\0';
+  for (i=0, founddata=0; i<40 && ! feof(fpin) && ! ferror(fpin); i++)
+  {
+    fread(readbuffer,1,2,fpin);
+
+    if ( ! strncmp(readbuffer, "da", 2) )
+    {
+      founddata = 1;
+      fread(readbuffer,1,6,fpin);
+    }
+  }
+
+  if ( feof(fpin) || ferror(fpin) )
+  {
+    (void)fprintf(stderr, "Error: Input WAV too short, or corrupt.\n");
+    return(1);
+  }
+
+  if ( ! founddata )
+  {
+    (void)fprintf(stderr, "Error: Can't find \"data\" chunk in WAV input.\n");
+    return(1);
+  }
 
   /********** Encode setup ************/
 
@@ -120,15 +170,15 @@ int main(){
 	while(!eos){
 		int result=ogg_stream_flush(&os,&og);
 		if(result==0)break;
-		fwrite(og.header,1,og.header_len,stdout);
-		fwrite(og.body,1,og.body_len,stdout);
+		fwrite(og.header,1,og.header_len,fpout);
+		fwrite(og.body,1,og.body_len,fpout);
 	}
 
   }
   
   while(!eos){
     long i;
-    long bytes=fread(readbuffer,1,READ*4,stdin); /* stereo hardwired here */
+    long bytes=fread(readbuffer,1,READ*4,fpin); /* stereo hardwired here */
 
     if(bytes==0){
       /* end of file.  this can be done implicitly in the mainline,
@@ -170,8 +220,8 @@ int main(){
       while(!eos){
 	int result=ogg_stream_pageout(&os,&og);
 	if(result==0)break;
-	fwrite(og.header,1,og.header_len,stdout);
-	fwrite(og.body,1,og.body_len,stdout);
+	fwrite(og.header,1,og.header_len,fpout);
+	fwrite(og.body,1,og.body_len,fpout);
 
 	/* this could be set above, but for illustrative purposes, I do
 	   it here (to show that vorbis does know where the stream ends) */
