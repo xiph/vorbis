@@ -1,4 +1,4 @@
-vorbis (1.0beta3-1) unstable; urgency=low
+libvorbis (1.0beta3-1) unstable; urgency=low
 
   * New Maintainer.
   * Upstream source was reorganized.

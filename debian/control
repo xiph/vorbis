@@ -1,4 +1,4 @@
-Source: vorbis
+Source: libvorbis
 Section: devel
 Priority: optional
 Maintainer: Christopher L Cheney <ccheney@debian.org>

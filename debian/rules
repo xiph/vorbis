@@ -61,7 +61,6 @@ binary-arch: build install
 	dh_installdocs doc/*.html doc/*.txt doc/*.png doc/vorbisfile/*.html
 	dh_installexamples
 	dh_installmanpages
-#	dh_undocumented
 	dh_installchangelogs 
 	dh_link
 	dh_strip
