@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.h,v 1.1.2.3 2000/04/06 15:59:37 xiphmont Exp $
+ last mod: $Id: sharedbook.h,v 1.1.2.4 2000/04/21 16:35:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,7 +31,13 @@ extern double *_book_logdist(const static_codebook *b,double *vals);
 extern double _float32_unpack(long val);
 extern long   _float32_pack(double val);
 extern int  _best(codebook *book, double *a, int step);
-extern int  _logbest(codebook *book, double *a, int step);
 extern int _ilog(unsigned int v);
+extern long _book_maptype1_quantvals(const static_codebook *b);
+
+extern int vorbis_book_besterror(codebook *book,double *a,int step,int addmul);
+extern long vorbis_book_codeword(codebook *book,int entry);
+extern long vorbis_book_codelen(codebook *book,int entry);
+
+
 
 #endif

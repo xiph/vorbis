@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.6.4.1 2000/04/06 15:59:38 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.6.4.2 2000/04/21 16:35:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,8 +42,7 @@ double *histogram_lo=NULL;
 double count=0.;
 
 int books=0;
-int dim=-1;
-double *work;
+int lastdim=-1;
 
 static double *_now(codebook *c, int i){
   return c->valuelist+i*c->c->dim;
@@ -59,26 +58,19 @@ int histerrsort(const void *a, const void *b){
 void process_preprocess(codebook **bs,char *basename){
   while(bs[books]){
     codebook *b=bs[books];
-    if(dim==-1){
-      dim=b->c->dim;
-      work=malloc(sizeof(double)*dim);
-    }else{
-      if(dim!=b->c->dim){
-	fprintf(stderr,"Each codebook in a cascade must have the same dimensional order\n");
-	exit(1);
-      }
-    }
+    lastdim=b->c->dim;
     books++;
   }
+
 
   if(books){
     const static_codebook *b=bs[books-1]->c;
     histogram=calloc(b->entries,sizeof(double));
     histogram_distance=calloc(b->entries,sizeof(double));
-    histogram_errorsq=calloc(b->entries*dim,sizeof(double));
-    histogram_error=calloc(b->entries*dim,sizeof(double));
-    histogram_hi=calloc(b->entries*dim,sizeof(double));
-    histogram_lo=calloc(b->entries*dim,sizeof(double));
+    histogram_errorsq=calloc(b->entries*lastdim,sizeof(double));
+    histogram_error=calloc(b->entries*lastdim,sizeof(double));
+    histogram_hi=calloc(b->entries*lastdim,sizeof(double));
+    histogram_lo=calloc(b->entries*lastdim,sizeof(double));
   }else{
     fprintf(stderr,"Specify at least one codebook\n");
     exit(1);
@@ -131,19 +123,19 @@ void process_postprocess(codebook **b,char *basename){
   char *buffer=alloca(strlen(basename)+80);
   codebook *bb=b[books-1];
 
-  fprintf(stderr,"Done.  Processed %ld data points for %ld entries:\n",
-	  (long)count,bb->c->entries);
+  fprintf(stderr,"Done.  Processed %ld data points:\n",
+	  (long)count);
   fprintf(stderr,"\tglobal mean amplitude: %g\n",
-	  meanamplitude_acc/(count*dim));
+	  meanamplitude_acc/(count*lastdim));
   fprintf(stderr,"\tglobal mean squared amplitude: %g\n",
-	  sqrt(meanamplitudesq_acc/(count*dim)));
+	  sqrt(meanamplitudesq_acc/(count*lastdim)));
 
   fprintf(stderr,"\tglobal mean error: %g\n",
-	  meanerror_acc/(count*dim));
+	  meanerror_acc/(count*lastdim));
   fprintf(stderr,"\tglobal mean squared error: %g\n",
-	  sqrt(meanerrorsq_acc/(count*dim)));
+	  sqrt(meanerrorsq_acc/(count*lastdim)));
   fprintf(stderr,"\tglobal mean deviation: %g\n",
-	  meandev_acc/(count*dim));
+	  meandev_acc/(count*lastdim));
 
   cell_spacing(b);
 
@@ -224,24 +216,64 @@ void process_postprocess(codebook **b,char *basename){
   }
 }
 
-void process_vector(codebook **bs,double *a){
+void process_vector(codebook **bs,int *addmul,int inter,double *a,int n){
   int bi;
-  int i;
-  double amplitude=0.;
-  double distance=0.;
+  int i,j;
   double base=0.;
-  int entry;
-  double *e;
-  memcpy(work,a,sizeof(double)*dim);
+  double *work=alloca(sizeof(double)*n);
+  double amplitude=0.;
+
+  memcpy(work,a,sizeof(double)*n);
 
   for(bi=0;bi<books;bi++){
     codebook *b=bs[bi];
-    entry=(b->c->q_log?_logbest(b,work,1):_best(b,work,1));
-    e=b->valuelist+b->c->dim*entry;
-    for(i=0;i<b->c->dim;i++)work[i]-=e[i];
+    int dim=b->dim;
+
+    if(inter){
+      for(i=0;i<n/dim;i++){
+	int entry=vorbis_book_besterror(b,work+i,n/dim,addmul[bi]);
+	
+	if(bi==books-1){
+	  double distance=0;
+	  histogram[entry]++;  
+	  
+	  for(j=0;j<dim;j++){
+	    double error=work[i+j*(n/dim)];
+	    histogram_errorsq[entry*dim+j]+=error*error;
+	    histogram_error[entry*dim+j]+=fabs(error);
+	    if(histogram[entry]==0 || histogram_hi[entry*dim+j]<error)
+	      histogram_hi[entry*dim+j]=error;
+	    if(histogram[entry]==0 || histogram_lo[entry*dim+j]>error)
+	      histogram_lo[entry*dim+j]=error;
+	    distance+=error*error;    
+	  }
+	  histogram_distance[entry]+=sqrt(distance);
+	}
+      }
+    }else{
+      for(i=0;i<=n-dim;i+=dim){
+	int entry=vorbis_book_besterror(b,work+i,1,addmul[bi]);
+	if(bi==books-1){
+	  double distance=0;
+	  histogram[entry]++;  
+	  
+	  for(j=0;j<dim;j++){
+	    double error=work[i+j];
+	    histogram_errorsq[entry*dim+j]+=error*error;
+	    histogram_error[entry*dim+j]+=fabs(error);
+	    if(histogram[entry]==0 || histogram_hi[entry*dim+j]<error)
+	      histogram_hi[entry*dim+j]=error;
+	    if(histogram[entry]==0 || histogram_lo[entry*dim+j]>error)
+	      histogram_lo[entry*dim+j]=error;
+	    distance+=error*error;    
+	  }
+	  histogram_distance[entry]+=sqrt(distance);
+	}
+      }
+    }
   }
 
-  for(i=0;i<dim;i++){
+  for(i=0;i<n;i++){
     double error=work[i];
     if(bs[0]->c->q_sequencep){
       amplitude=a[i]-base;
@@ -258,25 +290,15 @@ void process_vector(codebook **bs,double *a){
       meandev_acc+=fabs(error/amplitude);
     else
       meandev_acc+=fabs(error); /* yeah, yeah */
-    
-    histogram_errorsq[entry*dim+i]+=error*error;
-    histogram_error[entry*dim+i]+=fabs(error);
-    if(histogram[entry]==0 || histogram_hi[entry*dim+i]<error)
-      histogram_hi[entry*dim+i]=error;
-    if(histogram[entry]==0 || histogram_lo[entry*dim+i]>error)
-      histogram_lo[entry*dim+i]=error;
-    distance+=error*error;
   }
-
-  histogram[entry]++;  
-  histogram_distance[entry]+=sqrt(distance);
 
   if((long)(count++)%100)spinnit("working.... lines: ",count);
 }
 
 void process_usage(void){
   fprintf(stderr,
-	  "usage: vqmetrics <codebook>.vqh datafile.vqd [datafile.vqd]...\n\n"
+	  "usage: vqmetrics +|*<codebook>.vqh [ +|*<codebook.vqh> ]... \n"
+	  "                 datafile.vqd [datafile.vqd]...\n\n"
 	  "       data can be taken on stdin.  Output goes to output files:\n"
 	  "       basename-me.m:       gnuplot: mean error by entry value\n"
 	  "       basename-mse.m:      gnuplot: mean square error by entry value\n"

@@ -12,16 +12,9 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.2.4.3 2000/04/13 04:53:04 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.2.4.4 2000/04/21 16:35:40 xiphmont Exp $
 
  ********************************************************************/
-
-/* note that the codebook abstraction is capable of representing a log
-   codebook where there's a negative to positive dB range as well as
-   information to indicate negative/positive in the linear domain.
-   This trainer isn't that smart; it assumes that incoming data is
-   zero (linear) or 0. ... Inf dB, and just offsets 0. dB for purposes
-   of quantization */
 
 #include <stdlib.h>
 #include <math.h>
@@ -35,7 +28,7 @@
 
 float scalequant=3.;
 char *vqext_booktype="RESdata";  
-quant_meta q={0,0,0,0, 1,4.};          /* set sequence data */
+quant_meta q={0,0,0,0};          /* set sequence data */
 int vqext_aux=0;
 
 static double *quant_save=NULL;
@@ -46,9 +39,7 @@ double *vqext_weight(vqgen *v,double *p){
 
 /* quantize aligned on unit boundaries.  Because our grid is likely
    very coarse, play 'shuffle the blocks'; don't allow multiple
-   entries to fill the same spot as is nearly certain to happen.  last
-   complication; our scale is log with an offset guarding zero.  Don't
-   quantize to values in the no-man's land. */
+   entries to fill the same spot as is nearly certain to happen. */
 
 void vqext_quantize(vqgen *v,quant_meta *q){
   int j,k;
@@ -63,17 +54,9 @@ void vqext_quantize(vqgen *v,quant_meta *q){
   for(j=0;j<n;j++){
     for(k=0;k<dim;k++){
       double val=_now(v,j)[k];
-      double norm=rint((fabs(val)-q->encodebias)/scalequant);
-
-      if(norm<0)
-	test[k]=0.;
-      else{
-	if(norm>max)max=norm;
-	if(val>0)
-	  test[k]=norm+1;
-	else
-	  test[k]=-(norm+1);
-      }
+      double norm=rint(fabs(val)/scalequant);
+      if(norm>max)max=norm;
+      test[k]=norm;
     }
 
     /* allow move only if unoccupied */
@@ -119,20 +102,7 @@ double vqext_metric(vqgen *v,double *e, double *p){
 /* We don't interleave here; we assume that the interleave is provided
    for us by residuesplit in vorbis/huff/ */
 void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num){
-  int i;
-  double *buff=alloca(sizeof(double)*dim);
- 
-  for(i=0;i<dim;i++){
-    double val=b[start+i];
-    if(val>0.){
-      val=todB(val)+q.encodebias;
-    }else if(val<0.){
-      val=-todB(val)-q.encodebias;
-    }
-
-    buff[i]=val;
-  }
-  vqgen_addpoint(v,buff,NULL);
+  vqgen_addpoint(v,b+start,NULL);
 }
 
 /* need to reseed because of the coarse quantization we tend to use on
@@ -163,11 +133,7 @@ void vqext_preprocess(vqgen *v){
     for(i=0,j=0;i<v->points && j<v->entries;i++){
       for(k=0;k<v->elements;k++){
 	double val=_point(v,i)[k];
-	if(val>0.){
-	  test[k]=rint((val-q.encodebias)/scalequant)*scalequant+q.encodebias;
-	}else if(val<0.){
-	  test[k]=rint((val+q.encodebias)/scalequant)*scalequant-q.encodebias;
-	}
+	test[k]=rint(val/scalequant)*scalequant;
       }
       
       for(l=0;l<j;l++){
@@ -193,3 +159,4 @@ void vqext_preprocess(vqgen *v){
   vqgen_unquantize(v,&q);
 
 }
+

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.8.4.4 2000/04/13 04:53:04 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.8.4.5 2000/04/21 16:35:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -38,12 +38,7 @@ typedef struct {
   
   int         parts;
   codebook   *phrasebook;
-
   codebook ***partbooks;
-  int        *partstages;
-
-  double     *partlevels;
-  int        *partgrouping;
 
   int         partvals;
   int       **decodemap;
@@ -63,12 +58,9 @@ void free_look(vorbis_look_residue *i){
     for(j=0;j<look->parts;j++)
       if(look->partbooks[j])free(look->partbooks[j]);
     free(look->partbooks);
-    free(look->partlevels);
-    free(look->partgrouping);
     for(j=0;j<look->partvals;j++)
       free(look->decodemap[j]);
     free(look->decodemap);
-    if(look->partstages)free(look->partstages);
     memset(i,0,sizeof(vorbis_look_residue0));
     free(i);
   }
@@ -86,6 +78,9 @@ void pack(vorbis_info_residue *vr,oggpack_buffer *opb){
   _oggpack_write(opb,info->groupbook,8);  /* group huffman book */
   for(j=0;j<info->partitions;j++){
     _oggpack_write(opb,info->secondstages[j],4); /* zero *is* a valid choice */
+    /* bit of 0 == additive, 1 == multiplicative cascade */
+    if(info->secondstages[j]>1)
+      _oggpack_write(opb,info->addmullist[j],info->secondstages[j]-1);      
     acc+=info->secondstages[j];
   }
   for(j=0;j<acc;j++)
@@ -103,8 +98,13 @@ vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
   info->grouping=_oggpack_read(opb,24)+1;
   info->partitions=_oggpack_read(opb,6)+1;
   info->groupbook=_oggpack_read(opb,8);
-  for(j=0;j<info->partitions;j++)
+  for(j=0;j<info->partitions;j++){
     acc+=info->secondstages[j]=_oggpack_read(opb,4);
+    if(info->secondstages[j]>1)
+      info->addmullist[j]=_oggpack_read(opb,info->secondstages[j]-1);
+    else
+      info->addmullist[j]=0;
+  }
   for(j=0;j<acc;j++)
     info->booklist[j]=_oggpack_read(opb,8);
 
@@ -131,9 +131,6 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   dim=look->phrasebook->dim;
 
   look->partbooks=calloc(look->parts,sizeof(codebook **));
-  look->partlevels=calloc(look->parts,sizeof(double));
-  look->partgrouping=calloc(look->parts,sizeof(int));
-  look->partstages=calloc(look->parts,sizeof(int));
 
   for(j=0;j<look->parts;j++){
     int stages=info->secondstages[j];
@@ -142,12 +139,9 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
       for(k=0;k<stages;k++)
 	look->partbooks[j][k]=vd->fullbooks+info->booklist[acc++];
     }
-    look->partgrouping[j]=_ilog(info->partinterl[j])-1;
-    look->partlevels[j]=info->partlevels[j];
-    look->partstages[j]=stages;
   }
 
-  look->partvals=pow(look->parts,dim);
+  look->partvals=rint(pow(look->parts,dim));
   look->decodemap=malloc(look->partvals*sizeof(int *));
   for(j=0;j<look->partvals;j++){
     long val=j;
@@ -164,78 +158,76 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   return(look);
 }
 
-/* does not guard against invalid settings; eg, a subn of 16 and a
-   subgroup request of 32.  Max subn of 128 */
+/* classify by max quantized amplitude only */
 static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
-  int i,j=0;
+  vorbis_info_residue0 *info=look->info;
   double max=0.;
-  double entropy[8];
-  double temp[128];
-
-  /* setup */
-  for(i=0;i<n;i++){
-    if(vec[i])
-      temp[i]=(todB(vec[i])+6.);
-    else
-      temp[i]=0.;
-  }
-
-  /* handle case subgrp==1 outside */
+  int i;
+  
   for(i=0;i<n;i++)
-    if(temp[i]>max)max=temp[i];
-
-  while(1){
-    entropy[j]=max; /* in the encoder, we're comparing against
-                       non-normalized vals to save cycles */
-    n>>=1;
-    j++;
-
-    if(n<=0)break;
-    for(i=0;i<n;i++){
-      temp[i]+=temp[i+n];
-    }
-    max=0.;
-    for(i=0;i<n;i++)
-      if(temp[i]>max)max=temp[i];
-  }
-
+    if(fabs(vec[i])>max)max=fabs(vec[i]);
+  
   for(i=0;i<look->parts-1;i++)
-    if(entropy[look->partgrouping[i]]>look->partlevels[i])
+    if(max>=info->ampmax[i])
       break;
   return(i);
 }
 
 static int _encodepart(oggpack_buffer *opb,double *vec, int n,
-		       int stages, codebook **books){
-  int i,j,o,bits=0;
+		       int stages, int addmul, codebook **books){
+  int i,j,bits=0;
 
   double *work=alloca(n*sizeof(double));
+
+  /* pessimistic, but safe */
+  long *stackword=alloca(n*stages*sizeof(long));
+  int *stacklen=alloca(n*stages*sizeof(int));
+  int stack=0;
+
   memcpy(work,vec,n*sizeof(double));
+
+  /* The stages are listed in *decode* order; although the stages have
+     to decode this way, if the encode process is to use the same
+     setup data as the decode process we need to run encode backwards
+     into a stack, then write the entries out */
 
   /* If we have n samples, but book dim in m (<n), we interlace the
      samples we actually encode */
-  for(j=0;j<stages;j++){
+  for(j=stages-1;j>=0;j--){
     int dim=books[j]->dim;
     int step=n/dim;
-    for(i=0,o=0;i<n;i+=dim,o++)
-      bits+=vorbis_book_encodevEs(books[j],work+o,opb,step);
+    for(i=step-1;i>=0;i--){
+      int entry=vorbis_book_besterror(books[j],work+i,step,(addmul>>j)&1);
+      stackword[stack]=vorbis_book_codeword(books[j],entry);
+      bits+=stacklen[stack++]=vorbis_book_codelen(books[j],entry);
+    }
+  }
+
+  while(stack){
+    stack--;
+    _oggpack_write(opb,stackword[stack],stacklen[stack]);
   }
 
   return(bits);
 }
 
 static int _decodepart(oggpack_buffer *opb,double *work,double *vec, int n,
-		       int stages, codebook **books){
+		       int stages, int addmul,codebook **books){
   int i,j,o;
 
   memset(work,0,n*sizeof(double));
   for(j=0;j<stages;j++){
     int dim=books[j]->dim;
     int step=n/dim;
-    for(i=0,o=0;i<n;i+=dim,o++)
-      vorbis_book_decodevs(books[j],work+o,opb,step);
+    if(j)
+      for(i=0,o=0;i<n;i+=dim,o++)
+	vorbis_book_decodevs(books[j],work+o,opb,step,(addmul>>(j-1))&1);
+    else
+      for(i=0,o=0;i<n;i+=dim,o++)
+	vorbis_book_decodevs(books[j],work+o,opb,step,-1);
+    
   }
-
+  
   for(i=0;i<n;i++)
     vec[i]*=work[i];
   
@@ -298,7 +290,8 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
       for(j=0;j<ch;j++){
 	resbits[partword[j][l]]+=
 	  _encodepart(&vb->opb,in[j]+i,samples_per_partition,
-		      look->partstages[partword[j][l]],
+		      info->secondstages[partword[j][l]],
+		      info->addmullist[partword[j][l]],
 		      look->partbooks[partword[j][l]]);
 	resvals[partword[j][l]]+=samples_per_partition;
       }
@@ -312,7 +305,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   for(i=0;i<possible_partitions;i++)
     fprintf(stderr,"%ld(%ld):%ld ",i,resvals[i],resbits[i]);
   fprintf(stderr,"\n");
-
+ 
   return(0);
 }
 
@@ -345,7 +338,8 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
       for(j=0;j<ch;j++){
 	int part=partword[j][k];
 	_decodepart(&vb->opb,work,in[j]+i,samples_per_partition,
-		    look->partstages[part],
+		    info->secondstages[part],
+		    info->addmullist[partword[j][l]],
 		    look->partbooks[part]);
       }
   }

@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.24.2.1.2.1 2000/04/02 01:21:21 xiphmont Exp $
+# $Id: Makefile.in,v 1.24.2.1.2.2 2000/04/21 16:35:38 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -58,11 +58,15 @@ selftest:
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
 		-o test_bitwise -lm
 	$(CC) $(DEBUG) $(LDFLAGS) -c bitwise.c
-	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c bitwise.o\
-		-o test_codebook -lm
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST sharedbook.c\
+		-o test_sharedbook -lm
+	$(CC) $(DEBUG) $(LDFLAGS) -c sharedbook.c
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c \
+		sharedbook.o bitwise.o -o test_codebook -lm
 	@echo
 	@./test_framing
 	@./test_bitwise
+	@./test_sharedbook
 	@./test_codebook
 
 libvorbis.a: 	$(LFILES)	
@@ -73,7 +77,8 @@ vorbisfile.a:	$(LFILES)
 		$(AR) -r vorbisfile.a $^
 		$(RANLIB) vorbisfile.a
 
-psytune:	mdct.o psy.o lpc.o smallft.o window.o psytune.o
+psytune:	mdct.o psy.o lpc.o smallft.o window.o psytune.o floor0.o \
+		bitwise.o lsp.o codebook.o sharedbook.o
 	        $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 

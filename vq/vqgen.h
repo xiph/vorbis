@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.12.4.2 2000/04/13 04:53:05 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.12.4.3 2000/04/21 16:35:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,9 +48,6 @@ typedef struct {
   long   delta;     /* packed 24 bit float */       
   int    quant;     /* 0 < quant <= 16 */
   int    sequencep; /* bitflag */
-
-  int    log;       /* 0 == linear, 1 == log (dB) mapping */
-  double encodebias;
 } quant_meta;
 
 static inline double *_point(vqgen *v,long ptr){

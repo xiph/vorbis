@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.12.4.2 2000/04/13 04:53:04 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.12.4.3 2000/04/21 16:35:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -118,6 +118,13 @@ void reset_next_value(void){
   v_sofar=0;
 }
 
+char *setup_line(FILE *in){
+  reset_next_value();
+  value_line_buff=get_line(in);
+  return(value_line_buff);
+}
+
+
 int get_vector(codebook *b,FILE *in,int start, int n,double *a){
   int i;
   const static_codebook *c=b->c;
@@ -173,12 +180,15 @@ char *find_seek_to(FILE *in,char *s){
 codebook *codebook_load(char *filename){
   codebook *b=calloc(1,sizeof(codebook));
   static_codebook *c=(static_codebook *)(b->c=calloc(1,sizeof(static_codebook)));
-  encode_aux *a=calloc(1,sizeof(encode_aux));
+  encode_aux_nearestmatch *a=NULL;
+  encode_aux_threshmatch *t=NULL;
+  int quant_to_read=0;
   FILE *in=fopen(filename,"r");
   char *line;
   long i;
 
-  c->encode_tree=a;
+  c->nearest_tree=a;
+  c->thresh_tree=t;
 
   if(in==NULL){
     fprintf(stderr,"Couldn't open codebook %s\n",filename);
@@ -190,39 +200,127 @@ codebook *codebook_load(char *filename){
 
   /* get the major important values */
   line=get_line(in);
-  if(sscanf(line,"%ld, %ld, %d, %ld, %ld, %d, %d, %d, %d, %lf,",
-	    &(c->dim),&(c->entries),&(c->q_log),
-	    &(c->q_min),&(c->q_delta),&(c->q_quant),
-	    &(c->q_sequencep),
-	    &(c->q_zeroflag),&(c->q_negflag),
-	    &(c->q_encodebias))!=10){
+  if(sscanf(line,"%ld, %ld,",
+	    &(c->dim),&(c->entries))!=2){
     fprintf(stderr,"1: syntax in %s in line:\t %s",filename,line);
     exit(1);
   }
-
-  /* find the auxiliary encode struct (if any) */
-  find_seek_to(in,"static encode_aux _vq_aux_");
-  /* how big? */
   line=get_line(in);
   line=get_line(in);
-  line=get_line(in);
-  line=get_line(in);
-  line=get_line(in);
-  if(sscanf(line,"%ld, %ld",&(a->aux),&(a->alloc))!=2){
-    fprintf(stderr,"2: syntax in %s in line:\t %s",filename,line);
+  if(sscanf(line,"%d, %ld, %ld, %d, %d,",
+	    &(c->maptype),&(c->q_min),&(c->q_delta),&(c->q_quant),
+	    &(c->q_sequencep))!=5){
+    fprintf(stderr,"1: syntax in %s in line:\t %s",filename,line);
     exit(1);
+  }
+  
+  /* find the auxiliary encode struct[s] (if any) */
+  if(find_seek_to(in,"static encode_aux_nearestmatch _vq_aux_")){
+    /* how big? */
+    a=calloc(1,sizeof(encode_aux_nearestmatch));
+    line=get_line(in);
+    line=get_line(in);
+    line=get_line(in);
+    line=get_line(in);
+    line=get_line(in);
+    if(sscanf(line,"%ld, %ld",&(a->aux),&(a->alloc))!=2){
+      fprintf(stderr,"2: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+
+    /* load ptr0 */
+    find_seek_to(in,"static long _vq_ptr0");
+    reset_next_value();
+    a->ptr0=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->ptr0+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }
+    
+    /* load ptr1 */
+    find_seek_to(in,"static long _vq_ptr1");
+    reset_next_value();
+    a->ptr1=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->ptr1+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+    }
+    
+    
+    /* load p */
+    find_seek_to(in,"static long _vq_p_");
+    reset_next_value();
+    a->p=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->p+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }
+    
+    /* load q */
+    find_seek_to(in,"static long _vq_q_");
+    reset_next_value();
+    a->q=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->q+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }    
+  }
+  
+  if(find_seek_to(in,"static encode_aux_threshmatch _vq_aux_")){
+    /* how big? */
+    t=calloc(1,sizeof(encode_aux_threshmatch));
+    line=get_line(in);
+    line=get_line(in);
+    if(sscanf(line,"%d",&(t->quantvals))!=1){
+      fprintf(stderr,"2: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+    /* load quantthresh */
+    find_seek_to(in,"static long _vq_quantthresh_");
+    reset_next_value();
+    t->quantthresh=malloc(sizeof(long)*t->quantvals);
+    for(i=0;i<t->quantvals;i++)
+      if(get_next_value(in,t->quantthresh+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }    
+    /* load quantmap */
+    find_seek_to(in,"static long _vq_quantmap_");
+    reset_next_value();
+    t->quantmap=malloc(sizeof(long)*t->quantvals);
+    for(i=0;i<t->quantvals;i++)
+      if(get_next_ivalue(in,t->quantmap+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }    
+  }
+    
+  switch(c->maptype){
+  case 0:
+    quant_to_read=0;
+    break;
+  case 1:
+    quant_to_read=_book_maptype1_quantvals(c);
+    break;
+  case 2:
+    quant_to_read=c->entries*c->dim;
+    break;
   }
     
   /* load the quantized entries */
   find_seek_to(in,"static long _vq_quantlist_");
   reset_next_value();
-  c->quantlist=malloc(sizeof(long)*c->entries*c->dim);
-  for(i=0;i<c->entries*c->dim;i++)
+  c->quantlist=malloc(sizeof(long)*quant_to_read);
+  for(i=0;i<quant_to_read;i++)
     if(get_next_ivalue(in,c->quantlist+i)){
       fprintf(stderr,"out of data while reading codebook %s\n",filename);
       exit(1);
     }
-
+  
   /* load the lengthlist */
   find_seek_to(in,"static long _vq_lengthlist");
   reset_next_value();
@@ -233,50 +331,9 @@ codebook *codebook_load(char *filename){
       exit(1);
     }
 
-  /* load ptr0 */
-  find_seek_to(in,"static long _vq_ptr0");
-  reset_next_value();
-  a->ptr0=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->ptr0+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
-  /* load ptr1 */
-  find_seek_to(in,"static long _vq_ptr1");
-  reset_next_value();
-  a->ptr1=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->ptr1+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
-
-  /* load p */
-  find_seek_to(in,"static long _vq_p_");
-  reset_next_value();
-  a->p=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->p+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
-  /* load q */
-  find_seek_to(in,"static long _vq_q_");
-  reset_next_value();
-  a->q=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->q+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
   /* got it all */
   fclose(in);
-
+  
   vorbis_book_init_encode(b,c);
 
   return(b);

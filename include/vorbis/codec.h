@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.10.2.3 2000/04/06 15:59:36 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.10.2.4 2000/04/21 16:35:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -62,12 +62,9 @@ typedef struct vorbis_info_psy{
   double curveatt_4000Hz[5];
   double curveatt_8000Hz[5];
 
-  double peakatt_250Hz[5];
-  double peakatt_500Hz[5];
-  double peakatt_1000Hz[5];
-  double peakatt_2000Hz[5];
-  double peakatt_4000Hz[5];
-  double peakatt_8000Hz[5];
+  int    peakattp;
+  double peakatt[6][5]; /* 250,500,1000,2000,4000,8000 Hz @
+			   20, 40 60, 80, 100 dB */
   double peakpre;
   double peakpost;
 

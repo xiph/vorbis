@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.11.2.1.2.4 2000/04/13 04:53:04 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.11.2.1.2.5 2000/04/21 16:35:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,7 +33,6 @@ typedef struct {
   int ln;
   int  m;
   int *linearmap;
-  double *subcurve;
 
   vorbis_info_floor0 *vi;
   lpc_lookup lpclook;
@@ -50,7 +49,6 @@ static void free_look(vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   if(i){
     if(look->linearmap)free(look->linearmap);
-    if(look->subcurve)free(look->subcurve);
     lpc_clear(&look->lpclook);
     memset(look,0,sizeof(vorbis_look_floor0));
     free(look);
@@ -65,8 +63,6 @@ static void pack (vorbis_info_floor *i,oggpack_buffer *opb){
   _oggpack_write(opb,info->barkmap,16);
   _oggpack_write(opb,info->ampbits,6);
   _oggpack_write(opb,info->ampdB,8);
-  for(j=0;j<27;j++)
-    _oggpack_write(opb,(int)info->subcurve[j],8);
   _oggpack_write(opb,info->numbooks-1,4);
   for(j=0;j<info->numbooks;j++)
     _oggpack_write(opb,info->books[j],8);
@@ -80,8 +76,6 @@ static vorbis_info_floor *unpack (vorbis_info *vi,oggpack_buffer *opb){
   info->barkmap=_oggpack_read(opb,16);
   info->ampbits=_oggpack_read(opb,6);
   info->ampdB=_oggpack_read(opb,8);
-  for(j=0;j<27;j++)
-    info->subcurve[j]=_oggpack_read(opb,8);
   info->numbooks=_oggpack_read(opb,4)+1;
   
   if(info->order<1)goto err_out;
@@ -138,23 +132,6 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
     if(val>look->ln)val=look->ln; /* guard against the approximation */
     look->linearmap[j]=val;
   }
-  look->subcurve=malloc(look->ln*sizeof(double));
-  {
-    double max=toBARK(info->rate/2.);
-    for(j=0;j<look->ln;j++){
-      double bark=max/look->ln*j;
-      int f=floor(bark);
-      double del=bark-f;
-
-      if(f>=27){
-	f=26;
-	del=1.;
-      }
-
-      look->subcurve[j]=info->subcurve[f]*(1.-del)+info->subcurve[f+1]*del;
-    }
-  }
-
   return look;
 }
 
@@ -163,7 +140,7 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
 
 /* less efficient than the decode side (written for clarity).  We're
    not bottlenecked here anyway */
-static double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
+double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
 			    long frameno){
   /* map the input curve to a bark-scale curve for encoding */
   
@@ -201,7 +178,6 @@ static double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
     }
     last=bark;
   }
-  for(i=0;i<l->ln;i++)work[i]-=l->subcurve[i];
 
 #if 0
     { /******************/
@@ -222,7 +198,7 @@ static double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
 
 /* generate the whole freq response curve of an LPC IIR filter */
 
-static void _lpc_to_curve(double *curve,double *lpc,double amp,
+void _lpc_to_curve(double *curve,double *lpc,double amp,
 			  vorbis_look_floor0 *l,char *name,long frameno){
   double *lcurve=alloca(sizeof(double)*(l->ln*2));
   int i;
@@ -247,7 +223,6 @@ static void _lpc_to_curve(double *curve,double *lpc,double amp,
     }
 #endif
 
-  for(i=0;i<l->ln;i++)lcurve[i]+=l->subcurve[i];
   for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
 
 }
@@ -257,16 +232,17 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   long j,k;
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
+  double *work=alloca(look->n*sizeof(double));
   double amp;
   long bits=0;
 
   /* our floor comes in on a linear scale; go to a [-Inf...0] dB
      scale.  The curve has to be positive, so we offset it. */
-  for(j=0;j<look->n;j++)in[j]=todB(in[j])+info->ampdB;
-  
+  for(j=0;j<look->n;j++)work[j]=todB(in[j])+info->ampdB;
+
   /* use 'out' as temp storage */
   /* Convert our floor to a set of lpc coefficients */ 
-  amp=sqrt(_curve_to_lpc(in,out,look,vb->sequence));
+  amp=sqrt(_curve_to_lpc(work,out,look,vb->sequence));
   
   /* amp is in the range (0. to ampdB].  Encode that range using
      ampbits bits */
@@ -274,14 +250,14 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   {
     long maxval=(1<<info->ampbits)-1;
     
-    long val=amp/info->ampdB*maxval+1;
+    long val=rint(amp/info->ampdB*maxval);
 
     if(val<0)val=0;           /* likely */
     if(val>maxval)val=maxval; /* not bloody likely */
 
     _oggpack_write(&vb->opb,val,info->ampbits);
     if(val>0)
-      amp=(val-.5)/maxval*info->ampdB;
+      amp=(float)val/maxval*info->ampdB;
     else
       amp=0;
   }
@@ -307,8 +283,8 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 
 #if 0
     { /******************/
-      vorbis_lsp_to_lpc(out,in,look->m); 
-      _lpc_to_curve(in,in,amp,look,"Fprefloor",vb->sequence);
+      vorbis_lsp_to_lpc(out,work,look->m); 
+      _lpc_to_curve(work,work,amp,look,"Fprefloor",vb->sequence);
     }
 #endif
 
@@ -347,10 +323,10 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
   vorbis_info_floor0 *info=look->vi;
   int j,k;
   
-  long ampraw=_oggpack_read(&vb->opb,info->ampbits);
+  int ampraw=_oggpack_read(&vb->opb,info->ampbits);
   if(ampraw>0){
     long maxval=(1<<info->ampbits)-1;
-    double amp=(ampraw-.5)/maxval*info->ampdB;
+    double amp=(float)ampraw/maxval*info->ampdB;
     int booknum=_oggpack_read(&vb->opb,_ilog(info->numbooks));
     codebook *b=vb->vd->fullbooks+info->books[booknum];
     double last=0.;
@@ -358,7 +334,7 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
     memset(out,0,sizeof(double)*look->m);    
 
     for(j=0;j<look->m;j+=b->dim)
-      vorbis_book_decodev(b,out+j,&vb->opb);
+      vorbis_book_decodevs(b,out+j,&vb->opb,1,-1);
     for(j=0;j<look->m;){
       for(k=0;k<b->dim;k++,j++)out[j]+=last;
       last=out[j-1];

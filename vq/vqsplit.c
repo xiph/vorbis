@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.18.4.3 2000/04/13 04:53:05 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.18.4.4 2000/04/21 16:35:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -150,7 +150,7 @@ int lp_split(vqgen *v,codebook *b,
 	     long *membership,long *reventry,
 	     long depth, long *pointsofar){
 
-  encode_aux *t=b->c->encode_tree;
+  encode_aux_nearestmatch *t=b->c->nearest_tree;
 
   /* The encoder, regardless of book, will be using a straight
      euclidian distance-to-point metric to determine closest point.
@@ -336,7 +336,7 @@ int lp_split(vqgen *v,codebook *b,
   return(ret);
 }
 
-static int _node_eq(encode_aux *v, long a, long b){
+static int _node_eq(encode_aux_nearestmatch *v, long a, long b){
   long    Aptr0=v->ptr0[a];
   long    Aptr1=v->ptr1[a];
   long    Bptr0=v->ptr0[b];
@@ -355,12 +355,12 @@ static int _node_eq(encode_aux *v, long a, long b){
 void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   long i,j;
   static_codebook *c=(static_codebook *)b->c;
-  encode_aux *t;
+  encode_aux_nearestmatch *t;
 
   memset(b,0,sizeof(codebook));
   memset(c,0,sizeof(static_codebook));
   b->c=c;
-  t=c->encode_tree=calloc(1,sizeof(encode_aux));
+  t=c->nearest_tree=calloc(1,sizeof(encode_aux_nearestmatch));
 
   /* make sure there are no duplicate entries and that every 
      entry has points */

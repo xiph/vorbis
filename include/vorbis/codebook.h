@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.4.4.4 2000/04/13 00:03:22 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.4.4.5 2000/04/21 16:35:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,18 +33,20 @@
 */
 
 typedef struct static_codebook{
-  long dim;           /* codebook dimensions (elements per vector) */
-  long entries;       /* codebook entries */
+  long   dim;            /* codebook dimensions (elements per vector) */
+  long   entries;        /* codebook entries */
+  long  *lengthlist;     /* codeword lengths in bits */
 
-  /* mapping */
-  int    q_log;       /* 0 == linear, 1 == log (dB) mapping */
+  /* mapping ***************************************************************/
+  int    maptype;        /* 0=none
+			    1=implicitly populated values from map column 
+			    2=listed arbitrary values */
 
-  /* The below does a linear, single monotonic sequence mapping.  
-     The log mapping uses this, but extends it */
-  long   q_min;       /* packed 32 bit float; quant value 0 maps to minval */
-  long   q_delta;     /* packed 32 bit float; val 1 - val 0 == delta */
-  int    q_quant;     /* bits: 0 < quant <= 16 */
-  int    q_sequencep; /* bitflag */
+  /* The below does a linear, single monotonic sequence mapping. */
+  long     q_min;       /* packed 32 bit float; quant value 0 maps to minval */
+  long     q_delta;     /* packed 32 bit float; val 1 - val 0 == delta */
+  int      q_quant;     /* bits: 0 < quant <= 16 */
+  int      q_sequencep; /* bitflag */
 
   /* additional information for log (dB) mapping; the linear mapping
      is assumed to actually be values in dB.  encodebias is used to
@@ -52,19 +54,19 @@ typedef struct static_codebook{
      zeroflag indicates if entry zero is to represent -Inf dB; negflag
      indicates if we're to represent negative linear values in a
      mirror of the positive mapping. */
-  int    q_zeroflag;  
-  int    q_negflag;
-  /* encode only values that provide log encoding error parameters */
-  double q_encodebias; /* encode only */
 
-  long   *quantlist;  /* list of dim*entries quantized entry values */
+  long     *quantlist;  /* map == 1: (int)(entries/dim) element column map
+			   map == 2: list of dim*entries quantized entry vals
+			*/
 
-  long   *lengthlist; /* codeword lengths in bits */
-
-  struct encode_aux *encode_tree;
+  /* encode helpers ********************************************************/
+  struct encode_aux_nearestmatch *nearest_tree;
+  struct encode_aux_threshmatch  *thresh_tree;
 } static_codebook;
 
-typedef struct encode_aux{
+/* this structures an arbitrary trained book to quickly find the
+   nearest cell match */
+typedef struct encode_aux_nearestmatch{
   /* pre-calculated partitioning tree */
   long   *ptr0;
   long   *ptr1;
@@ -73,7 +75,14 @@ typedef struct encode_aux{
   long   *q;         /* decision points (each is an entry) */
   long   aux;        /* number of tree entries */
   long   alloc;       
-} encode_aux;
+} encode_aux_nearestmatch;
+
+/* assumes a maptype of 1; encode side only, so that's OK */
+typedef struct encode_aux_threshmatch{
+  double *quantthresh;
+  long   *quantmap;
+  int     quantvals;
+} encode_aux_threshmatch;
 
 typedef struct decode_aux{
   long   *ptr0;
@@ -87,7 +96,6 @@ typedef struct codebook{
   const static_codebook *c;
 
   double *valuelist;  /* list of dim*entries actual entry values */
-  double *logdist;    /* list of dim*entries metric vals for log encode */
   long   *codelist;   /* list of bitstream codewords for each entry */
   struct decode_aux *decode_tree;
 

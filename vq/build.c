@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.12.4.3 2000/04/13 04:53:04 xiphmont Exp $
+ last mod: $Id: build.c,v 1.12.4.4 2000/04/21 16:35:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,6 +22,8 @@
 #include <string.h>
 #include <errno.h>
 #include "vorbis/codebook.h"
+#include "../lib/sharedbook.h"
+#include "../lib/scales.h"
 
 #include "vqgen.h"
 #include "vqsplit.h"
@@ -135,8 +137,8 @@ int main(int argc,char *argv[]){
   
   /* quant */
   line=rline(in,out);
-  if(sscanf(line,"%d %ld %ld %d %d %lf",&q.log,&q.min,&q.delta,
-	    &q.quant,&q.sequencep,&q.encodebias)!=6){
+  if(sscanf(line,"%ld %ld %d %d",&q.min,&q.delta,
+	    &q.quant,&q.sequencep)!=4){
     fprintf(stderr,"Syntax error reading book file\n");
     exit(1);
   }
@@ -179,10 +181,7 @@ int main(int argc,char *argv[]){
   }
   
   fclose(in);
-
-  /* use our own because we want log training data to be linear for
-     splitting */
-  vqsp_unquantize(&v,&q);
+  vqgen_unquantize(&v,&q);
 
   /* build the book */
   vqsp_book(&v,&b,quantlist);
@@ -233,89 +232,64 @@ int main(int argc,char *argv[]){
 
   /* ptr0 */
   fprintf(out,"static long _vq_ptr0_%s[] = {\n",name);
-  for(j=0;j<c.encode_tree->aux;){
+  for(j=0;j<c.nearest_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",c.encode_tree->ptr0[j]);
+    for(k=0;k<8 && j<c.nearest_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.nearest_tree->ptr0[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* ptr1 */
   fprintf(out,"static long _vq_ptr1_%s[] = {\n",name);
-  for(j=0;j<c.encode_tree->aux;){
+  for(j=0;j<c.nearest_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",c.encode_tree->ptr1[j]);
+    for(k=0;k<8 && j<c.nearest_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.nearest_tree->ptr1[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* p */
   fprintf(out,"static long _vq_p_%s[] = {\n",name);
-  for(j=0;j<c.encode_tree->aux;){
+  for(j=0;j<c.nearest_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",c.encode_tree->p[j]*c.dim);
+    for(k=0;k<8 && j<c.nearest_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.nearest_tree->p[j]*c.dim);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* q */
   fprintf(out,"static long _vq_q_%s[] = {\n",name);
-  for(j=0;j<c.encode_tree->aux;){
+  for(j=0;j<c.nearest_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",c.encode_tree->q[j]*c.dim);
+    for(k=0;k<8 && j<c.nearest_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.nearest_tree->q[j]*c.dim);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
-  /* zero quant values?  Negative log quant values? */
-  {
-    int zero=0;
-    int neg=0;
-    for(j=0;j<c.entries*dim;j++){
-      if(c.quantlist[j]==0){
-	if(q.log)
-	  zero=1;
-	else{
-	  fprintf(stderr,"INTERNAL ERROR: Non log scale quantization has \n"
-		  "quantized entry values == 0 (< min)\n");
-	  exit(1);
-	}
-      }
-      if(c.quantlist[j]<0){
-	if(q.log)
-	  neg=1;
-	else{
-	  fprintf(stderr,"INTERNAL ERROR: Non log scale quantization has \n"
-		  "quantized entry values < 0 (< min)\n");
-	  exit(1);
-	}
-      }
-    }
-	    
-    
-    /* tie it all together */
-    
-    fprintf(out,"static encode_aux _vq_aux_%s = {\n",name);
-    fprintf(out,"\t_vq_ptr0_%s,\n",name);
-    fprintf(out,"\t_vq_ptr1_%s,\n",name);
-    fprintf(out,"\t_vq_p_%s,\n",name);
-    fprintf(out,"\t_vq_q_%s,\n",name);
-    fprintf(out,"\t%ld, %ld\n};\n\n",c.encode_tree->aux,c.encode_tree->aux);
-    
-    fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
-    
-    fprintf(out,"\t%ld, %ld, %d, %ld, %ld, %d, %d, %d, %d, %g,\n",
-	    c.dim,c.entries,q.log,q.min,q.delta,q.quant,q.sequencep,
-	    zero,neg,q.encodebias);
-    fprintf(out,"\t_vq_quantlist_%s,\n",name);
-    fprintf(out,"\t_vq_lengthlist_%s,\n",name);
-    fprintf(out,"\t&_vq_aux_%s,\n",name);
-    fprintf(out,"};\n\n");
-  }
+  /* tie it all together */
+  
+  fprintf(out,"static encode_aux_nearestmatch _vq_aux_%s = {\n",name);
+  fprintf(out,"\t_vq_ptr0_%s,\n",name);
+  fprintf(out,"\t_vq_ptr1_%s,\n",name);
+  fprintf(out,"\t_vq_p_%s,\n",name);
+  fprintf(out,"\t_vq_q_%s,\n",name);
+  fprintf(out,"\t%ld, %ld\n};\n\n",c.nearest_tree->aux,c.nearest_tree->aux);
+  
+  fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
+  
+  fprintf(out,"\t%ld, %ld,\n",c.dim,c.entries);
+  fprintf(out,"\t_vq_lengthlist_%s,\n",name);
+  fprintf(out,"\t2, %ld, %ld, %d, %d,\n",
+	  q.min,q.delta,q.quant,q.sequencep);
+  fprintf(out,"\t_vq_quantlist_%s,\n",name);
+  fprintf(out,"\t&_vq_aux_%s,\n",name);
+  fprintf(out,"\tNULL\n");
+  fprintf(out,"};\n\n");
+
   fprintf(out,"\n#endif\n");
   fclose(out);
   exit(0);

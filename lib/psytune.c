@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.2.2.5 2000/04/06 15:59:37 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2.2.6 2000/04/21 16:35:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,7 +33,7 @@
 static vorbis_info_psy _psy_set0={
   1,1,1,
 
-  1,16,4.,
+  1,8,4.,
 
   -130.,
 
@@ -44,19 +44,14 @@ static vorbis_info_psy _psy_set0={
   {-35.,-40.,-60.,-80.,-100.},
   {-35.,-40.,-60.,-80.,-100.},
 
-  /*{-99,-99,-99,-99,-99},
-  {-99,-99,-99,-99,-99},
-  {-99,-99,-99,-99,-99},
-  {-99,-99,-99,-99,-99},
-  {-99,-99,-99,-99,-99},
-  {-99,-99,-99,-99,-99},*/
-  {-8.,-12.,-18.,-20.,-24.},
-  {-8.,-12.,-18.,-20.,-24.},
-  {-8.,-12.,-18.,-20.,-24.},
-  {-8.,-12.,-18.,-20.,-24.},
-  {-8.,-12.,-18.,-20.,-24.},
-  {-8.,-12.,-18.,-20.,-24.},
-  -20.,-10.,
+  1,
+  {{-6.,-8.,-12.,-16.,-18.},
+   {-6.,-8.,-12.,-16.,-18.},
+   {-6.,-8.,-12.,-16.,-18.},
+   {-6.,-8.,-12.,-16.,-20.},
+   {-6.,-8.,-12.,-16.,-20.},
+   {-6.,-8.,-10.,-14.,-18.},},
+  -80.,-40.,
 
   110.,
 
@@ -92,7 +87,41 @@ void analysis(char *base,int i,double *v,int n,int bark,int dB){
   }
 }
 
+typedef struct {
+  long n;
+  int ln;
+  int  m;
+  int *linearmap;
+
+  vorbis_info_floor0 *vi;
+  lpc_lookup lpclook;
+} vorbis_look_floor0;
+
+extern double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
+			    long frameno);
+extern void _lpc_to_curve(double *curve,double *lpc,double amp,
+			  vorbis_look_floor0 *l,char *name,long frameno);
+
 long frameno=0;
+
+/* hacked from floor0.c */
+static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
+  int j;
+  double scale;
+  look->m=m;
+  look->n=n;
+  look->ln=ln;
+  lpc_init(&look->lpclook,look->ln,look->m);
+
+  scale=look->ln/toBARK(22050.);
+
+  look->linearmap=malloc(look->n*sizeof(int));
+  for(j=0;j<look->n;j++){
+    int val=floor( toBARK(22050./n*j) *scale);
+    if(val>look->ln)val=look->ln;
+    look->linearmap[j]=val;
+  }
+}
 
 int main(int argc,char *argv[]){
   int eos=0;
@@ -103,13 +132,13 @@ int main(int argc,char *argv[]){
   int framesize=2048;
   int order=32;
 
-  double *pcm[2],*out[2],*window,*mask,*maskwindow,*decay[2],*lpc,*floor;
+  double *pcm[2],*out[2],*window,*mask,*decay[2],*lpc,*floor;
   signed char *buffer,*buffer2;
   mdct_lookup m_look;
   vorbis_look_psy p_look;
   long i,j,k;
 
-  lpc_lookup lpc_look;
+  vorbis_look_floor0 floorlook;
 
   int ath=0;
   int decayp=0;
@@ -164,17 +193,13 @@ int main(int argc,char *argv[]){
   buffer=malloc(framesize*4);
   buffer2=buffer+framesize*2;
   window=_vorbis_window(0,framesize,framesize/2,framesize/2);
-  maskwindow=_vorbis_window(0,framesize,framesize/2,framesize/2);
   mdct_init(&m_look,framesize);
   _vp_psy_init(&p_look,&_psy_set0,framesize/2,44100);
-  lpc_init(&lpc_look,framesize/2,order);
+  floorinit(&floorlook,framesize/2,order,framesize/8);
 
   for(i=0;i<11;i++)
     for(j=0;j<9;j++)
       analysis("Pcurve",i*10+j,p_look.curves[i][j],EHMER_MAX,0,1);
-
-  for(j=0;j<framesize;j++)
-    maskwindow[j]*=maskwindow[j];
 
   /* we cheat on the WAV header; we just bypass 44 bytes and never
      verify that it matches 16bit/stereo/44.1kHz. */
@@ -203,47 +228,30 @@ int main(int argc,char *argv[]){
       }
       
       for(i=0;i<2;i++){
+	double amp;
 
 	analysis("pre",frameno,pcm[i],framesize,0,0);
 	
 	/* do the psychacoustics */
 	memset(mask,0,sizeof(double)*framesize/2);
 	for(j=0;j<framesize;j++)
-	  mask[j]=pcm[i][j]*maskwindow[j];
-
-	mdct_forward(&m_look,mask,mask);
-
-	analysis("maskmdct",frameno,mask,framesize/2,1,1);
-
-	_vp_tone_tone_mask(&p_look,mask,floor,decay[i]);
-	
-	analysis("mask",frameno,floor,framesize/2,1,1);
-	analysis("lmask",frameno,floor,framesize/2,0,1);
-	analysis("decay",frameno,decay[i],framesize/2,1,1);
-	analysis("ldecay",frameno,decay[i],framesize/2,0,1);
-	
-	for(j=0;j<framesize;j++)
-	  pcm[i][j]=pcm[i][j]*window[j];
-	analysis("pcm",frameno,pcm[i],framesize,0,0);
+	  pcm[i][j]*=window[j];
 
 	mdct_forward(&m_look,pcm[i],pcm[i]);
+
 	analysis("mdct",frameno,pcm[i],framesize/2,1,1);
-	analysis("lmdct",frameno,pcm[i],framesize/2,0,1);
 
-	/* floor */
-	/*{
-	  double amp;
+	_vp_tone_tone_mask(&p_look,pcm[i],floor,mask,decay[i]);
+	
+	analysis("mask",frameno,mask,framesize/2,1,1);
+	analysis("prefloor",frameno,floor,framesize/2,1,1);
+	analysis("decay",frameno,decay[i],framesize/2,1,1);
+	
+	amp=_curve_to_lpc(floor,lpc,&floorlook,frameno);
+	_lpc_to_curve(floor,lpc,sqrt(amp),&floorlook,"Ffloor",frameno);
+	analysis("floor",frameno,floor,framesize/2,1,1);
 
-	  for(j=0;j<framesize/2;j++)floor[j]=todB(floor[j])+DYNAMIC_RANGE_dB;
-	  amp=sqrt(vorbis_curve_to_lpc(floor,lpc,&lpc_look));
-	  fprintf(stderr,"amp=%g\n",amp);
-	  vorbis_lpc_to_curve(floor,lpc,amp,&lpc_look);
-	  for(j=0;j<framesize/2;j++)floor[j]=fromdB(floor[j]-DYNAMIC_RANGE_dB);
-	  analysis("floor",frameno,floor,framesize/2,1,1);
-
-	  }*/
-
-	_vp_apply_floor(&p_look,pcm[i],floor);
+	_vp_apply_floor(&p_look,pcm[i],floor,mask);
 
 	/* re-add floor */
 	for(j=0;j<framesize/2;j++){

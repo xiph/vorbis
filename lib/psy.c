@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.8 2000/04/12 08:47:53 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.9 2000/04/21 16:35:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -94,7 +94,6 @@ static void interp_curve(double *c,double *c1,double *c2,double del){
 static void setup_curve(double **c,
 			int oc,
 			double *curveatt_dB,
-			double *peakatt_dB,
 			double peaklowrolloff,
 			double peakhighrolloff){
   int i,j;
@@ -125,22 +124,6 @@ static void setup_curve(double **c,
   for(i=0;i<5;i++){
     attenuate_curve(c[i*2],curveatt_dB[i]);
     attenuate_curve(tempc[i*2],curveatt_dB[i]);
-  }
-
-  /* add in the additional peak attenuation hack */
-  for(i=0;i<5;i++){
-    double att=peakatt_dB[i];
-    for(j=EHMER_OFFSET;j<EHMER_MAX && att>tempc[i*2][j];j++){
-      c[i*2][j]=att;
-      tempc[i*2][j]=att;
-      att+=peakhighrolloff;
-    }
-    att=peakatt_dB[i]+peaklowrolloff;
-    for(j=EHMER_OFFSET-1;j>=0 && att>tempc[i*2][j];j--){
-      c[i*2][j]=att;
-      tempc[i*2][j]=att;
-      att+=peaklowrolloff;
-    }
   }
 
   /* The c array is comes in as dB curves at 20 40 60 80 100 dB.
@@ -238,18 +221,12 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   memcpy(p->curves[10][6],tone_4000_80dB_SL,sizeof(double)*EHMER_MAX);
   memcpy(p->curves[10][8],tone_8000_100dB_SL,sizeof(double)*EHMER_MAX);
 
-  setup_curve(p->curves[0],0,vi->curveatt_250Hz,vi->peakatt_250Hz,
-	      vi->peakpre,vi->peakpost);
-  setup_curve(p->curves[2],2,vi->curveatt_500Hz,vi->peakatt_500Hz,
-	      vi->peakpre,vi->peakpost);
-  setup_curve(p->curves[4],4,vi->curveatt_1000Hz,vi->peakatt_1000Hz,
-	      vi->peakpre,vi->peakpost);
-  setup_curve(p->curves[6],6,vi->curveatt_2000Hz,vi->peakatt_2000Hz,
-	      vi->peakpre,vi->peakpost);
-  setup_curve(p->curves[8],8,vi->curveatt_4000Hz,vi->peakatt_4000Hz,
-	      vi->peakpre,vi->peakpost);
-  setup_curve(p->curves[10],10,vi->curveatt_8000Hz,vi->peakatt_8000Hz,
-	      vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[0],0,vi->curveatt_250Hz,vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[2],2,vi->curveatt_500Hz,vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[4],4,vi->curveatt_1000Hz,vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[6],6,vi->curveatt_2000Hz,vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[8],8,vi->curveatt_4000Hz,vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[10],10,vi->curveatt_8000Hz,vi->peakpre,vi->peakpost);
 
   for(i=1;i<11;i+=2)
     for(j=0;j<9;j++)
@@ -357,8 +334,10 @@ static void add_seeds(double *floor,int n){
 
 /* Why Bark scale for encoding but not masking? Because masking has a
    strong harmonic dependancy */
-static void _vp_tone_tone_iter(vorbis_look_psy *p,double *f, double *flr, 
-			double *decay){
+static void _vp_tone_tone_iter(vorbis_look_psy *p,
+			       double *f, 
+			       double *flr, double *mask,
+			       double *decay){
   vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
   double *work=alloca(n*sizeof(double));
@@ -393,7 +372,7 @@ static void _vp_tone_tone_iter(vorbis_look_psy *p,double *f, double *flr,
   /* prime the working vector with peak values */
   /* Use the 250 Hz curve up to 250 Hz and 8kHz curve after 8kHz. */
   for(i=0;i<n;i++){
-    acc+=flr[i];
+    acc+=flr[i]; /* XXX acc is behaving incorrectly.  Check it */
     if(work[i]*work[i]>acc){
       int o=rint(p->octave[i]*2.);
       if(o<0)o=0;
@@ -404,30 +383,78 @@ static void _vp_tone_tone_iter(vorbis_look_psy *p,double *f, double *flr,
     }
   }
 
-  /* now, chase curves down from the peak seeds */
+  /* chase curves down from the peak seeds */
   add_seeds(flr,n);
+  
+  memcpy(mask,flr,n*sizeof(double));
 
   /* mask off the ATH */
-  if(p->vi->athp)
+  if(vi->athp)
     for(i=0;i<n;i++)
-      if(flr[i]<p->ath[i])
-	flr[i]=p->ath[i];
+      if(mask[i]<p->ath[i])
+	mask[i]=p->ath[i];
 
+  /* do the peak att with rolloff hack. But I don't know which is
+     better... doing it to mask or floor.  We'll assume mask right now */
+  if(vi->peakattp){
+    double curmask;
+
+    /* seed peaks for rolloff first so we only do it once */
+    for(i=0;i<n;i++){
+      if(work[i]>mask[i]){
+	double val=todB(work[i]);
+	int o=p->octave[i];
+	int choice=rint((val-specmax+vi->max_curve_dB)/20.)-1;
+	if(o<0)o=0;
+	if(o>5)o=5;
+	if(choice<0)choice=0;
+	if(choice>4)choice=4;
+	work[i]=fromdB(val+vi->peakatt[o][choice]);
+      }else{
+	work[i]=0;
+      }
+    }
+
+    /* chase down from peaks forward */
+    curmask=0.;
+    for(i=0;i<n-1;i++){
+      if(work[i]>curmask)curmask=work[i];
+      if(curmask>mask[i]){
+	mask[i]=curmask;
+	/* roll off the curmask */
+	curmask*=fromdB(vi->peakpost*(p->octave[i+1]-p->octave[i]));
+      }else{
+	curmask=0;
+      }
+    }
+    /* chase down from peaks backward */
+    curmask=0.;
+    for(i=n-1;i>0;i--){
+      if(work[i]>curmask)curmask=work[i];
+      if(curmask>=mask[i]){
+	mask[i]=curmask;
+	/* roll off the curmask */
+	curmask*=fromdB(vi->peakpre*(p->octave[i]-p->octave[i-1]));
+      }else{
+	curmask=0;
+      }
+    }
+  }
 }
 
 /* stability doesn't matter */
 static int comp(const void *a,const void *b){
   if(fabs(**(double **)a)<fabs(**(double **)b))
-    return(-1);
-  else
     return(1);
+  else
+    return(-1);
 }
 
 /* this applies the floor and (optionally) tries to preserve noise
    energy in low resolution portions of the spectrum */
 /* f and flr are *linear* scale, not dB */
 void _vp_apply_floor(vorbis_look_psy *p,double *f, 
-		      double *flr){
+		      double *flr,double *mask){
   double *work=alloca(p->n*sizeof(double));
   double thresh=fromdB(p->vi->noisefit_threshdB);
   int i,j,addcount=0;
@@ -438,9 +465,12 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
     if(flr[j]<=0)
       work[j]=0.;
     else{
-      double val=f[j]/flr[j];
-      if(fabs(val)<1.)val=0.;
-      work[j]=val;
+      if(fabs(f[j])<mask[j] || fabs(f[j])<flr[j]){
+ 	work[j]=0;
+      }else{
+	double val=f[j]/flr[j];
+	work[j]=val;
+      }
     }
   }
 
@@ -471,22 +501,26 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 	}	
       }
 
-      /* sort the zeroed values; add back the largest first, stop when
-         we violate the desired result above (which may be
+      /* sort the values below mask; add back the largest first, stop
+         when we violate the desired result above (which may be
          immediately) */
       if(z && current_SL*thresh<original_SL){
 	qsort(index,z,sizeof(double *),&comp);
 	
 	for(j=0;j<z;j++){
 	  int p=index[j]-f;
-	  double val=flr[p]*flr[p]+current_SL;
+
+	  /* yes, I mean *mask* here, not floor.  This should only be
+             being applied in areas where noise dominates masking;
+             otherwise we don't want to be adding tones back. */
+	  double val=mask[p]*mask[p]+current_SL;
 	  
 	  if(val<original_SL){
 	    addcount++;
 	    if(f[p]>0)
-	      work[p]=1.;
+	      work[p]=mask[p]/flr[p];
 	    else
-	      work[p]=-1.;
+	      work[p]=-mask[p]/flr[p];
 	    current_SL=val;
 	  }else
 	    break;
@@ -497,24 +531,27 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
   memcpy(f,work,p->n*sizeof(double));
 }
 
-void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr, 
-			     double *decay){
+void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, 
+			double *flr, double *mask,
+			double *decay){
   double *iter=alloca(sizeof(double)*p->n);
-  int i,j;
+  int i,j,n=p->n;
 
-  for(i=0;i<p->n;i++)iter[i]=fabs(f[i]);  
+  for(i=0;i<n;i++)iter[i]=fabs(f[i]);  
+
+  /* perform iterative tone-tone masking */
 
   for(i=0;i<p->vi->curve_fit_iterations;i++){
     if(i==0)
-      _vp_tone_tone_iter(p,iter,flr,decay);
+      _vp_tone_tone_iter(p,iter,flr,mask,decay);
     else{
-      _vp_tone_tone_iter(p,iter,iter,decay);
-      for(j=0;j<p->n;j++)
+      _vp_tone_tone_iter(p,iter,iter,mask,decay);
+      for(j=0;j<n;j++)
 	flr[j]=(flr[j]+iter[j])/2.;
     }
     if(i!=p->vi->curve_fit_iterations-1){
-      for(j=0;j<p->n;j++)
-	if(fabs(f[j])<flr[j])
+      for(j=0;j<n;j++)
+	if(fabs(f[j])<mask[j] && fabs(f[j])<flr[j])
 	  iter[j]=0.;
 	else
 	  iter[j]=fabs(f[j]);

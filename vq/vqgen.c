@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.30.4.2 2000/04/06 15:59:38 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.30.4.3 2000/04/21 16:35:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -162,17 +162,8 @@ void vqgen_cellmetric(vqgen *v){
    distance between values because each successive value is larger
    than the preceeding value.  Thus the desired quantibits apply to
    the encoded (delta) values, not abs positions. This requires minor
-   additional encode-side trickery. 
+   additional encode-side trickery. */
 
-   This is mildly complicated by log scales, but less so than in the
-   production codebook.  Here, the log scaling stays in the log
-   domain, but we map 0 linear (which would normally be -Inf log) to 0
-   log, and add a fixed offset to 0dB.  This allows us to train linear
-   data with a positive and negative range on a log scale without
-   screwing up the 0 singularity too badly. */
-
-/* This default quantizer doesn't do log quant; a trainer that does
-   log quant has to use its own */
 void vqgen_quantize(vqgen *v,quant_meta *q){
 
   double maxdel;
@@ -241,12 +232,8 @@ void vqgen_unquantize(vqgen *v,quant_meta *q){
     double last=0.;
     for(k=0;k<v->elements;k++){
       double now=_now(v,j)[k];
-      if(now!=0){
-	now=(fabs(now)-1.)*delta+last+mindel;
-	if(q->sequencep)last=now;
-	if(q->log)now+=q->encodebias;
-	if(_now(v,j)[k]<0)now= -now;
-      }
+      now=fabs(now)*delta+last+mindel;
+      if(q->sequencep)last=now;
       _now(v,j)[k]=now;
     }
   }
