@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.42 2002/03/17 19:50:47 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.43 2002/03/23 03:17:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -149,6 +149,7 @@ static int _ve_amp(envelope_lookup *ve,
     float val=.14*buf[0]+.14*buf[1]+.72*acc[j];
     buf[0]=buf[1];buf[1]=acc[j];
     acc[j]=val;
+    filters[j].markers[pos+1]=val;
   }
 
   /* look at local min/max */
@@ -162,6 +163,8 @@ static int _ve_amp(envelope_lookup *ve,
 }
 
 static int seq=0;
+static ogg_int64_t totalshift=-1024;
+
 long _ve_envelope_search(vorbis_dsp_state *v){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
@@ -175,18 +178,25 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 
   /* make sure we have enough storage to match the PCM */
   if(last>ve->storage){
-    ve->storage=last;
+    ve->storage=last+VE_DIV;
     ve->mark=_ogg_realloc(ve->mark,ve->storage*sizeof(*ve->mark));
   }
 
   for(j=first;j<last;j++){
     int ret=0;
     for(i=0;i<ve->ch;i++){
+      /* the mark delay is one searchstep because of min/max finder */
       float *pcm=v->pcm[i]+ve->searchstep*(j+1);
       ret|=_ve_amp(ve,gi,pcm,ve->band,ve->filter+i*VE_BANDS,j);
     }
-    /* the mark delay is one searchstep because of min/max finder */
-    ve->mark[j]=ret;
+
+    /* we assume a 'transient' occupies half a short block; this way,
+       it's contained in two short blocks, else the first block is
+       short and the second long, causing smearing */
+    ve->mark[j+VE_DIV/2]=0;
+    if(ret)
+      for(i=0;i<=VE_DIV/2;i++)
+	ve->mark[j+i]=ret;
   }
 
   ve->current=last*ve->searchstep;
@@ -206,16 +216,56 @@ long _ve_envelope_search(vorbis_dsp_state *v){
       if(ve->mark[j/ve->searchstep]){
 	if(j>centerW){
 
-	  ve->curmark=j;
+#if 0
+	  if(j>ve->curmark){
+	    float *marker=alloca(v->pcm_current*sizeof(*marker));
+	    int l;
+	    memset(marker,0,sizeof(*marker)*v->pcm_current);
 
+	    fprintf(stderr,"mark! seq=%d, cursor:%fs time:%fs\n",
+		    seq,
+		    (totalshift+ve->cursor)/44100.,
+		    (totalshift+j)/44100.);
+
+	    _analysis_output_always("pcmL",seq,v->pcm[0],v->pcm_current,0,0,totalshift);
+	    _analysis_output_always("pcmR",seq,v->pcm[1],v->pcm_current,0,0,totalshift);
+
+	    _analysis_output_always("markL",seq,v->pcm[0],j,0,0,totalshift);
+	    _analysis_output_always("markR",seq,v->pcm[1],j,0,0,totalshift);
+	    
+
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[0].markers[l]*.01;
+	    _analysis_output_always("delL0",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[1].markers[l]*.01;
+	    _analysis_output_always("delL1",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[2].markers[l]*.01;
+	    _analysis_output_always("delL2",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[3].markers[l]*.01;
+	    _analysis_output_always("delL3",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[4].markers[l]*.01;
+	    _analysis_output_always("delR0",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[5].markers[l]*.01;
+	    _analysis_output_always("delR1",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[6].markers[l]*.01;
+	    _analysis_output_always("delR2",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[7].markers[l]*.01;
+	    _analysis_output_always("delR3",seq,marker,v->pcm_current,0,0,totalshift);
+	      
+	    seq++;
+
+	  }
+#endif
+
+	  ve->curmark=j;
+	  ve->cursor=j;
 	  if(j>=testW)return(1);
 	  return(0);
 	}
       }
       j+=ve->searchstep;
-      ve->cursor=j;
     }
   }
+  ve->cursor=j;
  
   return(-1);
 }
@@ -247,16 +297,26 @@ int _ve_envelope_mark(vorbis_dsp_state *v){
 }
 
 void _ve_envelope_shift(envelope_lookup *e,long shift){
-  int smallsize=e->current/e->searchstep;
+  int smallsize=e->current/e->searchstep+VE_DIV/2; /* VE_DIV/2 is to
+                                                      match setting a
+                                                      mark on a region
+                                                      in
+                                                      envelope_search */
   int smallshift=shift/e->searchstep;
   int i;
 
   memmove(e->mark,e->mark+smallshift,(smallsize-smallshift)*sizeof(*e->mark));
+  
+  for(i=0;i<VE_BANDS*e->ch;i++)
+    memmove(e->filter[i].markers,
+	    e->filter[i].markers+smallshift,
+	    (1024-smallshift)*sizeof(*(*e->filter).markers));
 
   e->current-=shift;
   if(e->curmark>=0)
     e->curmark-=shift;
   e->cursor-=shift;
+  totalshift+=shift;
 }
 
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.19 2002/03/17 19:50:47 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.20 2002/03/23 03:17:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -29,6 +29,8 @@ typedef struct {
   int   ampptr;
   float delbuf[VE_CONV-1];
   float convbuf[2];
+  
+  float markers[1024];
 } envelope_filter_state;
 
 typedef struct {

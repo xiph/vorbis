@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.16 2002/01/22 11:59:00 xiphmont Exp $
+ last mod: $Id: window.c,v 1.17 2002/03/23 03:17:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,28 +48,32 @@ float *_vorbis_window(int type, int left){
 
 void _vorbis_apply_window(float *d,float *window[2],long *blocksizes,
 			  int lW,int W,int nW){
+  lW=(W?lW:0);
+  nW=(W?nW:0);
 
-  long n=blocksizes[W];
-  long ln=blocksizes[lW];
-  long rn=blocksizes[nW];
-
-  long leftbegin=n/4-ln/4;
-  long leftend=leftbegin+ln/2;
-
-  long rightbegin=n/2+n/4-rn/4;
-  long rightend=rightbegin+rn/2;
-  
-  int i,p;
-
-  for(i=0;i<leftbegin;i++)
-    d[i]=0.f;
-
-  for(p=0;i<leftend;i++,p++)
-    d[i]*=window[lW][p];
-
-  for(i=rightbegin,p=rn/2-1;i<rightend;i++,p--)
-    d[i]*=window[nW][p];
-
-  for(;i<n;i++)
-    d[i]=0.f;
+  {
+    long n=blocksizes[W];
+    long ln=blocksizes[lW];
+    long rn=blocksizes[nW];
+    
+    long leftbegin=n/4-ln/4;
+    long leftend=leftbegin+ln/2;
+    
+    long rightbegin=n/2+n/4-rn/4;
+    long rightend=rightbegin+rn/2;
+    
+    int i,p;
+    
+    for(i=0;i<leftbegin;i++)
+      d[i]=0.f;
+    
+    for(p=0;i<leftend;i++,p++)
+      d[i]*=window[lW][p];
+    
+    for(i=rightbegin,p=rn/2-1;i<rightend;i++,p--)
+      d[i]*=window[nW][p];
+    
+    for(;i<n;i++)
+      d[i]=0.f;
+  }
 }
