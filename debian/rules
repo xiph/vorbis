@@ -38,7 +38,9 @@ clean:
 
 
 # Build architecture-independent files here.
-binary-arch: libvorbis-dev ogg123 vorbize xmms-vorbis mp3tovorbis
+binary-arch: libvorbis-dev ogg123 vorbize xmms-vorbis # mp3tovorbis
+               # mp3tovorbis is small, and depends on mpg123 in non-free
+               # moved it as an "example" for vorbize
 
 libvorbis-dev: DH_OPTIONS=-plibvorbis-dev
 libvorbis-dev: build
@@ -116,6 +118,7 @@ vorbize: build
 	install -m 755 vorbis-tools/vorbize `pwd`/debian/vorbize/usr/bin/
 
 	dh_installdocs
+	dh_installexamples vorbis-tools/mp3tovorbis
 #	dh_installmenu
 	dh_installmanpages
 #	dh_installinfo

@@ -1,3 +1,11 @@
+vorbis (1.0beta1-2) unstable; urgency=low
+
+  * Changed xmms-vorbis to Architechture: any.  Closes: #67395
+  * Added Build-deps. Closes: #66628
+  * 
+
+ -- Michael Beattie <mjb@debian.org>  Wed,  9 Aug 2000 00:30:15 +1200
+
 vorbis (1.0beta1-1) unstable; urgency=low
 
   * First Beta, Ready for debian release.
