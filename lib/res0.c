@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.32.2.5 2001/08/08 04:19:58 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.32.2.6 2001/08/08 05:17:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -562,7 +562,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     }
   }
 
-  {
+  /*{
     long total=0;
     long totalbits=0;
     fprintf(stderr,"%d :: ",vb->mode);
@@ -573,7 +573,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     }
 
     fprintf(stderr,":: %ld:%1.2g\n",total,(double)totalbits/total);
-  }
+    }*/
   return(0);
 }
 

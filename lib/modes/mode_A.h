@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.14.4.5.2.6 2001/08/08 04:20:06 xiphmont Exp $
+ last mod: $Id: mode_A.h,v 1.14.4.5.2.7 2001/08/08 05:17:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -179,8 +179,8 @@ static vorbis_info_psy _psy_set_A0={
   5, 5, 10,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-20,-20,-20,-20,-20,-20,-20,-10,  0,  0,  0,  0,  0,  1,  1,  2,  3},
-  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.4f,.7f,.8f,.9f,.9f,.9f},
+  {-30,-30,-30,-30,-30,-30,-30,-20,  0,  0,  0,  0,  0,  1,  1,  2,  3},
+  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.7f,.8f,.9f,.9f,.9f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
@@ -196,7 +196,7 @@ static vorbis_info_psy _psy_set_A={
   0.f,
 
   /* tonemask */
-  1,  0.f,&_vp_tonemask_A,
+  1,  0.f,&_vp_tonemask_consbass_A,
   /* peakattp */
   1,  &_vp_peakatt_A,
 
@@ -206,7 +206,7 @@ static vorbis_info_psy _psy_set_A={
       10,10,100,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  { 0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0},
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,   0,  0,  0,  0},
   {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.7f,.75f,.8f,.8f,.85f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
