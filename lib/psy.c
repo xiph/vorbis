@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.43 2001/02/26 03:50:42 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.44 2001/03/21 07:44:46 msmith Exp $
 
  ********************************************************************/
 
@@ -191,7 +191,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   p->total_octave_lines=maxoc-p->firstoc+1;
 
   p->ath=_ogg_malloc(n*sizeof(float));
-  p->octave=_ogg_malloc(n*sizeof(int));
+  p->octave=_ogg_malloc(n*sizeof(long));
   p->bark=_ogg_malloc(n*sizeof(float));
   p->vi=vi;
   p->n=n;
