@@ -101,6 +101,8 @@ void vqsp_count(vqgen *v,long *membership,
 
   /* The entry splitting isn't total, so that storage has to be
      allocated for recursion.  Reuse the entryA/entryB vectors */
+  /* keep the entries in ascending order (relative to the original
+     list); we rely on that stability when ordering p/q choice */
   for(j=0;j<entries;j++){
     if(entryA[j] && entryB[j])C++;
     if(entryA[j])entryA[A++]=entryindex[j];
@@ -118,15 +120,6 @@ void pq_in_out(vqgen *v,double *n,double *c,double *p,double *q){
     double center=(p[k]+q[k])/2.;
     n[k]=(center-q[k])*2.;
     *c+=center*n[k];
-  }
-}
-
-void pq_center_out(vqgen *v,double *n,double *c,double *center,double *q){
-  int k;
-  *c=0.;
-  for(k=0;k<v->elements;k++){
-    n[k]=(center[k]-q[k])*2.;
-    *c+=center[k]*n[k];
   }
 }
 
@@ -172,9 +165,7 @@ int lp_split(vqgen *v,vqbook *b,
      even a midpoint division won't disturb the basic properties) */
 
   long ret;
-  double *p;
-  double *q;
-  double *n;
+  double *n=alloca(sizeof(double)*v->elements);
   double c;
   long *entryA=calloc(entries,sizeof(long));
   long *entryB=calloc(entries,sizeof(long));
@@ -185,6 +176,9 @@ int lp_split(vqgen *v,vqbook *b,
   long i,j,k;
 
   long *membership=malloc(sizeof(long)*points);
+
+  long   besti=-1;
+  long   bestj=-1;
   
   /* which cells do points belong to?  Do this before n^2 best pair chooser. */
 
@@ -206,11 +200,6 @@ int lp_split(vqgen *v,vqbook *b,
     membership[i]=firstentry;
   }
 
-  p=alloca(sizeof(double)*v->elements);
-  q=alloca(sizeof(double)*v->elements);
-  n=alloca(sizeof(double)*v->elements);
-  memset(p,0,sizeof(double)*v->elements);
-
   /* We need to find the dividing hyperplane. find the median of each
      axis as the centerpoint and the normal facing farthest point */
 
@@ -220,8 +209,6 @@ int lp_split(vqgen *v,vqbook *b,
   if(entries<8 || points*entries*entries<128*1024*1024){
     /* try every pair possibility */
     double best=0;
-    long   besti=0;
-    long   bestj=0;
     double this;
     for(i=0;i<entries-1;i++){
       for(j=i+1;j<entries;j++){
@@ -235,20 +222,30 @@ int lp_split(vqgen *v,vqbook *b,
 		   &entriesA,&entriesB,&entriesC);
 	this=(entriesA-entriesC)*(entriesB-entriesC);
 
-	if(this>best){
+	/* when choosing best, we also want some form of stability to
+           make sure more branches are pared later; secondary
+           weighting isn;t needed as the entry lists are in ascending
+           order, and we always try p/q in the same sequence */
+	
+	if( (besti==-1) ||
+	    (this>best) ){
+	  
 	  best=this;
-	  besti=i;
-	  bestj=j;
+	  besti=entryindex[i];
+	  bestj=entryindex[j];
+
 	}
       }
     }
-    pq_in_out(v,n,&c,_now(v,entryindex[besti]),_now(v,entryindex[bestj]));
   }else{
+    double *p=alloca(v->elements*sizeof(double));
+    double *q=alloca(v->elements*sizeof(double));
     double best=0.;
-    long   bestj=0;
     
     /* try COG/normal and furthest pairs */
-    /* medianpoint */
+    /* meanpoint */
+    /* eventually, we want to select the closest entry and figure n/c
+       from p/q (because storing n/c is too large */
     for(k=0;k<v->elements;k++){
       spinnit();
       
@@ -258,14 +255,32 @@ int lp_split(vqgen *v,vqbook *b,
       p[k]/=entries;
 
     }
-    
-    /* try every normal */
-    for(j=0;j<entries;j++){
-      double *ppj=_now(v,entryindex[j]);
+
+    /* we go through the entries one by one, looking for the entry on
+       the other side closest to the point of reflection through the
+       center */
+
+    for(i=0;i<entries;i++){
+      double *ppi=_now(v,entryindex[i]);
+      double ref_best=0.;
+      double ref_j=-1;
       double this;
       spinnit();
+      
+      for(k=0;k<v->elements;k++)
+	q[k]=2*p[k]-ppi[k];
 
-      pq_center_out(v,n,&c,p,_now(v,entryindex[j]));
+      for(j=0;j<entries;j++){
+	if(j!=i){
+	  double this=_dist_sq(v,q,_now(v,entryindex[j]));
+	  if(ref_j==-1 || this<ref_best){
+	    ref_best=this;
+	    ref_j=entryindex[j];
+	  }
+	}
+      }
+
+      pq_in_out(v,n,&c,ppi,_now(v,ref_j));
       vqsp_count(v,membership,
 		 entryindex,entries, 
 		 pointindex,points,
@@ -273,19 +288,33 @@ int lp_split(vqgen *v,vqbook *b,
 		 n, c, 
 		 &entriesA,&entriesB,&entriesC);
       this=(entriesA-entriesC)*(entriesB-entriesC);
-      
-      if(this>best){
+
+	/* when choosing best, we also want some form of stability to
+           make sure more branches are pared later; secondary
+           weighting isn;t needed as the entry lists are in ascending
+           order, and we always try p/q in the same sequence */
+	
+      if( (besti==-1) ||
+	  (this>best) ){
+	
 	best=this;
-	bestj=j;
+	besti=entryindex[i];
+	bestj=ref_j;
+
       }
     }
-    
-    pq_center_out(v,n,&c,p,_now(v,entryindex[bestj]));
+    if(besti>bestj){
+      long temp=besti;
+      besti=bestj;
+      bestj=temp;
+    }
+
   }
   
   /* find cells enclosing points */
   /* count A/B points */
 
+  pq_in_out(v,n,&c,_now(v,besti),_now(v,bestj));
   vqsp_count(v,membership,
 	     entryindex,entries, 
 	     pointindex,points,
@@ -332,13 +361,13 @@ int lp_split(vqgen *v,vqbook *b,
       b->alloc*=2;
       b->ptr0=realloc(b->ptr0,sizeof(long)*b->alloc);
       b->ptr1=realloc(b->ptr1,sizeof(long)*b->alloc);
-      b->n=realloc(b->n,sizeof(double)*b->dim*b->alloc);
-      b->c=realloc(b->c,sizeof(double)*b->alloc);
+      b->p=realloc(b->p,sizeof(long)*b->alloc);
+      b->q=realloc(b->q,sizeof(long)*b->alloc);
     }
     
-    memcpy(b->n+b->dim*thisaux,n,sizeof(double)*v->elements);
-    b->c[thisaux]=c;
-
+    b->p[thisaux]=besti;
+    b->q[thisaux]=bestj;
+    
     if(entriesA==1){
       ret=1;
       b->ptr0[thisaux]=entryA[0];
@@ -360,6 +389,27 @@ int lp_split(vqgen *v,vqbook *b,
   return(ret);
 }
 
+static int _node_eq(vqbook *v, long a, long b){
+  long    Aptr0=v->ptr0[a];
+  long    Aptr1=v->ptr1[a];
+  long    Ap   =v->p[a];
+  long    Aq   =v->q[a];
+  long    Bptr0=v->ptr0[b];
+  long    Bptr1=v->ptr1[b];
+  long    Bp   =v->p[b];
+  long    Bq   =v->q[b];
+  int i;
+
+  /* the possibility of choosing the same p and q, but switched, can;t
+     happen because we always look for the best p/q in the same search
+     order and the search is stable */
+
+  if(Aptr0==Bptr0 && Aptr1==Bptr1 && Ap==Bp && Aq==Bq)
+    return(1);
+
+  return(0);
+}
+
 void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
   long *entryindex=malloc(sizeof(long)*v->entries);
   long *pointindex=malloc(sizeof(long)*v->points);
@@ -376,8 +426,8 @@ void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
 
   b->ptr0=malloc(sizeof(long)*b->alloc);
   b->ptr1=malloc(sizeof(long)*b->alloc);
-  b->n=malloc(sizeof(double)*b->dim*b->alloc);
-  b->c=malloc(sizeof(double)*b->alloc);
+  b->p=malloc(sizeof(long)*b->alloc);
+  b->q=malloc(sizeof(long)*b->alloc);
   b->lengthlist=calloc(b->entries,sizeof(long));
   
   /* which cells do points belong to?  Only do this once. */
@@ -407,12 +457,69 @@ void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
   free(entryindex);
   free(pointindex);
 
+  fprintf(stderr,"Paring and rerouting redundant branches:\n");
+  /* The tree is likely big and redundant.  Pare and reroute branches */
+  {
+    int changedflag=1;
+    long *unique_entries=alloca(b->aux*sizeof(long));
+
+    while(changedflag){
+      int nodes=0;
+      changedflag=0;
+
+      fprintf(stderr,"\t...");
+      /* span the tree node by node; list unique decision nodes and
+	 short circuit redundant branches */
+
+      for(i=0;i<b->aux;){
+	int k;
+
+	/* check list of unique decisions */
+	for(j=0;j<nodes;j++)
+	  if(_node_eq(b,i,unique_entries[j]))break;
+
+	if(j==nodes){
+	  /* a new entry */
+	  unique_entries[nodes++]=i++;
+	}else{
+	  /* a redundant entry; find all higher nodes referencing it and
+             short circuit them to the previously noted unique entry */
+	  changedflag=1;
+	  for(k=0;k<b->aux;k++){
+	    if(b->ptr0[k]==-i)b->ptr0[k]=-unique_entries[j];
+	    if(b->ptr1[k]==-i)b->ptr1[k]=-unique_entries[j];
+	  }
+
+	  /* Now, we need to fill in the hole from this redundant
+             entry in the listing.  Insert the last entry in the list.
+             Fix the forward pointers to that last entry */
+	  b->aux--;
+	  b->ptr0[i]=b->ptr0[b->aux];
+	  b->ptr1[i]=b->ptr1[b->aux];
+	  b->p[i]=b->p[b->aux];
+	  b->q[i]=b->q[b->aux];
+	  for(k=0;k<b->aux;k++){
+	    if(b->ptr0[k]==-b->aux)b->ptr0[k]=-i;
+	    if(b->ptr1[k]==-b->aux)b->ptr1[k]=-i;
+	  }
+	  /* hole plugged */
+
+	}
+      }
+
+      fprintf(stderr," %ld remaining\n",b->aux);
+    }
+  }
+
   /* run all training points through the decision tree to get a final
      probability count */
   {
-    long *probability=calloc(b->entries,sizeof(long));
+    long *probability=malloc(b->entries*sizeof(long));
     long *membership=malloc(b->entries*sizeof(long));
 
+    for(i=0;i<b->entries;i++)probability[i]=1; /* trivial guard */
+
+    b->valuelist=v->entrylist; /* temporary for vqenc_entry; replaced later */
     for(i=0;i<v->points;i++){
       int ret=vqenc_entry(b,v->pointlist+i*v->elements);
       probability[ret]++;
@@ -464,10 +571,6 @@ void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
       probability[ret]++;
     }
     
-    /* print the results */
-    for(i=0;i<v->entries;i++)
-      fprintf(stderr,"%ld: count=%ld codelength=%ld\n",i,probability[i],b->lengthlist[i]);
-
     free(probability);
     free(membership);
   }
@@ -489,6 +592,8 @@ void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
     for(i=0;i<b->aux;i++){
       if(b->ptr0[i]>=0)b->ptr0[i]=revindex[b->ptr0[i]];
       if(b->ptr1[i]>=0)b->ptr1[i]=revindex[b->ptr1[i]];
+      b->p[i]=revindex[b->p[i]];
+      b->q[i]=revindex[b->q[i]];
     }
     free(revindex);
 
@@ -519,8 +624,6 @@ void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
 	length=b->lengthlist[i];
       }
       b->codelist[i]=current;
-      fprintf(stderr,"codeword %ld: %ld (length %d)\n",
-	      i, current, b->lengthlist[i]);
       current++;
     }
   }
@@ -535,16 +638,27 @@ void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
       }
     }
   }
-
+  fprintf(stderr,"Done.\n\n");
 }
 
+/* slow version for use here that does not use a preexpanded n/c. */
 int vqenc_entry(vqbook *b,double *val){
   int ptr=0,k;
+  double *n=alloca(b->dim*sizeof(double));
+
   while(1){
-    double c= -b->c[ptr];
-    double *nptr=b->n+b->dim*ptr;
+    double c=0.;
+    double *p=b->valuelist+b->p[ptr]*b->dim;
+    double *q=b->valuelist+b->q[ptr]*b->dim;
+    
+    for(k=0;k<b->dim;k++){
+      n[k]=p[k]-q[k];
+      c-=(p[k]+q[k])*n[k];
+    }
+    c/=2.;
+
     for(k=0;k<b->dim;k++)
-      c+=nptr[k]*val[k];
+      c+=n[k]*val[k];
     if(c>0.) /* in A */
       ptr= -b->ptr0[ptr];
     else     /* in B */

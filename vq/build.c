@@ -209,54 +209,68 @@ int main(int argc,char *argv[]){
   for(j=0;j<entries;j++){
     fprintf(out,"\t");
     for(k=0;k<dim;k++)
-      fprintf(out,"%ld, ",b.quantlist[i++]);
+      fprintf(out,"%5ld, ",b.quantlist[i++]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* codelist */
   fprintf(out,"static long _vq_codelist_%s[] = {\n",name);
-  for(j=0;j<entries;j++){
-    fprintf(out,"\t%ld,\n",b.codelist[j]);
+  for(j=0;j<entries;){
+    fprintf(out,"\t");
+    for(k=0;k<8 && j<entries;k++,j++)
+      fprintf(out,"%ld,",b.codelist[j]);
+    fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* lengthlist */
   fprintf(out,"static long _vq_lengthlist_%s[] = {\n",name);
-  for(j=0;j<entries;j++){
-    fprintf(out,"\t%ld,\n",b.lengthlist[j]);
+  for(j=0;j<entries;){
+    fprintf(out,"\t");
+    for(k=0;k<16 && j<entries;k++,j++)
+      fprintf(out,"%2ld,",b.lengthlist[j]);
+    fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* ptr0 */
   fprintf(out,"static long _vq_ptr0_%s[] = {\n",name);
-  for(j=0;j<b.aux;j++){
-    fprintf(out,"\t%ld,\n",b.ptr0[j]);
+  for(j=0;j<b.aux;){
+    fprintf(out,"\t");
+    for(k=0;k<8 && j<b.aux;k++,j++)
+      fprintf(out,"%5ld,",b.ptr0[j]);
+    fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* ptr1 */
   fprintf(out,"static long _vq_ptr1_%s[] = {\n",name);
-  for(j=0;j<b.aux;j++){
-    fprintf(out,"\t%ld,\n",b.ptr1[j]);
-  }
-  fprintf(out,"};\n\n");
-
-  /* n */
-  fprintf(out,"static double _vq_n_%s[] = {\n",name);
-  i=0;
-  for(j=0;j<b.aux;j++){
+  for(j=0;j<b.aux;){
     fprintf(out,"\t");
-    for(k=0;k<dim;k++)
-      fprintf(out,"%g,",b.n[i++]);
+    for(k=0;k<8 && j<b.aux;k++,j++)
+      fprintf(out,"%6ld,",b.ptr1[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
-  /* c */
-  fprintf(out,"static double _vq_c_%s[] = {\n",name);
-  for(j=0;j<b.aux;j++){
-    fprintf(out,"\t%g,\n",b.c[j]);
+  /* p */
+  fprintf(out,"static long _vq_p_%s[] = {\n",name);
+  for(j=0;j<b.aux;){
+    fprintf(out,"\t");
+    for(k=0;k<8 && j<b.aux;k++,j++)
+      fprintf(out,"%6ld,",b.p[j]);
+    fprintf(out,"\n");
+  }
+  fprintf(out,"};\n\n");
+
+  /* q */
+  fprintf(out,"static long _vq_q_%s[] = {\n",name);
+  for(j=0;j<b.aux;){
+    fprintf(out,"\t");
+    for(k=0;k<8 && j<b.aux;k++,j++)
+      fprintf(out,"%6ld,",b.q[j]);
+    fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
@@ -270,8 +284,10 @@ int main(int argc,char *argv[]){
   fprintf(out,"\t_vq_lengthlist_%s,\n",name);
   fprintf(out,"\t_vq_ptr0_%s,\n",name);
   fprintf(out,"\t_vq_ptr1_%s,\n",name);
-  fprintf(out,"\t_vq_n_%s,\n",name);
-  fprintf(out,"\t_vq_c_%s,\n",name);
+  fprintf(out,"\t0,\n",name);
+  fprintf(out,"\t0,\n",name);
+  fprintf(out,"\t_vq_p_%s,\n",name);
+  fprintf(out,"\t_vq_q_%s,\n",name);
   fprintf(out,"\t%ld, %ld };\n\n",b.aux,b.aux);
 
   fprintf(out,"\n#endif\n");

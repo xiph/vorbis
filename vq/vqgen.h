@@ -57,6 +57,8 @@ typedef struct vqbook{
   /* auxiliary encoding information. Not used in decode */
   double *n;         /* decision hyperplanes: sum(x_i*n_i)[0<=i<dim]=c */ 
   double *c;
+  long   *p;
+  long   *q;
   long   aux;
   long   alloc;
 
