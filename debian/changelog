@@ -1,11 +1,17 @@
 libvorbis (1.0beta4-1) unstable; urgency=low
 
-  * Added dependency for libogg-dev (closes: #78262)
+  * New upstream.
   * Appears to be fixed, can't reproduce bug (closes: #78848)
-  * Added dependency for libogg-dev (closes: #81432)
-  * Corrected library dev package name (closes: #82464)
 
  -- Christopher L Cheney <ccheney@debian.org>  Wed, 24 Jan 2001 21:52:29 -0600
+
+libvorbis (1.0beta3-2) unstable; urgency=low
+
+  * Added dependency for libogg-dev (closes: #78262)
+  * Added dependency for libogg-dev (closes: #81432)
+  * Corrected development library package name (closes: #82464)
+
+ -- Christopher L Cheney <ccheney@debian.org>  Sat,  3 Feb 2001 13:29:30 -0600
 
 libvorbis (1.0beta3-1) unstable; urgency=low
 

@@ -1,5 +1,5 @@
 Source: libvorbis
-Section: devel
+Section: libs
 Priority: optional
 Maintainer: Christopher L Cheney <ccheney@debian.org>
 Build-Depends: debhelper, libogg-dev
@@ -7,6 +7,7 @@ Standards-Version: 3.1.1
 
 Package: libvorbis-dev
 Architecture: any
+Section: devel
 Depends: libvorbis0 (= ${Source-Version}), libogg-dev, libc6-dev
 Description: Development library for OGG Vorbis
  Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
@@ -18,6 +19,7 @@ Description: Development library for OGG Vorbis
 
 Package: libvorbis0
 Architecture: any
+Section: libs
 Depends: ${shlibs:Depends}
 Description: The OGG Vorbis lossy audio compression codec.
  Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
