@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.26 2001/06/15 21:15:39 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.27 2001/06/18 22:19:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -360,7 +360,7 @@ long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
 }
 
 long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
-  int i,j,entry;
+  int i,j=0,entry;
   float *t;
 
   if(book->dim>8){
