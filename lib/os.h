@@ -45,7 +45,7 @@
 #  define M_PI (3.1415926536f)
 #endif
 
-#ifdef WIN32
+#if defined(_WIN32) && !defined(__SYMBIAN32__)
 #  include <malloc.h>
 #  define rint(x)   (floor((x)+0.5f)) 
 #  define NO_FLOAT_MATH_LIB
