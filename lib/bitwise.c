@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.c,v 1.5 1999/12/30 07:26:33 xiphmont Exp $
+  last mod: $Id: bitwise.c,v 1.6 2000/01/12 11:16:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -205,6 +205,10 @@ long _oggpack_bits(oggpack_buffer *b){
   return(b->endbyte*8+b->endbit);
 }
 
+char *_oggpack_buffer(oggpack_buffer *b){
+  return(b->buffer);
+}
+
 /* Self test of the bitwise routines; everything else is based on
    them, so they damned well better be solid. */
 
@@ -235,7 +239,7 @@ void cliptest(unsigned long *b,int vals,int bits,int *comp,int compsize){
   _oggpack_reset(&o);
   for(i=0;i<vals;i++)
     _oggpack_write(&o,b[i],bits?bits:ilog(b[i]));
-  buffer=o.buffer;
+  buffer=_oggpack_buffer(&o);
   bytes=_oggpack_bytes(&o);
   if(bytes!=compsize)report("wrong number of bytes!\n");
   for(i=0;i<bytes;i++)if(buffer[i]!=comp[i]){
@@ -334,7 +338,7 @@ int main(void){
   _oggpack_reset(&o);
   for(i=0;i<test2size;i++)
     _oggpack_write(&o,large[i],32);
-  buffer=o.buffer;
+  buffer=_oggpack_buffer(&o);
   bytes=_oggpack_bytes(&o);
   _oggpack_readinit(&r,buffer,bytes);
   for(i=0;i<test2size;i++){
