@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.11 2000/01/06 13:57:15 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.12 2000/01/10 10:42:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -391,7 +391,6 @@ static int _node_eq(encode_aux *v, long a, long b){
 void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   long *entryindex=malloc(sizeof(long)*v->entries);
   long *pointindex=malloc(sizeof(long)*v->points);
-  long *membership=malloc(sizeof(long)*v->points);
   long i,j;
   encode_aux *t;
 
@@ -411,25 +410,6 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   t->p=malloc(sizeof(long)*t->alloc);
   t->q=malloc(sizeof(long)*t->alloc);
   
-  /* which cells do points belong to?  Only do this once. */
-
-  for(i=0;i<v->points;i++){
-    double *ppt=_point(v,i);
-    long   firstentry=0;
-    double firstmetric=_dist(v,_now(v,0),ppt);
-    
-    for(j=1;j<v->entries;j++){
-      double thismetric=_dist(v,_now(v,j),ppt);
-      if(thismetric<firstmetric){
-	firstmetric=thismetric;
-	firstentry=j;
-      }
-    }
-    
-    membership[i]=firstentry;
-  }
-
-
   /* first, generate the encoding decision heirarchy */
   {
     long pointsofar=0;

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.6 2000/01/07 12:11:33 xiphmont Exp $
+ last mod: $Id: run.c,v 1.7 2000/01/10 10:42:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,6 +48,9 @@ int main(int argc,char *argv[]){
   codebook **b=calloc(1,sizeof(codebook *));
   int books=0;
   int input=0;
+
+  int start=0;
+  int num=-1;
   argv++;
 
   if(*argv==NULL){
@@ -61,9 +64,17 @@ int main(int argc,char *argv[]){
   while(*argv){
     if(*argv[0]=='-'){
       /* option */
-
-
-
+      if(argv[0][1]=='s'){
+	/* subvector */
+	if(sscanf(argv[1],"%d,%d",&start,&num)!=2){
+	  num= -1;
+	  if(sscanf(argv[1],"%d",&start)!=1){
+	    fprintf(stderr,"Syntax error using -s\n");
+	    exit(1);
+	  }
+	}
+	argv+=2;
+      }
     }else{
       /* input file.  What kind? */
       char *dot;
@@ -112,7 +123,7 @@ int main(int argc,char *argv[]){
 
 	reset_next_value();
 
-	while(get_vector(*b,in,a)!=-1)
+	while(get_vector(*b,in,start,num,a)!=-1)
 	  process_vector(b,a);
 
 	fclose(in);
@@ -134,7 +145,7 @@ int main(int argc,char *argv[]){
       }
       
       reset_next_value();
-      while(get_vector(*b,stdin,a)!=-1)
+      while(get_vector(*b,stdin,start,num,a)!=-1)
 	process_vector(b,a);
     }
   }

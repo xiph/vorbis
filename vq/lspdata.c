@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.8 2000/01/05 15:04:58 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.9 2000/01/10 10:42:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -76,7 +76,7 @@ void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
   if(start>0)base=b[start-1];
   for(i=0;i<dim;i++)a[i]=b[i+start]-base;
   if(start+dim+1>cols) /* +aux */
-    a[i]=M_PI-base;
+    a[i]=a[i-1];
   else
     a[i]=b[i+start]-base;
   

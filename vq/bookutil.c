@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.3 2000/01/06 13:57:10 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.4 2000/01/10 10:42:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -65,8 +65,10 @@ char *get_line(FILE *in){
       {
         long c=fgetc(in);
         switch(c){
-        case '\n':
         case EOF:
+	  if(sofar==0)return(NULL);
+	  /* fallthrough correct */
+        case '\n':
           linebuffer[sofar]='\0';
           gotline=1;
           break;
@@ -123,20 +125,26 @@ int get_next_ivalue(FILE *in,long *ivalue){
 }
 
 static double sequence_base=0.;
+static int v_sofar=0;
 void reset_next_value(void){
   value_line_buff=NULL;
   sequence_base=0.;
+  v_sofar=0;
 }
 
-int get_vector(codebook *b,FILE *in,double *a){
+int get_vector(codebook *b,FILE *in,int start, int n,double *a){
   int i;
 
   while(1){
 
-    if(get_line_value(in,a)){
-      sequence_base=0.;
+    if(v_sofar==n || get_line_value(in,a)){
+      reset_next_value();
       if(get_next_value(in,a))
 	break;
+      for(i=0;i<start;i++){
+	sequence_base=*a;
+	get_line_value(in,a);
+      }
     }
 
     for(i=1;i<b->dim;i++)
@@ -147,6 +155,7 @@ int get_vector(codebook *b,FILE *in,double *a){
       double temp=a[b->dim-1];
       for(i=0;i<b->dim;i++)a[i]-=sequence_base;
       if(b->q_sequencep)sequence_base=temp;
+      v_sofar++;
       return(0);
     }
     sequence_base=0.;
@@ -196,7 +205,7 @@ codebook *codebook_load(char *filename){
   if(sscanf(line,"%ld, %ld, %ld, %ld, %d, %d",
 	    &(b->dim),&(b->entries),&(b->q_min),&(b->q_delta),&(b->q_quant),
 	    &(b->q_sequencep))!=6){
-    fprintf(stderr,"syntax in %s in line:\t %s",filename,line);
+    fprintf(stderr,"1: syntax in %s in line:\t %s",filename,line);
     exit(1);
   }
 
@@ -211,7 +220,7 @@ codebook *codebook_load(char *filename){
   line=get_line(in);
   line=get_line(in);
   if(sscanf(line,"%ld, %ld",&(a->aux),&(a->alloc))!=2){
-    fprintf(stderr,"syntax in %s in line:\t %s",filename,line);
+    fprintf(stderr,"2: syntax in %s in line:\t %s",filename,line);
     exit(1);
   }
     

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.2 2000/01/07 12:11:31 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.3 2000/01/10 10:42:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -127,7 +127,7 @@ void process_postprocess(codebook **b,char *basename){
       for(k=0;k<bb->dim;k++){
 	fprintf(out,"%ld, %g, %g\n",
 		i*bb->dim+k,(bb->valuelist+i*bb->dim)[k],
-		sqrt((histogram_error+i*bb->dim)[k]/histogram[i]));
+		(histogram_error+i*bb->dim)[k]/histogram[i]);
       }
     }
     fclose(out);
