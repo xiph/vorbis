@@ -1,5 +1,5 @@
 # vorbis makefile configured for use with gcc on any platform
-# $Id: Makefile.in,v 1.30 2000/06/19 14:59:06 xiphmont Exp $
+# $Id: Makefile.in,v 1.31 2000/06/19 15:14:16 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -24,7 +24,7 @@ LD=@CC@
 LDFLAGS=@LDFLAGS@ $(FLAGS)
 AR=@AR@
 RANLIB=@RANLIB@
-LIBS=@LIBS@ -lm
+LIBS=@LIBS@ 
 
 HFILES =	../include/vorbis/codec.h \
 		../include/vorbis/internal.h ../include/vorbis/backends.h \
@@ -62,13 +62,13 @@ selftest:
 	$(MAKE) clean
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
-		-o test_bitwise -lm
+		-o test_bitwise $(LIBS)
 	$(CC) $(DEBUG) $(LDFLAGS) -c bitwise.c
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST sharedbook.c\
-		-o test_sharedbook -lm
+		-o test_sharedbook $(LIBS)
 	$(CC) $(DEBUG) $(LDFLAGS) -c sharedbook.c
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c \
-		sharedbook.o bitwise.o -o test_codebook -lm
+		sharedbook.o bitwise.o -o test_codebook $(LIBS)
 	@echo
 	@./test_framing
 	@./test_bitwise

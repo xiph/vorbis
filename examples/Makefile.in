@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.9 2000/06/19 14:59:06 xiphmont Exp $
+# $Id: Makefile.in,v 1.10 2000/06/19 15:14:15 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -25,7 +25,7 @@ LD=@CC@
 LDFLAGS=@LDFLAGS@ $(FLAGS)
 AR=@AR@
 RANLIB=@RANLIB@
-LIBS=@LIBS@ -lm
+LIBS=@LIBS@
 
 HFILES =	../include/vorbis/codec.h ../include/vorbis/vorbisfile.h \
 		../include/vorbis/internal.h ../include/vorbis/backends.h \

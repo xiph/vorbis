@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.14 2000/06/19 14:59:06 xiphmont Exp $
+# $Id: configure.in,v 1.15 2000/06/19 15:14:15 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -7,16 +7,22 @@ cp configure.guess config.guess
 cp configure.sub config.sub
 
 AC_CANONICAL_HOST
+LIBS="-lm"
 
 dnl If we're on IRIX, we wanna use cc even if gcc is there (unless the user
 dnl has overriden us)...
-case $host 
-	in *-*-irix*)
+case $host in 
+	*-*-irix*)
 		if test -z "$CC"; then
 			CC=cc
 		fi
 		AC_CHECK_LIB(audio, ALwritesamps)
 	;;
+# BeOS does not use -lm
+	*-*-beos)
+		LIBS=""
+	;;
+
 esac
 
 if test -z "$CC"; then
@@ -168,6 +174,7 @@ AC_SUBST(SIZE16)
 AC_SUBST(SIZE32)
 AC_SUBST(SIZE64)
 AC_SUBST(OPT)
+AC_SUBST(LIBS)
 AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(CC)

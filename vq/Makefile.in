@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.11 2000/05/08 20:49:50 xiphmont Exp $
+# $Id: Makefile.in,v 1.12 2000/06/19 15:14:16 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -23,7 +23,7 @@ LD=@CC@
 LDFLAGS=@LDFLAGS@ $(FLAGS)
 AR=@AR@
 RANLIB=@RANLIB@
-LIBS=@LIBS@ -lm
+LIBS=@LIBS@ 
 
 HFILES =	../include/vorbis/codebook.h vqgen.h vqext.h bookutil.h
 
