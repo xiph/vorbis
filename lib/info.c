@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.46 2001/10/02 00:14:31 segher Exp $
+ last mod: $Id: info.c,v 1.47 2001/10/14 06:52:07 msmith Exp $
 
  ********************************************************************/
 
@@ -41,8 +41,9 @@ static int ilog2(unsigned int v){
   return(ret);
 }
 
-static void _v_writestring(oggpack_buffer *o,char *s){
-  while(*s){
+static void _v_writestring(oggpack_buffer *o,char *s, int bytes){
+
+  while(bytes--){
     oggpack_write(o,*s++,8);
   }
 }
@@ -388,7 +389,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 
   /* preamble */  
   oggpack_write(opb,0x01,8);
-  _v_writestring(opb,"vorbis");
+  _v_writestring(opb,"vorbis", 6);
 
   /* basic information about the stream */
   oggpack_write(opb,0x00,32);
@@ -408,14 +409,15 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
   char temp[]="Xiphophorus libVorbis I 20010910";
+  int bytes = strlen(temp);
 
   /* preamble */  
   oggpack_write(opb,0x03,8);
-  _v_writestring(opb,"vorbis");
+  _v_writestring(opb,"vorbis", 6);
 
   /* vendor */
-  oggpack_write(opb,strlen(temp),32);
-  _v_writestring(opb,temp);
+  oggpack_write(opb,bytes,32);
+  _v_writestring(opb,temp, bytes);
   
   /* comments */
 
@@ -425,7 +427,7 @@ static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
     for(i=0;i<vc->comments;i++){
       if(vc->user_comments[i]){
 	oggpack_write(opb,vc->comment_lengths[i],32);
-	_v_writestring(opb,vc->user_comments[i]);
+	_v_writestring(opb,vc->user_comments[i], vc->comment_lengths[i]);
       }else{
 	oggpack_write(opb,0,32);
       }
@@ -442,7 +444,7 @@ static int _vorbis_pack_books(oggpack_buffer *opb,vorbis_info *vi){
   if(!ci)return(OV_EFAULT);
 
   oggpack_write(opb,0x05,8);
-  _v_writestring(opb,"vorbis");
+  _v_writestring(opb,"vorbis", 6);
 
   /* books */
   oggpack_write(opb,ci->books-1,8);
