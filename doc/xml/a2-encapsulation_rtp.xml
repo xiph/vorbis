@@ -15,10 +15,10 @@
 <literallayout class="monospaced">
 <!-- this works with extensions implemented in Saxon and Xalan
 <textobject><textdata 
-fileref="../draft-kerr-avt-vorbis-rtp-03.txt"/></textobject> -->
+fileref="draft-rtp.xml"/></textobject> -->
 <!-- this works with xinclude, implemented in xsltproc -->
 <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
-      href="../draft-kerr-avt-vorbis-rtp-03.txt" parse="text">
+      href="draft-rtp.xml" parse="text">
   <xi:fallback xmlns:xi="http://www.w3.org/2001/XInclude">
     <para>Please consult the internet draft <citetitle>RTP Payload Format for Vorbis Encoded
     Audio</citetitle> for description of how to embed Vorbis audio in an RTP stream.</para>

@@ -4,28 +4,21 @@ SUBDIRS = vorbisfile vorbisenc
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
-static_docs = components.png \
+### all of the static docs, commited to SVN and included as is
+static_docs = \
 	draft-kerr-avt-vorbis-rtp-03.txt \
 	eightphase.png \
 	evenlsp.png \
-	floor1-1.png \
-	floor1-2.png \
-	floor1-3.png \
-	floor1-4.png \
 	floor1_inverse_dB_table.html \
 	floorval.png \
 	fourphase.png \
 	framing.html \
 	helper.html \
-	hufftree-under.png \
-	hufftree.png \
 	index.html \
 	lspmap.png \
 	oddlsp.png \
 	oggstream.html \
 	programming.html \
-	residue-pack.png \
-	residue2.png \
 	squarepolar.png \
 	stereo.html \
 	stream.png \
@@ -37,20 +30,37 @@ static_docs = components.png \
 	vorbisword2.png \
 	wait.png \
 	white-ogg.png \
+	white-xifish.png
+
+### FIXME: bits needed by the spec which lives in xml
+SPEC_PNG = \
+	components.png \
+	floor1-1.png \
+	floor1-2.png \
+	floor1-3.png \
+	floor1-4.png \
+	hufftree.png \
+	hufftree-under.png \
+	residue-pack.png \
+	residue2.png \
 	white-xifish.png \
 	window1.png \
 	window2.png
+SPEC_PDF = xifish.pdf
+
+# FIXME: also needed here
+#	white-xifish.png 
 
 built_docs = Vorbis_I_spec.html Vorbis_I_spec.pdf
 
 # conditionally make the generated documentation
 if BUILD_DOCS
-doc_DATA = $(static_docs) $(built_docs)
+doc_DATA = $(static_docs) $(SPEC_PNG) $(built_docs)
 else
-doc_DATA = $(static_docs)
+doc_DATA = $(static_docs) $(SPEC_PNG)
 endif
 
-EXTRA_DIST = $(static_docs) $(built_docs)
+EXTRA_DIST = $(static_docs) $(doc_sources) $(SPEC_PNG) $(SPEC_PDF)
 
 doc_sources = xml/Vorbis_I_spec.xml \
 	xml/01-introduction.xml \
@@ -70,23 +80,43 @@ doc_sources = xml/Vorbis_I_spec.xml \
 	xml/spec-fo.xsl \
 	xml/spec-html.xsl
 
-nobase_EXTRA_DIST = $(doc_sources)
-
 # these are expensive; only remove if we have to
-MAINTAINERCLEANFILES = $(built_docs)
+DISTCLEANFILES = $(built_docs)
 CLEANFILES = Vorbis_I_spec.fo spec.aux spec.log spec.out
 
+# rules for temporary build dir for spec
+BUILDDIR = build
+# how to copy images to build dir
+SPEC_PNG_BUILD = $(foreach file, $(SPEC_PNG), $(BUILDDIR)/$(file))
+SPEC_PDF_BUILD = $(foreach file, $(SPEC_PDF), $(BUILDDIR)/$(file))
+$(BUILDDIR)/%: $(srcdir)/%
+	@echo "Copying $< to $@"
+	@mkdir -p $(BUILDDIR)
+	@cp $< $@
+
+# how to copy the xml to build dir; cheat by only targeting the main one
+$(BUILDDIR)/Vorbis_I_spec.xml: $(doc_sources)
+	@mkdir -p $(BUILDDIR)
+	@for file in $(doc_sources); do cp $(srcdir)/$$file $(BUILDDIR); done
+# translate the draft rtp.txt to .xml in the BUILDDIR
+$(BUILDDIR)/draft-rtp.xml: draft-kerr-avt-vorbis-rtp-03.txt
+	cat $< | sed 's///g' > $@
+# cat $< | sed 's///g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' > $@
+
 # explicit rules for generating docs
-Vorbis_I_spec.html:
-	xsltproc --xinclude --output $@ $(srcdir)/xml/spec-html.xsl $(srcdir)/xml/Vorbis_I_spec.xml
+Vorbis_I_spec.html: $(SPEC_PNG_BUILD) $(BUILDDIR)/Vorbis_I_spec.xml
+	cd build; xsltproc --xinclude --output Vorbis_I_spec.html spec-html.xsl Vorbis_I_spec.xml && mv $@ ..
 
-Vorbis_I_spec.fo:
-	xsltproc --xinclude --output $@ $(srcdir)/xml/spec-fo.xsl $(srcdir)/xml/Vorbis_I_spec.xml
+Vorbis_I_spec.fo: $(BUILDDIR)/Vorbis_I_spec.xml
+	cd build; xsltproc --xinclude --output $@ spec-fo.xsl Vorbis_I_spec.xml && mv $@ ..
 
-Vorbis_I_spec.pdf: Vorbis_I_spec.fo
-	cp $< spec.fo # work around a passivetex bug
-	pdfxmltex --interaction nonstopmode spec.fo
-	pdfxmltex --interaction nonstopmode spec.fo
-	rm spec.fo
-	mv spec.pdf $@
+Vorbis_I_spec.pdf: Vorbis_I_spec.fo $(SPEC_PNG_BUILD) $(SPEC_PDF_BUILD)
+	cp $< build/spec.fo # work around a passivetex bug
+	cd build; pdfxmltex --interaction nonstopmode spec.fo
+	cd build; pdfxmltex --interaction nonstopmode spec.fo
+	rm build/spec.fo
+	mv build/spec.pdf $@
 
+# clean up build dir
+clean-local:
+	-$(RM) -r $(BUILDDIR)

@@ -17,6 +17,7 @@ EXTRA_DIST = HACKING todo.txt macos macosx autogen.sh \
        vorbisenc-uninstalled.pc.in \
        vorbisfile-uninstalled.pc.in
 
+DISTCHECK_CONFIGURE_FLAGS = --enable-docs
 
 dist-hook:
 	rm -rf `find $(distdir)/macos -name CVS`

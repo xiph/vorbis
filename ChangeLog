@@ -1,5 +1,13 @@
 2004-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* Makefile.am:
+	* doc/Makefile.am:
+	* doc/xml/a2-encapsulation_rtp.xml:
+	  first stab at fixing doc build and distcheck issues.
+	  This makes libvorbis pass make distcheck if you have the tools.
+
+2004-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* autogen.sh:
 	  activate autoheader
 	* configure.in:
