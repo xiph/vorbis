@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.14.4.5.2.7 2001/08/08 05:17:18 xiphmont Exp $
+ last mod: $Id: mode_A.h,v 1.14.4.5.2.8 2001/08/12 11:03:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -165,21 +165,20 @@ static vorbis_info_psy _psy_set_A0={
 
   -100.,
   -140.,
-  0.f,
 
   /* tonemaskp */
-  1, 0.f, &_vp_tonemask_consbass_A,
+  0.f, -40.f,&_vp_tonemask_consbass_A,
 
   /* peakattp */
   1, &_vp_peakatt_A,
 
   1,/*noisemaskp */
-  -10.f,     /* suppress any noise curve over maxspec+n */
+  -30.f,     /* suppress any noise curve over maxspec+n */
   .6f, .6f,   /* low/high window */
   5, 5, 10,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-30,-30,-30,-30,-30,-30,-30,-20,  0,  0,  0,  0,  0,  1,  1,  2,  3},
+  {-30,-30,-30,-30,-30,-30,-20,-10,  0,  0,  0,  0,  0,  1,  1,  2,  3},
   {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.7f,.8f,.9f,.9f,.9f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
@@ -193,15 +192,14 @@ static vorbis_info_psy _psy_set_A={
 
   -100.f,
   -140.f,
-  0.f,
 
   /* tonemask */
-  1,  0.f,&_vp_tonemask_consbass_A,
+  0.f,-40.f,&_vp_tonemask_consbass_A,
   /* peakattp */
   1,  &_vp_peakatt_A,
 
   /*noisemaskp */
-  1,  -10.f,     /* suppress any noise curve over maxspec+n */
+  1,  -30.f,     /* suppress any noise curve over maxspec+n */
       .4f,.4f,   /* low/high window */
       10,10,100,
 
@@ -219,15 +217,14 @@ static vorbis_info_psy _psy_set_AT={
 
   -100.f,
   -140.f,
-  0.f,
 
   /* tonemask */
-  1,  0.f,&_vp_tonemask_consbass_A,
+  0.f,-40.f,&_vp_tonemask_consbass_A,
   /* peakattp */
   1,  &_vp_peakatt_A,
 
   /*noisemaskp */
-  1,  -10.f,     /* suppress any noise curve over maxspec+n */
+  1,  -30.f,     /* suppress any noise curve over maxspec+n */
       .4f,.4f,   /* low/high window */
       10,10,100,
 
@@ -264,7 +261,7 @@ static vorbis_info_floor1 _floor_set0A={6,
 					 2,1,4, 11,8,14, 23,20,26,
 					 41,35,48, 84,69,103},
 
-                                        60,30,300,
+                                        60,30,500,
                                         999,999,1,18.,
                                         8,70,
                                         96};

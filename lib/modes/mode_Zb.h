@@ -11,12 +11,12 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_B.h,v 1.14.2.3 2001/08/12 11:03:20 xiphmont Exp $
+ last mod: $Id: mode_Zb.h,v 1.1.2.1 2001/08/12 11:03:20 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_MODES_B_H_
-#define _V_MODES_B_H_
+#ifndef _V_MODES_Zb_H_
+#define _V_MODES_Zb_H_
 
 #include <stdio.h>
 #include "vorbis/codec.h"
@@ -56,17 +56,11 @@
 #include "books/res0_128_1024_3.vqh"
 #include "books/res0_128_1024_4.vqh"
 #include "books/res0_128_1024_5.vqh"
-#include "books/res0_128_1024_6.vqh"
-#include "books/res0_128_1024_7.vqh"
-#include "books/res0_128_1024_7a.vqh"
-#include "books/res0_128_1024_8.vqh"
-#include "books/res0_128_1024_8a.vqh"
-#include "books/res0_128_1024_9.vqh"
-#include "books/res0_128_1024_9a.vqh"
-#include "books/res0_128_1024_9b.vqh"
+#include "books/res0_128_1024_5a.vqh"
+#include "books/res0_128_1024_5b.vqh"
 
 
-static vorbis_info_psy_global _psy_set_BG={
+static vorbis_info_psy_global _psy_set_ZbG={
   0, /* decaydBpms */
   8,   /* lines per eighth octave */
   
@@ -77,32 +71,31 @@ static vorbis_info_psy_global _psy_set_BG={
   0,
 };
 
-static struct vp_couple_pass _psy_passB0[]={
+static struct vp_couple_pass _psy_passZb0[]={
   {1.f,1.f,
-    {{24,     0,0,       0,0,      0,0},
-     {64,    4.5,0,      0,12,      0,0},
-     {9999,  7.5,0,     4.5,12,   1.5,0}}
+    {{24,    0,0,       0,0,      0,0},
+     {9999,  0,0,   7.5f,12,  7.5f,0}}
   },
 };
 
-static vp_couple_pass _psy_passB[]={
+static vp_couple_pass _psy_passZb[]={
   {1.f,1.f,
     {{288,   0,0,       0,0,      0,0},
-     {512,  4.5,0,      0,12,     0,0},
-     {9999, 7.5,0,     4.5,12,  1.5,0}}
+     {9999,  0,0,   7.5f,12,  7.5f,0}}
   }
 };
 
-static vp_attenblock _vp_tonemask_consbass_B={
-  {{-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*63*/
-  {-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*88*/
-  {-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*125*/
-  {-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*175*/
-  {-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*250*/
-  {-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*350*/
-  {-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*500*/
-  {-40.f,-40.f,-40.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f,-115.f}, /*700*/
-  
+static vp_attenblock _vp_tonemask_consbass_Zb={
+  {{-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f,-110.f}, /*63*/
+  {-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f,-110.f}, /*88*/
+  {-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f,-110.f}, /*125*/
+  {-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f,-110.f}, /*175*/
+  {-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f,-110.f}, /*250*/
+  {-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f,-110.f}, /*350*/
+
+  {-35.f,-35.f,-35.f,-45.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f}, /*500*/
+  {-35.f,-35.f,-35.f,-45.f,-45.f,-55.f,-65.f,-75.f,-85.f,-95.f,-105.f}, /*700*/
+
   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*1000*/
   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*1400*/
   {-40.f,-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*2000*/
@@ -115,7 +108,7 @@ static vp_attenblock _vp_tonemask_consbass_B={
   {-24.f,-24.f,-26.f,-32.f,-32.f,-42.f,-50.f,-60.f,-70.f,-90.f,-100.f}, /*16000*/
 }};
 
-static vp_attenblock _vp_tonemask_B={
+static vp_attenblock _vp_tonemask_Zb={
 
   {{-30.f,-30.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*63*/
   {-30.f,-30.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*88*/
@@ -140,134 +133,133 @@ static vp_attenblock _vp_tonemask_B={
   {-24.f,-24.f,-26.f,-32.f,-32.f,-42.f,-50.f,-60.f,-70.f,-85.f,-100.f}, /*16000*/
 }};
 
-
-static vp_attenblock _vp_peakatt_B={
-  {{-14.f,-20.f,-20.f,-20.f,-26.f,-32.f,-32.f,-32.f,-32.f,-32.f,-40.f},/*63*/
-  {-14.f,-20.f,-20.f,-20.f,-26.f,-32.f,-32.f,-32.f,-32.f,-32.f,-40.f},/*88*/
-  {-14.f,-20.f,-20.f,-20.f,-26.f,-32.f,-32.f,-32.f,-32.f,-32.f,-40.f},/*125*/
-  {-14.f,-20.f,-20.f,-20.f,-26.f,-32.f,-32.f,-32.f,-32.f,-32.f,-40.f},/*175*/
-  {-14.f,-20.f,-20.f,-20.f,-26.f,-32.f,-32.f,-32.f,-32.f,-32.f,-40.f},/*250*/
-  {-14.f,-20.f,-20.f,-20.f,-26.f,-32.f,-32.f,-32.f,-32.f,-32.f,-40.f},/*350*/
-  {-14.f,-20.f,-20.f,-20.f,-26.f,-32.f,-32.f,-32.f,-32.f,-32.f,-40.f},/*500*/
-  {-10.f,-10.f,-10.f,-14.f,-20.f,-20.f,-20.f,-24.f,-26.f,-32.f,-40.f},/*700*/
-  {-10.f,-10.f,-10.f,-14.f,-20.f,-20.f,-20.f,-24.f,-26.f,-32.f,-40.f},/*1000*/
-  {-10.f,-10.f,-10.f,-14.f,-20.f,-20.f,-20.f,-24.f,-26.f,-32.f,-40.f},/*1400*/
-  {-10.f,-10.f,-10.f,-14.f,-20.f,-20.f,-20.f,-24.f,-26.f,-32.f,-40.f},/*2000*/
-  {-10.f,-10.f,-10.f,-14.f,-20.f,-20.f,-20.f,-24.f,-26.f,-32.f,-40.f},/*2800*/
-  {-10.f,-10.f,-10.f,-10.f,-18.f,-20.f,-20.f,-22.f,-24.f,-32.f,-40.f},/*4000*/
-  {-10.f,-10.f,-10.f,-10.f,-12.f,-14.f,-16.f,-18.f,-22.f,-32.f,-40.f},/*5600*/
-  {-10.f,-10.f,-10.f,-10.f,-10.f,-11.f,-12.f,-13.f,-22.f,-32.f,-40.f},/*8000*/
-  {-10.f,-10.f,-10.f,-10.f,-10.f,-10.f,-10.f,-11.f,-22.f,-32.f,-40.f},/*11500*/
-  {-10.f,-10.f,-10.f,-10.f,-10.f,-10.f,-10.f,-10.f,-20.f,-32.f,-40.f},/*16000*/
+static vp_attenblock _vp_peakatt_Zb={
+  {{-14.f,-16.f,-18.f,-19.f,-24.f,-24.f,-24.f,-24.f,-24.f,-24.f,-24.f},/*63*/
+   {-14.f,-16.f,-18.f,-19.f,-24.f,-24.f,-24.f,-24.f,-24.f,-24.f,-24.f},/*88*/
+   {-14.f,-16.f,-18.f,-19.f,-24.f,-24.f,-24.f,-24.f,-24.f,-24.f,-24.f},/*125*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-20.f,-26.f,-24.f,-24.f,-24.f,-24.f},/*175*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-26.f,-24.f,-24.f,-24.f},/*250*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-24.f,-24.f},/*350*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-24.f,-24.f},/*500*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*700*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*1000*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*1400*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*2000*/
+   {-10.f,-10.f,-10.f,-12.f,-16.f,-16.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*2400*/
+   {-10.f,-10.f,-10.f,-12.f,-16.f,-16.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*4000*/
+   {-10.f,-10.f,-10.f,-12.f,-12.f,-14.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*5600*/
+   {-10.f,-10.f,-10.f,-10.f,-10.f,-14.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*8000*/
+   {-10.f,-10.f,-10.f,-10.f,-10.f,-14.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*11500*/
+   {-10.f,-10.f,-10.f,-10.f,-10.f,-12.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*16000*/
 }};
 
-static vorbis_info_psy _psy_set_B0={
+static vorbis_info_psy _psy_set_Zb0={
   ATH_Bark_dB_lineaggressive,
 
-  -100.,
+  -90.,
   -140.,
 
   /* tonemaskp */
-  -3.f, -40.f, &_vp_tonemask_consbass_B,
+  6.f, -20.f,&_vp_tonemask_consbass_Zb,
 
   /* peakattp */
-  1, &_vp_peakatt_B,
+  1, &_vp_peakatt_Zb,
 
   /*noisemaskp */
-  1,-10.f,     /* suppress any noise curve over maxspec+n */
-  .6f, .6f,   /* low/high window */
-  5, 5, 10,
+  1,-24.f,     /* suppress any noise curve over maxspec+n */
+  .5f, .5f,   /* low/high window */
+  5, 5, -1,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-30,-30,-30,-30,-30,-30,-20,-10,  0,  0,  0,  0,  0,  1,  1,  2,  3},
-  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.6f,.75f,.85f,.85f,.85f},
+  {-20,-20,-20,-20,-20,-20,-10,  0,  0,  0,  0,  0,  0,  0,  0,  0,  1},
+  {1.f,1.f,1.f,1.f,1.f,1.f,1.f,.8f,.8f,.8f,.8f,.8f,.85f,.95f,.95f,1.f,1.f},
 
-  105.f,  /* even decade + 5 is important; saves an rint() later in a
+  95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
   1,
-  _psy_passB0
+  _psy_passZb0
 };
 
-static vorbis_info_psy _psy_set_B={
+static vorbis_info_psy _psy_set_Zb={
   ATH_Bark_dB_lineaggressive,
 
-  -100.f,
+  -90.f,
   -140.f,
 
   /* tonemask */
-  -3.f,-40.f,&_vp_tonemask_consbass_B,
+  6.f,-20.f,&_vp_tonemask_Zb,
   /* peakattp */
-  1,  &_vp_peakatt_B,
+  1,  &_vp_peakatt_Zb,
 
   /*noisemaskp */
-  1,  -10.f,     /* suppress any noise curve over maxspec+n */
-      .4f,.4f,   /* low/high window */
-      10,10,100,
+  1,  -24.f,     /* suppress any noise curve over maxspec+n */
+      .5f,.5f,   /* low/high window */
+      10,10,-1,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {  0,  0,  0,  0,  0,  0,  0,  0, -6, -6, -6, -6,  0,   0,  0,  0,  0},
-  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.6f,.7f,.75f,.8f},
+  {-10,-10,-10,-10,-10,-10,-10,  0,  0,  0,  0,  0,  0,  0,  1,  2,  3},
+  {.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.8f,.9f,.9f,.9f,.95f,.95f},
 
-  105.f,  /* even decade + 5 is important; saves an rint() later in a
+  95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
-  1,_psy_passB
+  1,_psy_passZb
 };
 
-static vorbis_info_psy _psy_set_BT={
+static vorbis_info_psy _psy_set_ZbT={
   ATH_Bark_dB_lineaggressive,
 
-  -100.f,
+  -90.f,
   -140.f,
 
   /* tonemask */
-  -3.f,-40.f,&_vp_tonemask_consbass_B,
+  6.f,-20.f,&_vp_tonemask_consbass_Zb,
   /* peakattp */
-  1,  &_vp_peakatt_B,
+  1,  &_vp_peakatt_Zb,
 
   /*noisemaskp */
-  1,  -10.f,     /* suppress any noise curve over maxspec+n */
-      .4f,.4f,   /* low/high window */
-      10,10,100,
+  1,  -24.f,     /* suppress any noise curve over maxspec+n */
+      .5f,.5f,   /* low/high window */
+      10,10,-1,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-30,-30,-30,-30,-30,-30,-30,-20, -6, -6, -6, -6,  0,   0,  0,  0,  0},
-  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.6f,.7f,.75f,.8f},
+  {-20,-20,-20,-20,-20,-20,-10,  0,  0,  0,  0,  0,  0,   0,  1,  2,  3},
+  {1.f,1.f,1.f,1.f,1.f,1.f,.9f,.8f,.8f,.8f,.8f,.8f,.9f,.9f,.9f,.95f,.95f},
 
-  105.f,  /* even decade + 5 is important; saves an rint() later in a
+  95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
-  1,_psy_passB
+  1,_psy_passZb
 };
 
 /* with GNUisms, this could be short and readable. Oh well */
-static vorbis_info_time0 _time_set0B={0};
-/*static vorbis_info_floor0 _floor_set0B={9, 44100,  64, 10,130, 2, {0,1},
+static vorbis_info_time0 _time_set0Zb={0};
+/*static vorbis_info_floor0 _floor_set0Zb={9, 44100,  64, 10,130, 2, {0,1},
   0.246f, .387f};*/
-/*static vorbis_info_floor0 _floor_set1B={30, 44100, 256, 12,150, 2, {2,3}, 
+/*static vorbis_info_floor0 _floor_set1Zb={30, 44100, 256, 12,150, 2, {2,3}, 
   .082f, .126f};*/
 
-static vorbis_info_floor1 _floor_set0B={6,
-                                        {0,1,1,1,2,2},
-                                        
-                                        {4,3,3},
-                                        {0,2,2},
-                                        {-1,0,1},
-                                        {{2},{-1,3,4,5},{-1,6,7,8}},
+static vorbis_info_floor1 _floor_set0Zb={3,
+					{0,1,2},
+					
+					{1,3,3},
+					{0,2,2},
+					{-1,0,1},
+					{{2},{-1,3,4,5},{-1,6,7,8}},
 
                                         4,
 
-                                        {0,128,  
+					{0,128,  
 
-					 6,17,30,58,
-					 
-					 2,1,4, 11,8,14, 23,20,26,
-					 41,35,48, 84,69,103},
+					 7,
+
+					 2,1,4,
+					 23,13,45},
 
                                         60,30,500,
-                                        999,999,1,18.,
+                                        999,999,0,18.,
                                         8,70,
-                                        112};
+                                        90};
 
-static vorbis_info_floor1 _floor_set1B={10,
+static vorbis_info_floor1 _floor_set1Zb={10,
 					{0,1,2,2,2,2,2, 3,3,3},
 					
 					{3,4,3,3},
@@ -279,7 +271,7 @@ static vorbis_info_floor1 _floor_set1B={10,
 					 {-1,20,21,22},
 					},
 
-					2,
+					4,
 					{0,1024,
 
 					 88,31,243,
@@ -291,87 +283,83 @@ static vorbis_info_floor1 _floor_set1B={10,
 					 329,282,387, 672,553,825
 					 },
 					
-					60,30,300,
+					60,30,400,
 					20,8,1,18.,
 					20,600,
-					896};
+					720};
 
-static vorbis_info_residue0 _residue_set0B={0,224,16,10,23,
-					    {0,1,1,1,1,1,1,3,3,7},
-					    {25,
-					     26,
-					     27,
-					     28,
-					     29,
-					     30,
-					     31,32,
-					     33,34,
-					     35,36,37},
+static vorbis_info_residue0 _residue_set0Zb={0,180,12,5,23,
+					    {1,1,1,1,7},
+					     {25,
+					      26,
+					      27,
+					      28,
+					      29,30,31},
 					    {9999,
-					     7,9999,9999,
-					     11,9999,
-					     9999,9999,9999,9999},
-					    {.5f,
-					     1.5f,1.5f,1.5f,
-					     2.5f,2.5f,
-					     4.5f,16.5f,84.5f},
+					     9999,
+					     9999,
+					     9999,
+					     9999},
+					    {2.5f,
+					     7.5,
+					     1.5f,
+					     22.5f},
 					    {0},
-					    {99,
-					     8,8,99,
-					     99,99,
-					     99,99,99,99},
+					    {2,
+					     2,
+					     99,
+					     99,
+					     99},
 					    {3}};
 
-static vorbis_info_residue0 _residue_set1B={0,1792, 32,10,24,
-					    {0,1,1,1,1,1,1,3,3,7},
-					    {25,
-					     26,
-					     27,
-					     28,
-					     29,
-					     30,
-					     31,32,
-					     33,34,
-					     35,36,37},
+static vorbis_info_residue0 _residue_set1Zb={0,1440, 32,5,24,
+					    {1,1,1,1,7},
+					     {25,
+					      26,
+					      27,
+					      28,
+					      29,30,31},
 					    {9999,
-					     10,9999,9999,
-					     20,9999,
-					     9999,9999,9999,9999},
-					    {.5f,
-					     1.5f,1.5f,1.5f,
-					     2.5f,2.5f,
-					     4.5f,16.5f,84.f},
+					     9999,
+					     9999,
+					     9999,
+					     9999},
+					    {2.5f,
+					     7.5f,
+					     1.5f,
+					     22.5f},
 					    {0},
-					    {99,
-					     32,32,99,
-					     99,99,
-					     99,99,99,99},
+					    {18,
+					     18,
+					     99,
+					     99,
+					     99},
 					    {3}};
 
-static vorbis_info_mapping0 _mapping_set0B={1, {0,0}, {0}, {0}, {0}, {0,0},
+static vorbis_info_mapping0 _mapping_set0Zb={1, {0,0}, {0}, {0}, {0}, {0,0},
                                             1,{0},{1}};
-static vorbis_info_mapping0 _mapping_set1B={1, {0,0}, {0}, {1}, {1}, {1,2},
+static vorbis_info_mapping0 _mapping_set1Zb={1, {0,0}, {0}, {1}, {1}, {1,2},
                                             1,{0},{1}};
-static vorbis_info_mode _mode_set0B={0,0,0,0};
-static vorbis_info_mode _mode_set1B={1,0,0,1};
+static vorbis_info_mode _mode_set0Zb={0,0,0,0};
+static vorbis_info_mode _mode_set1Zb={1,0,0,1};
 
 /* CD quality stereo, no channel coupling */
-codec_setup_info info_B={
+codec_setup_info info_Zb={
 
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   38,   3,
+  2,          2,    1,     2,       2,   32,   3,
   /* modes */
-  {&_mode_set0B,&_mode_set1B},
+  {&_mode_set0Zb,&_mode_set1Zb},
   /* maps */
-  {0,0},{&_mapping_set0B,&_mapping_set1B},
+  {0,0},{&_mapping_set0Zb,&_mapping_set1Zb},
   /* times */
-  {0,0},{&_time_set0B},
+  {0,0},{&_time_set0Zb},
   /* floors */
-  {1,1},{&_floor_set0B,&_floor_set1B},
+  {1,1},{&_floor_set0Zb,&_floor_set1Zb},
   /* residue */
-  {2,2},{&_residue_set0B,&_residue_set1B},
+  {2,2},{&_residue_set0Zb,&_residue_set1Zb},
   /* books */
     
   {  
@@ -410,19 +398,13 @@ codec_setup_info info_B={
    &_vq_book_res0_128_1024_3,
    &_vq_book_res0_128_1024_4,
    &_vq_book_res0_128_1024_5,
-   &_vq_book_res0_128_1024_6,
-   &_vq_book_res0_128_1024_7,
-   &_vq_book_res0_128_1024_7a,
-   &_vq_book_res0_128_1024_8,
-   &_vq_book_res0_128_1024_8a,
-   &_vq_book_res0_128_1024_9,
-   &_vq_book_res0_128_1024_9a,
-   &_vq_book_res0_128_1024_9b,
+   &_vq_book_res0_128_1024_5a,
+   &_vq_book_res0_128_1024_5b,
 
   },
   /* psy */
-  {&_psy_set_B0,&_psy_set_BT,&_psy_set_B},
-  &_psy_set_BG
+  {&_psy_set_Zb0,&_psy_set_ZbT,&_psy_set_Zb},
+  &_psy_set_ZbG
 };
 
 #endif
