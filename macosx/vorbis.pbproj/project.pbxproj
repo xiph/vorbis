@@ -43,8 +43,8 @@
 		};
 		034768E0FF38A50411DB9C8B = {
 			isa = PBXFrameworkReference;
-			name = vorbis.framework;
-			path = "/Volumes/Apps 3 GB/Dev/Sources/vorbis/macosx/build/vorbis.framework";
+			name = Vorbis.framework;
+			path = "/Volumes/Apps 3 GB/Dev/Sources/vorbis/macosx/build/Vorbis.framework";
 			refType = 0;
 		};
 //030
@@ -87,7 +87,7 @@
 			children = (
 				1058C7B0FEA5585E11CA2CBB,
 				1058C7B2FEA5585E11CA2CBB,
-				F5F1D7520191E84E01A802FE,
+				F552F5F60192892D01000105,
 			);
 			isa = PBXGroup;
 			name = "External Frameworks and Libraries";
@@ -116,9 +116,9 @@
 				HEADER_SEARCH_PATHS = "\"$(HOME)/Library/Frameworks/ogg.framework/Headers\"";
 				INSTALL_PATH = "$(HOME)/Library/Frameworks";
 				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
+				OTHER_CFLAGS = "-D__MACOSX__";
 				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = vorbis;
+				PRODUCT_NAME = Vorbis;
 				SECTORDER_FLAGS = "";
 				WARNING_CFLAGS = "-Wmost -Wno-four-char-constants -Wno-unknown-pragmas";
 				WRAPPER_EXTENSION = framework;
@@ -137,7 +137,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>English</string>
 	<key>CFBundleExecutable</key>
-	<string>vorbis</string>
+	<string>Vorbis</string>
 	<key>CFBundleIconFile</key>
 	<string></string>
 	<key>CFBundleIdentifier</key>
@@ -418,7 +418,6 @@
 		0867D6A0FE84028FC02AAC07 = {
 			buildActionMask = 2147483647;
 			files = (
-				F5F1D7530191E84F01A802FE,
 			);
 			isa = PBXFrameworksBuildPhase;
 			name = "Frameworks & Libraries";
@@ -508,15 +507,18 @@
 //F52
 //F53
 //F54
+		F552F5F60192892D01000105 = {
+			isa = PBXFrameworkReference;
+			name = ogg.framework;
+			path = /Users/giles/Library/Frameworks/ogg.framework;
+			refType = 0;
+		};
 		F58520B70191D12B01A802FE = {
 			children = (
 				F58520B80191D12B01A802FE,
 				F58520B90191D12B01A802FE,
 				F58520BA0191D12B01A802FE,
 				F58520BB0191D12B01A802FE,
-				F58520BC0191D12B01A802FE,
-				F58520BD0191D12B01A802FE,
-				F58520BE0191D12B01A802FE,
 			);
 			isa = PBXGroup;
 			name = Headers;
@@ -543,21 +545,6 @@
 		F58520BB0191D12B01A802FE = {
 			isa = PBXFileReference;
 			path = vorbisfile.h;
-			refType = 4;
-		};
-		F58520BC0191D12B01A802FE = {
-			isa = PBXFileReference;
-			path = Makefile;
-			refType = 4;
-		};
-		F58520BD0191D12B01A802FE = {
-			isa = PBXFileReference;
-			path = Makefile.am;
-			refType = 4;
-		};
-		F58520BE0191D12B01A802FE = {
-			isa = PBXFileReference;
-			path = Makefile.in;
 			refType = 4;
 		};
 		F58520BF0191D12B01A802FE = {
@@ -3871,18 +3858,6 @@
 			);
 			shellPath = /bin/sh;
 			shellScript = "installDir=\"${HOME}/Library/Frameworks\"\nfw=\"vorbis.framework\"\n\nmkdir -p \"${installDir}\"\nrm -rf \"${installDir}/${fw}\"\nditto build/${fw} \"${installDir}/${fw}\"\n## /usr/bin/cc -precomp \"${installDir}/${fw}/Headers/codec.h\" -o \"${installDir}/${fw}/Headers/codec.p\"\n";
-		};
-		F5F1D7520191E84E01A802FE = {
-			isa = PBXFrameworkReference;
-			name = ogg.framework;
-			path = "/Volumes/User 1 GB/ecc/Library/Frameworks/ogg.framework";
-			refType = 0;
-		};
-		F5F1D7530191E84F01A802FE = {
-			fileRef = F5F1D7520191E84E01A802FE;
-			isa = PBXBuildFile;
-			settings = {
-			};
 		};
 	};
 	rootObject = 0867D690FE84028FC02AAC07;
