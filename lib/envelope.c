@@ -14,7 +14,7 @@
  function: PCM data envelope analysis and manipulation
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 02 1999
+ last modification date: Oct 06 1999
 
  Vorbis manipulates the dynamic range of the incoming PCM data
  envelope to minimise time-domain energy leakage from percussive and
@@ -29,6 +29,7 @@
 
 #include "codec.h"
 #include "envelope.h"
+#include "bitwise.h"
 
 void _ve_envelope_init(envelope_lookup *e,int samples_per){
   int i;
@@ -120,17 +121,17 @@ static void _ve_deltas(double *deltas,double *pcm,int n,double *win,
 }
 
 void _ve_envelope_multipliers(vorbis_dsp_state *v){
-  int step=v->samples_per_envelope_step;
+  vorbis_info *vi=v->vi;
+  int step=vi->envelopesa;
   static int frame=0;
 
   /* we need a 1-1/4 envelope window overlap begin and 1/4 end */
-  int dtotal=(v->pcm_current-step/2)/v->samples_per_envelope_step;
+  int dtotal=(v->pcm_current-step/2)/vi->envelopesa;
   int dcurr=v->envelope_current;
   double *window=v->ve.window;
   int winlen=v->ve.winlen;
   int pch,ech;
-  vorbis_info *vi=&v->vi;
-
+  
   if(dtotal>dcurr){
     for(ech=0;ech<vi->envelopech;ech++){
       double *mult=v->multipliers[ech]+dcurr;
@@ -159,8 +160,9 @@ void _ve_envelope_multipliers(vorbis_dsp_state *v){
    coefficients */
 
 void _ve_envelope_sparsify(vorbis_block *vb){
+  vorbis_info *vi=vb->vd->vi;
   int ch;
-  for(ch=0;ch<vb->vd->vi.envelopech;ch++){
+  for(ch=0;ch<vi->envelopech;ch++){
     int flag=0;
     double *mult=vb->mult[ch];
     int n=vb->multend;
@@ -172,11 +174,11 @@ void _ve_envelope_sparsify(vorbis_block *vb){
     /* are we going to multiply anything? */
     
     for(i=1;i<n;i++){
-      if(mult[i]>=last*vb->vd->vi.preecho_thresh){
+      if(mult[i]>=last*vi->preecho_thresh){
 	flag=1;
 	break;
       }
-      if(i<n-1 && mult[i+1]>=last*vb->vd->vi.preecho_thresh){
+      if(i<n-1 && mult[i+1]>=last*vi->preecho_thresh){
 	flag=1;
 	break;
       }
@@ -193,10 +195,10 @@ void _ve_envelope_sparsify(vorbis_block *vb){
       
       last=1;
       for(;i<n;i++){
-	if(mult[i]/last>clamp*vb->vd->vi.preecho_thresh){
-	  last=mult[i]/vb->vd->vi.preecho_clamp;
+	if(mult[i]/last>clamp*vi->preecho_thresh){
+	  last=mult[i]/vi->preecho_clamp;
 	  
-	  mult[i]=floor(log(mult[i]/clamp/vb->vd->vi.preecho_clamp)/log(2))-1;
+	  mult[i]=floor(log(mult[i]/clamp/vi->preecho_clamp)/log(2))-1;
 	  if(mult[i]>15)mult[i]=15;
 	}else{
 	  mult[i]=0;
@@ -208,7 +210,7 @@ void _ve_envelope_sparsify(vorbis_block *vb){
 }
 
 void _ve_envelope_apply(vorbis_block *vb,int multp){
-  vorbis_info *vi=&vb->vd->vi;
+  vorbis_info *vi=vb->vd->vi;
   double env[vb->multend*vi->envelopesa];
   envelope_lookup *look=&vb->vd->ve;
   int i,j,k;
@@ -248,4 +250,41 @@ void _ve_envelope_apply(vorbis_block *vb,int multp){
     }
   }
 }
+
+int _ve_envelope_encode(vorbis_block *vb){
+  /* Not huffcoded yet. */
+
+  vorbis_info *vi=vb->vd->vi;
+  int scale=vb->W;
+  int n=vb->multend;
+  int i,j;
+
+  /* range is 0-15 */
+
+  for(i=0;i<vi->envelopech;i++){
+    double *mult=vb->mult[i];
+    for(j=0;j<n;j++)
+      _oggpack_write(&vb->opb,(int)(mult[j]),4);
+  }
+  return(0);
+}
+
+/* synthesis expands the buffers in vb if needed.  We can assume we
+   have enough storage handed to us. */
+int _ve_envelope_decode(vorbis_block *vb){
+  vorbis_info *vi=vb->vd->vi;
+  int scale=vb->W;
+  int n=vb->multend;
+  int i,j;
+
+  /* range is 0-15 */
+
+  for(i=0;i<vi->envelopech;i++){
+    double *mult=vb->mult[i];
+    for(j=0;j<n;j++)
+      mult[j]=_oggpack_read(&vb->opb,4);
+  }
+  return(0);
+}
+
 

@@ -145,13 +145,13 @@ int main(){
   /* Throw the comments plus a few lines about the bitstream we're
      decoding */
   {
-    char **ptr=vi->user_comments;
+    char **ptr=vi.user_comments;
     while(*ptr){
       fprintf(stderr,"%s\n",*ptr);
       ++ptr;
     }
-    fprintf(stderr,"\nBitstream is %d channel, %dHz\n",vi->channels,vi->rate);
-    fprintf(stderr,"Encoded by: %s\n\n",vi->vendor);
+    fprintf(stderr,"\nBitstream is %d channel, %dHz\n",vi.channels,vi.rate);
+    fprintf(stderr,"Encoded by: %s\n\n",vi.vendor);
   }
 
   convsize=4096/vi.channels;
@@ -213,6 +213,7 @@ int main(){
 		  ptr+=2;
 		}
 	      }
+	      fwrite(convbuffer,2*vi.channels,out,stdout);
 	      
 	      vorbis_synthesis_read(&vd,out); /* tell libvorbis how
 						 many samples we
@@ -226,9 +227,9 @@ int main(){
     if(!eos){
       buffer=ogg_sync_buffer(&oy,4096);
       bytes=fread(buffer,1,4096,stdin);
-      if(bytes==0)eos=1;
-    }else
       ogg_sync_wrote(&oy,bytes);
+      if(bytes==0)eos=1;
+    }
   }
   
   /* clean up and exit (this example doesn't deal with the possibility

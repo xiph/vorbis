@@ -16,7 +16,7 @@
 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 29 1999
+ last modification date: Oct 10 1999
 
  Algorithm adapted from _The use of multirate filter banks for coding
  of high quality digital audio_, by T. Sporer, K. Brandenburg and
@@ -35,9 +35,6 @@
  disagree.
 
  ********************************************************************/
-
-/* Undef the following if you want a normal MDCT */
-#define VORBIS_SPECIFIC_MODIFICATIONS
 
 #include <stdlib.h>
 #include <string.h>
@@ -262,9 +259,10 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
     double *BE=init->trig+n2;
     double *BO=BE+n4;
     double *out2=out+n2;
+    double scale=4./n;
     for(i=0;i<n4;i++){
-      out[i]   =x[0]* *BE+x[2]* *BO;
-      *(--out2)=x[0]* *BO-x[2]* *BE;
+      out[i]   =(x[0]* *BE+x[2]* *BO)*scale;
+      *(--out2)=(x[0]* *BO-x[2]* *BE)*scale;
       x+=4;
       BO++;
       BE++;
@@ -318,42 +316,22 @@ void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
     double *BO=BE+n4;
     int o1=n4,o2=o1-1;
     int o3=n4+n2,o4=o3-1;
-    double scale=n/4.;
     
     for(i=0;i<n4;i++){
-      double BEv=BE[i];
-      double BOv=BO[i];
-#ifdef VORBIS_SPECIFIC_MODIFICATIONS
-      double temp= (*x * BOv - *(x+2) * BEv)/ scale;
-      out[o3]=out[o4]=(*x * BEv + *(x+2) * BOv)/ -scale;
+      double temp= (*x * *BO - *(x+2) * *BE);
+      out[o3]=out[o4]= -(*x * *BE + *(x+2) * *BO);
       out[o1]=-temp*window[o1];
       out[o2]=temp*window[o2];
-#else
-      double temp1= (*x * BOv - *(x+2) * BEv)* scale;
-      double temp2= (*x * BEv + *(x+2) * BOv)* -scale;
-    
-      out[o1]=-temp1*window[o1];
-      out[o2]=temp1*window[o2];
-      out[o3]=temp2*window[o3];
-      out[o4]=temp2*window[o4];
-#endif
 
       o1++;
       o2--;
       o3++;
       o4--;
       x+=4;
+      BE++;BO++;
     }
   }
 }
-
-
-
-
-
-
-
-
 
 
 

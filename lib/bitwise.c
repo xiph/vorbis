@@ -48,7 +48,7 @@ void _oggpack_reset(oggpack_buffer *b){
   b->endbit=b->endbyte=0;
 }
 
-void _oggpack_writefree(oggpack_buffer *b){
+void _oggpack_writeclear(oggpack_buffer *b){
   free(b->buffer);
   memset(b,0,sizeof(oggpack_buffer));
 }

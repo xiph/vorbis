@@ -14,7 +14,7 @@
  function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 4 1999
+ last modification date: Oct 6 1999
 
  ********************************************************************/
 
@@ -96,18 +96,25 @@ typedef struct vorbis_info{
   int    comments;
   char *vendor;
 
-  int smallblock;
-  int largeblock;
+  int blocksize[2];
+  int floororder[2];
+  int flooroctaves[2];
+
   int envelopesa;
   int envelopech;
-  int floororder;
-  int flooroctaves;
   int floorch;
 
-  /* no mapping, copuling, balance yet. */
+  /*  int smallblock;
+  int largeblock;
+  int floororder;
+  int flooroctaves;
+  int floorch;*/
 
-  int balanceorder;
-  int balanceoctaves;
+  /* no mapping, coupling, balance yet. */
+
+  /*int balanceorder;
+    int balanceoctaves; 
+    this would likely need to be by channel and blocksize anyway*/
 
   double preecho_thresh;
   double preecho_clamp;
@@ -191,27 +198,23 @@ typedef struct {
    logical bitstream ****************************************************/
 
 typedef struct vorbis_dsp_state{
-  int samples_per_envelope_step;
-  int block_size[2];
-  double *window[2][2][2]; /* windowsize, leadin, leadout */
+  int analysisp;
+  vorbis_info *vi;
 
+  double *window[2][2][2]; /* windowsize, leadin, leadout */
   envelope_lookup ve;
   mdct_lookup vm[2];
   lpc_lookup vl[2];
   lpc_lookup vbal[2];
 
-  vorbis_info vi;
-
   double **pcm;
   double **pcmret;
   int      pcm_storage;
-  int      pcm_channels;
   int      pcm_current;
   int      pcm_returned;
 
   double **multipliers;
   int      envelope_storage;
-  int      envelope_channels;
   int      envelope_current;
 
   int  eofflag;
@@ -237,6 +240,7 @@ typedef struct vorbis_block{
   double **lpc;
   double **lsp;
   double *amp;
+  oggpack_buffer opb;
   
   int    pcm_channels;  /* allocated, not used */
   int    pcm_storage;   /* allocated, not used */

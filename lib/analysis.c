@@ -14,7 +14,7 @@
  function: single-block PCM analysis
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 4 1999
+ last modification date: Oct 7 1999
 
  ********************************************************************/
 
@@ -27,31 +27,104 @@
 #include "envelope.h"
 #include "mdct.h"
 #include "psy.h"
+#include "bitwise.h"
+#include "spectrum.h"
 
 /* this code is still seriously abbreviated.  I'm filling in pieces as
    we go... --Monty 19991004 */
 
 int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
+  static int frameno=0;
+  
   int i;
   double           *window=vb->vd->window[vb->W][vb->lW][vb->nW];
   lpc_lookup       *vl=&vb->vd->vl[vb->W];
-  vorbis_dsp_state *vd=vi->vd;
+  vorbis_dsp_state *vd=vb->vd;
   vorbis_info      *vi=vd->vi;
+  oggpack_buffer   *opb=&vb->opb;
+
   int              n=vb->pcmend;
+  int              spectral_order=vi->floororder[vb->W];
 
   /*lpc_lookup       *vbal=&vb->vd->vbal[vb->W];
     double balance_v[vbal->m];
     double balance_amp;*/
 
-  /* we have the preecho metrics; decie what to do with them */
-  _ve_envelope_sparsify(vb);
-  _ve_envelope_apply(vb,0);
+  /* first things first.  Make sure encode is ready*/
+  _oggpack_reset(opb);
+  /* Encode the packet type */
+  _oggpack_write(opb,0,1);
+  /* Encode the block size */
+  _oggpack_write(opb,vb->W,1);
+
+  /* we have the preecho metrics; decide what to do with them */
+  /*_ve_envelope_sparsify(vb);
+    _ve_envelope_apply(vb,0);*/
+
+  /* Encode the envelope */
+  /*if(_ve_envelope_encode(vb))return(-1);*/
   
+  /* time domain PCM -> MDCT domain */
   for(i=0;i<vi->channels;i++)
     mdct_forward(&vd->vm[vb->W],vb->pcm[i],vb->pcm[i],window);
 
+  /* no balance yet */
+    
+  /* extract the spectral envelope and residue */
+  /* just do by channel.  No coupling yet */
+  {
+    for(i=0;i<vi->channels;i++){
+      double floor[n/2];
+      double curve[n/2];
+      double *lpc=vb->lpc[i];
+      double *lsp=vb->lsp[i];
 
-  /* no balance or channel coupling yet */
+      memset(floor,0,sizeof(double)*n/2);
+      
+      _vp_noise_floor(vb->pcm[i],floor,n/2);
+      _vp_mask_floor(vb->pcm[i],floor,n/2);
+
+      /* Convert our floor to a set of lpc coefficients */
+      vb->amp[i]=sqrt(vorbis_curve_to_lpc(floor,lpc,vl));
+
+      /* LSP <-> LPC is orthogonal and LSP quantizes more stably */
+      vorbis_lpc_to_lsp(lpc,lsp,vl->m);
+
+      /* code the spectral envelope; mutates the lsp coeffs to reflect
+         what was actually encoded */
+      _vs_spectrum_encode(vb,vb->amp[i],lsp);
+
+      /* Generate residue from the decoded envelope, which will be
+         slightly different to the pre-encoding floor due to
+         quantization.  Slow, yes, but perhaps more accurate */
+
+      vorbis_lsp_to_lpc(lsp,lpc,vl->m); 
+      vorbis_lpc_to_curve(curve,lpc,vb->amp[i],vl);
+      
+      /* this may do various interesting massaging too...*/
+      _vs_residue_quantize(vb->pcm[i],curve,vi,n/2);
+
+      /* encode the residue */
+      _vs_residue_encode(vb,vb->pcm[i]);
+
+    }
+  }
+
+  /* set up the packet wrapper */
+
+  op->packet=opb->buffer;
+  op->bytes=_oggpack_bytes(opb);
+  op->b_o_s=0;
+  op->e_o_s=vb->eofflag;
+  op->frameno=vb->frameno;
+
+  return(0);
+}
+
+
+
+
+/* commented out, relocated balance stuff */
   /*{
     double *C=vb->pcm[0];
     double *D=vb->pcm[1];
@@ -115,103 +188,3 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
       
     }
   }*/
-    
-  /* extract the spectral envelope and residue */
-  /* just do by channel.  No coupling yet */
-  {
-    for(i=0;i<vi->channels;vi++){
-      double floor[n/2];
-      double curve[n/2];
-      double *lpc=vb->lpc[i];
-      double *lsp=vb->lsp[i];
-
-      memset(floor,0,sizeof(double)*n/2);
-      
-      _vp_noise_floor(vb->pcm[i],floor,n/2);
-      _vp_mask_floor(vb->pcm[i],floor,n/2);
-      vb->amp[i]=sqrt(vorbis_curve_to_lpc(floor,lpc,vl));
-
-      vorbis_lpc_to_lsp(lpc,lsp,vl->m);
-      
-      {
-	/* make this scale configurable */
-	int scale=1020;
-	int last=0;
-	for(i=0;i<vl->m;i++){
-	  double q=lsp[i]/M_PI*scale;
-	  int val=rint(q-last);
-	  
-	  last+=val;
-	  lsp[i]=val;
-	  
-	}
-      }
-      
-      /* make residue.  Get the floor curve back from LPC (do we want
-         to recover all the way from LSP in the future?  Yes, once the
-         residue massaging is smarter) */
-
-     vorbis_lpc_to_curve(work,lpc1,amp1,vl);
-      
-      _vp_psy_quantize(C,work,n/2);
-      _vp_psy_quantize(D,work,n/2);
-      
-      _vp_psy_unquantize(C,work,n/2);
-      _vp_psy_unquantize(D,work,n/2);
-      
-      
-      {
-	FILE *out;
-	char buffer[80];
-	
-	
-	/*sprintf(buffer,"qC%d.m",frameno);
-	  out=fopen(buffer,"w+");
-	  for(i=0;i<n/2;i++)
-	  fprintf(out,"%g\n",fabs(C[i]));
-	  fclose(out);
-	  
-	  sprintf(buffer,"qD%d.m",frameno);
-	  out=fopen(buffer,"w+");
-	  for(i=0;i<n/2;i++)
-	  fprintf(out,"%g\n",fabs(D[i]));
-	  fclose(out);
-	  
-	  sprintf(buffer,"floor%d.m",frameno);
-	  out=fopen(buffer,"w+");
-	  for(i=0;i<n/2;i++)
-	  fprintf(out,"%g\n",floor1[i]);
-	  fclose(out);
-	  
-	  sprintf(buffer,"lpc%d.m",frameno);
-	  out=fopen(buffer,"w+");
-	  for(i=0;i<n/2;i++)
-	  fprintf(out,"%g\n",work[i]);
-	  fclose(out);
-	  
-	  sprintf(buffer,"curve%d.m",frameno);
-	  out=fopen(buffer,"w+");
-	  for(i=0;i<n/2;i++)
-	  fprintf(out,"%g\n",curve[i]);
-	  fclose(out);
-	  
-	  sprintf(buffer,"lsp%d.m",frameno);
-	  out=fopen(buffer,"w+");
-	  for(i=0;i<30;i++){
-	  fprintf(out,"%g 0.\n",lsp1[i]);
-	  fprintf(out,"%g .1\n",lsp1[i]);
-	  fprintf(out,"\n");
-	  fprintf(out,"\n");
-	  }
-	  fclose(out);*/
-	
-	frameno++;
-      }
-    }
-    /* unmix */
-    _vp_balance_apply(D,C,balance_v,balance_amp,vbal,0);
-  }
-
-  return(0);
-}
-

@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.10 1999/10/05 15:34:56 xiphmont Exp $
+# $Id: Makefile.in,v 1.11 1999/10/10 20:32:17 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -31,7 +31,8 @@ HFILES =	mdct.h codec.h bitwise.h envelope.h lpc.h lsp.h modes.h\
 		psy.h smallft.h window.h xlogmap.h
 
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
-		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o
+		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
+		spectrum.o
 
 EFILES =	encoder_example.o decoder_example.o
 

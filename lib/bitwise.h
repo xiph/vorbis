@@ -22,7 +22,7 @@
 
 extern void _oggpack_writeinit(oggpack_buffer *b);
 extern void _oggpack_reset(oggpack_buffer *b);
-extern void _oggpack_writefree(oggpack_buffer *b);
+extern void _oggpack_writeclear(oggpack_buffer *b);
 extern void _oggpack_readinit(oggpack_buffer *b,char *buf,int bytes);
 extern void _oggpack_write(oggpack_buffer *b,unsigned long value,int bits);
 extern long _oggpack_look(oggpack_buffer *b,int bits);

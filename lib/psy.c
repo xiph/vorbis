@@ -27,7 +27,7 @@
 #include "smallft.h"
 #include "xlogmap.h"
 
-#define NOISEdB 10
+#define NOISEdB 0
 
 #define MASKdB  18
 #define HROLL   60
@@ -114,35 +114,6 @@ void _vp_mask_floor(double *f, double *m,int n){
     lroll=fromdB(roll);
     if(m[i]<lroll)m[i]=lroll;
   }
-}
-
-void _vp_psy_quantize(double *f, double *m,int n){
-  int i;
-  for(i=0;i<n;i++){
-    int val=rint(f[i]/m[i]);
-    if(val>16)val=16;
-    if(val<-16)val=-16;
-    if(val==0 || val==2){
-      if(f[i]<0){
-	f[i]=-1;
-      }else{
-	f[i]=1;
-      }
-    }
-
-    f[i]=val;
-  }
-}
-void _vp_psy_unquantize(double *f, double *m,int n){
-  int i;
-  for(i=0;i<n;i++)
-    f[i]*=m[i];
-}
-
-void _vp_psy_sparsify(double *f, double *m,int n){
-  int i;
-  for(i=0;i<n;i++)
-    if(fabs(f[i])<m[i]*.5)f[i]=0;
 }
 
 /* s must be padded at the end with m-1 zeroes */

@@ -14,53 +14,83 @@
  function: single-block PCM synthesis
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Aug 08 1999
+ last modification date: Oct 07 1999
 
  ********************************************************************/
 
+#include <stdio.h>
 #include "codec.h"
 #include "envelope.h"
 #include "mdct.h"
 #include "lpc.h"
 #include "lsp.h"
+#include "bitwise.h"
+#include "spectrum.h"
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  int i;
-  vorbis_info *vi=&vb->vd->vi;
-  double *window=vb->vd->window[vb->W][vb->lW][vb->nW];
-  lpc_lookup *vl=&vb->vd->vl[vb->W];
+  static int frameno=0;
+  vorbis_dsp_state *vd=vb->vd;
+  vorbis_info      *vi=vd->vi;
+  oggpack_buffer   *opb=&vb->opb;
+  lpc_lookup       *vl;
+  double           *window;
+  int              spectral_order;
+  int              n,i;
 
-  /* get the LSP params back to LPC params. This will be for each
-     spectral floor curve */
+  /* first things first.  Make sure decode is ready */
+  _oggpack_readinit(opb,op->packet,op->bytes);
 
-      
-  /*      {
-      int scale=1020;
-	double last=0;
-	for(i=0;i<30;i++){
-	  last+=lsp1[i];
-	  lsp2[i]=last*M_PI/scale;
-	}
-      }
+  /* Check the packet type */
+  if(_oggpack_read(opb,1)!=0){
+    /* Oops.  This is not an audio data packet */
+    return(-1);
+  }
 
+  /* Encode the block size */
+  vb->W=_oggpack_read(opb,1);
 
+  /* other random setup */
+  vb->frameno=op->frameno;
+  vb->eofflag=op->e_o_s;
+  vl=&vb->vd->vl[vb->W];
+  spectral_order=vi->floororder[vb->W];
 
-      vorbis_lsp_to_lpc(lsp2,lpc1,30);*/
-
-
-  /*for(i=0;i<vi->floorch;i++)
-    vorbis_lsp_to_lpc(vb->lsp[i],vb->lpc[i],vi->floororder);*/
-
-  /* Map the resulting floors back to the appropriate channels */
-
-  /*for(i=0;i<vi->channels;i++)
-    vorbis_lpc_apply(vb->pcm[i],vb->pcmend,vb->lpc[vi->floormap[i]],
-    vb->amp[vi->floormap[i]],vi->floororder);*/
+  /* The storage vectors are large enough; set the use markers */
+  n=vb->pcmend=vi->blocksize[vb->W];
+  vb->multend=vb->pcmend/vi->envelopesa;
   
-  for(i=0;i<vb->pcm_channels;i++)
-    mdct_backward(&vb->vd->vm[vb->W],vb->pcm[i],vb->pcm[i],window);
-  _ve_envelope_apply(vb,1);
+  /* we don't know the size of the following window, but we don't need
+     it yet.  We only use the first half of the window */
+  window=vb->vd->window[vb->W][vb->lW][0];
+  
+  /* recover the time envelope */
+  /*if(_ve_envelope_decode(vb)<0)return(-1);*/
 
+  for(i=0;i<vi->channels;i++){
+    double *lpc=vb->lpc[i];
+    double *lsp=vb->lsp[i];
+    
+    /* recover the spectral envelope */
+    if(_vs_spectrum_decode(vb,&vb->amp[i],lsp)<0)return(-1);
+    
+    /* recover the spectral residue */  
+    if(_vs_residue_decode(vb,vb->pcm[i])<0)return(-1);
+
+    /* LSP->LPC */
+    vorbis_lsp_to_lpc(lsp,lpc,vl->m); 
+
+    /* apply envelope to residue */
+    
+    vorbis_lpc_apply(vb->pcm[i],lpc,vb->amp[i],vl);
+      
+    /* MDCT->time */
+    mdct_backward(&vb->vd->vm[vb->W],vb->pcm[i],vb->pcm[i],window);
+    
+    /* apply time domain envelope */
+    /*_ve_envelope_apply(vb,1);*/
+  }
+  
+  return(0);
 }
 
 
