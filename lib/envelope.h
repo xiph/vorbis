@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.21 2002/03/24 21:04:00 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.22 2002/03/29 07:10:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,16 +20,25 @@
 
 #include "mdct.h"
 
-#define VE_DIV    4
-#define VE_CONV   3
-#define VE_BANDS  4
+#define VE_PRE    16
+#define VE_WIN    4
+#define VE_POST   2
+#define VE_AMP    (VE_PRE+VE_POST-1)
+
+#define VE_BANDS  6
+#define VE_NEARDC 15
+
+#define VE_MINSTRETCH 2   /* a bit less than short block */
+#define VE_MAXSTRETCH 31  /* one full block */
 
 typedef struct {
-  float ampbuf[VE_DIV];
+  float ampbuf[VE_AMP];
   int   ampptr;
-  float delbuf[VE_CONV-1];
-  float convbuf[2];
 
+  float nearDC[VE_NEARDC];
+  float nearDC_acc;
+  float nearDC_partialacc;
+  int   nearptr;
 } envelope_filter_state;
 
 typedef struct {
@@ -50,6 +59,7 @@ typedef struct {
 
   envelope_band          band[VE_BANDS];
   envelope_filter_state *filter;
+  int   stretch;
 
   int                   *mark;
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.47 2002/03/24 21:04:00 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.48 2002/03/29 07:10:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -284,6 +284,8 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 
 /* no time mapping implementation for now */
 static long seq=0;
+static ogg_int64_t total=0;
+extern void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg_int64_t off);
 
 static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state      *vd=vb->vd;
@@ -338,7 +340,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
     memcpy(fft,pcm,sizeof(*fft)*n);
     
-    /*_analysis_output_always("windowed",seq+i,pcm,n,0,0,total-n/2);*/
+    //_analysis_output_always("windowed",seq+i,pcm,n,0,0,total-n/2);
 
     /* transform the PCM data */
     /* only MDCT right now.... */
@@ -384,7 +386,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     for(j=0;j<n/2;j++)
       logmdct[j]=todB(mdct+j);
-    /*_analysis_output_always("mdct",seq+i,logmdct,n/2,1,0,total-n/2);*/
+    //_analysis_output_always("mdct",seq+i,logmdct,n/2,0,0,0);
 
 
     /* perform psychoacoustics; do masking */
@@ -569,7 +571,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     seq+=vi->channels;
   } 
 
-  /*total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;*/
+  total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;
   look->lastframe=vb->sequence;
   return(0);
 }

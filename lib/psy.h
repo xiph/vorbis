@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.27 2001/12/20 01:00:29 segher Exp $
+ last mod: $Id: psy.h,v 1.28 2002/03/29 07:10:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,7 @@
 #include "smallft.h"
 
 #include "backends.h"
+#include "envelope.h"
 
 #ifndef EHMER_MAX
 #define EHMER_MAX 56
@@ -87,8 +88,9 @@ typedef struct{
   int       eighth_octave_lines;
 
   /* for block long/short tuning; encode only */
-  float     preecho_thresh[4];
-  float     postecho_thresh[4];
+  float     preecho_thresh[VE_BANDS];
+  float     postecho_thresh[VE_BANDS];
+  float     stretch_penalty;
   float     preecho_minenergy;
 
   float     ampmax_att_per_sec;
