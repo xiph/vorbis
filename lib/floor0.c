@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.54 2003/03/07 09:13:30 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.55 2003/09/05 23:17:49 giles Exp $
 
  ********************************************************************/
 
@@ -143,7 +143,6 @@ static void floor0_map_lazy_init(vorbis_block      *vb,
 
 static vorbis_look_floor *floor0_look(vorbis_dsp_state *vd,
 				      vorbis_info_floor *i){
-  int j;
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
   vorbis_look_floor0 *look=_ogg_calloc(1,sizeof(*look));
   look->m=info->order;
