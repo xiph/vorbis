@@ -12,7 +12,7 @@ URL:		http://www.xiph.org/
 Vendor:		Xiphophorus <team@xiph.org>
 Source:		ftp://ftp.xiph.org/pub/ogg/vorbis/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-root
-Requires:	libogg >= 1.0rc2
+Requires:	libogg >= 1.0rc3
 Prefix:		%{_prefix}
 
 %description
@@ -23,7 +23,7 @@ and variable bitrates from 16 to 128 kbps/channel.
 %package devel
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
-Requires:	libogg-devel >= 1.0rc2
+Requires:	libogg-devel >= 1.0rc3
 Requires:	libvorbis-devel = %{version}
 
 %description devel
@@ -81,6 +81,9 @@ make DESTDIR=$RPM_BUILD_ROOT install
 /sbin/ldconfig
 
 %changelog
+* Sun Dec 31 2001 Jack Moffitt <jack@xiph.org>
+- Updated for rc3 release.
+
 * Sun Oct 07 2001 Jack Moffitt <jack@xiph.org>
 - Updated for configurable prefixes
 
