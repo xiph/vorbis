@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.7 2000/02/06 13:39:43 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.8 2000/02/09 22:04:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -191,7 +191,8 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   double **pcmbundle=alloca(sizeof(double *)*vi->channels);
   int **auxbundle=alloca(sizeof(int *)*vi->channels);
-
+  int *nonzero=alloca(sizeof(int)*vi->channels);
+  
   /* time domain pre-window: NONE IMPLEMENTED */
 
   /* window the PCM data: takes PCM vector, vb; modifies PCM vector */
@@ -230,9 +231,9 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       _vp_mask_floor(look->psy_look+submap,pcm,mask,floor);
  
       /* perform floor encoding; takes transform floor, returns decoded floor */
-      look->floor_func[submap]->
+      nonzero[i]=look->floor_func[submap]->
 	forward(vb,look->floor_look[submap],floor,decfloor);
-
+      
       /* no iterative residue/floor tuning at the moment */
       
       /* perform residue prequantization.  Do it now so we have all
@@ -248,9 +249,10 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
     for(i=0;i<map->submaps;i++){
       int ch_in_bundle=0;
       for(j=0;j<vi->channels;j++){
-      if(map->chmuxlist[j]==i)
-	pcmbundle[ch_in_bundle]=vb->pcm[j];
-	auxbundle[ch_in_bundle++]=pcmaux[j];
+	if(map->chmuxlist[j]==i && nonzero[j]==1){
+	  pcmbundle[ch_in_bundle]=vb->pcm[j];
+	  auxbundle[ch_in_bundle++]=pcmaux[j];
+	}
       }
       
       look->residue_func[i]->forward(vb,look->residue_look[i],pcmbundle,auxbundle,
@@ -272,6 +274,7 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
 
   double *window=vd->window[vb->W][vb->lW][vb->nW][mode->windowtype];
   double **pcmbundle=alloca(sizeof(double *)*vi->channels);
+  int *nonzero=alloca(sizeof(int)*vi->channels);
   
   /* time domain information decode (note that applying the
      information would have to happen later; we'll probably add a
@@ -282,14 +285,16 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
   for(i=0;i<vi->channels;i++){
     double *pcm=vb->pcm[i];
     int submap=map->chmuxlist[i];
-    look->floor_func[submap]->inverse(vb,look->floor_look[submap],pcm);
+    nonzero[i]=look->floor_func[submap]->
+      inverse(vb,look->floor_look[submap],pcm);
   }
 
   /* recover the residue, apply directly to the spectral envelope */
+
   for(i=0;i<map->submaps;i++){
     int ch_in_bundle=0;
     for(j=0;j<vi->channels;j++){
-      if(map->chmuxlist[j]==i)
+      if(map->chmuxlist[j]==i && nonzero[j])
 	pcmbundle[ch_in_bundle++]=vb->pcm[j];
     }
 
@@ -309,8 +314,12 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* window the data */
   for(i=0;i<vi->channels;i++){
     double *pcm=vb->pcm[i];
-    for(j=0;j<n;j++)
-      pcm[j]*=window[j];
+    if(nonzero[i])
+      for(j=0;j<n;j++)
+	pcm[j]*=window[j];
+    else
+      for(j=0;j<n;j++)
+	pcm[j]=0.;
   }
 	    
   /* now apply the decoded post-window time information */

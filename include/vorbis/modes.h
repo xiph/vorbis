@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.4 2000/01/28 15:25:08 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.5 2000/02/09 22:04:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -44,8 +44,8 @@ static vorbis_info_psy _psy_set0={
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0={0};
-static vorbis_info_floor0 _floor_set0={20, 44100,  64, 1, {0} };
-static vorbis_info_floor0 _floor_set1={32, 44100, 256, 1, {1} };
+static vorbis_info_floor0 _floor_set0={20, 44100,  64, 12,140, 1, {0} };
+static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,140, 1, {1} };
 static vorbis_info_residue0 _residue_set0={0,0};
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {0}, {0}};

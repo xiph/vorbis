@@ -11,8 +11,8 @@
  *                                                                  *
  ********************************************************************
 
- function: fft transform
- last mod: $Id: smallft.c,v 1.6 1999/12/30 07:26:49 xiphmont Exp $
+ function: *unnormalized* fft transform
+ last mod: $Id: smallft.c,v 1.7 2000/02/09 22:04:16 xiphmont Exp $
 
 ********************************************************************/
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.8 2000/02/07 20:03:15 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.9 2000/02/09 22:04:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -376,35 +376,46 @@ int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
   encode_aux *t=book->c->encode_tree;
   int dim=book->dim;
   int ptr=0,k;
+  /*double best1, best2;*/
 
-#if 1
-  /* optimized, using the decision tree */
-  while(1){
-    double c=0.;
-    double *p=book->valuelist+t->p[ptr];
-    double *q=book->valuelist+t->q[ptr];
-    
-    for(k=0;k<dim;k++)
-      c+=(p[k]-q[k])*(a[k]-(p[k]+q[k])*.5);
-
-    if(c>0.) /* in A */
-      ptr= -t->ptr0[ptr];
-    else     /* in B */
-      ptr= -t->ptr1[ptr];
-    if(ptr<=0)break;
-  }
-#else
-  /* brute force */
-  double this,best=_dist(book->dim,a,book->valuelist);
-  int i;
-  for(i=1;i<book->entries;i++){
-    this=_dist(book->dim,a,book->valuelist+i*book->dim);
-    if(this<best){
-      ptr=-i;
-      best=this;
+  {
+    /* optimized, using the decision tree */
+    while(1){
+      double c=0.;
+      double *p=book->valuelist+t->p[ptr];
+      double *q=book->valuelist+t->q[ptr];
+      
+      for(k=0;k<dim;k++)
+	c+=(p[k]-q[k])*(a[k]-(p[k]+q[k])*.5);
+      
+      if(c>0.) /* in A */
+	ptr= -t->ptr0[ptr];
+      else     /* in B */
+	ptr= -t->ptr1[ptr];
+      if(ptr<=0)break;
     }
+    /*fprintf(stderr,"Optimized: %d (%g), ",
+      -ptr,best1=_dist(book->dim,a,book->valuelist-ptr*dim));*/
   }
-#endif
+  /*{
+     brute force 
+    double this,best=_dist(book->dim,a,book->valuelist);
+    int i;
+    for(i=1;i<book->entries;i++){
+      this=_dist(book->dim,a,book->valuelist+i*book->dim);
+      if(this<best){
+	ptr=-i;
+	best=this;
+      }
+    }
+    fprintf(stderr,"brute-force: %d (%g)\n",-ptr,best2=best);
+  }
+
+  if(best1<best2){
+    fprintf(stderr,"ACK, shouldn;t happen.\n");
+    exit(1);
+  }*/
+
   memcpy(a,book->valuelist-ptr*dim,dim*sizeof(double));
   return(vorbis_book_encode(book,-ptr,b));
 }

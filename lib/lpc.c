@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.16 2000/02/06 13:39:42 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.17 2000/02/09 22:04:13 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,13 +45,13 @@ Carsten Bormann
 *********************************************************************/
 
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include "os.h"
 #include "smallft.h"
 #include "lpc.h"
 #include "scales.h"
+
 
 /* Autocorrelation LPC coeff generation algorithm invented by
    N. Levinson in 1947, modified by J. Durbin in 1959. */
@@ -164,10 +164,10 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
   l->barknorm=malloc(mapped*sizeof(double));
 
   /* we choose a scaling constant so that:
-     floor(bark(rate-1)*C)=mapped-1
-     floor(bark(rate)*C)=mapped */
+     floor(bark(rate/2-1)*C)=mapped-1
+     floor(bark(rate/2)*C)=mapped */
 
-  scale=mapped/toBARK(rate);
+  scale=mapped/toBARK(rate/2.);
 
   /* the mapping from a linear scale to a smaller bark scale is
      straightforward.  We do *not* make sure that the linear mapping
@@ -178,7 +178,7 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
   {
     int last=-1;
     for(i=0;i<n;i++){
-      int val=floor( toBARK(((double)rate)/n*i) *scale); /* bark numbers
+      int val=floor( toBARK((rate/2.)/n*i) *scale); /* bark numbers
 							    represent
 							    band edges */
       if(val>=mapped)val=mapped; /* guard against the approximation */
@@ -194,8 +194,13 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
      use computed width (not the number of actual bins above) for
      smoothness in the scale; they should agree closely */
 
+  /* keep it 0. to 1., else the dynamic range starts spreading through
+     all the squaring... */
+
   for(i=0;i<mapped;i++)
-    l->barknorm[i]=fromBARK((i+1)/scale)-fromBARK(i/scale);
+    l->barknorm[i]=(fromBARK((i+1)/scale)-fromBARK(i/scale));
+  for(i=0;i<mapped;i++)
+    l->barknorm[i]/=l->barknorm[mapped-1];
 
   /* we cheat decoding the LPC spectrum via FFTs */
   
@@ -239,7 +244,7 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
          going unused.  This isn't a waste actually; it keeps the
          scale resolution even so that the LPC generator has an easy
          time.  However, if we leave the bins empty we lose energy.
-         So, fill 'em in.  The decoder does not do anything witht he
+         So, fill 'em in.  The decoder does not do anything with  he
          unused bins, so we can fill them anyway we like to end up
          with a better spectral curve */
 
@@ -254,26 +259,6 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
   }
   for(i=0;i<mapped;i++)work[i]*=l->barknorm[i];
 
-#ifdef ANALYSIS
-  {
-    int j;
-    FILE *out;
-    char buffer[80];
-    static int frameno=0;
-    
-    sprintf(buffer,"prelpc%d.m",frameno);
-    out=fopen(buffer,"w+");
-    for(j=0;j<l->n;j++)
-      fprintf(out,"%g\n",curve[j]);
-    fclose(out);
-    sprintf(buffer,"preloglpc%d.m",frameno++);
-    out=fopen(buffer,"w+");
-    for(j=0;j<l->ln;j++)
-      fprintf(out,"%g\n",work[j]);
-    fclose(out);
-  }
-#endif
-
   return vorbis_lpc_from_spectrum(work,lpc,l);
 }
 
@@ -283,9 +268,7 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
    results from direct calculation are cleaner and faster. 
 
    This version does a linear curve generation and then later
-   interpolates the log curve from the linear curve.  This could stand
-   optimization; it could both be more precise as well as not compute
-   quite a few unused values */
+   interpolates the log curve from the linear curve.  */
 
 void _vlpc_de_helper(double *curve,double *lpc,double amp,
 			    lpc_lookup *l){
@@ -294,8 +277,8 @@ void _vlpc_de_helper(double *curve,double *lpc,double amp,
   if(amp==0)return;
 
   for(i=0;i<l->m;i++){
-    curve[i*2+1]=lpc[i]/4/amp;
-    curve[i*2+2]=-lpc[i]/4/amp;
+    curve[i*2+1]=lpc[i]/(4*amp);
+    curve[i*2+2]=-lpc[i]/(4*amp);
   }
 
   drft_backward(&l->fft,curve); /* reappropriated ;-) */
@@ -310,8 +293,7 @@ void _vlpc_de_helper(double *curve,double *lpc,double amp,
       curve[i]=(1./hypot(real+unit,imag));
     }
   }
-}
-  
+}  
 
 /* generate the whole freq response curve of an LPC IIR filter */
 
@@ -415,5 +397,4 @@ void vorbis_lpc_predict(double *coeff,double *prime,int m,
     data[i]=work[o]=y;
   }
 }
-
 
