@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.17 2000/02/21 01:13:02 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.18 2000/02/23 09:10:13 xiphmont Exp $
 
  ********************************************************************/
 
@@ -454,152 +454,83 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
 
   fprintf(stderr,"Building a book with %ld unique entries...\n",v->entries);
 
-  /* We don't always generate a single tree; it tends to be large.  We
-     trade off by splitting the cell and point sets into n totally
-     non-overlapping subsets (where the decision tree tends to have
-     substantial overlap in hyperplane splits) and generating a tree
-     for each.  Because the tree depth is O(n) o(lg(n)), the smaller
-     data set will get us much better storage usage for worst cases
-     (and we will run toward worst case) */
-
   {
-    /* split data set... */
-    int trees=v->entries/(32+log(v->entries)/log(2)*2)+1; /* a guess */
-    long *entrymap=malloc(v->entries*sizeof(long *));
-    long **entryindex=malloc(trees*sizeof(long *));
-    long *entries=calloc(trees,sizeof(long));
-    long *pointmap=malloc(v->points*sizeof(long));
-    long desired=(v->entries/trees)+1;
-    int booknum;
+    long *entryindex=malloc(v->entries*sizeof(long *));
+    long *pointindex=malloc(v->points*sizeof(long));
     long pointssofar=0;
       
-    for(i=0;i<trees;i++)entryindex[i]=calloc(desired,sizeof(long));
+    for(i=0;i<v->entries;i++)entryindex[i]=i;
+    for(i=0;i<v->points;i++)pointindex[i]=i;
 
-    fprintf(stderr,"Prepartitioning into %d trees...\n",trees);
-
-    /* map points to cells */
-    for(i=0;i<v->points;i++){
-      double *ppt=_point(v,i);
-      double firstmetric=_dist(v,_now(v,0),ppt);
-      long   firstentry=0;
-      
-      if(!(i&0xff))spinnit("parititoning... ",v->points-i);
-
-      for(j=0;j<v->entries;j++){
-	double thismetric=_dist(v,_now(v,j),ppt);
-	if(thismetric<firstmetric){
-	  firstmetric=thismetric;
-	  firstentry=j;
-	}
-      }
-      pointmap[i]=firstentry;
-    }
-
-    /* this could be more effective; long, narrow slices are probably
-       better than these porous blobs */
-
-    for(j=0;j<v->entries;j++){
-      int choice=-1;
-      for(i=0;i<trees;i++){
-	if(entries[i]<desired){ /* still has open space */
-	  choice=i;
-	  break;
-	}
-      }
-
-      entryindex[choice][entries[choice]++]=j;
-      entrymap[j]=choice;
-    }
-
-    
-    /* we overload the static codebook ptrs just a bit...  the first
-       <tree> ptr0s just point to the starting point in the struct for
-       that tree.  The first ptr0 points to the first tree at offset
-       <tree>, and thus can be used as the tree count.  Clever but
-       totally opaque :-( . */
-    
     t->alloc=4096;
     t->ptr0=malloc(sizeof(long)*t->alloc);
     t->ptr1=malloc(sizeof(long)*t->alloc);
     t->p=malloc(sizeof(long)*t->alloc);
     t->q=malloc(sizeof(long)*t->alloc);
-    t->aux=trees; 
+    t->aux=0;
     c->dim=v->elements;
     c->entries=v->entries;
     c->lengthlist=calloc(c->entries,sizeof(long));
     
-    for(booknum=0;booknum<trees;booknum++){
-      long points=0;
-      long *pointindex;
-
-      t->ptr0[booknum]=t->aux;
-      for(i=0;i<v->points;i++)
-	if(entrymap[pointmap[i]]==booknum)points++;
-      pointindex=malloc(points*sizeof(long));
-      points=0;
-      for(i=0;i<v->points;i++)
-	if(entrymap[pointmap[i]]==booknum)pointindex[points++]=i;
-
-      /* generate the encoding decision heirarchy */
-      fprintf(stderr,"Leaves added: %d              \n",
-	      lp_split(v,b,entryindex[booknum],entries[booknum],
-		       pointindex,points,0,&pointssofar));
+    fprintf(stderr,"Leaves added: %d              \n",
+	    lp_split(v,b,entryindex,v->entries,
+		     pointindex,v->points,0,&pointssofar));
       
-      free(pointindex);
-      fprintf(stderr,"Paring/rerouting redundant branches... ");
-
-      /* The tree is likely big and redundant.  Pare and reroute branches */
-      {
-	int changedflag=1;
+    free(pointindex);
+    
+    fprintf(stderr,"Paring/rerouting redundant branches... ");
+    
+    /* The tree is likely big and redundant.  Pare and reroute branches */
+    {
+      int changedflag=1;
+      
+      while(changedflag){
+	changedflag=0;
 	
-	while(changedflag){
-	  changedflag=0;
+	/* span the tree node by node; list unique decision nodes and
+	   short circuit redundant branches */
+	
+	for(i=0;i<t->aux;){
+	  int k;
 	  
-	  /* span the tree node by node; list unique decision nodes and
-	     short circuit redundant branches */
+	  /* check list of unique decisions */
+	  for(j=0;j<i;j++)
+	    if(_node_eq(t,i,j))break;
 	  
-	  for(i=t->ptr0[booknum];i<t->aux;){
-	    int k;
-
-	    /* check list of unique decisions */
-	    for(j=t->ptr0[booknum];j<i;j++)
-	      if(_node_eq(t,i,j))break;
-
-	    if(j<i){
-	      /* a redundant entry; find all higher nodes referencing it and
-		 short circuit them to the previously noted unique entry */
-	      changedflag=1;
-	      for(k=0;k<t->aux;k++){
-		if(t->ptr0[k]==-i)t->ptr0[k]=-j;
-		if(t->ptr1[k]==-i)t->ptr1[k]=-j;
-	      }
-
-	      /* Now, we need to fill in the hole from this redundant
-		 entry in the listing.  Insert the last entry in the list.
-		 Fix the forward pointers to that last entry */
-	      t->aux--;
-	      t->ptr0[i]=t->ptr0[t->aux];
-	      t->ptr1[i]=t->ptr1[t->aux];
-	      t->p[i]=t->p[t->aux];
-	      t->q[i]=t->q[t->aux];
-	      for(k=0;k<t->aux;k++){
-		if(t->ptr0[k]==-t->aux)t->ptr0[k]=-i;
-		if(t->ptr1[k]==-t->aux)t->ptr1[k]=-i;
-	      }
-	      /* hole plugged */
-	      
-	    }else
-	      i++;
-	  }
-	  
-	  fprintf(stderr,"\rParing/rerouting redundant branches... "
-		  "%ld remaining   ",t->aux);
+	  if(j<i){
+	    /* a redundant entry; find all higher nodes referencing it and
+	       short circuit them to the previously noted unique entry */
+	    changedflag=1;
+	    for(k=0;k<t->aux;k++){
+	      if(t->ptr0[k]==-i)t->ptr0[k]=-j;
+	      if(t->ptr1[k]==-i)t->ptr1[k]=-j;
+	    }
+	    
+	    /* Now, we need to fill in the hole from this redundant
+	       entry in the listing.  Insert the last entry in the list.
+	       Fix the forward pointers to that last entry */
+	    t->aux--;
+	    t->ptr0[i]=t->ptr0[t->aux];
+	    t->ptr1[i]=t->ptr1[t->aux];
+	    t->p[i]=t->p[t->aux];
+	    t->q[i]=t->q[t->aux];
+	    for(k=0;k<t->aux;k++){
+	      if(t->ptr0[k]==-t->aux)t->ptr0[k]=-i;
+	      if(t->ptr1[k]==-t->aux)t->ptr1[k]=-i;
+	    }
+	    /* hole plugged */
+	    
+	  }else
+	    i++;
 	}
-	fprintf(stderr,"\n");
+	
+	fprintf(stderr,"\rParing/rerouting redundant branches... "
+		"%ld remaining   ",t->aux);
       }
+      fprintf(stderr,"\n");
     }
   }
-
+  
   /* run all training points through the decision tree to get a final
      probability count */
   {
@@ -607,11 +538,17 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     for(i=0;i<c->entries;i++)probability[i]=1; /* trivial guard */
     b->valuelist=v->entrylist; /* temporary for vqenc_entry; replaced later */
 
+    /* sigh.  A necessary hack */
+    for(i=0;i<t->aux;i++)t->p[i]*=c->dim;
+    for(i=0;i<t->aux;i++)t->q[i]*=c->dim;
+    
     for(i=0;i<v->points;i++){
       int ret=codebook_entry(b,v->pointlist+i*v->elements);
       probability[ret]++;
       if(!(i&0xff))spinnit("counting hits... ",v->points-i);
     }
+    for(i=0;i<t->aux;i++)t->p[i]/=c->dim;
+    for(i=0;i<t->aux;i++)t->q[i]/=c->dim;
 
     build_tree_from_lengths(c->entries,probability,c->lengthlist);
     
@@ -632,7 +569,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     /* rearrange storage; ptr0/1 first as it needs a reverse index */
     /* n and c stay unchanged */
     for(i=0;i<c->entries;i++)revindex[index[i]]=i;
-    for(i=t->ptr0[0];i<t->aux;i++){
+    for(i=0;i<t->aux;i++){
       if(!(i&0x3f))spinnit("sorting... ",t->aux-i);
 
       if(t->ptr0[i]>=0)t->ptr0[i]=revindex[t->ptr0[i]];

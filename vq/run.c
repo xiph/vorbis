@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.8 2000/01/21 13:42:40 xiphmont Exp $
+ last mod: $Id: run.c,v 1.9 2000/02/23 09:10:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -79,7 +79,7 @@ int main(int argc,char *argv[]){
       char *dot;
       char *ext=NULL;
       char *name=strdup(*argv++);
-      dot=strchr(name,'.');
+      dot=strrchr(name,'.');
       if(dot)
 	ext=dot+1;
       else
@@ -95,10 +95,10 @@ int main(int argc,char *argv[]){
 
 	basename=strrchr(name,'/');
 	if(basename)
-	  basename=strdup(basename);
+	  basename=strdup(basename)+1;
 	else
 	  basename=strdup(name);
-	dot=strchr(basename,'.');
+	dot=strrchr(basename,'.');
 	if(dot)*dot='\0';
 
 	b=realloc(b,sizeof(codebook *)*(books+2));

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.11 2000/02/21 01:12:53 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.12 2000/02/23 09:10:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -291,77 +291,40 @@ codebook *codebook_load(char *filename){
   /* got it all */
   fclose(in);
 
-  /* might as well unquantize the entries while we're at it */
+  /* unquantize the entries while we're at it */
   codebook_unquantize(b);
 
   /* don't need n and c */
   return(b);
 }
 
-
-/* the new version!  we have ptr0[0] distinct trees in the auxiliary
-   encoding structure.  Find the best match in each one, choosing the
-   best global match */
-
 int codebook_entry(codebook *b,double *val){
   const static_codebook *c=b->c;
   encode_aux *t=c->encode_tree;
-  int trees=t->ptr0[0];
-
-  /*{
-    brute force 
-    double this,best=_dist(c->dim,val,b->valuelist);
-    int i;
-    for(i=1;i<c->entries;i++){
-      this=_dist(c->dim,val,b->valuelist+i*c->dim);
-      if(this<best){
-        ptr=-i;
-        best=this;
-      }
-    }
-  }*/
-  
   double *n=alloca(c->dim*sizeof(double));
-  double bestmetric;
-  double best=-1;
-  while(trees>0){
-    int ptr=t->ptr0[--trees],k;
+  int ptr=0,k;
 
-    while(1){
-      double C=0.;
-      double *p=b->valuelist+t->p[ptr];
-      double *q=b->valuelist+t->q[ptr];
-      
-      for(k=0;k<c->dim;k++){
-	n[k]=p[k]-q[k];
-	C-=(p[k]+q[k])*n[k];
-      }
-      C/=2.;
-      
-      for(k=0;k<c->dim;k++)
-	C+=n[k]*val[k];
-      
-      if(C>0.) /* in A */
-	ptr= -t->ptr0[ptr];
-      else     /* in B */
-	ptr= -t->ptr1[ptr];
-      if(ptr<=0)break;
+  do{
+    double C=0.;
+    double *p=b->valuelist+t->p[ptr];
+    double *q=b->valuelist+t->q[ptr];
+    
+    for(k=0;k<c->dim;k++){
+      n[k]=p[k]-q[k];
+      C-=(p[k]+q[k])*n[k];
     }
+    C/=2.;
+    
+    for(k=0;k<c->dim;k++)
+      C+=n[k]*val[k];
+    
+    if(C>0.) /* in A */
+      ptr=-t->ptr0[ptr];
+    else     /* in B */
+      ptr=-t->ptr1[ptr];
+  }while(ptr>0);
 
-    {
-      double dist=0.;
-      for(k=0;k<c->dim;k++){
-	double one=val[k]-(b->valuelist-ptr*c->dim)[k];
-	dist+=one*one;
-      }
-      if(best==-1 || dist<bestmetric){
-	best=-ptr;
-	bestmetric=dist;
-      }
-    }
-  }
-
-  return(best);
+  return(-ptr);
 }
 
 /* 24 bit float (not IEEE; nonnormalized mantissa +
@@ -425,7 +388,7 @@ void spinnit(char *s,int n){
 void build_tree_from_lengths(int vals, long *hist, long *lengths){
   int i,j;
   long *membership=malloc(vals*sizeof(long));
-      
+
   for(i=0;i<vals;i++)membership[i]=i;
 
   /* find codeword lengths */
@@ -467,6 +430,6 @@ void build_tree_from_lengths(int vals, long *hist, long *lengths){
       fprintf(stderr,"huffman fault; failed to build single tree\n");
       exit(1);
     }
-  
+
   free(membership);
 }
