@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.11 2000/06/26 11:25:32 omnic Exp $
+# $Id: Makefile.in,v 1.12 2000/07/07 01:20:46 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -69,6 +69,8 @@ seeking_test:	$(OFILES) ../lib/libvorbis.a ../lib/vorbisfile.a
 	$(CC) $(CFLAGS) $(LDFLAGS) seeking_test.o \
 			../lib/vorbisfile.a ../lib/libvorbis.a \
 			-o seeking_test $(LIBS)
+
+selftest:	
 
 $(OFILES): 	$(HFILES)
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.15 2000/06/14 01:38:31 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.16 2000/07/07 01:20:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -362,9 +362,9 @@ long vorbis_book_decodevs(codebook *book,double *a,oggpack_buffer *b,
    exactly equal out */
 
 #include <stdio.h>
+
 #include "vorbis/book/lsp20_0.vqh"
-#include "vorbis/book/lsp32_0.vqh"
-#include "vorbis/book/res0_1a.vqh"
+#include "vorbis/book/res0a_13.vqh"
 #define TESTSIZE 40
 
 double test1[TESTSIZE]={
@@ -419,58 +419,6 @@ double test1[TESTSIZE]={
   0.708603,
 };
 
-double test2[TESTSIZE]={
-  0.088654,
-  0.165742,
-  0.279013,
-  0.395894,
-
-  0.110812,
-  0.218422,
-  0.283423,
-  0.371719,
-
-  0.136985,
-  0.186066,
-  0.309814,
-  0.381521,
-
-  0.123925,
-  0.211707,
-  0.314771,
-  0.433026,
-
-  0.088619,
-  0.192276,
-  0.277568,
-  0.343509,
-
-  0.068400,
-  0.132901,
-  0.223999,
-  0.302538,
-
-  0.202159,
-  0.306131,
-  0.360362,
-  0.416066,
-
-  0.072591,
-  0.178019,
-  0.304315,
-  0.376516,
-
-  0.094336,
-  0.188401,
-  0.325119,
-  0.390264,
-
-  0.091636,
-  0.223099,
-  0.282899,
-  0.375124,
-};
-
 double test3[TESTSIZE]={
   0,1,-2,3,4,-5,6,7,8,9,
   8,-2,7,-1,4,6,8,3,1,-9,
@@ -478,9 +426,8 @@ double test3[TESTSIZE]={
   30,-25,-30,-1,-5,-32,4,3,-2,0};
 
 static_codebook *testlist[]={&_vq_book_lsp20_0,
-			     &_vq_book_lsp32_0,
-			     &_vq_book_res0_1a,NULL};
-double   *testvec[]={test1,test2,test3};
+			     &_vq_book_res0a_13,NULL};
+double   *testvec[]={test1,test3};
 
 int main(){
   oggpack_buffer write;
@@ -506,8 +453,10 @@ int main(){
                                                   we can write */
     vorbis_staticbook_pack(testlist[ptr],&write);
     fprintf(stderr,"Codebook size %ld bytes... ",_oggpack_bytes(&write));
-    for(i=0;i<TESTSIZE;i+=c.dim)
-      vorbis_book_encodev(&c,qv+i,&write);
+    for(i=0;i<TESTSIZE;i+=c.dim){
+      int best=_best(&c,qv+i,1);
+      vorbis_book_encodev(&c,best,qv+i,&write);
+    }
     vorbis_book_clear(&c);
     
     fprintf(stderr,"OK.\n");
