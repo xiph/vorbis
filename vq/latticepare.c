@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.2.2.3 2000/06/01 12:03:04 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.2.2.4 2000/06/02 03:27:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -115,12 +115,19 @@ static int closest(codebook *b,double *vec,int current){
   return(bestentry);
 }
 
+static int longsort(const void *a, const void *b){
+  return **(long **)b-**(long **)a;
+}
+
 void usage(void){
   fprintf(stderr,"Ogg/Vorbis lattice codebook paring utility\n\n"
-	  "usage: latticepare book.vqh data.vqd <target_cells>\n"
+	  "usage: latticepare book.vqh data.vqd <target_cells> <protected_cells> base\n"
 	  "where <target_cells> is the desired number of final cells (or -1\n"
-	  "for no change)\n\n"
-	  "produces new book on stdout\n\n");
+	  "                     for no change)\n"
+	  "      <protected_cells> is the number of highest-hit count cells\n"
+	  "                     to protect from dispersal\n"
+	  "      base is the base name (not including .vqh) of the new\n"
+	  "                     book\n\n");
   exit(1);
 }
 
@@ -129,7 +136,10 @@ int main(int argc,char *argv[]){
   codebook *b=NULL;
   int entries=0;
   int dim=0;
-  long i,j,target=-1;
+  long i,j,target=-1,protect=-1;
+  FILE *out=NULL;
+
+  int argnum=0;
 
   argv++;
   if(*argv==NULL){
@@ -137,104 +147,131 @@ int main(int argc,char *argv[]){
     exit(1);
   }
 
-  /* yes, this is evil.  However, it's very convenient to parse file
-     extentions */
-
   while(*argv){
     if(*argv[0]=='-'){
 
       argv++;
 	
     }else{
-      /* input file.  What kind? */
-      char *dot;
-      char *ext=NULL;
-      char *name=strdup(*argv++);
-      dot=strrchr(name,'.');
-      if(dot)
-        ext=dot+1;
-      else{
-	ext="";
-	target=atol(name);
+      switch (argnum++){
+      case 0:case 1:
+	{
+	  /* yes, this is evil.  However, it's very convenient to parse file
+	     extentions */
+	  
+	  /* input file.  What kind? */
+	  char *dot;
+	  char *ext=NULL;
+	  char *name=strdup(*argv++);
+	  dot=strrchr(name,'.');
+	  if(dot)
+	    ext=dot+1;
+	  else{
+	    ext="";
+	    
+	  }
+	  
+	  
+	  /* codebook */
+	  if(!strcmp(ext,"vqh")){
+	    
+	    basename=strrchr(name,'/');
+	    if(basename)
+	      basename=strdup(basename)+1;
+	    else
+	      basename=strdup(name);
+	    dot=strrchr(basename,'.');
+	    if(dot)*dot='\0';
+	    
+	    b=codebook_load(name);
+	    dim=b->dim;
+	    entries=b->entries;
+	  }
+	  
+	  /* data file; we do actually need to suck it into memory */
+	  /* we're dealing with just one book, so we can de-interleave */ 
+	  if(!strcmp(ext,"vqd") && !points){
+	    int cols;
+	    long lines=0;
+	    char *line;
+	    double *vec;
+	    FILE *in=fopen(name,"r");
+	    if(!in){
+	      fprintf(stderr,"Could not open input file %s\n",name);
+	      exit(1);
+	    }
+	    
+	    reset_next_value();
+	    line=setup_line(in);
+	    /* count cols before we start reading */
+	    {
+	      char *temp=line;
+	      while(*temp==' ')temp++;
+	      for(cols=0;*temp;cols++){
+		while(*temp>32)temp++;
+		while(*temp==' ')temp++;
+	      }
+	    }
+	    vec=alloca(cols*sizeof(double));
+	    /* count, then load, to avoid fragmenting the hell out of
+	       memory */
+	    while(line){
+	      lines++;
+	      for(j=0;j<cols;j++)
+		if(get_line_value(in,vec+j)){
+		  fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
+		  exit(1);
+		}
+	      if((lines&0xff)==0)spinnit("counting samples...",lines*cols);
+	      line=setup_line(in);
+	    }
+	    pointlist=malloc((cols*lines+entries*dim)*sizeof(double));
+	    
+	    rewind(in);
+	    line=setup_line(in);
+	    while(line){
+	      lines--;
+	      for(j=0;j<cols;j++)
+		if(get_line_value(in,vec+j)){
+		  fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
+		  exit(1);
+		}
+	      /* deinterleave, add to heap */
+	      add_vector(b,vec,cols);
+	      if((lines&0xff)==0)spinnit("loading samples...",lines*cols);
+	      
+	      line=setup_line(in);
+	    }
+	    fclose(in);
+	  }
+	}
+	break;
+      case 2:
+	target=atol(*argv++);
 	if(target==0)target=entries;
-      }
-      
+	break;
+      case 3:
+	protect=atol(*argv++);
+	break;
+      case 4:
+	{
+	  char *buff=alloca(strlen(*argv)+5);
+	  sprintf(buff,"%s.vqh",*argv);
+	  basename=*argv++;
 
-      /* codebook */
-      if(!strcmp(ext,"vqh")){
-
-        basename=strrchr(name,'/');
-        if(basename)
-          basename=strdup(basename)+1;
-        else
-          basename=strdup(name);
-        dot=strrchr(basename,'.');
-        if(dot)*dot='\0';
-
-        b=codebook_load(name);
-	dim=b->dim;
-	entries=b->entries;
-      }
-
-      /* data file; we do actually need to suck it into memory */
-      /* we're dealing with just one book, so we can de-interleave */ 
-      if(!strcmp(ext,"vqd") && !points){
-        int cols;
-        long lines=0;
-        char *line;
-        double *vec;
-        FILE *in=fopen(name,"r");
-        if(!in){
-          fprintf(stderr,"Could not open input file %s\n",name);
-          exit(1);
-        }
-
-        reset_next_value();
-        line=setup_line(in);
-        /* count cols before we start reading */
-        {
-          char *temp=line;
-          while(*temp==' ')temp++;
-          for(cols=0;*temp;cols++){
-            while(*temp>32)temp++;
-            while(*temp==' ')temp++;
-          }
-        }
-        vec=alloca(cols*sizeof(double));
-	/* count, then load, to avoid fragmenting the hell out of
-           memory */
-        while(line){
-          lines++;
-          for(j=0;j<cols;j++)
-            if(get_line_value(in,vec+j)){
-              fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
-              exit(1);
-            }
-	  if((lines&0xff)==0)spinnit("counting samples...",lines*cols);
-          line=setup_line(in);
-        }
-	pointlist=malloc((cols*lines+entries*dim)*sizeof(double));
-
-	rewind(in);
-	line=setup_line(in);
-        while(line){
-          lines--;
-          for(j=0;j<cols;j++)
-            if(get_line_value(in,vec+j)){
-              fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
-              exit(1);
-            }
-	  /* deinterleave, add to heap */
-	  add_vector(b,vec,cols);
-	  if((lines&0xff)==0)spinnit("loading samples...",lines*cols);
-
-          line=setup_line(in);
-        }
-        fclose(in);
+	  out=fopen(buff,"w");
+	  if(!out){
+	    fprintf(stderr,"unable ot open %s for output",buff);
+	    exit(1);
+	  }
+	}
+	break;
+      default:
+	usage();
       }
     }
   }
-  if(!entries || !points)usage();
+  if(!entries || !points || !out)usage();
   if(target==-1)usage();
 
   /* add guard points */
@@ -289,6 +326,18 @@ int main(int argc,char *argv[]){
 				     rint(secondmetric));
 	cellcount[firstentry]++;
 	cellcount2[secondentry]++;
+      }
+    }
+
+    /* which cells are most heavily populated?  Protect as many from
+       dispersal as the user has requested */
+    {
+      long **countindex=calloc(entries,sizeof(long *));
+      for(i=0;i<entries;i++)countindex[i]=cellcount+i;
+      qsort(countindex,entries,sizeof(long *),longsort);
+      for(i=0;i<protect;i++){
+	int ptr=countindex[i]-cellcount;
+	cellerrormax[ptr]=9e50;
       }
     }
 
@@ -515,7 +564,7 @@ int main(int argc,char *argv[]){
     }
   }
   /* we're done.  write it out. */
-  write_codebook(stdout,"foo",b->c);
+  write_codebook(out,basename,b->c);
 
   fprintf(stderr,"\r                                        \nDone.\n");
   return(0);
