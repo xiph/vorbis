@@ -1,7 +1,5 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS = foreign
-
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/vorbisfile
 
 doc_DATA = OggVorbis_File.html callbacks.html chaining_example_c.html\

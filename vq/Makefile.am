@@ -1,7 +1,5 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS = foreign
-
 INCLUDES = -I../lib -I$(top_srcdir)/include @OGG_CFLAGS@
 
 EXTRA_PROGRAMS = latticebuild latticepare latticehint\

@@ -5,6 +5,10 @@ dnl Initialization and Versioning
 dnl ------------------------------------------------
 
 AC_INIT(lib/mdct.c)
+
+AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
+
 AM_INIT_AUTOMAKE(libvorbis,1.0.1)
 AM_MAINTAINER_MODE
 
@@ -66,8 +70,6 @@ AM_CONDITIONAL(BUILD_DOCS, [test x$build_docs = xtrue])
 dnl --------------------------------------------------
 dnl Set build flags based on environment
 dnl --------------------------------------------------
-
-AC_CANONICAL_HOST
 
 dnl Set some target options
 
@@ -182,12 +184,14 @@ dnl --------------------------------------------------
 dnl Check for libraries
 dnl --------------------------------------------------
 
-AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
+AC_CHECK_LIB(m, cos, VORBIS_LIBS="-lm", VORBIS_LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
 XIPH_PATH_OGG(, AC_MSG_ERROR(must have Ogg installed!))
-LIBS="$LIBS $OGG_LIBS"
+libs_save=$LIBS
+LIBS="$OGG_LIBS $VORBIS_LIBS"
 AC_CHECK_FUNC(oggpack_writealign, , AC_MSG_ERROR(Ogg >= 1.0 required !))
+LIBS=$libs_save
 
 dnl --------------------------------------------------
 dnl Check for library functions
@@ -200,9 +204,26 @@ dnl --------------------------------------------------
 dnl Do substitutions
 dnl --------------------------------------------------
 
-AC_SUBST(LIBS)
+AC_SUBST(VORBIS_LIBS)
 AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile lib/Makefile lib/modes/Makefile lib/books/Makefile lib/books/coupled/Makefile lib/books/uncoupled/Makefile lib/books/floor/Makefile doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile include/Makefile include/vorbis/Makefile examples/Makefile win32/Makefile debian/Makefile vq/Makefile vorbis.pc vorbisenc.pc vorbisfile.pc)
+AC_OUTPUT([
+Makefile
+lib/Makefile
+lib/modes/Makefile
+lib/books/Makefile
+lib/books/coupled/Makefile
+lib/books/uncoupled/Makefile
+lib/books/floor/Makefile
+doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile
+include/Makefile include/vorbis/Makefile
+examples/Makefile
+win32/Makefile
+debian/Makefile
+vq/Makefile
+vorbis.pc
+vorbisenc.pc
+vorbisfile.pc
+])
