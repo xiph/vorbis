@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.28 2001/12/12 09:45:22 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.29 2001/12/19 00:48:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -100,7 +100,7 @@ int main(){
 
   /* add a comment */
   vorbis_comment_init(&vc);
-  vorbis_comment_add(&vc,"Track encoded by encoder_example.c");
+  vorbis_comment_add(&vc,"ENCODER=encoder_example.c");
 
   /* set up the analysis state and auxiliary encoding storage */
   vorbis_analysis_init(&vd,&vi);
