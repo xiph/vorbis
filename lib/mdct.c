@@ -13,7 +13,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [64 <= n ]
- last mod: $Id: mdct.c,v 1.21 2000/12/17 00:34:05 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.22 2000/12/17 08:50:27 xiphmont Exp $
 
  Original algorithm adapted long ago from _The use of multirate filter
  banks for coding of high quality digital audio_, by T. Sporer,
@@ -91,7 +91,7 @@ void mdct_init(mdct_lookup *lookup,int n){
 }
 
 /* 8 point butterfly (in place, 4 register) */
-static void mdct_butterfly_8(DATA_TYPE *x){
+STIN void mdct_butterfly_8(DATA_TYPE *x){
   REG_TYPE r0   = x[6] + x[2];
   REG_TYPE r1   = x[6] - x[2];
   REG_TYPE r2   = x[4] + x[0];
@@ -120,7 +120,7 @@ static void mdct_butterfly_8(DATA_TYPE *x){
 }
 
 /* 16 point butterfly (in place, 4 register) */
-static void mdct_butterfly_16(DATA_TYPE *x){
+STIN void mdct_butterfly_16(DATA_TYPE *x){
   REG_TYPE r0     = x[1]  - x[9];
   REG_TYPE r1     = x[0]  - x[8];
 
@@ -155,7 +155,7 @@ static void mdct_butterfly_16(DATA_TYPE *x){
 }
 
 /* 32 point butterfly (in place, 4 register) */
-static void mdct_butterfly_32(DATA_TYPE *x){
+STIN void mdct_butterfly_32(DATA_TYPE *x){
   REG_TYPE r0     = x[30] - x[14];
   REG_TYPE r1     = x[31] - x[15];
 
@@ -219,7 +219,7 @@ static void mdct_butterfly_32(DATA_TYPE *x){
 }
 
 /* N point first stage butterfly (in place, 2 register) */
-static void mdct_butterfly_first(DATA_TYPE *T,
+STIN void mdct_butterfly_first(DATA_TYPE *T,
 					DATA_TYPE *x,
 					int points){
   
@@ -266,7 +266,7 @@ static void mdct_butterfly_first(DATA_TYPE *T,
 }
 
 /* N/stage point generic N stage butterfly (in place, 2 register) */
-static void mdct_butterfly_generic(DATA_TYPE *T,
+STIN void mdct_butterfly_generic(DATA_TYPE *T,
 					  DATA_TYPE *x,
 					  int points,
 					  int trigint){
@@ -319,7 +319,7 @@ static void mdct_butterfly_generic(DATA_TYPE *T,
   }while(x2>=x);
 }
 
-static void mdct_butterflies(mdct_lookup *init,
+STIN void mdct_butterflies(mdct_lookup *init,
 			     DATA_TYPE *x,
 			     int points){
   
@@ -349,7 +349,7 @@ void mdct_clear(mdct_lookup *l){
   }
 }
 
-static void mdct_bitreverse(mdct_lookup *init, 
+STIN void mdct_bitreverse(mdct_lookup *init, 
 			    DATA_TYPE *x){
   int        n       = init->n;
   int       *bit     = init->bitrev;
