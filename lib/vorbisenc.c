@@ -5,14 +5,13 @@
  * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
  * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
- * http://www.xiph.org/                                             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.4 2000/11/17 11:47:18 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.5 2001/02/02 03:51:58 xiphmont Exp $
 
  ********************************************************************/
 

@@ -5,14 +5,13 @@
  * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
  * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
- * http://www.xiph.org/                                             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.17 2001/01/22 01:38:25 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.18 2001/02/02 03:51:57 xiphmont Exp $
 
  ********************************************************************/
 

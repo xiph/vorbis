@@ -5,14 +5,13 @@
  * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
  * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
- * http://www.xiph.org/                                             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.11 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.12 2001/02/02 03:51:56 xiphmont Exp $
 
  ********************************************************************/
 

@@ -5,14 +5,13 @@
  * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
  * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
- * http://www.xiph.org/                                             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: bark scale utility
- last mod: $Id: barkmel.c,v 1.3 2000/12/21 21:04:38 xiphmont Exp $
+ last mod: $Id: barkmel.c,v 1.4 2001/02/02 03:51:55 xiphmont Exp $
 
  ********************************************************************/
 

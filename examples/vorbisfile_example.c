@@ -5,14 +5,13 @@
  * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
  * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
- * http://www.xiph.org/                                             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: simple example decoder using vorbisfile
- last mod: $Id: vorbisfile_example.c,v 1.3 2000/11/06 00:06:54 xiphmont Exp $
+ last mod: $Id: vorbisfile_example.c,v 1.4 2001/02/02 03:51:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -60,6 +59,8 @@ int main(int argc, char **argv){
       ++ptr;
     }
     fprintf(stderr,"\nBitstream is %d channel, %ldHz\n",vi->channels,vi->rate);
+    fprintf(stderr,"\nDecoded length: %ld samples\n",
+	    (long)ov_pcm_total(&vf,-1));
     fprintf(stderr,"Encoded by: %s\n\n",ov_comment(&vf,-1)->vendor);
   }
   
