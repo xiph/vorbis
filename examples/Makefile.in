@@ -1,0 +1,69 @@
+# vorbis makefile configured for use with gcc on any platform
+
+# $Id: Makefile.in,v 1.1 1999/12/31 12:35:38 xiphmont Exp $
+
+###############################################################################
+#                                                                             #
+# To build a production vorbis (preferrably using gmake), just type 'make'.   #
+# To build with debugging or profiling information, use 'make debug' or       #
+# 'make profile' respectively.  'make clean' is a good idea between builds    #
+# with different target names, or before a final build.                       #
+#                                                                             #
+###############################################################################
+
+
+# DO NOT EDIT BELOW! ##########################################################
+# (unless, of course, you know what you are doing :) ##########################
+
+@SET_MAKE@
+FLAGS=-I. -I../include @TYPESIZES@ @CFLAGS@ 
+OPT=@OPT@ $(FLAGS)
+DEBUG=@DEBUG@ $(FLAGS)
+PROFILE=@PROFILE@ $(FLAGS)
+CC=@CC@
+LD=@CC@
+LDFLAGS=@LDFLAGS@ $(FLAGS)
+AR=@AR@
+RANLIB=@RANLIB@
+LIBS=@LIBS@ -lm
+
+HFILES =	../include/codec.h ../include/vorbisfile.h
+OFILES =	encoder_example.o decoder_example.o chaining_example.o
+BINFILES =      encoder_example decoder_example chaining_example
+
+all:
+	$(MAKE) target CFLAGS="$(OPT)"
+
+debug:	
+	$(MAKE) target CFLAGS="$(DEBUG)"
+
+profile: 
+	$(MAKE) target CFLAGS="$(PROFILE)"
+
+target:	$(BINFILES)
+
+encoder_example:	$(OFILES) ../lib/libvorbis.a
+	$(CC) $(CFLAGS) $(LDFLAGS) encoder_example.o ../lib/libvorbis.a -o \
+			encoder_example -lm
+
+decoder_example:	$(OFILES) ../lib/libvorbis.a
+	$(CC) $(CFLAGS) $(LDFLAGS) decoder_example.o ../lib/libvorbis.a -o \
+			decoder_example -lm
+
+chaining_example:	$(OFILES) ../lib/libvorbis.a ../lib/vorbisfile.a
+	$(CC) $(CFLAGS) $(LDFLAGS) chaining_example.o \
+			../lib/vorbisfile.a ../lib/libvorbis.a \
+			-o chaining_example -lm
+
+$(OFILES): 	$(HFILES)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	-rm -f *.o *.a test* *~ *.out ogg config.* \
+		encoder_example decoder_example chaining_example
+
+distclean:	clean
+	-rm -f Makefile
+
