@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.9.2.6 2000/10/10 22:20:14 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.9.2.7 2000/10/10 22:47:29 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -319,8 +319,6 @@ static void Newton_Raphson_Maehly(float *a,int ord,float *r){
 
     count++;
   }
-
-  fprintf(stderr,"***** error=%g, count=%d\n",error,count);
 
   /* Replaced the original bubble sort with a real sort.  With your
      help, we can eliminate the bubble sort in our lifetime. --Monty */
