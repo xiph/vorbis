@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - datatype - ov_callbacks</title>
+<title>Vorbisfile - datatype - ov_callbacks</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -19,22 +19,23 @@
 
 <p>
 The ov_callbacks structure contains file manipulation function prototypes necessary for opening, closing, seeking, and location.
-<p>
-The ov_callbacks structure does not need to be user-defined if you are working with a standard file.  The typical <a href="ov_open.html">ov_open()</a> call will fill ov_callbacks for you.  However, ov_callbacks should be defined if you are using other data sources.  In this situation, use <a href="ov_open_callbacks.html">ov_open_callbacks()</a> instead of <a href="ov_open.html">ov_open()</a>.
-<p>
 
 <p>
-The callbacks are designed following the stdio functions fread, fseek, fclose,
-and ftell. Except where otherwise noted below, they should work the same as
-these functions do.
-</p>
+The ov_callbacks structure does not need to be user-defined if you are
+working with stdio-based file manipulation; the <a
+href="ov_open.html">ov_open()</a> call provides default callbacks for
+stdio.  ov_callbacks are defined and passed to <a
+href="ov_open_callbacks.html">ov_open_callbacks()</a> when
+implementing non-stdio based stream manipulation (such as playback
+from a memory buffer).
+<p>
 
 <table border=0 width=100% color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>typedef struct {
   size_t (*read_func)  (void *ptr, size_t size, size_t nmemb, void *datasource);
-  int    (*seek_func)  (void *datasource, int64_t offset, int whence);
+  int    (*seek_func)  (void *datasource, ogg_int64_t offset, int whence);
   int    (*close_func) (void *datasource);
   long   (*tell_func)  (void *datasource);
 } ov_callbacks;</b></pre>
@@ -45,31 +46,30 @@ these functions do.
 <h3>Relevant Struct Members</h3>
 <dl>
 <dt><i>read_func</i></dt>
-<dd>Pointer to custom data reading function. Read up to size*nmemb bytes from
-the source into the buffer at ptr. Return the number of bytes read successfully.
-Must return 0 if nothing can be read. Should also set errno if an error occurs,
-in order to distinguish between error and EOF.</dd>
+<dd>Pointer to custom data reading function.</dd>
 <dt><i>seek_func</i></dt>
-<dd>Pointer to custom data seeking function. If your data source does not support
-seeking, you <em>must</em> return -1. Returns 0 on success. Seeks to a position <em>offset</em> bytes from a position defined by <em>whence</em>. If whence is SEEK_SET, seek relative to the file start. If SEEK_CUR, seek is relative to current file position. If SEEK_END, relative to end of file.</dd>
+<dd>Pointer to custom data seeking function. If the data source is not seekable (or the application wants the data source to be treated as unseekable at all times), the provided seek callback should always return -1 (failure).</dd>
 <dt><i>close_func</i></dt>
-<dd>Pointer to custom data source closure function. This should clear any
-resources used by the data source, such as open files or network sockets. Returns 0.</dd>
+<dd>Pointer to custom data source closure function.</dd>
 <dt><i>tell_func</i></dt>
-<dd>Pointer to custom data location function. Returns the current offset (from the start) of the data stream. If your source is non-seekable, this need not be
-implemented.</dd>
+<dd>Pointer to custom data location function.</dd>
 </dl>
 
+<p>
+
+See <a href="callbacks.html">the callbacks and non-stdio I/O document</a> for more
+detailed information on required behavior of the various callback
+functions.<p>
 
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 

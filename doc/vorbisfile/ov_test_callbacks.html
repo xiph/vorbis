@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - function - ov_test_callbacks</title>
+<title>Vorbisfile - function - ov_test_callbacks</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile - 20011218</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -18,9 +18,9 @@
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
 <p>This is an alternative function used to open and test an OggVorbis_File
-structure when using a data source other than a file.   It allows you to specify custom file manipulation routines and sets up all the related decoding structure.
+structure when using a data source other than a file.   It allows you to specify custom file manipulation routines and sets up all the related decoding structures.
 <p>Once this has been called, the same <tt>OggVorbis_File</tt>
-struct should be passed to all the vorbisfile functions.
+struct should be passed to all the libvorbisfile functions.
 <p>
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
@@ -40,9 +40,9 @@ int ov_test_callbacks(void *datasource, <a href="OggVorbis_File.html">OggVorbis_
 or pipe (it need not be seekable--though this obviously restricts what
 can be done with the bitstream).</dd>
 <dt><i>vf</i></dt>
-<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
+<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible libvorbisfile
 functions. Once this has been called, the same <tt>OggVorbis_File</tt>
-struct should be passed to all the vorbisfile functions.</dd>
+struct should be passed to all the libvorbisfile functions.</dd>
 <dt><i>initial</i></dt>
 <dd>Typically set to NULL.  This parameter is useful if some data has already been
 read from the file and the stream is not seekable. It is used in conjunction with <tt>ibytes</tt>.  In this case, <tt>initial</tt>
@@ -58,8 +58,7 @@ should contain the length (in bytes) of the buffer.  Used together with <tt>init
 
 <h3>Return Values</h3>
 <blockquote>
-<li>
-0 for success</li>
+<li>0 for success</li>
 <li>less than zero for failure:</li>
 <ul>
 <li>OV_EREAD - A read from media returned an error.</li>
@@ -71,17 +70,20 @@ should contain the length (in bytes) of the buffer.  Used together with <tt>init
 </blockquote>
 <p>
 
+
+
+
+<br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2001 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile - 20011218</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
-
 
 </body>
 

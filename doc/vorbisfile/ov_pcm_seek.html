@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - function - ov_bitrate</title>
+<title>Vorbisfile - function - ov_pcm_seek</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -28,7 +28,7 @@ the newly seeked to position.
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>
-int ov_pcm_seek(OggVorbis_File *vf,int64_t pos);
+int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos);
 </b></pre>
 	</td>
 </tr>
@@ -37,7 +37,7 @@ int ov_pcm_seek(OggVorbis_File *vf,int64_t pos);
 <h3>Parameters</h3>
 <dl>
 <dt><i>vf</i></dt>
-<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
+<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible libvorbisfile
 functions.</dd>
 <dt><i>pos</i></dt>
 <dd>Position in pcm samples to seek to in the bitstream.</dd>
@@ -46,8 +46,7 @@ functions.</dd>
 
 <h3>Return Values</h3>
 <blockquote>
-<li>
-0 for success</li>
+<li>0 for success</li>
 
 <li>
 nonzero indicates failure, described by several error codes:</li>
@@ -61,21 +60,21 @@ nonzero indicates failure, described by several error codes:</li>
 <li>OV_EFAULT - Internal logic fault; indicates a bug or heap/stack 
 		corruption.
 </li>
-<li>OV_EBADLINK - Invalid stream section supplied to libvorbis/libvorbisfile, or the requested link is corrupt. 
+<li>OV_EBADLINK - Invalid stream section supplied to libvorbisfile, or the requested link is corrupt. 
 </li>
 </ul></blockquote>
+
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
-
 
 </body>
 

@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - function - ov_bitrate</title>
+<title>Vorbisfile - function - ov_time_tell</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -17,7 +17,7 @@
 
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
-<p>Returns the current offset in seconds.
+<p>Returns the current decoding offset in seconds.
 
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
@@ -33,30 +33,30 @@ double ov_time_tell(OggVorbis_File *vf);
 <h3>Parameters</h3>
 <dl>
 <dt><i>vf</i></dt>
-<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
-functions. <b>Once this has been called, the same <tt>OggVorbis_File</tt>
-struct should be passed to all the vorbisfile functions.</b></dd>
+<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible libvorbisfile
+functions.</dd>
 </dl>
 
 
 <h3>Return Values</h3>
 <blockquote>
-<li><i>n</i> indicates the current offset in bytes.</li>
+<li><i>n</i> indicates the current decoding time offset in seconds.</li>
+<li>OV_EINVAL means that the argument was invalid.  In this case, the requested bitstream did not exist.</li>
 </blockquote>
 <p>
+
 
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
-
 
 </body>
 

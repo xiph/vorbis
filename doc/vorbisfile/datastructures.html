@@ -1,24 +1,22 @@
 <html>
 
 <head>
-<title>vorbisfile - Base Data Structures</title>
+<title>Vorbisfile - Base Data Structures</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
 <h1>Base Data Structures</h1>
-<p>There are several data structures used to hold file and bitstream information during vorbisfile decoding.
+<p>There are several data structures used to hold file and bitstream information during libvorbisfile decoding. These structures are declared in "vorbis/vorbisfile.h" and "vorbis/codec.h".
 <p>
-All the <b>vorbisfile</b> specific data structures are declared in "vorbis/vorbisfile.h" or "vorbis/codec.h".
-<p>
-<p>When using vorbisfile, we usually won't need to know about most of the contents of these data structures, but it may be helpful to understand what they contain.
+<p>When using libvorbisfile, it's not necessary to know about most of the contents of these data structures, but it may be helpful to understand what they contain.
 <br><br>
 
 <table border=1 color=black width=50% cellspacing=0 cellpadding=7>
@@ -42,7 +40,7 @@ All the <b>vorbisfile</b> specific data structures are declared in "vorbis/vorbi
 </tr>
 <tr valign=top>
 <td><a href="ov_callbacks.html">ov_callbacks</a></td>
-	<td>This structure contains pointers to file manipulation routines.  Can be user-specified for use with <a href="ov_open_callbacks.html">ov_open_callbacks()</a>.</td>
+	<td>This structure contains pointers to the application-specified file manipulation routines set for use by <a href="ov_open_callbacks.html">ov_open_callbacks()</a>. See also the <a href="callbacks.html">provided document on using application-provided callbacks instead of stdio</a>.</td>
 </tr>
 </table>
 
@@ -50,11 +48,11 @@ All the <b>vorbisfile</b> specific data structures are declared in "vorbis/vorbi
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 

@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - function - ov_bitrate</title>
+<title>Vorbisfile - function - ov_bitrate</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -35,7 +35,7 @@ long ov_bitrate(OggVorbis_File *vf,int i);
 <h3>Parameters</h3>
 <dl>
 <dt><i>vf</i></dt>
-<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
+<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible libvorbisfile
 functions.</dd>
 <dt><i>i</i></dt>
 <dd>Link to the desired logical bitstream.  For nonseekable files, this argument is ignored.  To retrieve the bitrate for the entire bitstream, this parameter should be set to -1.</dd>
@@ -44,7 +44,7 @@ functions.</dd>
 
 <h3>Return Values</h3>
 <blockquote>
-<li>OV_EINVAL indicates that an invalid argument value was submitted.</li>
+<li>OV_EINVAL indicates that an invalid argument value was submitted or that the stream represented by <tt>vf</tt> is not open.</li>
 <li>OV_FALSE means the call returned a 'false' status, which in this case most likely indicates that the file is nonseekable and the upper, lower, and nominal bitrates were unset.
 <li><i>n</i> indicates the bitrate for the given logical bitstream or the entire
    physical bitstream.  If the file is open for random (seekable) access, it will
@@ -54,19 +54,18 @@ functions.</dd>
 </blockquote>
 <p>
 
-<br>
+
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
-
 
 </body>
 

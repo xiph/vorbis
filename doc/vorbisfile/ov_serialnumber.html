@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - function - ov_serialnumber</title>
+<title>Vorbisfile - function - ov_serialnumber</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -17,7 +17,7 @@
 
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
-<p>Returns the serialnumber of the specified logical bitstream.
+<p>Returns the serialnumber of the specified logical bitstream link number within the overall physical bitstream.
 
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
@@ -33,11 +33,10 @@ long ov_serialnumber(OggVorbis_File *vf,int i);
 <h3>Parameters</h3>
 <dl>
 <dt><i>vf</i></dt>
-<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
-functions. Once this has been called, the same <tt>OggVorbis_File</tt>
-struct should be passed to all the vorbisfile functions.</dd>
+<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible libvorbisfile
+functions.</dd>
 <dt><i>i</i></dt>
-<dd><b>Link to the desired logical bitstream.  For nonseekable files, this argument is ignored.  To retrieve the <a href="vorbis_info.html">vorbis_info</a> struct for the current bitstream, this parameter should be set to -1.</b></dd>
+<dd>Link to the desired logical bitstream.  For nonseekable files, this argument is ignored.  To retrieve the serial number of the current bitstream, this parameter should be set to -1.</dd>
 </dl>
 
 
@@ -49,18 +48,19 @@ struct should be passed to all the vorbisfile functions.</dd>
 <li>Returns the serial number of the logical bitstream <i>i</i> or the serial number of the current bitstream if the file is nonseekable.</li>
 </blockquote>
 <p>
+
+
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
-
 
 </body>
 

@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - datatype - vorbis_comment</title>
+<title>Vorbisfile - datatype - vorbis_comment</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -31,8 +31,9 @@ or set to some reasonable default (usually 0).
 <pre><b>typedef struct vorbis_comment{
   /* unlimited user comment fields. */
   char **user_comments;
-  int    comments;
-  char  *vendor;
+  int  *comment_lengths;
+  int  comments;
+  char *vendor;
 
 } vorbis_comment;</b></pre>
 	</td>
@@ -42,7 +43,9 @@ or set to some reasonable default (usually 0).
 <h3>Parameters</h3>
 <dl>
 <dt><i>user_comments</i></dt>
-<dd>Unlimited user comment array.  Comments stored in normal C 0-terminated strings.</dd>
+<dd>Unlimited user comment array. The individual strings in the array are 8 bit clean, by the Vorbis specification, and as such the <tt>comment_lengths</tt> array should be consulted to determine string length.  For convenience, each string is also NULL-terminated by the decode library (although Vorbis comments are not NULL terminated within the bitstream itself).</dd>
+<dt><i>comment_lengths</i></dt>
+<dd>An int array that stores the length of each comment string</dd>
 <dt><i>comments</i></dt>
 <dd>Int signifying number of user comments in user_comments field.</dd>
 <dt><i>vendor</i></dt>
@@ -54,11 +57,11 @@ or set to some reasonable default (usually 0).
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 

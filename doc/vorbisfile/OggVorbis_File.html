@@ -1,15 +1,15 @@
 <html>
 
 <head>
-<title>vorbisfile - datatype - OggVorbis_File</title>
+<title>Vorbisfile - datatype - OggVorbis_File</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
 <body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
 <table border=0 width=100%>
 <tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile - 20011218</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
@@ -20,10 +20,30 @@
 <p>
 The OggVorbis_File structure defines an Ogg Vorbis file.
 <p>
-This structure is used in all vorbisfile routines.  Before it can be used, it must be initialized by <a href="ov_open.html">ov_open</a> or <a href="ov_open_callbacks.html">ov_open_callbacks</a>.
+
+This structure is used in all libvorbisfile routines.  Before it can be used,
+it must be initialized by <a href="ov_open.html">ov_open()</a> or <a
+href="ov_open_callbacks.html">ov_open_callbacks()</a>.
+
 <p>
-After use, the OggVorbis_File structure must be deallocated with a call to <a href="ov_clear.html">ov_clear()</a>.
-<p>Once a file or data source is passed to libvorbisfile, it is owned by vorbisfile.  The file should not be used by any other applications or functions outside the Vorbisfile API.
+After use, the OggVorbis_File structure must be deallocated with a
+call to <a href="ov_clear.html">ov_clear()</a>.
+
+<p>
+Once a file or data source is opened successfully by libvorbisfile
+(using <a href="ov_open.html">ov_open()</a> or <a
+href="ov_open_callbacks.html">ov_open_callbacks()</a>), it is owned by
+libvorbisfile.  The file should not be used by any other applications or
+functions outside of the libvorbisfile API.  The file must not be closed
+directly by the application at any time after a successful open;
+libvorbisfile expects to close the file within <a
+href="ov_clear.html">ov_clear()</a>.
+<p>
+If the call to <a href="ov_open.html">ov_open()</a> or <a
+href="ov_open_callbacks.html">ov_open_callbacks()</a> <b>fails</b>,
+libvorbisfile does <b>not</b> assume ownership of the file and the
+application is expected to close it if necessary.
+
 <br><br>
 <table border=0 width=100% color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
@@ -31,28 +51,28 @@ After use, the OggVorbis_File structure must be deallocated with a call to <a hr
 <pre><b>typedef struct {
   void             *datasource; /* Pointer to a FILE *, etc. */
   int              seekable;
-  int64_t          offset;
-  int64_t          end;
+  ogg_int64_t      offset;
+  ogg_int64_t      end;
   ogg_sync_state   oy; 
 
   /* If the FILE handle isn't seekable (eg, a pipe), only the current
      stream appears */
   int              links;
-  int64_t          *offsets;
-  int64_t          *dataoffsets;
+  ogg_int64_t      *offsets;
+  ogg_int64_t      *dataoffsets;
   long             *serialnos;
-  int64_t          *pcmlengths;
+  ogg_int64_t      *pcmlengths;
   vorbis_info      *vi;
   vorbis_comment   *vc;
 
   /* Decoding working state local storage */
-  int64_t          pcm_offset;
+  ogg_int64_t      pcm_offset;
   int              ready_state;
   long             current_serialno;
   int              current_link;
 
-  double           bittrack;
-  double           samptrack;
+  ogg_int64_t      bittrack;
+  ogg_int64_t      samptrack;
 
   ogg_stream_state os; /* take physical pages, weld into a logical
                           stream of packets */
@@ -69,34 +89,30 @@ After use, the OggVorbis_File structure must be deallocated with a call to <a hr
 <h3>Relevant Struct Members</h3>
 <dl>
 <dt><i>datasource</i></dt>
-<dd>Pointer to file or other ogg source.</dd>
+
+<dd>Pointer to file or other ogg source.  When using stdio based
+file/stream access, this field contains a <tt>FILE</tt> pointer. When using
+custom IO via callbacks, libvorbisfile treats this void pointer as a
+black box only to be passed to the callback routines provided by the
+application.</dd>
+
 <dt><i>seekable</i></dt>
-<dd>Read-only int indicating whether file is seekable, i.e., physical file is seekable, a pipe isn't.</dd>
+<dd>Read-only int indicating whether file is seekable. E.g., a physical file is seekable, a pipe isn't.</dd>
 <dt><i>links</i></dt>
 <dd>Read-only int indicating the number of logical bitstreams within the physical bitstream.</dd>
 <dt><i>ov_callbacks</i></dt>
-<dd>Collection of file manipulation routines to be used on this data source.</dd>
+<dd>Collection of file manipulation routines to be used on this data source.  When using stdio/FILE access via <a href="ov_open.html">ov_open()</a>, the callbacks will be filled in with stdio calls or wrappers to stdio calls.</dd>
 </dl>
-
-<h3>Notes</h3>
-
-<p>If your system's <tt>&lt;sys/types.h></tt> does not
-define <tt>int64_t,</tt> you will need to define this as a 64-bit type
-inside your system's project file/Makefile, etc. On win32, for example,
-this should be defined as <tt>__int64</tt>. On the Unix platform, these
-are usually defined properly in the system header files.
-<p>
-
 
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2001 vorbis team</p></td>
-<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile - 20011218</p></td>
+<td><p class=tiny>Vorbisfile documentation</p></td>
+<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
 </tr>
 </table>
 
