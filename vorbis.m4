@@ -3,10 +3,10 @@
 # Shamelessly stolen from Owen Taylor and Manish Singh
 # thomasvs added check for vorbis_bitrate_addblock which is new in rc3
 
-dnl AM_PATH_VORBIS([ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
+dnl XIPH_PATH_VORBIS([ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl Test for libvorbis, and define VORBIS_CFLAGS and VORBIS_LIBS
 dnl
-AC_DEFUN(AM_PATH_VORBIS,
+AC_DEFUN(XIPH_PATH_VORBIS,
 [dnl 
 dnl Get the cflags and libraries
 dnl
