@@ -14,7 +14,7 @@
  function: build a VQ codebook 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Nov 09 1999
+ last modification date: Nov 11 1999
 
  ********************************************************************/
 
@@ -28,6 +28,19 @@
 #include <math.h>
 #include <string.h>
 
+/************************************************************************
+ * The basic idea here is that a VQ codebook is like an m-dimensional
+ * foam with n bubbles.  The bubbles compete for space/volume and are
+ * 'pressurized' [biased] according to some metric.  The basic alg
+ * iterates through allowing the bubbles to compete for space until
+ * they converge (if the damping is dome properly) on a steady-state
+ * solution.
+ *
+ * We use the ratio of local to average error as the metric to bias a
+ * variable-length word codebook, and probability of occurrence within
+ * that bubble as the metric to bias fixed length word
+ * codebooks. Individual input points, collected from libvorbis, are
+ * used to train the algorithm monte-carlo style.  */
 
 typedef struct vqgen{
   int    elements;
@@ -46,14 +59,8 @@ typedef struct vqgen{
   long   entries;
 
   double (*error_func)   (struct vqgen *v,double *a,double *b);
+  double (*bias_func)     (struct vqgen *v,int entry);
 } vqgen;
-
-
-/*************************************************************************
- * Generating a vector quantization codebook is a *bit* like
- * simulating a weird m-dimensional foam, building a number of bubbles
- * with a [supposedly] constant, minimum error.  We train the 'foam'
- * with data points like a monte-carlo simulation. */
 
 /* internal helpers *****************************************************/
 double *_point(vqgen *v,long ptr){
@@ -75,6 +82,13 @@ double _error_func(vqgen *v,double *a, double *b){
   for(i=0;i<el;i++)
     acc+=(a[i]-b[i])*(a[i]-b[i]);
   return acc;
+}
+
+double _vqgen_distance(vqgen *v,double *a, double *b){
+  int i;
+  double acc=0.;
+  for(i=0;i<v->elements;i++)acc+=(a[i]-b[i])*(a[i]-b[i]);
+  return sqrt(acc);
 }
 
 void vqgen_init(vqgen *v,int elements,int entries){
@@ -120,6 +134,7 @@ void vqgen_iterate(vqgen *v,int biasp){
   static int iteration=0;
   long i,j;
   double averror=0.;
+  double realerror=0.;
 
   FILE *graph;
   FILE *err;
@@ -155,6 +170,8 @@ void vqgen_iterate(vqgen *v,int biasp){
     }
     
     v->error[bestentry]+=v->error_func(v,_now(v,bestentry),_point(v,i));
+    realerror+=sqrt(v->error_func(v,_now(v,bestentry),_point(v,i))/v->elements);
+
     v->assigned[bestentry]++;
     {
       double *n=_next(v,bestentry);
@@ -184,9 +201,12 @@ void vqgen_iterate(vqgen *v,int biasp){
   }
   
   /* average global error */
-  for(i=0;i<v->entries;i++)
+  for(i=0;i<v->entries;i++){
     averror+=v->error[i];
-  
+    if(v->error[i]==0)fprintf(stderr,"%d ",i);
+  }
+  fprintf(stderr,"\n",i);
+
   averror/=v->entries;
 
   /* positive/negative 'pressure' */
@@ -195,7 +215,7 @@ void vqgen_iterate(vqgen *v,int biasp){
     for(i=0;i<v->entries;i++){
       double bias=0;
       if(v->error[i]){
-	bias=(averror-v->error[i])/v->assigned[i]*.05;
+	bias=(averror-v->error[i])/v->assigned[i]*.2;
 	v->bias[i]-=bias;
       }else{
 	fprintf(stderr,"de-biasing\n");
@@ -218,7 +238,7 @@ void vqgen_iterate(vqgen *v,int biasp){
     fprintf(bias,"%g\n",v->bias[i]);
   }
 
-  fprintf(stderr,"average error: %g\n",averror);
+  fprintf(stderr,"average error: %g\n",realerror/v->points);
 
   fclose(err);
   fclose(bias);
@@ -230,14 +250,15 @@ void vqgen_iterate(vqgen *v,int biasp){
 int main(int argc,char *argv[]){
   FILE *in=fopen(argv[1],"r");
   vqgen v;
-  char buffer[80];
+  char buffer[160];
   int i;
 
-  vqgen_init(&v,2,16);
+  vqgen_init(&v,4,128);
 
-  while(fgets(buffer,80,in)){
-    double a[2];
-    if(sscanf(buffer,"%lf %lf",a,a+1)==2)
+  while(fgets(buffer,160,in)){
+    double a[8];
+    if(sscanf(buffer,"%lf %lf %lf %lf",
+	      a,a+1,a+2,a+3)==4)
       vqgen_addpoint(&v,a);
   }
   fclose(in);
@@ -247,7 +268,7 @@ int main(int argc,char *argv[]){
     vqgen_iterate(&v,0);
 
   for(i=0;i<100;i++)
-    vqgen_iterate(&v,1);
+    vqgen_iterate(&v,i%10);
 
     vqgen_iterate(&v,0);
     vqgen_iterate(&v,0);
