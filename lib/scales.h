@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.5.6.1 2000/09/02 05:19:25 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.5.6.1.2.1 2000/09/23 16:59:53 msmith Exp $
 
  ********************************************************************/
 
@@ -23,8 +23,8 @@
 
 /* 20log10(x) */
 #define DYNAMIC_RANGE_dB 200.
-#define todB(x)   ((x)==0?-9.e40:log(fabs(x))*8.6858896)
-#define todB_nn(x)   ((x)==0?-9.e40:log(x)*8.6858896)
+#define todB(x)   ((x)==0?-9.e38:log(fabs(x))*8.6858896)
+#define todB_nn(x)   ((x)==0?-9.e38:log(x)*8.6858896)
 #define fromdB(x) (exp((x)*.11512925))
 
 
