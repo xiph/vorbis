@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.28 2000/08/30 06:09:21 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.29 2000/08/30 07:09:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,7 +26,6 @@ extern "C"
 
 #define MAX_BARK 27
 
-#include <sys/types.h>
 #include "os_types.h"
 #include "vorbis/codebook.h"
 #include "vorbis/internal.h"

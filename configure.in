@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.21 2000/08/30 06:09:21 xiphmont Exp $
+# $Id: configure.in,v 1.22 2000/08/30 07:09:46 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -25,9 +25,7 @@ case $host in
 
 esac
 
-if test -z "$CC"; then
-	AC_PROG_CC	
-fi
+AC_PROG_CC	
 AC_PROG_CPP
 AC_PROG_RANLIB
 AC_CHECK_PROG(AR,ar,ar)
@@ -118,8 +116,6 @@ fi
 
 AC_HEADER_STDC
 
-CFLAGS=""
-
 dnl AC_PATH_X
 dnl AC_PATH_XTRA
 
@@ -184,9 +180,8 @@ AC_CACHE_VAL(has_int16_t,
 [AC_TRY_RUN([
 #ifdef __BEOS__
 #include <inttypes.h>
-#else
-#include <sys/types.h>
 #endif
+#include <sys/types.h>
 int16_t foo;
 int main() {return 0;}
 ],
@@ -201,9 +196,8 @@ AC_CACHE_VAL(has_int32_t,
 [AC_TRY_RUN([
 #ifdef __BEOS__
 #include <inttypes.h>
-#else
-#include <sys/types.h>
 #endif
+#include <sys/types.h>
 int32_t foo;
 int main() {return 0;}
 ],
@@ -218,9 +212,8 @@ AC_CACHE_VAL(has_uint32_t,
 [AC_TRY_RUN([
 #ifdef __BEOS__
 #include <inttypes.h>
-#else
-#include <sys/types.h>
 #endif
+#include <sys/types.h>
 uint32_t foo;
 int main() {return 0;}
 ],
@@ -235,9 +228,8 @@ AC_CACHE_VAL(has_u_int32_t,
 [AC_TRY_RUN([
 #ifdef __BEOS__
 #include <inttypes.h>
-#else
-#include <sys/types.h>
 #endif
+#include <sys/types.h>
 u_int32_t foo;
 int main() {return 0;}
 ],
@@ -252,9 +244,8 @@ AC_CACHE_VAL(has_int64_t,
 [AC_TRY_RUN([
 #ifdef __BEOS__
 #include <inttypes.h>
-#else
-#include <sys/types.h>
 #endif
+#include <sys/types.h>
 int64_t foo;
 int main() {return 0;}
 ],
