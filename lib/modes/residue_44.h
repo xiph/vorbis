@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.1.2.4 2001/12/06 12:47:34 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.1.2.5 2001/12/07 08:36:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -38,7 +38,7 @@ static bitrate_manager_info _bm_44_default={
    at 1/3 and 1/9, as well as an optional middle pass for stereo
    backfill */
 
-/*     0   1   2   4  22   1   2   4  22   +      
+/*     0   1   2   4  26   1   2   4  26   +      
            0   0   0   0         
 
        0   1   2   3   4   5   6   7   8   9
@@ -52,12 +52,12 @@ static vorbis_info_residue0 _residue_44_low={
   {0},
   {-1},
   {9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999},
-  {  .5,  1.5,  2.5,  4.5, 22.5,  1.5,  2.5,  4.5, 22.5},
+  {  .5,  1.5,  2.5,  4.5, 26.5,  1.5,  2.5,  4.5, 26.5},
   {0},
   {  99,   -1,   -1,   -1,   -1,   99,   99,   99,   99}
 };
 
-/*     0   1   2   4   1   2   4  22  84   +      
+/*     0   1   2   4   1   2   4  16  42   +      
            0   0   0            
 
        0   1   2   3   4   5   6   7   8   9
@@ -72,13 +72,13 @@ static vorbis_info_residue0 _residue_44_mid={
   {0},
   {-1},
   {9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999},
-  {  .5,  1.5,  2.5,  4.5,  1.5,  2.5,  4.5, 22.5, 84.5},
+  {  .5,  1.5,  2.5,  4.5,  1.5,  2.5,  4.5, 16.5, 42.5},
   {0},
   {  99,   -1,   -1,   -1,   99,   99,   99,   99,   99}
 };
 
 
-/*     0   4  22   1   2   4   7  22  84   +      
+/*     0   4  42   1   2   4   8  16  56   +      
            0   0   0            
 
        0   1   2   3   4   5   6   7   8   9
@@ -93,79 +93,60 @@ static vorbis_info_residue0 _residue_44_high={
   {0},
   {-1},
   {9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999},
-  {  .5,  4.5, 22.5,  1.5,  2.5,  4.5,  7.5, 22.5, 84.5},
+  {  .5,  4.5, 42.5,  1.5,  2.5,  4.5,  8.5, 16.5, 56.5},
   {0},
   {  99,   -1,   -1,   99,   99,   99,   99,   99,   99}
 };
 
+#include "books/coupled/_44c0_short.vqh"
+#include "books/coupled/_44c0_long.vqh"
+
+#include "books/coupled/_44c0_s0_p1_0.vqh"
+#include "books/coupled/_44c0_s0_p2_0.vqh"
+#include "books/coupled/_44c0_s0_p3_0.vqh"
+#include "books/coupled/_44c0_s0_p4_0.vqh"
+#include "books/coupled/_44c0_s0_p4_1.vqh"
+#include "books/coupled/_44c0_s1_p5_0.vqh"
+#include "books/coupled/_44c0_s1_p6_0.vqh"
+#include "books/coupled/_44c0_s2_p7_0.vqh"
+#include "books/coupled/_44c0_s4_p8_0.vqh"
+#include "books/coupled/_44c0_s4_p8_1.vqh"
+#include "books/coupled/_44c0_s4_p9_0.vqh"
+#include "books/coupled/_44c0_s4_p9_1.vqh"
+#include "books/coupled/_44c0_s4_p9_2.vqh"
+
 /* residue backfill is entered in the template array as if stereo
    backfill is not in use.  It's up to vorbisenc to make the
    appropriate index adjustment */
-#if 0
 static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 0; 64-ish */
-  {&_residue_44_low,  {&44c0_short,&44c0_long},
+  {&_residue_44_low,  {&_huff_book__44c0_short,&_huff_book__44c0_long},
    { {{0}}, /* lossless stereo */
      {{0}}, /* 6dB (2.5) stereo */
      {{0}}, /* 12dB (4.5) stereo */
-     {{0}}, /* 17dB (7.5) stereo */
-     {{0},{0,0,&44c0_s0_p1_0},{0,0,&44c0_s0_p2_0},{0,0,&44c0_s0_p3_0},{&44c0_s0_p4_0,&44c0_p4_1},
-      {0,0,&44c0_s1_p5_0},{0,0,&44c0_s1_p6_0},{0,0,&44c0_s2_p7_0},{&44c0_s4_p8_0,&44c0_s4_p8_1},
-      {&44c0_s4_p9_0,&44c0_s4_p9_1,&44c0_s4_p9_2}}, /* 22dB (12.5) stereo */
-     {{0}}, /* 27dB (22.5) stereo */
+     {{0}}, /* 18dB (8.5) stereo */
+     {{0},{0,0,&_44c0_s0_p1_0},{0,0,&_44c0_s0_p2_0},{0,0,&_44c0_s0_p3_0},
+      {&_44c0_s0_p4_0,&_44c0_s0_p4_1},{0,0,&_44c0_s1_p5_0},{0,0,&_44c0_s1_p6_0},
+      {0,0,&_44c0_s2_p7_0},{&_44c0_s4_p8_0,&_44c0_s4_p8_1},
+      {&_44c0_s4_p9_0,&_44c0_s4_p9_1,&_44c0_s4_p9_2}}, /* 24dB (16.5) stereo */
    },
    { {0}, /* lossless stereo */
      {0}, /* 6dB (2.5) stereo */
      {0}, /* 12dB (4.5) stereo */
-     {0}, /* 17dB (7.5) stereo */
-     {0,0,0,0,0,0,0,0,&44c0_s4_s8,&44c0_s4_s9},/* 22dB (12.5) stereo */
-     {0}, /* 27dB (22.5) stereo */
-   },
-   { {{0}}, /* lossless stereo */
-     {{0}}, /* 6dB (2.5) stereo */
-     {{0}}, /* 12dB (4.5) stereo */
-     {{&44c0_s0_r0_0,&44c0_s0_r0_1},{&44c0_s0_r1_0,&44c0_s0_r1_1},
-      {&44c0_s0_r2_0,&44c0_s0_r2_1},{&44c0_s0_r3_0,&44c0_s0_r3_1},
-      {&44c0_s0_r4_0,&44c0_s0_r4_1},{&44c0_s1_r5_0,&44c0_s1_r5_1},
-      {&44c0_s1_r6_0,&44c0_s1_r6_1},{&44c0_s2_r7_0,&44c0_s2_r7_1},
-      {&44c0_s4_r8_0,&44c0_s3_r8_1},{&44c0_s4_r9_0,&44c0_s3_r9_1}}, /* 17dB (7.5) stereo */
-     {{0}}, /* 22dB (12.5) stereo */
-     {{0}}, /* 27dB (22.5) stereo */
-   },
-  }
-
-  /* mode 1; 80-ish */
-
-};
-#endif
-
-#include "books/res_44c_Z_128aux.vqh"
-#include "books/res_44c_Z_1024aux.vqh"
-
-static vorbis_residue_template _residue_template_44_stereo_temp[11]={
-  /* mode 0; 64-ish */
-  {&_residue_44_low,  {&_huff_book_res_44c_Z_128aux, 
-		      &_huff_book_res_44c_Z_1024aux},
-   { {{0}}, /* lossless stereo */
-     {{0}}, /* 6dB (2.5) stereo */
-     {{0}}, /* 12dB (4.5) stereo */
-     {{0}}, /* 17dB (7.5) stereo */
-     {{0}},
-     {{0}}, /* 27dB (22.5) stereo */
-   },
-   { {0}, /* lossless stereo */
-     {0}, /* 6dB (2.5) stereo */
-     {0}, /* 12dB (4.5) stereo */
-     {0}, /* 17dB (7.5) stereo */
+     {0}, /* 18dB (8.5) stereo */
      {0},
-     {0}, /* 27dB (22.5) stereo */
+     //{0,0,0,0,0,0,0,0,&44c0_s4_s8,&44c0_s4_s9},/* 24dB (16.5) stereo */
    },
    { {{0}}, /* lossless stereo */
      {{0}}, /* 6dB (2.5) stereo */
      {{0}}, /* 12dB (4.5) stereo */
-     {{0}},
-     {{0}}, /* 22dB (12.5) stereo */
-     {{0}}, /* 27dB (22.5) stereo */
+     {{0}}, /* 18dB (8.5) stereo */
+     //{{&44c0_s0_r0_0,&44c0_s0_r0_1},{&44c0_s0_r1_0,&44c0_s0_r1_1},
+     // {&44c0_s0_r2_0,&44c0_s0_r2_1},{&44c0_s0_r3_0,&44c0_s0_r3_1},
+     // {&44c0_s0_r4_0,&44c0_s0_r4_1},{&44c0_s1_r5_0,&44c0_s1_r5_1},
+     // {&44c0_s1_r6_0,&44c0_s1_r6_1},{&44c0_s2_r7_0,&44c0_s2_r7_1},
+     // {&44c0_s4_r8_0,&44c0_s3_r8_1},{&44c0_s4_r9_0,&44c0_s3_r9_1}}, /* 18dB (8.5) stereo */
+     {{0}}, /* 24dB (16.5) stereo */
    },
   }
 
