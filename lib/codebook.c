@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.9 2000/02/09 22:04:11 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.10 2000/02/21 13:09:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -54,7 +54,7 @@ long *_make_words(long *l,long n){
 
   for(i=0;i<n;i++){
     long length=l[i];
-    long entry=marker[l[i]];
+    long entry=marker[length];
 
     /* when we claim a node for an entry, we also claim the nodes
        below it (pruning off the imagined tree that may have dangled
@@ -91,7 +91,11 @@ long *_make_words(long *l,long n){
        markers were dangling from our just-taken node.  Dangle them
        from our *new* node. */
     for(j=length+1;j<33;j++)
-      marker[j]=marker[j-1]<<1;
+      if((marker[j]>>1) == entry){
+	entry=marker[j];
+	marker[j]=marker[j-1]<<1;
+      }else
+	break;
   }
 
   /* bitreverse the words because our bitwise packer/unpacker is LSb
@@ -146,19 +150,22 @@ decode_aux *_make_decode_tree(codebook *c){
 /* unpack the quantized list of values for encode/decode ***********/
 static double *_book_unquantize(const static_codebook *b){
   long j,k;
-  double mindel=_float24_unpack(b->q_min);
-  double delta=_float24_unpack(b->q_delta);
-  double *r=malloc(sizeof(double)*b->entries*b->dim);
-
-  for(j=0;j<b->entries;j++){
-    double last=0.;
-    for(k=0;k<b->dim;k++){
-      double val=b->quantlist[j*b->dim+k]*delta+last+mindel;
-      r[j*b->dim+k]=val;
-      if(b->q_sequencep)last=val;
+  if(b->quantlist){
+    double mindel=_float24_unpack(b->q_min);
+    double delta=_float24_unpack(b->q_delta);
+    double *r=malloc(sizeof(double)*b->entries*b->dim);
+    
+    for(j=0;j<b->entries;j++){
+      double last=0.;
+      for(k=0;k<b->dim;k++){
+	double val=b->quantlist[j*b->dim+k]*delta+last+mindel;
+	r[j*b->dim+k]=val;
+	if(b->q_sequencep)last=val;
+      }
     }
-  }
-  return(r);
+    return(r);
+  }else
+    return(NULL);
 }
 
 void vorbis_staticbook_clear(static_codebook *b){
@@ -361,24 +368,15 @@ int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b){
   return(book->c->lengthlist[a]);
 }
 
-static double _dist(int el,double *a, double *b){
-  int i;
-  double acc=0.;
-  for(i=0;i<el;i++){
-    double val=(a[i]-b[i]);
-    acc+=val*val;
-  }
-  return acc;
-}
-
-/* returns the number of bits and *modifies a* to the quantized value *****/
-int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
+static int  _best(codebook *book, double *a){
   encode_aux *t=book->c->encode_tree;
   int dim=book->dim;
-  int ptr=0,k;
-  /*double best1, best2;*/
+  int trees=t->ptr0[0];
+  double bestmetric;
+  long best=-1;
 
-  {
+  while(trees-->0){
+    int ptr=t->ptr0[trees],k;
     /* optimized, using the decision tree */
     while(1){
       double c=0.;
@@ -394,33 +392,54 @@ int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
 	ptr= -t->ptr1[ptr];
       if(ptr<=0)break;
     }
-    /*fprintf(stderr,"Optimized: %d (%g), ",
-      -ptr,best1=_dist(book->dim,a,book->valuelist-ptr*dim));*/
-  }
-  /*{
-     brute force 
-    double this,best=_dist(book->dim,a,book->valuelist);
-    int i;
-    for(i=1;i<book->entries;i++){
-      this=_dist(book->dim,a,book->valuelist+i*book->dim);
-      if(this<best){
-	ptr=-i;
-	best=this;
+    
+    {
+      double dist=0.;
+      double *v=book->valuelist-ptr*dim;
+      for(k=0;k<book->dim;k++){
+        double one=a[k]-v[k];
+        dist+=one*one;
       }
-    }
-    fprintf(stderr,"brute-force: %d (%g)\n",-ptr,best2=best);
+      if(best==-1 || dist<bestmetric){
+        best=-ptr;
+        bestmetric=dist;
+      }
+    } 
   }
-
-  if(best1<best2){
-    fprintf(stderr,"ACK, shouldn;t happen.\n");
-    exit(1);
-  }*/
-
-  memcpy(a,book->valuelist-ptr*dim,dim*sizeof(double));
-  return(vorbis_book_encode(book,-ptr,b));
+  return(best);
 }
 
-/* returns the entry number or -1 on eof ****************************/
+/* returns the number of bits and *modifies a* to the quantization value *****/
+int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
+  int dim=book->dim;
+  int best=_best(book,a);
+  memcpy(a,book->valuelist+best*dim,dim*sizeof(double));
+  return(vorbis_book_encode(book,best,b));}
+
+/* returns the number of bits and *modifies a* to the quantization error *****/
+int vorbis_book_encodevE(codebook *book, double *a, oggpack_buffer *b){
+  int dim=book->dim,k;
+  int best=_best(book,a);
+  for(k=0;k<dim;k++)
+    a[k]-=(book->valuelist+best*dim)[k];
+  return(vorbis_book_encode(book,best,b));
+}
+
+/* returns the total squared quantization error for best match and sets each 
+   element of a to local error ***************/
+double vorbis_book_vE(codebook *book, double *a){
+  int dim=book->dim,k;
+  int best=_best(book,a);
+  double acc=0.;
+  for(k=0;k<dim;k++){
+    double val=(book->valuelist+best*dim)[k];
+    a[k]-=val;
+    acc+=a[k]*a[k];
+  }
+  return(acc);
+}
+
+/* returns the entry number or -1 on eof *************************************/
 long vorbis_book_decode(codebook *book, oggpack_buffer *b){
   long ptr=0;
   decode_aux *t=book->decode_tree;
@@ -439,7 +458,7 @@ long vorbis_book_decode(codebook *book, oggpack_buffer *b){
   return(-ptr);
 }
 
-/* returns the entry number or -1 on eof ****************************/
+/* returns the entry number or -1 on eof *************************************/
 long vorbis_book_decodev(codebook *book, double *a, oggpack_buffer *b){
   long entry=vorbis_book_decode(book,b);
   int i;
