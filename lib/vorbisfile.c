@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.22 2000/05/01 05:48:26 jon Exp $
+ last mod: $Id: vorbisfile.c,v 1.23 2000/05/16 11:38:36 msmith Exp $
 
  ********************************************************************/
 
@@ -1041,7 +1041,6 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 
 	    if(host_endian==bigendianp){
 	      if(sgned){
-		short *dest;
 		for(i=0;i<channels;i++) { /* It's faster in this order */
 		  double *src=pcm[i];
 		  short *dest=((short *)buffer)+i;
@@ -1053,9 +1052,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    dest+=channels;
 		  }
 		}
-		buffer=(char *)dest;
 	      }else{
-		short *dest;
 		for(i=0;i<channels;i++) {
 		  double *src=pcm[i];
 		  short *dest=((short *)buffer)+i;
@@ -1067,7 +1064,6 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    dest+=channels;
 		  }
 		}
-		buffer=(char *)dest;
 	      }
 	    }else if(bigendianp){
 	      for(j=0;j<samples;j++)
