@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.36.2.1 2001/07/08 08:48:01 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.36.2.2 2001/08/07 19:50:00 xiphmont Exp $
 
  Preecho calculation.
 
@@ -133,8 +133,8 @@ static float _ve_deltai(envelope_lookup *ve,float *pre,float *post){
      basing blocks on quantization noise that outweighs the signal
      itself (for low power signals) */
 
-  float min=ve->minenergy;
-  float A=min*min*n;
+  float minV=ve->minenergy;
+  float A=minV*minV*n;
   float B=A;
 
   for(i=0;i<n;i++){

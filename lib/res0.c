@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.32.2.3 2001/08/02 22:14:21 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.32.2.4 2001/08/07 19:50:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -488,6 +488,12 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
   int n=info->end-info->begin;
 
   int partvals=n/samples_per_partition;
+
+  long resbits[possible_partitions];
+  long resvals[possible_partitions];
+  memset(resbits,0,sizeof(resbits));
+  memset(resvals,0,sizeof(resvals));
+
   
 #ifdef TRAIN_RES
   FILE *of;
@@ -539,20 +545,33 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	long offset=i*samples_per_partition+info->begin;
 	
 	for(j=0;j<ch;j++){
-	  /*if(s==0)look->resvals[partword[j][i]]++;*/
+	  if(s==0)resvals[partword[j][i]]+=samples_per_partition;
 	  if(info->secondstages[partword[j][i]]&(1<<s)){
 	    codebook *statebook=look->partbooks[partword[j][i]][s];
 	    if(statebook){
 	      int ret=encode(&vb->opb,in[j]+offset,samples_per_partition,
 			     statebook,look);
-	      /*look->resbits[partword[j][i]][s]+=ret;*/
 	      look->postbits+=ret;
+	      resbits[partword[j][i]]+=ret;
 	      
 	    }
 	  }
 	}
       }
     }
+  }
+
+  {
+    long total=0;
+    long totalbits=0;
+    fprintf(stderr,"%d :: ",vb->mode);
+    for(k=0;k<possible_partitions;k++){
+      fprintf(stderr,"%d/%1.2g, ",resvals[k],(float)resbits[k]/resvals[k]);
+      total+=resvals[k];
+      totalbits+=resbits[k];
+    }
+
+    fprintf(stderr,":: %ld:%1.2g\n",total,(double)totalbits/total);
   }
   return(0);
 }

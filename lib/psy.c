@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48.2.6 2001/08/07 03:47:22 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.48.2.7 2001/08/07 19:50:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -527,24 +527,24 @@ static void max_seeds(vorbis_look_psy *p,
  
   pos=p->octave[0]-p->firstoc-(linesper>>1);
   while(linpos+1<p->n){
-    float min=seed[pos];
+    float minV=seed[pos];
     long end=((p->octave[linpos]+p->octave[linpos+1])>>1)-p->firstoc;
     while(pos+1<=end){
       pos++;
-      if((seed[pos]>NEGINF && seed[pos]<min) || min==NEGINF)
-	min=seed[pos];
+      if((seed[pos]>NEGINF && seed[pos]<minV) || minV==NEGINF)
+	minV=seed[pos];
     }
     
     /* seed scale is log.  Floor is linear.  Map back to it */
     end=pos+p->firstoc;
     for(;linpos<p->n && p->octave[linpos]<=end;linpos++)
-      if(flr[linpos]<min)flr[linpos]=min;
+      if(flr[linpos]<minV)flr[linpos]=minV;
   }
   
   {
-    float min=seed[p->total_octave_lines-1];
+    float minV=seed[p->total_octave_lines-1];
     for(;linpos<p->n;linpos++)
-      if(flr[linpos]<min)flr[linpos]=min;
+      if(flr[linpos]<minV)flr[linpos]=minV;
   }
   
 }
@@ -1005,110 +1005,84 @@ float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
   return(amp);
 }
 
-static void couple_lossless(float A, float B, float *mag, float *ang,float t){
-  float fmag;
-  
+static void couple_lossless(float A, float B, float *mag, float *ang){
   if(fabs(A)>fabs(B)){
-    fmag=fabs(*mag=A); *ang=(A>0.f?A-B:B-A);
+    *mag=A; *ang=(A>0.f?A-B:B-A);
   }else{
-    fmag=fabs(*mag=B); *ang=(B>0.f?A-B:B-A);
+    *mag=B; *ang=(B>0.f?A-B:B-A);
   }
-
-  if(*ang>fmag*1.9999f)*ang=-fmag*2.f;
-
 }
 
-static void couple_8phase(float A, float B, float *mag, float *ang,float t){
-  float fmag;
-
+static void couple_Nphase(float A, float B, float Aa, float Ba,
+			    float *mag, float *ang){
   if(fabs(A)>fabs(B)){
-    fmag=fabs(*mag=A); *ang=(A>0?A-B:B-A);
+    *mag=A;*ang=(A>0.f?Aa-Ba:Ba-Aa);
   }else{
-    fmag=fabs(*mag=B); *ang=(B>0?A-B:B-A);
+    *mag=B;*ang=(B>0.f?Aa-Ba:Ba-Aa);
+  }
+}
+
+static void couple_8phase(float A, float B, float *mag, float *ang){
+  if(fabs(A)>fabs(B)){
+    *mag=A; *ang=(A>0?A-B:B-A);
+  }else{
+    *mag=B; *ang=(B>0?A-B:B-A);
   }
 
-  if(fmag>0.f)
-    switch((int)(rint(*ang/fmag))){
+  if(*mag!=0.f)
+    switch((int)(rint(*ang / *mag))){
     case 0:
-      if(fmag>t){
-	if(*ang>fmag-t)*ang=fmag-t;
-	if(*ang<t-fmag)*ang=t-fmag;
-      }else{
-	*ang=0;
-      }
+      *ang=0;
       break;
     case 2:case -2:
-      *ang=-2*fmag;
+      *ang=-2*fabs(*mag);
       break;
     case 1:
-      *ang=fmag;
+      *ang= *mag;
       break;
     case -1:
-      *ang=-fmag;
+      *ang= -*mag;
       break;
     }
 }
 
-static void couple_6phase(float A, float B, float *mag, float *ang,float t){
-  float fmag;
-  
+static void couple_6phase(float A, float B, float *mag, float *ang){
   if(fabs(A)>fabs(B)){
-    fmag=fabs(*mag=A); *ang=(A>0?A-B:B-A);
+    *mag=A; *ang=(A>0?A-B:B-A);
   }else{
-    fmag=fabs(*mag=B); *ang=(B>0?A-B:B-A);
+    *mag=B; *ang=(B>0?A-B:B-A);
   }
 
-  if(fmag>0.f)
-    switch((int)(rint(*ang/fmag))){
+  if(*mag!=0.f)
+    switch((int)(rint(*ang / *mag))){
     case -2:case 2:
-      *ang=0;
       *mag=0;
-      break;
+      /*fall*/
     case 0:
-      if(fmag>t){
-	if(*ang>fmag-t)*ang=fmag-t;
-	if(*ang<t-fmag)*ang=t-fmag;
-      }else{
-	*ang=0;
-      }
+      *ang=0;
       break;
     case 1:
-      *ang=fmag;
+      *ang= *mag;
       break;
     case -1:
-      *ang=-fmag;
+      *ang= -*mag;
       break;
     }
 }
 
-static void couple_point(float A, float B, float *mag, float *ang,float t){
-  float fmag;
-  
+static void couple_point(float A, float B, float *mag, float *ang){
   if(fabs(A)>fabs(B)){
-    fmag=fabs(*mag=A); *ang=(A>0?A-B:B-A);
+    *mag=A; *ang=(A>0?A-B:B-A);
   }else{
-    fmag=fabs(*mag=B); *ang=(B>0?A-B:B-A);
+    *mag=B; *ang=(B>0?A-B:B-A);
   }
 
-  if(fmag>0.f)
-    switch((int)(rint(*ang/fmag))){
-    case 0:
-      if(fmag>t){
-	if(*ang>fmag-t)*ang=fmag-t;
-	if(*ang<t-fmag)*ang=t-fmag;
-      }else{
-	*ang=0;
-      }
-      break;
-
-    case 1:
-    case -1:
-      *ang=0;
-      break;
-
-    case -2:
-    case 2:
+  if(*mag!=0.f)
+    switch((int)(rint(*ang / *mag))){
+    case -2:case 2:
       *mag=0;
+      /* fall */
+    case 0:case 1: case -1:
       *ang=0;
       break;
     }
@@ -1124,8 +1098,6 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 
   int i,j,k,n=p->n;
   vorbis_info_psy *info=p->vi;
-  float granule=info->couple_pass[passno].granule;
-  float igranule=info->couple_pass[passno].igranule;
 
   /* perform any requested channel coupling */
   for(i=0;i<vi->coupling_steps;i++){
@@ -1146,28 +1118,39 @@ void _vp_quantize_couple(vorbis_look_psy *p,
       nonzero[vi->coupling_ang[i]]=1; 
 
       for(j=0,k=0;j<n;k++){
-	vp_couple *part=info->couple_pass[passno].couple+k;
+	vp_couple *part=info->couple_pass[passno].couple_pass+k;
 
 	for(;j<part->limit && j<p->n;j++){
 	  /* partition by partition; k is our by-location partition
 	     class counter */
-	  float ang,mag=max(fabs(pcmM[j]),fabs(pcmA[j]));
-	  float M=rint(pcmM[j]*igranule)*granule;
-	  float A=rint(pcmA[j]*igranule)*granule;
+
+	  float granulem=part->granulem;
+	  float igranulem=part->igranulem;
+
+	  float Am=rint(pcmM[j]*igranulem)*granulem;
+	  float Bm=rint(pcmA[j]*igranulem)*granulem;
+	  float ang,mag,fmag=max(fabs(Am),fabs(Bm));
 	  
-	  if(mag<part->couple_point.amppost){
-	    couple_point(M,A,&mag,&ang,part->couple_point.threshhold);
+	  if(fmag<part->amppost_point){
+	    couple_point(Am,Bm,&mag,&ang);
 	  }else{
-	    if(mag<part->couple_sixphase.amppost){
-	      couple_6phase(M,A,&mag,&ang,part->couple_point.threshhold);
+	    if(fmag<part->amppost_6phase){
+	      couple_6phase(Am,Bm,&mag,&ang);
 	    }else{ 
-	      if(mag<part->couple_eightphase.amppost){
-		couple_8phase(M,A,&mag,&ang,part->couple_point.threshhold);
+	      if(fmag<part->amppost_8phase){
+		couple_8phase(Am,Bm,&mag,&ang);
 	      }else{
-		couple_lossless(M,A,&mag,&ang,part->couple_point.threshhold);
+		if(fmag<part->amppost_Nphase){
+		  float Aa=rint(pcmM[j]*part->igranulea)*part->granulea;
+		  float Ba=rint(pcmA[j]*part->igranulea)*part->granulea;
+		  couple_Nphase(Am,Bm,Aa,Ba,&mag,&ang);
+		}else{
+		  couple_lossless(Am,Bm,&mag,&ang);
+		}
 	      }
 	    }
 	  }
+	  if(ang>fmag*1.9999f)ang=-fmag*2.f;
 	  
 	  qM[j]=mag-sofarM[j];
 	  qA[j]=ang-sofarA[j];
