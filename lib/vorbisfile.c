@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.45 2001/05/27 06:44:01 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.46 2001/05/27 08:16:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,6 +25,7 @@
 #include "vorbis/vorbisfile.h"
 
 #include "os.h"
+#include "codec_internal.h"
 #include "misc.h"
 
 /* A 'chained bitstream' is a Vorbis bitstream that contains more than
@@ -1085,7 +1086,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	  }
 	}
 	if(ret<0)goto seek_error;
-	if(op.granulepos!=-1 && !op.e_o_s){
+	if(op.granulepos!=-1){
 	  vf->pcm_offset=op.granulepos+total;
 	  break;
 	}else
@@ -1112,13 +1113,14 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
    returns zero on success, nonzero on failure */
 
 int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
-  int thisblock,lastblock=0,blockacc=0;
+  int thisblock,lastblock=0;
   int ret=ov_pcm_seek_page(vf,pos);
+  codec_setup_info *ci=vf->vi->codec_setup;
   if(ret<0)return(ret);
 
   /* discard leading packets we don't need for the lapping of the
      position we want; don't decode them */
-#if 0
+
   while(1){
     ogg_packet op;
     ogg_page og;
@@ -1126,12 +1128,13 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
     int ret=ogg_stream_packetpeek(&vf->os,&op);
     if(ret>0){
       thisblock=vorbis_packet_blocksize(vf->vi+vf->current_link,&op);
+      if(lastblock)vf->pcm_offset+=(lastblock+thisblock)>>2;
 
-      if(blockacc+
-	 ((lastblock+thisblock)>>2)+
-	 (thisblock>>1)+vf->pcm_offset>pos)break;
+      if(vf->pcm_offset+((thisblock+ci->blocksizes[1])>>2)>=pos)break;
 
       ogg_stream_packetout(&vf->os,NULL);
+      
+
       /* end of logical stream case is hard, especially with exact
          length positioning. */
 
@@ -1141,11 +1144,10 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
 	vf->pcm_offset=op.granulepos;
 	for(i=0;i<vf->current_link;i++)
 	  vf->pcm_offset+=vf->pcmlengths[i];
-	blockacc=0;
-      }else
-	if(lastblock)blockacc+=(lastblock+thisblock)>>2;
+      }
 
       lastblock=thisblock;
+
     }else{
       if(ret<0 && ret!=OV_HOLE)break;
       
@@ -1170,9 +1172,6 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
       ogg_stream_pagein(&vf->os,&og);
     }
   }
-
-  if(lastblock)vf->pcm_offset+=blockacc;
-#endif
 
   /* discard samples until we reach the desired position. Crossing a
      logical bitstream boundary with abandon is OK. */
