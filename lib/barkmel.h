@@ -11,24 +11,27 @@
  *                                                                  *
  ********************************************************************
 
- function: linear x scale -> log x scale mappings (with bias)
- last mod: $Id: xlogmap.h,v 1.2 1999/12/30 07:26:57 xiphmont Exp $
+ function: linear scale -> bark and mel scales
+ last mod: $Id: barkmel.h,v 1.1 1999/12/31 12:35:12 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_XLOGMAP_H_
-#define _V_XLOGMAP_H_
+#ifndef _V_BARKMEL_H_
+#define _V_BARKMEL_H_
 
 #include <math.h>
 
-/*
-Bias     = log_2( n / ( (2^octaves) - 1))
-log_x    = log_2( linear_x + 2^Bias ) - Bias 
-linear_x = 2^(Bias+log_x)-2^Bias; 
-*/
+/* The bark scale equations are approximations, since the original
+   table was somewhat hand rolled.  They're chosen to have the best
+   possible fit to the rolled tables, thus their somewhat odd
+   appearence (these are more accurate and over a longer range than
+   the oft-quoted bark equations found in the texts I have).  The
+   approximations are valid from 0 - 30kHz (nyquist) or so.
 
-#define LOG_BIAS(n,o)  (log((n)/(pow(2.,(o))-1))/log(2.))
-#define LOG_X(x,b)     (log((x)+pow(2.,(b)))/log(2.)-(b))
-#define LINEAR_X(x,b)  (pow(2.,((b)+(x)))-pow(2.,(b)))
+   all f in Hz, z in Bark */
+
+#define fBARK(f) (13.1*atan(.00074*(f))+2.24*atan((f)*(f)*1.85e-8)+1e-4*(f))
+#define iBARK(z) (102.*(z)-2.*pow(z,2.)+.4*pow(z,3)+pow(1.46,z)-1.)
+#define fMEL(f)  (1000.*(log(1.+(f)*.001)*1.442695))
 
 #endif

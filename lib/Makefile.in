@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.17 1999/12/30 07:26:31 xiphmont Exp $
+# $Id: Makefile.in,v 1.18 1999/12/31 12:35:11 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -29,7 +29,7 @@ LIBS=@LIBS@ -lm
 
 HFILES =	../include/codec.h ../include/vorbisfile.h \
 		bitwise.h envelope.h lpc.h lsp.h \
-		psy.h smallft.h window.h xlogmap.h os.h mdct.h
+		psy.h smallft.h window.h barkmel.h os.h mdct.h
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
 		spectrum.o vorbisfile.o

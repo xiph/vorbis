@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: spectrum envelope and residue code/decode
- last mod: $Id: spectrum.c,v 1.7 1999/12/30 07:26:51 xiphmont Exp $
+ last mod: $Id: spectrum.c,v 1.8 1999/12/31 12:35:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,7 +37,7 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
 
   int scale=vb->W;
   int m=vb->vd->vi->floororder[scale];
-  int n=vb->pcmend*4;
+  int n=vb->pcmend*64;
   int last=0;
   double dlast=0.;
   double min=M_PI/n/2.;
@@ -62,6 +62,7 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
   for(i=0;i<m;i++){
     int val=rint(lsp[i]/M_PI*n-last);
     _oggpack_write(&vb->opb,val,bits);
+
     lsp[i]=(last+=val)*M_PI/n;
 
     /* Underpowered but sufficient for now. In the real spec (coming
@@ -75,7 +76,7 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
 int _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp){
   int scale=vb->W;
   int m=vb->vd->vi->floororder[scale];
-  int n=vb->pcmend*4;
+  int n=vb->pcmend*64;
   int last=0;
   double dlast=0.;
   int bits=rint(log(n)/log(2));

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.5 1999/12/30 07:26:41 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.6 1999/12/31 12:35:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,8 +21,7 @@
 
 #include "codec.h"
 
-extern void lpc_init(lpc_lookup *l,int n, int mapped,
-		       int m, int oct, int encode_p);
+extern void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m);
 extern void lpc_clear(lpc_lookup *l);
 
 /* simple linear scale LPC code */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.18 1999/12/30 07:26:35 xiphmont Exp $
+ last mod: $Id: block.c,v 1.19 1999/12/31 12:35:12 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -198,10 +198,10 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   /* Yes, wasteful to have four lookups.  This will get collapsed once
      things crystallize */
 
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/2,
-	   vi->floororder[0],vi->flooroctaves[0],1);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/2,
-	   vi->floororder[0],vi->flooroctaves[0],1);
+  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->floormap[0],vi->rate,
+	   vi->floororder[0]);
+  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->floormap[1],vi->rate,
+	   vi->floororder[1]);
 
   /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
 	   vi->balanceorder,vi->balanceoctaves,1);
@@ -456,10 +456,10 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   /* Yes, wasteful to have four lookups.  This will get collapsed once
      things crystallize */
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/2,
-	   vi->floororder[0],vi->flooroctaves[0],0);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/4,
-	   vi->floororder[1],vi->flooroctaves[1],0);
+  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->floormap[0],vi->rate,
+	   vi->floororder[0]);
+  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->floormap[1],vi->rate,
+	   vi->floororder[1]);
   /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
 	   vi->balanceorder,vi->balanceoctaves,0);
   lpc_init(&v->vbal[1],vi->blocksize[1]/2,256,

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.c,v 1.7 1999/12/30 07:26:47 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.8 1999/12/31 12:35:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,7 +24,6 @@
 #include "psy.h"
 #include "lpc.h"
 #include "smallft.h"
-#include "xlogmap.h"
 
 /* Set up decibel threshhold 'curves'.  Actually, just set a level at
    log frequency intervals, interpolate, and call it a curve. */

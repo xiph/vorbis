@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.11 1999/12/30 07:26:39 xiphmont Exp $
+ last mod: $Id: info.c,v 1.12 1999/12/31 12:35:13 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,7 +46,7 @@ int vorbis_info_modeset(vorbis_info *vi, int mode){
   memcpy(vi,&(predef_modes[mode]),sizeof(vorbis_info));
   vi->threshhold_points=threshhold_points;
   vi->user_comments=calloc(1,sizeof(char *));
-  vi->vendor=strdup("Xiphophorus libVorbis I 19991104");
+  vi->vendor=strdup("Xiphophorus libVorbis I 19991230");
 
   return(0);
 }
@@ -121,8 +121,8 @@ int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op){
 
 	vi->floororder[0]=_oggpack_read(&opb,8);
 	vi->floororder[1]=_oggpack_read(&opb,8);
-	vi->flooroctaves[0]=_oggpack_read(&opb,8);
-	vi->flooroctaves[1]=_oggpack_read(&opb,8);
+	vi->floormap[0]=_oggpack_read(&opb,16);
+	vi->floormap[1]=_oggpack_read(&opb,16);
 	vi->floorch=_oggpack_read(&opb,8);
 
 	if(vi->rate<1)return(-1);
@@ -211,8 +211,8 @@ int vorbis_info_headerout(vorbis_info *vi,
   _oggpack_write(&opb,ilog2(vi->blocksize[1]),4);
   _oggpack_write(&opb,vi->floororder[0],8);
   _oggpack_write(&opb,vi->floororder[1],8);
-  _oggpack_write(&opb,vi->flooroctaves[0],8);
-  _oggpack_write(&opb,vi->flooroctaves[1],8);
+  _oggpack_write(&opb,vi->floormap[0],16);
+  _oggpack_write(&opb,vi->floormap[1],16);
   _oggpack_write(&opb,vi->floorch,8);
 
   /* build the packet */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.2 1999/12/30 07:26:29 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.3 1999/12/31 12:35:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -65,16 +65,11 @@ typedef struct {
 } envelope_lookup;
 
 typedef struct lpclook{
-  /* encode lookups */
-  int *uscale;
-  double *escale;
+  /* en/decode lookups */
+  int *linearmap;
+  double *barknorm;
   drft_lookup fft;
 
-  /* en/decode lookups */
-  long *dscale;
-  int *iscale;
-  double *ifrac;
-  double *norm;
   int n;
   int ln;
   int m;
@@ -129,7 +124,7 @@ typedef struct vorbis_info{
 
   int blocksize[2];
   int floororder[2];
-  int flooroctaves[2];
+  int floormap[2];
 
   int floorch;
 

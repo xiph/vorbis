@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.10 1999/12/30 07:26:40 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.11 1999/12/31 12:35:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,15 +51,13 @@ Carsten Bormann
 #include "os.h"
 #include "smallft.h"
 #include "lpc.h"
-#include "xlogmap.h"
+#include "barkmel.h"
 
-/* This is pared down for Vorbis. Autocorrelation LPC coeff generation
-   algorithm invented by N. Levinson in 1947, modified by J. Durbin in
-   1959. */
+/* Autocorrelation LPC coeff generation algorithm invented by
+   N. Levinson in 1947, modified by J. Durbin in 1959. */
 
 /* Input : n elements of time doamin data
    Output: m lpc coefficients, excitation energy */
-
 
 double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
   double *aut=alloca(sizeof(double)*(m+1));
@@ -145,100 +143,74 @@ double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l){
   return(vorbis_lpc_from_data(work,lpc,n,m));
 }
 
-/* On top of this basic LPC infrastructure we introduce two modifications:
+/* initialize Bark scale and normalization lookups.  We could do this
+   with static tables, but Vorbis allows a number of possible
+   combinations, so it's best to do it computationally.
 
-   1) Filter generation is limited in the resolution of features it
-   can represent (this is more obvious when the filter is looked at as
-   a set of LSP coefficients).  Human perception of the audio spectrum
-   is logarithmic not only in amplitude, but also frequency.  Because
-   the high frequency features we'll need to encode will be broader
-   than the low frequency features, filter generation will be
-   dominated by higher frequencies (when most of the energy is in the
-   lowest frequencies, and greatest perceived resolution is in the
-   midrange).  To avoid this effect, Vorbis encodes the frequency
-   spectrum with a biased log frequency scale. The intent is to
-   roughly equalize the sizes of the octaves (see xlogmap.h)
+   The below is authoritative in terms of defining scale mapping.
+   Note that the scale depends on the sampling rate as well as the
+   linear block and mapping sizes (note that for a given sample rate
+   and block size, there's generally a fairly obviously optimal
+   mapping size */
 
-   2) When we change the frequency scale, we also change the
-   (apparent) relative energies of the bands; that is, on a log scale
-   covering 5 octaves, the highest octave goes from being represented
-   in half the bins, to only 1/32 of the bins.  If the amplitudes
-   remain the same, we have divided the energy represented by the
-   highest octave by 16 (as far as Levinson-Durbin is concerned).
-   This will seriously skew filter generation, which bases calculation
-   on the mean square error with respect to energy.  Thus, Vorbis
-   normalizes the amplitudes of the log spectrum frequencies to keep
-   the relative octave energies correct. */
-
-/* n == size of vector to be used for filter, m == order of filter,
-   oct == octaves in normalized scale, encode_p == encode (1) or
-   decode (0) */
-
-void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
-  double bias=LOG_BIAS(n,oct);
-  double scale=(float)mapped/(float)oct; /* where n==mapped */    
+void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
   int i;
-
+  double scale;
   memset(l,0,sizeof(lpc_lookup));
 
   l->n=n;
   l->ln=mapped;
   l->m=m;
-  l->iscale=malloc(n*sizeof(int));
-  l->ifrac=malloc(n*sizeof(double));
-  l->norm=malloc(n*sizeof(double));
 
-  for(i=0;i<n;i++){
-    /* how much 'real estate' in the log domain does the bin in the
-       linear domain represent? */
-    double logA=LOG_X(i,bias);
-    double logB=LOG_X(i+1.,bias);
-    l->norm[i]=logB-logA;  /* this much */
-  }
+  l->linearmap=malloc(n*sizeof(int));
+  l->barknorm=malloc(mapped*sizeof(double));
 
-  /* the scale is encode/decode specific for algebraic simplicity */
+  /* we choose a scaling constant so that:
+     floor(bark(rate-1)*C)=mapped-1
+     floor(bark(rate)*C)=mapped */
 
-  if(encode_p){
-    /* encode */
-    l->escale=malloc(mapped*sizeof(double));
-    l->uscale=malloc(n*sizeof(int));
-    
-    /* undersample guard */
+  scale=mapped/fBARK(rate);
+
+  /* the mapping from a linear scale to a smaller bark scale is
+     straightforward with a single catch; make sure not to skip any
+     bark-scale bins.  In order to do this, we assign map_N = min
+     (map_N-1 + 1, bark(N)) */
+  {
+    int last=-1;
     for(i=0;i<n;i++){
-      l->uscale[i]=rint(LOG_X(i,bias)/oct*mapped);
-    }   
-
-    for(i=0;i<mapped;i++){
-      l->escale[i]=LINEAR_X(i/scale,bias);
-      l->uscale[(int)(floor(l->escale[i]))]=-1;
-      l->uscale[(int)(ceil(l->escale[i]))]=-1;
-    }   
-
-
+      int val=floor( fBARK(((double)rate)/n*i) *scale); /* bark numbers
+                                                          represent
+                                                          band edges */
+      if(val>=mapped)val=mapped; /* guard against the approximation */
+      if(val>last+1)val=last+1;
+      l->linearmap[i]=val;
+      last=val;
+    }
   }
-  /* decode; encode may use this too */
+
+  /* 'Normalization' is just making sure that power isn't lost in the
+     log scale by virtue of compressing the scale in higher
+     frequencies.  We figure the weight of bands in proportion to
+     their linear/bark width ratio below, again, authoritatively.  We
+     use computed width (not the number of actual bins above) for
+     smoothness in the scale; they should agree closely unless the
+     encoder chose parameters poorly (and got a bark scale that would
+     have had lots of skipped bins) */
+
+  for(i=0;i<mapped;i++)
+    l->barknorm[i]=iBARK((i+1)/scale)-iBARK(i/scale);
+
+  /* we cheat decoding the LPC spectrum via FFTs */
   
   drft_init(&l->fft,mapped*2);
-  for(i=0;i<n;i++){
-    double is=LOG_X(i,bias)/oct*mapped;
-    if(is<0.)is=0.;
 
-    l->iscale[i]=floor(is);
-    if(l->iscale[i]>=l->ln-1)l->iscale[i]=l->ln-2;
-
-    l->ifrac[i]=is-floor(is);
-    if(l->ifrac[i]>1.)l->ifrac[i]=1.;
-    
-  }
 }
 
 void lpc_clear(lpc_lookup *l){
   if(l){
-    if(l->escale)free(l->escale);
+    if(l->barknorm)free(l->barknorm);
+    if(l->linearmap)free(l->linearmap);
     drft_clear(&l->fft);
-    free(l->iscale);
-    free(l->ifrac);
-    free(l->norm);
   }
 }
 
@@ -247,32 +219,26 @@ void lpc_clear(lpc_lookup *l){
    not bottlenecked here anyway */
 
 double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
-  /* map the input curve to a log curve for encoding */
-
-  /* for clarity, mapped and n are both represented although setting
-     'em equal is a decent rule of thumb. The below must be reworked
-     slightly if mapped != n */
+  /* map the input curve to a bark-scale curve for encoding */
   
   int mapped=l->ln;
   double *work=alloca(sizeof(double)*mapped);
   int i;
 
-  /* fairly correct for low frequencies, naieve for high frequencies
-     (suffers from undersampling) */
-  for(i=0;i<mapped;i++){
-    double lin=l->escale[i];
-    int a=floor(lin);
-    int b=ceil(lin);
-    double del=lin-floor(lin);
+  memset(work,0,sizeof(double)*mapped);
 
-    work[i]=(curve[a]/l->norm[a]*(1.-del)+
-	     curve[b]/l->norm[b]*del);      
+  /* Only the decode side is behavior-specced; for now in the encoder,
+     we select the maximum value of each band as representative (this
+     helps make sure peaks don't go out of range.  In error terms,
+     selecting min would make more sense, but the codebook is trained
+     numerically, so we don't lose in encoding.  We'd still want to
+     use the original curve for error and noise estimation */
 
+  for(i=0;i<l->n;i++){
+    int bark=l->linearmap[i];
+    if(work[bark]<curve[i])work[bark]=curve[i];
   }
-
-  /*  for(i=0;i<l->n;i++)
-    if(l->uscale[i]>0)
-    if(work[l->uscale[i]]<curve[i])work[l->uscale[i]]=curve[i];*/
+  for(i=0;i<mapped;i++)work[i]*=l->barknorm[i];
 
 #ifdef ANALYSIS
   {
@@ -281,6 +247,11 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
     char buffer[80];
     static int frameno=0;
     
+    sprintf(buffer,"prelpc%d.m",frameno);
+    out=fopen(buffer,"w+");
+    for(j=0;j<l->n;j++)
+      fprintf(out,"%g\n",curve[j]);
+    fclose(out);
     sprintf(buffer,"preloglpc%d.m",frameno++);
     out=fopen(buffer,"w+");
     for(j=0;j<l->ln;j++)
@@ -328,11 +299,12 @@ void _vlpc_de_helper(double *curve,double *lpc,double amp,
 }
   
 
-/* generate the whole freq response curve on an LPC IIR filter */
+/* generate the whole freq response curve of an LPC IIR filter */
 
 void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
   double *lcurve=alloca(sizeof(double)*(l->ln*2));
   int i;
+  static int frameno=0;
 
   _vlpc_de_helper(lcurve,lpc,amp,l);
 
@@ -341,7 +313,6 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
     int j;
     FILE *out;
     char buffer[80];
-    static int frameno=0;
     
     sprintf(buffer,"loglpc%d.m",frameno++);
     out=fopen(buffer,"w+");
@@ -353,17 +324,28 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
 
   if(amp==0)return;
 
-  for(i=0;i<l->n;i++){
-    int ii=l->iscale[i];
-    curve[i]=((1.-l->ifrac[i])*lcurve[ii]+
-	      l->ifrac[i]*lcurve[ii+1])*l->norm[i];
-  }
+  for(i=0;i<l->ln;i++)lcurve[i]/=l->barknorm[i];
+  for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
 
+#ifdef ANALYSIS
+  {
+    int j;
+    FILE *out;
+    char buffer[80];
+    
+    sprintf(buffer,"lpc%d.m",frameno-1);
+    out=fopen(buffer,"w+");
+    for(j=0;j<l->n;j++)
+      fprintf(out,"%g\n",curve[j]);
+    fclose(out);
+  }
+#endif
 }
 
 void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
   double *lcurve=alloca(sizeof(double)*((l->ln+l->n)*2));
   int i;
+  static int frameno=0;
 
   if(amp==0){
     memset(residue,0,l->n*sizeof(double));
@@ -371,13 +353,24 @@ void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
     
     _vlpc_de_helper(lcurve,lpc,amp,l);
 
-    for(i=0;i<l->n;i++){
-      if(residue[i]!=0){
-	int ii=l->iscale[i];
-	residue[i]*=((1.-l->ifrac[i])*lcurve[ii]+
-		     l->ifrac[i]*lcurve[ii+1])*l->norm[i];
-      }
-    }
+#ifdef ANALYSIS
+  {
+    int j;
+    FILE *out;
+    char buffer[80];
+    
+    sprintf(buffer,"loglpc%d.m",frameno++);
+    out=fopen(buffer,"w+");
+    for(j=0;j<l->ln;j++)
+      fprintf(out,"%g\n",lcurve[j]);
+    fclose(out);
+  }
+#endif
+
+    for(i=0;i<l->ln;i++)lcurve[i]/=l->barknorm[i];
+    for(i=0;i<l->n;i++)
+      if(residue[i]!=0)
+	residue[i]*=lcurve[l->linearmap[i]];
   }
 }
 
