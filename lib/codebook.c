@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.23.4.1 2001/05/11 22:07:49 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.23.4.2 2001/05/23 02:15:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -411,6 +411,43 @@ long s_vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
     for(i=0,o=0;i<book->dim;i++,o+=step)
       for (j=0;j<step;j++)
        a[o+j]*=t[j][i];
+    break;
+  }
+  return(0);
+}
+
+long s_vorbis_book_decodev(codebook *book,float *a,oggpack_buffer *b,
+			   int partsize,int addmul){
+  int i,j,entry;
+  float *t;
+
+  switch(addmul){
+  case -1:
+    for(i=0;i<partsize;){
+      entry = vorbis_book_decode(book,b);
+      if(entry==-1)return(-1);
+      t     = book->valuelist+entry*book->dim;
+      for (j=0;j<book->dim;)
+	a[i++]=t[j++];
+    }
+    break;
+  case 0:
+    for(i=0;i<partsize;){
+      entry = vorbis_book_decode(book,b);
+      if(entry==-1)return(-1);
+      t     = book->valuelist+entry*book->dim;
+      for (j=0;j<book->dim;)
+	a[i++]+=t[j++];
+    }
+    break;
+  case 1:
+    for(i=0;i<partsize;){
+      entry = vorbis_book_decode(book,b);
+      if(entry==-1)return(-1);
+      t     = book->valuelist+entry*book->dim;
+      for (j=0;j<book->dim;)
+	a[i++]*=t[j++];
+    }
     break;
   }
   return(0);

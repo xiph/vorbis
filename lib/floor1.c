@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.1.2.6 2001/05/13 22:40:24 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.1.2.7 2001/05/23 02:15:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,10 +28,7 @@
 
 #include <stdio.h>
 
-#define VORBIS_IEEE_FLOAT32
-
 #define floor1_rangedB 140 /* floor 1 fixed at -140dB to 0dB range */
-
 
 typedef struct {
   int sorted_index[VIF_POSIT+2];
@@ -69,29 +66,6 @@ typedef struct lsfit_acc{
   long edgey0;
   long edgey1;
 } lsfit_acc;
-
-static void vorbis_msecheck(vorbis_look_floor1 *look,
-			    const float *flr,const float *mdct,
-			    const float *out,int n){
-  float fn=22050./n;
-  float lastbark=toBARK(0);
-  float att=look->vi->twofitatten;
-  int i;
-  float count=0;
-  float mse=0;
-  for(i=0;i<n;i++){
-    float bark=toBARK((i+1)*fn);
-    if(mdct[i]+att>=flr[i]){
-      float imse=(todB(out+i)-flr[i]);
-      imse*=imse;
-      mse+=imse*(bark-lastbark);
-      count+=(bark-lastbark);
-    }
-    lastbark=bark;
-  }
-
-  if(count)look->mse+=mse/count;
-}
 
 /***********************************************/
  
@@ -307,88 +281,27 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,vorbis_info_mode *mi,
 }
 
 static int render_point(int x0,int x1,int y0,int y1,int x){
-  int dy=y1-y0;
-  int adx=x1-x0;
-  int ady=abs(dy);
-  int err=ady*(x-x0);
-  
-  int off=err/adx;
-  if(dy<0)return(y0-off);
-  return(y0+off);
+  y0&=0x7fff; /* mask off flag */
+  y1&=0x7fff;
+    
+  {
+    int dy=y1-y0;
+    int adx=x1-x0;
+    int ady=abs(dy);
+    int err=ady*(x-x0);
+    
+    int off=err/adx;
+    if(dy<0)return(y0-off);
+    return(y0+off);
+  }
 }
 
-static int FLOOR_quantdB_LOOKUP[560]={
-	1023, 1021, 1019, 1018, 1016, 1014, 1012, 1010, 
-	1008, 1007, 1005, 1003, 1001, 999, 997, 996, 
-	994, 992, 990, 988, 986, 985, 983, 981, 
-	979, 977, 975, 974, 972, 970, 968, 966, 
-	964, 963, 961, 959, 957, 955, 954, 952, 
-	950, 948, 946, 944, 943, 941, 939, 937, 
-	935, 933, 932, 930, 928, 926, 924, 922, 
-	921, 919, 917, 915, 913, 911, 910, 908, 
-	906, 904, 902, 900, 899, 897, 895, 893, 
-	891, 890, 888, 886, 884, 882, 880, 879, 
-	877, 875, 873, 871, 869, 868, 866, 864, 
-	862, 860, 858, 857, 855, 853, 851, 849, 
-	847, 846, 844, 842, 840, 838, 836, 835, 
-	833, 831, 829, 827, 826, 824, 822, 820, 
-	818, 816, 815, 813, 811, 809, 807, 805, 
-	804, 802, 800, 798, 796, 794, 793, 791, 
-	789, 787, 785, 783, 782, 780, 778, 776, 
-	774, 772, 771, 769, 767, 765, 763, 762, 
-	760, 758, 756, 754, 752, 751, 749, 747, 
-	745, 743, 741, 740, 738, 736, 734, 732, 
-	730, 729, 727, 725, 723, 721, 719, 718, 
-	716, 714, 712, 710, 708, 707, 705, 703, 
-	701, 699, 698, 696, 694, 692, 690, 688, 
-	687, 685, 683, 681, 679, 677, 676, 674, 
-	672, 670, 668, 666, 665, 663, 661, 659, 
-	657, 655, 654, 652, 650, 648, 646, 644, 
-	643, 641, 639, 637, 635, 634, 632, 630, 
-	628, 626, 624, 623, 621, 619, 617, 615, 
-	613, 612, 610, 608, 606, 604, 602, 601, 
-	599, 597, 595, 593, 591, 590, 588, 586, 
-	584, 582, 580, 579, 577, 575, 573, 571, 
-	570, 568, 566, 564, 562, 560, 559, 557, 
-	555, 553, 551, 549, 548, 546, 544, 542, 
-	540, 538, 537, 535, 533, 531, 529, 527, 
-	526, 524, 522, 520, 518, 516, 515, 513, 
-	511, 509, 507, 506, 504, 502, 500, 498, 
-	496, 495, 493, 491, 489, 487, 485, 484, 
-	482, 480, 478, 476, 474, 473, 471, 469, 
-	467, 465, 463, 462, 460, 458, 456, 454, 
-	452, 451, 449, 447, 445, 443, 442, 440, 
-	438, 436, 434, 432, 431, 429, 427, 425, 
-	423, 421, 420, 418, 416, 414, 412, 410, 
-	409, 407, 405, 403, 401, 399, 398, 396, 
-	394, 392, 390, 388, 387, 385, 383, 381, 
-	379, 378, 376, 374, 372, 370, 368, 367, 
-	365, 363, 361, 359, 357, 356, 354, 352, 
-	350, 348, 346, 345, 343, 341, 339, 337, 
-	335, 334, 332, 330, 328, 326, 324, 323, 
-	321, 319, 317, 315, 314, 312, 310, 308, 
-	306, 304, 303, 301, 299, 297, 295, 293, 
-	292, 290, 288, 286, 284, 282, 281, 279, 
-	277, 275, 273, 271, 270, 268, 266, 264, 
-	262, 260, 259, 257, 255, 253, 251, 250, 
-	248, 246, 244, 242, 240, 239, 237, 235, 
-	233, 231, 229, 228, 226, 224, 222, 220, 
-	218, 217, 215, 213, 211, 209, 207, 206, 
-	204, 202, 200, 198, 196, 195, 193, 191, 
-	189, 187, 186, 184, 182, 180, 178, 176, 
-	175, 173, 171, 169, 167, 165, 164, 162, 
-	160, 158, 156, 154, 153, 151, 149, 147, 
-	145, 143, 142, 140, 138, 136, 134, 132, 
-	131, 129, 127, 125, 123, 122, 120, 118, 
-	116, 114, 112, 111, 109, 107, 105, 103, 
-	101, 100, 98, 96, 94, 92, 90, 89, 
-	87, 85, 83, 81, 79, 78, 76, 74, 
-	72, 70, 68, 67, 65, 63, 61, 59, 
-	58, 56, 54, 52, 50, 48, 47, 45, 
-	43, 41, 39, 37, 36, 34, 32, 30, 
-	28, 26, 25, 23, 21, 19, 17, 15, 
-	14, 12, 10, 8, 6, 4, 3, 1, 
-};
+static int vorbis_dBquant(const float *x){
+  int i= *x*7.3142857f+1023.5f;
+  if(i>1023)return(1023);
+  if(i<0)return(0);
+  return i;
+}
 
 static float FLOOR_fromdB_LOOKUP[256]={
 	1.0649863e-07F, 1.1341951e-07F, 1.2079015e-07F, 1.2863978e-07F, 
@@ -457,23 +370,6 @@ static float FLOOR_fromdB_LOOKUP[256]={
 	0.82788260F, 0.88168307F, 0.9389798F, 1.F, 
 };
 
-#ifdef VORBIS_IEEE_FLOAT32
-static int vorbis_floor1_dBquant(const float *x){
-  float temp=*x-256.f;
-  ogg_uint32_t *i=(ogg_uint32_t *)(&temp);
-  if(*i<(ogg_uint32_t)0xc3800000)return(1023);
-  if(*i>(ogg_uint32_t)0xc3c5e000)return(0);
-  return FLOOR_quantdB_LOOKUP[(*i-0xc3800000)>>13];
-}
-#else
-static int vorbis_floor1_dBquant(const float *x){
-  int i= ((*x)+140.)/140.*1024.+.5;
-  if(i>1023)return(1023);
-  if(i<0)return(0);
-  return i;
-}
-#endif
-
 static void render_line(int x0,int x1,int y0,int y1,float *d){
   int dy=y1-y0;
   int adx=x1-x0;
@@ -504,7 +400,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
 			  int x0, int x1,lsfit_acc *a,
 			  int n,vorbis_info_floor1 *info){
   long i;
-  int quantized=vorbis_floor1_dBquant(flr);
+  int quantized=vorbis_dBquant(flr);
 
   long xa=0,ya=0,x2a=0,y2a=0,xya=0,na=0, xb=0,yb=0,x2b=0,y2b=0,xyb=0,nb=0;
 
@@ -515,7 +411,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
   if(x1>n)x1=n;
 
   for(i=x0;i<x1;i++){
-    int quantized=vorbis_floor1_dBquant(flr+i);
+    int quantized=vorbis_dBquant(flr+i);
     if(quantized){
       if(mdct[i]+info->twofitatten>=flr[i]){
 	xa  += i;
@@ -563,7 +459,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
 
   a->edgey1=-200;
   if(x1<n){
-    int quantized=vorbis_floor1_dBquant(flr+i);
+    int quantized=vorbis_dBquant(flr+i);
     a->edgey1=quantized;
   }
   return(a->n);
@@ -653,7 +549,7 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
   int x=x0;
   int y=y0;
   int err=0;
-  int val=vorbis_floor1_dBquant(mask+x);
+  int val=vorbis_dBquant(mask+x);
   int mse=0;
   int n=0;
 
@@ -677,7 +573,7 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
     }
 
     if(mdct[x]+info->twofitatten>=mask[x]){
-      val=vorbis_floor1_dBquant(mask+x);
+      val=vorbis_dBquant(mask+x);
       if(val){
 	if(y+info->maxover<val)return(1);
 	if(y-info->maxunder>val)return(1);
@@ -1058,13 +954,15 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       int ly=fit_valueA[0]*info->mult;
       for(j=1;j<posts;j++){
 	int current=look->forward_index[j];
-	int hy=fit_valueA[current]*info->mult;
-	hx=info->postlist[current];
-	
-	render_line(lx,hx,ly,hy,codedflr);
-	
-	lx=hx;
-	ly=hy;
+	if(fit_valueB[current]>0){
+	  int hy=fit_valueA[current]*info->mult;
+	  hx=info->postlist[current];
+	  
+	  render_line(lx,hx,ly,hy,codedflr);
+	  
+	  lx=hx;
+	  ly=hy;
+	}
       }
       for(j=hx;j<look->n;j++)codedflr[j]=codedflr[j-1]; /* be certain */
 
@@ -1082,8 +980,6 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       for(j=n;j<look->n;j++)residue[j]=0.f;
 
     }    
-
-    vorbis_msecheck(look,logmask,logmdct,codedflr,n);
 
   }else{
     oggpack_write(&vb->opb,0,1);
@@ -1151,21 +1047,26 @@ static int floor1_inverse(vorbis_block *vb,vorbis_look_floor *in,float *out){
       int room=(hiroom<loroom?hiroom:loroom)<<1;
       int val=fit_value[i];
 
-      if(val>=room){
-	if(hiroom>loroom){
-	  val = val-loroom;
-	}else{
+      if(val){
+	if(val>=room){
+	  if(hiroom>loroom){
+	    val = val-loroom;
+	  }else{
 	  val = -1-(val-hiroom);
-	}
-      }else{
-	if(val&1){
-	  val= -((val+1)>>1);
+	  }
 	}else{
-	  val>>=1;
+	  if(val&1){
+	    val= -((val+1)>>1);
+	  }else{
+	    val>>=1;
+	  }
 	}
-      }
 
-      fit_value[i]=val+predicted;
+	fit_value[i]=val+predicted;
+      }else{
+	fit_value[i]=predicted|0x8000;
+      }
+	
     }
 
     /* render the lines */
@@ -1175,13 +1076,17 @@ static int floor1_inverse(vorbis_block *vb,vorbis_look_floor *in,float *out){
       int ly=fit_value[0]*info->mult;
       for(j=1;j<look->posts;j++){
 	int current=look->forward_index[j];
-	int hy=fit_value[current]*info->mult;
-	hx=info->postlist[current];
-	
-	render_line(lx,hx,ly,hy,out);
-	
-	lx=hx;
-	ly=hy;
+	int hy=fit_value[current]&0x7fff;
+	if(hy==fit_value[current]){
+
+	  hy*=info->mult;
+	  hx=info->postlist[current];
+	  
+	  render_line(lx,hx,ly,hy,out);
+	  
+	  lx=hx;
+	  ly=hy;
+	}
       }
       for(j=hx;j<n;j++)out[j]=out[j-1]; /* be certain */
     }    

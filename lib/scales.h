@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.15.4.2 2001/05/13 22:40:24 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.15.4.3 2001/05/23 02:15:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -90,7 +90,7 @@ static float todB_LOOKUP[256]={
           49.187850f,   50.102999f,   50.930853f,   51.686624f
 };
 
-static float todB(float *x){
+static float todB(const float *x){
   ogg_int32_t *i=(ogg_int32_t *)x;
   ogg_int32_t temp=((*i&0x7fffffff)-0x33cfffff)>>20;
   if(temp<0)return -400.f;

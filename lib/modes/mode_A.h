@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.14.4.4 2001/05/13 22:40:25 xiphmont Exp $
+ last mod: $Id: mode_A.h,v 1.14.4.5 2001/05/23 02:15:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -132,6 +132,7 @@ static vorbis_info_psy _psy_set_A0={
   .5f,   /* high window */
   5,
   5,
+  10,
   {.000f, 0.f,/*63*/
    .000f, 0.f,/*88*/
    .000f, 0.f,/*125*/
@@ -221,6 +222,7 @@ static vorbis_info_psy _psy_set_A={
   .5f,   /* high window */
   25,
   25,
+  40,
   {.000f, 0.f, /*63*/
    .000f, 0.f, /*88*/
    .000f, 0.f, /*125*/
@@ -299,7 +301,7 @@ static vorbis_info_floor1 _floor_set1A={10,
 					
 					60,30,600,
 					20,8,1,18.,
-					20,768};
+					20,600};
 
 static vorbis_info_residue0 _residue_set0A={0,96,16,6,25,
 					    {0,1,1,1,1,1},
@@ -342,7 +344,7 @@ codec_setup_info info_A={
   /* floors */
   {1,1},{&_floor_set0A,&_floor_set1A},
   /* residue */
-  {0,0},{&_residue_set0A,&_residue_set1A},
+  {1,1},{&_residue_set0A,&_residue_set1A},
   /* books */
   {&_huff_book_line0_class0, /* 0 */
    &_huff_book_line0_class1,
