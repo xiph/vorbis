@@ -12,14 +12,14 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.17.4.1 2000/08/31 09:00:02 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.17.4.2 2000/09/27 06:21:00 jack Exp $
 
  ********************************************************************/
 
 #include <stdio.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
 #include "registry.h"
-#include "bitwise.h"
 #include "misc.h"
 #include "os.h"
 
@@ -31,23 +31,23 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
  
   /* first things first.  Make sure decode is ready */
   _vorbis_block_ripcord(vb);
-  _oggpack_readinit(opb,op->packet,op->bytes);
+  oggpack_readinit(opb,op->packet,op->bytes);
 
   /* Check the packet type */
-  if(_oggpack_read(opb,1)!=0){
+  if(oggpack_read(opb,1)!=0){
     /* Oops.  This is not an audio data packet */
     return(-1);
   }
 
   /* read our mode and pre/post windowsize */
-  mode=_oggpack_read(opb,vd->modebits);
+  mode=oggpack_read(opb,vd->modebits);
   if(mode==-1)return(-1);
   
   vb->mode=mode;
   vb->W=vi->mode_param[mode]->blockflag;
   if(vb->W){
-    vb->lW=_oggpack_read(opb,1);
-    vb->nW=_oggpack_read(opb,1);
+    vb->lW=oggpack_read(opb,1);
+    vb->nW=oggpack_read(opb,1);
     if(vb->nW==-1)   return(-1);
   }else{
     vb->lW=0;
@@ -55,7 +55,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   }
   
   /* more setup */
-  vb->frameno=op->frameno;
+  vb->granulepos=op->granulepos;
   vb->sequence=op->packetno-3; /* first block is third packet */
   vb->eofflag=op->e_o_s;
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.11.2.3 2000/09/02 05:19:24 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.11.2.4 2000/09/27 06:20:54 jack Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "vorbis/codec.h"
+#include <vorbis/codec.h>
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 #include <io.h>

@@ -1,5 +1,5 @@
-#ifndef _OS_TYPES_H
-#define _OS_TYPES_H
+#ifndef _OS_H
+#define _OS_H
 /********************************************************************
  *                                                                  *
  * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
@@ -14,44 +14,47 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os_types.h.in,v 1.3.2.1 2000/08/31 08:05:47 xiphmont Exp $
+ last mod: $Id: os.h,v 1.9.2.1 2000/09/27 06:20:59 jack Exp $
 
  ********************************************************************/
 
-#if defined (_WIN32) 
-#if !defined(__GNUC__)
+#include <math.h>
+#ifndef _V_IFDEFJAIL_H_
+#define _V_IFDEFJAIL_H_
 
-/* MSVC/Borland */
-typedef __int64 ogg_int64_t;
-typedef __int32 ogg_int32_t;
-typedef unsigned __int32 ogg_uint32_t;
-typedef __int16 ogg_int16_t;
-
-#else
-
-/* Cygwin */
-#include <_G_config.h>
-typedef _G_int64_t ogg_int64_t;
-typedef _G_int32_t ogg_int32_t;
-typedef unsigned _G_int32_t ogg_uint32_t;
-typedef _G_int16_t ogg_int16_t;
-#endif
-#else
-
-#ifdef __BEOS__
-/* Be */
-#include <inttypes.h>
+#ifndef M_PI
+#define M_PI (3.1415926539)
 #endif
 
-#include <sys/types.h>
+#ifndef __GNUC__
+#ifdef _WIN32
+#  include <malloc.h>
+#  define rint(x)   (floor((x)+0.5)) 
+#endif
+#endif
 
-/* filled in by configure */
-typedef @SIZE16@ ogg_int16_t;
-typedef @SIZE32@ ogg_int32_t;
-typedef @USIZE32@ ogg_uint32_t;
-typedef @SIZE64@ ogg_int64_t;
+#ifdef _WIN32
+#  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
+#else /* if not _WIN32 */
+#  define FAST_HYPOT hypot
+#endif
 
 #endif
 
-#endif 
+#ifdef HAVE_ALLOCA_H
+#include <alloca.h>
+#endif
 
+#ifdef USE_MEMORY_H
+#include <memory.h>
+#endif
+
+#ifndef min
+#  define min(x,y)  ((x)>(y)?(y):(x))
+#endif
+
+#ifndef max
+#  define max(x,y)  ((x)<(y)?(y):(x))
+#endif
+
+#endif /* _OS_H */

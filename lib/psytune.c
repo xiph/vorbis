@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.6.2.2 2000/09/26 22:31:50 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.6.2.3 2000/09/27 06:20:59 jack Exp $
 
  ********************************************************************/
 
@@ -150,8 +150,7 @@ typedef struct {
   lpc_lookup lpclook;
 } vorbis_look_floor0;
 
-
-long frameno=0;
+long granulepos=0;
 
 /* hacked from floor0.c */
 static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
@@ -279,7 +278,7 @@ int main(int argc,char *argv[]){
       for(i=0;i<2;i++){
 	float amp;
 
-	analysis("pre",frameno,pcm[i],framesize,0,0);
+	analysis("pre",granulepos,pcm[i],framesize,0,0);
 	
 	/* do the psychacoustics */
 	for(j=0;j<framesize;j++)
@@ -287,7 +286,7 @@ int main(int argc,char *argv[]){
 
 	mdct_forward(&m_look,pcm[i],pcm[i]);
 
-	analysis("mdct",frameno,pcm[i],framesize/2,1,1);
+	analysis("mdct",granulepos,pcm[i],framesize/2,1,1);
 
 	_vp_compute_mask(&p_look,pcm[i],floor,decay[i]);
 	
@@ -298,7 +297,7 @@ int main(int argc,char *argv[]){
 	/*r(j=0;j<framesize/2;j++)
 	  if(fabs(pcm[i][j])<1.)pcm[i][j]=0;*/
 
-	analysis("quant",frameno,pcm[i],framesize/2,1,1);
+	analysis("quant",granulepos,pcm[i],framesize/2,1,1);
 
 	/* re-add floor */
 	for(j=0;j<framesize/2;j++){
@@ -313,14 +312,14 @@ int main(int argc,char *argv[]){
 	  }
 	}
 	
-	analysis("final",frameno,pcm[i],framesize/2,1,1);
+	analysis("final",granulepos,pcm[i],framesize/2,1,1);
 
 	/* take it back to time */
 	mdct_backward(&m_look,pcm[i],pcm[i]);
 	for(j=0;j<framesize/2;j++)
 	  out[i][j]+=pcm[i][j]*window[j];
 
-	frameno++;
+	granulepos++;
       }
            
       /* write data.  Use the part of buffer we're about to shift out */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.13.2.2 2000/09/06 13:28:33 msmith Exp $
+ last mod: $Id: encoder_example.c,v 1.13.2.3 2000/09/27 06:20:54 jack Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "vorbis/mode_C.h"
+#include <vorbis/mode_C.h>
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 #include <io.h>

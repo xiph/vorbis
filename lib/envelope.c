@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.21.2.2 2000/08/31 09:00:00 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.21.2.3 2000/09/27 06:20:59 jack Exp $
 
  Preecho calculation.
 
@@ -22,12 +22,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
 
 #include "os.h"
 #include "scales.h"
 #include "envelope.h"
-#include "bitwise.h"
 #include "misc.h"
 
 /* We use a Chebyshev bandbass for the preecho trigger bandpass; it's
@@ -115,16 +115,16 @@ static float _ve_deltai(envelope_lookup *ve,IIR_state *iir,
   float *workB=alloca(sizeof(float)*n2),B=0.;
   long i;
 
-  /*_analysis_output("A",frameno,pre,n,0,0);
-    _analysis_output("B",frameno,post,n,0,0);*/
+  /*_analysis_output("A",granulepos,pre,n,0,0);
+    _analysis_output("B",granulepos,post,n,0,0);*/
 
   for(i=0;i<n;i++){
     workA[i]=pre[i]*ve->window[i];
     workB[i]=post[i]*ve->window[i];
   }
 
-  /*_analysis_output("Awin",frameno,workA,n,0,0);
-    _analysis_output("Bwin",frameno,workB,n,0,0);*/
+  /*_analysis_output("Awin",granulepos,workA,n,0,0);
+    _analysis_output("Bwin",granulepos,workB,n,0,0);*/
 
   drft_forward(&ve->drft,workA);
   drft_forward(&ve->drft,workB);
@@ -140,8 +140,8 @@ static float _ve_deltai(envelope_lookup *ve,IIR_state *iir,
     }
   }
 
-  /*_analysis_output("Afft",frameno,workA,n,0,0);
-    _analysis_output("Bfft",frameno,workB,n,0,0);*/
+  /*_analysis_output("Afft",granulepos,workA,n,0,0);
+    _analysis_output("Bfft",granulepos,workB,n,0,0);*/
 
   for(i=0;i<n;i++){
     A+=workA[i]*workA[i];
@@ -191,10 +191,10 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
       float m=_ve_deltai(ve,iir,filtered-ve->winlength,filtered);
       
       if(m>vi->preecho_thresh){
-	/*frameno++;*/
+	/*granulepos++;*/
 	return(0);
       }
-      /*frameno++;*/
+      /*granulepos++;*/
     }
     
     j+=vi->blocksizes[0]/2;
