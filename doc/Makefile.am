@@ -80,10 +80,10 @@ CLEANFILES = Vorbis_I_spec.fo spec.aux spec.log spec.out
 
 # explicit rules for generating docs
 Vorbis_I_spec.html:
-	xsltproc --xinclude --output $@ xml/spec-html.xsl xml/Vorbis_I_spec.xml
+	xsltproc --xinclude --output $@ $(srcdir)/xml/spec-html.xsl $(srcdir)/xml/Vorbis_I_spec.xml
 
 Vorbis_I_spec.fo:
-	xsltproc --xinclude --output $@ xml/spec-fo.xsl xml/Vorbis_I_spec.xml
+	xsltproc --xinclude --output $@ $(srcdir)/xml/spec-fo.xsl $(srcdir)/xml/Vorbis_I_spec.xml
 
 Vorbis_I_spec.pdf: Vorbis_I_spec.fo
 	cp $< spec.fo # work around a passivetex bug
