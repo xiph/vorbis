@@ -14,7 +14,7 @@
  function: PCM data vector blocking, windowing and dis/reassembly
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 28 1999
+ last modification date: Jul 29 1999
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes (512 and 2048
@@ -33,10 +33,9 @@
 #include "envelope.h"
 #include "mdct.h"
 
-/* pcm accumulator and multipliers 
-   examples (not exhaustive):
+/* pcm accumulator examples (not exhaustive):
 
- <-------------- lW----------------->
+ <-------------- lW ---------------->
                    <--------------- W ---------------->
 :            .....|.....       _______________         |
 :        .'''     |     '''_---      |       |\        |
@@ -45,7 +44,6 @@
                   |<------ Sl ------>|      > Sr <     |endW
                   |beginSl           |endSl  |  |endSr   
                   |beginW            |endlW  |beginSr
-                  mult[0]                              mult[n]
 
 
                       |< lW >|       
@@ -59,20 +57,18 @@
                   |beginW |  |endlW                     
                   mult[0] |beginSl                     mult[n]
 
- <-------------- lW----------------->
-                          |<-W-->|                               
-:            ..............  __  |   |                    
-:        .'''             |`/  \ |   |                       
-:.....'''                 |/`...\|...|                    
-:.........................|__||__|___|                  
-                          |Sl||Sr|endW    
-                          |  ||  |endSr
-                          |  ||beginSr
-                          |  |endSl
+ <-------------- lW ----------------->
+                          |<--W-->|                               
+:            ..............  ___  |   |                    
+:        .'''             |`/   \ |   |                       
+:.....'''                 |/`....\|...|                    
+:.........................|___|___|___|                  
+                          |Sl |Sr |endW    
+                          |   |   |endSr
+                          |   |beginSr
+                          |   |endSl
 			  |beginSl
 			  |beginW
-                          mult[0]
-                                 mult[n]
 */
 
 static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
