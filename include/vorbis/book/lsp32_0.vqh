@@ -3578,7 +3578,7 @@ static static_codebook _vq_book_lsp32_0 = {
 	_vq_lengthlist_lsp32_0,
 	2, 1603583344, 1584581135, 8, 1,
 	_vq_quantlist_lsp32_0,
-	&_vq_auxn_lsp32_0
+	&_vq_auxn_lsp32_0,
 	NULL,
 };
 

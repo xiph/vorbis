@@ -490,7 +490,7 @@ static static_codebook _vq_book_lsp20_0 = {
 	_vq_lengthlist_lsp20_0,
 	2, 1605468556, 1583283192, 8, 1,
 	_vq_quantlist_lsp20_0,
-	&_vq_auxn_lsp20_0
+	&_vq_auxn_lsp20_0,
 	NULL,
 };
 
