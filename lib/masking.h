@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: masking curve data for psychoacoustics
- last mod: $Id: masking.h,v 1.13 2001/02/26 03:50:42 xiphmont Exp $
+ last mod: $Id: masking.h,v 1.14 2001/05/27 06:44:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,7 @@
 float ATH_Bark_dB[]={  
    15,   15,   15,    15,    11,    10,     8,    7,    7,    7,
     6,    2,    0,     0,    -3,    -5,    -6,   -6, -4.5f, 2.5f,
-   10,   15,   15,    15,    15,    15,   15};
+   10,   15,   20,    30,    40,    50,   60};
 
 /* The below masking curves are straight from the R. Ehmer
    (J. Acoustical Society of America) papers ca 1958-59.  I modified

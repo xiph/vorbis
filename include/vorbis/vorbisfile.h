@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.13 2001/02/26 03:50:39 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.14 2001/05/27 06:43:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -43,27 +43,32 @@ typedef struct {
   long   (*tell_func)  (void *datasource);
 } ov_callbacks;
 
+#define  NOTOPEN   0
+#define  PARTOPEN  1
+#define  OPENED    2
+#define  STREAMSET 3
+#define  INITSET   4
 
 typedef struct OggVorbis_File {
-  void             *datasource; /* Pointer to a FILE *, etc. */
+  void            *datasource; /* Pointer to a FILE *, etc. */
   int              seekable;
-  ogg_int64_t          offset;
-  ogg_int64_t          end;
+  ogg_int64_t      offset;
+  ogg_int64_t      end;
   ogg_sync_state   oy; 
 
   /* If the FILE handle isn't seekable (eg, a pipe), only the current
      stream appears */
   int              links;
-  ogg_int64_t          *offsets;
-  ogg_int64_t          *dataoffsets;
-  long             *serialnos;
-  ogg_int64_t          *pcmlengths;
-  vorbis_info      *vi;
-  vorbis_comment   *vc;
+  ogg_int64_t     *offsets;
+  ogg_int64_t     *dataoffsets;
+  long            *serialnos;
+  ogg_int64_t     *pcmlengths;
+  vorbis_info     *vi;
+  vorbis_comment  *vc;
 
   /* Decoding working state local storage */
-  ogg_int64_t          pcm_offset;
-  int              decode_ready;
+  ogg_int64_t      pcm_offset;
+  int              ready_state;
   long             current_serialno;
   int              current_link;
 
@@ -83,6 +88,11 @@ extern int ov_clear(OggVorbis_File *vf);
 extern int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
 extern int ov_open_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
+
+extern int ov_test(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
+extern int ov_test_callbacks(void *datasource, OggVorbis_File *vf,
+		char *initial, long ibytes, ov_callbacks callbacks);
+extern int ov_test_open(OggVorbis_File *vf);
 
 extern long ov_bitrate(OggVorbis_File *vf,int i);
 extern long ov_bitrate_instant(OggVorbis_File *vf);

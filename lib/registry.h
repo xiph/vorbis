@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.h,v 1.5 2001/02/26 03:50:43 xiphmont Exp $
+ last mod: $Id: registry.h,v 1.6 2001/05/27 06:44:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,8 +23,8 @@
 #define VI_TRANSFORMB 1
 #define VI_WINDOWB 1
 #define VI_TIMEB 1
-#define VI_FLOORB 1
-#define VI_RESB 1
+#define VI_FLOORB 2
+#define VI_RESB 2
 #define VI_MAPB 1
 
 extern vorbis_func_time      *_time_P[];

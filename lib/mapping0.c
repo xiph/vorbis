@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.27 2001/02/26 13:31:31 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.28 2001/05/27 06:44:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -197,6 +197,7 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "envelope.h"
 #include "mdct.h"
 #include "psy.h"
+#define VORBIS_IEEE_FLOAT32
 #include "scales.h"
 
 /* no time mapping implementation for now */
@@ -217,77 +218,80 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   int    *nonzero=alloca(sizeof(int)*vi->channels);
 
-  float **floor=_vorbis_block_alloc(vb,vi->channels*sizeof(float *));
-  float *additional=_vorbis_block_alloc(vb,n*sizeof(float));
+  float *work=_vorbis_block_alloc(vb,n*sizeof(float));
   float newmax=vbi->ampmax;
 
   for(i=0;i<vi->channels;i++){
-    float *pcm=vb->pcm[i];
     float scale=4.f/n;
     int submap=info->chmuxlist[i];
     float ret;
 
-    _analysis_output("pcm",seq,pcm,n,0,0);
+    /* the following makes things clearer to *me* anyway */
+    float *pcm     =vb->pcm[i]; 
+    float *mdct    =pcm;
+    float *logmdct =pcm+n/2;
+    float *res     =pcm;
+    float *codedflr=pcm+n/2;
+    float *fft     =work;
+    float *logfft  =work;
+    float *logmax  =work;
+    float *logmask =work+n/2;
 
     /* window the PCM data */
     for(j=0;j<n;j++)
-      additional[j]=pcm[j]*=window[j];
-	    
-    _analysis_output("windowed",seq,pcm,n,0,0);
-
+      fft[j]=pcm[j]*=window[j];
+    
     /* transform the PCM data */
     /* only MDCT right now.... */
     mdct_forward(b->transform[vb->W][0],pcm,pcm);
+    for(j=0;j<n/2;j++)
+      logmdct[j]=todB(mdct+j);
     
     /* FFT yields more accurate tonal estimation (not phase sensitive) */
-    drft_forward(&look->fft_look,additional);
-    
-    additional[0]=fabs(additional[0]*scale);
-    for(j=1;j<n-1;j+=2)
-      additional[(j+1)>>1]=scale*FAST_HYPOT(additional[j],additional[j+1]);
+    drft_forward(&look->fft_look,fft);
+    fft[0]*=scale;
+    fft[0]=todB(fft);
+    for(j=1;j<n-1;j+=2){
+      float temp=scale*FAST_HYPOT(fft[j],fft[j+1]);
+      logfft[(j+1)>>1]=todB(&temp);
+    }
 
-    /* set up our masking data working vector, and stash unquantized
-       data for later */
-    /*memcpy(pcm+n/2,pcm,n*sizeof(float)/2);*/
-    memcpy(additional+n/2,pcm,n*sizeof(float)/2);
-
-    /* begin masking work */
-    floor[i]=_vorbis_block_alloc(vb,n*sizeof(float)/2);
-
-    _analysis_output("fft",seq,additional,n/2,0,1);
-    _analysis_output("mdct",seq,additional+n/2,n/2,0,1);
-    _analysis_output("lfft",seq,additional,n/2,0,0);
-    _analysis_output("lmdct",seq,additional+n/2,n/2,0,0);
+    _analysis_output("fft",seq,logfft,n/2,0,0);
+    _analysis_output("mdct",seq,logmdct,n/2,0,0);
 
     /* perform psychoacoustics; do masking */
-    ret=_vp_compute_mask(look->psy_look+submap,additional,additional+n/2,
-			 floor[i],NULL,vbi->ampmax);
+    ret=_vp_compute_mask(look->psy_look+submap,
+			 logfft, /* -> logmax */
+			 logmdct,
+			 logmask,
+			 vbi->ampmax);
     if(ret>newmax)newmax=ret;
 
-    _analysis_output("prefloor",seq,floor[i],n/2,0,0);
+    _analysis_output("mask",seq,logmask,n/2,0,0);
     
     /* perform floor encoding */
     nonzero[i]=look->floor_func[submap]->
-      forward(vb,look->floor_look[submap],floor[i]);
+      forward(vb,look->floor_look[submap],
+	      mdct,
+	      logmdct,
+	      logmask,
+	      logmax,
+	      res,
+	      codedflr);
 
-    _analysis_output("floor",seq,floor[i],n/2,0,1);
-
-    /* apply the floor, do optional noise levelling */
-    _vp_apply_floor(look->psy_look+submap,pcm,floor[i]);
-
-    _analysis_output("res",seq++,pcm,n/2,0,0);
+    _analysis_output("codedflr",seq,codedflr,n/2,0,1);
+    _analysis_output("res",seq++,res,n/2,0,0);
       
 #ifdef TRAIN_RES
     if(nonzero[i]){
       FILE *of;
       char buffer[80];
-      int i;
       
       sprintf(buffer,"residue_%d.vqd",vb->mode);
       of=fopen(buffer,"a");
-      for(i=0;i<n/2;i++){
-	fprintf(of,"%.2f, ",pcm[i]);
-	if(fabs(pcm[i])>1000){
+      for(j=0;j<n/2;j++){
+	fprintf(of,"%.2f, ",res[j]);
+	if(fabs(res[j])>1000){
 	  fprintf(stderr," %d ",seq-1);
 	}
       }
@@ -297,7 +301,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 #endif      
   }
 
-  seq++;
   vbi->ampmax=newmax;
 
   /* perform residue encoding with residue mapping; this is

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.4 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: distribution.c,v 1.5 2001/05/27 06:44:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -155,7 +155,7 @@ int main(int argc,char *argv[]){
 	flag=1;
       }
       
-      while(sscanf(line,"%f",&code)==1){
+      while(line && sscanf(line,"%f",&code)==1){
 	line=strchr(line,',');
 	if(line)line++;
 	if(code<min)min=code;
@@ -187,7 +187,7 @@ int main(int argc,char *argv[]){
       lines--;
       if(!(lines&0xff))spinnit("counting distribution. lines so far...",lines);
       
-      while(sscanf(line,"%f",&code)==1){
+      while(line && sscanf(line,"%f",&code)==1){
 	line=strchr(line,',');
 	if(line)line++;
 	

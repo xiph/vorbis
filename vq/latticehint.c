@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.8 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.9 2001/05/27 06:44:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -186,7 +186,7 @@ int main(int argc,char *argv[]){
       if(dB){
 	if(fabs(v1)<.01)v1=(v1+v2)*.5;
 	if(fabs(v2)<.01)v2=(v1+v2)*.5;
-	t->quantthresh[i]=fromdB((todB(v1)+todB(v2))*.5);
+	t->quantthresh[i]=fromdB((todB(&v1)+todB(&v2))*.5);
 	if(v1<0 || v2<0)t->quantthresh[i]*=-1;
 
       }else{

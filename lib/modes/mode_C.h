@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_C.h,v 1.12 2001/02/26 03:51:10 xiphmont Exp $
+ last mod: $Id: mode_C.h,v 1.13 2001/05/27 06:44:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -109,6 +109,7 @@ static vorbis_info_psy _psy_set_C0={
   .5f,   /* high window */
   5,
   5,
+  10,
   {.000f, 0.f,/*63*/
    .000f, 0.f,/*88*/
    .000f, 0.f,/*125*/
@@ -131,8 +132,6 @@ static vorbis_info_psy _psy_set_C0={
   105.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
   -26.,
-
-  -0., -.004   /* attack/decay control */
 };
 
 static vorbis_info_psy _psy_set_C={
@@ -199,6 +198,7 @@ static vorbis_info_psy _psy_set_C={
   .5f,   /* high window */
   25,
   25,
+  40,
   {.000f, 0.f, /*63*/
    .000f, 0.f, /*88*/
    .000f, 0.f, /*125*/
@@ -221,8 +221,6 @@ static vorbis_info_psy _psy_set_C={
   105.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
   -32.,
-
-  -0.f, -.004f,   /* attack/decay control */
 
 };
 

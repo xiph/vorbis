@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.21 2001/02/26 03:50:43 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.22 2001/05/27 06:44:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -70,6 +70,34 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   type=ci->map_type[ci->mode_param[mode]->mapping];
 
   return(_mapping_P[type]->inverse(vb,b->mode[mode]));
+}
+
+long vorbis_packet_blocksize(vorbis_info *vi,ogg_packet *op){
+  codec_setup_info     *ci=vi->codec_setup;
+  oggpack_buffer       opb;
+  int                  type,mode,i;
+ 
+  oggpack_readinit(&opb,op->packet,op->bytes);
+
+  /* Check the packet type */
+  if(oggpack_read(&opb,1)!=0){
+    /* Oops.  This is not an audio data packet */
+    return(OV_ENOTAUDIO);
+  }
+
+  {
+    int modebits=0;
+    int v=ci->modes;
+    while(v>1){
+      modebits++;
+      v>>=1;
+    }
+
+    /* read our mode and pre/post windowsize */
+    mode=oggpack_read(&opb,modebits);
+  }
+  if(mode==-1)return(OV_EBADPACKET);
+  return(ci->blocksizes[ci->mode_param[mode]->blockflag]);
 }
 
 

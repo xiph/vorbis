@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.8 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.9 2001/05/27 06:44:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -50,7 +50,7 @@ static int getval(FILE *in,int begin,int n,int group,int max){
 static void usage(){
   fprintf(stderr,
 	  "usage:\n" 
-	  "huffbuild <input>.vqd <begin,n,group> [noguard]\n"
+	  "huffbuild <input>.vqd <begin,n,group>|<lorange-hirange> [noguard]\n"
 	  "   where begin,n,group is first scalar, \n"
 	  "                          number of scalars of each in line,\n"
 	  "                          number of scalars in a group\n"
@@ -65,6 +65,7 @@ int main(int argc, char *argv[]){
   int i,j,k,begin,n,subn,guard=1;
   FILE *file;
   int maxval=0;
+  int loval=0;
 
   if(argc<3)usage();
   if(argc==4)guard=0;
@@ -76,19 +77,28 @@ int main(int argc, char *argv[]){
 
   {
     char *pos=strchr(argv[2],',');
-    begin=atoi(argv[2]);
-    if(!pos)
-      usage();
-    else
-      n=atoi(pos+1);
-    pos=strchr(pos+1,',');
-    if(!pos)
-      usage();
-    else
-      subn=atoi(pos+1);
-    if(n/subn*subn != n){
-      fprintf(stderr,"n must be divisible by group\n");
-      exit(1);
+    char *dpos=strchr(argv[2],'-');
+    if(dpos){
+      loval=atoi(argv[2]);
+      maxval=atoi(dpos+1);
+      subn=1;
+      subn=1;
+      begin=0;
+    }else{
+      begin=atoi(argv[2]);
+      if(!pos)
+	usage();
+      else
+	n=atoi(pos+1);
+      pos=strchr(pos+1,',');
+      if(!pos)
+	usage();
+      else
+	subn=atoi(pos+1);
+      if(n/subn*subn != n){
+	fprintf(stderr,"n must be divisible by group\n");
+	exit(1);
+      }
     }
   }
 
@@ -96,35 +106,44 @@ int main(int argc, char *argv[]){
   file=fopen(infile,"r");
   if(!file){
     fprintf(stderr,"Could not open file %s\n",infile);
-    exit(1);
-  }
-  i=0;
-  while(1){
-    long v;
-    if(get_next_ivalue(file,&v))break;
-    if(v>maxval)maxval=v;
+    if(!maxval)
+      exit(1);
+    else
+      fprintf(stderr,"  making untrained books.\n");
 
-    if(!(i++&0xff))spinnit("loading... ",i);
   }
-  rewind(file);
-  maxval++;
+
+  if(!maxval){
+    i=0;
+    while(1){
+      long v;
+      if(get_next_ivalue(file,&v))break;
+      if(v>maxval)maxval=v;
+      
+      if(!(i++&0xff))spinnit("loading... ",i);
+    }
+    rewind(file);
+    maxval++;
+  }
 
   {
     long vals=pow(maxval,subn);
     long *hist=_ogg_malloc(vals*sizeof(long));
     long *lengths=_ogg_malloc(vals*sizeof(long));
     
-    for(j=0;j<vals;j++)hist[j]=guard;
+    for(j=loval;j<vals;j++)hist[j]=guard;
     
-    reset_next_value();
-    i/=subn;
-    while(!feof(file)){
-      long val=getval(file,begin,n,subn,maxval);
-      if(val==-1)break;
-      hist[val]++;
-      if(!(i--&0xff))spinnit("loading... ",i*subn);
+    if(file){
+      reset_next_value();
+      i/=subn;
+      while(!feof(file)){
+	long val=getval(file,begin,n,subn,maxval);
+	if(val==-1 || val>=maxval)break;
+	hist[val]++;
+	if(!(i--&0xff))spinnit("loading... ",i*subn);
+      }
+      fclose(file);
     }
-    fclose(file);
  
     /* we have the probabilities, build the tree */
     fprintf(stderr,"Building tree for %ld entries\n",vals);

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.39 2001/02/26 03:50:41 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.40 2001/05/27 06:43:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -197,6 +197,7 @@ float _curve_to_lpc(float *curve,float *lpc,
   float *work=alloca(sizeof(float)*mapped);
   int i,j,last=0;
   int bark=0;
+  static int seq=0;
 
   memset(work,0,sizeof(float)*mapped);
   
@@ -232,17 +233,30 @@ float _curve_to_lpc(float *curve,float *lpc,
   /* If we're over-ranged to avoid edge effects, fill in the end of spectrum gap */
   for(i=bark+1;i<mapped;i++)
     work[i]=work[i-1];
+
+
+  /**********************/
+
+  for(i=0;i<l->n;i++)
+    curve[i]-=150;
+
+  _analysis_output("barkfloor",seq,work,bark,0,0);
+  _analysis_output("barkcurve",seq++,curve,l->n,1,0);
+
+  for(i=0;i<l->n;i++)
+    curve[i]+=150;
+
+  /**********************/
   
   return vorbis_lpc_from_curve(work,lpc,&(l->lpclook));
 }
 
-/* generate the whole freq response curve of an LSP IIR filter */
-/* didn't need in->out seperation, modifies the flr[] vector; takes in
-   a dB scale floor, puts out linear */
-static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
-		    float *flr){
+static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
+			  const float *mdct, const float *logmdct,   /* in */
+			  const float *logmask, const float *logmax, /* in */
+			  float *residue, float *codedflr){          /* out */
   long j;
-  vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
+  vorbis_look_floor0 *look=(vorbis_look_floor0 *)in;
   vorbis_info_floor0 *info=look->vi;
   float amp;
   long bits=0;
@@ -267,11 +281,11 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
      positive, so we offset it. */
 
   for(j=0;j<look->n;j++)
-    flr[j]+=info->ampdB;
+    codedflr[j]=logmask[j]+info->ampdB;
 
   /* use 'out' as temp storage */
   /* Convert our floor to a set of lpc coefficients */ 
-  amp=sqrt(_curve_to_lpc(flr,flr,look));
+  amp=sqrt(_curve_to_lpc(codedflr,codedflr,look));
 
   /* amp is in the range (0. to ampdB].  Encode that range using
      ampbits bits */
@@ -292,8 +306,8 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 
   if(val){
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
-    _analysis_output("lpc",seq-1,flr,look->m,0,0);
-    if(vorbis_lpc_to_lsp(flr,flr,look->m))
+    _analysis_output("lpc",seq-1,codedflr,look->m,0,0);
+    if(vorbis_lpc_to_lsp(codedflr,codedflr,look->m))
       val=0;
 
   }
@@ -309,15 +323,15 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     codebook *b;
     int booknum;
 
-    _analysis_output("lsp",seq-1,flr,look->m,0,0);
+    _analysis_output("lsp",seq-1,codedflr,look->m,0,0);
 
     /* which codebook to use? We do it only by range right now. */
     if(info->numbooks>1){
       float last=0.;
       for(j=0;j<look->m;j++){
-	float val=flr[j]-last;
+	float val=codedflr[j]-last;
 	if(val<info->lessthan || val>info->greaterthan)break;
-	last=flr[j];
+	last=codedflr[j];
       }
       if(j<look->m)
 	booknum=0;
@@ -334,8 +348,8 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     {
       float last=0.f;
       for(j=0;j<look->m;j++){
-	fprintf(of,"%.12g, ",flr[j]-last);
-	last=flr[j];
+	fprintf(of,"%.12g, ",codedflr[j]-last);
+	last=codedflr[j];
       }
     }
     fprintf(of,"\n");
@@ -351,7 +365,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
        nailed to the last quantized value of the previous block. */
 
     for(j=0;j<look->m;j+=b->dim){
-      int entry=_f0_fit(b,flr,lspwork,j);
+      int entry=_f0_fit(b,codedflr,lspwork,j);
       bits+=vorbis_book_encode(b,entry,&vb->opb);
 
 #ifdef TRAIN_LSP
@@ -367,9 +381,16 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     _analysis_output("lsp2",seq-1,lspwork,look->m,0,0);
 
     /* take the coefficients back to a spectral envelope curve */
-    vorbis_lsp_to_curve(flr,look->linearmap,look->n,look->ln,
+    vorbis_lsp_to_curve(codedflr,look->linearmap,look->n,look->ln,
 			lspwork,look->m,amp,info->ampdB);
-    _analysis_output("lsp3",seq-1,flr,look->n,0,1);
+
+    _analysis_output("barklsp",seq-1,codedflr,look->n,1,1);
+    _analysis_output("lsp3",seq-1,codedflr,look->n,0,1);
+
+    /* generate residue output */
+    for(j=0;j<look->n;j++)
+      residue[j]=mdct[j]/codedflr[j];
+    
     return(val);
   }
 
@@ -377,7 +398,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     fclose(of);
 #endif
 
-  memset(flr,0,sizeof(float)*look->n);
+  memset(codedflr,0,sizeof(float)*look->n);
   return(val);
 }
 

@@ -8,8 +8,9 @@ INCLUDES = -I$(top_srcdir)/include @OGG_CFLAGS@
 
 lib_LTLIBRARIES = libvorbis.la libvorbisfile.la libvorbisenc.la
 
-libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c lpc.c\
-			analysis.c synthesis.c psy.c info.c time0.c floor0.c\
+libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c \
+			lpc.c analysis.c synthesis.c psy.c info.c time0.c \
+			floor1.c floor0.c\
 			res0.c mapping0.c registry.c codebook.c sharedbook.c\
 			lookup.c bitbuffer.c\
 			envelope.h lpc.h lsp.h codebook.h misc.h psy.h\

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.43 2001/02/26 03:50:41 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.44 2001/05/27 06:43:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -75,32 +75,40 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 }
 
 /* there was no great place to put this.... */
-void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
-#ifdef ANALYSIS
+void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB){
   int j;
   FILE *of;
   char buffer[80];
-  sprintf(buffer,"%s_%d.m",base,i);
-  of=fopen(buffer,"w");
 
-  if(!of)perror("failed to open data dump file");
-
-  for(j=0;j<n;j++){
-    if(dB && v[j]==0)
-          fprintf(of,"\n\n");
-    else{
-      if(bark)
-	fprintf(of,"%g ",toBARK(22050.f*j/n));
-      else
-	fprintf(of,"%g ",(double)j);
-      
-      if(dB){
-	fprintf(of,"%g\n",todB(fabs(v[j])));
-      }else{
-	fprintf(of,"%g\n",v[j]);
+  //  if(i==5870){
+    sprintf(buffer,"%s_%d.m",base,i);
+    of=fopen(buffer,"w");
+    
+    if(!of)perror("failed to open data dump file");
+    
+    for(j=0;j<n;j++){
+      if(dB && v[j]==0)
+	fprintf(of,"\n\n");
+      else{
+	if(bark)
+	  fprintf(of,"%g ",toBARK(22050.f*j/n));
+	else
+	  fprintf(of,"%g ",(double)j);
+	
+	if(dB){
+	  fprintf(of,"%g\n",todB(v+j));
+	}else{
+	  fprintf(of,"%g\n",v[j]);
+	}
       }
     }
-  }
-  fclose(of);
+    fclose(of);
+    //  }
+}
+
+void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
+#ifdef ANALYSIS
+  _analysis_output_always(base,i,v,n,bark,dB);
 #endif
 }
+

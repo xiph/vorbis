@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.23 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.24 2001/05/27 06:44:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -191,7 +191,7 @@ codebook *codebook_load(char *filename){
   }
 
   /* find the codebook struct */
-  find_seek_to(in,"static static_codebook _vq_book_");
+  find_seek_to(in,"static static_codebook _");
 
   /* get the major important values */
   line=get_line(in);
@@ -379,7 +379,7 @@ codebook *codebook_load(char *filename){
     }
   
   /* load the lengthlist */
-  find_seek_to(in,"static long _vq_lengthlist");
+  find_seek_to(in,"_lengthlist");
   reset_next_value();
   c->lengthlist=_ogg_malloc(sizeof(long)*c->entries);
   for(i=0;i<c->entries;i++)

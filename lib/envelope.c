@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.35 2001/02/26 03:50:41 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.36 2001/05/27 06:43:59 xiphmont Exp $
 
  Preecho calculation.
 
@@ -141,8 +141,8 @@ static float _ve_deltai(envelope_lookup *ve,float *pre,float *post){
     B+=post[i]*post[i];
   }
 
-  A=todB(A);
-  B=todB(B);
+  A=todB(&A);
+  B=todB(&B);
 
   return(B-A);
 }

@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.6 2001/02/26 03:50:41 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.7 2001/05/27 06:43:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,7 +61,9 @@ typedef struct{
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
-		     float *);
+		     const float *, const float *, /* in */
+		     const float *, const float *, /* in */
+		     float *, float *);            /* out */
   int  (*inverse)   (struct vorbis_block *,vorbis_look_floor *,
 		     float *);
 } vorbis_func_floor;
@@ -81,6 +83,37 @@ typedef struct{
   float greaterthan;  /* encode-only config setting hacks for libvorbis */
 
 } vorbis_info_floor0;
+
+#define VIF_POSIT 63
+#define VIF_CLASS 16
+#define VIF_PARTS 31
+typedef struct{
+  int   partitions;                /* 0 to 31 */
+  int   partitionclass[VIF_PARTS]; /* 0 to 15 */
+
+  int   class_dim[VIF_CLASS];        /* 1 to 8 */
+  int   class_subs[VIF_CLASS];       /* 0,1,2,3 (bits: 1<<n poss) */
+  int   class_book[VIF_CLASS];       /* subs ^ dim entries */
+  int   class_subbook[VIF_CLASS][8]; /* [VIF_CLASS][subs] */
+
+
+  int   mult;                      /* 1 2 3 or 4 */ 
+  int   postlist[VIF_POSIT+2];    /* first two implicit */ 
+
+
+  /* encode side analysis parameters */
+  float maxover;     
+  float maxunder;  
+  float maxerr;    
+
+  int   twofitminsize;
+  int   twofitminused;
+  int   twofitweight;  
+  float twofitatten;
+  int   unusedminsize;
+  int   unusedmin_n;
+
+} vorbis_info_floor1;
 
 /* Residue backend generic *****************************************/
 typedef struct{

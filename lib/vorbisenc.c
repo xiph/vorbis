@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.6 2001/02/26 03:50:43 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.7 2001/05/27 06:44:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -139,7 +139,8 @@ int vorbis_encode_init(vorbis_info *vi,
 
   /* adjust for sample rate */
   for(i=0;i<ci->floors;i++)
-    ((vorbis_info_floor0 *)(ci->floor_param[i]))->rate=rate;
+    if(ci->floor_type[i]==0)
+      ((vorbis_info_floor0 *)(ci->floor_param[i]))->rate=rate;
 
   /* adjust for channels; all our mappings use submap zero now */
   /* yeah, OK, _ogg_calloc did this for us.  But it's a reminder/placeholder */
