@@ -24,8 +24,64 @@ as well as a working example of using libvorbis in production code.
 
 <h2>Encoding Overview</h2>
 
+
+
 <h2>Decoding Overview</h2>
 
+Decoding a bitstream with libvorbis follows roughly the following
+steps:
+
+<ol>
+<li>Frame the incoming bitstream into pages
+<li>Sort the pages by logical bitstream and buffer then into logical streams
+<li>Decompose the logical streams into raw packets
+<li>Reconstruct segments of the original data from each packet
+<li>Glue the reconstructed segments back into a decoded stream
+</ol>
+
+<h3>Framing</h3>
+
+An OggSquish bitstream is logically arranged into pages, but to decode
+the pages, we have to find them first.  The raw bitstream is first fed
+into an <tt>ogg_sync_state</tt> buffer using <tt>ogg_sync_buffer()</tt>
+and <tt>ogg_sync_wrote()</tt>.  After each block we submit to the sync
+buffer, we should check to see if we can frame and extract a complete
+page or pages using <tt>ogg_sync_pageout()</tt>.  Extra pages are
+buffered; allowing them to build up in the <tt>ogg_sync_state</tt>
+buffer will eventually exhaust memory.<p>
+
+The Ogg pages returned from <tt>ogg_sync_pageout</tt> need not be
+decoded further to be used as landmarks in seeking; seeking can be
+either a rough process of simply jumping to approximately intuited
+portions of the bitstream, or it can be a precise bisection process
+that captures pages and inspects data position.  When seeking,
+however, sequential multiplexing (chaining) must be accounted for;
+beginning play in a new logical bitstream requires initializing a
+synthesis engine with the headers from that bitstream.  Vorbis
+bitstreams do not make use of concurent multiplexing (grouping).<p>
+
+<h3>Sorting</h3>
+
+The pages produced by <tt>ogg_sync_pageout</tt> are then sorted by
+serial number to seperate logical bitstreams.  Initialize logical
+bitstream buffers (<tt>og_stream_state</tt>) using
+<tt>ogg_stream_init()</tt>. Pages are submitted to the matching
+logical bitstream buffer using <tt>ogg_stream_pagein</tt>; the serial
+number of the page and the stream buffer must match, or the page will
+be rejected.  A page submitted out of sequence will simply be noted,
+and in the course of outputting packets, the hole will be flagged
+(<tt>ogg_sync_pageout</tt> and <tt>ogg_stream_packetout</tt> will
+return a negative value at positions where they had to recapture the
+stream).
+
+<h3>Extracting packets</h3>
+
+After submitting page[s] to a logical stream, read available packets
+using <tt>ogg_stream_packetout</tt>.
+
+<h3>Decoding packets</h3>
+
+<h3>Reassembling data segments</h3>
 
 
 <h2>OggSquish Bitstream Manipulation Structures</h3>
@@ -383,12 +439,14 @@ int    ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og);
 Reads complete, framed, verified Ogg pages from the sync buffer,
 placing the page data in <tt>og</tt>.<p>
 
-Returns zero when there's no complete pages buffered for retrieval.
-Returns positive when a page is returned in <tt>og</tt>. Note that the
-data in <tt>og</tt> points into the sync buffer storage; the pointers
-are valid until the next call to <tt>ogg_sync_buffer</tt>,
-<tt>ogg_sync_clear</tt>, <tt>ogg_sync_destroy</tt> or
-<tt>ogg_sync_reset</tt>.
+Returns zero when there's no complete pages buffered for
+retrieval. Returns negative when a loss of sync or recapture occurred
+(this is not necessarily an error; recapture would be required after
+seeking, for example).  Returns positive when a page is returned in
+<tt>og</tt>. Note that the data in <tt>og</tt> points into the sync
+buffer storage; the pointers are valid until the next call to
+<tt>ogg_sync_buffer</tt>, <tt>ogg_sync_clear</tt>,
+<tt>ogg_sync_destroy</tt> or <tt>ogg_sync_reset</tt>.
 
 
 <h3>
