@@ -1,3 +1,12 @@
+libvorbis (1.0rc1-1) unstable; urgency=low
+
+  * New upstream. (Closes: #84977, #95330)
+  * Upstream says lame at fault. See bug details. (Closes: #98010)
+  * Fixed versioned depends.
+  * Changed clean method to distclean.
+
+ -- Christopher L Cheney <ccheney@debian.org>  Sun, 17 Jun 2001 20:00:00 -0500
+
 libvorbis (1.0beta4-1) unstable; urgency=low
 
   * New upstream.
