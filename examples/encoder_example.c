@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.13.2.1 2000/08/31 08:59:58 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.13.2.2 2000/09/06 13:28:33 msmith Exp $
 
  ********************************************************************/
 
@@ -113,7 +113,17 @@ int main(){
     ogg_stream_packetin(&os,&header_comm);
     ogg_stream_packetin(&os,&header_code);
 
-    /* no need to write out here.  We'll get to that in the main loop */
+	/* We don't have to write out here, but doing so makes streaming 
+	 * much easier, so we do, flushing ALL pages. This ensures the actual
+	 * audio data will start on a new page
+	 */
+	while(!eos){
+		int result=ogg_stream_flush(&os,&og);
+		if(result==0)break;
+		fwrite(og.header,1,og.header_len,stdout);
+		fwrite(og.body,1,og.body_len,stdout);
+	}
+
   }
   
   while(!eos){
