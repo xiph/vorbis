@@ -33,6 +33,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#ifdef __WINS__
+
 /* Disable some warnings */
 
 #pragma warning(disable: 4100) /* unreferenced formal parameter */
@@ -46,5 +48,7 @@
 #pragma warning(disable: 4701) /* local variable may be be used without having been initialized */
 #pragma warning(disable: 4706) /* assignment within conditional expression */
 #pragma warning(disable: 4761) /* integral size mismatch in argument: conversion supplied */
+
+#endif
 
 #endif /* ! CONFIG_H */
