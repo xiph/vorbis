@@ -7,11 +7,11 @@
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.6 2002/10/27 14:55:31 giles Exp $
+ $Id: 04-codec.xml,v 1.7 2002/10/27 16:20:47 giles Exp $
  <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
-<title>codec setup and packet decode</title>
+<title>Codec Setup and Packet Decode</title>
 
 <section>
 <title>Overview</title>
@@ -20,7 +20,7 @@
 This document serves as the top-level reference document for the
 bit-by-bit decode specification of Vorbis I.  This document assumes a
 high-level understanding of the Vorbis decode process, which is
-provided in the section <xref linkend="vorbis-spec-intro"/>.  <xref
+provided in <xref linkend="vorbis-spec-intro"/>.  <xref
 linkend="vorbis-spec-bitpacking"/> covers reading and writing bit fields from
 and to bitstream packets.</para>
 
@@ -57,7 +57,7 @@ identification, comment, setup.</para>
 
 </section>
 
-<section><title>Identification Header</title>
+<section><title>Identification header</title>
 
 <para>
 The identification header is a short header of only a few fields used
@@ -100,13 +100,13 @@ fields are meaningful only when greater than zero.</para>
 
 </section>
 
-<section><title>Comment Header</title>
+<section><title>Comment header</title>
 <para>
 Comment header decode and data specification is covered in
 <xref linkend="vorbis-spec-comment"/>.</para>
 </section>
 
-<section><title>Setup Header</title>
+<section><title>Setup header</title>
 
 <para>
 Vorbis codec setup is configurable to an extreme degree:
@@ -130,7 +130,7 @@ configurations, channel mapping configurations and mode
 configurations. It finishes with a framing bit of '1'.  Header decode
 proceeds in the following order:</para>
 
-<section><title>codebooks</title>
+<section><title>Codebooks</title>
 
 <orderedlist>
 <listitem><simpara><varname>[vorbis_codebook_count]</varname> = read eight bits as unsigned integer and add one</simpara></listitem>
@@ -142,7 +142,7 @@ codebook configurations <varname>[vorbis_codebook_configurations]</varname>.</si
 
 </section>
 
-<section><title>time domain transforms</title>
+<section><title>Time domain transforms</title>
 
 <para>
 These hooks are placeholders in Vorbis I.  Nevertheless, the
@@ -156,7 +156,7 @@ sync.</para>
 
 </section>
 
-<section><title>floors</title>
+<section><title>Floors</title>
 
 <para>
 Vorbis uses two floor types; header decode is handed to the decode
@@ -182,7 +182,7 @@ linkend="vorbis-spec-floor1"/>; save this configuration in slot <varname>[i]</va
 
 </section>
 
-<section><title>residues</title>
+<section><title>Residues</title>
 
 <para>
 Vorbis uses three residue types; header decode of each type is identical.
@@ -204,7 +204,7 @@ linkend="vorbis-spec-residue"/>; save this configuration in slot <varname>[i]</v
 
 </section>
 
-<section><title>mappings</title>
+<section><title>Mappings</title>
 
 <para>
 Mappings are used to set up specific pipelines for encoding
@@ -271,7 +271,7 @@ uses a single mapping type (0), with implicit PCM channel mappings.</para>
 
 </section>
 
-<section><title>modes</title>
+<section><title>Modes</title>
 
 <orderedlist>
  <listitem><simpara><varname>[vorbis_mode_count]</varname> = read 6 bits as unsigned integer and add one</simpara></listitem>

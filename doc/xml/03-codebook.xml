@@ -7,11 +7,11 @@
 <section id="vorbis-spec-codebook">
 <sectioninfo>
 <releaseinfo>
- $Id: 03-codebook.xml,v 1.4 2002/10/27 14:55:31 giles Exp $
+ $Id: 03-codebook.xml,v 1.5 2002/10/27 16:20:47 giles Exp $
  <emphasis>Last update to this document: August 8, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
-<title>probability model and codebooks</title>
+<title>Probability Model and Codebooks</title>
 
 <section>
 <title>Overview</title>
@@ -27,7 +27,7 @@ well as an optional lookup table of output vector values to which a
 decoded Huffman value is applied as an offset, generating the final
 decoded output corresponding to a given compressed codeword.</para>
 
-<section><title>bitwise operation</title>
+<section><title>Bitwise operation</title>
 <para>
 The codebook mechanism is built on top of the vorbis bitpacker. Both
 the codebooks themselves and the codewords they decode are unrolled 
@@ -38,7 +38,7 @@ stream according to <xref linkend="vorbis-spec-bitpacking"/>.</para>
 </section>
 
 <section>
-<title>Packed Codebook Format</title>
+<title>Packed codebook format</title>
 
 <para>
 For purposes of the examples below, we assume that the storage

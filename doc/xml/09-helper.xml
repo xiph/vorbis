@@ -7,11 +7,11 @@
 <section id="vorbis-spec-helper">
 <sectioninfo>
 <releaseinfo>
- $Id: 09-helper.xml,v 1.4 2002/10/27 14:55:31 giles Exp $
+ $Id: 09-helper.xml,v 1.5 2002/10/27 16:20:47 giles Exp $
  <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
-<title>helper equations</title>
+<title>Helper equations</title>
 
 <section>
 <title>Overview</title>

@@ -7,11 +7,11 @@
 <section id="vorbis-spec-bitpacking">
 <sectioninfo>
 <releaseinfo>
- $Id: 02-bitpacking.xml,v 1.5 2002/10/27 14:55:31 giles Exp $
+ $Id: 02-bitpacking.xml,v 1.6 2002/10/27 16:20:47 giles Exp $
  <emphasis>Last update to this document: July 14, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
-<title>bitpacking convention</title>
+<title>Bitpacking Convention</title>
 
 
 <section>

@@ -7,18 +7,19 @@
 <section id="vorbis-spec-intro">
 <sectioninfo>
 <releaseinfo>
- $Id: 01-introduction.xml,v 1.6 2002/10/27 15:05:51 giles Exp $
+ $Id: 01-introduction.xml,v 1.7 2002/10/27 16:20:47 giles Exp $
 <emphasis>Last update to this document: July 18, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
-<title>introduction and description</title>
+<title>Introduction and Description</title>
 
 <section>
 <title>Overview</title>
 
 <para>
 This document provides a high level description of the Vorbis codec's
-construction.  A bit-by-bit specification appears beginning in <xref linkend="vorbis-spec-codec"/>.
+construction.  A bit-by-bit specification appears beginning in 
+<xref linkend="vorbis-spec-codec"/>.
 The later sections assume a high-level
 understanding of the Vorbis decode process, which is 
 provided here.</para>
@@ -324,7 +325,7 @@ a list of n-dimensional rows (lattice VQ).</para>
 <title>High-level Decode Process</title>
 
 <section>
-<title>Decode setup</title> 
+<title>Decode Setup</title> 
 
 <para>
 Before decoding can begin, a decoder must initialize using the

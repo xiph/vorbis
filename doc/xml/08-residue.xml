@@ -7,11 +7,11 @@
 <section id="vorbis-spec-residue">
 <sectioninfo>
  <releaseinfo>
-  $Id: 08-residue.xml,v 1.3 2002/10/27 14:55:31 giles Exp $
+  $Id: 08-residue.xml,v 1.4 2002/10/27 16:20:47 giles Exp $
   <emphasis>Last update to this document: July 19, 2002</emphasis>
  </releaseinfo>
 </sectioninfo>
-<title>residue setup and decode</title>
+<title>Residue setup and decode</title>
 
 
 <section>
@@ -132,7 +132,7 @@ residue coding setup is restricted to a power of two.</para>
 
 </section>
 
-<section><title> residue 1 </title>
+<section><title>residue 1</title>
 
 <para>
 Residue 1 does not interleave VQ encoding.  It represents partition
@@ -160,7 +160,7 @@ codebook dimensions = 1  encoded as: [ 0 ], [ 1 ], [ 2 ], [ 3 ], [ 4 ], [ 5 ], [
 
 </section>
 
-<section><title> residue 2 </title>
+<section><title>residue 2</title>
 
 <para>
 Residue type two can be thought of as a variant of residue type 1.
