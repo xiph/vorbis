@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.27.2.2 2001/10/11 20:34:14 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.27.2.3 2001/11/22 06:19:52 xiphmont Exp $
 
  ********************************************************************/
 
@@ -176,24 +176,27 @@ int main(){
        block for encoding now */
     while(vorbis_analysis_blockout(&vd,&vb)==1){
 
-      /* analysis */
-      vorbis_analysis(&vb,&op);
-      
-      /* weld the packet into the bitstream */
-      ogg_stream_packetin(&os,&op);
+      /* analysis, assume we want to use bitrate management */
+      vorbis_analysis(&vb,NULL);
+      vorbis_bitrate_addblock(&vb);
 
-      /* write out pages (if any) */
-      while(!eos){
-	int result=ogg_stream_pageout(&os,&og);
-	if(result==0)break;
-	fwrite(og.header,1,og.header_len,stdout);
-	fwrite(og.body,1,og.body_len,stdout);
-
-	/* this could be set above, but for illustrative purposes, I do
-	   it here (to show that vorbis does know where the stream ends) */
+      while(vorbis_bitrate_flushpacket(&vd,&op)){
 	
-	if(ogg_page_eos(&og))eos=1;
-
+	/* weld the packet into the bitstream */
+	ogg_stream_packetin(&os,&op);
+	
+	/* write out pages (if any) */
+	while(!eos){
+	  int result=ogg_stream_pageout(&os,&og);
+	  if(result==0)break;
+	  fwrite(og.header,1,og.header_len,stdout);
+	  fwrite(og.body,1,og.body_len,stdout);
+	  
+	  /* this could be set above, but for illustrative purposes, I do
+	     it here (to show that vorbis does know where the stream ends) */
+	  
+	  if(ogg_page_eos(&og))eos=1;
+	}
       }
     }
   }
