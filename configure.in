@@ -156,10 +156,8 @@ dnl --------------------------------------------------
 dnl Do substitutions
 dnl --------------------------------------------------
 
-AC_SUBST(LIBS)
 AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
-AC_SUBST(CC)
 AC_SUBST(pthread_lib)
 
 AC_OUTPUT(Makefile lib/Makefile doc/Makefile doc/vorbisfile/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)
