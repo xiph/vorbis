@@ -1,0 +1,184 @@
+# $Id: configure.in,v 1.1 1999/07/13 06:50:34 mwhitson Exp $
+# $Date: 1999/07/13 06:50:34 $
+
+AC_INIT(mdct.c)
+#AC_CONFIG_HEADER(config.h)
+
+cp configure.guess config.guess
+cp configure.sub config.sub
+
+AC_CANONICAL_HOST
+
+dnl If we're on IRIX, we wanna use cc even if gcc is there (unless the user
+dnl has overriden us)...
+case $host 
+	in *-*-irix*)
+		if test -z "$CC"; then
+			CC=cc
+		fi
+		AC_CHECK_LIB(audio, ALwritesamps)
+	;;
+esac
+
+if test -z "$CC"; then
+	AC_PROG_CC	
+fi
+AC_PROG_RANLIB
+AC_CHECK_PROG(AR,ar,ar)
+
+dnl Set some target options
+if test -z "$GCC"; then
+	case $host in 
+	*-*-irix*)
+		DEBUG="-g" 
+		OPT="-O2 -w"
+		PROFILE="-p -g3 -O2" ;;
+	sparc-sun-solaris*)
+		DEBUG="-v -g"
+		OPT="-xO4 -fast -w -fsingle -fsimple -native -xcg92"
+		PROFILE="-v -xpg -g -xO4 -fast -fsingle -native -fsimple -xcg92 -Dsuncc" ;;
+	*)
+		DEBUG="-g"
+		OPT="-O"
+		PROFILE="-g -p" ;;
+        esac
+else
+	case $host in 
+	i?86-*-linux*)
+		DEBUG="-g -Wall -fsigned-char"
+		OPT="-O20 -ffast-math -fsigned-char"
+		PROFILE="-pg -g -O20 -fsigned-char";;
+	sparc-sun-*)
+		DEBUG="-g -Wall -fsigned-char -mv8"
+		OPT="-O20 -ffast-math -fsigned-char -mv8"
+		PROFILE="-pg -g -O20 -fsigned-char -mv8" ;;
+	*)
+		DEBUG="-g -Wall -fsigned-char"
+		OPT="-O20 -fsigned-char"
+		PROFILE="-O20 -g -pg -fsigned-char" ;;
+        esac
+fi
+
+AC_HEADER_STDC
+
+CFLAGS=""
+
+AC_PATH_X
+AC_PATH_XTRA
+
+AC_CHECK_LIB(pthread, pthread_create, 
+	pthread_lib="-lpthread"; AC_DEFINE(HAVE_LIBPTHREAD), :)
+
+dnl Linuxthreads require you to define _REENTRANT in all threaded
+dnl code.  Bogus, bogus...
+
+if test -n "$pthread_lib"; then
+	case $host in 
+	i?86-*-linux*)
+		AC_DEFINE(_REENTRANT)
+		;;
+	esac
+fi
+
+#if test -n "$x_libraries"; then
+#	XOGG="yes"
+#
+#	dnl If we find libgtk installed, great; otherwise assume we have
+#	dnl to build it ourselves.
+#
+#	AC_CHECK_LIB(gtk, gtk_main, :, LIBGTKDIR="libgtk", $X_LIBS -lglib -lgdk -lX11 -lXext -lm)
+#
+#	dnl libpthread is required for xogg.
+#
+#	if test -z "$pthread_lib"; then XOGG=""; fi
+#
+#	dnl If we don't have libgtk installed, and we don't have a libgtk 
+#	dnl  subdirectory to build the library ourself, we can't build xogg.
+#
+#	if test -n "$LIBGTKDIR" -a ! -d "$LIBGTKDIR"; then
+#		XOGG=""
+#		LIBGTKDIR=""
+#	fi
+#fi
+
+dnl This seems to be the only way to make autoconf only *sometimes* configure
+dnl a subdirectory with AC_CONFIG_SUBDIRS.  "__noconf" is assumed to not 
+dnl exist as a directory, so configure won't try to recursively enter it, unless
+dnl the shell variable $dummy is reset to an existing directory inside the
+dnl if clause.
+
+dummy="__noconf"
+
+#if test -d "$LIBGTKDIR"; then
+#	enable_shared="no"; export enable_shared
+#	dummy="libgtk"
+#	AC_CONFIG_SUBDIRS("$dummy")
+#	X_LIBS="-L${srcdir}/libgtk/gtk/.libs -L${srcdir}/libgtk/gdk/.libs -L${srcdir}/libgtk/glib/.libs $X_LIBS"
+#fi
+
+TYPESIZES="" 
+
+AC_CHECK_SIZEOF(short)
+AC_CHECK_SIZEOF(int)
+AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(long long)
+
+case 2 in
+	$ac_cv_sizeof_short) TYPESIZES="$TYPESIZES -Dsize16='short'"
+		SIZE16=TRUE;;
+	$ac_cv_sizeof_int) TYPESIZES="$TYPESIZES -Dsize16='int'"
+		SIZE16=TRUE;;
+esac
+
+case 4 in
+	$ac_cv_sizeof_short) TYPESIZES="$TYPESIZES -Dsize32='short'"
+		SIZE32=TRUE;;
+	$ac_cv_sizeof_int) TYPESIZES="$TYPESIZES -Dsize32='int'"
+		SIZE32=TRUE;;
+	$ac_cv_sizeof_long) TYPESIZES="$TYPESIZES -Dsize32='long'"
+		SIZE32=TRUE;;
+esac
+
+case 8 in
+	$ac_cv_sizeof_int) TYPESIZES="$TYPESIZES -Dsize64='int'"
+		SIZE64=TRUE;;
+	$ac_cv_sizeof_long) TYPESIZES="$TYPESIZES -Dsize64='long'"
+		SIZE64=TRUE;;
+	$ac_cv_sizeof_long_long) TYPESIZES="$TYPESIZES -Dsize64='long long'"
+		SIZE64=TRUE;;
+esac
+
+
+if test -z "$SIZE16"; then
+	AC_MSG_ERROR(No 16 bit tupe found on this platform!)
+fi
+if test -z "$SIZE32"; then
+	AC_MSG_ERROR(No 32 bit tupe found on this platform!)
+fi
+if test -z "$SIZE64"; then
+	AC_MSG_WARN(No 64 bit tupe found on this platform!)
+fi
+	
+AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS(fcntl.h limits.h sys/ioctl.h sys/time.h unistd.h)
+
+AC_C_CONST
+AC_HEADER_TIME
+AC_STRUCT_TM
+
+AC_PROG_MAKE_SET
+AC_FUNC_MEMCMP
+AC_TYPE_SIGNAL
+AC_CHECK_FUNCS(gettimeofday select strcspn strerror strspn sigaction)
+
+AC_SUBST(TYPESIZES)
+AC_SUBST(OPT)
+AC_SUBST(DEBUG)
+AC_SUBST(PROFILE)
+AC_SUBST(CC)
+AC_SUBST(RANLIB)
+#AC_SUBST(XOGG)
+#AC_SUBST(LIBGTKDIR)
+AC_SUBST(pthread_lib)
+
+AC_OUTPUT(Makefile)
