@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.9 1999/10/02 21:21:18 xiphmont Exp $
+# $Id: Makefile.in,v 1.10 1999/10/05 15:34:56 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -27,18 +27,24 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-OFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
+HFILES =	mdct.h codec.h bitwise.h envelope.h lpc.h lsp.h modes.h\
+		psy.h smallft.h window.h xlogmap.h
+
+LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o
-TARGETFILES =	libvorbis.a
+
+EFILES =	encoder_example.o decoder_example.o
 
 all:
-	$(MAKE) target CFLAGS="$(OPT)" 
+	$(MAKE) target CFLAGS="$(OPT)"
 
-debug: 
+debug:	
 	$(MAKE) target CFLAGS="$(DEBUG)"
 
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
+
+target:	libvorbis.a encoder_example decoder_example
 
 selftest:	
 	$(MAKE) clean
@@ -49,16 +55,19 @@ selftest:
 	@./test_framing
 	@./test_bitwise
 
-dsptest:	debug
-		$(CC) $(DEBUG) $(LDFLAGS) dsptest.c libvorbis.a -o dsptest -lm
+encoder_example:	$(EFILES) libvorbis.a
+	$(CC) $(CFLAGS) $(LDFLAGS) encoder_example.o libvorbis.a -o \
+			encoder_example -lm
 
-target:	$(TARGETFILES)
+decoder_example:	$(EFILES) libvorbis.a
+	$(CC) $(CFLAGS) $(LDFLAGS) decoder_example.o libvorbis.a -o \
+			decoder_example -lm
 
-libvorbis.a: 	$(OFILES)	
-		$(AR) -r libvorbis.a $(OFILES)
+libvorbis.a: 	$(LFILES)	
+		$(AR) -r libvorbis.a $(LFILES)
 		$(RANLIB) libvorbis.a
 
-$(OFILES): 	mdct.h
+$(LFILES): 	$(HFILES)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<

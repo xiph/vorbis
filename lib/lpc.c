@@ -265,8 +265,6 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
 
   }
 
-  memcpy(curve,work,sizeof(work));
-
   return vorbis_gen_lpc(work,lpc,l);
 }
 

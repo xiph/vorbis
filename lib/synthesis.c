@@ -33,6 +33,21 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   /* get the LSP params back to LPC params. This will be for each
      spectral floor curve */
 
+      
+  /*      {
+      int scale=1020;
+	double last=0;
+	for(i=0;i<30;i++){
+	  last+=lsp1[i];
+	  lsp2[i]=last*M_PI/scale;
+	}
+      }
+
+
+
+      vorbis_lsp_to_lpc(lsp2,lpc1,30);*/
+
+
   /*for(i=0;i<vi->floorch;i++)
     vorbis_lsp_to_lpc(vb->lsp[i],vb->lpc[i],vi->floororder);*/
 

@@ -14,12 +14,25 @@
  function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 2 1999
+ last modification date: Oct 4 1999
 
  ********************************************************************/
 
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
+
+#include <sys/types.h> /* get BSD style 16/32/64 bit types */
+
+/* If we have defines from the configure script, use those */
+#ifdef size64
+#  define int64_t size64
+#endif
+#ifdef size32
+#  define int32_t size32
+#endif
+#ifdef size16
+#  define int16_t size16
+#endif
 
 /* lookup structures for various simple transforms *****************/
 
@@ -128,7 +141,7 @@ typedef struct {
 
 
   int    *lacing_vals;    /* The values that will go to the segment table */
-  size64 *pcm_vals;       /* pcm_pos values for headers. Not compact
+  int64_t *pcm_vals;      /* pcm_pos values for headers. Not compact
 			     this way, but it is simple coupled to the
 			     lacing fifo */
   long    lacing_storage;
@@ -145,7 +158,7 @@ typedef struct {
 			     of a logical bitstream */
   long    serialno;
   long    pageno;
-  size64  pcmpos;
+  int64_t  pcmpos;
 
 } ogg_stream_state;
 
@@ -158,7 +171,7 @@ typedef struct {
   long  b_o_s;
   long  e_o_s;
 
-  size64 frameno;
+  int64_t frameno;
 
 } ogg_packet;
 
@@ -281,18 +294,20 @@ extern int    ogg_stream_reset(ogg_stream_state *os);
 extern int    ogg_stream_destroy(ogg_stream_state *os);
 extern int    ogg_stream_eof(ogg_stream_state *os);
 
-extern int    ogg_page_version(ogg_page *og);
-extern int    ogg_page_continued(ogg_page *og);
-extern int    ogg_page_bos(ogg_page *og);
-extern int    ogg_page_eos(ogg_page *og);
-extern size64 ogg_page_frameno(ogg_page *og);
-extern int    ogg_page_serialno(ogg_page *og);
-extern int    ogg_page_pageno(ogg_page *og);
+extern int     ogg_page_version(ogg_page *og);
+extern int     ogg_page_continued(ogg_page *og);
+extern int     ogg_page_bos(ogg_page *og);
+extern int     ogg_page_eos(ogg_page *og);
+extern int64_t ogg_page_frameno(ogg_page *og);
+extern int     ogg_page_serialno(ogg_page *og);
+extern int     ogg_page_pageno(ogg_page *og);
 
 /* Vorbis PRIMITIVES: general ***************************************/
 
+extern void vorbis_dsp_clear(vorbis_dsp_state *v);
+
 extern void vorbis_info_init(vorbis_info *vi); 
-extern int  vorbis_info_clear(vorbis_info *vi); 
+extern void vorbis_info_clear(vorbis_info *vi); 
 extern int  vorbis_info_modeset(vorbis_info *vi, int mode); 
 extern int  vorbis_info_addcomment(vorbis_info *vi, char *comment); 
 extern int  vorbis_info_headerin(vorbis_info *vi,ogg_packet *op);
@@ -306,7 +321,6 @@ extern int  vorbis_block_clear(vorbis_block *vb);
 
 /* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
 extern int      vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi);
-extern void     vorbis_analysis_clear(vorbis_dsp_state *v);
 
 extern double **vorbis_analysis_buffer(vorbis_dsp_state *v,int vals);
 extern int      vorbis_analysis_wrote(vorbis_dsp_state *v,int vals);
@@ -314,7 +328,6 @@ extern int      vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb);
 extern int      vorbis_analysis(vorbis_block *vb,ogg_packet *op);
 
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
-extern int  vorbis_synthesis_clear(vorbis_dsp_state *v);
 extern int  vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi);
 
 extern int vorbis_synthesis(vorbis_block *vb,ogg_packet *op);

@@ -31,6 +31,7 @@
 #include "window.h"
 #include "envelope.h"
 #include "mdct.h"
+#include "lpc.h"
 
 /* pcm accumulator examples (not exhaustive):
 
@@ -211,7 +212,7 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   return(0);
 }
 
-void vorbis_analysis_clear(vorbis_dsp_state *v){
+void vorbis_dsp_clear(vorbis_dsp_state *v){
   int i,j,k;
   if(v){
 
@@ -223,7 +224,7 @@ void vorbis_analysis_clear(vorbis_dsp_state *v){
       for(i=0;i<v->pcm_channels;i++)
 	if(v->pcm[i])free(v->pcm[i]);
       free(v->pcm);
-      free(v->pcmret);
+      if(v->pcmret)free(v->pcmret);
     }
     if(v->multipliers){
       for(i=0;i<v->envelope_channels;i++)
@@ -233,6 +234,10 @@ void vorbis_analysis_clear(vorbis_dsp_state *v){
     _ve_envelope_clear(&v->ve);
     mdct_clear(&v->vm[0]);
     mdct_clear(&v->vm[1]);
+    lpc_clear(&v->vl[0]);
+    lpc_clear(&v->vl[1]);
+    lpc_clear(&v->vbal[0]);
+    lpc_clear(&v->vbal[1]);
     memset(v,0,sizeof(vorbis_dsp_state));
   }
 }

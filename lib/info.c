@@ -44,7 +44,7 @@ int vorbis_info_modeset(vorbis_info *vi, int mode){
 }
 
 /* convenience function */
-int vorbis_info_add_comment(vorbis_info *vi,char *comment){
+int vorbis_info_addcomment(vorbis_info *vi,char *comment){
   vi->user_comments=realloc(vi->user_comments,
 			    (vi->comments+1)*sizeof(char *));
   vi->user_comments[vi->comments]=strdup(comment);
@@ -81,7 +81,6 @@ int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op){
     /* Also verify header-ness, vorbis */
     {
       char buffer[6];
-      int type;
       memset(buffer,0,6);
       _v_readstring(&opb,buffer,6);
       if(memcmp(buffer,"vorbis",6)){
@@ -193,6 +192,7 @@ int vorbis_info_headerout(vorbis_info *vi,
 
   /* build the packet */
   if(vi->header)free(vi->header);
+  vi->header=malloc(_oggpack_bytes(&opb));
   memcpy(vi->header,opb.buffer,_oggpack_bytes(&opb));
   op->packet=vi->header;
   op->bytes=_oggpack_bytes(&opb);
@@ -238,6 +238,7 @@ int vorbis_info_headerout(vorbis_info *vi,
   }
   
   if(vi->header1)free(vi->header1);
+  vi->header1=malloc(_oggpack_bytes(&opb));
   memcpy(vi->header1,opb.buffer,_oggpack_bytes(&opb));
   op_comm->packet=vi->header1;
   op_comm->bytes=_oggpack_bytes(&opb);
@@ -255,6 +256,7 @@ int vorbis_info_headerout(vorbis_info *vi,
   _oggpack_write(&opb,0x02,8);
 
   if(vi->header2)free(vi->header2);
+  vi->header2=malloc(_oggpack_bytes(&opb));
   memcpy(vi->header2,opb.buffer,_oggpack_bytes(&opb));
   op_code->packet=vi->header2;
   op_code->bytes=_oggpack_bytes(&opb);
@@ -267,7 +269,7 @@ int vorbis_info_headerout(vorbis_info *vi,
   return(0);
 }
 
-int vorbis_info_clear(vorbis_info *vi){
+void vorbis_info_clear(vorbis_info *vi){
   /* clear the non-flat storage before zeroing */
 
   /* comments */
