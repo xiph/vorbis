@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.40 2001/12/18 00:55:53 segher Exp $
+ last mod: $Id: mapping0.c,v 1.41 2001/12/18 17:42:28 jack Exp $
 
  ********************************************************************/
 
@@ -703,7 +703,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* now apply the decoded post-window time information */
   /* NOT IMPLEMENTED */
 
-  fprintf(stderr,"seq %d\r",seq);
+  /*fprintf(stderr,"seq %d\r",seq);*/
     
   /* all done! */
   return(0);
