@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.44 2001/09/11 05:06:57 xiphmont Exp $
+ last mod: $Id: info.c,v 1.45 2001/09/30 14:02:31 msmith Exp $
 
  ********************************************************************/
 
@@ -219,7 +219,7 @@ static int _vorbis_unpack_comment(vorbis_comment *vc,oggpack_buffer *opb){
   _v_readstring(opb,vc->vendor,vendorlen);
   vc->comments=oggpack_read(opb,32);
   if(vc->comments<0)goto err_out;
-  vc->user_comments=_ogg_calloc(vc->comments+1,sizeof(char **));
+  vc->user_comments=_ogg_calloc(vc->comments+1,sizeof(char *));
   vc->comment_lengths=_ogg_calloc(vc->comments+1, sizeof(int));
 	    
   for(i=0;i<vc->comments;i++){
