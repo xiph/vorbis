@@ -32,8 +32,10 @@ double threshhold_points[THRESH_POINTS]=
 vorbis_info predef_modes[]={
   /* CD quality stereo, no channel coupling */
 
-    /* channels, sample rate,  dummy, dummy, dummy, dummy */
-  { 2, 44100,     0, NULL, 0, NULL, 
+    /* channels, sample rate, upperkbps, nominalkbps, lowerkbps */
+  { 2, 44100, 0,0,0,
+    /* dummy, dummy, dummy, dummy */
+    0, NULL, 0, NULL, 
     /* smallblock, largeblock, LPC order (small, large) */
     {512, 4096}, {16,16}, 
     /* spectral octaves (small, large), spectral channels */

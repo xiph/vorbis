@@ -14,7 +14,7 @@
  function: maintain the info structure, info <-> header packets
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 22 1999
+ last modification date: Nov 04 1999
 
  ********************************************************************/
 
@@ -27,6 +27,15 @@
 #include "modes.h"
 #include "bitwise.h"
 
+static int ilog2(unsigned int v){
+  int ret=0;
+  while(v>1){
+    ret++;
+    v>>=1;
+  }
+  return(ret);
+}
+  
 void vorbis_info_init(vorbis_info *vi){
   memset(vi,0,sizeof(vorbis_info));
 }
@@ -39,7 +48,7 @@ int vorbis_info_modeset(vorbis_info *vi, int mode){
   memcpy(vi,&(predef_modes[mode]),sizeof(vorbis_info));
   vi->threshhold_points=threshhold_points;
   vi->user_comments=calloc(1,sizeof(char *));
-  vi->vendor=strdup("Xiphophorus libVorbis I 19991022");
+  vi->vendor=strdup("Xiphophorus libVorbis I 19991104");
 
   return(0);
 }
@@ -102,17 +111,24 @@ int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op){
 	if(_oggpack_read(&opb,32)!=0){
 	  return(-1);
 	}
-	vi->channels=_oggpack_read(&opb,32);
+	vi->channels=_oggpack_read(&opb,8);
 	vi->rate=_oggpack_read(&opb,32);
 
-	vi->blocksize[0]=_oggpack_read(&opb,32);
-	vi->blocksize[1]=_oggpack_read(&opb,32);
+	vi->bitrate_upper=_oggpack_read(&opb,32);
+	vi->bitrate_nominal=_oggpack_read(&opb,32);
+	vi->bitrate_lower=_oggpack_read(&opb,32);
+
+	vi->blocksize[0]=1<<_oggpack_read(&opb,4);
+	vi->blocksize[1]=1<<_oggpack_read(&opb,4);
 
 	vi->floororder[0]=_oggpack_read(&opb,8);
 	vi->floororder[1]=_oggpack_read(&opb,8);
 	vi->flooroctaves[0]=_oggpack_read(&opb,8);
 	vi->flooroctaves[1]=_oggpack_read(&opb,8);
-	vi->floorch=_oggpack_read(&opb,16);
+	vi->floorch=_oggpack_read(&opb,8);
+
+	if(vi->rate<1)return(-1);
+	if(vi->floorch<1 || vi->floorch>vi->channels)return(-1);
 
 	return(0);
       case 0x81:
@@ -186,15 +202,20 @@ int vorbis_info_headerout(vorbis_info *vi,
 
   _oggpack_write(&opb,0x00,32);
 
-  _oggpack_write(&opb,vi->channels,32);
+  _oggpack_write(&opb,vi->channels,8);
   _oggpack_write(&opb,vi->rate,32);
-  _oggpack_write(&opb,vi->blocksize[0],32);
-  _oggpack_write(&opb,vi->blocksize[1],32);
+
+  _oggpack_write(&opb,vi->bitrate_upper,32);
+  _oggpack_write(&opb,vi->bitrate_nominal,32);
+  _oggpack_write(&opb,vi->bitrate_lower,32);
+
+  _oggpack_write(&opb,ilog2(vi->blocksize[0]),4);
+  _oggpack_write(&opb,ilog2(vi->blocksize[1]),4);
   _oggpack_write(&opb,vi->floororder[0],8);
   _oggpack_write(&opb,vi->floororder[1],8);
   _oggpack_write(&opb,vi->flooroctaves[0],8);
   _oggpack_write(&opb,vi->flooroctaves[1],8);
-  _oggpack_write(&opb,vi->floorch,16);
+  _oggpack_write(&opb,vi->floorch,8);
 
   /* build the packet */
   if(vi->header)free(vi->header);

@@ -20,6 +20,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 #include "codec.h"
 #include "vorbisfile.h"
 
@@ -218,21 +219,18 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
       int result=ogg_stream_packetout(&vf->os,&op);
       if(result==0)break;
       if(result==-1){
-	fprintf(stderr,"Corrupt header in logical bitstream.  "
-		"Exiting.\n");
+	fprintf(stderr,"Corrupt header in logical bitstream.\n");
 	goto bail_header;
       }
       if(vorbis_info_headerin(vi,&op)){
-	fprintf(stderr,"Illegal header in logical bitstream.  "
-		"Exiting.\n");
+	fprintf(stderr,"Illegal header in logical bitstream.\n");
 	goto bail_header;
       }
       i++;
     }
     if(i<3)
       if(_get_next_page(vf,&og,1)<0){
-	fprintf(stderr,"Missing header in logical bitstream.  "
-		"Exiting.\n");
+	fprintf(stderr,"Missing header in logical bitstream.\n");
 	goto bail_header;
       }
   }
@@ -253,6 +251,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first){
   int i,ret;
   
   vf->vi=malloc(vf->links*sizeof(vorbis_info));
+  vf->dataoffsets=malloc(vf->links*sizeof(long));
   vf->pcmlengths=malloc(vf->links*sizeof(size64));
   vf->serialnos=malloc(vf->links*sizeof(long));
   
@@ -276,7 +275,9 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first){
 				      be called in a non-seekable stream
 				      (in which case, we need to preserve
 				      the stream local storage) */
-      }
+	vf->dataoffsets[i]=-1;
+      }else
+	vf->dataoffsets[i]=vf->offset;
     }
 
     /* get the serial number and PCM length of this link. To do this,
@@ -317,7 +318,7 @@ static int _open_seekable(OggVorbis_File *vf){
   
   /* we can seek, so set out learning all about this file */
   vf->seekable=1;
-  fseek(vf->f,0,SEEK_END); /* Yes, I know I used lseek earlier. */
+  fseek(vf->f,0,SEEK_END);
   vf->offset=vf->end=ftell(vf->f);
   
   /* We get the offset for the last page of the physical bitstream.
@@ -488,6 +489,7 @@ int ov_clear(OggVorbis_File *vf){
 	vorbis_info_clear(vf->vi+i);
       free(vf->vi);
     }
+    if(vf->dataoffsets)free(vf->dataoffsets);
     if(vf->pcmlengths)free(vf->pcmlengths);
     if(vf->serialnos)free(vf->serialnos);
     if(vf->offsets)free(vf->offsets);
@@ -507,7 +509,7 @@ int ov_clear(OggVorbis_File *vf){
 */
 
 int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
-  long offset=lseek(fileno(f),0,SEEK_CUR);
+  long offset=fseek(f,0,SEEK_CUR);
   int ret;
 
   memset(vf,0,sizeof(OggVorbis_File));
@@ -554,13 +556,64 @@ long ov_seekable(OggVorbis_File *vf){
   return vf->seekable;
 }
 
+/* returns the bitrate for a given logical bitstream or the entire
+   physical bitstream.  If the file is open for random access, it will
+   find the *actual* average bitrate.  If the file is streaming, it
+   returns the nominal bitrate (if set) else the average of the
+   upper/lower bounds (if set) else -1 (unset).
+
+   If you want the actual bitrate field settings, get them from the
+   vorbis_info structs */
+
+long ov_bitrate(OggVorbis_File *vf,int i){
+  if(i>=vf->links)return(-1);
+  if(!vf->seekable)return(ov_bitrate(vf,0));
+  if(i<0){
+    size64 bits;
+    int i;
+    for(i=0;i<vf->links;i++)
+      bits+=vf->offsets[i+1]-vf->dataoffsets[i];
+    return(rint(bits/ov_time_total(vf,-1)));
+  }else{
+    if(vf->seekable){
+      /* return the actual bitrate */
+      return(rint((vf->offsets[i+1]-vf->dataoffsets[i])/ov_time_total(vf,i)));
+    }else{
+      /* return nominal if set */
+      if(vf->vi[i].bitrate_nominal>0){
+	return vf->vi[i].bitrate_nominal;
+      }else{
+	if(vf->vi[i].bitrate_upper>0){
+	  if(vf->vi[i].bitrate_lower>0){
+	    return (vf->vi[i].bitrate_upper+vf->vi[i].bitrate_lower)/2;
+	  }else{
+	    return vf->vi[i].bitrate_upper;
+	  }
+	}
+	return(-1);
+      }
+    }
+  }
+}
+
+/* Guess */
+long ov_serialnumber(OggVorbis_File *vf,int i){
+  if(i>=vf->links)return(-1);
+  if(!vf->seekable && i>=0)return(ov_serialnumber(vf,-1));
+  if(i<0){
+    return(vf->current_serialno);
+  }else{
+    return(vf->serialnos[i]);
+  }
+}
+
 /* returns: total raw (compressed) length of content if i==-1
             raw (compressed) length of that logical bitstream for i==0 to n
 	    -1 if the stream is not seekable (we can't know the length)
 */
 long ov_raw_total(OggVorbis_File *vf,int i){
-  if(!vf->seekable)return(-1);
-  if(i<0 || i>=vf->links){
+  if(!vf->seekable || i>=vf->links)return(-1);
+  if(i<0){
     long acc=0;
     int i;
     for(i=0;i<vf->links;i++)
@@ -576,8 +629,8 @@ long ov_raw_total(OggVorbis_File *vf,int i){
 	    -1 if the stream is not seekable (we can't know the length)
 */
 size64 ov_pcm_total(OggVorbis_File *vf,int i){
-  if(!vf->seekable)return(-1);
-  if(i<0 || i>=vf->links){
+  if(!vf->seekable || i>=vf->links)return(-1);
+  if(i<0){
     size64 acc=0;
     int i;
     for(i=0;i<vf->links;i++)
@@ -593,8 +646,8 @@ size64 ov_pcm_total(OggVorbis_File *vf,int i){
 	    -1 if the stream is not seekable (we can't know the length)
 */
 double ov_time_total(OggVorbis_File *vf,int i){
-  if(!vf->seekable)return(-1);
-  if(i<0 || i>=vf->links){
+  if(!vf->seekable || i>=vf->links)return(-1);
+  if(i<0){
     double acc=0;
     int i;
     for(i=0;i<vf->links;i++)
@@ -614,7 +667,6 @@ double ov_time_total(OggVorbis_File *vf,int i){
    returns zero on success, nonzero on failure */
 
 int ov_raw_seek(OggVorbis_File *vf,long pos){
-  int link;
 
   if(!vf->seekable)return(-1); /* don't dump machine if we can't seek */
   if(pos<0 || pos>vf->offsets[vf->links])goto seek_error;
@@ -672,7 +724,7 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
    returns zero on success, nonzero on failure */
 
 int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
-  int i,link=-1;
+  int link=-1;
   size64 total=ov_pcm_total(vf,-1);
 
   if(!vf->seekable)return(-1); /* don't dump machine if we can't seek */  
@@ -766,7 +818,7 @@ int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
 int ov_time_seek(OggVorbis_File *vf,double seconds){
   /* translate time to PCM position and call ov_pcm_seek */
 
-  int i,link=-1;
+  int link=-1;
   size64 pcm_total=ov_pcm_total(vf,-1);
   double time_total=ov_time_total(vf,-1);
 

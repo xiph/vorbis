@@ -35,6 +35,7 @@ typedef struct {
      stream appears */
   int              links;
   long             *offsets;
+  long             *dataoffsets;
   long             *serialnos;
   size64           *pcmlengths;
   vorbis_info      *vi;
@@ -55,8 +56,10 @@ typedef struct {
 extern int ov_clear(OggVorbis_File *vf);
 extern int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
 
+extern long ov_bitrate(OggVorbis_File *vf,int i);
 extern long ov_streams(OggVorbis_File *vf);
 extern long ov_seekable(OggVorbis_File *vf);
+extern long ov_serialnumber(OggVorbis_File *vf,int i);
 
 extern long ov_raw_total(OggVorbis_File *vf,int i);
 extern size64 ov_pcm_total(OggVorbis_File *vf,int i);
