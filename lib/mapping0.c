@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.41 2001/12/18 17:42:28 jack Exp $
+ last mod: $Id: mapping0.c,v 1.42 2001/12/19 01:08:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -380,14 +380,11 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     /* perform psychoacoustics; do masking */
     _vp_compute_mask(look->psy_look[blocktype],
-		     b->psy_g_look,
-		     i,
 		     logfft, /* -> logmax */
 		     logmdct,
 		     logmask,
 		     global_ampmax,
 		     local_ampmax[i],
-		     ci->blocksizes[vb->lW]/2,
 		     bm->avgnoise);
 
     _analysis_output("mask",seq+i,logmask,n/2,1,0);
@@ -403,12 +400,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
 
     _vp_remove_floor(look->psy_look[blocktype],
-		     b->psy_g_look,
-		     logmdct,
 		     mdct,
 		     codedflr,
-		     res,
-		     local_ampmax[i]);
+		     res);
 
     /*for(j=0;j<n/2;j++)
       if(fabs(res[j])>1200){
@@ -416,7 +410,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	fprintf(stderr,"%ld ",seq+i);
 	}*/
 
-    //_analysis_output("res",seq+i,res,n/2,1,0);
     _analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
       
   }
@@ -495,8 +488,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			  0);
     }
 
-    //for(i=0;i<vi->channels;i++)
-    //_analysis_output("quant",seq+i,quantized[i],n/2,1,0);
+    for(i=0;i<vi->channels;i++)
+      _analysis_output("quant",seq+i,quantized[i],n/2,1,0);
 
   
     /* classify, by submap */
@@ -557,8 +550,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      lqua[j]=lpcm[j]-lsof[j];
 	  }
 	}else{
-	  char buf[80];
-	  
+
 	  _vp_quantize_couple(look->psy_look[blocktype],
 			      info,
 			      pcm,
@@ -566,11 +558,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			      quantized,
 			      nonzero,
 			      i);
-	  
-	  //sprintf(buf,"quant%d",i);
-	  //for(j=0;j<vi->channels;j++)
-	  //_analysis_output(buf,seq+j,quantized[j],n/2,1,0);
-	  
 	}
       }
     }
@@ -682,8 +669,6 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
-    //_analysis_output("out",seq+i,pcm,n/2,1,1);
-    //_analysis_output("lout",seq+i,pcm,n/2,0,0);
     mdct_backward(b->transform[vb->W][0],pcm,pcm);
   }
 
@@ -697,14 +682,8 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
       for(j=0;j<n;j++)
 	pcm[j]=0.f;
 
-    //_analysis_output("final",seq,pcm,n,0,0);
   }
 	    
-  /* now apply the decoded post-window time information */
-  /* NOT IMPLEMENTED */
-
-  /*fprintf(stderr,"seq %d\r",seq);*/
-    
   /* all done! */
   return(0);
 }

@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.10 2001/12/12 09:45:24 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.11 2001/12/19 01:08:13 xiphmont Exp $
 
  ********************************************************************/
 
@@ -79,7 +79,48 @@ typedef struct backend_lookup_state {
 
 } backend_lookup_state;
 
-/* vorbis_info contains all the setup information specific to the
+/* high level configuration information for setting things up
+   step-by-step with the detaile vorbis_encode_ctl interface */
+
+typedef struct highlevel_block {
+  double tone_mask_quality;
+  double tone_peaklimit_quality;
+
+  double noise_bias_quality;
+  double noise_compand_quality;
+
+  double ath_quality;
+
+} highlevel_block;
+
+typedef struct highlevel_encode_setup {
+  double base_quality;       /* these have to be tracked by the ctl */
+  double base_quality_short; /* interface so that the right books get */
+  double base_quality_long;  /* chosen... */
+
+  int short_block_p;
+  int long_block_p;
+  int impulse_block_p;
+
+  int stereo_couple_p;
+  int stereo_backfill_p;
+  int residue_backfill_p;
+
+  int    stereo_point_dB;
+  double stereo_point_kHz[2];
+  double lowpass_kHz[2];
+
+  double ath_floating_dB;
+  double ath_absolute_dB;
+
+  double amplitude_track_dBpersec;
+  double trigger_quality;
+
+  highlevel_block blocktype[4]; /* impulse, padding, trans, long */
+  
+} highlevel_encode_setup;
+
+/* codec_setup_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,
    psychoacoustic settings, channel setup, options, codebook
    etc).  
@@ -118,7 +159,9 @@ typedef struct codec_setup_info {
 
   vorbis_info_psy        *psy_param[64]; /* encode only */
   vorbis_info_psy_global psy_g_param;
+
   bitrate_manager_info   bi;
+  highlevel_encode_setup hi;
 
   int    passlimit[32];     /* iteration limit per couple/quant pass */
   int    coupling_passes;

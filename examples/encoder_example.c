@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.29 2001/12/19 00:48:41 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.30 2001/12/19 01:08:13 xiphmont Exp $
 
  ********************************************************************/
 

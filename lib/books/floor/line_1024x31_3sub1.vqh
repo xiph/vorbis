@@ -19,7 +19,7 @@
 #include "codebook.h"
 
 static long _huff_lengthlist_line_1024x31_3sub1[] = {
-	 0, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5,
+	 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
 	 5, 5,
 };
 

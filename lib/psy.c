@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.59 2001/12/18 02:57:30 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.60 2001/12/19 01:08:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -650,8 +650,6 @@ static void seed_chase(float *seeds, int linesper, long n){
 
 /* bleaugh, this is more complicated than it needs to be */
 static void max_seeds(vorbis_look_psy *p,
-		      vorbis_look_psy_global *g,
-		      int channel,
 		      float *seed,
 		      float *flr){
   long   n=p->total_octave_lines;
@@ -789,12 +787,9 @@ static void bark_noise_hybridmp(int n,const long *b,
 
    
 void _vp_remove_floor(vorbis_look_psy *p,
-		      vorbis_look_psy_global *g,
-		      float *logmdct, 
 		      float *mdct,
 		      float *codedflr,
-		      float *residue,
-		      float local_specmax){ 
+		      float *residue){ 
   int i,n=p->n;
   
   for(i=0;i<n;i++)
@@ -806,14 +801,11 @@ void _vp_remove_floor(vorbis_look_psy *p,
   
 
 void _vp_compute_mask(vorbis_look_psy *p,
-		      vorbis_look_psy_global *g,
-		      int channel,
 		      float *logfft, 
 		      float *logmdct, 
 		      float *logmask, 
 		      float global_specmax,
 		      float local_specmax,
-		      int lastsize,
 		      float bitrate_noise_offset){
   int i,n=p->n;
   static int seq=0;
@@ -869,7 +861,7 @@ void _vp_compute_mask(vorbis_look_psy *p,
 
   /* tone masking */
   seed_loop(p,(const float ***)p->tonecurves,logfft,logmask,seed,global_specmax);
-  max_seeds(p,g,channel,seed,logmask);
+  max_seeds(p,seed,logmask);
 
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */
@@ -1006,13 +998,13 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 	     we opt not to fill in additional resolution (in order to
 	     simplify the iterative codebook design and
 	     efficiency). */
+
+	  qM[j]=mag-sofarM[j];
+	  qA[j]=ang-sofarA[j];
 	 
-	  if(ang<-rqlimit || ang>rqlimit){
+	  if(qA[j]<-rqlimit || qA[j]>rqlimit){
 	    qM[j]=0.f;
 	    qA[j]=0.f;
-	  }else{ 
-	    qM[j]=mag-sofarM[j];
-	    qA[j]=ang-sofarA[j];
 	  }
 	}
       }

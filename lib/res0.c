@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.39 2001/12/16 04:15:47 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.40 2001/12/19 01:08:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -56,9 +56,11 @@ typedef struct {
 
 #ifdef TRAIN_RES
   long      *training_data[8][64];
+  float      training_max[8][64];
+  float      training_min[8][64];
   int       longp;
-  double    tmin;
-  double    tmax;
+  float     tmin;
+  float     tmax;
 #endif
 
 } vorbis_look_residue0;
@@ -88,6 +90,7 @@ void res0_free_look(vorbis_look_residue *i){
     {
       int j,k,l;
       for(j=0;j<look->parts;j++){
+	fprintf(stderr,"partition %d: ",j);
 	for(k=0;k<8;k++)
 	  if(look->training_data[k][j]){
 	    char buffer[80];
@@ -103,8 +106,11 @@ void res0_free_look(vorbis_look_residue *i){
 	    
 	    fclose(of);
 	    
+	    fprintf(stderr,"%d(%.2f|%.2f) ",k,look->training_min[k][j],look->training_max[k][j]);
+
 	    _ogg_free(look->training_data[k][j]);
 	  }
+	fprintf(stderr,"\n");
       }
     }
     fprintf(stderr,"min/max residue: %g::%g\n",look->tmin,look->tmax);
@@ -368,8 +374,7 @@ static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
 }
 
 static int _interleaved_encodepart(oggpack_buffer *opb,float *vec, int n,
-				   codebook *book,vorbis_look_residue0 *look,
-				   long *acc){
+				   codebook *book,long *acc){
   int i,bits=0;
   int dim=book->dim;
   int step=n/dim;
@@ -388,8 +393,7 @@ static int _interleaved_encodepart(oggpack_buffer *opb,float *vec, int n,
 }
  
 static int _encodepart(oggpack_buffer *opb,float *vec, int n,
-		       codebook *book,vorbis_look_residue0 *look,
-		       long *acc){
+		       codebook *book,long *acc){
   int i,bits=0;
   int dim=book->dim;
   int step=n/dim;
@@ -523,7 +527,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 		      float **in,int ch,
 		      int pass,long **partword,
 		      int (*encode)(oggpack_buffer *,float *,int,
-				    codebook *,vorbis_look_residue0 *,long *),
+				    codebook *,long *),
 		      ogg_uint32_t *stats){
   long i,j,k,s;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
@@ -602,16 +606,25 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	  if(info->secondstages[partword[j][i]]&(1<<s)){
 	    codebook *statebook=look->partbooks[partword[j][i]][s];
 	    if(statebook){
-	      int fn=-1;
 	      int ret;
 	      long *accumulator=NULL;
 
 #ifdef TRAIN_RES
 	      accumulator=look->training_data[s][partword[j][i]];
+	      {
+		int l;
+		float *samples=in[j]+offset;
+		for(l=0;l<samples_per_partition;l++){
+		  if(samples[l]<look->training_min[s][partword[j][i]])
+		    look->training_min[s][partword[j][i]]=samples[l];
+		  if(samples[l]>look->training_max[s][partword[j][i]])
+		    look->training_max[s][partword[j][i]]=samples[l];
+		}
+	      }
 #endif
 	      
 	      ret=encode(&vb->opb,in[j]+offset,samples_per_partition,
-			 statebook,look,accumulator);
+			 statebook,accumulator);
 
 	      look->postbits+=ret;
 	      resbits[partword[j][i]]+=ret;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.51 2001/12/12 09:45:24 xiphmont Exp $
+ last mod: $Id: block.c,v 1.52 2001/12/19 01:08:13 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -379,7 +379,6 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   return(v->pcmret);
 }
 
-static int seq=0;
 static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
   int order=32;
@@ -394,12 +393,8 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
       for(j=0;j<v->pcm_current;j++)
 	work[j]=v->pcm[i][v->pcm_current-j-1];
       
-      _analysis_output("preextrap",seq,v->pcm[i],v->pcm_current,0,0);
-      _analysis_output("workextrap",seq,work,v->pcm_current,0,0);
-
       /* prime as above */
       vorbis_lpc_from_data(work,lpc,v->pcm_current-v->centerW,order);
-      _analysis_output("lpc",seq,lpc,order,0,0);
       
       /* run the predictor filter */
       vorbis_lpc_predict(lpc,work+v->pcm_current-v->centerW-order,
@@ -407,13 +402,9 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
 			 work+v->pcm_current-v->centerW,
 			 v->centerW);
 
-      _analysis_output("extrap",seq,work,v->pcm_current,0,0);
-
-
       for(j=0;j<v->pcm_current;j++)
 	v->pcm[i][v->pcm_current-j-1]=work[j];
 
-      _analysis_output("postextrap",seq++,v->pcm[i],v->pcm_current,0,0);
     }
   }
 }
@@ -735,7 +726,6 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     }
 
     for(j=0;j<vi->channels;j++){
-      static int seq=0;
       float *pcm=v->pcm[j]+beginW;
       float *p=vb->pcm[j];
 
@@ -746,9 +736,6 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       for(;i<sizeW;i++)
 	pcm[i]=p[i];
 
-      //_analysis_output("lapped",seq,pcm,sizeW,0,0);
-      //_analysis_output("buffered",seq++,v->pcm[j],sizeW+beginW,0,0);
-    
     }
 
     /* deal with initial packet state; we do this using the explicit
