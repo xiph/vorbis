@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.27 2000/01/05 15:05:01 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.28 2000/01/06 13:57:13 xiphmont Exp $
 
  ********************************************************************/
 
@@ -81,38 +81,6 @@ void _vqgen_seed(vqgen *v){
 }
 
 /* External calls *******************************************************/
-
-void spinnit(char *s,int n){
-  static int p=0;
-  static long lasttime=0;
-  long test;
-  struct timeval thistime;
-
-  gettimeofday(&thistime,NULL);
-  test=thistime.tv_sec*10+thistime.tv_usec/100000;
-  if(lasttime!=test){
-    lasttime=test;
-
-    fprintf(stderr,"%s%d ",s,n);
-
-    p++;if(p>3)p=0;
-    switch(p){
-    case 0:
-      fprintf(stderr,"|    \r");
-      break;
-    case 1:
-      fprintf(stderr,"/    \r");
-      break;
-    case 2:
-      fprintf(stderr,"-    \r");
-      break;
-    case 3:
-      fprintf(stderr,"\\    \r");
-      break;
-    }
-    fflush(stderr);
-  }
-}
 
 /* We have two forms of quantization; in the first, each vector
    element in the codebook entry is orthogonal.  Residues would use this
@@ -272,7 +240,7 @@ double vqgen_iterate(vqgen *v){
     exit(1);
   }
 
-  /* fill in nearest points for entries */
+  /* fill in nearest points for entry biasing */
   /*memset(v->bias,0,sizeof(double)*v->entries);*/
   memset(nearcount,0,sizeof(long)*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
@@ -283,7 +251,7 @@ double vqgen_iterate(vqgen *v){
     long   firstentry=0;
     long   secondentry=1;
 
-    spinnit("working... ",v->points-i);
+    if(i%100)spinnit("biasing... ",v->points+v->points+v->entries-i);
 
     if(firstmetric>secondmetric){
       double temp=firstmetric;
@@ -309,23 +277,6 @@ double vqgen_iterate(vqgen *v){
     }
 
     j=firstentry;
-      
-#ifdef NOISY
-    fprintf(cells,"%g %g\n%g %g\n\n",
-          _now(v,j)[0],_now(v,j)[1],
-          ppt[0],ppt[1]);
-#endif
-
-    j=firstentry;
-    meterror+=firstmetric-v->bias[firstentry];
-    /* set up midpoints for next iter */
-    if(v->assigned[j]++)
-      for(k=0;k<v->elements;k++)
-	vN(new,j)[k]+=ppt[k];
-    else
-      for(k=0;k<v->elements;k++)
-	vN(new,j)[k]=ppt[k];
-
     for(j=0;j<v->entries;j++){
       
       double thismetric;
@@ -346,13 +297,16 @@ double vqgen_iterate(vqgen *v){
       if(k<desired){
 	nearbiasptr[k]=thismetric;
 	k++;
-	if(k==desired)
+	if(k==desired){
+	  spinnit("biasing... ",v->points+v->points+v->entries-i);
 	  qsort(nearbiasptr,desired,sizeof(double),directdsort);
+	}
 	
       }else if(thismetric>nearbiasptr[desired-1]){
 	nearbiasptr[k]=thismetric;
 	k++;
 	if(k==desired2){
+	  spinnit("biasing... ",v->points+v->points+v->entries-i);
 	  qsort(nearbiasptr,desired2,sizeof(double),directdsort);
 	  k=desired;
 	}
@@ -365,13 +319,48 @@ double vqgen_iterate(vqgen *v){
   for(i=0;i<v->entries;i++){
     double *nearbiasptr=nearbias+desired2*i;
 
-    spinnit("working... ",v->entries-i);
+    spinnit("biasing... ",v->points+v->entries-i);
 
     /* due to the delayed sorting, we likely need to finish it off....*/
     if(nearcount[i]>desired)
       qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
 
     v->bias[i]=nearbiasptr[desired-1];
+  }
+
+  /* Now assign with new bias and find new midpoints */
+  for(i=0;i<v->points;i++){
+    double *ppt=v->weight_func(v,_point(v,i));
+    double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
+    long   firstentry=0;
+
+    if(i%100)spinnit("centering... ",v->points-i);
+
+    for(j=0;j<v->entries;j++){
+      double thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
+      if(thismetric<firstmetric){
+	firstmetric=thismetric;
+	firstentry=j;
+      }
+    }
+
+    j=firstentry;
+      
+#ifdef NOISY
+    fprintf(cells,"%g %g\n%g %g\n\n",
+          _now(v,j)[0],_now(v,j)[1],
+          ppt[0],ppt[1]);
+#endif
+
+    meterror+=firstmetric-v->bias[firstentry];
+    /* set up midpoints for next iter */
+    if(v->assigned[j]++)
+      for(k=0;k<v->elements;k++)
+	vN(new,j)[k]+=ppt[k];
+    else
+      for(k=0;k<v->elements;k++)
+	vN(new,j)[k]=ppt[k];
+
   }
 
   /* assign midpoints */

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.6 2000/01/05 10:14:53 xiphmont Exp $
+# $Id: Makefile.in,v 1.7 2000/01/06 13:57:09 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -29,7 +29,7 @@ HFILES =	../include/vorbis/codebook.h vqgen.h vqext.h bookutil.h
 
 OFILES = 	vqgen.o vqsplit.o bookutil.o
 ALLOFILES = 	$(OFILES) lspdata.o genericdata.o train.o build.o run.o\
-		cascade.o
+		cascade.o partition.o metrics.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -40,7 +40,7 @@ debug:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-target:	lspvqtrain genericvqtrain vqbuild vqcascade
+target:	lspvqtrain genericvqtrain vqbuild vqcascade vqpartition vqmetrics
 
 lspvqtrain:	$(OFILES) lspdata.o train.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
@@ -52,6 +52,12 @@ vqbuild:	$(OFILES) build.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 vqcascade:	$(OFILES) run.o cascade.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+
+vqpartition:	$(OFILES) run.o partition.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+
+vqmetrics:	$(OFILES) run.o metrics.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 $(ALLOFILES): 	$(HFILES)

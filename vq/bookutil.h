@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.h,v 1.1 2000/01/05 10:14:54 xiphmont Exp $
+ last mod: $Id: bookutil.h,v 1.2 2000/01/06 13:57:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,8 @@
 #define _V_BOOKUTIL_H_
 
 #include <stdio.h>
+#include <sys/time.h>
+
 #include "vorbis/codebook.h"
 
 extern void      codebook_unquantize(codebook *b);
@@ -34,7 +36,7 @@ extern char     *find_seek_to(FILE *in,char *s);
 extern codebook *codebook_load(char *filename);
 extern int       codebook_entry(codebook *b,double *val);
 
-
+extern void spinnit(char *s,int n);
 extern long float24_pack(double val);
 extern double float24_unpack(long val);
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.10 2000/01/05 15:05:02 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.11 2000/01/06 13:57:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -183,7 +183,7 @@ int lp_split(vqgen *v,codebook *b,
   /* more than one way to do this part.  For small sets, we can brute
      force it. */
 
-  if(entries<8 || (double)points*entries*entries<128.*1024*1024){
+  if(entries<8 || (double)points*entries*entries<16.*1024*1024){
     /* try every pair possibility */
     double best=0;
     double this;

@@ -12,14 +12,12 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.9 2000/01/05 10:14:58 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.10 2000/01/06 13:57:14 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _VQGEN_H_
 #define _VQGEN_H_
-
-#include <sys/time.h>
 
 typedef struct vqgen{
   int it;
@@ -68,11 +66,6 @@ extern void vqgen_addpoint(vqgen *v, double *p,double *aux);
 extern double vqgen_iterate(vqgen *v);
 extern void vqgen_unquantize(vqgen *v,quant_meta *q);
 extern void vqgen_quantize(vqgen *v,quant_meta *q);
-
-extern void spinnit(char *s,int n);
-
-extern long float24_pack(double val);
-extern double float24_unpack(long val);
 
 #endif
 

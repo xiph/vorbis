@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.2 2000/01/05 15:04:55 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.3 2000/01/06 13:57:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -67,6 +67,7 @@ char *get_line(FILE *in){
         switch(c){
         case '\n':
         case EOF:
+          linebuffer[sofar]='\0';
           gotline=1;
           break;
         default:
@@ -132,16 +133,20 @@ int get_vector(codebook *b,FILE *in,double *a){
 
   while(1){
 
-    if(get_next_value(in,a))
-      break;
+    if(get_line_value(in,a)){
+      sequence_base=0.;
+      if(get_next_value(in,a))
+	break;
+    }
 
     for(i=1;i<b->dim;i++)
       if(get_line_value(in,a+i))
 	break;
     
     if(i==b->dim){
+      double temp=a[b->dim-1];
       for(i=0;i<b->dim;i++)a[i]-=sequence_base;
-      if(b->q_sequencep)sequence_base=a[b->dim-1];
+      if(b->q_sequencep)sequence_base=temp;
       return(0);
     }
     sequence_base=0.;
@@ -343,5 +348,37 @@ double float24_unpack(long val){
   double exp =(val&0x7c0000)>>18;
   if(sign)mant= -mant;
   return(ldexp(mant,exp-17-VQ_FEXP_BIAS));
+}
+
+void spinnit(char *s,int n){
+  static int p=0;
+  static long lasttime=0;
+  long test;
+  struct timeval thistime;
+
+  gettimeofday(&thistime,NULL);
+  test=thistime.tv_sec*10+thistime.tv_usec/100000;
+  if(lasttime!=test){
+    lasttime=test;
+
+    fprintf(stderr,"%s%d ",s,n);
+
+    p++;if(p>3)p=0;
+    switch(p){
+    case 0:
+      fprintf(stderr,"|    \r");
+      break;
+    case 1:
+      fprintf(stderr,"/    \r");
+      break;
+    case 2:
+      fprintf(stderr,"-    \r");
+      break;
+    case 3:
+      fprintf(stderr,"\\    \r");
+      break;
+    }
+    fflush(stderr);
+  }
 }
 
