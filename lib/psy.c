@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.9 2000/04/21 16:35:39 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.10 2000/05/02 00:28:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -216,9 +216,9 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   memcpy(p->curves[8][6],tone_4000_80dB_SL,sizeof(double)*EHMER_MAX);
   memcpy(p->curves[8][8],tone_4000_100dB_SL,sizeof(double)*EHMER_MAX);
 
-  memcpy(p->curves[10][2],tone_4000_40dB_SL,sizeof(double)*EHMER_MAX);
-  memcpy(p->curves[10][4],tone_4000_60dB_SL,sizeof(double)*EHMER_MAX);
-  memcpy(p->curves[10][6],tone_4000_80dB_SL,sizeof(double)*EHMER_MAX);
+  memcpy(p->curves[10][2],tone_8000_60dB_SL,sizeof(double)*EHMER_MAX);
+  memcpy(p->curves[10][4],tone_8000_60dB_SL,sizeof(double)*EHMER_MAX);
+  memcpy(p->curves[10][6],tone_8000_80dB_SL,sizeof(double)*EHMER_MAX);
   memcpy(p->curves[10][8],tone_8000_100dB_SL,sizeof(double)*EHMER_MAX);
 
   setup_curve(p->curves[0],0,vi->curveatt_250Hz,vi->peakpre,vi->peakpost);
@@ -337,48 +337,23 @@ static void add_seeds(double *floor,int n){
 static void _vp_tone_tone_iter(vorbis_look_psy *p,
 			       double *f, 
 			       double *flr, double *mask,
-			       double *decay){
+			       double specmax){
   vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
-  double *work=alloca(n*sizeof(double));
-  double specmax=0;
   double acc=0.;
 
-  memcpy(work,f,p->n*sizeof(double));
-  
-  /* handle decay */
-  if(vi->decayp && decay){
-    double decscale=1.-pow(vi->decay_coeff,n); 
-    double attscale=1.-pow(vi->attack_coeff,n); 
-    for(i=0;i<n;i++){
-      double del=work[i]-decay[i];
-      if(del>0)
-	/* add energy */
-	decay[i]+=del*attscale;
-      else
-	/* remove energy */
-	decay[i]+=del*decscale;
-      if(decay[i]>work[i])work[i]=decay[i];
-    }
-  }
-
-  for(i=0;i<n;i++){
-    if(work[i]>specmax)specmax=work[i];
-  }
-
-  specmax=todB(specmax);
   memset(flr,0,sizeof(double)*n);
 
   /* prime the working vector with peak values */
   /* Use the 250 Hz curve up to 250 Hz and 8kHz curve after 8kHz. */
   for(i=0;i<n;i++){
-    acc+=flr[i]; /* XXX acc is behaving incorrectly.  Check it */
-    if(work[i]*work[i]>acc){
+    /*acc+=flr[i]; XXX acc is behaving incorrectly.  Check it */
+    if(f[i]>mask[i]){
       int o=rint(p->octave[i]*2.);
       if(o<0)o=0;
       if(o>10)o=10;
 
-      acc+=seed_peaks(flr,p->curves[o],work[i],
+      /*acc+=*/seed_peaks(flr,p->curves[o],f[i],
 		      specmax,p->pre,p->post,i,n,vi->max_curve_dB);
     }
   }
@@ -386,60 +361,6 @@ static void _vp_tone_tone_iter(vorbis_look_psy *p,
   /* chase curves down from the peak seeds */
   add_seeds(flr,n);
   
-  memcpy(mask,flr,n*sizeof(double));
-
-  /* mask off the ATH */
-  if(vi->athp)
-    for(i=0;i<n;i++)
-      if(mask[i]<p->ath[i])
-	mask[i]=p->ath[i];
-
-  /* do the peak att with rolloff hack. But I don't know which is
-     better... doing it to mask or floor.  We'll assume mask right now */
-  if(vi->peakattp){
-    double curmask;
-
-    /* seed peaks for rolloff first so we only do it once */
-    for(i=0;i<n;i++){
-      if(work[i]>mask[i]){
-	double val=todB(work[i]);
-	int o=p->octave[i];
-	int choice=rint((val-specmax+vi->max_curve_dB)/20.)-1;
-	if(o<0)o=0;
-	if(o>5)o=5;
-	if(choice<0)choice=0;
-	if(choice>4)choice=4;
-	work[i]=fromdB(val+vi->peakatt[o][choice]);
-      }else{
-	work[i]=0;
-      }
-    }
-
-    /* chase down from peaks forward */
-    curmask=0.;
-    for(i=0;i<n-1;i++){
-      if(work[i]>curmask)curmask=work[i];
-      if(curmask>mask[i]){
-	mask[i]=curmask;
-	/* roll off the curmask */
-	curmask*=fromdB(vi->peakpost*(p->octave[i+1]-p->octave[i]));
-      }else{
-	curmask=0;
-      }
-    }
-    /* chase down from peaks backward */
-    curmask=0.;
-    for(i=n-1;i>0;i--){
-      if(work[i]>curmask)curmask=work[i];
-      if(curmask>=mask[i]){
-	mask[i]=curmask;
-	/* roll off the curmask */
-	curmask*=fromdB(vi->peakpre*(p->octave[i]-p->octave[i-1]));
-      }else{
-	curmask=0;
-      }
-    }
-  }
 }
 
 /* stability doesn't matter */
@@ -465,10 +386,10 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
     if(flr[j]<=0)
       work[j]=0.;
     else{
-      if(fabs(f[j])<mask[j] || fabs(f[j])<flr[j]){
- 	work[j]=0;
-      }else{
-	double val=f[j]/flr[j];
+      double val=rint(f[j]/flr[j]);
+      if(mask[j]>flr[j] && fabs(f[j])<mask[j]){
+	work[j]=0;
+      }else{	  
 	work[j]=val;
       }
     }
@@ -536,26 +457,93 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f,
 			double *decay){
   double *iter=alloca(sizeof(double)*p->n);
   int i,j,n=p->n;
+  double specmax=0.;
 
   for(i=0;i<n;i++)iter[i]=fabs(f[i]);  
+  f=iter;
+  iter=alloca(sizeof(double)*p->n);
 
-  /* perform iterative tone-tone masking */
+  /* handle decay */
+  if(p->vi->decayp && decay){
+    double decscale=1.-pow(p->vi->decay_coeff,n); 
+    double attscale=1.-pow(p->vi->attack_coeff,n); 
+    for(i=0;i<n;i++){
+      double del=f[i]-decay[i];
+      if(del>0)
+	/* add energy */
+	decay[i]+=del*attscale;
+      else
+	/* remove energy */
+	decay[i]+=del*decscale;
+      if(decay[i]>f[i])f[i]=decay[i];
+    }
+  }
 
+  for(i=0;i<n;i++){
+    if(f[i]>specmax)specmax=f[i];
+  }
+  specmax=todB(specmax);
+
+  /* do the peak att with rolloff hack to the mask */
+  memset(mask,0,sizeof(double)*n);
+  if(p->vi->peakattp){
+    double curmask;
+
+    /* chase down from peaks forward */
+    curmask=0.;
+    for(i=0;i<n-1;i++){
+      if(f[i]>curmask){
+	double val=todB(f[i]);
+	int o=p->octave[i];
+	int choice=rint((val-specmax+p->vi->max_curve_dB)/20.)-1;
+	if(o<0)o=0;
+	if(o>5)o=5;
+	if(choice<0)choice=0;
+	if(choice>4)choice=4;
+	val=fromdB(val+p->vi->peakatt[o][choice]);
+	if(val>curmask)curmask=val;
+      }
+      mask[i]=curmask;
+      /* roll off the curmask */
+      curmask*=fromdB(p->vi->peakpost*(p->octave[i+1]-p->octave[i]));
+    }
+    /* chase down from peaks backward */
+    curmask=0.;
+    for(i=n-1;i>0;i--){
+      if(mask[i]>curmask)
+	curmask=mask[i];
+      else
+	mask[i]=curmask;
+      /* roll off the curmask */
+      curmask*=fromdB(p->vi->peakpre*(p->octave[i]-p->octave[i-1]));
+    }
+  }
+  /* mask off the ATH */
+  if(p->vi->athp)
+    for(i=0;i<n;i++)
+      if(mask[i]<p->ath[i])
+	mask[i]=p->ath[i];
+
+  /* perform iterative additive tone-tone masking */
+  
   for(i=0;i<p->vi->curve_fit_iterations;i++){
     if(i==0)
-      _vp_tone_tone_iter(p,iter,flr,mask,decay);
+      _vp_tone_tone_iter(p,f,flr,mask,specmax);
     else{
-      _vp_tone_tone_iter(p,iter,iter,mask,decay);
-      for(j=0;j<n;j++)
-	flr[j]=(flr[j]+iter[j])/2.;
+      _vp_tone_tone_iter(p,iter,flr,mask,specmax);
     }
     if(i!=p->vi->curve_fit_iterations-1){
       for(j=0;j<n;j++)
-	if(fabs(f[j])<mask[j] && fabs(f[j])<flr[j])
+	if(f[j]<mask[j] || f[j]<flr[j])
 	  iter[j]=0.;
 	else
-	  iter[j]=fabs(f[j]);
+	  iter[j]=f[j];
     }
   }
+
+  for(i=0;i<n;i++)
+    if(mask[i]<flr[i])
+      mask[i]=flr[i];
+
 }
 
