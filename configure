@@ -2117,7 +2117,8 @@ done
 
 ac_given_srcdir=$srcdir
 
-trap 'rm -fr `echo "Makefile lib/Makefile examples/Makefile vq/Makefile huff/Makefile cmdline/Makefile xmms/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile lib/Makefile examples/Makefile vq/Makefile \
+	huff/Makefile cmdline/Makefile xmms/Makefile kmpg/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2206,7 +2207,8 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile lib/Makefile examples/Makefile vq/Makefile huff/Makefile cmdline/Makefile xmms/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"Makefile lib/Makefile examples/Makefile vq/Makefile \
+	huff/Makefile cmdline/Makefile xmms/Makefile kmpg/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then

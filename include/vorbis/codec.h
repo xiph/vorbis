@@ -12,12 +12,18 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.11 2000/04/03 09:45:55 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.12 2000/04/10 00:12:14 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
+
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 
 #define MAX_BARK 27
 
@@ -386,6 +392,12 @@ extern int      vorbis_synthesis(vorbis_block *vb,ogg_packet *op);
 extern int      vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
 extern int      vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
 extern int      vorbis_synthesis_read(vorbis_dsp_state *v,int samples);
+
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 
 #endif
 
