@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.23 2002/07/11 06:40:48 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.24 2002/07/18 01:41:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -95,7 +95,8 @@ static int ilog(unsigned int v){
 
 static int ilog2(unsigned int v){
   int ret=0;
-  while(v>1){
+  if(v)--v;
+  while(v){
     ret++;
     v>>=1;
   }
