@@ -21,10 +21,10 @@
 #include "vqgen.h"
 
 extern char *vqext_booktype;
+extern quant_meta q;
 
 extern double vqext_metric(vqgen *v,double *b, double *a);
-extern quant_return vqext_quantize(vqgen *v,int quantbits);
-extern void vqext_unquantize(vqgen *v,quant_return *q);
 extern void vqext_adjdata(double *b,int start,int dim);
+extern void vqext_preprocess(vqgen *v);
 
 #endif

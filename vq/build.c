@@ -60,7 +60,7 @@ static char *rline(FILE *in,FILE *out,int pass){
     }
     
     if(linebuffer[0]=='#'){
-      if(pass)fprintf(out,"%s",linebuffer);
+      if(pass)fprintf(out,"%s\n",linebuffer);
       sofar=0;
     }else{
       return(linebuffer);
@@ -75,10 +75,10 @@ static char *rline(FILE *in,FILE *out,int pass){
 int main(int argc,char *argv[]){
   vqgen v;
   vqbook b;
-  quant_return q;
+  quant_meta q;
   int *quantlist=NULL;
 
-  int entries=-1,dim=-1,quant=-1;
+  int entries=-1,dim=-1;
   FILE *out=NULL;
   FILE *in=NULL;
   char *line,*name;
@@ -132,15 +132,15 @@ int main(int argc,char *argv[]){
   
   /* quant */
   line=rline(in,out,1);
-  if(sscanf(line,"%lf %lf %d %d",&q.minval,&q.delt,
-	    &q.addtoquant,&quant)!=4){
+  if(sscanf(line,"%ld %ld %d %d",&q.min,&q.delta,
+	    &q.quant,&q.sequencep)!=4){
     fprintf(stderr,"Syntax error reading book file\n");
     exit(1);
   }
   
   /* quantized entries */
-  /* save quant data; we can't regen it because the quant details
-     are specific to the data type */
+  /* save quant data; we don't want to requantize later as our method
+     is currently imperfect wrt repeated application */
   i=0;
   quantlist=malloc(sizeof(int)*v.elements*v.entries);
   for(j=0;j<entries;j++){
@@ -148,20 +148,10 @@ int main(int argc,char *argv[]){
     for(k=0;k<dim;k++){
       line=rline(in,out,0);
       sscanf(line,"%lf",&a);
+      v.entrylist[i]=a;
       quantlist[i++]=rint(a);
     }
   }    
-  
-  /* unquantized entries */
-  i=0;
-  for(j=0;j<entries;j++){
-    double a;
-    for(k=0;k<dim;k++){
-      line=rline(in,out,0);
-      sscanf(line,"%lf",&a);
-      v.entrylist[i++]=a;
-    }
-  }
   
   /* ignore bias */
   for(j=0;j<entries;j++)line=rline(in,out,0);
@@ -186,6 +176,7 @@ int main(int argc,char *argv[]){
   }
   
   fclose(in);
+  vqgen_unquantize(&v,&q);
 
   /* build the book */
   vqsp_book(&v,&b);

@@ -61,11 +61,18 @@
 
 double *sortvals;
 int els;
-int iascsort(const void *a,const void *b){
+int dascsort(const void *a,const void *b){
   double av=sortvals[*((long *)a) * els];
   double bv=sortvals[*((long *)b) * els];
   if(av<bv)return(-1);
   return(1);
+}
+
+long *isortvals;
+int iascsort(const void *a,const void *b){
+  long av=isortvals[*((long *)a)];
+  long bv=isortvals[*((long *)b)];
+  return(av-bv);
 }
 
 extern double _dist_sq(vqgen *v,double *a, double *b);
@@ -246,7 +253,7 @@ int lp_split(vqgen *v,vqbook *b,
       /* just sort the index array */
       sortvals=v->entrylist+k;
       els=v->elements;
-      qsort(entryindex,entries,sizeof(long),iascsort);
+      qsort(entryindex,entries,sizeof(long),dascsort);
       if(entries&0x1){
 	p[k]=v->entrylist[(entryindex[entries/2])*v->elements+k];
       }else{
@@ -318,11 +325,11 @@ int lp_split(vqgen *v,vqbook *b,
       b->alloc*=2;
       b->ptr0=realloc(b->ptr0,sizeof(long)*b->alloc);
       b->ptr1=realloc(b->ptr1,sizeof(long)*b->alloc);
-      b->n=realloc(b->n,sizeof(double)*b->elements*b->alloc);
+      b->n=realloc(b->n,sizeof(double)*b->dim*b->alloc);
       b->c=realloc(b->c,sizeof(double)*b->alloc);
     }
     
-    memcpy(b->n+b->elements*thisaux,n,sizeof(double)*v->elements);
+    memcpy(b->n+b->dim*thisaux,n,sizeof(double)*v->elements);
     b->c[thisaux]=c;
 
     if(entriesA==1){
@@ -349,34 +356,34 @@ int lp_split(vqgen *v,vqbook *b,
 void vqsp_book(vqgen *v, vqbook *b){
   long *entryindex=malloc(sizeof(double)*v->entries);
   long *pointindex=malloc(sizeof(double)*v->points);
-  long i;
+  long i,j;
 
   memset(b,0,sizeof(vqbook));
   for(i=0;i<v->entries;i++)entryindex[i]=i;
   for(i=0;i<v->points;i++)pointindex[i]=i;
   
-  b->elements=v->elements;
+  b->dim=v->elements;
   b->entries=v->entries;
   b->alloc=4096;
+
   b->ptr0=malloc(sizeof(long)*b->alloc);
   b->ptr1=malloc(sizeof(long)*b->alloc);
-  b->n=malloc(sizeof(double)*b->elements*b->alloc);
+  b->n=malloc(sizeof(double)*b->dim*b->alloc);
   b->c=malloc(sizeof(double)*b->alloc);
-  
-  b->valuelist=v->entrylist;
-  b->codelist=malloc(sizeof(long)*b->entries);
   b->lengthlist=calloc(b->entries,sizeof(long));
-
+  
   /* first, generate the encoding decision heirarchy */
   fprintf(stderr,"Total leaves: %d\n",
 	  lp_split(v,b,entryindex,v->entries, pointindex,v->points,0,0));
   
+  free(entryindex);
+  free(pointindex);
+
   /* run all training points through the decision tree to get a final
      probability count */
   {
     long *probability=calloc(b->entries,sizeof(long));
     long *membership=malloc(b->entries*sizeof(long));
-    long j;
 
     for(i=0;i<v->points;i++){
       int ret=vqenc_entry(b,v->pointlist+i*v->elements);
@@ -431,28 +438,81 @@ void vqsp_book(vqgen *v, vqbook *b){
     
     /* print the results */
     for(i=0;i<v->entries;i++)
-      fprintf(stderr,"%d: count=%ld codelength=%d\n",i,probability[i],b->lengthlist[i]);
+      fprintf(stderr,"%ld: count=%ld codelength=%ld\n",i,probability[i],b->lengthlist[i]);
 
     free(probability);
     free(membership);
   }
 
-  /* rearrange, sort by codelength */
+  /* Sort the entries by codeword length, short to long (eases
+     assignment and packing to do it now) */
+  {
+    long *wordlen=b->lengthlist;
+    long *index=malloc(b->entries*sizeof(long));
+    long *revindex=malloc(b->entries*sizeof(long));
+    int k;
+    for(i=0;i<b->entries;i++)index[i]=i;
+    isortvals=b->lengthlist;
+    qsort(index,b->entries,sizeof(long),iascsort);
 
+    /* rearrange storage; ptr0/1 first as it needs a reverse index */
+    /* n and c stay unchanged */
+    for(i=0;i<b->entries;i++)revindex[index[i]]=i;
+    for(i=0;i<b->aux;i++){
+      if(b->ptr0[i]>=0)b->ptr0[i]=revindex[i];
+      if(b->ptr1[i]>=0)b->ptr1[i]=revindex[i];
+    }
+    free(revindex);
+
+    /* map lengthlist and vallist with index */
+    b->lengthlist=calloc(b->entries,sizeof(long));
+    b->valuelist=malloc(sizeof(double)*b->entries*b->dim);
+    for(i=0;i<b->entries;i++){
+      long e=index[i];
+      for(k=0;k<b->dim;k++)
+	b->valuelist[i*b->dim+k]=v->entrylist[e*b->dim+k];
+      b->lengthlist[i]=wordlen[e];
+    }
+
+    free(wordlen);
+  }
 
   /* generate the codewords (short to long) */
-  
-  
-  free(entryindex);
-  free(pointindex);
+  {
+    long current=0;
+    long length=0;
+    b->codelist=malloc(sizeof(long)*b->entries);
+    for(i=0;i<b->entries;i++){
+      if(length != b->lengthlist[i]){
+	current<<=(b->lengthlist[i]-length);
+	length=b->lengthlist[i];
+      }
+      b->codelist[i]=current;
+      fprintf(stderr,"codeword %ld: %ld (length %d)\n",
+	      i, current, b->lengthlist[i]);
+      current++;
+    }
+  }
+
+  /* sanity check the codewords */
+  for(i=0;i<b->entries;i++){
+    for(j=i+1;j<b->entries;j++){
+      if(b->codelist[i]==b->codelist[j]){
+	fprintf(stderr,"Error; codewords for %ld and %ld both equal %lx\n",
+		i, j, b->codelist[i]);
+	exit(1);
+      }
+    }
+  }
+
 }
 
 int vqenc_entry(vqbook *b,double *val){
   int ptr=0,k;
   while(1){
     double c= -b->c[ptr];
-    double *nptr=b->n+b->elements*ptr;
-    for(k=0;k<b->elements;k++)
+    double *nptr=b->n+b->dim*ptr;
+    for(k=0;k<b->dim;k++)
       c+=nptr[k]*val[k];
     if(c>0.) /* in A */
       ptr= -b->ptr0[ptr];

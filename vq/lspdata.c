@@ -14,7 +14,7 @@
  function: metrics and quantization code for LSP VQ codebooks
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Dec 15 1999
+ last modification date: Dec 24 1999
 
  ********************************************************************/
 
@@ -23,7 +23,8 @@
 #include "vqgen.h"
 #include "vqext.h"
 
-char *vqext_booktype="LSPdata";
+char *vqext_booktype="LSPdata";  
+quant_meta q={0,0,0,1};          /* set sequence data */
 
 /* LSP training metric.  We weight error proportional to distance
    *between* LSP vector values.  The idea of this metric is not to set
@@ -32,14 +33,14 @@ char *vqext_booktype="LSPdata";
    features. */
 
 double global_maxdel=M_PI;
-#define FUDGE ((global_maxdel*1.0)-testdist)
+#define FUDGE ((global_maxdel*2.0)-testdist)
 
                             /* candidate,actual */
 double vqext_metric(vqgen *v,double *b, double *a){
   int i;
   int el=v->elements;
   double acc=0.;
-  double lasta=0.;
+  /*double lasta=0.;*/
   double lastb=0.;
   for(i=0;i<el;i++){
 
@@ -57,76 +58,6 @@ double vqext_metric(vqgen *v,double *b, double *a){
   return acc;
 }
 
-/* LSP quantizes all absolute values, but the book encodes distance
-   between values (which has a smaller range).  Thus the desired
-   quantibits apply to the encoded (delta) values, not abs
-   positions. This requires minor additional trickery. */
-
-quant_return vqext_quantize(vqgen *v,int quantbits){
-  quant_return q;
-  double maxval=0.;
-  double maxdel;
-  double mindel;
-  double delta;
-  double fullrangevals;
-  double maxquant=((1<<quantbits)-1);
-  int j,k;
-
-  mindel=maxdel=_now(v,0)[0];
-  
-  for(j=0;j<v->entries;j++){
-    double last=0.;
-    for(k=0;k<v->elements;k++){
-      if(mindel>_now(v,j)[k]-last)mindel=_now(v,j)[k]-last;
-      if(maxdel<_now(v,j)[k]-last)maxdel=_now(v,j)[k]-last;
-      if(maxval<_now(v,j)[k])maxval=_now(v,j)[k];
-      last=_now(v,j)[k];
-    }
-  }
-
-  q.minval=0.;
-  delta=(maxdel-mindel)/((1<<quantbits)-2);
-  fullrangevals=floor(maxval/delta);
-  q.delt=delta=maxval/fullrangevals;
-  q.addtoquant=floor(mindel/delta);
-
-  for(j=0;j<v->entries;j++){
-    double last=0.;
-    for(k=0;k<v->elements;k++){
-      double val=_now(v,j)[k];
-      double now=rint(val/delta);
-      double test=_now(v,j)[k]=now-last-q.addtoquant;
-
-      if(test<0){
-	fprintf(stderr,"fault; quantized value<0\n");
-	exit(1);
-      }
-
-      if(test>maxquant){
-	fprintf(stderr,"fault; quantized value>max\n");
-	exit(1);
-      }
-      last=now;
-    }
-  }
-  return(q);
-}
-
-/* much easier :-) */
-void vqext_unquantize(vqgen *v,quant_return *q){
-  long j,k;
-  if(global_maxdel==M_PI)global_maxdel=0.;
-  for(j=0;j<v->entries;j++){
-    double last=0.;
-    for(k=0;k<v->elements;k++){
-      double del=(_now(v,j)[k]+q->addtoquant)*q->delt+q->minval;
-      last+=del;
-      _now(v,j)[k]=last;
-      if(del>global_maxdel)global_maxdel=del;
-    }
-  }
-}
-
 /* Data files are line-vectors, starting with zero.  If we want to
    train on a subvector starting in the middle, we need to adjust the
    data as if it was starting at zero */
@@ -136,5 +67,20 @@ void vqext_adjdata(double *b,int start,int dim){
     int i;
     double base=b[start-1];
     for(i=start;i<start+dim;i++)b[i]-=base;
+  }
+}
+
+/* we just need to calc the global_maxdel from the training set */
+void vqext_preprocess(vqgen *v){
+  long j,k;
+
+  global_maxdel=0.;
+  for(j=0;j<v->entries;j++){
+    double last=0.;
+    for(k=0;k<v->elements;k++){
+      double now=_now(v,j)[k];
+      if(now-last>global_maxdel)global_maxdel=now-last;
+      last=now;
+    }
   }
 }

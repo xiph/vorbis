@@ -76,6 +76,117 @@ void _vqgen_seed(vqgen *v){
 
 /* External calls *******************************************************/
 
+/* We have two forms of quantization; in the first, each vector
+   element in the codebook entry is orthogonal.  Residues would use this
+   quantization for example.
+
+   In the second, we have a sequence of monotonically increasing
+   values that we wish to quantize as deltas (to save space).  We
+   still need to quantize so that absolute values are accurate. For
+   example, LSP quantizes all absolute values, but the book encodes
+   distance between values because each successive value is larger
+   than the preceeding value.  Thus the desired quantibits apply to
+   the encoded (delta) values, not abs positions. This requires minor
+   additional encode-side trickery. */
+
+/* 24 bit float (not IEEE; nonnormalized mantissa +
+   biased exponent ): neeeeemm mmmmmmmm mmmmmmmm */
+
+#define VQ_FEXP_BIAS 20 /* bias toward values smaller than 1. */
+long float24_pack(double val){
+  int sign=0;
+  long exp;
+  long mant;
+  if(val<0){
+    sign=0x800000;
+    val= -val;
+  }
+  exp= floor(log(val)/log(2));
+  mant=rint(ldexp(val,17-exp));
+  exp=(exp+VQ_FEXP_BIAS)<<18;
+
+  return(sign|exp|mant);
+}
+
+double float24_unpack(long val){
+  double mant=val&0x3ffff;
+  double sign=val&0x800000;
+  double exp =(val&0x7c0000)>>18;
+  if(sign)mant= -mant;
+  return(ldexp(mant,exp-17-VQ_FEXP_BIAS));
+}
+
+void vqgen_quantize(vqgen *v,quant_meta *q){
+
+  double maxdel;
+  double mindel;
+
+  double delta;
+  double maxquant=((1<<q->quant)-1);
+
+  int j,k;
+
+  mindel=maxdel=_now(v,0)[0];
+  
+  for(j=0;j<v->entries;j++){
+    double last=0.;
+    for(k=0;k<v->elements;k++){
+      if(mindel>_now(v,j)[k]-last)mindel=_now(v,j)[k]-last;
+      if(maxdel<_now(v,j)[k]-last)maxdel=_now(v,j)[k]-last;
+      if(q->sequencep)last=_now(v,j)[k];
+    }
+  }
+
+
+  /* first find the basic delta amount from the maximum span to be
+     encoded.  Loosen the delta slightly to allow for additional error
+     during sequence quantization */
+
+  delta=(maxdel-mindel)/((1<<q->quant)-1.5);
+
+  q->min=float24_pack(mindel);
+  q->delta=float24_pack(delta);
+
+  for(j=0;j<v->entries;j++){
+    double last=0;
+    for(k=0;k<v->elements;k++){
+      double val=_now(v,j)[k];
+      double now=rint((val-last-mindel)/delta);
+      
+      _now(v,j)[k]=now;
+      if(now<0){
+	/* be paranoid; this should be impossible */
+	fprintf(stderr,"fault; quantized value<0\n");
+	exit(1);
+      }
+
+      if(now>maxquant){
+	/* be paranoid; this should be impossible */
+	fprintf(stderr,"fault; quantized value>max\n");
+	exit(1);
+      }
+      if(q->sequencep)last=(now*delta)+mindel+last;
+    }
+  }
+}
+
+/* much easier :-) */
+void vqgen_unquantize(vqgen *v,quant_meta *q){
+  long j,k;
+  double mindel=float24_unpack(q->min);
+  double delta=float24_unpack(q->delta);
+
+  for(j=0;j<v->entries;j++){
+    double last=0.;
+    for(k=0;k<v->elements;k++){
+      double now=_now(v,j)[k]*delta+last+mindel;
+      _now(v,j)[k]=now;
+      if(q->sequencep)last=now;
+
+    }
+  }
+}
+
 void vqgen_init(vqgen *v,int elements,int entries,
 		double (*metric)(vqgen *,double *, double *)){
   memset(v,0,sizeof(vqgen));

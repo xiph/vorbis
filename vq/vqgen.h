@@ -16,8 +16,7 @@
 
 typedef struct vqgen{
   int it;
-
-  int    elements;
+  int elements;
 
   /* point cache */
   double *pointlist; 
@@ -34,19 +33,26 @@ typedef struct vqgen{
 } vqgen;
 
 typedef struct vqbook{
-  long elements;
-  long entries;
+  long dim;           /* codebook dimensions (elements per vector) */
+  long entries;       /* codebook entries */
 
-  double *valuelist;
-  long   *codelist;
-  long   *lengthlist;
+  long   min;         /* packed 24 bit float; quant value 0 maps to minval */
+  long   delta;       /* packed 24 bit float; val 1 - val 0 == delta */       
+  int    quant;       /* 0 < quant <= 16 */
+  int    sequencep;   /* bitflag */
+
+  double *valuelist;  /* list of dim*entries quant/actual entry values */
+  long   *codelist;   /* list of bitstream codewords for each entry */
+  long   *lengthlist; /* codeword lengths in bits */
 
   /* auxiliary encoding/decoding information */
+  /* encode: provided pre-calculated partitioning tree */
+  /* decode: hufftree */
   long   *ptr0;
   long   *ptr1;
 
-  /* auxiliary encoding information */
-  double *n;
+  /* auxiliary encoding information. Not used in decode */
+  double *n;         /* decision hyperplanes: sum(x_i*n_i)[0<=i<dim]=c */ 
   double *c;
   long   aux;
   long   alloc;
@@ -54,10 +60,11 @@ typedef struct vqbook{
 } vqbook;
 
 typedef struct {
-  double minval;
-  double delt;
-  int    addtoquant;
-} quant_return;
+  long   min;       /* packed 24 bit float */       
+  long   delta;     /* packed 24 bit float */       
+  int    quant;     /* 0 < quant <= 16 */
+  int    sequencep; /* bitflag */
+} quant_meta;
 
 static inline double *_point(vqgen *v,long ptr){
   return v->pointlist+(v->elements*ptr);
@@ -72,6 +79,9 @@ extern void vqgen_init(vqgen *v,int elements,int entries,
 extern void vqgen_addpoint(vqgen *v, double *p);
 extern double *vqgen_midpoint(vqgen *v);
 extern double vqgen_iterate(vqgen *v);
+
+extern void vqgen_unquantize(vqgen *v,quant_meta *q);
+extern void vqgen_quantize(vqgen *v,quant_meta *q);
 
 extern void vqsp_book(vqgen *v,vqbook *b);
 extern int vqenc_entry(vqbook *b,double *val);

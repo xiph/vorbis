@@ -14,7 +14,7 @@
  function: utility main for training codebooks
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Dec 15 1999
+ last modification date: Dec 23 1999
 
  ********************************************************************/
 
@@ -62,7 +62,7 @@ static char *rline(FILE *in,FILE *out,int pass){
     }
     
     if(linebuffer[0]=='#'){
-      if(pass)fprintf(out,"%s",linebuffer);
+      if(pass)fprintf(out,"%s\n",linebuffer);
       sofar=0;
     }else{
       return(linebuffer);
@@ -105,9 +105,8 @@ void setexit(int dummy){
 
 int main(int argc,char *argv[]){
   vqgen v;
-  quant_return q;
 
-  int entries=-1,dim=-1,quant=-1;
+  int entries=-1,dim=-1;
   int start=0,num=-1;
   double desired=.05;
   int iter=1000;
@@ -116,6 +115,7 @@ int main(int argc,char *argv[]){
   char *line;
   long i,j,k;
   int init=0;
+  q.quant=-1;
 
   argv++;
   if(!*argv){
@@ -166,18 +166,13 @@ int main(int argc,char *argv[]){
       
       /* quant setup */
       line=rline(in,out,1);
-      if(sscanf(line,"%lf %lf %d %d",&q.minval,&q.delt,
-		&q.addtoquant,&quant)!=4){
+      if(sscanf(line,"%ld %ld %d %d",&q.min,&q.delta,
+		&q.quant,&q.sequencep)!=4){
 	fprintf(stderr,"Syntax error reading book file\n");
 	exit(1);
       }
       
       /* quantized entries */
-      for(j=0;j<entries;j++)
-	for(k=0;k<dim;k++)
-	  line=rline(in,out,0);
-      
-      /* unquantized entries */
       i=0;
       for(j=0;j<entries;j++){
 	for(k=0;k<dim;k++){
@@ -185,9 +180,10 @@ int main(int argc,char *argv[]){
 	  sscanf(line,"%lf",&a);
 	  v.entrylist[i++]=a;
 	}
-      }
-      
-	/* bias, points */
+      }      
+      vqgen_unquantize(&v,&q);
+
+      /* bias, points */
       i=0;
       for(j=0;j<entries;j++){
 	line=rline(in,out,0);
@@ -196,11 +192,11 @@ int main(int argc,char *argv[]){
       }
       
       {
-	double b[80];
+	double *b=alloca(dim*sizeof(double));
 	i=0;
 	v.entries=0; /* hack to avoid reseeding */
 	while(1){
-	  for(k=0;k<dim && k<80;k++){
+	  for(k=0;k<dim;k++){
 	    line=rline(in,out,0);
 	    if(!line)break;
 	    sscanf(line,"%lf",b+k);
@@ -226,7 +222,7 @@ int main(int argc,char *argv[]){
       }
       switch(argv[0][1]){
       case 'p':
-	if(sscanf(argv[1],"%d,%d,%d",&entries,&dim,&quant)!=3)
+	if(sscanf(argv[1],"%d,%d,%d",&entries,&dim,&q.quant)!=3)
 	  goto syner;
 	break;
       case 's':
@@ -256,7 +252,7 @@ int main(int argc,char *argv[]){
       int cols=-1;
 
       if(!init){
-	if(dim==-1 || entries==-1 || quant==-1){
+	if(dim==-1 || entries==-1 || q.quant==-1){
 	  fprintf(stderr,"-p required when training a new set\n");
 	  exit(1);
 	}
@@ -320,15 +316,17 @@ int main(int argc,char *argv[]){
     exit(1);
   }
 
+  vqext_preprocess(&v);
+
   /* train the book */
   signal(SIGTERM,setexit);
   signal(SIGINT,setexit);
 
   for(i=0;i<iter && !exiting;i++){
     double result;
-    if(i!=0)vqext_unquantize(&v,&q);
+    if(i!=0)vqgen_unquantize(&v,&q);
     result=vqgen_iterate(&v);
-    q=vqext_quantize(&v,quant);
+    vqgen_quantize(&v,&q);
     if(result<desired)break;
   }
 
@@ -337,7 +335,7 @@ int main(int argc,char *argv[]){
   fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
   fprintf(out,"%s\n",vqext_booktype);
   fprintf(out,"%d %d\n",entries,dim);
-  fprintf(out,"%g %g %d %d\n",q.minval,q.delt,q.addtoquant,quant);
+  fprintf(out,"%ld %ld %d %d\n",q.min,q.delta,q.quant,q.sequencep);
 
   /* quantized entries */
   fprintf(out,"# quantized entries---\n");
@@ -345,17 +343,6 @@ int main(int argc,char *argv[]){
   for(j=0;j<entries;j++)
     for(k=0;k<dim;k++)
       fprintf(out,"%d\n",(int)(rint(v.entrylist[i++])));
-
-  /* dequantize */
-  vqext_unquantize(&v,&q);
-
-  fprintf(out,"# unquantized entries---\n");
-  i=0;
-  for(j=0;j<entries;j++)
-    for(k=0;k<dim;k++)
-      fprintf(out,"%f\n",v.entrylist[i++]);
-
-  /* unquantized entries */
   
   fprintf(out,"# biases---\n");
   i=0;
