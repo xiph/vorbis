@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.4.2.1 2000/08/31 08:59:58 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.4.2.2 2000/10/05 22:41:25 xiphmont Exp $
 
  ********************************************************************/
 
