@@ -36,6 +36,8 @@
 
  ********************************************************************/
 
+static const char rcsid[] = "$Id";
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -336,16 +338,3 @@ void iMDCT(double *in, double *out, MDCT_lookup *init, double *window){
     }
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-

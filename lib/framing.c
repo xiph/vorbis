@@ -23,6 +23,8 @@
 
  ********************************************************************/
 
+static const char rcsid[] = "$Id";
+
 #include <stdlib.h>
 #include <string.h>
 #include "codec.h"
@@ -640,7 +642,3 @@ int main(void){
 }
 
 #endif
-
-
-
-

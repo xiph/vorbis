@@ -18,6 +18,8 @@
 
  ********************************************************************/
 
+/* $Id: codec.h,v 1.2 1999/07/13 08:00:15 mwhitson Exp $ */
+
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
 

@@ -26,6 +26,8 @@
 
  ********************************************************************/
 
+static const char rcsid[] = "$Id";
+
 #include <stdlib.h>
 
 /* pcm accumulator and multipliers 
@@ -305,7 +307,3 @@ int vorbis_analysis(vorbis_state *v, double **pcm, int vals){
   /* done */
   return(1);
 }
-
-
-
-
