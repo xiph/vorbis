@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.2.2.4 2000/06/02 03:27:39 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.2.2.5 2000/06/02 23:48:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -81,6 +81,24 @@ void add_vector(codebook *b,double *vec,long n){
   }
 }
 
+static int bestm(codebook *b,double *vec){
+  encode_aux_threshmatch *tt=b->c->thresh_tree;
+  int dim=b->dim;
+  int i,k,o;
+  int best=0;
+  
+  /* what would be the closest match if the codebook was fully
+     populated? */
+  
+  for(k=0,o=dim-1;k<dim;k++,o--){
+    int i;
+    for(i=0;i<tt->threshvals-1;i++)
+      if(vec[o]<tt->quantthresh[i])break;
+    best=(best*tt->quantvals)+tt->quantmap[i];
+  }
+  return(best);
+}
+
 static int closest(codebook *b,double *vec,int current){
   encode_aux_threshmatch *tt=b->c->thresh_tree;
   int dim=b->dim;
@@ -88,17 +106,7 @@ static int closest(codebook *b,double *vec,int current){
 
   double bestmetric=0;
   int bestentry=-1;
-  int best=0;
-
-  /* what would be the closest match if the codebook was fully
-     populated? */
-
-  for(k=0,o=dim-1;k<dim;k++,o--){
-    int i;
-    for(i=0;i<tt->threshvals-1;i++)
-      if(vec[o]<tt->quantthresh[i])break;
-    best=(best*tt->quantvals)+tt->quantmap[i];
-  }
+  int best=bestm(b,vec);
 
   if(current<0 && b->c->lengthlist[best]>0)return best;
 
@@ -113,6 +121,20 @@ static int closest(codebook *b,double *vec,int current){
   }
 
   return(bestentry);
+}
+
+static double _heuristic(codebook *b,double *ppt,int secondbest){
+  double *secondcell=b->valuelist+secondbest*b->dim;
+  int best=bestm(b,ppt);
+  double *firstcell=b->valuelist+best*b->dim;
+  double error=_dist(b->dim,firstcell,secondcell);
+  double *zero=alloca(b->dim*sizeof(double));
+  double fromzero;
+  
+  memset(zero,0,b->dim*sizeof(double));
+  fromzero=sqrt(_dist(b->dim,firstcell,zero));
+
+  return(error/fromzero);
 }
 
 static int longsort(const void *a, const void *b){
@@ -323,7 +345,7 @@ int main(int argc,char *argv[]){
       if(i<points-entries){
 	cellerror[firstentry]+=secondmetric-firstmetric;
 	cellerrormax[firstentry]=max(cellerrormax[firstentry],
-				     rint(secondmetric));
+				     _heuristic(b,ppt,secondentry));
 	cellcount[firstentry]++;
 	cellcount2[secondentry]++;
       }
@@ -402,7 +424,7 @@ int main(int argc,char *argv[]){
 	  cellcount[bestcell]--;
 	  cellerror[firstentry]+=secondmetric-firstmetric;
 	  cellerrormax[firstentry]=max(cellerrormax[firstentry],
-				       rint(secondmetric));
+				       _heuristic(b,ppt,secondentry));
 	}
 
 	membership[head]=firsthead[firstentry];
@@ -434,7 +456,7 @@ int main(int argc,char *argv[]){
 	  cellcount2[bestcell]--;
 	  cellerror[firstentry]+=secondmetric-oldsecondmetric;
 	  cellerrormax[firstentry]=max(cellerrormax[firstentry],
-				       rint(secondmetric));
+				       _heuristic(b,ppt,secondentry));
 	}
 	
 	secondary[head]=secondhead[secondentry];

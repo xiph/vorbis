@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.20.2.1 2000/05/24 21:17:01 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.20.2.2 2000/06/02 23:48:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -370,9 +370,9 @@ static void seed_curve(double *flr,
   int nextx;
 
   /* make this attenuation adjustable */
-  int choice=rint((todB(amp)-specmax+specatt)/10.)-2;
-  if(choice<0)choice=0;
-  if(choice>8)choice=8;
+  int choice=(int)((todB(amp)-specmax+specatt)/10.-1.5);
+  choice=max(choice,0);
+  choice=min(choice,8);
 
   for(i=0;i<EHMER_MAX;i++){
     if(prevx<n){
@@ -383,10 +383,10 @@ static void seed_curve(double *flr,
 	lin*=amp;	
 	if(prevx<0){
 	  if(nextx>=0){
-	    if(flr[0]<lin)flr[0]=lin;
+	    flr[0]=max(flr[0],lin);
 	  }
 	}else{
-	  if(flr[prevx]<lin)flr[prevx]=lin;
+	  flr[prevx]=max(flr[prevx],lin);
 	}
       }
       prevx=nextx;
@@ -652,11 +652,18 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f, double *flr){
       work[j]=f[j]/flr[j];
   }
 
-  /* mask off the ATH */
+  /* mask off the ATH.  This should be floating below specmax too, but
+     for now, 0dB is fixed... */
   if(p->vi->athp)
     for(j=0;j<p->n;j++)
-      if(fabs(f[j])<p->ath[j])
-	work[j]=0.;
+      if(fabs(f[j])<p->ath[j]){
+	/* zeroes can cause rounding stability issues */
+	if(f[j]>0)
+	  work[j]=.1;
+	else
+	  if(f[j]<0)
+	    work[j]=-.1;
+      }
 
   /* look at spectral energy levels.  Noise is noise; sensation level
      is important */

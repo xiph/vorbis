@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.10.2.2 2000/05/25 09:55:16 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.10.2.3 2000/06/02 23:48:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,6 +27,20 @@
 #include "vorbis/book/lsp32_0.vqh"
 #include "vorbis/book/resaux0_short.vqh"
 #include "vorbis/book/resaux0_long.vqh"
+
+#include "vorbis/book/res0b_1.vqh"
+#include "vorbis/book/res0b_2.vqh"
+#include "vorbis/book/res0b_3.vqh"
+#include "vorbis/book/res0b_4.vqh"
+#include "vorbis/book/res0b_5.vqh"
+#include "vorbis/book/res0b_6.vqh"
+#include "vorbis/book/res0b_7.vqh"
+#include "vorbis/book/res0b_8.vqh"
+#include "vorbis/book/res0b_9.vqh"
+#include "vorbis/book/res0b_10.vqh"
+#include "vorbis/book/res0b_11.vqh"
+#include "vorbis/book/res0b_12.vqh"
+#include "vorbis/book/res0b_13.vqh"
 
 #include "vorbis/book/res0a_1.vqh"
 #include "vorbis/book/res0a_2.vqh"
@@ -146,7 +160,7 @@ vorbis_info info_A={
   /* psy */
   {&_psy_set0},
   /* thresh sample period, preecho clamp trigger threshhold, range */
-  64, 10, 2 
+  64, 4, 2 
 };
 
 #define PREDEF_INFO_MAX 0
