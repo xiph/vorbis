@@ -15,10 +15,12 @@ AC_ARG_ENABLE(vorbistest, [  --disable-vorbistest       Do not try to compile an
   if test x$vorbis_prefix != x ; then
     vorbis_args="$vorbis_args --prefix=$vorbis_prefix"
     VORBIS_CFLAGS="-I$vorbis_prefix/include"
-    VORBIS_LIBS="-L$vorbis_prefix/lib"
+    VORBIS_LIBDIR="-L$vorbis_prefix/lib"
   fi
 
-  VORBIS_LIBS="$VORBIS_LIBS -lvorbisfile -lvorbis -lm"
+  VORBIS_LIBS="$VORBIS_LIBDIR -lvorbis -lm"
+  VORBISFILE_LIBS="-lvorbisfile"
+  VORBISENC_LIBS="-lvorbisenc"
 
   AC_MSG_CHECKING(for Vorbis)
   no_vorbis=""
@@ -82,9 +84,13 @@ int main ()
      fi
      VORBIS_CFLAGS=""
      VORBIS_LIBS=""
+     VORBISFILE_LIBS=""
+     VORBISENC_LIBS=""
      ifelse([$2], , :, [$2])
   fi
   AC_SUBST(VORBIS_CFLAGS)
   AC_SUBST(VORBIS_LIBS)
+  AC_SUBST(VORBISFILE_LIBS)
+  AC_SUBST(VORBISENC_LIBS)
   rm -f conf.vorbistest
 ])
