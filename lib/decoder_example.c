@@ -241,9 +241,9 @@ int main(){
   /* ogg_page and ogg_packet structs always point to storage in
      libvorbis.  They're never freed or manipulated directly */
   
-  vorbis_info_clear(&vi);
   vorbis_dsp_clear(&vd);
   vorbis_block_clear(&vb);
+  vorbis_info_clear(&vi);  /* must be called last */
   
   fprintf(stderr,"Done.\n");
   return(0);

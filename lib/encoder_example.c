@@ -140,12 +140,12 @@ int main(){
     }
   }
 
-  /* clean up and exit */
+  /* clean up and exit.  vorbis_info_clear() must be called last */
   
   ogg_stream_clear(&os);
-  vorbis_info_clear(&vi);
   vorbis_dsp_clear(&vd);
   vorbis_block_clear(&vb);
+  vorbis_info_clear(&vi);
   
   /* ogg_page and ogg_packet structs always point to storage in
      libvorbis.  They're never freed or manipulated directly */
