@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.50 2003/12/30 12:44:28 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -824,10 +824,18 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   vorbis_encode_map_n_res_setup(vi,hi->base_setting,setup->maps);
 
   /* set bitrate readonlies and management */
-  vi->bitrate_nominal=setting_to_approx_bitrate(vi);
+  if(hi->bitrate_av>0)
+    vi->bitrate_nominal=hi->bitrate_av;
+  else{
+    vi->bitrate_nominal=setting_to_approx_bitrate(vi);
+  }
+
   vi->bitrate_lower=hi->bitrate_min;
   vi->bitrate_upper=hi->bitrate_max;
-  vi->bitrate_window=(double)hi->bitrate_reservoir/vi->rate;
+  if(hi->bitrate_av)
+    vi->bitrate_window=(double)hi->bitrate_reservoir/hi->bitrate_av;
+  else
+    vi->bitrate_window=0.;
 
   if(hi->managed){
     ci->bi.avg_rate=hi->bitrate_av;
