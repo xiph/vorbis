@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.2 2000/01/12 11:34:35 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.3 2000/01/22 10:40:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,7 +32,7 @@
 
 */
 
-typedef struct codebook{
+typedef struct static_codebook{
   long dim;           /* codebook dimensions (elements per vector) */
   long entries;       /* codebook entries */
 
@@ -42,17 +42,12 @@ typedef struct codebook{
   int    q_quant;     /* 0 < quant <= 16 */
   int    q_sequencep; /* bitflag */
 
-  double *valuelist;  /* list of dim*entries actual entry values */
   long   *quantlist;  /* list of dim*entries quantized entry values */
 
-  /* actual codewords/lengths */
-  long   *codelist;   /* list of bitstream codewords for each entry */
   long   *lengthlist; /* codeword lengths in bits */
 
   struct encode_aux *encode_tree;
-  struct decode_aux *decode_tree;
-
-} codebook;
+} static_codebook;
 
 typedef struct encode_aux{
   /* pre-calculated partitioning tree */
@@ -70,6 +65,17 @@ typedef struct decode_aux{
   long   *ptr1;
   long   aux;        /* number of tree entries */
 } decode_aux;
+
+typedef struct codebook{
+  long dim;           /* codebook dimensions (elements per vector) */
+  long entries;       /* codebook entries */
+  static_codebook *c;
+
+  double *valuelist;  /* list of dim*entries actual entry values */
+  long   *codelist;   /* list of bitstream codewords for each entry */
+  struct decode_aux *decode_tree;
+
+} codebook;
 
 #define VQ_FEXP_BIAS 20 /* bias toward values smaller than 1. */
 

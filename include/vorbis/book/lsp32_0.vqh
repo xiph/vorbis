@@ -1691,12 +1691,9 @@ static encode_aux _vq_aux_lsp32_0 = {
 
 static codebook _vq_book_lsp32_0 = {
 	4, 256, 4089638, 2558033, 8, 1,
-	0,
 	_vq_quantlist_lsp32_0,
-	0,
 	_vq_lengthlist_lsp32_0,
-	&_vq_aux_lsp32_0,
-	0
+	&_vq_aux_lsp32_0
 };
 
 

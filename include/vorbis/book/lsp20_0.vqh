@@ -1167,12 +1167,9 @@ static encode_aux _vq_aux_lsp20_0 = {
 
 static codebook _vq_book_lsp20_0 = {
 	4, 256, 4152003, 2812515, 8, 1,
-	0,
 	_vq_quantlist_lsp20_0,
-	0,
 	_vq_lengthlist_lsp20_0,
-	&_vq_aux_lsp20_0,
-	0
+	&_vq_aux_lsp20_0
 };
 
 

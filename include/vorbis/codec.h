@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.3 2000/01/20 04:43:50 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.4 2000/01/22 10:40:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,7 @@
 #include <sys/types.h>
 #include "vorbis/codebook.h"
 #include "vorbis/internal.h"
+#include "vorbis/backends.h"
 
 /* vobis_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,
@@ -60,59 +61,48 @@ typedef struct vorbis_info{
 
   long blocksizes[2];
 
-  /* unlimited user comment fields.  libvorbis writes 'libvorbis'
-     whatever vedor is set to in encode */
-  char **user_comments;
-  int    comments;
-  char  *vendor;
-
   /* modes are the primary means of supporting on-the-fly different
      blocksizes, different channel mappings (LR or mid-side),
      different residue backends, etc.  Each mode consists of a
      blocksize flag and a mapping (along with the mapping setup */
+
   int        modes;
-  int       *blockflags;
-  int       *windowtypes;
-  int       *transformtypes;
-  int       *mappingtypes;
-  void     **modelist;
-  
-  /* Codebook storage for encode and decode.  Encode side is submitted
-     by the client (and memory must be managed by the client), decode
-     side is allocated by header_in */
+  int        maps;
   int        times;
-  int       *timetypes;
-  void     **timelist;
-
   int        floors;
-  int       *floortypes;
-  void     **floorlist;
-
   int        residues;
-  int       *residuetypes;
-  void     **residuelist;
-
-  /* all books are the same generic type */
   int        books;
-  codebook **booklist;
+  int        psys;     /* encode only */
 
-  /* here on out is encode only, not added to the header */
-  int        psys;
-  void     **psylist;
+  vorbis_info_mode    **mode_param;
+  int                  *map_type;
+  vorbis_info_mapping **map_param;
+  int                  *time_type;
+  vorbis_info_time    **time_param;
+  int                  *floor_type;
+  vorbis_info_floor   **floor_param;
+  int                  *residue_type;
+  vorbis_info_res     **residue_param;
+  static_codebook     **book_param;
+  vorbis_info_psy     **psy_param; /* encode only */
   
-  /* for block long/sort tuning */
-  int    envelopesa;
-  double preecho_thresh;
-  double preecho_clamp;
-
-  /* local storage, only used on the encoding size.  This way the
-     application does not need to worry about freeing some packets'
-     memory and not others'.  Packet storage is always tracked */
-  char *header;
-  char *header1;
-  char *header2;
+  /* for block long/sort tuning; encode only */
+  int        envelopesa;
+  double     preecho_thresh;
+  double     preecho_clamp;
 
 } vorbis_info;
+
+/* the comments are not part of vorbis_info so that vorbis_info can be
+   static storage */
+typedef struct vorbis_comments{
+  /* unlimited user comment fields.  libvorbis writes 'libvorbis'
+     whatever vendor is set to in encode */
+  char **user_comments;
+  int    comments;
+  char  *vendor;
+
+} vorbis_comments;
  
 /* ogg_page is used to encapsulate the data in one Ogg bitstream page *****/
 
@@ -192,15 +182,10 @@ typedef struct {
 /* vorbis_dsp_state buffers the current vorbis audio
    analysis/synthesis state.  The DSP state belongs to a specific
    logical bitstream ****************************************************/
-
 typedef struct vorbis_dsp_state{
   int analysisp;
   vorbis_info *vi;
   int    modebits;
-
-  double *window[2][2][2]; /* windowsize, leadin, leadout */
-  envelope_lookup ve;    
-  mdct_lookup vm[2];
 
   double **pcm;
   double **pcmret;
@@ -227,12 +212,33 @@ typedef struct vorbis_dsp_state{
   int64_t floor_bits;
   int64_t res_bits;
 
+  /* local lookup storage */
+  envelope_lookup         ve;    
+  double                **window[2][2][2]; /* block, leadin, leadout, type */
+  vorbis_look_transform **transform[2];    /* block, type */
+  codebook               *fullbooks;
+  /* backend lookups are tied to the mode, not the backend or naked mapping */
+  vorbis_look_mapping   **mode;
+
+  /* local storage, only used on the encoding side.  This way the
+     application does not need to worry about freeing some packets'
+     memory and not others'; packet storage is always tracked.
+     Cleared next call to a _dsp_ function */
+  char *header;
+  char *header1;
+  char *header2;
+
 } vorbis_dsp_state;
 
 /* vorbis_block is a single block of data to be processed as part of
 the analysis/synthesis stream; it belongs to a specific logical
 bitstream, but is independant from other vorbis_blocks belonging to
 that logical bitstream. *************************************************/
+
+struct alloc_chain{
+  void *ptr;
+  struct alloc_chain *next;
+};
 
 typedef struct vorbis_block{
   /* necessary stream state for linking to the framing abstraction */
@@ -251,9 +257,11 @@ typedef struct vorbis_block{
 
   /* local storage to avoid remallocing; it's up to the mapping to
      structure it */
-  double *localstore;
-  long   localtop;
-  long   localalloc;
+  double             *localstore;
+  long                localtop;
+  long                localalloc;
+  long                totaluse;
+  struct alloc_chain *reap;
 
   /* bitmetrics for the frame */
   long glue_bits;
@@ -262,10 +270,6 @@ typedef struct vorbis_block{
   long res_bits;
 
 } vorbis_block;
-
-/* internal use */
-extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
-extern void _vorbis_block_ripcord(vorbis_block *vb);
 
 /* libvorbis encodes in two abstraction layers; first we perform DSP
    and produce a packet (see docs/analysis.txt).  The packet is then
@@ -281,71 +285,70 @@ extern void _vorbis_block_ripcord(vorbis_block *vb);
 
 /* OggSquish BITSREAM PRIMITIVES: encoding **************************/
 
-extern int     ogg_stream_packetin(ogg_stream_state *os, ogg_packet *op);
-extern int     ogg_stream_pageout(ogg_stream_state *os, ogg_page *og);
+extern int      ogg_stream_packetin(ogg_stream_state *os, ogg_packet *op);
+extern int      ogg_stream_pageout(ogg_stream_state *os, ogg_page *og);
 
 /* OggSquish BITSREAM PRIMITIVES: decoding **************************/
 
-extern int     ogg_sync_init(ogg_sync_state *oy);
-extern int     ogg_sync_clear(ogg_sync_state *oy);
-extern int     ogg_sync_destroy(ogg_sync_state *oy);
-extern int     ogg_sync_reset(ogg_sync_state *oy);
+extern int      ogg_sync_init(ogg_sync_state *oy);
+extern int      ogg_sync_clear(ogg_sync_state *oy);
+extern int      ogg_sync_destroy(ogg_sync_state *oy);
+extern int      ogg_sync_reset(ogg_sync_state *oy);
 
-extern char   *ogg_sync_buffer(ogg_sync_state *oy, long size);
-extern int     ogg_sync_wrote(ogg_sync_state *oy, long bytes);
-extern long    ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og);
-extern int     ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og);
-extern int     ogg_stream_pagein(ogg_stream_state *os, ogg_page *og);
-extern int     ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op);
+extern char    *ogg_sync_buffer(ogg_sync_state *oy, long size);
+extern int      ogg_sync_wrote(ogg_sync_state *oy, long bytes);
+extern long     ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og);
+extern int      ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og);
+extern int      ogg_stream_pagein(ogg_stream_state *os, ogg_page *og);
+extern int      ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op);
 
 /* OggSquish BITSREAM PRIMITIVES: general ***************************/
 
-extern int     ogg_stream_init(ogg_stream_state *os,int serialno);
-extern int     ogg_stream_clear(ogg_stream_state *os);
-extern int     ogg_stream_reset(ogg_stream_state *os,long expected_pageno);
-extern int     ogg_stream_destroy(ogg_stream_state *os);
-extern int     ogg_stream_eof(ogg_stream_state *os);
+extern int      ogg_stream_init(ogg_stream_state *os,int serialno);
+extern int      ogg_stream_clear(ogg_stream_state *os);
+extern int      ogg_stream_reset(ogg_stream_state *os,long expected_pageno);
+extern int      ogg_stream_destroy(ogg_stream_state *os);
+extern int      ogg_stream_eof(ogg_stream_state *os);
 
-extern int     ogg_page_version(ogg_page *og);
-extern int     ogg_page_continued(ogg_page *og);
-extern int     ogg_page_bos(ogg_page *og);
-extern int     ogg_page_eos(ogg_page *og);
-extern int64_t ogg_page_frameno(ogg_page *og);
-extern int     ogg_page_serialno(ogg_page *og);
-extern int     ogg_page_pageno(ogg_page *og);
+extern int      ogg_page_version(ogg_page *og);
+extern int      ogg_page_continued(ogg_page *og);
+extern int      ogg_page_bos(ogg_page *og);
+extern int      ogg_page_eos(ogg_page *og);
+extern int64_t  ogg_page_frameno(ogg_page *og);
+extern int      ogg_page_serialno(ogg_page *og);
+extern int      ogg_page_pageno(ogg_page *og);
 
 /* Vorbis PRIMITIVES: general ***************************************/
 
-extern void vorbis_dsp_clear(vorbis_dsp_state *v);
+extern int      vorbis_info_init(vorbis_info *vi,vorbis_comments *vc);
+extern int      vorbis_comment_init(vorbis_comments *vc);
+extern int      vorbis_comment_add(vorbis_comments *vc, char *comment); 
+extern int      vorbis_comment_clear(vorbis_comments *vc);
 
-extern void vorbis_info_init(vorbis_info *vi); 
-extern void vorbis_info_clear(vorbis_info *vi); 
-extern int  vorbis_info_modeset(vorbis_info *vi, int mode); 
-extern int  vorbis_info_addcomment(vorbis_info *vi, char *comment); 
-extern int  vorbis_info_headerin(vorbis_info *vi,ogg_packet *op);
-extern int  vorbis_info_headerout(vorbis_info *vi,
-				  ogg_packet *op,
-				  ogg_packet *op_comm,
-				  ogg_packet *op_code);
-
-extern int  vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
-extern int  vorbis_block_clear(vorbis_block *vb);
+extern int      vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
+extern int      vorbis_block_clear(vorbis_block *vb);
+extern void     vorbis_dsp_clear(vorbis_dsp_state *v);
 
 /* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
 extern int      vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi);
-
+extern int      vorbis_analysis_headerout(vorbis_dsp_state *v,
+					  ogg_packet *op,
+					  ogg_packet *op_comm,
+					  ogg_packet *op_code);
 extern double **vorbis_analysis_buffer(vorbis_dsp_state *v,int vals);
 extern int      vorbis_analysis_wrote(vorbis_dsp_state *v,int vals);
 extern int      vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb);
 extern int      vorbis_analysis(vorbis_block *vb,ogg_packet *op);
 
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
-extern int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi);
+extern int      vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comments *vc,
+					  ogg_packet *op);
 
-extern int vorbis_synthesis(vorbis_block *vb,ogg_packet *op);
-extern int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
-extern int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
-extern int vorbis_synthesis_read(vorbis_dsp_state *v,int samples);
+extern int      vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi);
+extern int      vorbis_synthesis(vorbis_block *vb,ogg_packet *op);
+extern int      vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
+extern int      vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
+extern int      vorbis_synthesis_read(vorbis_dsp_state *v,int samples);
 
 #endif
 

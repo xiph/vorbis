@@ -13,7 +13,7 @@
 
  function: libvorbis codec internal types.  These structures are 
            'visible', but generally uninteresting to the developer
- last mod: $Id: internal.h,v 1.2 2000/01/20 04:43:51 xiphmont Exp $
+ last mod: $Id: internal.h,v 1.3 2000/01/22 10:40:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,28 +32,10 @@ typedef struct {
 } mdct_lookup;
 
 typedef struct {
-  int n;
-  double *trigcache;
-  int *splitcache;
-} drft_lookup;
-
-typedef struct {
   int winlen;
   double *window;
   mdct_lookup mdct;
 } envelope_lookup;
-
-typedef struct lpclook{
-  /* en/decode lookups */
-  int *linearmap;
-  double *barknorm;
-  drft_lookup fft;
-
-  int n;
-  int ln;
-  int m;
-
-} lpc_lookup;
 
 /* structures for various internal data abstractions ********************/
 
@@ -66,6 +48,10 @@ typedef struct {
   long storage;
   
 } oggpack_buffer;
+
+/* internal use */
+extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
+extern void _vorbis_block_ripcord(vorbis_block *vb);
 
 #endif
 
