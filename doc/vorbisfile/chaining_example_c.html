@@ -24,16 +24,15 @@ The example program source:
 	<td>
 <pre><b>
 
-#include "vorbis/codec.h"
-#include "vorbis/vorbisfile.h"
-#include "../lib/misc.h"
+#include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
 
 int main(){
   OggVorbis_File ov;
   int i;
 
   /* open the file/pipe on stdin */
-  if(ov_open(stdin,&ov,NULL,-1)==-1){
+  if(ov_open(stdin,&ov,NULL,-1)<0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }

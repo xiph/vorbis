@@ -61,7 +61,7 @@ called to initialize the <a href="OggVorbis_File.html">OggVorbis_File</a> struct
 <tr bgcolor=#cccccc>
         <td>
 <pre><b>
-  if(ov_open(stdin,&ov,NULL,-1)==-1){
+  if(ov_open(stdin,&ov,NULL,-1)<0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }

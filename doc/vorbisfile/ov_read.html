@@ -65,10 +65,15 @@ functions.</dd>
 <h3>Return Values</h3>
 <blockquote>
 <li>
--1 indicates an error or hole in data.</li>
+OV_HOLE indicates there was an interruption in the data. (one of: garbage between pages, loss of sync followed by recapture, or a corrupt page)</li>
+<li>
+OV_EBADLINK	indicates that an invalid stream section was supplied to libvorbisfile, 
+		or the requested link is corrupt. 
+</li>
+
 <li>
 0 indicates EOF</li>
-<li><i>n</i> indicates actual number of bytes read.  This may vary, but will be no longer than the parameter <tt>length</tt>.</li>
+<li><i>n</i> indicates actual number of bytes read.  Within a logical bitstream, the number should equal <tt>length</tt>.  At the end of a logical bitstream, the number of bytes read will equal the remaining number of bytes in the bitstream.</li>
 </blockquote>
 <p>
 <h3>Notes</h3>

@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>vorbisfile - function - ov_bitrate</title>
+<title>vorbisfile - function - ov_time_seek_page</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
@@ -13,22 +13,23 @@
 </tr>
 </table>
 
-<h1>ov_pcm_seek</h1>
+<h1>ov_time_seek_page</h1>
 
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
-<p>Seeks to the offset specified (in pcm samples) within the physical bitstream.  This function only works for seekable streams.
-<p>This also updates everything needed within the
+<p>For seekable
+streams, this seeks to closest full page preceding the given time.  This function is faster than <a href="ov_time_seek.html">ov_time_seek</a> because it doesn't seek through the last few samples to reach an exact time, but it is also less accurate.  This should be used when speed is important.
+<p>This function also updates everything needed within the
 decoder, so you can immediately call <a href="ov_read.html">ov_read()</a> and get data from
-the newly seeked to position.
-<p>
+the newly seeked to position.  
+<p>For obvious reasons, this doesn't work for unseekable streams.
 
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>
-int ov_pcm_seek(OggVorbis_File *vf,int64_t pos);
+int ov_time_seek_page(<a href="OggVorbis_File.html">OggVorbis_File</a> *vf, double seconds);
 </b></pre>
 	</td>
 </tr>
@@ -37,10 +38,9 @@ int ov_pcm_seek(OggVorbis_File *vf,int64_t pos);
 <h3>Parameters</h3>
 <dl>
 <dt><i>vf</i></dt>
-<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
-functions.</dd>
-<dt><i>pos</i></dt>
-<dd>Position in pcm samples to seek to in the bitstream.</dd>
+<dd>Pointer to our already opened and initialized OggVorbis_File structure.</dd>
+<dt><i>seconds</i></dt>
+<dd>Location to seek to within the file, specified in seconds.</dd>
 </dl>
 
 
@@ -64,6 +64,8 @@ nonzero indicates failure, described by several error codes:</li>
 <li>OV_EBADLINK - Invalid stream section supplied to libvorbis/libvorbisfile, or the requested link is corrupt. 
 </li>
 </ul></blockquote>
+
+
 <br><br>
 <hr noshade>
 <table border=0 width=100%>

@@ -69,11 +69,15 @@ should contain the length (in bytes) of the buffer.  Used together with <tt>init
 <blockquote>
 <li>
 0 for success</li>
-
-<li>
--1 for failure</li>
+<li>less than zero for failure:</li>
+<ul>
+<li>OV_EREAD - A read from media returned an error.</li>
+<li>OV_ENOTVORBIS - Bitstream is not Vorbis data.</li>
+<li>OV_EVERSION - Vorbis version mismatch.</li>
+<li>OV_EBADHEADER - Invalid Vorbis bitstream header.</li>
+<li>OV_EFAULT - Internal logic fault; indicates a bug or heap/stack corruption.</li>
+</ul>
 </blockquote>
-If the function fails, this was not recognizable as an OggVorbis file.
 <p>
 
 <h3>Notes</h3>

@@ -23,6 +23,7 @@ The OggVorbis_File structure defines an Ogg Vorbis file.
 This structure is used in all vorbisfile routines.  Before it can be used, it must be initialized by <a href="ov_open.html">ov_open</a> or <a href="ov_open_callbacks.html">ov_open_callbacks</a>.
 <p>
 After use, the OggVorbis_File structure must be deallocated with a call to <a href="ov_clear.html">ov_clear()</a>.
+<p>Once a file or data source is passed to libvorbisfile, it is owned by vorbisfile.  The file should not be used by any other applications or functions outside the Vorbisfile API.
 <br><br>
 <table border=0 width=100% color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
@@ -58,7 +59,7 @@ After use, the OggVorbis_File structure must be deallocated with a call to <a hr
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
 
-  ov_callbacks callbacks;
+  <a href="ov_callbacks.html">ov_callbacks</a> callbacks;
 
 } OggVorbis_File;</b></pre>
 	</td>
@@ -73,6 +74,8 @@ After use, the OggVorbis_File structure must be deallocated with a call to <a hr
 <dd>Read-only int indicating whether file is seekable, i.e., physical file is seekable, a pipe isn't.</dd>
 <dt><i>links</i></dt>
 <dd>Read-only int indicating the number of logical bitstreams within the physical bitstream.</dd>
+<dt><i>ov_callbacks</i></dt>
+<dd>Collection of file manipulation routines to be used on this data source.</dd>
 </dl>
 
 <h3>Notes</h3>

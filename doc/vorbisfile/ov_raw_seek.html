@@ -21,7 +21,7 @@
 <p>This also updates everything needed within the
 decoder, so you can immediately call <a href="ov_read.html">ov_read()</a> and get data from
 the newly seeked to position.
-
+<p>When seek speed is a priority, this is the best vorbisfile seek funtion to use.
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
@@ -48,7 +48,15 @@ struct should be passed to all the vorbisfile functions.</dd>
 <blockquote>
 <li>
 0 indicates success</li>
-<li>nonzero indicates failure.</li>
+<li>nonzero indicates failure, described by several error codes:</li>
+<ul>
+<li>OV_ENOSEEK - Bitstream is not seekable.
+</li>
+<li>OV_EINVAL - Invalid argument value.
+</li>
+<li>OV_EBADLINK - Invalid stream section supplied to libvorbis/libvorbisfile, or the requested link is corrupt. 
+</li>
+</ul>
 </blockquote>
 <p>
 <br><br>

@@ -39,14 +39,13 @@ double ov_time_total(OggVorbis_File *vf,int i);
 functions. Once this has been called, the same <tt>OggVorbis_File</tt>
 struct should be passed to all the vorbisfile functions.</dd>
 <dt><i>i</i></dt>
-<dd><b>Link to the desired logical bitstream.  For nonseekable files, this argument is ignored.  To retrieve the <a href="vorbis_info.html">vorbis_info</a> struct for the current bitstream, this parameter should be set to -1.</b></dd>
+<dd><b>Link to the desired logical bitstream.  To retrieve the <a href="vorbis_info.html">vorbis_info</a> struct for the current bitstream, this parameter should be set to -1.</b></dd>
 </dl>
 
 
 <h3>Return Values</h3>
 <blockquote>
-<li>
--1 if the bitstream is nonseekable.</li>
+<li>OV_EINVAL means that the argument was invalid.  In this case, the requested bitstream did not exist or the bitstream is nonseekable.</li>
 <li>
 total length in seconds of content if i=-1.</li>
 <li>length in seconds of logical bitstream if i=1 to n.</li>

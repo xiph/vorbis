@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>vorbisfile - function - ov_bitrate</title>
+<title>vorbisfile - function - ov_pcm_seek_page</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
@@ -13,11 +13,12 @@
 </tr>
 </table>
 
-<h1>ov_pcm_seek</h1>
+<h1>ov_pcm_seek_page</h1>
 
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
-<p>Seeks to the offset specified (in pcm samples) within the physical bitstream.  This function only works for seekable streams.
+<p>Seeks to the closest page preceding the specified location (in pcm samples) within the physical bitstream.  This function only works for seekable streams.
+<p>This function is faster than <a href="ov_pcm_seek.html">ov_pcm_seek</a> because the function can begin decoding at a page boundary rather than seeking through any remaining samples before the specified location.  However, it is less accurate.
 <p>This also updates everything needed within the
 decoder, so you can immediately call <a href="ov_read.html">ov_read()</a> and get data from
 the newly seeked to position.
@@ -63,7 +64,7 @@ nonzero indicates failure, described by several error codes:</li>
 </li>
 <li>OV_EBADLINK - Invalid stream section supplied to libvorbis/libvorbisfile, or the requested link is corrupt. 
 </li>
-</ul></blockquote>
+</ul></</blockquote>
 <br><br>
 <hr noshade>
 <table border=0 width=100%>

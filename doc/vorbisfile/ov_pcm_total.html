@@ -36,14 +36,13 @@ int64_t ov_pcm_total(OggVorbis_File *vf,int i);
 <dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
 functions.</dd>
 <dt><i>i</i></dt>
-<dd>Link to the desired logical bitstream.  For nonseekable files, this argument is ignored.  To retrieve the total pcm samples for the entire physical bitstream, this parameter should be set to -1.</dd>
+<dd>Link to the desired logical bitstream.  To retrieve the total pcm samples for the entire physical bitstream, this parameter should be set to -1.</dd>
 </dl>
 
 
 <h3>Return Values</h3>
 <blockquote>
-<li>
--1 if the bitstream is nonseekable.</li>
+<li>OV_EINVAL means that the argument was invalid.  In this case, the requested bitstream did not exist or the bitstream is unseekable.</li>
 <li>
 total length in pcm samples of content if i=-1.</li>
 <li>length in pcm samples of logical bitstream if i=1 to n.</li>
