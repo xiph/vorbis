@@ -7,12 +7,13 @@
 Ogg Vorbis comment field specification
 </font></h1>
 
-<em>Last update to this document: February 9, 2001</em><p>
+<em>Last update to this document: October 2, 2001</em><p>
 
-The text comment header is the second (of three) header packets that
+<p>The text comment header is the second (of three) header packets that
 begin a Vorbis bitstream. It is meant for short, text comments,
-not arbitrary metadata; arbitrary metadata belongs in a
-metadata stream (usually an XML stream type).<p>
+not arbitrary metadata; arbitrary metadata belongs in a separate
+logical bitream (usually an XML stream type) that provides greater
+structure and machine parseability.</p>
 
 <h2>Comment use rationale</h2>
 
@@ -36,9 +37,9 @@ is limited to 2^32-1 bytes. The vector length is encoded; the vector
 is not null terminated. In addition to the vector list, there is a
 single vector for vendor name (also 8 bit clean, length encoded in 32
 bits). Libvorbis currently sets the vendor string to "Xiphophorus
-libVorbis I 20010119".<p>
+libVorbis I 20010910".<p>
 
-The comment vectors are structured similarly to a UNIX environment.
+The comment vectors are structured similarly to a UNIX environment variable.
 That is, comment fields consist of a field name and a field value and
 look like:
 
@@ -58,8 +59,8 @@ to be considered equivalent to ASCII 0x61 through 0x7A inclusive
 <li>The field name is immediately followed by ASCII 0x3D ('='); this
 equals sign is used to terminate the field name.
 
-<li>0x3D is followed by 8 bit clean UTF-8 field contents to the end of
-the field.
+<li>0x3D is followed by 8 bit clean UTF-8 encoded field contents
+to the end of the field.
 </ul>
 
 <h3>Field names</h3>
@@ -72,13 +73,15 @@ in this list.
 <dt>TITLE<dd>Track name
 
 <dt>VERSION<dd>The version field may be used to differentiate multiple
-version of the same track title in a single collection. (e.g. remix info)
+versions of the same track title in a single collection. (e.g. remix info)
 
 <dt>ALBUM<dd>The collection name to which this track belongs
 
 <dt>TRACKNUMBER<dd>The track number of this piece if part of a specific larger collection or album
 
-<dt>ARTIST<dd>Track performer
+<dt>ARTIST<dd>The artist generally considered responsible for the work. In popular music this is usually the performing band or singer. For classical music it would be the composer. For an audio book it would be the author of the original text.
+
+<dt>PERFORMER<dd>The artist(s) who performed the work. In classical music this would be the conductor, orchestra, soloists. In an audio book it would be the actor who did the reading. In popular music this is typically the same as the ARTIST and is ommitted.
 
 <dt>ORGANIZATION<dd>Name of the organization producing the track (i.e.
 the 'record label')
@@ -91,9 +94,13 @@ the 'record label')
 
 <dt>LOCATION<dd>Location where track was recorded
 
-<dt>COPYRIGHT<dd>Copyright information
+<dt>COPYRIGHT<dd>Copyright and license information (e.g. '(c) 2001 Nobody's Band. All rights reserved' or '(c) 1999 Jack Moffit, distributed under the terms of the Open Audio License. see http://www.eff.org/IP/Open_licenses/eff_oal.html for details')
+
+<dt>CONTACT<dd>Contact information for the creators or distributors of the track. This could be a URL, an email address, the physical address of the producing label.
 
 <dt>ISRC<dd>ISRC number for the track; see <a href="http://www.ifpi.org/online/isrc_intro.html">the ISRC intro page</a> for more information on ISRC numbers.
+
+<dt>DISCID<dd>Table of contents hash from an associated disc, generally used to index the track in published music databases. See <a href="http://freedb.org/">http://freedb.org/</a> for and example of such a hash.
 
 </dl>
 
@@ -115,7 +122,8 @@ context at this point.  Abuse will be discouraged.
 <li>
 There is no vendor-specific prefix to 'nonstandard' field names.
 Vendors should make some effort to avoid arbitrarily polluting the
-common namespace.
+common namespace. We will generally collect the more useful tags
+here to help with standardization.
 <li>
 Field names are not required to be unique (occur once) within a
 comment header.  As an example, assume a track was recorded by three
