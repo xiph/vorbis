@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.31.2.1 2000/10/14 03:14:06 xiphmont Exp $
+ last mod: $Id: info.c,v 1.31.2.2 2000/10/31 00:10:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -406,7 +406,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 }
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
-  char temp[]="Xiphophorus libVorbis I 20000508";
+  char temp[]="Xiphophorus libVorbis I 20001031";
 
   /* preamble */  
   oggpack_write(opb,0x03,8);

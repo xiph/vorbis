@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.39.2.1 2000/10/14 03:14:06 xiphmont Exp $
+ last mod: $Id: block.c,v 1.39.2.2 2000/10/31 00:10:37 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -682,15 +682,30 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
        it reads the last two marked pages in proper sequence */
 
     if(v->granulepos==-1)
-      v->granulepos=vb->granulepos;
+      if(vb->granulepos==-1){
+	v->granulepos=0;
+      }else{
+	v->granulepos=vb->granulepos;
+      }
     else{
       v->granulepos+=(centerW-v->centerW);
       if(vb->granulepos!=-1 && v->granulepos!=vb->granulepos){
-	if(v->granulepos>vb->granulepos && vb->eofflag){
-	  /* partial last frame.  Strip the padding off */
-	  centerW-=(v->granulepos-vb->granulepos);
+
+	if(v->granulepos>vb->granulepos){
+	  long extra=v->granulepos-vb->granulepos;
+
+	  if(vb->eofflag){
+	    /* partial last frame.  Strip the extra samples off */
+	    centerW-=extra;
+	  }else if(vb->sequence == 1){
+	    /* partial first frame.  Discard extra leading samples */
+	    v->pcm_returned+=extra;
+	    if(v->pcm_returned>centerW)v->pcm_returned=centerW;
+	    
+	  }
+	  
 	}/* else{ Shouldn't happen *unless* the bitstream is out of
-            spec.  Either way, believe the bitstream } */
+	    spec.  Either way, believe the bitstream } */
 	v->granulepos=vb->granulepos;
       }
     }
