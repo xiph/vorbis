@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.20 2002/03/07 03:41:03 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.21 2002/03/17 19:50:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,9 +23,16 @@
 
 /* 20log10(x) */
 #ifdef VORBIS_IEEE_FLOAT32
+
 static float unitnorm(float x){
   ogg_uint32_t *ix=(ogg_uint32_t *)&x;
   *ix=(*ix&0x80000000UL)|(0x3f800000UL);
+  return(x);
+}
+
+static float FABS(float x){
+  ogg_uint32_t *ix=(ogg_uint32_t *)&x;
+  *ix&=0x7fffffffUL;
   return(x);
 }
 
@@ -111,6 +118,8 @@ static float unitnorm(float x){
   if(x<0)return(-1.f);
   return(1.f);
 }
+
+#define FABS(x) fabs(*(x))
 
 #define todB(x)   (*(x)==0?-400.f:log(*(x)**(x))*4.34294480f)
 #define todB_nn(x)   (*(x)==0.f?-400.f:log(*(x))*8.6858896f)

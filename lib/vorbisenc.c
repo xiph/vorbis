@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.37 2002/02/20 07:35:19 msmith Exp $
+ last mod: $Id: vorbisenc.c,v 1.38 2002/03/17 19:50:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -622,7 +622,7 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 				0,0,0,0,0,0,0,0,0,0,0);
   
   ret|=vorbis_encode_global_psych_setup(vi,hi->trigger_quality,_psy_global_44,
-				       0., 1., 1.5, 2., 2., 2., 2., 2., 2., 2., 2.);
+				       0., 1., 1.5, 2., 2., 2.5, 3., 3., 3., 3., 3.);
 
   ret|=vorbis_encode_psyset_setup(vi,0);
   ret|=vorbis_encode_psyset_setup(vi,1);

@@ -11,30 +11,34 @@
  ********************************************************************
 
  function: key psychoacoustic settings for 44.1/48kHz
- last mod: $Id: psych_44.h,v 1.7 2001/12/22 09:40:40 xiphmont Exp $
+ last mod: $Id: psych_44.h,v 1.8 2002/03/17 19:50:49 xiphmont Exp $
 
  ********************************************************************/
 
 
 /* preecho trigger settings *****************************************/
 
-static vorbis_info_psy_global _psy_global_44[3]={
+static vorbis_info_psy_global _psy_global_44[4]={
 
   {8,   /* lines per eighth octave */
    /*{990.f,990.f,990.f,990.f}, {-990.f,-990.f,-990.f,-990.f}, -90.f,
    {0.f,0.f,0.f,0.f}, {-0.f,-0.f,-0.f,-0.f}, -90.f,*/
-   {30.f,30.f,30.f,34.f}, {-990.f,-990.f,-990.f,-990.f}, -90.f,
+   {46.f,40.f,40.f,36.f}, {-990.f,-990.f,-990.f,-990.f}, -100.f,
    -6.f, 0,
   },
   {8,   /* lines per eighth octave */
    /*{990.f,990.f,990.f,990.f}, {-990.f,-990.f,-990.f,-990.f}, -90.f,*/
-   {26.f,26.f,26.f,30.f}, {-90.f,-90.f,-90.f,-90.f}, -90.f,
+   {40.f,36.f,32.f,30.f}, {-90.f,-90.f,-90.f,-90.f}, -100.f,
    -6.f, 0,
   },
   {8,   /* lines per eighth octave */
-   {26.f,26.f,26.f,30.f}, {-26.f,-26.f,-26.f,-30.f}, -90.f,
+   {40.f,36.f,32.f,30.f}, {-60.f,-40.f,-40.f,-40.f}, -100.f,
    -6.f, 0,
-  }
+  },
+  {8,   /* lines per eighth octave */
+   {40.f,36.f,32.f,30.f}, {-40.f,-36.f,-32.f,-30.f}, -100.f,
+   -6.f, 0,
+  },
 };
 
 /* noise compander lookups * low, mid, high quality ****************/

@@ -11,15 +11,31 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.18 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: envelope.h,v 1.19 2002/03/17 19:50:47 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_ENVELOPE_
 #define _V_ENVELOPE_
 
-#include "iir.h"
-#include "smallft.h"
+#include "mdct.h"
+
+#define VE_DIV    4
+#define VE_CONV   3
+#define VE_BANDS  4
+
+typedef struct {
+  float ampbuf[VE_DIV];
+  int   ampptr;
+  float delbuf[VE_CONV-1];
+  float convbuf[2];
+} envelope_filter_state;
+
+typedef struct {
+  int begin;
+  int end;
+  float *window;
+} envelope_band;
 
 typedef struct {
   int ch;
@@ -27,13 +43,17 @@ typedef struct {
   int searchstep;
   float minenergy;
 
-  IIR_state *iir;
-  float    **filtered;
+  mdct_lookup  mdct;
+  float       *mdct_win;
+
+  envelope_band          band[VE_BANDS];
+  envelope_filter_state *filter;
+
+  int                   *mark;
 
   long storage;
   long current;
-  long mark;
-  long prevmark;
+  long curmark;
   long cursor;
 } envelope_lookup;
 

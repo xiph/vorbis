@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.64 2001/12/22 09:40:39 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.65 2002/03/17 19:50:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -922,8 +922,8 @@ static void couple_point(float A, float B, float fA, float fB,
       *mag=B;
     }
     
-    corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
-    *mag=rint(*mag*corr*igranule)*granule; 
+    corr=origmag/FAST_HYPOT(fA,fB);
+    *mag=unitnorm(*mag)*floorf(corr*igranule+.5f)*granule; 
     *ang=0.f;
 
   }else{
