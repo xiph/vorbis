@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.55 2002/10/17 04:56:23 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.56 2002/10/17 06:06:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -157,7 +157,7 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "psy.h"
 #include "scales.h"
 
-//#if 0
+#if 0
 static long seq=0;
 static ogg_int64_t total=0;
 static float FLOOR1_fromdB_LOOKUP[256]={
@@ -227,7 +227,7 @@ static float FLOOR1_fromdB_LOOKUP[256]={
   0.82788260F, 0.88168307F, 0.9389798F, 1.F, 
 };
 
-//#endif 
+#endif 
 
 extern int *floor1_fit(vorbis_block *vb,vorbis_look_floor *look,
 		       const float *logmdct,   /* in */
@@ -346,7 +346,7 @@ static int mapping0_forward(vorbis_block *vb){
       for(j=0;j<n/2;j++)
 	logmdct[j]=todB(mdct+j);
 
-      //#if 0
+#if 0
       if(vi->channels==2){
 	if(i==0)
 	  _analysis_output("mdctL",seq,logmdct,n/2,1,0,0);
@@ -355,7 +355,7 @@ static int mapping0_forward(vorbis_block *vb){
       }else{
 	_analysis_output("mdct",seq,logmdct,n/2,1,0,0);
       }
-      //#endif 
+#endif 
       
       /* first step; noise masking.  Not only does 'noise masking'
          give us curves from which we can decide how much resolution
@@ -641,10 +641,10 @@ static int mapping0_forward(vorbis_block *vb){
     
   }
 
-  //#if 0
+#if 0
   seq++;
   total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;
-  //#endif
+#endif
   return(0);
 }
 
