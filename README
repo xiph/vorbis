@@ -52,6 +52,8 @@ Directory:
 
 ./mac 		Codewarrior project files and build tweaks for MacOS.
 
+./macosx 	Project files for MacOS X.
+
 ./win32		Win32 projects files and build automation
 
 ./vq 		Internal utilities for training/building new LSP/residue 
@@ -70,16 +72,16 @@ patent concerns.
 
 This package contains:
 
-.) libvorbis, a BSD-license software implementation of
+.) libvorbis, a BSD-style license software implementation of
 the Vorbis specification by the Xiphophorus company
 (http://www.xiph.org/) 
 
-.) libvorbisfile, a BSD-license convenience library
+.) libvorbisfile, a BSD-style license convenience library
 built on Vorbis designed to simplify common uses and a number of GPL
 example programs
 
-.) libvorbisenc, a BSD-license library that provides a simple, programmatic
-encoding setup interface 
+.) libvorbisenc, a BSD-style license library that provides a simple,
+programmatic encoding setup interface 
 
 .) example code making use of libogg, libvorbis, libvorbisfile and
 libvorbisenc
@@ -137,6 +139,3 @@ be found in the "access paths" pane in your project settings.  Now
 simply add the shared libraries you need to your project (OggLib and
 VorbisLib at least) and #include "ogg/ogg.h" and "vorbis/codec.h"
 wherever you need to access Ogg and Vorbis functionality.
-
-
-$Id: README,v 1.12 2002/07/03 00:37:55 volsung Exp $
