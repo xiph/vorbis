@@ -14,20 +14,20 @@
 
  ********************************************************************/
 
-#ifndef _V_44l/line_128x19_class1_VQH_
-#define _V_44l/line_128x19_class1_VQH_
+#ifndef _V_line_128x19_class1_VQH_
+#define _V_line_128x19_class1_VQH_
 #include "codebook.h"
 
-static long _huff_lengthlist_44l/line_128x19_class1[] = {
+static long _huff_lengthlist_line_128x19_class1[] = {
 	 1, 2, 7,14, 8, 3, 6,17,14,11,13,19,19,19,19,19,
 	 8, 4, 8,13,10, 6,10,18,15,11,15,19,19,19,19,19,
 	13, 8,13,18,13, 8,14,19,19,16,19,19,19,19,19,19,
 	19,19,19,19,19,16,19,19,19,18,18,18,18,18,18,18,
 };
 
-static static_codebook _huff_book_44l/line_128x19_class1 = {
+static static_codebook _huff_book_line_128x19_class1 = {
 	1, 64,
-	_huff_lengthlist_44l/line_128x19_class1,
+	_huff_lengthlist_line_128x19_class1,
 	0, 0, 0, 0, 0,
 	NULL,
 	NULL,

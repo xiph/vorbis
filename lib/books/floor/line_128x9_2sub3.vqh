@@ -14,20 +14,20 @@
 
  ********************************************************************/
 
-#ifndef _V_44l/line_128x9_2sub3_VQH_
-#define _V_44l/line_128x9_2sub3_VQH_
+#ifndef _V_line_128x9_2sub3_VQH_
+#define _V_line_128x9_2sub3_VQH_
 #include "codebook.h"
 
-static long _huff_lengthlist_44l/line_128x9_2sub3[] = {
+static long _huff_lengthlist_line_128x9_2sub3[] = {
 	 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 7, 2, 8, 3, 9, 3,
 	 9, 4, 8, 4, 9, 4,12, 6,12, 6,11, 8,13, 9,11,12,
 	12,13,13,13,13,13,13,13,13,13,13,13,13,13,13,13,
 };
 
-static static_codebook _huff_book_44l/line_128x9_2sub3 = {
+static static_codebook _huff_book_line_128x9_2sub3 = {
 	1, 64,
-	_huff_lengthlist_44l/line_128x9_2sub3,
+	_huff_lengthlist_line_128x9_2sub3,
 	0, 0, 0, 0, 0,
 	NULL,
 	NULL,
