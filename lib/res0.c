@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.17.2.2 2000/09/02 05:19:25 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.17.2.3 2000/09/02 09:39:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -229,13 +229,13 @@ static int _encodepart(oggpack_buffer *opb,float *vec, int n,
 
 static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
 		       int stages, codebook **books){
-  int i,j;
+  int i;
   
   memset(work,0,sizeof(float)*n);
-  for(j=0;j<stages;j++){
-    int dim=books[j]->dim;
+  for(i=0;i<stages;i++){
+    int dim=books[i]->dim;
     int step=n/dim;
-    if(s_vorbis_book_decodevs(books[j],work+i,opb,step,0)==-1)
+    if(s_vorbis_book_decodevs(books[i],work,opb,step,0)==-1)
       return(-1);
   }
   

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.9.2.2 2000/09/02 05:19:25 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.9.2.3 2000/09/02 09:39:19 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -76,10 +76,13 @@ static int comp(const void *a,const void *b){
 }
 
 /* CACM algorithm 283. */
+/* we require doubles here due to the huge spread between val/p and
+   the required max error of 1.e-12, which is beyond the capabilities
+   of floats */
 static void cacm283(float *a,int ord,float *r){
   int i, k;
-  float val, p, delta, error;
-  float rooti;
+  double val, p, delta, error;
+  double rooti;
 
   for(i=0; i<ord;i++) r[i] = 2.0 * (i+0.5) / ord - 1.0;
   
