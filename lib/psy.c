@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16 2000/02/12 08:33:07 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.17 2000/03/10 13:21:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,6 +26,7 @@
 #include "lpc.h"
 #include "smallft.h"
 #include "scales.h"
+#include "misc.h"
 
 /* Set up decibel threshhold slopes on a Bark frequency scale */
 

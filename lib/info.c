@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.22 2000/02/23 11:50:29 xiphmont Exp $
+ last mod: $Id: info.c,v 1.23 2000/03/10 13:21:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,6 +28,7 @@
 #include "registry.h"
 #include "window.h"
 #include "psy.h"
+#include "misc.h"
 
 /* helpers */
 static int ilog2(unsigned int v){

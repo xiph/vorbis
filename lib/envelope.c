@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.15 2000/02/07 20:03:16 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.16 2000/03/10 13:21:18 xiphmont Exp $
 
  Preecho calculation.
 
@@ -29,6 +29,7 @@
 #include "envelope.h"
 #include "bitwise.h"
 #include "window.h"
+#include "misc.h"
 
 void _ve_envelope_init(envelope_lookup *e,int samples_per){
   int i;

@@ -12,13 +12,14 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.6 2000/02/06 13:39:48 xiphmont Exp $
+ last mod: $Id: window.c,v 1.7 2000/03/10 13:21:18 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <math.h>
 #include "os.h"
+#include "misc.h"
 
 double *_vorbis_window(int type, int window,int left,int right){
   double *ret=calloc(window,sizeof(double));

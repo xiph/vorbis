@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.11 2000/02/23 09:24:26 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.12 2000/03/10 13:21:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,6 +22,7 @@
 #include "vorbis/codebook.h"
 #include "bitwise.h"
 #include "bookinternal.h"
+#include "misc.h"
 
 /**** pack/unpack helpers ******************************************/
 static int ilog(unsigned int v){

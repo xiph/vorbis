@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: *unnormalized* fft transform
- last mod: $Id: smallft.c,v 1.7 2000/02/09 22:04:16 xiphmont Exp $
+ last mod: $Id: smallft.c,v 1.8 2000/03/10 13:21:18 xiphmont Exp $
 
 ********************************************************************/
 
@@ -33,6 +33,7 @@
 #include <string.h>
 #include <math.h>
 #include "smallft.h"
+#include "misc.h"
 
 static void drfti1(int n, double *wa, int *ifac){
   static int ntryh[4] = { 4,2,3,5 };

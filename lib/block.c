@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.27 2000/02/23 11:22:43 xiphmont Exp $
+ last mod: $Id: block.c,v 1.28 2000/03/10 13:21:18 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -35,6 +35,7 @@
 #include "bitwise.h"
 #include "registry.h"
 #include "bookinternal.h"
+#include "misc.h"
 
 static int ilog2(unsigned int v){
   int ret=0;
@@ -268,14 +269,19 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
   if(v){
     vorbis_info *vi=v->vi;
 
-    if(v->window[0][0][0])
-      for(i=0;i<VI_WINDOWB;i++){
+    if(v->window[0][0][0]){
+      for(i=0;i<VI_WINDOWB;i++)
 	if(v->window[0][0][0][i])free(v->window[0][0][0][i]);
-	for(j=0;j<2;j++)
-	  for(k=0;k<2;k++)
+      free(v->window[0][0][0]);
+
+      for(j=0;j<2;j++)
+	for(k=0;k<2;k++){
+	  for(i=0;i<VI_WINDOWB;i++)
 	    if(v->window[1][j][k][i])free(v->window[1][j][k][i]);
-      }
- 
+	  free(v->window[1][j][k]);
+	}
+    }
+    
     if(v->pcm){
       for(i=0;i<vi->channels;i++)
 	if(v->pcm[i])free(v->pcm[i]);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.11 2000/02/23 11:22:44 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.12 2000/03/10 13:21:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,6 +26,7 @@
 #include "lsp.h"
 #include "bookinternal.h"
 #include "scales.h"
+#include "misc.h"
 
 typedef struct {
   long n;

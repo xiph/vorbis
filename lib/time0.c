@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: time backend 0 (dummy)
- last mod: $Id: time0.c,v 1.4 2000/02/23 09:24:32 xiphmont Exp $
+ last mod: $Id: time0.c,v 1.5 2000/03/10 13:21:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,7 @@
 #include <string.h>
 #include "vorbis/codec.h"
 #include "registry.h"
+#include "misc.h"
 
 static void pack (vorbis_info_time *i,oggpack_buffer *opb){
 }

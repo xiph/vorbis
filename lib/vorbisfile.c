@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.15 2000/02/23 11:22:47 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.16 2000/03/10 13:21:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include "vorbis/vorbisfile.h"
 
 #include "os.h"
+#include "misc.h"
 
 /* A 'chained bitstream' is a Vorbis bitstream that contains more than
    one logical bitstream arranged end to end (the only form of Ogg
@@ -240,7 +241,6 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
 	goto bail_header;
       }
   }
-  ogg_stream_clear(&vf->os);
   return 0; 
 
  bail_header:
@@ -280,15 +280,11 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
       _seek_helper(vf,vf->offsets[i]);
       if(_fetch_headers(vf,vf->vi+i,vf->vc+i,NULL)==-1){
 	fprintf(stderr,"Error opening logical bitstream #%d.\n\n",i+1);
-    
-	ogg_stream_clear(&vf->os); /* clear local storage.  This is not
-				      done in _fetch_headers, as that may
-				      be called in a non-seekable stream
-				      (in which case, we need to preserve
-				      the stream local storage) */
-	vf->dataoffsets[i]=-1;
-      }else
+    	vf->dataoffsets[i]=-1;
+      }else{
 	vf->dataoffsets[i]=vf->offset;
+        ogg_stream_clear(&vf->os);
+      }
     }
 
     /* get the serial number and PCM length of this link. To do this,
@@ -317,6 +313,14 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
   }
 }
 
+static int _make_decode_ready(OggVorbis_File *vf){
+  if(vf->decode_ready)exit(1);
+  vorbis_synthesis_init(&vf->vd,vf->vi);
+  vorbis_block_init(&vf->vd,&vf->vb);
+  vf->decode_ready=1;
+  return(0);
+}
+
 static int _open_seekable(OggVorbis_File *vf){
   vorbis_info initial_i;
   vorbis_comment initial_c;
@@ -326,8 +330,6 @@ static int _open_seekable(OggVorbis_File *vf){
   ogg_page og;
   
   /* is this even vorbis...? */
-  vorbis_info_init(&initial_i);
-  vorbis_comment_init(&initial_c);
   ret=_fetch_headers(vf,&initial_i,&initial_c,&serialno);
   dataoffset=vf->offset;
   ogg_stream_clear(&vf->os);
@@ -366,10 +368,12 @@ static int _open_nonseekable(OggVorbis_File *vf){
   /* we cannot seek. Set up a 'single' (current) logical bitstream entry  */
   vf->links=1;
   vf->vi=malloc(sizeof(vorbis_info));
+  vf->vc=malloc(sizeof(vorbis_info));
 
   /* Try to fetch the headers, maintaining all the storage */
   if(_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno)==-1)return(-1);
-    
+  _make_decode_ready(vf);
+
   return 0;
 }
 
@@ -479,6 +483,10 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 					  leave machine uninitialized */
 	
 	vf->current_link=link;
+
+	ogg_stream_init(&vf->os,vf->current_serialno);
+	ogg_stream_reset(&vf->os,ogg_page_pageno(&og));
+
       }else{
 	/* we're streaming */
 	/* fetch the three header packets, build the info struct */
@@ -488,12 +496,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	link=0;
       }
       
-      /* reload */
-      ogg_stream_init(&vf->os,vf->current_serialno);
-      ogg_stream_reset(&vf->os,ogg_page_pageno(&og));
-      vorbis_synthesis_init(&vf->vd,vf->vi+link);
-      vorbis_block_init(&vf->vd,&vf->vb);
-      vf->decode_ready=1;
+      _make_decode_ready(vf);
     }
     ogg_stream_pagein(&vf->os,&og);
   }
@@ -516,6 +519,7 @@ int ov_clear(OggVorbis_File *vf){
 	vorbis_comment_clear(vf->vc+i);
       }
       free(vf->vi);
+      free(vf->vc);
     }
     if(vf->dataoffsets)free(vf->dataoffsets);
     if(vf->pcmlengths)free(vf->pcmlengths);
@@ -525,6 +529,7 @@ int ov_clear(OggVorbis_File *vf){
     if(vf->f)fclose(vf->f);
     memset(vf,0,sizeof(OggVorbis_File));
   }
+  _VDBG_dump();
   return(0);
 }
 
@@ -565,11 +570,6 @@ int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
   if(ret){
     vf->f=NULL;
     ov_clear(vf);
-  }else{
-    ogg_stream_init(&vf->os,vf->current_serialno);
-    vorbis_synthesis_init(&vf->vd,vf->vi);
-    vorbis_block_init(&vf->vd,&vf->vb);
-    vf->decode_ready=1;
   }
   return(ret);
 }
