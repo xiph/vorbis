@@ -89,7 +89,7 @@ SOURCE=..\lib\analysis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bitbuffer.c
+SOURCE=..\lib\bitrate.c
 # End Source File
 # Begin Source File
 
@@ -174,6 +174,10 @@ SOURCE=..\include\vorbis\backends.h
 # Begin Source File
 
 SOURCE=..\lib\bitbuffer.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\bitrate.h
 # End Source File
 # Begin Source File
 

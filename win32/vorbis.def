@@ -1,5 +1,5 @@
 ;
-; $Id: vorbis.def,v 1.7 2001/10/23 13:27:18 cwolf Exp $
+; $Id: vorbis.def,v 1.8 2001/12/27 14:25:20 cwolf Exp $
 ; 
 LIBRARY
 EXPORTS
@@ -8,6 +8,7 @@ _mapping_P
 _residue_P
 _time_P
 _vi_psy_copy
+residue_free_info
 vorbis_analysis
 vorbis_analysis_blockout
 vorbis_analysis_buffer
@@ -16,6 +17,8 @@ vorbis_analysis_init
 vorbis_analysis_wrote
 vorbis_block_clear
 vorbis_block_init
+vorbis_bitrate_addblock
+vorbis_bitrate_flushpacket
 vorbis_comment_add
 vorbis_comment_add_tag
 vorbis_comment_clear
@@ -24,6 +27,7 @@ vorbis_comment_query
 vorbis_comment_query_count
 vorbis_commentheader_out
 vorbis_dsp_clear
+vorbis_info_blocksize
 vorbis_info_clear
 vorbis_info_init
 vorbis_packet_blocksize

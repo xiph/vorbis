@@ -98,7 +98,11 @@ SOURCE=..\lib\analysis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bitbuffer.c
+SOURCE=..\lib\barkmel.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\bitrate.c
 # End Source File
 # Begin Source File
 
