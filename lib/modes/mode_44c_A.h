@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_A.h,v 1.4.2.10 2001/11/22 07:54:41 xiphmont Exp $
+ last mod: $Id: mode_44c_A.h,v 1.4.2.11 2001/11/24 05:26:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -82,10 +82,12 @@
 
 static bitrate_manager_info _bm_set_44c_A={
   /* progressive coding and bitrate controls */
-            110000,90000,     -1,-1,
   2.,.5,
-  2.,       128000,           128000,  
-            128000,           128000,
+  //2.,       128000,           128000,  
+  //          128000,           128000,
+
+  2.,       0,           0,  
+            0,           0,
            
   4.0, 0.,  -1.,              .05, 
             -.05,             .05,

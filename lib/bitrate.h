@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.h,v 1.1.2.2 2001/11/22 06:21:07 xiphmont Exp $
+ last mod: $Id: bitrate.h,v 1.1.2.3 2001/11/24 05:26:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -66,11 +66,6 @@ typedef struct bitrate_manager_state {
 
 typedef struct bitrate_manager_info{
   /* detailed bitrate management setup */
-  double absolute_min_short;
-  double absolute_min_long;
-  double absolute_max_short;
-  double absolute_max_long;
-
   double queue_avg_time;
   double queue_avg_center;
   double queue_minmax_time;

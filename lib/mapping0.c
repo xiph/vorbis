@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.8 2001/11/22 06:21:08 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.9 2001/11/24 05:26:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -466,8 +466,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     int     *chbundle=alloca(sizeof(*chbundle)*info->submaps);
     int      chcounter=0;
 
-    long  minbits;
-
     /* play a little loose with this abstraction */
     int   quant_passes=ci->coupling_passes;
 
@@ -532,12 +530,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       classifications[i]=look->residue_func[i]->
 	class(vb,look->residue_look[i],pcmbundle[i],zerobundle[i],chbundle[i]);
     }
-
-    /* this is the only good place to enforce minimum by-packet bitrate */
-    if(vb->W)
-      minbits=bi->absolute_min_long/vi->rate*ci->blocksizes[1]/2;
-    else
-      minbits=bi->absolute_min_short/vi->rate*ci->blocksizes[0]/2;
 
     /* actual encoding loop; we pack all the iterations to collect
        management data */
