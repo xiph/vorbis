@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.73 2003/09/02 04:39:26 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.74 2003/09/12 18:30:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -388,7 +388,8 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
 }
 
 static int _make_decode_ready(OggVorbis_File *vf){
-  if(vf->ready_state!=STREAMSET)return OV_EFAULT;
+  if(vf->ready_state>STREAMSET)return 0;
+  if(vf->ready_state<STREAMSET)return OV_EFAULT;
   if(vf->seekable){
     if(vorbis_synthesis_init(&vf->vd,vf->vi+vf->current_link))
       return OV_EBADLINK;
