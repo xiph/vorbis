@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.8 2000/02/23 09:24:01 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.9 2000/02/23 11:42:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,8 +31,9 @@
 
 #include "vorbis/book/resX_1.vqh"
 
-/*#include "vorbis/book/res128_0a.vqh"
-#include "vorbis/book/res128_0b.vqh"
+#include "vorbis/book/res128_0a.vqh"
+#include "vorbis/book/res1024_0a.vqh"
+/*#include "vorbis/book/res128_0b.vqh"
 #include "vorbis/book/res128_0c7x4.vqh"
 #include "vorbis/book/res1024_1a.vqh"
 #include "vorbis/book/res1024_0b.vqh"
@@ -59,8 +60,8 @@ static vorbis_info_psy _psy_set0={
 static vorbis_info_time0 _time_set0={0};
 static vorbis_info_floor0 _floor_set0={20, 44100,  64, 12,140, 1, {0} };
 static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,140, 1, {1} };
-static vorbis_info_residue0 _residue_set0={0, 128, 8,4,2,{0,1,1,1},{4,4,4}};
-static vorbis_info_residue0 _residue_set1={0,1024, 8,4,3,{0,1,1,1},{4,4,4}};
+static vorbis_info_residue0 _residue_set0={0, 128, 8,4,2,{0,1,1,1},{4,6,6}};
+static vorbis_info_residue0 _residue_set1={0,1024, 8,4,3,{0,1,1,1},{5,6,6}};
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {1}, {0}};
 static vorbis_info_mode _mode_set0={0,0,0,0};
@@ -73,7 +74,7 @@ vorbis_info info_A={
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   5,   1,
+  2,          2,    1,     2,       2,   7,   1,
   /* modes */
   {&_mode_set0,&_mode_set1},
   /* maps */
@@ -90,6 +91,9 @@ vorbis_info info_A={
 
    &_huff_book_resshort8aux,/* 2 */
    &_huff_book_reslong8aux, /* 3 */
+
+   &_vq_book_res128_0a,    /* 4 */
+   &_vq_book_res1024_0a,   /* 5 */
 
 #if 0
    &_vq_book_res128_0a,    /* 4 */
