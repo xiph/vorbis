@@ -13,7 +13,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [64 <= n ]
- last mod: $Id: mdct.c,v 1.20 2000/12/16 01:49:39 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.21 2000/12/17 00:34:05 xiphmont Exp $
 
  Original algorithm adapted long ago from _The use of multirate filter
  banks for coding of high quality digital audio_, by T. Sporer,
@@ -44,6 +44,7 @@
 #include <math.h>
 #include "vorbis/codec.h"
 #include "mdct.h"
+#include "os.h"
 
 /* build lookups for trig functions; also pre-figure scaling and
    some window function algebra. */
