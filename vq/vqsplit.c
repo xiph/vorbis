@@ -59,15 +59,6 @@
    (provided parameter), we may choose to ignore the overlap in order
    to pare the tree down */
 
-double *sortvals;
-int els;
-int dascsort(const void *a,const void *b){
-  double av=sortvals[*((long *)a) * els];
-  double bv=sortvals[*((long *)b) * els];
-  if(av<bv)return(-1);
-  return(1);
-}
-
 long *isortvals;
 int iascsort(const void *a,const void *b){
   long av=isortvals[*((long *)a)];
@@ -226,7 +217,7 @@ int lp_split(vqgen *v,vqbook *b,
   /* more than one way to do this part.  For small sets, we can brute
      force it. */
 
-  {
+  if(entries<8 || points*entries*entries<128*1024*1024){
     /* try every pair possibility */
     double best=0;
     long   besti=0;
@@ -252,8 +243,46 @@ int lp_split(vqgen *v,vqbook *b,
       }
     }
     pq_in_out(v,n,&c,_now(v,entryindex[besti]),_now(v,entryindex[bestj]));
-  }
+  }else{
+    double best=0.;
+    long   bestj=0;
+    
+    /* try COG/normal and furthest pairs */
+    /* medianpoint */
+    for(k=0;k<v->elements;k++){
+      spinnit();
+      
+      p[k]=0.;
+      for(j=0;j<entries;j++)
+	p[k]+=v->entrylist[entryindex[j]*v->elements+k];
+      p[k]/=entries;
 
+    }
+    
+    /* try every normal */
+    for(j=0;j<entries;j++){
+      double *ppj=_now(v,entryindex[j]);
+      double this;
+      spinnit();
+
+      pq_center_out(v,n,&c,p,_now(v,entryindex[j]));
+      vqsp_count(v,membership,
+		 entryindex,entries, 
+		 pointindex,points,
+		 entryA,entryB,
+		 n, c, 
+		 &entriesA,&entriesB,&entriesC);
+      this=(entriesA-entriesC)*(entriesB-entriesC);
+      
+      if(this>best){
+	best=this;
+	bestj=j;
+      }
+    }
+    
+    pq_center_out(v,n,&c,p,_now(v,entryindex[bestj]));
+  }
+  
   /* find cells enclosing points */
   /* count A/B points */
 
