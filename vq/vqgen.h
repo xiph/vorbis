@@ -12,12 +12,14 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.8 1999/12/30 07:27:05 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.9 2000/01/05 10:14:58 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _VQGEN_H_
 #define _VQGEN_H_
+
+#include <sys/time.h>
 
 typedef struct vqgen{
   int it;
@@ -38,36 +40,6 @@ typedef struct vqgen{
   double  (*metric_func) (struct vqgen *v,double *entry,double *point);
   double *(*weight_func) (struct vqgen *v,double *point);
 } vqgen;
-
-typedef struct vqbook{
-  long dim;           /* codebook dimensions (elements per vector) */
-  long entries;       /* codebook entries */
-
-  long   min;         /* packed 24 bit float; quant value 0 maps to minval */
-  long   delta;       /* packed 24 bit float; val 1 - val 0 == delta */       
-  int    quant;       /* 0 < quant <= 16 */
-  int    sequencep;   /* bitflag */
-
-  double *valuelist;  /* list of dim*entries actual entry values */
-  long   *quantlist;  /* list of dim*entries quantized entry values */
-  long   *codelist;   /* list of bitstream codewords for each entry */
-  long   *lengthlist; /* codeword lengths in bits */
-
-  /* auxiliary encoding/decoding information */
-  /* encode: provided pre-calculated partitioning tree */
-  /* decode: hufftree */
-  long   *ptr0;
-  long   *ptr1;
-
-  /* auxiliary encoding information. Not used in decode */
-  double *n;         /* decision hyperplanes: sum(x_i*n_i)[0<=i<dim]=c */ 
-  double *c;
-  long   *p;
-  long   *q;
-  long   aux;
-  long   alloc;
-
-} vqbook;
 
 typedef struct {
   long   min;       /* packed 24 bit float */       
@@ -96,11 +68,11 @@ extern void vqgen_addpoint(vqgen *v, double *p,double *aux);
 extern double vqgen_iterate(vqgen *v);
 extern void vqgen_unquantize(vqgen *v,quant_meta *q);
 extern void vqgen_quantize(vqgen *v,quant_meta *q);
+
+extern void spinnit(char *s,int n);
+
 extern long float24_pack(double val);
 extern double float24_unpack(long val);
-
-extern void vqsp_book(vqgen *v,vqbook *b,long *quantlist);
-extern int vqenc_entry(vqbook *b,double *val);
 
 #endif
 

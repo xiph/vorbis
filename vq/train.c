@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.11 1999/12/30 07:27:02 xiphmont Exp $
+ last mod: $Id: train.c,v 1.12 2000/01/05 10:14:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,46 +24,15 @@
 #include <signal.h>
 #include "vqgen.h"
 #include "vqext.h"
+#include "bookutil.h"
 
-static char *linebuffer=NULL;
-static int  lbufsize=0;
 static char *rline(FILE *in,FILE *out,int pass){
-  long sofar=0;
-  if(feof(in))return NULL;
-
   while(1){
-    int gotline=0;
-
-    while(!gotline){
-      if(sofar+1>=lbufsize){
-	if(!lbufsize){	
-	  lbufsize=16;
-	  linebuffer=malloc(lbufsize);
-	}else{
-	  lbufsize*=2;
-	  linebuffer=realloc(linebuffer,lbufsize);
-	}
-      }
-      {
-	long c=fgetc(in);
-	switch(c){
-	case '\n':
-	case EOF:
-	  gotline=1;
-	  break;
-	default:
-	  linebuffer[sofar++]=c;
-	  linebuffer[sofar]='\0';
-	  break;
-	}
-      }
-    }
-    
-    if(linebuffer[0]=='#'){
-      if(pass)fprintf(out,"%s\n",linebuffer);
-      sofar=0;
+    char *line=get_line(in);
+    if(line && line[0]=='#'){
+      if(pass)fprintf(out,"%s\n",line);
     }else{
-      return(linebuffer);
+      return(line);
     }
   }
 }

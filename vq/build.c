@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.7 1999/12/30 07:26:59 xiphmont Exp $
+ last mod: $Id: build.c,v 1.8 2000/01/05 10:14:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,7 +21,10 @@
 #include <math.h>
 #include <string.h>
 #include <errno.h>
+#include "vorbis/codebook.h"
+
 #include "vqgen.h"
+#include "vqsplit.h"
 
 static char *linebuffer=NULL;
 static int  lbufsize=0;
@@ -71,10 +74,10 @@ static char *rline(FILE *in,FILE *out){
 
 int main(int argc,char *argv[]){
   vqgen v;
-  vqbook b;
+  codebook b;
   quant_meta q;
-  long *quantlist=NULL;
 
+  long *quantlist=NULL;
   int entries=-1,dim=-1,aux=-1;
   FILE *out=NULL;
   FILE *in=NULL;
@@ -198,7 +201,7 @@ int main(int argc,char *argv[]){
  " ********************************************************************/\n\n");
 
   fprintf(out,"#ifndef _V_%s_VQH_\n#define _V_%s_VQH_\n",name,name);
-  fprintf(out,"#include \"vqgen.h\"\n\n");
+  fprintf(out,"#include \"vorbis/codebook.h\"\n\n");
 
   /* first, the static vectors, then the book structure to tie it together. */
   /* quantlist */
@@ -234,59 +237,65 @@ int main(int argc,char *argv[]){
 
   /* ptr0 */
   fprintf(out,"static long _vq_ptr0_%s[] = {\n",name);
-  for(j=0;j<b.aux;){
+  for(j=0;j<b.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.aux;k++,j++)
-      fprintf(out,"%5ld,",b.ptr0[j]);
+    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",b.encode_tree->ptr0[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* ptr1 */
   fprintf(out,"static long _vq_ptr1_%s[] = {\n",name);
-  for(j=0;j<b.aux;){
+  for(j=0;j<b.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.aux;k++,j++)
-      fprintf(out,"%6ld,",b.ptr1[j]);
+    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",b.encode_tree->ptr1[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* p */
   fprintf(out,"static long _vq_p_%s[] = {\n",name);
-  for(j=0;j<b.aux;){
+  for(j=0;j<b.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.aux;k++,j++)
-      fprintf(out,"%6ld,",b.p[j]);
+    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",b.encode_tree->p[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* q */
   fprintf(out,"static long _vq_q_%s[] = {\n",name);
-  for(j=0;j<b.aux;){
+  for(j=0;j<b.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.aux;k++,j++)
-      fprintf(out,"%6ld,",b.q[j]);
+    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",b.encode_tree->q[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* tie it all together */
-  fprintf(out,"static vqbook _vq_book_%s = {\n",name);
+
+  fprintf(out,"static encode_aux _vq_aux_%s = {\n",name);
+  fprintf(out,"\t_vq_ptr0_%s,\n",name);
+  fprintf(out,"\t_vq_ptr1_%s,\n",name);
+  fprintf(out,"\t0,\n");
+  fprintf(out,"\t0,\n");
+  fprintf(out,"\t_vq_p_%s,\n",name);
+  fprintf(out,"\t_vq_q_%s,\n",name);
+  fprintf(out,"\t%ld, %ld\n};\n\n",b.encode_tree->aux,b.encode_tree->aux);
+
+  fprintf(out,"static codebook _vq_book_%s = {\n",name);
   fprintf(out,"\t%ld, %ld, %ld, %ld, %d, %d,\n",
 	  b.dim,b.entries,q.min,q.delta,q.quant,q.sequencep);
   fprintf(out,"\t0,\n"); /* valuelist */
   fprintf(out,"\t_vq_quantlist_%s,\n",name);
   fprintf(out,"\t_vq_codelist_%s,\n",name);
   fprintf(out,"\t_vq_lengthlist_%s,\n",name);
-  fprintf(out,"\t_vq_ptr0_%s,\n",name);
-  fprintf(out,"\t_vq_ptr1_%s,\n",name);
-  fprintf(out,"\t0,\n",name);
-  fprintf(out,"\t0,\n",name);
-  fprintf(out,"\t_vq_p_%s,\n",name);
-  fprintf(out,"\t_vq_q_%s,\n",name);
-  fprintf(out,"\t%ld, %ld };\n\n",b.aux,b.aux);
+  fprintf(out,"\t&_vq_aux_%s,\n",name);
+  fprintf(out,"\t0\n");
+  fprintf(out,"};\n\n");
 
   fprintf(out,"\n#endif\n");
   fclose(out);

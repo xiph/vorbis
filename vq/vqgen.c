@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.25 1999/12/30 07:27:04 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.26 2000/01/05 10:14:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -29,7 +29,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+
 #include "vqgen.h"
+#include "bookutil.h"
 
 /* Codebook generation happens in two steps: 
 
@@ -80,6 +82,38 @@ void _vqgen_seed(vqgen *v){
 
 /* External calls *******************************************************/
 
+void spinnit(char *s,int n){
+  static int p=0;
+  static long lasttime=0;
+  long test;
+  struct timeval thistime;
+
+  gettimeofday(&thistime,NULL);
+  test=thistime.tv_sec*10+thistime.tv_usec/100000;
+  if(lasttime!=test){
+    lasttime=test;
+
+    fprintf(stderr,"%s%d ",s,n);
+
+    p++;if(p>3)p=0;
+    switch(p){
+    case 0:
+      fprintf(stderr,"|    \r");
+      break;
+    case 1:
+      fprintf(stderr,"/    \r");
+      break;
+    case 2:
+      fprintf(stderr,"-    \r");
+      break;
+    case 3:
+      fprintf(stderr,"\\    \r");
+      break;
+    }
+    fflush(stderr);
+  }
+}
+
 /* We have two forms of quantization; in the first, each vector
    element in the codebook entry is orthogonal.  Residues would use this
    quantization for example.
@@ -92,33 +126,6 @@ void _vqgen_seed(vqgen *v){
    than the preceeding value.  Thus the desired quantibits apply to
    the encoded (delta) values, not abs positions. This requires minor
    additional encode-side trickery. */
-
-/* 24 bit float (not IEEE; nonnormalized mantissa +
-   biased exponent ): neeeeemm mmmmmmmm mmmmmmmm */
-
-#define VQ_FEXP_BIAS 20 /* bias toward values smaller than 1. */
-long float24_pack(double val){
-  int sign=0;
-  long exp;
-  long mant;
-  if(val<0){
-    sign=0x800000;
-    val= -val;
-  }
-  exp= floor(log(val)/log(2));
-  mant=rint(ldexp(val,17-exp));
-  exp=(exp+VQ_FEXP_BIAS)<<18;
-
-  return(sign|exp|mant);
-}
-
-double float24_unpack(long val){
-  double mant=val&0x3ffff;
-  double sign=val&0x800000;
-  double exp =(val&0x7c0000)>>18;
-  if(sign)mant= -mant;
-  return(ldexp(mant,exp-17-VQ_FEXP_BIAS));
-}
 
 void vqgen_quantize(vqgen *v,quant_meta *q){
 
@@ -247,21 +254,6 @@ double vqgen_iterate(vqgen *v){
   long   *nearcount=malloc(v->entries*sizeof(long));
   double *nearbias=malloc(v->entries*desired2*sizeof(double));
 
-#ifdef NOISY
-  char buff[80];
-  FILE *assig;
-  FILE *bias;
-  FILE *cells;
-  sprintf(buff,"cells%d.m",v->it);
-  cells=fopen(buff,"w");
-  sprintf(buff,"assig%d.m",v->it);
-  assig=fopen(buff,"w");
-  sprintf(buff,"bias%d.m",v->it);
-  bias=fopen(buff,"w");
-#endif
-
-  fprintf(stderr,"Pass #%d... ",v->it);
-
   if(v->entries<2){
     fprintf(stderr,"generation requires at least two entries\n");
     exit(1);
@@ -277,6 +269,9 @@ double vqgen_iterate(vqgen *v){
     double secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
     long   firstentry=0;
     long   secondentry=1;
+
+    spinnit("working... ",v->points-i);
+
     if(firstmetric>secondmetric){
       double temp=firstmetric;
       firstmetric=secondmetric;
@@ -301,7 +296,7 @@ double vqgen_iterate(vqgen *v){
     }
       
     j=firstentry;
-    meterror+=sqrt(_dist_sq(v,_now(v,j),ppt));
+    meterror+=sqrt(_dist_sq(v,_now(v,j),ppt)/v->elements);
     /* set up midpoints for next iter */
     if(v->assigned[j]++)
       for(k=0;k<v->elements;k++)
@@ -309,13 +304,6 @@ double vqgen_iterate(vqgen *v){
     else
       for(k=0;k<v->elements;k++)
 	vN(new,j)[k]=ppt[k];
-
-   
-#ifdef NOISY
-    fprintf(cells,"%g %g\n%g %g\n\n",
-	    _now(v,j)[0],_now(v,j)[1],
-	    ppt[0],ppt[1]);
-#endif
 
     for(j=0;j<v->entries;j++){
       
@@ -356,6 +344,8 @@ double vqgen_iterate(vqgen *v){
   for(i=0;i<v->entries;i++){
     double *nearbiasptr=nearbias+desired2*i;
 
+    spinnit("working... ",v->entries-i);
+
     /* due to the delayed sorting, we likely need to finish it off....*/
     if(nearcount[i]>desired)
       qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
@@ -370,15 +360,13 @@ double vqgen_iterate(vqgen *v){
     if(v->assigned[j])
       for(k=0;k<v->elements;k++)
 	_now(v,j)[k]=vN(new,j)[k]/v->assigned[j];
-#ifdef NOISY
-    fprintf(assig,"%ld\n",v->assigned[j]);
-    fprintf(bias,"%g\n",v->bias[j]);
-#endif
   }
 
   asserror/=(v->entries*fdesired);
+
+  fprintf(stderr,"Pass #%d... ",v->it);
   fprintf(stderr,": dist %g(%g) metric error=%g \n",
-	  asserror,fdesired,meterror/v->points/v->elements);
+	  asserror,fdesired,meterror/v->points);
   v->it++;
   
   free(new);
