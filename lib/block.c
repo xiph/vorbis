@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.44 2001/02/02 03:51:55 xiphmont Exp $
+ last mod: $Id: block.c,v 1.45 2001/02/15 19:05:45 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -493,7 +493,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       largebound=v->centerW+ci->blocksizes[1]*3/4+ci->blocksizes[0]/4;
     else
       /* min boundary; nW large, next small */
-      largebound=v->centerW+ci->blocksizes[1]*3/4+ci->blocksizes[0]*3/4;
+      largebound=v->centerW+ci->blocksizes[1]/2+ci->blocksizes[0]/2;
 
     bp=_ve_envelope_search(v,largebound);
     if(bp==-1)return(0); /* not enough data currently to search for a

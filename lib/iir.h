@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.h,v 1.5 2001/02/02 03:51:56 xiphmont Exp $
+  last mod: $Id: iir.h,v 1.6 2001/02/15 19:05:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,7 +30,7 @@ typedef struct {
 extern void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B);
 extern void IIR_clear(IIR_state *s);
 extern float IIR_filter(IIR_state *s,float in);
-extern float IIR_filter_ChebBand(IIR_state *s,float in);
+extern float IIR_filter_Band(IIR_state *s,float in);
 extern void IIR_reset(IIR_state *s);
 
 #endif

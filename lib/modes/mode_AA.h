@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_AA.h,v 1.7 2001/02/02 03:52:25 xiphmont Exp $
+ last mod: $Id: mode_AA.h,v 1.8 2001/02/15 19:06:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -240,7 +240,7 @@ static vorbis_info_floor0 _floor_set0AA={9, 44100,  64, 10,130, 2, {0,1},
                                         0.246f, .387f};
 static vorbis_info_floor0 _floor_set1AA={30, 44100, 256, 12,150, 2, {2,3}, 
                                         .082f, .126f};
-static vorbis_info_residue0 _residue_set0AA={0,64,16,6,4,
+static vorbis_info_residue0 _residue_set0AA={0,192,16,6,4,
 					    {0,1,1,1,1,1},
 					    {6,7,8,9,10},
 					    
@@ -269,7 +269,7 @@ static vorbis_info_mode _mode_set1AA={1,0,0,1};
 codec_setup_info info_AA={
 
   /* smallblock, largeblock */
-  {256, 2048}, 
+  {512, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
   2,          2,    1,     2,       2,   20,   2,
   /* modes */
@@ -311,7 +311,7 @@ codec_setup_info info_AA={
   /* psy */
   {&_psy_set_AA0,&_psy_set_AA},
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
-  256, 24.f, -28.f, -96.f,
+  256, {30.f,30.f,30.f,34.f}, {-90.f,-90.f,-90.f,-90.f}, -90.f,
 
   -10., 
 

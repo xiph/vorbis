@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.5 2001/02/02 03:51:56 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.6 2001/02/15 19:05:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -110,8 +110,8 @@ typedef struct codec_setup_info {
   
   /* for block long/sort tuning; encode only */
   int       envelopesa;
-  float     preecho_thresh;
-  float     postecho_thresh;
+  float     preecho_thresh[4];
+  float     postecho_thresh[4];
   float     preecho_minenergy;
 
   float     ampmax_att_per_sec;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.12 2001/02/02 03:51:56 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.13 2001/02/15 19:05:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,11 +31,10 @@ typedef struct {
 
   IIR_state *iir;
   float    **filtered;
+
   long storage;
   long current;
 
-  drft_lookup drft;
-  float *window;
 } envelope_lookup;
 
 extern void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi);

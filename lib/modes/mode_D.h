@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_D.h,v 1.10 2001/02/02 03:52:25 xiphmont Exp $
+ last mod: $Id: mode_D.h,v 1.11 2001/02/15 19:06:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -308,7 +308,7 @@ codec_setup_info info_D={
   /* psy */
   {&_psy_set_D0,&_psy_set_D},
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
-  256, 18.f, -18.f, -96.f,
+  256, {26.f,26.f,26.f,30.f}, {-90.f,-90.f,-90.f,-90.f}, -90.f,
 
   -15., 
 

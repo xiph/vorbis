@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.7 2001/02/02 03:51:56 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.8 2001/02/15 19:05:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -69,8 +69,8 @@ float IIR_filter(IIR_state *s,float in){
 }
 
 /* this assumes the symmetrical structure of the feed-forward stage of
-   a Chebyshev bandpass to save multiplies */
-float IIR_filter_ChebBand(IIR_state *s,float in){
+   a typical bandpass to save multiplies */
+float IIR_filter_Band(IIR_state *s,float in){
   int stages=s->stages,i;
   float newA;
   float newB=0;
