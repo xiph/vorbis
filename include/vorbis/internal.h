@@ -13,7 +13,7 @@
 
  function: libvorbis codec internal types.  These structures are 
            'visible', but generally uninteresting to the developer
- last mod: $Id: internal.h,v 1.1 2000/01/05 03:10:47 xiphmont Exp $
+ last mod: $Id: internal.h,v 1.2 2000/01/20 04:43:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,15 +21,6 @@
 #define _vorbis_internal_h_
 
 /* lookup structures for various simple transforms *****************/
-
-typedef struct {
-  int n;
-  struct vorbis_info *vi;
-
-  double *maskthresh;
-  double *barknum;
-
-} psy_lookup;
 
 typedef struct {
   int n;

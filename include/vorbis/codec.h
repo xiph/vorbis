@@ -12,53 +12,29 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.2 2000/01/12 11:34:37 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.3 2000/01/20 04:43:50 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
 
+#define MAX_BARK 27
+
 #include <sys/types.h>
 #include "vorbis/codebook.h"
 #include "vorbis/internal.h"
 
-/* vobis_info contains all the setup information specific to the specific
-   compression/decompression mode in progress (eg, psychoacoustic settings,
-   channel setup, options, codebook etc) *********************************/
-
-#define MAX_BARK 27
-
-/* not used yet */
-typedef struct vorbis_info_time{
-}vorbis_info_time;
-
-typedef struct vorbis_info_floor{
-  int   order;
-  long  rate;
-  long  barkmap;
-  int   stages;
-  int  *books;
-} vorbis_info_floor;
-
-typedef struct vorbis_info_res{
-  long  begin;
-  long  end;
-
-  int   stages;
-  int  *books;
-} vorbis_info_res;
-
-typedef struct vorbis_psysettings{
-  double maskthresh[MAX_BARK];
-  double lrolldB;
-  double hrolldB;
-} vorbis_psysettings;
+/* vobis_info contains all the setup information specific to the
+   specific compression/decompression mode in progress (eg,
+   psychoacoustic settings, channel setup, options, codebook
+   etc). Substructures are in backends.h.
+*********************************************************************/
 
 typedef struct vorbis_info{
+  int version;
   int channels;
   long rate;
-  int version;
 
   /* The below bitrate declarations are *hints*.
      Combinations of the three values carry the following implications:
@@ -79,40 +55,51 @@ typedef struct vorbis_info{
   long bitrate_nominal;
   long bitrate_lower;
 
+  /* Vorbis supports only short and long blocks, but allows the
+     encoder to choose the sizes */
+
+  long blocksizes[2];
+
   /* unlimited user comment fields.  libvorbis writes 'libvorbis'
      whatever vedor is set to in encode */
   char **user_comments;
   int    comments;
   char  *vendor;
 
-  /* short and long block sizes */
-  int blocksize[2];
-
-  /* no mapping so no balance yet */
-  int channelmapping[2];   /* mapping type: 0 == (independant channel) */
-
-  /* time domain setup */
-  int                timech;    
-  vorbis_info_time  *times[2];
-
-  /* mdct domain floor setup */
-  int                floorch;
-  vorbis_info_floor *floors[2]; /* [long,short][floorchannel] */
-
-  /* mdct domain residue setup */
-  int                residuech;
-  vorbis_info_res   *residues[2];
-
+  /* modes are the primary means of supporting on-the-fly different
+     blocksizes, different channel mappings (LR or mid-side),
+     different residue backends, etc.  Each mode consists of a
+     blocksize flag and a mapping (along with the mapping setup */
+  int        modes;
+  int       *blockflags;
+  int       *windowtypes;
+  int       *transformtypes;
+  int       *mappingtypes;
+  void     **modelist;
+  
   /* Codebook storage for encode and decode.  Encode side is submitted
      by the client (and memory must be managed by the client), decode
      side is allocated by header_in */
-  codebook  *booklist;
+  int        times;
+  int       *timetypes;
+  void     **timelist;
+
+  int        floors;
+  int       *floortypes;
+  void     **floorlist;
+
+  int        residues;
+  int       *residuetypes;
+  void     **residuelist;
+
+  /* all books are the same generic type */
   int        books;
+  codebook **booklist;
 
-  /* Encode-side settings for analysis. different mappings use them
-     differently. */
-  vorbis_psysettings *psy;
-
+  /* here on out is encode only, not added to the header */
+  int        psys;
+  void     **psylist;
+  
   /* for block long/sort tuning */
   int    envelopesa;
   double preecho_thresh;
@@ -124,8 +111,6 @@ typedef struct vorbis_info{
   char *header;
   char *header1;
   char *header2;
-
-  int   freeall;     /* codebooks submitted or malloced? */
 
 } vorbis_info;
  
@@ -211,13 +196,11 @@ typedef struct {
 typedef struct vorbis_dsp_state{
   int analysisp;
   vorbis_info *vi;
+  int    modebits;
 
   double *window[2][2][2]; /* windowsize, leadin, leadout */
-  envelope_lookup ve;
+  envelope_lookup ve;    
   mdct_lookup vm[2];
-  lpc_lookup vl[2];
-  lpc_lookup vbal[2];
-  psy_lookup vp[2];
 
   double **pcm;
   double **pcmret;
@@ -239,10 +222,10 @@ typedef struct vorbis_dsp_state{
   long frameno;
   long sequence;
 
-  int64_t gluebits;
-  int64_t time_envelope_bits;
-  int64_t spectral_envelope_bits;
-  int64_t spectral_residue_bits;
+  int64_t glue_bits;
+  int64_t time_bits;
+  int64_t floor_bits;
+  int64_t res_bits;
 
 } vorbis_dsp_state;
 
@@ -252,17 +235,10 @@ bitstream, but is independant from other vorbis_blocks belonging to
 that logical bitstream. *************************************************/
 
 typedef struct vorbis_block{
-  double **pcm;
-  double **lpc;
-  double **lsp;
-  double *amp;
+  /* necessary stream state for linking to the framing abstraction */
+  double  **pcm;       /* this is a pointer into local storage */ 
   oggpack_buffer opb;
   
-  int   pcm_channels;  /* allocated, not used */
-  int   pcm_storage;   /* allocated, not used */
-  int   floor_channels;
-  int   floor_storage;
-
   long  lW;
   long  W;
   long  nW;
@@ -273,12 +249,23 @@ typedef struct vorbis_block{
   int sequence;
   vorbis_dsp_state *vd; /* For read-only access of configuration */
 
-  long gluebits;
-  long time_envelope_bits;
-  long spectral_envelope_bits;
-  long spectral_residue_bits;
+  /* local storage to avoid remallocing; it's up to the mapping to
+     structure it */
+  double *localstore;
+  long   localtop;
+  long   localalloc;
+
+  /* bitmetrics for the frame */
+  long glue_bits;
+  long time_bits;
+  long floor_bits;
+  long res_bits;
 
 } vorbis_block;
+
+/* internal use */
+extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
+extern void _vorbis_block_ripcord(vorbis_block *vb);
 
 /* libvorbis encodes in two abstraction layers; first we perform DSP
    and produce a packet (see docs/analysis.txt).  The packet is then
