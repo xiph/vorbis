@@ -42,11 +42,11 @@ static void *_insert(void *ptr,char *file,long line){
   if(pinsert>=palloced){
     palloced+=64;
     if(pointers){
-      pointers=(void **)_ogg_realloc(pointers,sizeof(void **)*palloced);
-      insertlist=(long *)_ogg_realloc(insertlist,sizeof(long *)*palloced);
+      pointers=(void **)realloc(pointers,sizeof(void **)*palloced);
+      insertlist=(long *)realloc(insertlist,sizeof(long *)*palloced);
     }else{
-      pointers=(void **)_ogg_malloc(sizeof(void **)*palloced);
-      insertlist=(long *)_ogg_malloc(sizeof(long *)*palloced);
+      pointers=(void **)malloc(sizeof(void **)*palloced);
+      insertlist=(long *)malloc(sizeof(long *)*palloced);
     }
   }
 
@@ -84,14 +84,14 @@ void _VDBG_dump(void){
   pthread_mutex_unlock(&memlock);
 }
 
-extern void *_VDBG__ogg_malloc(void *ptr,long bytes,char *file,long line){
+extern void *_VDBG_malloc(void *ptr,long bytes,char *file,long line){
   bytes+=HEAD_ALIGN;
   if(ptr){
     ptr-=HEAD_ALIGN;
     _ripremove(ptr);
-    ptr=_ogg_realloc(ptr,bytes);
+    ptr=realloc(ptr,bytes);
   }else{
-    ptr=_ogg_malloc(bytes);
+    ptr=malloc(bytes);
     memset(ptr,0,bytes);
   }
   return _insert(ptr,file,line);

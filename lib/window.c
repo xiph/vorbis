@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.9 2000/11/06 00:07:03 xiphmont Exp $
+ last mod: $Id: window.c,v 1.10 2000/11/14 00:05:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -55,7 +55,7 @@ float *_vorbis_window(int type, int window,int left,int right){
     }
     break;
   default:
-    free(ret);
+    _ogg_free(ret);
     return(NULL);
   }
   return(ret);

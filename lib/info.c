@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.32 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: info.c,v 1.33 2000/11/14 00:05:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -130,10 +130,10 @@ void vorbis_comment_clear(vorbis_comment *vc){
   if(vc){
     long i;
     for(i=0;i<vc->comments;i++)
-      if(vc->user_comments[i])free(vc->user_comments[i]);
-    if(vc->user_comments)free(vc->user_comments);
-	if(vc->comment_lengths)free(vc->comment_lengths);
-    if(vc->vendor)free(vc->vendor);
+      if(vc->user_comments[i])_ogg_free(vc->user_comments[i]);
+    if(vc->user_comments)_ogg_free(vc->user_comments);
+	if(vc->comment_lengths)_ogg_free(vc->comment_lengths);
+    if(vc->vendor)_ogg_free(vc->vendor);
   }
   memset(vc,0,sizeof(vorbis_comment));
 }
@@ -151,7 +151,7 @@ void vorbis_info_clear(vorbis_info *vi){
   if(ci){
 
     for(i=0;i<ci->modes;i++)
-      if(ci->mode_param[i])free(ci->mode_param[i]);
+      if(ci->mode_param[i])_ogg_free(ci->mode_param[i]);
 
     for(i=0;i<ci->maps;i++) /* unpack does the range checking */
       _mapping_P[ci->map_type[i]]->free_info(ci->map_param[i]);
@@ -175,7 +175,7 @@ void vorbis_info_clear(vorbis_info *vi){
     for(i=0;i<ci->psys;i++)
       _vi_psy_free(ci->psy_param[i]);
 
-    free(ci);
+    _ogg_free(ci);
   }
 
   memset(vi,0,sizeof(vorbis_info));
@@ -515,7 +515,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   if(_vorbis_pack_info(&opb,vi))goto err_out;
 
   /* build the packet */
-  if(b->header)free(b->header);
+  if(b->header)_ogg_free(b->header);
   b->header=_ogg_malloc(oggpack_bytes(&opb));
   memcpy(b->header,opb.buffer,oggpack_bytes(&opb));
   op->packet=b->header;
@@ -529,7 +529,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   oggpack_reset(&opb);
   if(_vorbis_pack_comment(&opb,vc))goto err_out;
 
-  if(b->header1)free(b->header1);
+  if(b->header1)_ogg_free(b->header1);
   b->header1=_ogg_malloc(oggpack_bytes(&opb));
   memcpy(b->header1,opb.buffer,oggpack_bytes(&opb));
   op_comm->packet=b->header1;
@@ -543,7 +543,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   oggpack_reset(&opb);
   if(_vorbis_pack_books(&opb,vi))goto err_out;
 
-  if(b->header2)free(b->header2);
+  if(b->header2)_ogg_free(b->header2);
   b->header2=_ogg_malloc(oggpack_bytes(&opb));
   memcpy(b->header2,opb.buffer,oggpack_bytes(&opb));
   op_code->packet=b->header2;
@@ -560,9 +560,9 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   memset(op_comm,0,sizeof(ogg_packet));
   memset(op_code,0,sizeof(ogg_packet));
 
-  if(b->header)free(b->header);
-  if(b->header1)free(b->header1);
-  if(b->header2)free(b->header2);
+  if(b->header)_ogg_free(b->header);
+  if(b->header1)_ogg_free(b->header1);
+  if(b->header2)_ogg_free(b->header2);
   b->header=NULL;
   b->header1=NULL;
   b->header2=NULL;

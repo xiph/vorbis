@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.31 2000/11/06 00:07:02 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.32 2000/11/14 00:05:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -567,13 +567,13 @@ int ov_clear(OggVorbis_File *vf){
 	vorbis_info_clear(vf->vi+i);
 	vorbis_comment_clear(vf->vc+i);
       }
-      free(vf->vi);
-      free(vf->vc);
+      _ogg_free(vf->vi);
+      _ogg_free(vf->vc);
     }
-    if(vf->dataoffsets)free(vf->dataoffsets);
-    if(vf->pcmlengths)free(vf->pcmlengths);
-    if(vf->serialnos)free(vf->serialnos);
-    if(vf->offsets)free(vf->offsets);
+    if(vf->dataoffsets)_ogg_free(vf->dataoffsets);
+    if(vf->pcmlengths)_ogg_free(vf->pcmlengths);
+    if(vf->serialnos)_ogg_free(vf->serialnos);
+    if(vf->offsets)_ogg_free(vf->offsets);
     ogg_sync_clear(&vf->oy);
     if(vf->datasource)(vf->callbacks.close_func)(vf->datasource);
     memset(vf,0,sizeof(OggVorbis_File));

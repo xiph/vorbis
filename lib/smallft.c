@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: *unnormalized* fft transform
- last mod: $Id: smallft.c,v 1.10 2000/11/06 00:07:02 xiphmont Exp $
+ last mod: $Id: smallft.c,v 1.11 2000/11/14 00:05:31 xiphmont Exp $
 
 ********************************************************************/
 
@@ -1248,8 +1248,8 @@ void drft_init(drft_lookup *l,int n){
 
 void drft_clear(drft_lookup *l){
   if(l){
-    if(l->trigcache)free(l->trigcache);
-    if(l->splitcache)free(l->splitcache);
+    if(l->trigcache)_ogg_free(l->trigcache);
+    if(l->splitcache)_ogg_free(l->splitcache);
     memset(l,0,sizeof(drft_lookup));
   }
 }

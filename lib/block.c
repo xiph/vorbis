@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.40 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: block.c,v 1.41 2000/11/14 00:05:30 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -131,9 +131,9 @@ void _vorbis_block_ripcord(vorbis_block *vb){
   struct alloc_chain *reap=vb->reap;
   while(reap){
     struct alloc_chain *next=reap->next;
-    free(reap->ptr);
+    _ogg_free(reap->ptr);
     memset(reap,0,sizeof(struct alloc_chain));
-    free(reap);
+    _ogg_free(reap);
     reap=next;
   }
   /* consolidate storage */
@@ -153,7 +153,7 @@ int vorbis_block_clear(vorbis_block *vb){
     if(vb->vd->analysisp)
       oggpack_writeclear(&vb->opb);
   _vorbis_block_ripcord(vb);
-  if(vb->localstore)free(vb->localstore);
+  if(vb->localstore)_ogg_free(vb->localstore);
 
   memset(vb,0,sizeof(vorbis_block));
   return(0);
@@ -279,40 +279,40 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     if(b){
       if(b->window[0][0][0]){
 	for(i=0;i<VI_WINDOWB;i++)
-	  if(b->window[0][0][0][i])free(b->window[0][0][0][i]);
-	free(b->window[0][0][0]);
+	  if(b->window[0][0][0][i])_ogg_free(b->window[0][0][0][i]);
+	_ogg_free(b->window[0][0][0]);
 	
 	for(j=0;j<2;j++)
 	  for(k=0;k<2;k++){
 	    for(i=0;i<VI_WINDOWB;i++)
-	      if(b->window[1][j][k][i])free(b->window[1][j][k][i]);
-	    free(b->window[1][j][k]);
+	      if(b->window[1][j][k][i])_ogg_free(b->window[1][j][k][i]);
+	    _ogg_free(b->window[1][j][k]);
 	  }
       }
 
       if(b->ve){
 	_ve_envelope_clear(b->ve);
-	free(b->ve);
+	_ogg_free(b->ve);
       }
 
       if(b->transform[0]){
 	mdct_clear(b->transform[0][0]);
-	free(b->transform[0][0]);
-	free(b->transform[0]);
+	_ogg_free(b->transform[0][0]);
+	_ogg_free(b->transform[0]);
       }
       if(b->transform[1]){
 	mdct_clear(b->transform[1][0]);
-	free(b->transform[1][0]);
-	free(b->transform[1]);
+	_ogg_free(b->transform[1][0]);
+	_ogg_free(b->transform[1]);
       }
       
     }
     
     if(v->pcm){
       for(i=0;i<vi->channels;i++)
-	if(v->pcm[i])free(v->pcm[i]);
-      free(v->pcm);
-      if(v->pcmret)free(v->pcmret);
+	if(v->pcm[i])_ogg_free(v->pcm[i]);
+      _ogg_free(v->pcm);
+      if(v->pcmret)_ogg_free(v->pcmret);
     }
 
     /* free mode lookups; these are actually vorbis_look_mapping structs */
@@ -328,14 +328,14 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     }
 
     if(b){
-      if(b->mode)free(b->mode);    
-      if(b->fullbooks)free(b->fullbooks);
+      if(b->mode)_ogg_free(b->mode);    
+      if(b->fullbooks)_ogg_free(b->fullbooks);
       
       /* free header, header1, header2 */
-      if(b->header)free(b->header);
-      if(b->header1)free(b->header1);
-      if(b->header2)free(b->header2);
-      free(b);
+      if(b->header)_ogg_free(b->header);
+      if(b->header1)_ogg_free(b->header1);
+      if(b->header2)_ogg_free(b->header2);
+      _ogg_free(b);
     }
     
     memset(v,0,sizeof(vorbis_dsp_state));
@@ -348,9 +348,9 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   backend_lookup_state *b=v->backend_state;
 
   /* free header, header1, header2 */
-  if(b->header)free(b->header);b->header=NULL;
-  if(b->header1)free(b->header1);b->header1=NULL;
-  if(b->header2)free(b->header2);b->header2=NULL;
+  if(b->header)_ogg_free(b->header);b->header=NULL;
+  if(b->header1)_ogg_free(b->header1);b->header1=NULL;
+  if(b->header2)_ogg_free(b->header2);b->header2=NULL;
 
   /* Do we have enough storage space for the requested buffer? If not,
      expand the PCM (and envelope) storage */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.27 2000/11/07 09:51:42 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.28 2000/11/14 00:05:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -80,18 +80,18 @@ static vorbis_info_floor *floor0_copy_info (vorbis_info_floor *i){
 static void floor0_free_info(vorbis_info_floor *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_floor0));
-    free(i);
+    _ogg_free(i);
   }
 }
 
 static void floor0_free_look(vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   if(i){
-    if(look->linearmap)free(look->linearmap);
-    if(look->lsp_look)free(look->lsp_look);
+    if(look->linearmap)_ogg_free(look->linearmap);
+    if(look->lsp_look)_ogg_free(look->lsp_look);
     lpc_clear(&look->lpclook);
     memset(look,0,sizeof(vorbis_look_floor0));
-    free(look);
+    _ogg_free(look);
   }
 }
 
@@ -385,7 +385,7 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
       codebook *b=be->fullbooks+info->books[booknum];
       float last=0.;
       
-      memset(out,0,sizeof(double)*look->m);    
+      memset(out,0,sizeof(float)*look->m);    
       
       for(j=0;j<look->m;j+=b->dim)
 	if(vorbis_book_decodevs(b,lsp+j,&vb->opb,1,-1)==-1)goto eop;

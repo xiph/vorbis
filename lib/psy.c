@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.31 2000/11/08 06:08:11 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.32 2000/11/14 00:05:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,7 +37,7 @@
 void _vi_psy_free(vorbis_info_psy *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_psy));
-    free(i);
+    _ogg_free(i);
   }
 }
 
@@ -290,20 +290,20 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
 void _vp_psy_clear(vorbis_look_psy *p){
   int i,j;
   if(p){
-    if(p->ath)free(p->ath);
-    if(p->octave)free(p->octave);
+    if(p->ath)_ogg_free(p->ath);
+    if(p->octave)_ogg_free(p->octave);
     if(p->tonecurves){
       for(i=0;i<P_BANDS;i++){
 	for(j=0;j<P_LEVELS;j++){
-	  free(p->tonecurves[i][j]);
+	  _ogg_free(p->tonecurves[i][j]);
 	}
-	free(p->noiseatt[i]);
-	free(p->tonecurves[i]);
-	free(p->peakatt[i]);
+	_ogg_free(p->noiseatt[i]);
+	_ogg_free(p->tonecurves[i]);
+	_ogg_free(p->peakatt[i]);
       }
-      free(p->tonecurves);
-      free(p->noiseatt);
-      free(p->peakatt);
+      _ogg_free(p->tonecurves);
+      _ogg_free(p->noiseatt);
+      _ogg_free(p->peakatt);
     }
     memset(p,0,sizeof(vorbis_look_psy));
   }

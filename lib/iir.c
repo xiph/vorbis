@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.4 2000/11/07 09:51:43 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.5 2000/11/14 00:05:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,9 +39,9 @@ void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
 
 void IIR_clear(IIR_state *s){
   if(s){
-    free(s->coeff_A);
-    free(s->coeff_B);
-    free(s->z_A);
+    _ogg_free(s->coeff_A);
+    _ogg_free(s->coeff_B);
+    _ogg_free(s->z_A);
     memset(s,0,sizeof(IIR_state));
   }
 }

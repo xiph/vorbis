@@ -28,6 +28,8 @@ int main (int argc,char *argv[]){
     else
       amp[i]=32767.;
 
+    fprintf(stderr,"%g Hz, %g amp\n",f[i],amp[i]);
+
     i++;
   }
 

@@ -13,7 +13,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [16 <= n ]
- last mod: $Id: mdct.c,v 1.18 2000/11/06 00:07:01 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.19 2000/11/14 00:05:31 xiphmont Exp $
 
  Algorithm adapted from _The use of multirate filter banks for coding
  of high quality digital audio_, by T. Sporer, K. Brandenburg and
@@ -90,8 +90,8 @@ void mdct_init(mdct_lookup *lookup,int n){
 
 void mdct_clear(mdct_lookup *l){
   if(l){
-    if(l->trig)free(l->trig);
-    if(l->bitrev)free(l->bitrev);
+    if(l->trig)_ogg_free(l->trig);
+    if(l->bitrev)_ogg_free(l->bitrev);
     memset(l,0,sizeof(mdct_lookup));
   }
 }

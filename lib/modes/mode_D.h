@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_D.h,v 1.3 2000/11/08 13:16:33 xiphmont Exp $
+ last mod: $Id: mode_D.h,v 1.4 2000/11/14 00:05:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -107,7 +107,7 @@ static vorbis_info_psy _psy_set_256 ={
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0_256={0};
-static vorbis_info_floor0 _floor_set0_256={12, 44100,  64, 12,150, 1, {0} };
+static vorbis_info_floor0 _floor_set0_256={30, 44100, 256, 12,150, 1, {1} };
 static vorbis_info_floor0 _floor_set1_256={30, 44100, 256, 12,150, 1, {1} };
 static vorbis_info_residue0 _residue_set0_256={0,128, 32,6,2,
 					   {0,1,1,1,1,1},
@@ -172,7 +172,7 @@ codec_setup_info info_D={
   /* psy */
   {&_psy_set_256},
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
-  256, 24, 6, -96.
+  256, 0, 6, -96.
 };
 
 #define PREDEF_INFO_MAX 0

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.20 2000/11/08 13:16:27 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.21 2000/11/14 00:05:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -55,7 +55,7 @@ vorbis_info_residue *res0_copy_info(vorbis_info_residue *vr){
 void res0_free_info(vorbis_info_residue *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_residue0));
-    free(i);
+    _ogg_free(i);
   }
 }
 
@@ -64,13 +64,13 @@ void res0_free_look(vorbis_look_residue *i){
   if(i){
     vorbis_look_residue0 *look=(vorbis_look_residue0 *)i;
     for(j=0;j<look->parts;j++)
-      if(look->partbooks[j])free(look->partbooks[j]);
-    free(look->partbooks);
+      if(look->partbooks[j])_ogg_free(look->partbooks[j]);
+    _ogg_free(look->partbooks);
     for(j=0;j<look->partvals;j++)
-      free(look->decodemap[j]);
-    free(look->decodemap);
+      _ogg_free(look->decodemap[j]);
+    _ogg_free(look->decodemap);
     memset(i,0,sizeof(vorbis_look_residue0));
-    free(i);
+    _ogg_free(i);
   }
 }
 

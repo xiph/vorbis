@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.18 2000/11/07 09:51:43 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.19 2000/11/14 00:05:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -67,7 +67,7 @@ static vorbis_info_mapping *mapping0_copy_info(vorbis_info_mapping *vm){
 static void mapping0_free_info(vorbis_info_mapping *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_mapping0));
-    free(i);
+    _ogg_free(i);
   }
 }
 
@@ -84,20 +84,20 @@ static void mapping0_free_look(vorbis_look_mapping *look){
 
     if(l->decay){
       for(i=0;i<l->ch;i++){
-	if(l->decay[i])free(l->decay[i]);
+	if(l->decay[i])_ogg_free(l->decay[i]);
       }
-      free(l->decay);
+      _ogg_free(l->decay);
     }
 
-    free(l->time_func);
-    free(l->floor_func);
-    free(l->residue_func);
-    free(l->time_look);
-    free(l->floor_look);
-    free(l->residue_look);
-    if(l->psy_look)free(l->psy_look);
+    _ogg_free(l->time_func);
+    _ogg_free(l->floor_func);
+    _ogg_free(l->residue_func);
+    _ogg_free(l->time_look);
+    _ogg_free(l->floor_look);
+    _ogg_free(l->residue_look);
+    if(l->psy_look)_ogg_free(l->psy_look);
     memset(l,0,sizeof(vorbis_look_mapping0));
-    free(l);
+    _ogg_free(l);
   }
 }
 

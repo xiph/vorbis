@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.11 2000/11/08 13:16:27 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.12 2000/11/14 00:05:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -89,7 +89,7 @@ long *_make_words(long *l,long n){
       /* update ourself */
       if(length<32 && (entry>>length)){
 	/* error condition; the lengths must specify an overpopulated tree */
-	free(r);
+	_ogg_free(r);
 	return(NULL);
       }
       r[i]=entry;
@@ -171,7 +171,7 @@ decode_aux *_make_decode_tree(codebook *c){
 	ptr1[ptr]=-i;
     }
   }
-  free(codelist);
+  _ogg_free(codelist);
 
   t->tabn = _ilog(c->entries)-4; /* this is magic */
   if(t->tabn<5)t->tabn=5;
@@ -283,21 +283,21 @@ float *_book_unquantize(const static_codebook *b){
 
 void vorbis_staticbook_clear(static_codebook *b){
   if(b->allocedp){
-    if(b->quantlist)free(b->quantlist);
-    if(b->lengthlist)free(b->lengthlist);
+    if(b->quantlist)_ogg_free(b->quantlist);
+    if(b->lengthlist)_ogg_free(b->lengthlist);
     if(b->nearest_tree){
-      free(b->nearest_tree->ptr0);
-      free(b->nearest_tree->ptr1);
-      free(b->nearest_tree->p);
-      free(b->nearest_tree->q);
+      _ogg_free(b->nearest_tree->ptr0);
+      _ogg_free(b->nearest_tree->ptr1);
+      _ogg_free(b->nearest_tree->p);
+      _ogg_free(b->nearest_tree->q);
       memset(b->nearest_tree,0,sizeof(encode_aux_nearestmatch));
-      free(b->nearest_tree);
+      _ogg_free(b->nearest_tree);
     }
     if(b->thresh_tree){
-      free(b->thresh_tree->quantthresh);
-      free(b->thresh_tree->quantmap);
+      _ogg_free(b->thresh_tree->quantthresh);
+      _ogg_free(b->thresh_tree->quantmap);
       memset(b->thresh_tree,0,sizeof(encode_aux_threshmatch));
-      free(b->thresh_tree);
+      _ogg_free(b->thresh_tree);
     }
 
     memset(b,0,sizeof(static_codebook));
@@ -307,7 +307,7 @@ void vorbis_staticbook_clear(static_codebook *b){
 void vorbis_staticbook_destroy(static_codebook *b){
   if(b->allocedp){
     vorbis_staticbook_clear(b);
-    free(b);
+    _ogg_free(b);
   }
 }
 
@@ -315,13 +315,16 @@ void vorbis_book_clear(codebook *b){
   /* static book is not cleared; we're likely called on the lookup and
      the static codebook belongs to the info struct */
   if(b->decode_tree){
-    free(b->decode_tree->ptr0);
-    free(b->decode_tree->ptr1);
+    _ogg_free(b->decode_tree->tab);
+    _ogg_free(b->decode_tree->tabl);
+
+    _ogg_free(b->decode_tree->ptr0);
+    _ogg_free(b->decode_tree->ptr1);
     memset(b->decode_tree,0,sizeof(decode_aux));
-    free(b->decode_tree);
+    _ogg_free(b->decode_tree);
   }
-  if(b->valuelist)free(b->valuelist);
-  if(b->codelist)free(b->codelist);
+  if(b->valuelist)_ogg_free(b->valuelist);
+  if(b->codelist)_ogg_free(b->codelist);
   memset(b,0,sizeof(codebook));
 }
 
