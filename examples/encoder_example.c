@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.10 2000/08/15 09:09:31 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.11 2000/08/15 09:45:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "vorbis/mode_A.h"
+#include "vorbis/mode_E.h"
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 #include <io.h>
@@ -79,7 +79,7 @@ int main(){
 
   /* choose an encoding mode */
   /* (mode 0: 44kHz stereo uncoupled, roughly 128kbps VBR) */
-  vi=&info_A;
+  vi=&info_E;
 
   /* add a comment */
   vorbis_comment_init(&vc);
