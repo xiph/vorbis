@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.c,v 1.11 2000/07/07 00:53:10 xiphmont Exp $
+  last mod: $Id: bitwise.c,v 1.12 2000/07/07 01:41:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -54,7 +54,7 @@ void _oggpack_writeclear(oggpack_buffer *b){
   memset(b,0,sizeof(oggpack_buffer));
 }
 
-void _oggpack_readinit(oggpack_buffer *b,char *buf,int bytes){
+void _oggpack_readinit(oggpack_buffer *b,unsigned char *buf,int bytes){
   memset(b,0,sizeof(oggpack_buffer));
   b->buffer=b->ptr=buf;
   b->storage=bytes;
@@ -207,7 +207,7 @@ long _oggpack_bits(oggpack_buffer *b){
   return(b->endbyte*8+b->endbit);
 }
 
-char *_oggpack_buffer(oggpack_buffer *b){
+unsigned char *_oggpack_buffer(oggpack_buffer *b){
   return(b->buffer);
 }
 

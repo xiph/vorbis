@@ -13,7 +13,7 @@
 
  function: code raw [Vorbis] packets into framed OggSquish stream and
            decode Ogg streams back into raw packets
- last mod: $Id: framing.c,v 1.20 2000/07/07 01:35:31 xiphmont Exp $
+ last mod: $Id: framing.c,v 1.21 2000/07/07 01:41:43 xiphmont Exp $
 
  note: The CRC code is directly derived from public domain code by
  Ross Williams (ross@guest.adelaide.edu.au).  See docs/framing.html
@@ -856,7 +856,7 @@ void print_header(ogg_page *og){
 }
 
 void copy_page(ogg_page *og){
-  char *temp=malloc(og->header_len);
+  unsigned char *temp=malloc(og->header_len);
   memcpy(temp,og->header,og->header_len);
   og->header=temp;
 
