@@ -6,7 +6,7 @@
 Ogg Vorbis I format specification: codec setup and packet decode
 </font></h1>
 
-<em>Last update to this document: August 8, 2002</em><br>
+<em>Last update to this document: September 20, 2002</em><br>
 
 <h1>Overview</h1>
 
@@ -172,8 +172,8 @@ uses a single mapping type (0), with implicit PCM channel mappings.<p>
               <ol><li><tt>[vorbis_mapping_coupling_steps]</tt>= read 8 bits as unsigned integer and add one<p>
                   <li>for <tt>[j]</tt> each of <tt>[vorbis_mapping_coupling_steps]</tt> steps:<p>
                       <ol>
-                      <li>vector <tt>[vorbis_mapping_magnitude]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels]) bits as unsigned integer<p>
-                      <li>vector <tt>[vorbis_mapping_angle]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels]) bits as unsigned integer<p>
+                      <li>vector <tt>[vorbis_mapping_magnitude]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels] - 1) bits as unsigned integer<p>
+                      <li>vector <tt>[vorbis_mapping_angle]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels] - 1) bits as unsigned integer<p>
                       <li>the numbers read in the above two steps are channel numbers representing the channel to treat as magnitude and the channel to treat as angle, respectively.  If for any coupling step the angle channel number equals the magnitude channel number, the magnitude channel number is greater than <tt>[audio_channels]</tt>-1, or the angle channel is greater than <tt>[audio_channels]</tt>-1, the stream is undecodable.<p>
                       </ol>
                </ol>
