@@ -6,7 +6,7 @@
 Ogg Vorbis I format specification: floor type 1 setup and decode
 </font></h1>
 
-<em>Last update to this document: September 10, 2002</em><br>
+<em>Last update to this document: September 19, 2002</em><br>
 
 <h1>Overview</h1>
 
@@ -128,15 +128,16 @@ context.<p>
  17) [floor1_values] = 2
  18) iterate [i] over the range 0 ... [floor1_partitions]-1 {
 
-       19) iterate [j] over the range 0 ... ([floor1_class_dimensions] element [i])-1 {
-             20) vector [floor1_X_list] element ([j] + [floor1_values]) = 
+       19) [current_class_number] = vector [floor1_partition_class_list] element [i]
+       20) iterate [j] over the range 0 ... ([floor1_class_dimensions] element [current_class_number])-1 {
+             21) vector [floor1_X_list] element ([j] + [floor1_values]) = 
                  read [rangebits] bits as unsigned integer
             }
 
-       21) [floor1_values] = [floor1_values] + [floor1_class_dimensions] element [i]
+       22) [floor1_values] = [floor1_values] + [floor1_class_dimensions] element [i]
      }
  
- 22) done
+ 23) done
 </pre>
 
 An end-of-packet condition while reading any aspect of a floor 1
