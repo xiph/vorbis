@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.30.4.1 2000/04/04 07:08:45 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.30.4.2 2000/04/06 15:59:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -201,8 +201,11 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
 
   delta=(maxdel-mindel)/((1<<q->quant)-1.5);
 
-  q->min=_float24_pack(mindel);
-  q->delta=_float24_pack(delta);
+  q->min=_float32_pack(mindel);
+  q->delta=_float32_pack(delta);
+
+  mindel=_float32_unpack(q->min);
+  delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
     double last=0;
@@ -231,8 +234,8 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
    scales; we just make sure they're properly offset. */
 void vqgen_unquantize(vqgen *v,quant_meta *q){
   long j,k;
-  double mindel=_float24_unpack(q->min);
-  double delta=_float24_unpack(q->delta);
+  double mindel=_float32_unpack(q->min);
+  double delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
     double last=0.;
@@ -243,8 +246,8 @@ void vqgen_unquantize(vqgen *v,quant_meta *q){
 	if(q->sequencep)last=now;
 	if(q->log)now+=q->encodebias;
 	if(_now(v,j)[k]<0)now= -now;
-	_now(v,j)[k]=now;
       }
+      _now(v,j)[k]=now;
     }
   }
 }

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.1.2.2 2000/04/04 07:08:44 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.1.2.3 2000/04/06 15:59:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -34,31 +34,36 @@ int _ilog(unsigned int v){
   return(ret);
 }
 
-/* 24 bit float (not IEEE; nonnormalized mantissa +
-   biased exponent ): neeeeemm mmmmmmmm mmmmmmmm 
+/* 32 bit float (not IEEE; nonnormalized mantissa +
+   biased exponent) : neeeeeee eeemmmmm mmmmmmmm mmmmmmmm 
    Why not IEEE?  It's just not that important here. */
 
-long _float24_pack(double val){
+#define VQ_FEXP 10
+#define VQ_FMAN 21
+#define VQ_FEXP_BIAS 768 /* bias toward values smaller than 1. */
+
+/* doesn't currently guard under/overflow */
+long _float32_pack(double val){
   int sign=0;
   long exp;
   long mant;
   if(val<0){
-    sign=0x800000;
+    sign=0x80000000;
     val= -val;
   }
   exp= floor(log(val)/log(2));
-  mant=rint(ldexp(val,17-exp));
-  exp=(exp+VQ_FEXP_BIAS)<<18;
+  mant=rint(ldexp(val,(VQ_FMAN-1)-exp));
+  exp=(exp+VQ_FEXP_BIAS)<<VQ_FMAN;
 
   return(sign|exp|mant);
 }
 
-double _float24_unpack(long val){
-  double mant=val&0x3ffff;
-  double sign=val&0x800000;
-  double exp =(val&0x7c0000)>>18;
+double _float32_unpack(long val){
+  double mant=val&0x1fffff;
+  double sign=val&0x80000000;
+  double exp =(val&0x7fe00000)>>VQ_FMAN;
   if(sign)mant= -mant;
-  return(ldexp(mant,exp-17-VQ_FEXP_BIAS));
+  return(ldexp(mant,exp-(VQ_FMAN-1)-VQ_FEXP_BIAS));
 }
 
 /* given a list of word lengths, generate a list of codewords.  Works
@@ -169,8 +174,8 @@ decode_aux *_make_decode_tree(codebook *c){
 double *_book_unquantize(const static_codebook *b){
   long j,k;
   if(b->quantlist){
-    double mindel=_float24_unpack(b->q_min);
-    double delta=_float24_unpack(b->q_delta);
+    double mindel=_float32_unpack(b->q_min);
+    double delta=_float32_unpack(b->q_delta);
     double *r=malloc(sizeof(double)*b->entries*b->dim);
     
     for(j=0;j<b->entries;j++){

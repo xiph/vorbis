@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.7.4.1 2000/03/30 01:46:47 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.7.4.2 2000/04/06 15:59:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -66,11 +66,12 @@ typedef struct{
   int   order;
   long  rate;
   long  barkmap;
+  unsigned char subcurve[27];
 
   int   ampbits;
   int   ampdB;
 
-  int   stages; /* <= 16 */
+  int   numbooks; /* <= 16 */
   int   books[16];
 } vorbis_info_floor0;
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.9.2.3 2000/04/04 07:08:44 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.9.2.4 2000/04/06 15:59:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,7 +42,9 @@
 
 /* A farily high quality setting mix */
 static vorbis_info_psy _psy_set0={
-  3,1,1,
+  3, /* iterations to fit */
+  1, /* athp */
+  1, /* decayp */
 
   1,16,4.,
 
@@ -76,8 +78,13 @@ static vorbis_info_psy _psy_set0={
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0={0};
-static vorbis_info_floor0 _floor_set0={20, 44100,  64, 12,140, 1, {0} };
-static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,140, 1, {1} };
+static vorbis_info_floor0 _floor_set0={20, 44100,  64, 
+   /* yes, the first number is different than the ATH */
+   {31,31,31,17,15,14,13,13,13,13,12,10,8,6,3,1,0,0,2,4,17,24,27,23,31,86,126},
+				       12,150, 1, {0} };
+static vorbis_info_floor0 _floor_set1={32, 44100, 256, 
+   {31,31,31,17,15,14,13,13,13,13,12,10,8,6,3,1,0,0,2,4,17,24,27,23,31,86,126},
+				       12,150, 1, {1} };
 static vorbis_info_residue0 _residue_set0={0, 128, 8,1,0,{0},{}};
 static vorbis_info_residue0 _residue_set1={0,1024, 8,1,0,{0},{}};
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};

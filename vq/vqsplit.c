@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.18.4.1 2000/04/04 07:08:45 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.18.4.2 2000/04/06 15:59:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -538,6 +538,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     long *probability=malloc(c->entries*sizeof(long));
     for(i=0;i<c->entries;i++)probability[i]=1; /* trivial guard */
     b->valuelist=v->entrylist; /* temporary for vqenc_entry; replaced later */
+    b->dim=c->dim;
 
     /* sigh.  A necessary hack */
     for(i=0;i<t->aux;i++)t->p[i]*=c->dim;

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.4.4.2 2000/04/01 12:51:31 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.4.4.3 2000/04/06 15:59:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -95,8 +95,6 @@ typedef struct codebook{
   struct decode_aux *decode_tree;
 
 } codebook;
-
-#define VQ_FEXP_BIAS 20 /* bias toward values smaller than 1. */
 
 #endif
 

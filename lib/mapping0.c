@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.11.2.2.2.2 2000/04/01 12:51:32 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.11.2.2.2.3 2000/04/06 15:59:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -195,6 +195,7 @@ static vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
 #include "psy.h"
 #include "bitwise.h"
 #include "spectrum.h"
+#include "scales.h"
 
 /* no time mapping implementation for now */
 static int forward(vorbis_block *vb,vorbis_look_mapping *l){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.12.4.1 2000/04/04 07:08:45 xiphmont Exp $
+ last mod: $Id: build.c,v 1.12.4.2 2000/04/06 15:59:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -135,8 +135,8 @@ int main(int argc,char *argv[]){
   
   /* quant */
   line=rline(in,out);
-  if(sscanf(line,"%ld %ld %d %d",&q.min,&q.delta,
-	    &q.quant,&q.sequencep)!=4){
+  if(sscanf(line,"%d %ld %ld %d %d %lf %lf",&q.log,&q.min,&q.delta,
+	    &q.quant,&q.sequencep,&q.encodebias,&q.entropy)!=7){
     fprintf(stderr,"Syntax error reading book file\n");
     exit(1);
   }
@@ -268,24 +268,51 @@ int main(int argc,char *argv[]){
   }
   fprintf(out,"};\n\n");
 
-  /* tie it all together */
-
-  fprintf(out,"static encode_aux _vq_aux_%s = {\n",name);
-  fprintf(out,"\t_vq_ptr0_%s,\n",name);
-  fprintf(out,"\t_vq_ptr1_%s,\n",name);
-  fprintf(out,"\t_vq_p_%s,\n",name);
-  fprintf(out,"\t_vq_q_%s,\n",name);
-  fprintf(out,"\t%ld, %ld\n};\n\n",c.encode_tree->aux,c.encode_tree->aux);
-
-  fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
-XXX
-  fprintf(out,"\t%ld, %ld, %ld, %ld, %d, %d,\n",
-	  c.dim,c.entries,q.min,q.delta,q.quant,q.sequencep);
-  fprintf(out,"\t_vq_quantlist_%s,\n",name);
-  fprintf(out,"\t_vq_lengthlist_%s,\n",name);
-  fprintf(out,"\t&_vq_aux_%s,\n",name);
-  fprintf(out,"};\n\n");
-
+  /* zero quant values?  Negative log quant values? */
+  {
+    int zero=0;
+    int neg=0;
+    for(j=0;j<c.entries*dim;j++){
+      if(c.quantlist[j]==0){
+	if(q.log)
+	  zero=1;
+	else{
+	  fprintf(stderr,"INTERNAL ERROR: Non log scale quantization has \n"
+		  "quantized entry values == 0 (< min)\n");
+	  exit(1);
+	}
+      }
+      if(c.quantlist[j]<0){
+	if(q.log)
+	  neg=1;
+	else{
+	  fprintf(stderr,"INTERNAL ERROR: Non log scale quantization has \n"
+		  "quantized entry values < 0 (< min)\n");
+	  exit(1);
+	}
+      }
+    }
+	    
+    
+    /* tie it all together */
+    
+    fprintf(out,"static encode_aux _vq_aux_%s = {\n",name);
+    fprintf(out,"\t_vq_ptr0_%s,\n",name);
+    fprintf(out,"\t_vq_ptr1_%s,\n",name);
+    fprintf(out,"\t_vq_p_%s,\n",name);
+    fprintf(out,"\t_vq_q_%s,\n",name);
+    fprintf(out,"\t%ld, %ld\n};\n\n",c.encode_tree->aux,c.encode_tree->aux);
+    
+    fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
+    
+    fprintf(out,"\t%ld, %ld, %d, %ld, %ld, %d, %d, %d, %d, %g, %g,\n",
+	    c.dim,c.entries,q.log,q.min,q.delta,q.quant,q.sequencep,
+	    zero,neg,q.encodebias,q.entropy);
+    fprintf(out,"\t_vq_quantlist_%s,\n",name);
+    fprintf(out,"\t_vq_lengthlist_%s,\n",name);
+    fprintf(out,"\t&_vq_aux_%s,\n",name);
+    fprintf(out,"};\n\n");
+  }
   fprintf(out,"\n#endif\n");
   fclose(out);
   exit(0);

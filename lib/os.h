@@ -11,27 +11,24 @@
  *                                                                  *
  ********************************************************************
 
- function: basic shared codebook operations
- last mod: $Id: sharedbook.h,v 1.1.2.3 2000/04/06 15:59:37 xiphmont Exp $
+ function: #ifdef jail to whip a few platforms into the UNIX ideal.
+ last mod: $Id: os.h,v 1.2.4.1 2000/04/06 15:59:37 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_INT_SHCODEBOOK_H_
-#define _V_INT_SHCODEBOOK_H_
+#ifndef _V_IFDEFJAIL_H_
+#define _V_IFDEFJAIL_H_
 
-#include "vorbis/codebook.h"
+#ifndef M_PI
+#define M_PI (3.1415926539)
+#endif
 
-extern void vorbis_staticbook_clear(static_codebook *b);
-extern int vorbis_book_init_encode(codebook *dest,const static_codebook *source);
-extern int vorbis_book_init_decode(codebook *dest,const static_codebook *source);
-extern void vorbis_book_clear(codebook *b);
-
-extern double *_book_unquantize(const static_codebook *b);
-extern double *_book_logdist(const static_codebook *b,double *vals);
-extern double _float32_unpack(long val);
-extern long   _float32_pack(double val);
-extern int  _best(codebook *book, double *a, int step);
-extern int  _logbest(codebook *book, double *a, int step);
-extern int _ilog(unsigned int v);
+#ifdef _WIN32
+#define alloca(x) (_alloca(x))
+/* not strictly correct, but Vorbis doesn't care */
+#define rint(x)   (floor((x)+0.5)) 
+#endif
 
 #endif
+
+

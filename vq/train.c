@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.16.4.1 2000/04/04 07:08:45 xiphmont Exp $
+ last mod: $Id: train.c,v 1.16.4.2 2000/04/06 15:59:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -137,8 +137,8 @@ int main(int argc,char *argv[]){
       
       /* quant setup */
       line=rline(in,out,1);
-      if(sscanf(line,"%ld %ld %d %d",&q.min,&q.delta,
-		&q.quant,&q.sequencep)!=4){
+      if(sscanf(line,"%d %ld %ld %d %d %lf %lf",&q.log,&q.min,&q.delta,
+		&q.quant,&q.sequencep,&q.encodebias,&q.entropy)!=7){
 	fprintf(stderr,"Syntax error reading book file\n");
 	exit(1);
       }
@@ -315,7 +315,8 @@ int main(int argc,char *argv[]){
   fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
   fprintf(out,"%s\n",vqext_booktype);
   fprintf(out,"%d %d %d\n",entries,dim,vqext_aux);
-  fprintf(out,"%ld %ld %d %d\n",q.min,q.delta,q.quant,q.sequencep);
+  fprintf(out,"%d %ld %ld %d %d %g %g\n",
+	  q.log,q.min,q.delta,q.quant,q.sequencep,q.encodebias,q.entropy);
 
   /* quantized entries */
   fprintf(out,"# quantized entries---\n");

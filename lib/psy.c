@@ -12,18 +12,20 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.6 2000/04/02 01:21:22 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.7 2000/04/06 15:59:37 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
-#include <stdio.h>
 #include "vorbis/codec.h"
 
 #include "masking.h"
 #include "psy.h"
+#include "os.h"
+#include "lpc.h"
+#include "smallft.h"
 #include "scales.h"
 
 /* the beginnings of real psychoacoustic infrastructure.  This is
@@ -315,10 +317,9 @@ static double seed_peaks(double *floor,double **curve,
   double ret=0.;
 
   /* make this attenuation adjustable */
-  int choice=rint((amp-specmax+specatt)/10.)-2;
+  int choice=rint((todB(amp)-specmax+specatt)/10.)-2;
   if(choice<0)choice=0;
   if(choice>8)choice=8;
-  amp=fromdB(amp);
 
   for(i=0;i<EHMER_MAX;i++){
     if(prevx<n){
@@ -326,7 +327,6 @@ static double seed_peaks(double *floor,double **curve,
       ix=x*_eights[i];
       nextx=(ix<n?post[ix]:n);
       if(lin){
-	
 	/* Currently uses a n+n = +3dB additivity */
 	lin*=amp;
 	lin*=lin;
@@ -399,7 +399,7 @@ static void _vp_tone_tone_iter(vorbis_look_psy *p,double *f, double *flr,
       if(o<0)o=0;
       if(o>10)o=10;
 
-      acc+=seed_peaks(flr,p->curves[o],todB(work[i]),
+      acc+=seed_peaks(flr,p->curves[o],work[i],
 		      specmax,p->pre,p->post,i,n,vi->max_curve_dB);
     }
   }
@@ -415,8 +415,12 @@ static void _vp_tone_tone_iter(vorbis_look_psy *p,double *f, double *flr,
 
 }
 
+/* stability doesn't matter */
 static int comp(const void *a,const void *b){
-  return(fabs(**(double **)a)<fabs(**(double **)b));
+  if(fabs(**(double **)a)<fabs(**(double **)b))
+    return(-1);
+  else
+    return(1);
 }
 
 /* this applies the floor and (optionally) tries to preserve noise
@@ -432,9 +436,9 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
   /* subtract the floor */
   for(j=0;j<p->n;j++){
     if(flr[j]<=0)
-      work[j]=0;
+      work[j]=0.;
     else{
-      double val=rint(f[j]/flr[j]);
+      double val=f[j]/flr[j];
       if(fabs(val)<1.)val=0.;
       work[j]=val;
     }
@@ -470,7 +474,7 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
       /* sort the zeroed values; add back the largest first, stop when
          we violate the desired result above (which may be
          immediately) */
-      if(z &&current_SL*thresh<original_SL){
+      if(z && current_SL*thresh<original_SL){
 	qsort(index,z,sizeof(double *),&comp);
 	
 	for(j=0;j<z;j++){
@@ -482,14 +486,13 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 	    if(f[p]>0)
 	      work[p]=1.;
 	    else
-		work[p]=-1.;
+	      work[p]=-1.;
 	    current_SL=val;
 	  }else
 	    break;
 	}
       }
     }
-    fprintf(stderr,"added %d noise coeffs back\n",addcount);
   }
   memcpy(f,work,p->n*sizeof(double));
 }
@@ -518,3 +521,4 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr,
     }
   }
 }
+

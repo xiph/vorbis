@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.2.2.4 2000/04/01 12:51:32 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2.2.5 2000/04/06 15:59:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include <math.h>
 
 #include "vorbis/codec.h"
+#include "os.h"
 #include "psy.h"
 #include "mdct.h"
 #include "window.h"
@@ -30,7 +31,7 @@
 #include "lpc.h"
 
 static vorbis_info_psy _psy_set0={
-  3,1,1,
+  1,1,1,
 
   1,16,4.,
 
@@ -166,7 +167,7 @@ int main(int argc,char *argv[]){
   maskwindow=_vorbis_window(0,framesize,framesize/2,framesize/2);
   mdct_init(&m_look,framesize);
   _vp_psy_init(&p_look,&_psy_set0,framesize/2,44100);
-  lpc_init(&lpc_look,framesize/2,256,44100,order);
+  lpc_init(&lpc_look,framesize/2,order);
 
   for(i=0;i<11;i++)
     for(j=0;j<9;j++)
@@ -216,8 +217,8 @@ int main(int argc,char *argv[]){
 
 	_vp_tone_tone_mask(&p_look,mask,floor,decay[i]);
 	
-	analysis("mask",frameno,floor,framesize/2,1,0);
-	analysis("lmask",frameno,floor,framesize/2,0,0);
+	analysis("mask",frameno,floor,framesize/2,1,1);
+	analysis("lmask",frameno,floor,framesize/2,0,1);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
 	analysis("ldecay",frameno,decay[i],framesize/2,0,1);
 	
@@ -230,17 +231,17 @@ int main(int argc,char *argv[]){
 	analysis("lmdct",frameno,pcm[i],framesize/2,0,1);
 
 	/* floor */
-	{
+	/*{
 	  double amp;
 
-	  for(j=0;j<framesize/2;j++)floor[j]=todB(floor[j]+DYNAMIC_RANGE_dB);
+	  for(j=0;j<framesize/2;j++)floor[j]=todB(floor[j])+DYNAMIC_RANGE_dB;
 	  amp=sqrt(vorbis_curve_to_lpc(floor,lpc,&lpc_look));
 	  fprintf(stderr,"amp=%g\n",amp);
 	  vorbis_lpc_to_curve(floor,lpc,amp,&lpc_look);
 	  for(j=0;j<framesize/2;j++)floor[j]=fromdB(floor[j]-DYNAMIC_RANGE_dB);
 	  analysis("floor",frameno,floor,framesize/2,1,1);
 
-	}
+	  }*/
 
 	_vp_apply_floor(&p_look,pcm[i],floor);
 

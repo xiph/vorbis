@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.2.4.1 2000/04/04 07:08:45 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.2.4.2 2000/04/06 15:59:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -88,8 +88,8 @@ void vqext_quantize(vqgen *v,quant_meta *q){
      information (as we know granularity beforehand and don't need to
      maximize it) */
 
-  q->min=_float24_pack(0.);
-  q->delta=_float24_pack(scalequant);
+  q->min=_float32_pack(0.);
+  q->delta=_float32_pack(scalequant);
   q->quant=_ilog(max);
 
   if(quant_save){

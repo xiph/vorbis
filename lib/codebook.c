@@ -12,11 +12,12 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.11.4.3 2000/04/04 07:08:44 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.11.4.4 2000/04/06 15:59:36 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "vorbis/codec.h"
 #include "vorbis/codebook.h"
@@ -79,8 +80,8 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
     _oggpack_write(opb,1,1);
 
     /* values that define the dequantization */
-    _oggpack_write(opb,c->q_min,24);
-    _oggpack_write(opb,c->q_delta,24);
+    _oggpack_write(opb,c->q_min,32);
+    _oggpack_write(opb,c->q_delta,32);
     _oggpack_write(opb,c->q_quant-1,4);
     _oggpack_write(opb,c->q_sequencep,1);
     _oggpack_write(opb,c->q_log,1);
@@ -170,8 +171,8 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   if(_oggpack_read(opb,1)){
 
     /* values that define the dequantization */
-    s->q_min=_oggpack_read(opb,24);
-    s->q_delta=_oggpack_read(opb,24);
+    s->q_min=_oggpack_read(opb,32);
+    s->q_delta=_oggpack_read(opb,32);
     s->q_quant=_oggpack_read(opb,4)+1;
     s->q_sequencep=_oggpack_read(opb,1);
     s->q_log=_oggpack_read(opb,1);
