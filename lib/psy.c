@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.38 2001/02/01 01:29:17 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.39 2001/02/01 02:10:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -564,6 +564,7 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
     for(;hi<n && (hi<i+himin || b[hi]<=bi+hiwidth);hi++){
       int bin=BIN(f[hi]);
       if(bin>LASTBIN)bin=LASTBIN;
+      if(bin<0)bin=0;
       radix[bin]++;
       if(bin<median)
 	countabove++;
@@ -573,6 +574,7 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
     for(;lo<i && lo+lomin<i && b[lo]+lowidth<=bi;lo++){
       int bin=BIN(f[lo]);
       if(bin>LASTBIN)bin=LASTBIN;
+      if(bin<0)bin=0;
       radix[bin]--;
       if(bin<median)
 	countabove--;
