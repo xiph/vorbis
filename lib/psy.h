@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.28.2.5 2002/06/20 03:55:28 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.28.2.6 2002/06/24 00:06:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -76,8 +76,10 @@ typedef struct{
   float ampmax_att_per_sec;
 
   /* channel coupling config */
+  int   coupling_pkHz[PACKETBLOBS];  
   int   coupling_pointlimit[2][PACKETBLOBS];  
-  int   coupling_pointamp[PACKETBLOBS];  
+  int   coupling_prepointamp[PACKETBLOBS];  
+  int   coupling_postpointamp[PACKETBLOBS];  
 
 } vorbis_info_psy_global;
 

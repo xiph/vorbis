@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.45.4.4 2002/05/31 00:16:11 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.45.4.5 2002/06/24 00:06:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -52,6 +52,7 @@ typedef struct {
   long      frames;
 
 #ifdef TRAIN_RES
+  int        train_seq;
   long      *training_data[8][64];
   float      training_max[8][64];
   float      training_min[8][64];
@@ -87,7 +88,7 @@ void res0_free_look(vorbis_look_residue *i){
 	    codebook *statebook=look->partbooks[j][k];
 	    
 	    /* long and short into the same bucket by current convention */
-	    sprintf(buffer,"res_part%d_pass%d.vqd",j,k);
+	    sprintf(buffer,"res%d_part_pass%d.vqd",j,k);
 	    of=fopen(buffer,"a");
 
 	    for(l=0;l<statebook->entries;l++)
@@ -274,7 +275,12 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
       look->decodemap[j][k]=deco;
     }
   }
-
+#ifdef TRAIN_RES
+  {
+    static int train_seq=0;
+    look->train_seq=train_seq++;
+  }
+#endif
   return(look);
 }
 
@@ -371,7 +377,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   
   int partvals=n/samples_per_partition;
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(*partword));
-  float scale=1./ci->blocksizes[vb->W];
+  float scale=vi->rate/ci->blocksizes[vb->W]*.001;
   /* we find the partition type for each partition of each
      channel.  We'll go back and do the interleaved encoding in a
      bit.  For now, clarity */
@@ -383,7 +389,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   
   for(i=0;i<partvals;i++){
     int offset=i*samples_per_partition+info->begin;
-    float cur=offset/scale*vi->rate;
+    float cur=offset*scale;
     for(j=0;j<ch;j++){
       float max=0.;
       for(k=0;k<samples_per_partition;k++)
@@ -404,7 +410,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
     char buffer[80];
   
     for(i=0;i<ch;i++){
-      sprintf(buffer,"resaux_%d.vqd",vb->mode);
+      sprintf(buffer,"resaux_%d.vqd",look->train_seq);
       of=fopen(buffer,"a");
       for(j=0;j<partvals;j++)
 	fprintf(of,"%ld, ",partword[i][j]);
@@ -463,7 +469,7 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
   }  
   
 #ifdef TRAIN_RES
-  sprintf(buffer,"resaux_%d.vqd",vb->mode);
+  sprintf(buffer,"resaux_%d.vqd",look->train_seq);
   of=fopen(buffer,"a");
   for(i=0;i<partvals;i++)
     fprintf(of,"%ld, ",partword[0][i]);

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.39.2.6 2002/06/20 03:55:28 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.39.2.7 2002/06/24 00:06:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -29,15 +29,25 @@
 
 /* careful with this; it's using static array sizing to make managing
    all the modes a little less annoying.  If we use a residue backend
-   with > 10 partition types, or a different division of iteration,
+   with > 12 partition types, or a different division of iteration,
    this needs to be updated. */
+typedef struct {
+  static_codebook *books[12][3];
+} static_bookblock;
 
 typedef struct {
-  vorbis_info_residue0 *res[2];
-  static_codebook *book_aux[2];
-  static_codebook *book_aux_managed[2];
-  static_codebook *books_base[10][3];
+  int res_type;
+  int limit_type; /* 0 lowpass limited, 1 point stereo limited */
+  vorbis_info_residue0 *res;
+  static_codebook  *book_aux;
+  static_codebook  *book_aux_managed;
+  static_bookblock *books_base;
 } vorbis_residue_template;
+
+typedef struct {
+  vorbis_info_mapping0    *map;
+  vorbis_residue_template *res;
+} vorbis_mapping_template;
 
 typedef struct vp_adjblock{
   int block[P_BANDS];
@@ -60,7 +70,13 @@ typedef struct {
   float decay;
 } att3;
 typedef struct { int data[P_NOISECURVES]; } adj3; 
-typedef struct { int data[PACKETBLOBS]; } adjB; 
+
+typedef struct {
+  int   pre[PACKETBLOBS];
+  int   post[PACKETBLOBS];
+  float kHz[PACKETBLOBS];
+} adj_stereo;
+
 typedef struct {
   int lo;
   int hi;
@@ -110,18 +126,15 @@ typedef struct {
   double   *psy_lowpass;
 
   vorbis_info_psy_global *global_params;
-  double *global_mapping;
-  adjB   *stereo_modes;
-  adjB   *stereo_pkHz;
-
+  double     *global_mapping;
+  adj_stereo *stereo_modes;
 
   static_codebook ***floor_books;
   vorbis_info_floor1 *floor_params;
   int *floor_short_mapping;
   int *floor_long_mapping;
 
-  vorbis_residue_template *residue;
-  int res_type;
+  vorbis_mapping_template *maps;
 } ve_setup_data_template;
 
 #include "modes/setup_44.h"
@@ -136,17 +149,10 @@ static ve_setup_data_template *setup_list[]={
 
 /* a few static coder conventions */
 static vorbis_info_mode _mode_template[2]={
-  {0,0,0,-1},
-  {1,0,0,-1}
+  {0,0,0,0},
+  {1,0,0,1}
 };
 
-/* mapping conventions:
-   only one submap (this would change for efficient 5.1 support for example)*/
-/* Four psychoacoustic profiles are used, one for each blocktype */
-static vorbis_info_mapping0 _mapping_template[2]={
-  {1, {0,0}, {0}, {-1}, 0,{0},{0}},
-  {1, {0,0}, {1}, {-1}, 0,{0},{0}}
-};
 
 static int vorbis_encode_toplevel_setup(vorbis_info *vi,int ch,long rate){
   if(vi && vi->codec_setup){
@@ -229,33 +235,32 @@ static int vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
 
 static int vorbis_encode_global_stereo(vorbis_info *vi,
 				       highlevel_encode_setup *hi,
-				       adjB *pdB,
-				       adjB *pkHz){
+				       adj_stereo *p){
   float s=hi->stereo_point_setting;
   int i,is=s;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy_global *g=&ci->psy_g_param;
 
+  memcpy(g->coupling_prepointamp,p[is].pre,sizeof(*p[is].pre));
+  memcpy(g->coupling_postpointamp,p[is].post,sizeof(*p[is].post));
+
   if(hi->managed){
-    memcpy(g->coupling_pointamp,pdB[is].data,sizeof(*pdB));
     /* interpolate the kHz threshholds */
     for(i=0;i<PACKETBLOBS;i++){
-      float kHz=pkHz[is*2].data[i]*(1.-ds)+pkHz[is*2+2].data[i]*ds;
+      float kHz=p[is].kHz[i]*(1.-ds)+p[is+1].kHz[i]*ds;
       g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-      kHz=pkHz[is*2+1].data[i]*(1.-ds)+pkHz[is*2+3].data[i]*ds;
       g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+      g->coupling_pkHz[i]=kHz;
     }
   }else{
-    int point_dB=pdB[is].data[PACKETBLOBS/2];
-    float kHz=pkHz[is*2].data[PACKETBLOBS/2]*(1.-ds)+pkHz[is*2+2].data[PACKETBLOBS/2]*ds;
-    for(i=0;i<PACKETBLOBS;i++)
-      g->coupling_pointamp[i]=point_dB;
-    for(i=0;i<PACKETBLOBS;i++)
+    float kHz=p[is].kHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].kHz[PACKETBLOBS/2]*ds;
+    for(i=0;i<PACKETBLOBS;i++){
+
       g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-    kHz=pkHz[is*2+1].data[PACKETBLOBS/2]*(1.-ds)+pkHz[is*2+3].data[PACKETBLOBS/2]*ds;
-    for(i=0;i<PACKETBLOBS;i++)
       g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+      g->coupling_pkHz[i]=kHz;
+    }
   }
 
   return(0);
@@ -402,34 +407,17 @@ static void vorbis_encode_blocksize_setup(vorbis_info *vi,double s,
 
 }
 
-static int vorbis_encode_residue_setup(vorbis_info *vi,double s,int block,
-				       int type,
-				       vorbis_residue_template *in){
+static void vorbis_encode_residue_setup(vorbis_info *vi,
+				       int number, int block,
+				       vorbis_residue_template *res){
 
   codec_setup_info *ci=vi->codec_setup;
-  int i,is=s;
-  int n,k;
-  int number=block;
-
+  int i,n,k;
+  
   vorbis_info_residue0 *r=ci->residue_param[number]=
     _ogg_malloc(sizeof(*r));
-  vorbis_info_mapping0 *map=ci->map_param[number]=
-    _ogg_calloc(1,sizeof(*map));
-  vorbis_info_mode *mode=ci->mode_param[number]=
-    _ogg_calloc(1,sizeof(*mode));
   
-  memcpy(ci->mode_param[number],&_mode_template[block],
-	 sizeof(*_mode_template));
-  if(number>=ci->modes)ci->modes=number+1;
-  ci->mode_param[number]->mapping=number;
-  ci->mode_param[number]->blockflag=block;
-  
-  ci->map_type[number]=0;
-  memcpy(ci->map_param[number],&_mapping_template[block],sizeof(*map));
-  if(number>=ci->maps)ci->maps=number+1;
-  ((vorbis_info_mapping0 *)(ci->map_param[number]))->residuesubmap[0]=number;
-
-  memcpy(r,in[is].res[block],sizeof(*r));
+  memcpy(r,res->res,sizeof(*r));
   if(ci->residues<=number)ci->residues=number+1;
 
   switch(ci->blocksizes[block]){
@@ -440,69 +428,64 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double s,int block,
     r->grouping=32;
     break;
   }
-  ci->residue_type[number]=type;
+  ci->residue_type[number]=res->res_type;
 
-  switch(ci->residue_type[number]){
-  case 1:
-    n=r->end=ci->blocksizes[block]>>1; /* to be adjusted by lowpass later */
-    break;
-  case 2:
-    n=r->end=(ci->blocksizes[block]>>1)*vi->channels; /* to be adjusted by lowpass later */
-    break;
-  }
+  /* to be adjusted by lowpass/pointlimit later */
+  n=r->end=ci->blocksizes[block]>>1; 
+  if(res->res_type==2)
+    n=r->end*=vi->channels;
   
   for(i=0;i<r->partitions;i++)
     for(k=0;k<3;k++)
-      if(in[is].books_base[i][k])
+      if(res->books_base->books[i][k])
 	r->secondstages[i]|=(1<<k);
   
-  if(type==2){ /* that is to say, if we're coupling, which will always mean
-		  res type 2 in this encoder for now */
-    vorbis_info_mapping0 *map=ci->map_param[number];
-    
-    map->coupling_steps=1;
-    map->coupling_mag[0]=0;
-    map->coupling_ang[0]=1;
-    
-  }
-
   /* fill in all the books */
   {
     int booklist=0,k;
 
     if(ci->hi.managed){
-      r->groupbook=book_dup_or_new(ci,in[is].book_aux_managed[block]);
-      ci->book_param[r->groupbook]=in[is].book_aux_managed[block];      
+      r->groupbook=book_dup_or_new(ci,res->book_aux_managed);
+      ci->book_param[r->groupbook]=res->book_aux_managed;      
     }else{
-      r->groupbook=book_dup_or_new(ci,in[is].book_aux[block]);
-      ci->book_param[r->groupbook]=in[is].book_aux[block];
+      r->groupbook=book_dup_or_new(ci,res->book_aux);
+      ci->book_param[r->groupbook]=res->book_aux;
     }
 
     for(i=0;i<r->partitions;i++){
       for(k=0;k<3;k++){
-	if(in[is].books_base[i][k]){
-	  int bookid=book_dup_or_new(ci,in[is].books_base[i][k]);
+	if(res->books_base->books[i][k]){
+	  int bookid=book_dup_or_new(ci,res->books_base->books[i][k]);
 	  r->booklist[booklist++]=bookid;
-	  ci->book_param[bookid]=in[is].books_base[i][k];
+	  ci->book_param[bookid]=res->books_base->books[i][k];
 	}
       }
     }
   }
   
-  /* lowpass setup */
+  /* lowpass setup/pointlimit */
   {
-    double freq=ci->hi.lowpass_kHz[block]*1000.;
-    vorbis_info_floor1 *f=ci->floor_param[block];
+    double freq=ci->hi.lowpass_kHz*1000.;
+    vorbis_info_floor1 *f=ci->floor_param[block]; /* by convention */
     double nyq=vi->rate/2.;
     long blocksize=ci->blocksizes[block]>>1;
-    
-    if(freq>vi->rate/2)freq=vi->rate/2;
-    /* lowpass needs to be set in the floor and the residue. */
-    
+
+    /* lowpass needs to be set in the floor and the residue. */    
+    if(freq>nyq)freq=nyq;
     /* in the floor, the granularity can be very fine; it doesn't alter
        the encoding structure, only the samples used to fit the floor
        approximation */
     f->n=freq/nyq*blocksize; 
+
+    /* this res may by limited by the maximum pointlimit of the mode,
+       not the lowpass. the floor is always lowpass limited. */
+    if(res->limit_type){
+      if(ci->hi.managed)
+	freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS-1]*1000.;
+      else
+	freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS/2]*1000.;
+      if(freq>nyq)freq=nyq;
+    }
     
     /* in the residue, we're constrained, physically, by partition
        boundaries.  We still lowpass 'wherever', but we have to round up
@@ -515,9 +498,35 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double s,int block,
       r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
 	r->grouping;
   }
-   
-  return(0);
 }      
+
+/* we assume two maps in this encoder */
+static void vorbis_encode_map_n_res_setup(vorbis_info *vi,double s,
+					  vorbis_mapping_template *maps){
+
+  codec_setup_info *ci=vi->codec_setup;
+  int i,j,is=s;
+  vorbis_info_mapping0 *map=maps[is].map;
+  vorbis_info_mode *mode=_mode_template;
+  vorbis_residue_template *res=maps[is].res;
+
+  for(i=0;i<2;i++){
+
+    ci->map_param[i]=_ogg_calloc(1,sizeof(*map));
+    ci->mode_param[i]=_ogg_calloc(1,sizeof(*mode));
+  
+    memcpy(ci->mode_param[i],mode+i,sizeof(*_mode_template));
+    if(i>=ci->modes)ci->modes=i+1;
+
+    ci->map_type[i]=0;
+    memcpy(ci->map_param[i],map+i,sizeof(*map));
+    if(i>=ci->maps)ci->maps=i+1;
+    
+    for(j=0;j<map[i].submaps;j++)
+      vorbis_encode_residue_setup(vi,map[i].residuesubmap[j],i
+				  ,res+map[i].residuesubmap[j]);
+  }
+}
 
 static double setting_to_approx_bitrate(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -625,14 +634,11 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 				 setup->floor_params,
 				 setup->floor_long_mapping);
   
-  /* setup of [mostly] short block detection */
+  /* setup of [mostly] short block detection and stereo*/
   ret|=vorbis_encode_global_psych_setup(vi,hi->trigger_setting,
 					setup->global_params,
 					setup->global_mapping);
-  
-  ret|=vorbis_encode_global_stereo(vi,hi,
-				   setup->stereo_modes,
-				   setup->stereo_pkHz);
+  ret|=vorbis_encode_global_stereo(vi,hi,setup->stereo_modes);
 
   /* basic psych setup and noise normalization */
   ret|=vorbis_encode_psyset_setup(vi,hi->short_setting,
@@ -726,15 +732,7 @@ int vorbis_encode_setup_init(vorbis_info *vi){
     return ret; 
   }
 
-  ret|=vorbis_encode_residue_setup(vi,hi->short_setting,0,
-				   setup->res_type,
-				   setup->residue);  
-  ret|=vorbis_encode_residue_setup(vi,hi->long_setting,1,
-				   setup->res_type,
-				   setup->residue);
-    
-  if(ret)
-    vorbis_info_clear(vi);
+  vorbis_encode_map_n_res_setup(vi,hi->base_setting,setup->maps);
 
   /* set bitrate readonlies and management */
   vi->bitrate_nominal=setting_to_approx_bitrate(vi);
@@ -782,8 +780,7 @@ static int vorbis_encode_setup_setting(vorbis_info *vi,
   hi->noise_normalize_p=1;
 
   hi->stereo_point_setting=hi->base_setting;
-  hi->lowpass_kHz[0]=
-    hi->lowpass_kHz[1]=
+  hi->lowpass_kHz=
     setup->psy_lowpass[is]*(1.-ds)+setup->psy_lowpass[is+1]*ds;  
   
   hi->ath_floating_dB=setup->psy_ath_float[is]*(1.-ds)+

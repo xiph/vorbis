@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.7 2002/06/20 03:55:27 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.8 2002/06/24 00:06:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,7 +30,7 @@
 #include "misc.h"
 
 #define NEGINF -9999.f
-static double stereo_threshholds[]={0.0, 2.5, 4.5, 8.5, 16.5, 9e10};
+static double stereo_threshholds[]={0.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -82,11 +82,6 @@ static void attenuate_curve(float *c,float att){
     c[i]+=att;
 }
 
-extern int analysis_noisy;
-
-#include <stdio.h>
-extern void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg_int64_t off);
-
 static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
 				  float center_boost, float center_decay_rate){
   int i,j,k,m;
@@ -125,25 +120,14 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
     memcpy(workc[i][0],tonemasks[i][0],EHMER_MAX*sizeof(*tonemasks[i][0]));
     memcpy(workc[i][1],tonemasks[i][0],EHMER_MAX*sizeof(*tonemasks[i][0]));
     
-    for(j=0;j<P_LEVELS;j++){
-      char buf[80];
-      sprintf(buf,"m%d",i);
-      _analysis_output_always(buf,j,workc[i][j],EHMER_MAX,0,0,0);
-    }
-
     /* apply centered curve boost/decay */
     for(j=0;j<P_LEVELS;j++){
       for(k=0;k<EHMER_MAX;k++){
-	float adj=center_boost-abs(EHMER_OFFSET-k)*center_decay_rate;
-	if(adj<0.)adj=0.;
+	float adj=center_boost+abs(EHMER_OFFSET-k)*center_decay_rate;
+	if(adj<0. && center_boost>0)adj=0.;
+	if(adj>0. && center_boost<0)adj=0.;
 	workc[i][j][k]+=adj;
       }
-    }
-
-    for(j=0;j<P_LEVELS;j++){
-      char buf[80];
-      sprintf(buf,"boost%d",i);
-      _analysis_output_always(buf,j,workc[i][j],EHMER_MAX,0,0,0);
     }
 
     /* normalize curves so the driving amplitude is 0dB */
@@ -169,13 +153,6 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
       min_curve(athc[j],athc[j-1]);
       min_curve(workc[i][j],athc[j]);
     }
-
-    for(j=0;j<P_LEVELS;j++){
-      char buf[80];
-      sprintf(buf,"limited%d",i);
-      _analysis_output_always(buf,j,workc[i][j],EHMER_MAX,0,0,0);
-    }
-
   }
 
   for(i=0;i<P_BANDS;i++){
@@ -195,9 +172,7 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
     bin=floor(fromOC(i*.5)/binHz);
     lo_curve=  ceil(toOC(bin*binHz+1)*2);
     hi_curve=  floor(toOC((bin+1)*binHz)*2);
-
-    fprintf(stderr,"i=%d(%d) lo=%d hi=%d\n",i,bin,lo_curve,hi_curve);
-
+    if(lo_curve>i)lo_curve=i;
     if(lo_curve<0)lo_curve=0;
     if(hi_curve>=P_BANDS)hi_curve=P_BANDS-1;
 
@@ -257,12 +232,6 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
       ret[i][m][1]=j;
 
     }
-
-    for(j=0;j<P_LEVELS;j++){
-      char buf[80];
-      sprintf(buf,"fc%d",i);
-      _analysis_output_always(buf,j,ret[i][j]+2,EHMER_MAX,0,0,0);
-    }    
   }
 
   return(ret);
@@ -424,6 +393,7 @@ static void seed_loop(vorbis_look_psy *p,
       oc=oc>>p->shiftoc;
       if(oc>=P_BANDS)oc=P_BANDS-1;
       if(oc<0)oc=0;
+
       seed_curve(seed,
 		 curves[oc],
 		 max,
@@ -1036,7 +1006,8 @@ void _vp_couple(int blobno,
       int *floorM=ifloor[vi->coupling_mag[i]];
       int *floorA=ifloor[vi->coupling_ang[i]];
       int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
-      float point=stereo_threshholds[g->coupling_pointamp[blobno]];
+      float prepoint=stereo_threshholds[g->coupling_prepointamp[blobno]];
+      float postpoint=stereo_threshholds[g->coupling_postpointamp[blobno]];
       int partition=(p->vi->normal_point_p?p->vi->normal_partition:p->n);
 
       nonzero[vi->coupling_mag[i]]=1; 
@@ -1047,7 +1018,8 @@ void _vp_couple(int blobno,
 
 	for(k=0;k<partition;k++){
 	  int l=k+j;
-	  if(l>=limit && fabs(rM[l])<point && fabs(rA[l])<point){
+	  if((l>=limit && fabs(rM[l])<postpoint && fabs(rA[l])<postpoint) ||
+	     (fabs(rM[l])<prepoint && fabs(rA[l])<prepoint)){
 	    precomputed_couple_point(mag_memo[i][l],
 				     floorM[l],floorA[l],
 				     qM+l,qA+l);
