@@ -11,10 +11,11 @@
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id: chaining_example.c,v 1.15 2001/12/20 01:00:24 segher Exp $
+ last mod: $Id: chaining_example.c,v 1.16 2002/03/07 03:41:02 xiphmont Exp $
 
  ********************************************************************/
 
+#include <stdlib.h>
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.16 2001/12/20 01:00:25 segher Exp $
+ last mod: $Id: vorbisfile.h,v 1.17 2002/03/07 03:41:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -62,7 +62,9 @@ typedef struct OggVorbis_File {
   ogg_int64_t     *offsets;
   ogg_int64_t     *dataoffsets;
   long            *serialnos;
-  ogg_int64_t     *pcmlengths;
+  ogg_int64_t     *pcmlengths; /* overloaded to maintain binary
+				  compatability; x2 size, stores both
+				  beginning and end values */
   vorbis_info     *vi;
   vorbis_comment  *vc;
 
@@ -104,7 +106,7 @@ extern ogg_int64_t ov_raw_total(OggVorbis_File *vf,int i);
 extern ogg_int64_t ov_pcm_total(OggVorbis_File *vf,int i);
 extern double ov_time_total(OggVorbis_File *vf,int i);
 
-extern int ov_raw_seek(OggVorbis_File *vf,long pos);
+extern int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos);
 extern int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos);
 extern int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos);
 extern int ov_time_seek(OggVorbis_File *vf,double pos);
@@ -117,7 +119,7 @@ extern double ov_time_tell(OggVorbis_File *vf);
 extern vorbis_info *ov_info(OggVorbis_File *vf,int link);
 extern vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
 
-extern long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,
+extern long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int samples,
 			  int *bitstream);
 extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int bigendianp,int word,int sgned,int *bitstream);
