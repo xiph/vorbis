@@ -14,12 +14,12 @@
  function: stdio-based convenience library for opening/seeking/decoding
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Nov 02 1999
+ last modification date: Nov 04 1999
 
  ********************************************************************/
 
-#ifndef _VO_FILE_H_
-#define _VO_FILE_H_
+#ifndef _OV_FILE_H_
+#define _OV_FILE_H_
 
 #include <stdio.h>
 #include "codec.h"
@@ -40,7 +40,11 @@ typedef struct {
   vorbis_info      *vi;
 
   /* Decoding working state local storage */
-  int ready;
+  size64           pcm_offset;
+  int              decode_ready;
+  long             current_serialno;
+  int              current_link;
+
   ogg_stream_state os; /* take physical pages, weld into a logical
                           stream of packets */
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
@@ -51,9 +55,25 @@ typedef struct {
 extern int ov_clear(OggVorbis_File *vf);
 extern int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
 
-extern double ov_lbtime(OggVorbis_File *vf,int i);
-extern double ov_totaltime(OggVorbis_File *vf);
+extern long ov_streams(OggVorbis_File *vf);
+extern long ov_seekable(OggVorbis_File *vf);
 
+extern long ov_raw_total(OggVorbis_File *vf,int i);
+extern size64 ov_pcm_total(OggVorbis_File *vf,int i);
+extern double ov_time_total(OggVorbis_File *vf,int i);
+
+extern int ov_raw_seek(OggVorbis_File *vf,long pos);
+extern int ov_pcm_seek(OggVorbis_File *vf,size64 pos);
+extern int ov_time_seek(OggVorbis_File *vf,double pos);
+
+extern long ov_raw_tell(OggVorbis_File *vf);
+extern size64 ov_pcm_tell(OggVorbis_File *vf);
+extern double ov_time_tell(OggVorbis_File *vf);
+
+extern vorbis_info *ov_info(OggVorbis_File *vf,int link);
+
+extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
+		    int bigendianp,int word,int sgned,int *bitstream);
 
 #endif
 

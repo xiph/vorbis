@@ -32,25 +32,24 @@ int main(){
   }
   
   /* print details about each logical bitstream in the input */
-  if(ov.seekable){
+  if(ov_seekable(&ov)){
     printf("Input bitstream contained %d logical bitstream section(s).\n",
-	   ov.links);
+	   ov_streams(&ov));
     printf("Total bitstream playing time: %ld seconds\n\n",
-	   (long)ov_totaltime(&ov));
+	   (long)ov_time_total(&ov,-1));
 
   }else{
     printf("Standard input was not seekable.\n"
 	   "First logical bitstream information:\n\n");
   }
 
-  for(i=0;i<ov.links;i++){
+  for(i=0;i<ov_streams(&ov);i++){
+    vorbis_info *vi=ov_info(&ov,i);
     printf("\tlogical bitstream section %d information:\n",i+1);
     printf("\t\t%ldHz %d channels serial number=%ld\n",
-	   ov.vi[i].rate,ov.vi[i].channels,ov.serialnos[i]);
-    printf("\t\tcompressed length: %ldbytes ",(ov.offsets?
-				     ov.offsets[i+1]-ov.offsets[i]:
-				     -1));
-    printf(" play time: %lds\n",(long)ov_lbtime(&ov,i));
+	   vi->rate,vi->channels,ov.serialnos[i]);
+    printf("\t\tcompressed length: %ldbytes ",ov_raw_total(&ov,i));
+    printf(" play time: %lds\n",(long)ov_time_total(&ov,i));
   }
   
   ov_clear(&ov);
