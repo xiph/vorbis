@@ -8,3 +8,6 @@ config.cache
 config.log
 configure
 *.gz
+.libs
+.deps
+*.ogg
