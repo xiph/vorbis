@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.51 2001/08/16 22:52:54 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.52 2001/09/01 06:14:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -214,7 +214,7 @@ static void setup_curve(float **c,
 
 void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 		  vorbis_info_psy_global *gi,int n,long rate){
-  long i,j,k,lo=0,hi=0;
+  long i,j,k,lo=-99,hi=0;
   long maxoc;
   memset(p,0,sizeof(vorbis_look_psy));
 
@@ -246,7 +246,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     for(;hi<n && (hi<i+vi->noisewindowhimin ||
 	  toBARK(rate/(2*n)*hi)<(bark+vi->noisewindowhi));hi++);
     
-    p->bark[i]=(hi<<16)+lo;
+    p->bark[i]=(lo<<16)+hi;
 
   }
 
@@ -368,9 +368,6 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     if(halfoc>=P_BANDS-1)halfoc=P_BANDS-1;
     inthalfoc=(int)halfoc;
     del=halfoc-inthalfoc;
-
-    p->noisethresh[i]=((p->vi->noisethresh[inthalfoc]*(1.-del) + 
-			p->vi->noisethresh[inthalfoc+1]*del))*2.f-1.f;
     p->noiseoffset[i]=
       p->vi->noiseoff[inthalfoc]*(1.-del) + 
       p->vi->noiseoff[inthalfoc+1]*del;
@@ -599,59 +596,40 @@ static void bark_noise_hybridmp(int n,const long *b,
 				float *noise,
 				const float offset,
 				const int fixed){
-  long i,hi=0,lo=0,hif=0,lof=0;
+  long i,hi=b[0]>>16,lo=b[0]>>16,hif=-fixed/2,lof=-fixed/2;
   double xa=0,xb=0;
   double ya=0,yb=0;
   double x2a=0,x2b=0;
   double y2a=0,y2b=0;
   double xya=0,xyb=0; 
   double na=0,nb=0;
-  int first=-1,firstf=-1;
-  int last=0,lastf=0;
-  int rna=0,rnb=0;
 
   for(i=0;i<n;i++){
     if(hi<n){
       /* find new lo/hi */
-      int bi=b[i]>>16;
+      int bi=b[i]&0xffffL;
       for(;hi<bi;hi++){
-        double bin=(f[hi]<-offset?0.:f[hi]+offset);
-        if(bin>0.f){
-          double nn= bin*bin;
-          nn*=nn;
-          na  += nn;
-          xa  += hi*nn;
-          ya  += bin*nn;
-          x2a += hi*hi*nn;
-          y2a += bin*bin*nn;
-          xya += hi*bin*nn;
-          last=hi;
-          rna++;
-          if(first==-1)first=hi;
-        }
+	int ii=(hi<0?-hi:hi);
+        double bin=(f[ii]<-offset?1.:f[ii]+offset);
+	double nn= bin*bin;
+	na  += nn;
+	xa  += hi*nn;
+	ya  += bin*nn;
+	x2a += hi*hi*nn;
+	y2a += bin*bin*nn;
+	xya += hi*bin*nn;
       }
-      bi=b[i]&0xffff;
+      bi=b[i]>>16;
       for(;lo<bi;lo++){
-        double bin=(f[lo]<-offset?0.:f[lo]+offset);
-        if(bin>0.f){
-          double nn= bin*bin;
-          nn*=nn;
-          na  -= nn;
-          xa  -= lo*nn;
-          ya  -= bin*nn;
-          x2a -= lo*lo*nn;
-          y2a -= bin*bin*nn;
-          xya -= lo*bin*nn;
-          rna--;
-        }
-        if(first<lo)first=-1;
-        if(last<lo){
-          first=-1;
-        }else{
-          for(first=lo;first<hi;first++)
-            if(f[first]>0.f)break;
-          if(first==hi)first=-1;
-        }
+	int ii=(lo<0?-lo:lo);
+        double bin=(f[ii]<-offset?1.:f[ii]+offset);
+	double nn= bin*bin;
+	na  -= nn;
+	xa  -= lo*nn;
+	ya  -= bin*nn;
+	x2a -= lo*lo*nn;
+	y2a -= bin*bin*nn;
+	xya -= lo*bin*nn;
       }
     }
 
@@ -660,74 +638,50 @@ static void bark_noise_hybridmp(int n,const long *b,
       if(bi>n)bi=n;
 
       for(;hif<bi;hif++){
-        double bin=(f[hif]<-offset?0.:f[hif]+offset);
-        if(bin>0.f){
-          double nn= bin*bin;
-          nn*=nn;
-          nb  += nn;
-          xb  += hif*nn;
-          yb  += bin*nn;
-          x2b += hif*hif*nn;
-          y2b += bin*bin*nn;
-          xyb += hif*bin*nn;
-          lastf=hif;
-          rnb++;
-          if(firstf==-1)firstf=hif;
-        }
+	int ii=(hif<0?-hif:hif);
+        double bin=(f[ii]<-offset?1.:f[ii]+offset);
+	double nn= bin*bin;
+	nb  += nn;
+	xb  += hif*nn;
+	yb  += bin*nn;
+	x2b += hif*hif*nn;
+	y2b += bin*bin*nn;
+	xyb += hif*bin*nn;
       }
       bi=i-(fixed+1)/2;
-      if(bi<0)bi=0;
       for(;lof<bi;lof++){
-        double bin=(f[lof]<-offset?0.:f[lof]+offset);
-        if(bin>0.f){
-          double nn= bin*bin;
-          nn*=nn;
-          nb  -= nn;
-          xb  -= lof*nn;
-          yb  -= bin*nn;
-          x2b -= lof*lof*nn;
-          y2b -= bin*bin*nn;
-          xyb -= lof*bin*nn;
-          rnb--;
-        }
-        if(firstf<lof)firstf=-1;
-        if(lastf<lof){
-          firstf=-1;
-        }else{
-          for(firstf=lof;firstf<hif;firstf++)
-            if(f[firstf]>0.f)break;
-          if(firstf==hif)firstf=-1;
-        }
+	int ii=(lof<0?-lof:lof);
+        double bin=(f[ii]<-offset?1.:f[ii]+offset);
+	double nn= bin*bin;
+	nb  -= nn;
+	xb  -= lof*nn;
+	yb  -= bin*nn;
+	x2b -= lof*lof*nn;
+	y2b -= bin*bin*nn;
+	xyb -= lof*bin*nn;
       }
     }
 
     {    
-      double va;
+      double va=0.f;
       
-      if(rna>2 && (last-first)*3/2>hi-lo){
+      if(na>2){
         double denom=1./(na*x2a-xa*xa);
         double a=(ya*x2a-xya*xa)*denom;
         double b=(na*xya-xa*ya)*denom;
         va=a+b*i;
-      }else{
-	va=0.f;
-        if(na>.5)va=ya/na;
       }
       if(va<0.)va=0.;
 
       if(fixed>0){
-        double vb;
+        double vb=0.f;
 
-        if(rnb>2 && (lastf-firstf)*3/2>hif-lof){
+        if(nb>2){
           double denomf=1./(nb*x2b-xb*xb);
           double af=(yb*x2b-xyb*xb)*denomf;
           double bf=(nb*xyb-xb*yb)*denomf;
           vb=af+bf*i;
-        }else{
-	  vb=0.f;
-	  if(nb>.5)vb=yb/nb;
         }
-
         if(vb<0.)vb=0.;
         if(va>vb && vb>0.)va=vb;
 
@@ -790,11 +744,17 @@ void _vp_compute_mask(vorbis_look_psy *p,
        envelope line (1.) */
 
     _analysis_output("median",seq,work,n,1,0);
-    _analysis_output("envelope",seq,logmask,n,1,0);
 
-    for(i=0;i<n;i++)logmask[i]= 
-		      work[i]+
-		      p->noisethresh[i]*logmask[i]+p->noiseoffset[i];
+    _analysis_output("medianenvelope",seq,logmask,n,1,0);
+    for(i=0;i<n;i++)logmask[i]+=work[i];
+    _analysis_output("envelope",seq,logmask,n,1,0);
+    for(i=0;i<n;i++)logmask[i]-=work[i];
+
+    for(i=0;i<n;i++){
+      int dB=logmask[i]+.5;
+      if(dB>=NOISE_COMPAND_LEVELS)dB=NOISE_COMPAND_LEVELS-1;
+      logmask[i]= work[i]+p->vi->noisecompand[dB]+p->noiseoffset[i];
+    }
 
     _analysis_output("noise",seq,logmask,n,1,0);
 
@@ -852,79 +812,167 @@ float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
   return(amp);
 }
 
-static void couple_lossless(float A, float B, float *mag, float *ang){
+static void couple_lossless(float A, float B, 
+			    float granule,float igranule,
+			    float *mag, float *ang){
+
+  A=rint(A*igranule)*granule;
+  B=rint(B*igranule)*granule;
+  
   if(fabs(A)>fabs(B)){
     *mag=A; *ang=(A>0.f?A-B:B-A);
   }else{
     *mag=B; *ang=(B>0.f?A-B:B-A);
   }
+
+  if(*ang>fabs(*mag)*1.9999f)*ang=-fabs(*mag)*2.f;
+ 
 }
 
-static void couple_8phase(float A, float B, float *mag, float *ang){
-  if(fabs(A)>fabs(B)){
-    *mag=A; *ang=(A>0?A-B:B-A);
-  }else{
-    *mag=B; *ang=(B>0?A-B:B-A);
-  }
+static void couple_8phase(float A, float B, float fA, float fB, 
+			 float granule,float igranule,
+			 float fmag, float *mag, float *ang){
 
-  if(*mag!=0.f)
-    switch((int)(rint(*ang / *mag))){
+  float origmag=FAST_HYPOT(A*fA,B*fB),corr;
+
+  if(fmag!=0.f){
+    float phase=rint((A-B)/fmag);
+    
+    if(fabs(A)>fabs(B)){
+      *mag=A;phase=(A>0?phase:-phase);
+    }else{
+      *mag=B;phase=(B>0?phase:-phase);
+    }
+    
+    switch((int)phase){
     case 0:
-      *ang=0;
-      break;
-    case 2:case -2:
-      *ang=-2*fabs(*mag);
+      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
+      *mag=rint(*mag*corr*igranule)*granule; 
+      *ang=0.f;
       break;
     case 1:
-      *ang= *mag;
+      corr=origmag/(fmag*fA);
+      *mag=rint(A*corr*igranule)*granule; 
+      *ang=fabs(*mag);
       break;
     case -1:
-      *ang= -*mag;
+      corr=origmag/(fmag*fB);
+      *mag=rint(B*corr*igranule)*granule; 
+      *ang=-fabs(*mag);
+      break;
+    default:
+      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
+      *mag=rint(*mag*corr*igranule)*granule; 
+      *ang=-2.f*fabs(*mag);
       break;
     }
+  }else{
+    *mag=0.f;
+    *ang=0.f;
+  }    
 }
 
-static void couple_6phase(float A, float B, float *mag, float *ang){
-  if(fabs(A)>fabs(B)){
-    *mag=A; *ang=(A>0?A-B:B-A);
-  }else{
-    *mag=B; *ang=(B>0?A-B:B-A);
-  }
+static void couple_6phase(float A, float B, float fA, float fB, 
+			 float granule,float igranule,
+			 float fmag, float *mag, float *ang){
 
-  if(*mag!=0.f)
-    switch((int)(rint(*ang / *mag))){
-    case -2:case 2:
-      *mag=0;
-      /*fall*/
+  float origmag=FAST_HYPOT(A*fA,B*fB),corr;
+
+  if(fmag!=0.f){
+    float phase=rint((A-B)/fmag);
+    
+    if(fabs(A)>fabs(B)){
+      *mag=A;phase=(A>0?phase:-phase);
+    }else{
+      *mag=B;phase=(B>0?phase:-phase);
+    }
+    
+    switch((int)phase){
     case 0:
-      *ang=0;
+      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
+      *mag=rint(*mag*corr*igranule)*granule; 
+      *ang=0.f;
       break;
-    case 1:
-      *ang= *mag;
+    case 1:case 2:
+      corr=origmag/(fmag*fA);
+      *mag=rint(A*corr*igranule)*granule; 
+      *ang=fabs(*mag);
       break;
-    case -1:
-      *ang= -*mag;
+    case -1:case -2:
+      corr=origmag/(fmag*fB);
+      *mag=rint(B*corr*igranule)*granule; 
+      *ang=-fabs(*mag);
       break;
     }
-}
-
-static void couple_point(float A, float B, float *mag, float *ang){
-  if(fabs(A)>fabs(B)){
-    *mag=A; *ang=(A>0?A-B:B-A);
   }else{
-    *mag=B; *ang=(B>0?A-B:B-A);
-  }
+    *mag=0.f;
+    *ang=0.f;
+  }    
+}
 
-  if(*mag!=0.f)
-    switch((int)(rint(*ang / *mag))){
-    case -2:case 2:
-      *mag=0;
-      /* fall */
-    case 0:case 1: case -1:
-      *ang=0;
+static void couple_4phase(float A, float B, float fA, float fB, 
+			 float granule,float igranule,
+			 float fmag, float *mag, float *ang){
+
+  float origmag=FAST_HYPOT(A*fA,B*fB),corr;
+
+  if(fmag!=0.f){
+    float phase=rint((A-B)*.5/fmag);
+    
+    if(fabs(A)>fabs(B)){
+      *mag=A;phase=(A>0?phase:-phase);
+    }else{
+      *mag=B;phase=(B>0?phase:-phase);
+    }
+    
+    corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
+    *mag=rint(*mag*corr*igranule)*granule; 
+    switch((int)phase){
+    case 0:
+      *ang=0.f;
+      break;
+    default:
+      *ang=-2.f*fabs(*mag);
       break;
     }
+  }else{
+    *mag=0.f;
+    *ang=0.f;
+  }    
 }
+
+static void couple_point(float A, float B, float fA, float fB, 
+			 float granule,float igranule,
+			 float fmag, float *mag, float *ang){
+
+  float origmag=FAST_HYPOT(A*fA,B*fB),corr;
+
+  if(fmag!=0.f){
+    float phase=rint((A-B)*.5/fmag);
+    
+    if(fabs(A)>fabs(B)){
+      *mag=A;phase=(A>0?phase:-phase);
+    }else{
+      *mag=B;phase=(B>0?phase:-phase);
+    }
+    
+    //switch((int)phase){
+      //case 0:
+      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
+      *mag=rint(*mag*corr*igranule)*granule; 
+      *ang=0.f;
+      //break;
+      //default:
+      //*mag=0.f;
+      //*ang=0.f;
+      //break;
+      //}
+  }else{
+    *mag=0.f;
+    *ang=0.f;
+  }    
+}
+
 
 void _vp_quantize_couple(vorbis_look_psy *p,
 			 vorbis_info_mapping0 *vi,
@@ -949,6 +997,8 @@ void _vp_quantize_couple(vorbis_look_psy *p,
       
       float *pcmM=pcm[vi->coupling_mag[i]];
       float *pcmA=pcm[vi->coupling_ang[i]];
+      float *floorM=pcm[vi->coupling_mag[i]]+n;
+      float *floorA=pcm[vi->coupling_ang[i]]+n;
       float *sofarM=sofar[vi->coupling_mag[i]];
       float *sofarA=sofar[vi->coupling_ang[i]];
       float *qM=quantized[vi->coupling_mag[i]];
@@ -963,26 +1013,25 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 	for(;j<part->limit && j<p->n;j++){
 	  /* partition by partition; k is our by-location partition
 	     class counter */
+	  float ang,mag,fmag=max(fabs(pcmM[j]),fabs(pcmA[j]));
 
-	  float Am=rint(pcmM[j]*igranulem)*granulem;
-	  float Bm=rint(pcmA[j]*igranulem)*granulem;
-	  float ang,mag,fmag=max(fabs(Am),fabs(Bm));
-	  
 	  if(fmag<part->amppost_point){
-	    couple_point(Am,Bm,&mag,&ang);
+	    couple_point(pcmM[j],pcmA[j],floorM[j],floorA[j],
+			 granulem,igranulem,fmag,&mag,&ang);
 	  }else{
 	    if(fmag<part->amppost_6phase){
-	      couple_6phase(Am,Bm,&mag,&ang);
+	      couple_6phase(pcmM[j],pcmA[j],floorM[j],floorA[j],
+			   granulem,igranulem,fmag,&mag,&ang);
 	    }else{ 
 	      if(fmag<part->amppost_8phase){
-		couple_8phase(Am,Bm,&mag,&ang);
+		couple_8phase(pcmM[j],pcmA[j],floorM[j],floorA[j],
+			      granulem,igranulem,fmag,&mag,&ang);
 	      }else{
-		couple_lossless(Am,Bm,&mag,&ang);
+		couple_lossless(pcmM[j],pcmA[j],
+				granulem,igranulem,&mag,&ang);
 	      }
 	    }
 	  }
-	  fmag=rint(fmag);
-	  if(ang>fmag*1.9999f)ang=-fmag*2.f;
 	  
 	  qM[j]=mag-sofarM[j];
 	  qA[j]=ang-sofarA[j];

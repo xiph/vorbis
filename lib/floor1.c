@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.14 2001/08/16 20:31:38 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.15 2001/09/01 06:14:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -940,7 +940,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	  {
 	    FILE *of;
 	    char buffer[80];
-	    sprintf(buffer,"line_%ldx%ld_class%d.vqd",
+	    sprintf(buffer,"line_%dx%ld_class%d.vqd",
 		    vb->pcmend/2,posts-2,class);
 	    of=fopen(buffer,"a");
 	    fprintf(of,"%d\n",cval);
@@ -964,7 +964,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	    {
 	      FILE *of;
 	      char buffer[80];
-	      sprintf(buffer,"line_%ldx%ld_%dsub%d.vqd",
+	      sprintf(buffer,"line_%dx%ld_%dsub%d.vqd",
 		      vb->pcmend/2,posts-2,class,bookas[k]);
 	      of=fopen(buffer,"a");
 	      fprintf(of,"%d\n",fit_valueB[j+k]);

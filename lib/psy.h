@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.22 2001/08/13 01:36:57 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.23 2001/09/01 06:14:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,15 +61,12 @@ typedef struct vp_attenblock{
   float block[P_BANDS][P_LEVELS];
 } vp_attenblock;
 
+#define NOISE_COMPAND_LEVELS 40
 typedef struct vorbis_info_psy{
   float  *ath;
 
   float  ath_adjatt;
   float  ath_maxatt;
-
-  /*     0  1  2   3   4   5   6   7   8   9  10  11  12  13  14  15   16   */
-  /* x: 63 88 125 175 250 350 500 700 1k 1.4k 2k 2.8k 4k 5.6k 8k 11.5k 16k Hz */
-  /* y: 0 10 20 30 40 50 60 70 80 90 100 dB */
 
   float tone_masteratt;
   float tone_maxatt;
@@ -87,7 +84,7 @@ typedef struct vorbis_info_psy{
   int   noisewindowhimin;
   int   noisewindowfixed;
   float noiseoff[P_BANDS];
-  float noisethresh[P_BANDS];
+  float *noisecompand;
 
   float max_curve_dB;
 
