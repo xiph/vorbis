@@ -261,7 +261,7 @@ double vqgen_iterate(vqgen *v){
       min=max=_now(v,0)[k];
 
       for(j=1;j<v->entries;j++){
-	double val=_now(v,0)[k];
+	double val=_now(v,j)[k];
 	if(val<min)min=val;
 	if(val>max)max=val;
       }
