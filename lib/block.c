@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.50.2.3 2001/10/16 20:10:10 xiphmont Exp $
+ last mod: $Id: block.c,v 1.50.2.4 2001/10/20 03:00:09 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -272,22 +272,20 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   {
     codec_setup_info *ci=vi->codec_setup;
     /* first find the max possible needed queue size */
-    long maxpackets=(max(ci->bitrate_bound_queuetime,
-		     ci->bitrate_avg_queuetime)*
-      vi->rate+(ci->blocksizes[0]-1))/ci->blocksizes[0]+1;
+    long maxpackets=(ci->bitrate_queue_time*vi->rate+(ci->blocksizes[0]-1))/ci->blocksizes[0]+1;
     long bins=BITTRACK_DIVISOR*ci->passlimit[ci->coupling_passes-1];
-    if(ci->bitrate_queue_loweravg<=0. && 
-       ci->bitrate_queue_upperavg<=0.)bins=0;
+    if(ci->bitrate_queue_avgmin<=0. && 
+       ci->bitrate_queue_avgmax<=0.)bins=0;
 
     b->bitrate_queue_size=maxpackets;
     b->bitrate_bins=bins;
-    b->bitrate_queue=_ogg_malloc(maxpackets*sizeof(*b->bitrate_queue));
+    b->bitrate_queue_actual=_ogg_malloc(maxpackets*sizeof(*b->bitrate_queue_actual));
     if(bins){
-      b->bitrate_queue_bin=_ogg_malloc(maxpackets*bins*
-				       sizeof(*b->bitrate_queue));
-      b->bitrate_avgbitacc=_ogg_malloc(bins*sizeof(*b->bitrate_avgbitacc));
+      b->bitrate_queue_binned=_ogg_malloc(maxpackets*bins*
+					  sizeof(*b->bitrate_queue_binned));
+      b->bitrate_queue_binacc=_ogg_malloc(bins*sizeof(*b->bitrate_queue_binacc));
     }
-    b->bitrate_floatinglimit=ci->bitrate_floatinglimit_initial;
+    b->bitrate_avgfloat=ci->bitrate_avgfloat_initial;
   }
 
   return(0);
@@ -330,9 +328,9 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	_ogg_free(b->transform[1]);
       }
       if(b->psy_g_look)_vp_global_free(b->psy_g_look);
-      if(b->bitrate_queue)_ogg_free(b->bitrate_queue);
-      if(b->bitrate_queue_bin)_ogg_free(b->bitrate_queue_bin);
-      if(b->bitrate_avgbitacc)_ogg_free(b->bitrate_avgbitacc);
+      if(b->bitrate_queue_actual)_ogg_free(b->bitrate_queue_actual);
+      if(b->bitrate_queue_binned)_ogg_free(b->bitrate_queue_binned);
+      if(b->bitrate_queue_binacc)_ogg_free(b->bitrate_queue_binacc);
       
     }
     

@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.9.4.3 2001/10/16 20:10:10 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.9.4.4 2001/10/20 03:00:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -68,22 +68,19 @@ typedef struct backend_lookup_state {
   unsigned char *header2;
 
   /* encode side bitrate tracking */
-  ogg_uint32_t  *bitrate_queue;
-  ogg_uint32_t  *bitrate_queue_bin;
+  ogg_uint32_t  *bitrate_queue_actual;
+  ogg_uint32_t  *bitrate_queue_binned;
   int            bitrate_queue_size;
   int            bitrate_queue_head;
   int            bitrate_bins;
 
   /* 0, -1, -4, -16, -n/16, -n/8, -n/4, -n/2 */
-  long   bitrate_boundbitacc[8];
-  long   bitrate_boundsampleacc[8];
-  long   bitrate_boundtail[8]; 
-  
-  long   *bitrate_avgbitacc;
-  long   bitrate_avgsampleacc;
-  long   bitrate_avgtail;
+  long    bitrate_queue_bitacc[8];
+  long    bitrate_queue_sampleacc[8];
+  long    bitrate_queue_tail[8]; 
+  long   *bitrate_queue_binacc;
 
-  double bitrate_floatinglimit;
+  double bitrate_avgfloat;
 
 } backend_lookup_state;
 
@@ -128,23 +125,24 @@ typedef struct codec_setup_info {
   vorbis_info_psy_global *psy_g_param;
 
   /* detailed bitrate management setup */
-  double bitrate_floatinglimit_initial; /* set by mode */
-  double bitrate_floatinglimit_minimum; /* set by mode */
-  double bitrate_floatinglimit_upslew_max;
-  double bitrate_floatinglimit_downslew_max;
-
-  double bitrate_bound_queuetime;
-  double bitrate_avg_queuetime;
-
   double bitrate_absolute_min_short;
   double bitrate_absolute_min_long;
   double bitrate_absolute_max_short;
   double bitrate_absolute_max_long;
 
-  double bitrate_queue_min;
-  double bitrate_queue_max;
-  double bitrate_queue_loweravg;
-  double bitrate_queue_upperavg;
+  double bitrate_queue_time;
+  double bitrate_queue_hardmin;
+  double bitrate_queue_hardmax;
+  double bitrate_queue_avgmin;
+  double bitrate_queue_avgmax;
+
+  double bitrate_avgfloat_initial; /* set by mode */
+  double bitrate_avgfloat_minimum; /* set by mode */
+  double bitrate_avgfloat_downslew_max;
+  double bitrate_avgfloat_upslew_max;
+  double bitrate_avgfloat_downhyst;
+  double bitrate_avgfloat_uphyst;
+
 
   int    passlimit[32];     /* iteration limit per couple/quant pass */
   int    coupling_passes;
