@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.10 2000/11/06 00:06:56 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.11 2000/11/08 13:16:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,7 +45,7 @@ typedef struct {
 } ov_callbacks;
 
 
-typedef struct {
+typedef struct OggVorbis_File {
   void             *datasource; /* Pointer to a FILE *, etc. */
   int              seekable;
   ogg_int64_t          offset;

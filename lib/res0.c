@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.19 2000/11/06 00:07:02 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.20 2000/11/08 13:16:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -213,7 +213,7 @@ static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
 
 static int _encodepart(oggpack_buffer *opb,float *vec, int n,
 		       int stages, codebook **books,int mode,int part){
-  int i,j,bits=0;
+  int i,j,bits=0,flag=0;
 
   for(j=0;j<stages;j++){
     int dim=books[j]->dim;
@@ -231,10 +231,12 @@ static int _encodepart(oggpack_buffer *opb,float *vec, int n,
       }
 #endif
       bits+=vorbis_book_encode(books[j],entry,opb);
+      if(entry!=books[j]->zeroentry)flag=1;
+
     }
   }
 
-  return(bits);
+  return(flag);
 }
 
 static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
@@ -273,6 +275,7 @@ int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(long *));
+  long lastbyte,lastbit;;
 
   partvals=partwords*partitions_per_word;
 
@@ -301,7 +304,10 @@ int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
      residual words for that partition word.  Then write the next
      partition channel words... */
   
+  lastbyte=vb->opb.endbyte;
+  lastbit=vb->opb.endbit;
   for(i=info->begin,l=0;i<info->end;){
+    
     /* first we encode a partition codeword for each channel */
     for(j=0;j<ch;j++){
       long val=partword[j][l];
@@ -312,16 +318,27 @@ int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
     /* now we encode interleaved residual values for the partitions */
     for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition)
       for(j=0;j<ch;j++){
-	resbits[partword[j][l]]+=
-	  _encodepart(&vb->opb,in[j]+i,samples_per_partition,
-		      info->secondstages[partword[j][l]],
-		      look->partbooks[partword[j][l]],look->map,partword[j][l]);
+	/*resbits[partword[j][l]]+=*/
+	int flag=_encodepart(&vb->opb,in[j]+i,samples_per_partition,
+			     info->secondstages[partword[j][l]],
+			     look->partbooks[partword[j][l]],look->map,partword[j][l]);
 	resvals[partword[j][l]]+=samples_per_partition;
+	if(flag){
+	  lastbyte=vb->opb.endbyte;
+	  lastbit=vb->opb.endbit;
+	}
       }
       
   }
 
-  for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];
+  /* grab a free byte or two here and there */
+  if(lastbyte<vb->opb.endbyte){
+    vb->opb.endbyte=lastbyte;
+    vb->opb.endbit=lastbit;  /* yeah overengineered */
+  }
+
+
+  /*for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];*/
   /*fprintf(stderr,
 	  "Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
 	  ch*(info->end-info->begin),phrasebits,resbitsT);

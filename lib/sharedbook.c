@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.10 2000/11/06 00:07:02 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.11 2000/11/08 13:16:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -273,7 +273,9 @@ float *_book_unquantize(const static_codebook *b){
 	  r[j*b->dim+k]=val;
 	}
       }
+      break;
     }
+
     return(r);
   }
   return(NULL);
@@ -324,12 +326,30 @@ void vorbis_book_clear(codebook *b){
 }
 
 int vorbis_book_init_encode(codebook *c,const static_codebook *s){
+  long j,k;
   memset(c,0,sizeof(codebook));
   c->c=s;
   c->entries=s->entries;
   c->dim=s->dim;
   c->codelist=_make_words(s->lengthlist,s->entries);
   c->valuelist=_book_unquantize(s);
+
+  /* set the 'zero entry' */
+  c->zeroentry=-1;
+  if(c->valuelist){
+    for(j=0;j<s->entries;j++){
+      int flag=1;
+      for(k=0;k<s->dim;k++){
+	if(fabs(c->valuelist[j*s->dim+k])>1e-12){
+	  flag=0;
+	  break;
+	}
+      }
+      if(flag)
+	c->zeroentry=j;
+    }
+  }
+
   return(0);
 }
 
