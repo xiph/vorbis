@@ -1,0 +1,6 @@
+usr/include/vorbis/*.h
+usr/include/vorbis/book/*.vqh
+usr/lib/*.a
+usr/lib/*.la
+usr/lib/*.so
+usr/share/aclocal/vorbis.m4

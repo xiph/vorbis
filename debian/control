@@ -5,9 +5,9 @@ Maintainer: Christopher L Cheney <ccheney@debian.org>
 Build-Depends: debhelper
 Standards-Version: 3.1.1
 
-Package: libvorbis-dev
+Package: libvorbis0-dev
 Architecture: any
-Depends: libvorbis (= ${Source-Version}), libc6-dev
+Depends: libvorbis0 (= ${Source-Version}), libc6-dev
 Description: Development library for OGG Vorbis
  Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
  general-purpose compressed audio format for high quality (44.1-48.0kHz,
@@ -16,7 +16,7 @@ Description: Development library for OGG Vorbis
  audio representations including MPEG-1 audio layer 3, MPEG-4 
  audio (AAC and TwinVQ), and PAC.
 
-Package: libvorbis
+Package: libvorbis0
 Architecture: any
 Depends: ${shlibs:Depends}
 Description: The OGG Vorbis lossy audio compression codec.

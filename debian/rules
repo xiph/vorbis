@@ -12,8 +12,9 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	
-	./autogen.sh --prefix=/usr
+
+	# If compiling cvs version change to ./autogen.sh --prefix=/usr 
+	./configure --prefix=/usr
 
 	touch configure-stamp
 
@@ -52,39 +53,22 @@ binary-indep: build install
 
 # Build architecture-dependent files here.
 binary-arch: build install
-#	dh_testversion
 	dh_testdir
 	dh_testroot
-	#
-	# build libvorbis${major} package by moving files from vorbis-dev
-	#
-#	dh_movefiles -plibvorbis$(major)             \
-#	usr/lib/libvorbis.so.$(major)        \
-#	usr/lib/libvorbis.so.$(version)
 
 	dh_movefiles
 
-#	dh_installdebconf	
 	dh_installdocs doc/*.html doc/*.txt doc/*.png doc/vorbisfile/*.html
 	dh_installexamples
-#	dh_installmenu
-#	dh_installemacsen
-#	dh_installpam
-#	dh_installinit
-#	dh_installcron
 	dh_installmanpages
-#	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs 
 	dh_link
 	dh_strip
 	dh_compress
 	dh_fixperms
-	# You may want to make some executables suid here.
-#	dh_suidregister
 	dh_makeshlibs
 	dh_installdeb
-#	dh_perl
 	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
