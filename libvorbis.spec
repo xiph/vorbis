@@ -12,7 +12,7 @@ URL:		http://www.xiph.org/
 Vendor:		Xiphophorus <team@xiph.org>
 Source:		ftp://ftp.xiph.org/pub/ogg/vorbis/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-root
-Requires:	libogg >= 1.0beta3
+Requires:	libogg >= 1.0prebeta4
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
@@ -22,7 +22,7 @@ and variable bitrates from 16 to 128 kbps/channel.
 %package devel
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
-Requires:	libogg-devel >= 1.0beta3
+Requires:	libogg-devel >= 1.0prebeta4
 Requires:	libvorbis-devel = %{version}
 
 %description devel
