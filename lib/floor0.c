@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.6 2000/02/06 13:39:40 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.7 2000/02/07 20:03:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -111,33 +111,20 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   vorbis_lpc_to_lsp(out,out,look->m);
   memcpy(work,out,sizeof(double)*look->m);
 
-  for(j=12;j<20;j++)
-    fprintf(stderr,"%0.3g, ",out[j]);
-  fprintf(stderr,"\n");
-
-  /* code the spectral envelope, and keep track of the actual quantized
-     values */
+  /* code the spectral envelope, and keep track of the actual
+     quantized values; we don't want creeping error as each block is
+     nailed to the last quantized value of the previous block. */
   _oggpack_write(&vb->opb,amp*32768,18);
   {
     codebook *b=vb->vd->fullbooks+info->books[0];
     double last=0.;
     for(j=0;j<look->m;){
-      double next=out[j+b->dim-1];
-      for(k=0;k<b->dim;k++,j++)out[j]-=last;
-      last=next;
+      for(k=0;k<b->dim;k++)out[j+k]-=last;
+      vorbis_book_encodev(b,out+j,&vb->opb);
+      for(k=0;k<b->dim;k++,j++)out[j]+=last;
+      last=out[j-1];
     }
   }
-
-  for(k=0;k<info->stages;k++){
-    codebook *b=vb->vd->fullbooks+info->books[k];
-    for(j=0;j<look->m;j+=b->dim)
-      vorbis_book_encodev(b,out+j,&vb->opb);
-  }
-  
-  for(j=0;j<look->m;j++)
-    out[j]=work[j]-out[j];
-
-        
 
   /* take the coefficients back to a spectral envelope curve */
   vorbis_lsp_to_lpc(out,out,look->m); 
@@ -167,11 +154,6 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
       last=out[j-1];
     }
   }
-
-  for(j=12;j<20;j++)
-    fprintf(stderr,"%0.3g, ",out[j]);
-  fprintf(stderr,"\n");
-  
 
   /* take the coefficients back to a spectral envelope curve */
   vorbis_lsp_to_lpc(out,out,look->m); 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.7 2000/02/06 13:40:39 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.8 2000/02/07 20:03:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -361,12 +361,24 @@ int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b){
   return(book->c->lengthlist[a]);
 }
 
-/* returns the number of bits and *modifies a* to the residual error *****/
+static double _dist(int el,double *a, double *b){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
+  return acc;
+}
+
+/* returns the number of bits and *modifies a* to the quantized value *****/
 int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
   encode_aux *t=book->c->encode_tree;
   int dim=book->dim;
   int ptr=0,k;
 
+#if 1
+  /* optimized, using the decision tree */
   while(1){
     double c=0.;
     double *p=book->valuelist+t->p[ptr];
@@ -381,7 +393,19 @@ int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
       ptr= -t->ptr1[ptr];
     if(ptr<=0)break;
   }
-  for(k=0;k<dim;k++)a[k]-=(book->valuelist-ptr*dim)[k];
+#else
+  /* brute force */
+  double this,best=_dist(book->dim,a,book->valuelist);
+  int i;
+  for(i=1;i<book->entries;i++){
+    this=_dist(book->dim,a,book->valuelist+i*book->dim);
+    if(this<best){
+      ptr=-i;
+      best=this;
+    }
+  }
+#endif
+  memcpy(a,book->valuelist-ptr*dim,dim*sizeof(double));
   return(vorbis_book_encode(book,-ptr,b));
 }
 
@@ -581,7 +605,7 @@ int main(){
 	exit(1);
       }
     for(i=0;i<TESTSIZE;i++)
-      if(fabs(testvec[ptr][i]-qv[i]-iv[i])>.000001){
+      if(fabs(qv[i]-iv[i])>.000001){
 	fprintf(stderr,"input (%g) != output (%g) at position (%ld)\n",
 		iv[i],testvec[ptr][i]-qv[i],i);
 	exit(1);
