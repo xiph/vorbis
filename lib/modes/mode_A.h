@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.16 2001/06/18 09:07:32 xiphmont Exp $
+ last mod: $Id: mode_A.h,v 1.14.4.5 2001/05/23 02:15:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,10 +22,33 @@
 #include "vorbis/codec.h"
 #include "backends.h"
 
-#include "books/lsp12_0.vqh"
-#include "books/lsp30_0.vqh"
-#include "books/lsp12_1.vqh"
-#include "books/lsp30_1.vqh"
+#include "books/line0_class0.vqh"
+#include "books/line0_class1.vqh"
+#include "books/line0_class2.vqh"
+#include "books/line1_class0.vqh"
+#include "books/line1_class1.vqh"
+#include "books/line1_class2.vqh"
+#include "books/line1_class3.vqh"
+
+#include "books/line0_0sub0.vqh"
+#include "books/line0_0sub1.vqh"
+#include "books/line0_1sub1.vqh"
+#include "books/line0_1sub2.vqh"
+#include "books/line0_1sub3.vqh"
+#include "books/line0_2sub1.vqh"
+#include "books/line0_2sub2.vqh"
+#include "books/line0_2sub3.vqh"
+
+#include "books/line1_0sub0.vqh"
+#include "books/line1_0sub1.vqh"
+#include "books/line1_1sub0.vqh"
+#include "books/line1_1sub1.vqh"
+#include "books/line1_2sub1.vqh"
+#include "books/line1_2sub2.vqh"
+#include "books/line1_2sub3.vqh"
+#include "books/line1_3sub1.vqh"
+#include "books/line1_3sub2.vqh"
+#include "books/line1_3sub3.vqh"
 
 #include "books/res0_128_128aux.vqh"
 #include "books/res0_128_1024aux.vqh"
@@ -48,7 +71,7 @@
 
 
 static vorbis_info_psy _psy_set_A0={
-  ATH_Bark_dB_lspconservative,
+  1,/*athp*/
   1,/*decayp*/
 
   -100.,
@@ -136,7 +159,7 @@ static vorbis_info_psy _psy_set_A0={
 };
 
 static vorbis_info_psy _psy_set_A={
-  ATH_Bark_dB_lspconservative,
+  1,/*athp*/
   1,/*decayp*/
 
   -100.f,
@@ -199,7 +222,7 @@ static vorbis_info_psy _psy_set_A={
   .5f,   /* high window */
   25,
   25,
-  50,
+  40,
   {.000f, 0.f, /*63*/
    .000f, 0.f, /*88*/
    .000f, 0.f, /*125*/
@@ -227,22 +250,71 @@ static vorbis_info_psy _psy_set_A={
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0A={0};
-static vorbis_info_floor0 _floor_set0A={12, 44100,  64, 10,130, 2, {0,1},
-                                        0.199f, .285f};
-static vorbis_info_floor0 _floor_set1A={30, 44100, 256, 12,150, 2, {2,3}, 
-                                        .082f, .126f};
-static vorbis_info_residue0 _residue_set0A={0,96,16,6,4,
+/*static vorbis_info_floor0 _floor_set0A={12, 44100,  64, 10,130, 2, {0,1},
+  0.199f, .285f};*/
+/*static vorbis_info_floor0 _floor_set1A={30, 44100, 256, 12,150, 2, {2,3}, 
+  .082f, .126f};*/
+
+static vorbis_info_floor1 _floor_set0A={4,
+					{0,1,2,2},
+					
+					{3,3,3},
+					{1,2,2},
+					{0,1,2},
+					{{3,4},{-1,5,6,7},{-1,8,9,10}},
+
+					4,
+					{0,128,
+					 5,21,
+
+					 2,1,3,
+					 11,7,15,
+					 45,30,73},
+					
+					60,30,600,
+					999,999,0,18.,
+					8,96};
+
+static vorbis_info_floor1 _floor_set1A={10,
+					{0,1,2,2,2,2,2, 3,3,3},
+					
+					{3,4,3,3},
+					{1,1,2,2},
+					{11,12,13,14},
+					{{15,16},
+					 {17,18},
+					 {-1,19,20,21},
+					 {-1,22,23,24},
+					},
+
+					4,
+					{0,1024,
+
+					 88,31,243,
+
+					 14,54,143,460,
+					 
+					 6,3,10, 22,18,26, 41,36,47, 
+					 69,61,78, 112,99,126, 185,162,211,  
+					 329,282,387, 672,553,825
+					 },
+					
+					60,30,600,
+					20,8,1,18.,
+					20,600};
+
+static vorbis_info_residue0 _residue_set0A={0,96,16,6,25,
 					    {0,1,1,1,1,1},
-					    {6,7,8,9,10},
+					    {27,28,29,30,31},
 					    
 					    {0,99999,9999,9999,9999},
 					    {999.f,1.5f,3.5f,15.5f,26.5f},
 					    {4,4,4,4,4},
 					    {99,99,99,99,99}};
 
-static vorbis_info_residue0 _residue_set1A={0, 960, 32,10,5,
+static vorbis_info_residue0 _residue_set1A={0, 960, 32,10,26,
 					    {0,1,1,1,1,1,1,1,1,1},
-					    {11,12,13,14,15,16,17,18,19},
+					    {32,33,34,35,36,37,38,39,40},
 					   
 					    {0,8,9999,16,9999,
 					     24,9999,9999,9999},
@@ -251,10 +323,8 @@ static vorbis_info_residue0 _residue_set1A={0, 960, 32,10,5,
 					    {5,5,5,5,5,5,5,5,5},
 					    {99,99,99,99,99,99,99,99,99}};
 
-static vorbis_info_mapping0 _mapping_set0A={1, {0,0}, {0}, {0}, {0}, {0},
-					    0,{0},{0}};
-static vorbis_info_mapping0 _mapping_set1A={1, {0,0}, {0}, {1}, {1}, {1},
-					    0,{0},{0}};
+static vorbis_info_mapping0 _mapping_set0A={1, {0,0}, {0}, {0}, {0}, {0}};
+static vorbis_info_mapping0 _mapping_set1A={1, {0,0}, {0}, {1}, {1}, {1}};
 static vorbis_info_mode _mode_set0A={0,0,0,0};
 static vorbis_info_mode _mode_set1A={1,0,0,1};
 
@@ -264,7 +334,7 @@ codec_setup_info info_A={
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   20,   2,
+  2,          2,    1,     2,       2,   41,   2,
   /* modes */
   {&_mode_set0A,&_mode_set1A},
   /* maps */
@@ -272,32 +342,56 @@ codec_setup_info info_A={
   /* times */
   {0,0},{&_time_set0A},
   /* floors */
-  {0,0},{&_floor_set0A,&_floor_set1A},
+  {1,1},{&_floor_set0A,&_floor_set1A},
   /* residue */
-  {0,0},{&_residue_set0A,&_residue_set1A},
+  {1,1},{&_residue_set0A,&_residue_set1A},
   /* books */
-  {&_vq_book_lsp12_0,       /* 0 */
-   &_vq_book_lsp12_1,       /* 1 */
-   &_vq_book_lsp30_0,      /* 2 */
-   &_vq_book_lsp30_1,      /* 3 */
+  {&_huff_book_line0_class0, /* 0 */
+   &_huff_book_line0_class1,
+   &_huff_book_line0_class2, /* 2 */
+   
+   &_huff_book_line0_0sub0,  /* 3 */
+   &_huff_book_line0_0sub1,
+   &_huff_book_line0_1sub1,  /* 5 */
+   &_huff_book_line0_1sub2,
+   &_huff_book_line0_1sub3,  /* 7 */
+   &_huff_book_line0_2sub1,
+   &_huff_book_line0_2sub2,  /* 9 */
+   &_huff_book_line0_2sub3, 
 
-   &_huff_book_res0_128_128aux,
+   &_huff_book_line1_class0,
+   &_huff_book_line1_class1, /* 12 */
+   &_huff_book_line1_class2,
+   &_huff_book_line1_class3, /* 14 */
+
+   &_huff_book_line1_0sub0,
+   &_huff_book_line1_0sub1, /* 16 */
+   &_huff_book_line1_1sub0, 
+   &_huff_book_line1_1sub1,
+   &_huff_book_line1_2sub1,  
+   &_huff_book_line1_2sub2, /* 20 */
+   &_huff_book_line1_2sub3, 
+   &_huff_book_line1_3sub1,
+   &_huff_book_line1_3sub2,
+   &_huff_book_line1_3sub3, /* 24 */
+
+   &_huff_book_res0_128_128aux, 
    &_huff_book_res0_128_1024aux,
 
-   &_vq_book_res0_128_128_1,
+   &_vq_book_res0_128_128_1, 
    &_vq_book_res0_128_128_2,
    &_vq_book_res0_128_128_3,
    &_vq_book_res0_128_128_4,
-   &_vq_book_res0_128_128_5,
+   &_vq_book_res0_128_128_5, 
 
    &_vq_book_res0_128_1024_1,
-   &_vq_book_res0_128_1024_2,
+   &_vq_book_res0_128_1024_2, 
    &_vq_book_res0_128_1024_3,
-   &_vq_book_res0_128_1024_4,
+   &_vq_book_res0_128_1024_4, 
    &_vq_book_res0_128_1024_5,
-   &_vq_book_res0_128_1024_6,
+   &_vq_book_res0_128_1024_6, 
    &_vq_book_res0_128_1024_7,
-   &_vq_book_res0_128_1024_8,
+   &_vq_book_res0_128_1024_8, 
    &_vq_book_res0_128_1024_9,
 
   },

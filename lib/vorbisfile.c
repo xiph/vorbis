@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.48 2001/06/02 11:38:14 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.46 2001/05/27 08:16:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -49,7 +49,7 @@
    information exists in an Ogg bitstream to seek to
    sample-granularity positions in the output.  Or, one can seek by
    picking some portion of the stream roughly in the desired area if
-   we only want coarse navigation through the stream. */
+   we only want course navigation through the stream. */
 
 /*************************************************************************
  * Many, many internal helpers.  The intention is not to be confusing; 
@@ -57,8 +57,7 @@
  * harder to understand anyway.  The high level functions are last.  Begin
  * grokking near the end of the file */
 
-/* read a little more data from the file/pipe into the ogg_sync framer
-*/
+/* read a little more data from the file/pipe into the ogg_sync framer */
 #define CHUNKSIZE 8500 /* a shade over 8k; anyone using pages well
                           over 8k gets what they deserve */
 static long _get_data(OggVorbis_File *vf){
@@ -590,14 +589,13 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
   if((ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,NULL))<0){
     vf->datasource=NULL;
     ov_clear(vf);
-  }else if(vf->ready_state < PARTOPEN)
+  }else
     vf->ready_state=PARTOPEN;
   return(ret);
 }
 
 static int _ov_open2(OggVorbis_File *vf){
-  if(vf->ready_state < OPENED)
-    vf->ready_state=OPENED;
+  vf->ready_state=OPENED;
   if(vf->seekable){
     int ret=_open_seekable2(vf);
     if(ret){
