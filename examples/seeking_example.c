@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.2 2000/05/08 20:49:42 xiphmont Exp $
+ last mod: $Id: seeking_example.c,v 1.3 2000/07/07 06:16:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,8 +37,9 @@ int main(){
     double length=ov_time_total(&ov,-1);
     printf("testing seeking to random places in %g seconds....\n",length);
     for(i=0;i<100;i++){
-      ov_time_seek(&ov,drand48()*length);
-      printf("\r\t%d...     ",i);
+      double val=(double)rand()/RAND_MAX*length;
+      ov_time_seek(&ov,val);
+      printf("\r\t%d [%gs]...     ",i,val);
       fflush(stdout);
     }
     

@@ -14,13 +14,22 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os_types.h,v 1.5 2000/06/19 22:55:49 xiphmont Exp $
+ last mod: $Id: os_types.h,v 1.6 2000/07/07 06:16:24 xiphmont Exp $
 
  ********************************************************************/
 
-#if defined (_WIN32) && !defined(__GNUC__)
+#if defined (_WIN32) 
+#if !defined(__GNUC__)
+
 typedef __int64 int64_t;
+typedef __int16 int16_t;
 #define vorbis_size32_t int
+#else
+#include <_G_config.h>
+pedef _G_int64_t int64_t;
+typedef _G_int32_t int32_t;
+typedef _G_int16_t int16_t;
+#endif
 #endif
 
 #ifdef __BEOS__

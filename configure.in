@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.17 2000/07/07 01:52:24 xiphmont Exp $
+# $Id: configure.in,v 1.18 2000/07/07 06:16:24 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -28,6 +28,7 @@ esac
 if test -z "$CC"; then
 	AC_PROG_CC	
 fi
+AC_PROG_CPP
 AC_PROG_RANLIB
 AC_CHECK_PROG(AR,ar,ar)
 AC_CHECK_PROG(INSTALL,install,install)
@@ -55,10 +56,51 @@ if test -z "$GCC"; then
         esac
 else
 
-# -D__NO_MATH_INLINES avoids some serious FP assembly related bugs in
-# glibc 2.0/2.1
-
 	case $host in 
+	*86-*-linux*)
+		DEBUG="-g -Wall -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
+		OPT="-O20 -ffast-math -D_REENTRANT -fsigned-char"
+		PROFILE="-pg -g -O20 -ffast-math -D_REENTRANT -fsigned-char"
+		
+		# glibc < 2.1.3 has a serious FP bug in the math inline header
+		# that will cripple Vorbis.  Look to see if the magic FP stack
+		# clobber is missing in the mathinline header, thus indicating
+		# the buggy version
+
+		AC_EGREP_CPP(log10.*fldlg2.*fxch,[
+				#define __LIBC_INTERNAL_MATH_INLINES 1
+			     	#define __OPTIMIZE__
+				#include <math.h>
+				],bad=maybe,bad=no)
+		if test ${bad} = "maybe" ;then
+		      AC_EGREP_CPP(log10.*fldlg2.*fxch.*st\([[0123456789]]*\),
+					[
+					#define __LIBC_INTERNAL_MATH_INLINES 1
+				     	#define __OPTIMIZE__
+					#include <math.h>
+					],bad=no,bad=yes)
+		fi
+ 		if test ${bad} = "yes" ;then
+ AC_MSG_WARN([                                                        ])
+ AC_MSG_WARN([********************************************************])
+ AC_MSG_WARN([* The glibc headers on this machine have a serious bug *])
+ AC_MSG_WARN([* in /usr/include/bits/mathinline.h  This bug affects  *])
+ AC_MSG_WARN([* all floating point code, not just Ogg, built on this *])
+ AC_MSG_WARN([* machine.  Upgrading to glibc 2.1.3 is strongly urged *])
+ AC_MSG_WARN([* to correct the problem.  Note that upgrading glibc   *])
+ AC_MSG_WARN([* will not fix any previously built programs; this is  *])
+ AC_MSG_WARN([* a compile-time time bug.                             *])
+ AC_MSG_WARN([* To work around the problem for this build of Ogg,    *])
+ AC_MSG_WARN([* autoconf is disabling all math inlining.  This will  *])
+ AC_MSG_WARN([* hurt Ogg performace but is necessary for an Ogg that *])
+ AC_MSG_WARN([* will actually work.  Once glibc is upgraded, rerun   *])
+ AC_MSG_WARN([* configure and make to build with inlining.           *])
+ AC_MSG_WARN([********************************************************])
+ AC_MSG_WARN([                                                        ])
+
+  		OPT=${OPT}" -D__NO_MATH_INLINES"
+  		PROFILE=${PROFILE}" -D__NO_MATH_INLINES"
+  		fi;;
 	*-*-linux*)
 		DEBUG="-g -Wall -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
 		OPT="-O20 -ffast-math -D_REENTRANT -fsigned-char"
