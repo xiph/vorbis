@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.34 2002/01/22 02:16:40 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.35 2002/01/22 02:19:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -78,25 +78,25 @@ static int vorbis_encode_toplevel_setup(vorbis_info *vi,int small,int large,int 
     /* time mapping hooks are unused in vorbis I */
     ci->times=1;
     ci->time_type[0]=0;
-    ci->time_param[0]=calloc(1,sizeof(_time_dummy));
+    ci->time_param[0]=_ogg_calloc(1,sizeof(_time_dummy));
     memcpy(ci->time_param[0],&_time_dummy,sizeof(_time_dummy));
 
     /* by convention, two modes: one for short, one for long blocks.
        short block mode uses mapping sero, long block uses mapping 1 */
     ci->modes=2;
-    ci->mode_param[0]=calloc(1,sizeof(_mode_set_short));
+    ci->mode_param[0]=_ogg_calloc(1,sizeof(_mode_set_short));
     memcpy(ci->mode_param[0],&_mode_set_short,sizeof(_mode_set_short));
-    ci->mode_param[1]=calloc(1,sizeof(_mode_set_long));
+    ci->mode_param[1]=_ogg_calloc(1,sizeof(_mode_set_long));
     memcpy(ci->mode_param[1],&_mode_set_long,sizeof(_mode_set_long));
 
     /* by convention two mappings, both mapping type zero (polyphonic
        PCM), first for short, second for long blocks */
     ci->maps=2;
     ci->map_type[0]=0;
-    ci->map_param[0]=calloc(1,sizeof(_mapping_set_short));
+    ci->map_param[0]=_ogg_calloc(1,sizeof(_mapping_set_short));
     memcpy(ci->map_param[0],&_mapping_set_short,sizeof(_mapping_set_short));
     ci->map_type[1]=0;
-    ci->map_param[1]=calloc(1,sizeof(_mapping_set_long));
+    ci->map_param[1]=_ogg_calloc(1,sizeof(_mapping_set_long));
     memcpy(ci->map_param[1],&_mapping_set_long,sizeof(_mapping_set_long));
 
     return(0);
@@ -109,7 +109,7 @@ static int vorbis_encode_floor_setup(vorbis_info *vi,double q,int block,
 				    vorbis_info_floor1 *in, 
 				    ...){
   int x[11],i,k,iq=rint(q*10);
-  vorbis_info_floor1 *f=calloc(1,sizeof(*f));
+  vorbis_info_floor1 *f=_ogg_calloc(1,sizeof(*f));
   codec_setup_info *ci=vi->codec_setup;
   va_list ap;
 
@@ -196,7 +196,7 @@ static int vorbis_encode_psyset_setup(vorbis_info *vi,int block){
   if(block>=ci->psys)
     ci->psys=block+1;
   if(!p){
-    p=calloc(1,sizeof(*p));
+    p=_ogg_calloc(1,sizeof(*p));
     ci->psy_param[block]=p;
   }
 
@@ -407,7 +407,7 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
     /* free preexisting instance */
     residue_free_info(ci->residue_param[block],ci->residue_type[block]);
 
-  r=ci->residue_param[block]=malloc(sizeof(*r));
+  r=ci->residue_param[block]=_ogg_malloc(sizeof(*r));
   memcpy(r,in[iq].res[block],sizeof(*r));
   if(ci->residues<=block)ci->residues=block+1;
 

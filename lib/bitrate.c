@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.9 2001/12/23 11:54:49 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.10 2002/01/22 02:19:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -154,14 +154,14 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
       }
       
       /* space for the packet queueing */
-      bm->queue_packet_buffers=calloc(maxpackets,sizeof(*bm->queue_packet_buffers));
-      bm->queue_packets=calloc(maxpackets,sizeof(*bm->queue_packets));
+      bm->queue_packet_buffers=_ogg_calloc(maxpackets,sizeof(*bm->queue_packet_buffers));
+      bm->queue_packets=_ogg_calloc(maxpackets,sizeof(*bm->queue_packets));
       for(i=0;i<maxpackets;i++)
 	oggpack_writeinit(bm->queue_packet_buffers+i);
       
     }else{
-      bm->queue_packet_buffers=calloc(1,sizeof(*bm->queue_packet_buffers));
-      bm->queue_packets=calloc(1,sizeof(*bm->queue_packets));
+      bm->queue_packet_buffers=_ogg_calloc(1,sizeof(*bm->queue_packet_buffers));
+      bm->queue_packets=_ogg_calloc(1,sizeof(*bm->queue_packets));
       oggpack_writeinit(bm->queue_packet_buffers);
     }      
   }
