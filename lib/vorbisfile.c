@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.48 2001/06/02 11:38:14 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.49 2001/09/13 02:17:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -260,7 +260,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
       i++;
     }
     if(i<3)
-      if(_get_next_page(vf,og_ptr,1)<0){
+      if(_get_next_page(vf,og_ptr,CHUNKSIZE)<0){
 	ret=OV_EBADHEADER;
 	goto bail_header;
       }
@@ -271,6 +271,8 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
   vorbis_info_clear(vi);
   vorbis_comment_clear(vc);
   ogg_stream_clear(&vf->os);
+  vf->ready_state=OPENED;
+
   return ret;
 }
 
@@ -477,11 +479,10 @@ static int _process_packet(OggVorbis_File *vf,int readp){
       }
     }
 
-    if(vf->ready_state>=STREAMSET){
+    if(vf->ready_state>=OPENED){
       if(!readp)return(0);
       if(_get_next_page(vf,&og,-1)<0)return(OV_EOF); /* eof. 
 							leave unitialized */
-      
       /* bitrate tracking; add the header's bytes here, the body bytes
 	 are done by packet above */
       vf->bittrack+=og.header_len*8;
@@ -538,7 +539,8 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	  /* we're streaming */
 	  /* fetch the three header packets, build the info struct */
 	  
-	  _fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,&og);
+	  int ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,&og);
+	  if(ret)return(ret);
 	  vf->current_link++;
 	  link=0;
 	}
@@ -1372,13 +1374,6 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
   int host_endian = host_is_big_endian();
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
-  if(vf->ready_state==OPENED)return(OV_EOF); /* stream is always
-						initialized after
-						other calls (after
-						open)... unless there
-						was no page at the end
-						to initialize state
-						with. */
 
   while(1){
     if(vf->ready_state>=STREAMSET){
@@ -1483,14 +1478,12 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
     }
 
     /* suck in another packet */
-    switch(_process_packet(vf,1)){
-    case 0:case OV_EOF:
-      return(0);
-    case OV_HOLE:
-      return(OV_HOLE);
-    case OV_EBADLINK:
-      return(OV_EBADLINK);
+    {
+      int ret=_process_packet(vf,1);
+      if(ret==OV_EOF)return(0);
+      if(ret<=0)return(ret);
     }
+
   }
 }
 
