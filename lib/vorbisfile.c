@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.59 2002/03/07 03:41:03 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.60 2002/03/19 17:49:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -515,8 +515,9 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 	         So, we need a previous granulepos from an in-sequence page
 	         to have a reference point.  Thus the !op_ptr->e_o_s clause
 	         above */
-	      
-	      granulepos-=vf->pcmlengths[link*2];
+
+	      if(vf->seekable && link>0)
+		granulepos-=vf->pcmlengths[link*2];
 	      if(granulepos<0)granulepos=0; /* actually, this
 					       shouldn't be possible
 					       here unless the stream
