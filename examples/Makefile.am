@@ -5,7 +5,7 @@ AUTOMAKE_OPTIONS = foreign
 INCLUDES = -I$(top_srcdir)/include
 
 noinst_PROGRAMS = decoder_example encoder_example chaining_example\
-		vorbisfile_example
+		vorbisfile_example seeking_example
 
 LDADD = $(top_srcdir)/lib/.libs/libvorbis.a
 
@@ -15,6 +15,8 @@ chaining_example_SOURCES = chaining_example.c
 chaining_example_LDADD = $(top_srcdir)/lib/.libs/libvorbisfile.a $(top_srcdir)/lib/.libs/libvorbis.a
 vorbisfile_example_SOURCES = vorbisfile_example.c
 vorbisfile_example_LDADD = $(top_srcdir)/lib/.libs/libvorbisfile.a $(top_srcdir)/lib/.libs/libvorbis.a
+seeking_example_SOURCES = seeking_example.c
+seeking_example_LDADD = $(top_srcdir)/lib/.libs/libvorbisfile.a $(top_srcdir)/lib/.libs/libvorbis.a
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"

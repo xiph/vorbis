@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.8 2000/10/12 03:12:41 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.9 2000/10/13 19:48:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -97,7 +97,9 @@ extern double ov_time_total(OggVorbis_File *vf,int i);
 
 extern int ov_raw_seek(OggVorbis_File *vf,long pos);
 extern int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos);
+extern int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos);
 extern int ov_time_seek(OggVorbis_File *vf,double pos);
+extern int ov_time_seek_page(OggVorbis_File *vf,double pos);
 
 extern ogg_int64_t ov_raw_tell(OggVorbis_File *vf);
 extern ogg_int64_t ov_pcm_tell(OggVorbis_File *vf);

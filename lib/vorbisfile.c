@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.29 2000/10/12 03:12:54 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.30 2000/10/13 19:48:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -813,11 +813,13 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
   return -1;
 }
 
-/* seek to a sample offset relative to the decompressed pcm stream 
+/* Page granularity seek (faster than sample granularity because we
+   don't do the last bit of decode to find a specific sample).
 
-   returns zero on success, nonzero on failure */
-
-int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
+   Seek to the last [granule marked] page preceeding the specified pos
+   location, such that decoding past the returned point will quickly
+   arrive at the requested position. */
+int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
   int link=-1;
   ogg_int64_t total=ov_pcm_total(vf,-1);
 
@@ -876,6 +878,20 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   /* verify result */
   if(vf->pcm_offset>=pos)goto seek_error;
   if(pos>ov_pcm_total(vf,-1))goto seek_error;
+  return(0);
+
+ seek_error:
+  /* dump machine so we're in a known state */
+  vf->pcm_offset=-1;
+  _decode_clear(vf);
+  return -1;
+}
+
+/* seek to a sample offset relative to the decompressed pcm stream 
+   returns zero on success, nonzero on failure */
+
+int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
+  if(ov_pcm_seek_page(vf,pos))return(-1);
 
   /* discard samples until we reach the desired position. Crossing a
      logical bitstream boundary with abandon is OK. */
@@ -893,12 +909,6 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
 	vf->pcm_offset=ov_pcm_total(vf,-1); /* eof */
   }
   return 0;
-  
- seek_error:
-  /* dump machine so we're in a known state */
-  vf->pcm_offset=-1;
-  _decode_clear(vf);
-  return -1;
 }
 
 /* seek to a playback time relative to the decompressed pcm stream 
@@ -924,6 +934,38 @@ int ov_time_seek(OggVorbis_File *vf,double seconds){
   {
     ogg_int64_t target=pcm_total+(seconds-time_total)*vf->vi[link].rate;
     return(ov_pcm_seek(vf,target));
+  }
+
+ seek_error:
+  /* dump machine so we're in a known state */
+  vf->pcm_offset=-1;
+  _decode_clear(vf);
+  return -1;
+}
+
+/* page-granularity version of ov_time_seek 
+   returns zero on success, nonzero on failure */
+int ov_time_seek_page(OggVorbis_File *vf,double seconds){
+  /* translate time to PCM position and call ov_pcm_seek */
+
+  int link=-1;
+  ogg_int64_t pcm_total=ov_pcm_total(vf,-1);
+  double time_total=ov_time_total(vf,-1);
+
+  if(!vf->seekable)return(-1); /* don't dump machine if we can't seek */  
+  if(seconds<0 || seconds>time_total)goto seek_error;
+  
+  /* which bitstream section does this time offset occur in? */
+  for(link=vf->links-1;link>=0;link--){
+    pcm_total-=vf->pcmlengths[link];
+    time_total-=ov_time_total(vf,link);
+    if(seconds>=time_total)break;
+  }
+
+  /* enough information to convert time offset to pcm offset */
+  {
+    ogg_int64_t target=pcm_total+(seconds-time_total)*vf->vi[link].rate;
+    return(ov_pcm_seek_page(vf,target));
   }
 
  seek_error:
