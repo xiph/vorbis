@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.78 2002/10/17 04:41:39 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.79 2002/10/17 04:56:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -630,10 +630,10 @@ static void bark_noise_hybridmp(int n,const long *b,
     lo = hi - fixed;
     
     tN = N[hi] + N[-lo];
-    tX = X[hi] + X[-lo];
+    tX = X[hi] - X[-lo];
     tXX = XX[hi] + XX[-lo];
     tY = Y[hi] + Y[-lo];
-    tXY = XY[hi] + XY[-lo];
+    tXY = XY[hi] - XY[-lo];
     
     
     A = tY * tXX - tX * tXY;
@@ -780,14 +780,14 @@ void _vp_noisemask(vorbis_look_psy *p,
     }
     
     if(seq&1)
-      _analysis_output("median2R",seq/2,work,n,1,0,0);
+      _analysis_output("medianR",seq/2,work,n,1,0,0);
     else
-      _analysis_output("median2L",seq/2,work,n,1,0,0);
+      _analysis_output("medianL",seq/2,work,n,1,0,0);
     
     if(seq&1)
-      _analysis_output("envelope2R",seq/2,work2,n,1,0,0);
+      _analysis_output("envelopeR",seq/2,work2,n,1,0,0);
     else
-      _analysis_output("envelope2L",seq/2,work2,n,1,0,0);
+      _analysis_output("enveloperL",seq/2,work2,n,1,0,0);
     seq++;
   }
 #endif
