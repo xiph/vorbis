@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.17 2000/12/13 18:12:34 giles Exp $
+ last mod: $Id: os.h,v 1.18 2000/12/17 08:47:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,7 +33,12 @@
 #  include <malloc.h>
 #  define rint(x)   (floor((x)+0.5)) 
 #endif
+
+#define STIN static
+#else
+#define STIN static inline
 #endif
+
 
 #ifdef _WIN32
 #  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
