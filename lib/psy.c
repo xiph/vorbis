@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.60 2001/12/19 01:08:14 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.61 2001/12/19 18:06:17 segher Exp $
 
  ********************************************************************/
 
@@ -693,7 +693,6 @@ static void bark_noise_hybridmp(int n,const long *b,
   double xa=0,xb=0;
   double ya=0,yb=0;
   double x2a=0,x2b=0;
-  double y2a=0,y2b=0;
   double xya=0,xyb=0; 
   double na=0,nb=0;
 
@@ -709,7 +708,6 @@ static void bark_noise_hybridmp(int n,const long *b,
 	xa  += hi*nn;
 	ya  += bin*nn;
 	x2a += hi*hi*nn;
-	y2a += bin*bin*nn;
 	xya += hi*bin*nn;
       }
       bi=b[i]>>16;
@@ -721,7 +719,6 @@ static void bark_noise_hybridmp(int n,const long *b,
 	xa  -= lo*nn;
 	ya  -= bin*nn;
 	x2a -= lo*lo*nn;
-	y2a -= bin*bin*nn;
 	xya -= lo*bin*nn;
       }
     }
@@ -738,7 +735,6 @@ static void bark_noise_hybridmp(int n,const long *b,
 	xb  += hif*nn;
 	yb  += bin*nn;
 	x2b += hif*hif*nn;
-	y2b += bin*bin*nn;
 	xyb += hif*bin*nn;
       }
       bi=i-(fixed+1)/2;
@@ -750,7 +746,6 @@ static void bark_noise_hybridmp(int n,const long *b,
 	xb  -= lof*nn;
 	yb  -= bin*nn;
 	x2b -= lof*lof*nn;
-	y2b -= bin*bin*nn;
 	xyb -= lof*bin*nn;
       }
     }
