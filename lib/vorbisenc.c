@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.39.2.9 2002/06/26 08:03:15 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.39.2.10 2002/06/28 04:19:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -424,7 +424,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
 				       vorbis_residue_template *res){
 
   codec_setup_info *ci=vi->codec_setup;
-  int i,n,k;
+  int i,n;
   
   vorbis_info_residue0 *r=ci->residue_param[number]=
     _ogg_malloc(sizeof(*r));

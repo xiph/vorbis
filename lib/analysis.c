@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.51.2.4 2002/06/20 03:55:27 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.51.2.5 2002/06/28 04:19:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -100,8 +100,9 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg
     /*  } */
 }
 
-void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
-  if(analysis_noisy)_analysis_output_always(base,i,v,n,bark,dB,0);
+void _analysis_output(char *base,int i,float *v,int n,int bark,int dB,
+		      ogg_int64_t off){
+  if(analysis_noisy)_analysis_output_always(base,i,v,n,bark,dB,off);
 }
 
 

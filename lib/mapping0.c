@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.49.2.8 2002/06/26 08:03:15 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.49.2.9 2002/06/28 04:19:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,8 +36,6 @@
    Why a lookup for each backend in a given mode?  Because the
    blocksize is set by the mode, and low backend lookups may require
    parameters from other areas of the mode/mapping */
-
-extern int analysis_noisy;
 
 static void mapping0_free_info(vorbis_info_mapping *i){
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)i;
@@ -159,10 +157,10 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "psy.h"
 #include "scales.h"
 
-/* no time mapping implementation for now */
+#if 0
 static long seq=0;
 static ogg_int64_t total=0;
-extern void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg_int64_t off);
+#endif 
 
 extern int *floor1_fit(vorbis_block *vb,vorbis_look_floor *look,
 		       const float *logmdct,   /* in */
@@ -199,7 +197,6 @@ static int mapping0_forward(vorbis_block *vb){
 
   vb->mode=modenumber;
 
-
   for(i=0;i<vi->channels;i++){
     float scale=4.f/n;
     float scale_dB;
@@ -214,9 +211,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
     if(vi->channels==2)
       if(i==0)
-	_analysis_output_always("pcmL",seq,pcm,n,0,0,total-n/2);
+	_analysis_output("pcmL",seq,pcm,n,0,0,total-n/2);
       else
-	_analysis_output_always("pcmR",seq,pcm,n,0,0,total-n/2);
+	_analysis_output("pcmR",seq,pcm,n,0,0,total-n/2);
 #endif
   
     /* window the PCM data */
@@ -225,9 +222,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
     if(vi->channels==2)
       if(i==0)
-	_analysis_output_always("windowedL",seq,pcm,n,0,0,total-n/2);
+	_analysis_output("windowedL",seq,pcm,n,0,0,total-n/2);
       else
-	_analysis_output_always("windowedR",seq,pcm,n,0,0,total-n/2);
+	_analysis_output("windowedR",seq,pcm,n,0,0,total-n/2);
 #endif
 
     /* transform the PCM data */
@@ -250,9 +247,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
     if(vi->channels==2)
       if(i==0)
-	_analysis_output_always("fftL",seq,logfft,n/2,1,0,0);
+	_analysis_output("fftL",seq,logfft,n/2,1,0,0);
       else
-	_analysis_output_always("fftR",seq,logfft,n/2,1,0,0);
+	_analysis_output("fftR",seq,logfft,n/2,1,0,0);
 #endif
 
   }
@@ -285,11 +282,11 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
       if(vi->channels==2){
 	if(i==0)
-	  _analysis_output_always("mdctL",seq,logmdct,n/2,1,0,0);
+	  _analysis_output("mdctL",seq,logmdct,n/2,1,0,0);
 	else
-	  _analysis_output_always("mdctR",seq,logmdct,n/2,1,0,0);
+	  _analysis_output("mdctR",seq,logmdct,n/2,1,0,0);
       }else{
-	_analysis_output_always("mdct",seq,logmdct,n/2,1,0,0);
+	_analysis_output("mdct",seq,logmdct,n/2,1,0,0);
       }
 #endif 
       
@@ -306,9 +303,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
       if(vi->channels==2){
 	if(i==0)
-	  _analysis_output_always("noiseL",seq,noise,n/2,1,0,0);
+	  _analysis_output("noiseL",seq,noise,n/2,1,0,0);
 	else
-	  _analysis_output_always("noiseR",seq,noise,n/2,1,0,0);
+	  _analysis_output("noiseR",seq,noise,n/2,1,0,0);
       }
 #endif
 
@@ -325,9 +322,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
       if(vi->channels==2){
 	if(i==0)
-	  _analysis_output_always("toneL",seq,tone,n/2,1,0,0);
+	  _analysis_output("toneL",seq,tone,n/2,1,0,0);
 	else
-	  _analysis_output_always("toneR",seq,tone,n/2,1,0,0);
+	  _analysis_output("toneR",seq,tone,n/2,1,0,0);
       }
 #endif
 
@@ -345,9 +342,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
       if(vi->channels==2){
 	if(i==0)
-	  _analysis_output_always("mask1L",seq,logmask,n/2,1,0,0);
+	  _analysis_output("mask1L",seq,logmask,n/2,1,0,0);
 	else
-	  _analysis_output_always("mask1R",seq,logmask,n/2,1,0,0);
+	  _analysis_output("mask1R",seq,logmask,n/2,1,0,0);
       }
 #endif
 
@@ -375,9 +372,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
 	if(vi->channels==2){
 	  if(i==0)
-	    _analysis_output_always("mask2L",seq,logmask,n/2,1,0,0);
+	    _analysis_output("mask2L",seq,logmask,n/2,1,0,0);
 	  else
-	    _analysis_output_always("mask2R",seq,logmask,n/2,1,0,0);
+	    _analysis_output("mask2R",seq,logmask,n/2,1,0,0);
 	}
 #endif
 	
@@ -396,9 +393,9 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
 	if(vi->channels==2)
 	  if(i==0)
-	    _analysis_output_always("mask0L",seq,logmask,n/2,1,0,0);
+	    _analysis_output("mask0L",seq,logmask,n/2,1,0,0);
 	  else
-	    _analysis_output_always("mask0R",seq,logmask,n/2,1,0,0);
+	    _analysis_output("mask0R",seq,logmask,n/2,1,0,0);
 #endif
 
 	floor_posts[i][0]=
@@ -494,11 +491,6 @@ static int mapping0_forward(vorbis_block *vb){
 				 ilogmask);
 #if 0
 	{
-
-
-
-
-
 	  static float FLOOR1_fromdB_LOOKUP[256]={
 	    1.0649863e-07F, 1.1341951e-07F, 1.2079015e-07F, 1.2863978e-07F, 
 	    1.3699951e-07F, 1.4590251e-07F, 1.5538408e-07F, 1.6548181e-07F, 
@@ -571,7 +563,7 @@ static int mapping0_forward(vorbis_block *vb){
 	  float work[n/2];
 	  for(j=0;j<n/2;j++)
 	    work[j]=FLOOR1_fromdB_LOOKUP[ilogmask[j]];
-	  _analysis_output_always(buf,seq,work,n/2,1,1,0);
+	  _analysis_output(buf,seq,work,n/2,1,1,0);
 	}
 #endif
 	_vp_remove_floor(psy_look,
@@ -585,7 +577,7 @@ static int mapping0_forward(vorbis_block *vb){
 	{
 	  char buf[80];
 	  sprintf(buf,"resI%d",k,i);
-	  _analysis_output_always(buf,seq,res,n/2,1,1,0);
+	  _analysis_output(buf,seq,res,n/2,1,1,0);
 	}
 #endif
       }
@@ -640,10 +632,12 @@ static int mapping0_forward(vorbis_block *vb){
       
     }
     
-    seq++;
-  } 
+  }
 
+#if 0
+  seq++;
   total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;
+#endif
   return(0);
 }
 

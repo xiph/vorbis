@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.20.4.5 2002/06/26 08:03:15 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.20.4.6 2002/06/28 04:19:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -76,10 +76,10 @@ static void floor1_free_info(vorbis_info_floor *i){
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
   if(look){
-    /*fprintf(stderr,"floor 1 bit usage %f:%f (%f total)\n",
+    fprintf(stderr,"floor 1 bit usage %f:%f (%f total)\n",
 	    (float)look->phrasebits/look->frames,
 	    (float)look->postbits/look->frames,
-	    (float)(look->postbits+look->phrasebits)/look->frames);*/
+	    (float)(look->postbits+look->phrasebits)/look->frames);
 
     memset(look,0,sizeof(*look));
     _ogg_free(look);
@@ -474,8 +474,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
   return(na);
 }
 
-/* returns < 0 on too few points to fit, >=0 (meansq error) on success */
-static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
+static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
   long x=0,y=0,x2=0,y2=0,xy=0,n=0,an=0,i;
   long x0=a[0].x0;
   long x1=a[fits-1].x1;
@@ -528,7 +527,6 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     if(*y0<0)*y0=0;
     if(*y1<0)*y1=0;
 
-    return(0);
   }
 }
 
@@ -620,7 +618,9 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
   int hineighbor[VIF_POSIT+2]; 
   int *output=NULL;
   int memo[VIF_POSIT+2];
-  
+
+  for(i=0;i<posts;i++)fit_valueA[i]=-200; /* mark all unused */
+  for(i=0;i<posts;i++)fit_valueB[i]=-200; /* mark all unused */
   for(i=0;i<posts;i++)loneighbor[i]=0; /* 0 for the implicit 0 post */
   for(i=0;i<posts;i++)hineighbor[i]=1; /* 1 for the implicit post at n */
   for(i=0;i<posts;i++)memo[i]=-1;      /* no neighbor yet */
@@ -640,116 +640,78 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
     /* start by fitting the implicit base case.... */
     int y0=-200;
     int y1=-200;
-    int mse=fit_line(fits,posts-1,&y0,&y1);
-    if(mse<0){
-      /* Only a single nonzero point */
-      y0=-200;
-      y1=0;
-      fit_line(fits,posts-1,&y0,&y1);
-    }
+    fit_line(fits,posts-1,&y0,&y1);
 
     fit_valueA[0]=y0;
     fit_valueB[0]=y0;
     fit_valueB[1]=y1;
     fit_valueA[1]=y1;
 
-    if(mse>=0){
-      /* Non degenerate case */
-      /* start progressive splitting.  This is a greedy, non-optimal
-	 algorithm, but simple and close enough to the best
-	 answer. */
-      for(i=2;i<posts;i++){
-	int sortpos=look->reverse_index[i];
-	int ln=loneighbor[sortpos];
-	int hn=hineighbor[sortpos];
-
-	/* eliminate repeat searches of a particular range with a memo */
-	if(memo[ln]!=hn){
-	  /* haven't performed this error search yet */
-	  int lsortpos=look->reverse_index[ln];
-	  int hsortpos=look->reverse_index[hn];
-	  memo[ln]=hn;
-
-	  {
-	    /* A note: we want to bound/minimize *local*, not global, error */
-	    int lx=info->postlist[ln];
-	    int hx=info->postlist[hn];	  
-	    int ly=post_Y(fit_valueA,fit_valueB,ln);
-	    int hy=post_Y(fit_valueA,fit_valueB,hn);
-	    
-	    if(inspect_error(lx,hx,ly,hy,logmask,logmdct,info)){
-	      /* outside error bounds/begin search area.  Split it. */
-	      int ly0=-200;
-	      int ly1=-200;
-	      int hy0=-200;
-	      int hy1=-200;
-	      int lmse=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-	      int hmse=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
-	      
-	      /* the boundary/sparsity cases are the hard part.  They
-                 don't happen often given that we use the full mask
-                 curve (weighted) now, but when they do happen they
-                 can go boom. Pay them detailed attention */
-	      /* cases for a segment:
-		 >=0) normal fit (>=2 unique points)
-		 -1) one point on x0;
-		 one point on x1; <-- disallowed by fit_line
-		 -2) one point in between x0 and x1
-		 -3) no points */
-
-	      switch(lmse){ 
-	      case -2:  
-		/* no points in the low segment */
-		break;
-	      case -1:
-		ly0=fits[lsortpos].edgey0;
-		break;
-		/*default:
-		  break;*/
-	      }
-
-	      switch(hmse){ 
-	      case -2:  
-		/* no points in the hi segment */
-		break;
-	      case -1:
-		hy0=fits[sortpos].edgey0;
-		break;
-	      }
-	      
-	      /* store new edge values */
-	      fit_valueB[ln]=ly0;
-	      if(ln==0 && ly0>=0)fit_valueA[ln]=ly0;
-	      fit_valueA[i]=ly1;
-	      fit_valueB[i]=hy0;
-	      fit_valueA[hn]=hy1;
-	      if(hn==1 && hy1>=0)fit_valueB[hn]=hy1;
-
-	      if(ly1>=0 || hy0>=0){
-		/* store new neighbor values */
-		for(j=sortpos-1;j>=0;j--)
-		  if(hineighbor[j]==hn)
-		    hineighbor[j]=i;
-		  else
-		    break;
-		for(j=sortpos+1;j<posts;j++)
-		  if(loneighbor[j]==ln)
-		    loneighbor[j]=i;
-		  else
-		    break;
+    /* Non degenerate case */
+    /* start progressive splitting.  This is a greedy, non-optimal
+       algorithm, but simple and close enough to the best
+       answer. */
+    for(i=2;i<posts;i++){
+      int sortpos=look->reverse_index[i];
+      int ln=loneighbor[sortpos];
+      int hn=hineighbor[sortpos];
+      
+      /* eliminate repeat searches of a particular range with a memo */
+      if(memo[ln]!=hn){
+	/* haven't performed this error search yet */
+	int lsortpos=look->reverse_index[ln];
+	int hsortpos=look->reverse_index[hn];
+	memo[ln]=hn;
 		
-	      }
-	    }else{
-	      fit_valueA[i]=-200;
-	      fit_valueB[i]=-200;
+	{
+	  /* A note: we want to bound/minimize *local*, not global, error */
+	  int lx=info->postlist[ln];
+	  int hx=info->postlist[hn];	  
+	  int ly=post_Y(fit_valueA,fit_valueB,ln);
+	  int hy=post_Y(fit_valueA,fit_valueB,hn);
+	  
+	  if(inspect_error(lx,hx,ly,hy,logmask,logmdct,info)){
+	    /* outside error bounds/begin search area.  Split it. */
+	    int ly0=-200;
+	    int ly1=-200;
+	    int hy0=-200;
+	    int hy1=-200;
+	    fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
+	    fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+	    
+	    /* store new edge values */
+	    fit_valueB[ln]=ly0;
+	    if(ln==0)fit_valueA[ln]=ly0;
+	    fit_valueA[i]=ly1;
+	    fit_valueB[i]=hy0;
+	    fit_valueA[hn]=hy1;
+	    if(hn==1)fit_valueB[hn]=hy1;
+	    
+	    if(ly1>=0 || hy0>=0){
+	      /* store new neighbor values */
+	      for(j=sortpos-1;j>=0;j--)
+		if(hineighbor[j]==hn)
+		  hineighbor[j]=i;
+		else
+		  break;
+	      for(j=sortpos+1;j<posts;j++)
+		if(loneighbor[j]==ln)
+		  loneighbor[j]=i;
+		else
+		  break;
+	      
 	    }
+	  }else{
+	    
+	    fit_valueA[i]=-200;
+	    fit_valueB[i]=-200;
 	  }
 	}
       }
     }
-    
+  
     output=_vorbis_block_alloc(vb,sizeof(*output)*posts);
-
+    
     output[0]=post_Y(fit_valueA,fit_valueB,0);
     output[1]=post_Y(fit_valueA,fit_valueB,1);
     
@@ -766,7 +728,7 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
       
       int predicted=render_point(x0,x1,y0,y1,info->postlist[i]);
       int vx=post_Y(fit_valueA,fit_valueB,i);
-	
+      
       if(vx>=0 && predicted!=vx){ 
 	output[i]=vx;
       }else{

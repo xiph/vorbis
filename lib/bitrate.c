@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.11.4.5 2002/06/26 08:03:15 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.11.4.6 2002/06/28 04:19:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -293,7 +293,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	/* apply the average floater to new blocks */
 	bin=rint(bm->avgfloat);
 
-	/*fprintf(stderr,"%d ",bin);*/
+	fprintf(stderr,"%d ",bin);
 
 	
 	while(bm->avg_centeracc>desired_center){

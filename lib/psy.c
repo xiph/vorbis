@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.10 2002/06/27 07:05:46 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.11 2002/06/28 04:19:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -711,9 +711,11 @@ void _vp_remove_floor(vorbis_look_psy *p,
  
   if(sliding_lowpass>n)sliding_lowpass=n;
   
-  for(i=0;i<sliding_lowpass;i++)
+  for(i=0;i<sliding_lowpass;i++){
     residue[i]=
       mdct[i]*FLOOR1_fromdB_INV_LOOKUP[codedflr[i]];
+  }
+
   for(;i<n;i++)
     residue[i]=0.;
 }
