@@ -24,6 +24,7 @@ vorbis_synthesis
 vorbis_synthesis_blockin
 vorbis_synthesis_pcmout
 vorbis_synthesis_read
+vorbis_packet_blocksize
 _vi_psy_copy
 _mapping_P
 _floor_P

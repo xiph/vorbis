@@ -1,7 +1,7 @@
 @echo off
 echo ---+++--- Building Vorbisfile (Static) ---+++---
 
-if .%SRCROOT%==. set SRCROOT=c:\src
+if .%SRCROOT%==. set SRCROOT=i:\xiph
 
 set OLDPATH=%PATH%
 set OLDINCLUDE=%INCLUDE%

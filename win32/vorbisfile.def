@@ -23,3 +23,6 @@ ov_time_tell
 ov_info
 ov_comment
 ov_read
+ov_test
+ov_test_callbacks
+ov_test_open
