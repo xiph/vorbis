@@ -6,7 +6,7 @@
 Ogg Vorbis I format specification: floor type 1 setup and decode
 </font></h1>
 
-<em>Last update to this document: August 8, 2002</em><br>
+<em>Last update to this document: September 10, 2002</em><br>
 
 <h1>Overview</h1>
 
@@ -185,23 +185,24 @@ Assuming <tt>[nonzero]</tt> is set, decode proceeds as follows:<p>
       13) iterate [j] over the range 0 ... [cdim]-1 {
        
              14) [book] = array [floor1_subclass_books] element [class],([cval] bitwise AND [csub])
-	     15) if ( [book] is not less than zero ) {
+             15) [cval] = [cval] right shifted [cbits] bits
+	     16) if ( [book] is not less than zero ) {
 	     
-	           16) vector [floor1_Y] element ([j]+[offset]) = read from packet using codebook 
+	           17) vector [floor1_Y] element ([j]+[offset]) = read from packet using codebook 
                        [book] in scalar context
 
                  } else [book] is less than zero {
 
-	           17) vector [floor1_Y] element ([j]+[offset]) = 0
+	           18) vector [floor1_Y] element ([j]+[offset]) = 0
 
                  }
           }
              
-      18) [offset] = [offset] + [cdim]
+      19) [offset] = [offset] + [cdim]
          
      }
   
- 19) done
+ 20) done
 </pre>
 
 An end-of-packet condition during curve decode should be considered a
@@ -235,57 +236,61 @@ Unwrap the always-positive-or-zero values read from the packet into
 
 <pre>
   1) [range] = vector { 256, 128, 86, 64 } element ([floor1_multiplier]-1)
-  2) iterate [i] over the range 2 ... [floor1_values]-1 {
+  2) vector [floor1_step2_flag] element [0] = set
+  3) vector [floor1_step2_flag] element [1] = set
+  4) vector [floor1_final_Y] element [0] = vector [floor1_Y] element [0]
+  5) vector [floor1_final_Y] element [1] = vector [floor1_Y] element [1]
+  6) iterate [i] over the range 2 ... [floor1_values]-1 {
     
-       3) [low_neighbor_offset] = <a href="helper.html#low_neighbor">low_neighbor</a>([floor1_X_list],[i])
-       4) [high_neighbor_offset] = <a href="helper.html#high_neighbor">high_neighbor</a>([floor1_X_list],[i])
+       7) [low_neighbor_offset] = <a href="helper.html#low_neighbor">low_neighbor</a>([floor1_X_list],[i])
+       8) [high_neighbor_offset] = <a href="helper.html#high_neighbor">high_neighbor</a>([floor1_X_list],[i])
 
-       5) [predicted] = <a href="helper.html#render_point">render_point</a>( vector [floor1_X_list] element [low_neighbor_offset],
+       9) [predicted] = <a href="helper.html#render_point">render_point</a>( vector [floor1_X_list] element [low_neighbor_offset],
                                       vector [floor1_X_list] element [high_neighbor_offset],
-				      vector [floor1_Y] element [low_neighbor_offset],
-				      vector [floor1_Y] element [high_neighbor_offset],
+				      vector [floor1_final_Y] element [low_neighbor_offset],
+				      vector [floor1_final_Y] element [high_neighbor_offset],
                                       vector [floor1_X_list] element [i] )
 
-       6) [val] = vector [floor1_Y] element [i]
-       7) [highroom] = [range] - [predicted]
-       8) [lowroom]  = [predicted]
-       9) if ( [highroom] is less than [lowroom] ) {
+      10) [val] = vector [floor1_Y] element [i]
+      11) [highroom] = [range] - [predicted]
+      12) [lowroom]  = [predicted]
+      13) if ( [highroom] is less than [lowroom] ) {
 
-            10) [room] = [highroom] * 2
+            14) [room] = [highroom] * 2
          
           } else [highroom] is not less than [lowroom] {
 		      
-            11) [root] = [lowroom] * 2
+            15) [root] = [lowroom] * 2
         
           }
 
-      12) if ( [val] is nonzero ) {
+      16) if ( [val] is nonzero ) {
 
-            13) vector [floor1_step2_flag] element [low_neighbor_offset] = set
-            14) vector [floor1_step2_flag] element [high_neighbor_offset] = set
-            15) vector [floor1_step2_flag] element [i] = set
-            16) if ( [val] is greater than or equal to [room] ) {
+            17) vector [floor1_step2_flag] element [low_neighbor_offset] = set
+            18) vector [floor1_step2_flag] element [high_neighbor_offset] = set
+            19) vector [floor1_step2_flag] element [i] = set
+            20) if ( [val] is greater than or equal to [room] ) {
  
-                  17) if ( [hiroom] is greater than [lowroom] ) {
+                  21) if ( [hiroom] is greater than [lowroom] ) {
 
-                        18) vector [floor1_final_Y] element [i] = [val] - [lowroom] + [predicted]
+                        22) vector [floor1_final_Y] element [i] = [val] - [lowroom] + [predicted]
 		     
 		      } else [hiroom] is not greater than [lowroom] {
               
-                        19) vector [floor1_final_Y] element [i] = [predicted] - ([val] - [lowroom]) - 1
+                        23) vector [floor1_final_Y] element [i] = [predicted] - ([val] - [lowroom]) - 1
                    
                       }
                
                 } else [val] is less than [room] {
 		 
-		  20) if ([val] is odd) {
+		  24) if ([val] is odd) {
                  
-                        21) vector [floor1_final_Y] element [i] = 
+                        25) vector [floor1_final_Y] element [i] = 
                             [predicted] - (([val] - 1) divided by  2 using integer division)
 
                       } else [val] is even {
 
-                        22) vector [floor1_final_Y] element [i] = 
+                        26) vector [floor1_final_Y] element [i] = 
                             [predicted] + ([val] / 2 using integer division)
                           
                       }
@@ -294,17 +299,13 @@ Unwrap the always-positive-or-zero values read from the packet into
 
           } else [val] is zero {
 
-            23) vector [floor1_step2_flag] element [i] = unset
-            24) vector [floor1_final_Y] element [i] = [predicted]
+            27) vector [floor1_step2_flag] element [i] = unset
+            28) vector [floor1_final_Y] element [i] = [predicted]
 
           }
 
      }
 
- 25) vector [floor1_step2_flag] element [0] = set
- 26) vector [floor1_step2_flag] element [1] = set
- 27) vector [floor1_final_Y] element [0] = vector [floor1_Y] element [0]
- 28) vector [floor1_final_Y] element [1] = vector [floor1_Y] element [1]
  29) done
 
 </pre>
