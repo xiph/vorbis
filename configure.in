@@ -1,12 +1,9 @@
-# $Id: configure.in,v 1.20.2.3.2.1 2000/09/03 08:34:51 jack Exp $
+# $Id: configure.in,v 1.20.2.3.2.2 2000/09/07 01:25:44 jack Exp $
 
 AC_INIT(lib/mdct.c)
 
 dnl Do some additional argument setup
 AC_ARG_WITH(ogg, [  --with-ogg=DIR          Set where the Ogg library is located]) 
-
-cp configure.guess config.guess
-cp configure.sub config.sub
 
 AC_CANONICAL_HOST
 
