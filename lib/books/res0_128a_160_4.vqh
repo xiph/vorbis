@@ -17,7 +17,7 @@
 
 #ifndef _V_res0_128a_160_4_VQH_
 #define _V_res0_128a_160_4_VQH_
-#include "vorbis/codebook.h"
+#include "codebook.h"
 
 static long _vq_quantlist_res0_128a_160_4[] = {
 	4,

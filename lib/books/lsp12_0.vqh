@@ -17,7 +17,7 @@
 
 #ifndef _V_lsp12_0_VQH_
 #define _V_lsp12_0_VQH_
-#include "vorbis/codebook.h"
+#include "codebook.h"
 
 static long _vq_quantlist_lsp12_0[] = {
 	0,

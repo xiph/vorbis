@@ -17,7 +17,7 @@
 
 #ifndef _V_resaux0_1024a_350_VQH_
 #define _V_resaux0_1024a_350_VQH_
-#include "vorbis/codebook.h"
+#include "codebook.h"
 
 static long _huff_lengthlist_resaux0_1024a_350[] = {
 	 6,17,20,20,19,17,18,16,18,19,19,19,16,16,19,19,

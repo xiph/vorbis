@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.17.2.2 2000/11/03 10:06:07 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.17.2.3 2000/11/03 10:47:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -556,7 +556,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
  " ********************************************************************/\n\n");
 
   fprintf(out,"#ifndef _V_%s_VQH_\n#define _V_%s_VQH_\n",name,name);
-  fprintf(out,"#include \"vorbis/codebook.h\"\n\n");
+  fprintf(out,"#include \"codebook.h\"\n\n");
 
   /* first, the static vectors, then the book structure to tie it together. */
   /* quantlist */

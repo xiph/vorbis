@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.5.2.2 2000/11/03 10:06:08 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.5.2.3 2000/11/03 10:47:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
  " ********************************************************************/\n\n");
 
     fprintf(file,"#ifndef _V_%s_VQH_\n#define _V_%s_VQH_\n",base,base);
-    fprintf(file,"#include \"vorbis/codebook.h\"\n\n");
+    fprintf(file,"#include \"codebook.h\"\n\n");
     
     /* first, the static vectors, then the book structure to tie it together. */
     /* lengthlist */

@@ -17,7 +17,7 @@
 
 #ifndef _V_resaux0_1024a_256_VQH_
 #define _V_resaux0_1024a_256_VQH_
-#include "vorbis/codebook.h"
+#include "codebook.h"
 
 static long _huff_lengthlist_resaux0_1024a_256[] = {
 	 3, 9,12,12,13,16, 9, 9,13,14,16,17,11,15,17,18,
