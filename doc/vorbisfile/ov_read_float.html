@@ -64,7 +64,7 @@ functions.</dd>
 <dt>0</dt>
   <dd>indicates EOF</dd>
 <dt><i>n</i></dt>
-  <dd>indicates actual number of bytes read.  <tt>ov_read()</tt> will
+  <dd>indicates actual number of samples read.  <tt>ov_read_float()</tt> will
       decode at most one vorbis packet per invocation, so the value
       returned will generally be less than <tt>length</tt>.
 </dl>
@@ -74,7 +74,7 @@ functions.</dd>
 <p><b>Typical usage:</b>
 <blockquote>
 <tt>float **pcm;
-bytes_read = ov_read_float(&amp;vf,pcm, 1024, &amp;current_section)</tt>
+samples_read = ov_read_float(&amp;vf,pcm, 1024, &amp;current_section)</tt>
 </blockquote>
 
 This decodes up to 1024 float samples.
