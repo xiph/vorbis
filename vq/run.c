@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.5 2000/01/05 15:04:59 xiphmont Exp $
+ last mod: $Id: run.c,v 1.6 2000/01/07 12:11:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,16 +36,18 @@
 
  */
 
-extern void process_preprocess(codebook *b,char *basename);
-extern void process_postprocess(codebook *b,char *basename);
-extern void process_vector(codebook *b,double *a);
+extern void process_preprocess(codebook **b,char *basename);
+extern void process_postprocess(codebook **b,char *basename);
+extern void process_vector(codebook **b,double *a);
 extern void process_usage(void);
 
 int main(int argc,char *argv[]){
   char *name;
   char *basename;
   double *a=NULL;
-  codebook *b=NULL;
+  codebook **b=calloc(1,sizeof(codebook *));
+  int books=0;
+  int input=0;
   argv++;
 
   if(*argv==NULL){
@@ -53,34 +55,69 @@ int main(int argc,char *argv[]){
     exit(1);
   }
 
-  name=strdup(*argv);
-  b=codebook_load(name);
-  a=alloca(sizeof(double)*b->dim);
-  argv=argv++;
+  /* yes, this is evil.  However, it's very convenient to parse file
+     extentions */
 
-  {
-    char *dot;
-    basename=strrchr(name,'/');
-    if(basename)
-      basename=strdup(basename);
-    else
-      basename=strdup(name);
-    dot=strchr(basename,'.');
-    if(dot)*dot='\0';
-  }
-
-  process_preprocess(b,basename);
-  
   while(*argv){
-    /* only input files */
-    char *file=strdup(*argv++);
-    FILE *in=fopen(file,"r");
-    reset_next_value();
+    if(*argv[0]=='-'){
+      /* option */
 
-    while(get_vector(b,in,a)!=-1)
-      process_vector(b,a);
 
-    fclose(in);
+
+    }else{
+      /* input file.  What kind? */
+      char *dot;
+      char *ext=NULL;
+      char *name=strdup(*argv++);
+      dot=strchr(name,'.');
+      if(dot)
+	ext=dot+1;
+      else
+	ext="";
+
+      /* codebook */
+      if(!strcmp(ext,"vqh")){
+	if(input){
+	  fprintf(stderr,"specify all input data (.vqd) files following\n"
+		  "codebook header (.vqh) files\n");
+	  exit(1);
+	}
+
+	basename=strrchr(name,'/');
+	if(basename)
+	  basename=strdup(basename);
+	else
+	  basename=strdup(name);
+	dot=strchr(basename,'.');
+	if(dot)*dot='\0';
+
+	b=realloc(b,sizeof(codebook *)*(books+2));
+	b[books++]=codebook_load(name);
+	b[books]=NULL;
+	if(!a)a=malloc(sizeof(double)*b[books-1]->dim);
+      }
+
+      /* data file */
+      if(!strcmp(ext,"vqd")){
+	FILE *in=fopen(name,"r");
+	if(!in){
+	  fprintf(stderr,"Could not open input file %s\n",name);
+	  exit(1);
+	}
+
+	if(!input){
+	  process_preprocess(b,basename);
+	  input++;
+	}
+
+	reset_next_value();
+
+	while(get_vector(*b,in,a)!=-1)
+	  process_vector(b,a);
+
+	fclose(in);
+      }
+    }
   }
 
   /* take any data from stdin */
@@ -91,8 +128,13 @@ int main(int argc,char *argv[]){
       exit(1);
     }
     if((S_IFIFO|S_IFREG|S_IFSOCK)&st.st_mode){
+      if(!input){
+	process_preprocess(b,basename);
+	input++;
+      }
+      
       reset_next_value();
-      while(get_vector(b,stdin,a)!=-1)
+      while(get_vector(*b,stdin,a)!=-1)
 	process_vector(b,a);
     }
   }

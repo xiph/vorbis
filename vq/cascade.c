@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.3 2000/01/06 13:57:12 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.4 2000/01/07 12:11:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,28 +26,52 @@
 /* set up metrics */
 
 double count=0.;
+int dim=-1;
+double *work=NULL;
 
-void process_preprocess(codebook *b,char *basename){
+void process_preprocess(codebook **bs,char *basename){
+  while(*bs){
+    codebook *b=*bs;
+    if(dim==-1){
+      dim=b->dim;
+      work=malloc(sizeof(double)*dim);
+    }else{
+      if(dim!=b->dim){
+	fprintf(stderr,"Each codebook in a cascade must have the same dimensional order\n");
+	exit(1);
+      }
+    }
+    bs++;
+  }
 }
-void process_postprocess(codebook *b,char *basename){
+
+void process_postprocess(codebook **b,char *basename){
   fprintf(stderr,"Done.                      \n");
 }
 
-void process_vector(codebook *b,double *a){
-  int entry=codebook_entry(b,a);
-  double *e=b->valuelist+b->dim*entry;
+void process_vector(codebook **bs,double *a){
   int i;
+  memcpy(work,a,dim*sizeof(double));
 
-  for(i=0;i<b->dim;i++)
-    fprintf(stdout,"%f, ",a[i]-e[i]);
+  while(*bs){
+    codebook *b=*bs;
+    int entry=codebook_entry(b,work);
+    double *e=b->valuelist+b->dim*entry;
+
+    for(i=0;i<b->dim;i++)work[i]-=e[i];
+    bs++;
+  }
+
+  for(i=0;i<dim;i++)
+    fprintf(stdout,"%f, ",work[i]);
   fprintf(stdout,"\n");
-
+  
   if((long)(count++)%100)spinnit("working.... lines: ",count);
 }
 
 void process_usage(void){
   fprintf(stderr,
-	  "usage: vqcascade <codebook>.vqh datafile.vqd [datafile.vqd]...\n\n"
+	  "usage: vqcascade book.vqh [book.vqh]... datafile.vqd [datafile.vqd]...\n\n"
 	  "       data can be taken on stdin.  residual error data sent to\n"
 	  "       stdout.\n\n");
 

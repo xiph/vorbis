@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do data partitioning
- last mod: $Id: partition.c,v 1.1 2000/01/06 13:57:13 xiphmont Exp $
+ last mod: $Id: partition.c,v 1.2 2000/01/07 12:11:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,12 +27,22 @@
 FILE **out;
 long count;
 
-void process_preprocess(codebook *b,char *basename){
+void process_preprocess(codebook **b,char *basename){
   int i;
   char *buffer=alloca(strlen(basename)+80);
+  codebook *b0=*b;
 
-  out=malloc(sizeof(FILE *)*b->entries);
-  for(i=0;i<b->entries;i++){
+  if(!b0){
+    fprintf(stderr,"Specify at least one codebook, binky.\n");
+    exit(1);
+  }
+  if(b[1]){
+    fprintf(stderr,"Ignoring all but first codebook\n");
+    exit(1);
+  }
+
+  out=malloc(sizeof(FILE *)*b0->entries);
+  for(i=0;i<b0->entries;i++){
     sprintf(buffer,"%s-%dp.vqd",basename,i);
     out[i]=fopen(buffer,"w");
     if(out[i]==NULL){
@@ -42,19 +52,21 @@ void process_preprocess(codebook *b,char *basename){
   }
 }
 
-void process_postprocess(codebook *b,char *basename){
+void process_postprocess(codebook **b,char *basename){
+  codebook *b0=*b;
   int i;
-  for(i=0;i<b->entries;i++)
+  for(i=0;i<b0->entries;i++)
     fclose(out[i]);
   fprintf(stderr,"Done.                      \n");
 }
 
 /* just redirect this entry to the appropriate partition file */
-void process_vector(codebook *b,double *a){
-  int entry=codebook_entry(b,a);
+void process_vector(codebook **b,double *a){
+  codebook *b0=*b;
+  int entry=codebook_entry(b0,a);
   int i;
 
-  for(i=0;i<b->dim;i++)
+  for(i=0;i<b0->dim;i++)
     fprintf(out[entry],"%f, ",a[i]);
   fprintf(out[entry],"\n");
   if(count++%100)spinnit("working.... lines: ",count);
@@ -62,7 +74,7 @@ void process_vector(codebook *b,double *a){
 
 void process_usage(void){
   fprintf(stderr,
-	  "usage: vqpartition <codebook>.vqh datafile.vqd [datafile.vqd]...\n\n"
+	  "usage: vqpartition codebook.vqh datafile.vqd [datafile.vqd]...\n\n"
 	  "       data can be taken on stdin.  partitioning data is written to\n"
   
 	  "       files named <basename>-<n>p.vqh.\n\n");
