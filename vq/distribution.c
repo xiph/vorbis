@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.1.2.1 2000/12/30 03:00:49 xiphmont Exp $
+ last mod: $Id: distribution.c,v 1.1.2.2 2000/12/30 06:30:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,6 +27,10 @@
    distribution file.vqd
 */
 
+int ascend(const void *a,const void *b){
+  return(*((long *)a)-*((long *)b));
+}
+
 int main(int argc,char *argv[]){
   FILE *in;
   long lines=0;
@@ -39,7 +43,7 @@ int main(int argc,char *argv[]){
   char *line;
 
   if(argv[1]==NULL){
-    fprintf(stderr,"Usage: distribution file.vqd [bins]\n\n");
+    fprintf(stderr,"Usage: distribution {data.vqd [bins]| book.vqh} \n\n");
     exit(1);
   }
   if(argv[2]!=NULL)
@@ -51,78 +55,166 @@ int main(int argc,char *argv[]){
     exit(1);
   }
 
-  /* do it the simple way; two pass. */
-  line=setup_line(in);
-  while(line){      
-    float code;
-    lines++;
-    if(!(lines&0xff))spinnit("getting min/max. lines so far...",lines);
-    
-    while(!flag && sscanf(line,"%f",&code)==1){
-      line=strchr(line,',');
-      min=max=code;
-      flag=1;
+  if(strrchr(argv[1],'.') && strcmp(strrchr(argv[1],'.'),".vqh")==0){
+    /* load/decode a book */
+
+    codebook *b=codebook_load(argv[1]);
+    static_codebook *c=(static_codebook *)(b->c);
+    float delta;
+    int i;
+    fclose(in);
+
+    switch(c->maptype){
+    case 0:
+      printf("entropy codebook only; no mappings\n");
+      exit(0);
+      break;
+    case 1:
+      bins=_book_maptype1_quantvals(c);
+      break;
+    case 2:
+      bins=c->entries*c->dim;
+      break;
     }
 
-    while(sscanf(line,"%f",&code)==1){
-      line=strchr(line,',');
-      if(code<min)min=code;
-      if(code>max)max=code;
+    max=min=_float32_unpack(c->q_min);
+    delta=_float32_unpack(c->q_delta);
+
+    for(i=0;i<bins;i++){
+      float val=c->quantlist[i]*delta+min;
+      if(val>max)max=val;
     }
-    
+
+    printf("Minimum scalar value: %f\n",min);
+    printf("Maximum scalar value: %f\n",max);
+
+    switch(c->maptype){
+    case 1:
+      {
+	/* lattice codebook.  dump it. */
+	int j,k;
+	long maxcount=0;
+	long **sort=calloc(bins,sizeof(long *));
+	long base=c->lengthlist[0];
+	countarray=calloc(bins,sizeof(long));
+
+	for(i=0;i<bins;i++)sort[i]=countarray+i;
+	qsort(sort,bins,sizeof(long *),ascend);
+
+	for(i=0;i<b->entries;i++)
+	  if(c->lengthlist[i]>base)base=c->lengthlist[i];
+	
+	/* do a rough count */
+	for(j=0;j<b->entries;j++){
+	  int indexdiv=1;
+	  for(k=0;k<b->dim;k++){
+	    if(c->lengthlist[j]){
+	      int index= (j/indexdiv)%bins;
+	      countarray[index]+=(1<<(base-c->lengthlist[j]));
+	      indexdiv*=bins;
+	    }
+	  }
+	}
+
+	/* dump the count */
+
+	{
+	  long maxcount=0,i,j;
+	  for(i=0;i<bins;i++)
+	    if(countarray[i]>maxcount)maxcount=countarray[i];
+      
+	  for(i=0;i<bins;i++){
+	    int ptr=sort[i]-countarray;
+	    int stars=rint(50./maxcount*countarray[ptr]);
+	    printf("%08f (%8ld) |",c->quantlist[ptr]*delta+min,countarray[ptr]);
+	    for(j=0;j<stars;j++)printf("*");
+	    printf("\n");
+	  }
+	}
+      }
+      break;
+    case 2:
+      {
+	/* trained, full mapping codebook. */
+	printf("Can't do probability dump of a trained [type 2] codebook (yet)\n");
+      }
+      break;
+    }
+  }else{
+    /* load/count a data file */
+
+    /* do it the simple way; two pass. */
     line=setup_line(in);
-  }
-
-  if(bins<1){
-    if((int)(max-min)==min-max){
-      bins=max-min;
-    }else{
-      bins=25;
-    }
-  }
-
-  printf("\r                                                     \r");
-  printf("Minimum scalar value: %f\n",min);
-  printf("Maximum scalar value: %f\n",max);
-
-  printf("\n counting hits into %d bins...\n",bins+1);
-  countarray=calloc(bins+1,sizeof(long));
-
-  rewind(in);
-  line=setup_line(in);
-  while(line){      
-    float code;
-    lines--;
-    if(!(lines&0xff))spinnit("counting distribution. lines so far...",lines);
-    
-    while(sscanf(line,"%f",&code)==1){
-      line=strchr(line,',');
-
-      code-=min;
-      code/=(max-min);
-      code*=bins;
-      countarray[(int)rint(code)]++;
-      total++;
+    while(line){      
+      float code;
+      lines++;
+      if(!(lines&0xff))spinnit("getting min/max. lines so far...",lines);
+      
+      while(!flag && sscanf(line,"%f",&code)==1){
+	line=strchr(line,',');
+	min=max=code;
+	flag=1;
+      }
+      
+      while(sscanf(line,"%f",&code)==1){
+	line=strchr(line,',');
+	if(code<min)min=code;
+	if(code>max)max=code;
+      }
+      
+      line=setup_line(in);
     }
     
-    line=setup_line(in);
-  }
-
-
-  fclose(in);
-
-  /* make a pretty graph */
-  {
-    long maxcount=0,i,j;
-    for(i=0;i<bins+1;i++)
-      if(countarray[i]>maxcount)maxcount=countarray[i];
-
+    if(bins<1){
+      if((int)(max-min)==min-max){
+	bins=max-min;
+      }else{
+	bins=25;
+      }
+    }
+    
     printf("\r                                                     \r");
-    for(i=0;i<bins+1;i++){
-      int stars=rint(50./maxcount*countarray[i]);
-      printf("%08f (%8ld) |",(max-min)/bins*i+min,countarray[i]);
-      for(j=0;j<stars;j++)printf("*");
+    printf("Minimum scalar value: %f\n",min);
+    printf("Maximum scalar value: %f\n",max);
+    
+    printf("\n counting hits into %d bins...\n",bins+1);
+    countarray=calloc(bins+1,sizeof(long));
+    
+    rewind(in);
+    line=setup_line(in);
+    while(line){      
+      float code;
+      lines--;
+      if(!(lines&0xff))spinnit("counting distribution. lines so far...",lines);
+      
+      while(sscanf(line,"%f",&code)==1){
+	line=strchr(line,',');
+	
+	code-=min;
+	code/=(max-min);
+	code*=bins;
+	countarray[(int)rint(code)]++;
+	total++;
+      }
+      
+      line=setup_line(in);
+    }
+
+    fclose(in);
+    
+    /* make a pretty graph */
+    {
+      long maxcount=0,i,j;
+      for(i=0;i<bins+1;i++)
+	if(countarray[i]>maxcount)maxcount=countarray[i];
+      
+      printf("\r                                                     \r");
+      for(i=0;i<bins+1;i++){
+	int stars=rint(50./maxcount*countarray[i]);
+	printf("%08f (%8ld) |",(max-min)/bins*i+min,countarray[i]);
+	for(j=0;j<stars;j++)printf("*");
       printf("\n");
+      }
     }
   }
   printf("\nDone.\n");
