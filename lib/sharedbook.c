@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.6 2000/07/17 12:55:37 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.7 2000/07/19 18:10:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -387,9 +387,9 @@ int _best(codebook *book, double *a, int step){
       }
     }
 
-    /* must be within the pigeonholable range; if we quant outside,
-       the search lists are inaccurate at the boundaries */
-    if(k==dim){
+    /* must be within the pigeonholable range; if we quant outside (or
+       in an entry that we define no list for), brute force it */
+    if(k==dim && pt->fitlength[entry]){
       /* search the abbreviated list */
       long *list=pt->fitlist+pt->fitmap[entry];
       for(i=0;i<pt->fitlength[entry];i++){
