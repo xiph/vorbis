@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.13 2002/07/01 11:20:19 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.14 2002/07/02 04:25:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -247,7 +247,6 @@ static vorbis_residue_template _res_44s_9[]={
    &_huff_book__44c9_s_long,&_huff_book__44c9_sm_long,
    &_resbook_44s_9,&_resbook_44s_9}
 };
-
 
 static vorbis_mapping_template _mapres_template_44_stereo[]={
   { _map_nominal, _res_44s_0 }, /* 0 */

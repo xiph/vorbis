@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.45 2002/07/01 21:56:46 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.46 2002/07/02 04:25:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -142,12 +142,24 @@ typedef struct {
 
 #include "modes/setup_44.h"
 #include "modes/setup_44u.h"
+#include "modes/setup_32.h"
+#include "modes/setup_X.h"
 
 static ve_setup_data_template *setup_list[]={
   &ve_setup_44_stereo,
   &ve_setup_44_stereo_low,
   &ve_setup_44_uncoupled,
   &ve_setup_44_uncoupled_low,
+
+  &ve_setup_32_stereo,
+  &ve_setup_32_stereo_low,
+  &ve_setup_32_uncoupled,
+  &ve_setup_32_uncoupled_low,
+
+  &ve_setup_X_stereo,
+  &ve_setup_X_uncoupled,
+  &ve_setup_X_stereo_low,
+  &ve_setup_X_uncoupled_low,
   0
 };
 
