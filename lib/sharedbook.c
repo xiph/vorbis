@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.23 2002/01/19 04:52:40 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.24 2002/01/19 05:01:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -132,9 +132,12 @@ ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
       temp<<=1;
       temp|=(r[count]>>j)&1;
     }
-    r[count]=temp;
-    if(l[i] || sparsecount==0)
-      count++;
+
+    if(sparsecount){
+      if(l[i])
+	r[count++]=temp;
+    }else
+      r[count++]=temp;
   }
 
   return(r);
