@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.20 2001/01/30 09:40:11 msmith Exp $
+ last mod: $Id: os.h,v 1.21 2001/02/01 01:03:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,46 +22,55 @@
 #include <ogg/os_types.h>
 
 #ifndef _V_IFDEFJAIL_H_
-#define _V_IFDEFJAIL_H_
+#  define _V_IFDEFJAIL_H_
 
-#ifndef M_PI
-#define M_PI (3.1415926536f)
+#  ifdef __GNUC__
+#    define STIN static inline
+#  elif _WIN32
+#    define STIN static __inline
+#else
+#  define STIN static
 #endif
 
-#ifndef __GNUC__
+#ifndef M_PI
+#  define M_PI (3.1415926536f)
+#endif
+
 #ifdef _WIN32
 #  include <malloc.h>
 #  define rint(x)   (floor((x)+0.5f)) 
-#endif
-
-#define STIN static
-#else
-#define STIN static inline
-#define sqrt sqrtf
-#define log logf
-#define exp expf
-#define pow powf
-#define acos acosf
-#define atan atanf
-#define frexp frexpf
-#define rint rintf
-#endif
-
-
-#ifdef _WIN32
+#  define NO_FLOAT_MATH_LIB
 #  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
-#else /* if not _WIN32 */
+#endif
+
+#ifdef DARWIN
+#  define NO_FLOAT_MATH_LIB
+#endif
+
+#ifndef NO_FLOAT_MATH_LIB
+#  define sqrt sqrtf
+#  define log logf
+#  define exp expf
+#  define pow powf
+#  define acos acosf
+#  define atan atanf
+#  define frexp frexpf
+#  define rint rintf
+#endif
+
+
+#ifndef FAST_HYPOT
 #  define FAST_HYPOT hypot
 #endif
 
 #endif
 
 #ifdef HAVE_ALLOCA_H
-#include <alloca.h>
+#  include <alloca.h>
 #endif
 
 #ifdef USE_MEMORY_H
-#include <memory.h>
+#  include <memory.h>
 #endif
 
 #ifndef min
@@ -72,11 +81,8 @@
 #  define max(x,y)  ((x)<(y)?(y):(x))
 #endif
 
-
-#if defined(__i386__) && defined(__GNUC__)
-
-#ifndef __BEOS__
-
+#if defined(__i386__) && defined(__GNUC__) && !defined(__BEOS__)
+#  define VORBIS_FPU_CONTROL
 /* both GCC and MSVC are kinda stupid about rounding/casting to int.
    Because of encapsulation constraints (GCC can't see inside the asm
    block and so we end up doing stupid things like a store/load that
@@ -109,28 +115,14 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
   __asm__("fistl %0": "=m"(i) : "t"(f));
   return(i);
 }
-
-#else
-/* this is for beos */
-
-typedef int vorbis_fpu_control;
-static int vorbis_ftoi(double f){
-  return (int)(f+.5);
-}
-
-/* We don't have special code for this compiler/arch, so do it the slow way */
-#define vorbis_fpu_setround(vorbis_fpu_control) {}
-#define vorbis_fpu_restore(vorbis_fpu_control) {}
-
 #endif
 
-#else
 
+#if defined(_WIN32) && !defined(__GNUC__)
+#  define VORBIS_FPU_CONTROL
 
-typedef int vorbis_fpu_control;
+typedef ogg_int16_t vorbis_fpu_control;
 
-#ifdef _MSC_VER 
-/* MSVC++ */
 static __inline int vorbis_ftoi(double f){
 	int i;
 	__asm{
@@ -145,17 +137,21 @@ static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
 
 static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
 }
-#else 
+
+#endif
+
+
+#ifndef VORBIS_FPU_CONTROL
+
+typedef int vorbis_fpu_control;
 
 static int vorbis_ftoi(double f){
   return (int)(f+.5);
 }
 
 /* We don't have special code for this compiler/arch, so do it the slow way */
-#define vorbis_fpu_setround(vorbis_fpu_control) {}
-#define vorbis_fpu_restore(vorbis_fpu_control) {}
-
-#endif
+#  define vorbis_fpu_setround(vorbis_fpu_control) {}
+#  define vorbis_fpu_restore(vorbis_fpu_control) {}
 
 #endif
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_AA.h,v 1.4 2001/01/22 01:38:50 xiphmont Exp $
+ last mod: $Id: mode_AA.h,v 1.5 2001/02/01 01:03:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -312,7 +312,7 @@ codec_setup_info info_AA={
   /* psy */
   {&_psy_set_AA0,&_psy_set_AA},
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
-  256, 30.f, -30.f, -96.f,
+  256, 22.f, -22.f, -96.f,
 
   -10., 
 
