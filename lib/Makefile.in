@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.20 2000/01/05 03:10:52 xiphmont Exp $
+# $Id: Makefile.in,v 1.21 2000/01/12 11:34:39 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -28,11 +28,11 @@ RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
 HFILES =	../include/vorbis/codec.h ../include/vorbis/vorbisfile.h \
-		bitwise.h envelope.h lpc.h lsp.h \
+		bitwise.h envelope.h lpc.h lsp.h bookinternal.h\
 		psy.h smallft.h window.h scales.h os.h mdct.h
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
-		spectrum.o vorbisfile.o
+		spectrum.o codebook.o vorbisfile.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -53,9 +53,13 @@ selftest:
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
 		-o test_bitwise -lm
+	$(CC) $(DEBUG) $(LDFLAGS) -c bitwise.c
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c bitwise.o\
+		-o test_codebook -lm
 	@echo
 	@./test_framing
 	@./test_bitwise
+	@./test_codebook
 
 libvorbis.a: 	$(LFILES)	
 		$(AR) -r libvorbis.a $^

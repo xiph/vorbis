@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.11 2000/01/05 03:11:04 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.12 2000/01/12 11:34:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -68,7 +68,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   n=vb->pcmend=vi->blocksize[vb->W];
   
   /* No envelope encoding yet */
-  _oggpack_write(opb,0,1);
+  _oggpack_read(opb,0,1);
 
   for(i=0;i<vi->channels;i++){
     double *lpc=vb->lpc[i];

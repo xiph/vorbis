@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.1 2000/01/05 03:10:47 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.2 2000/01/12 11:34:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,6 +21,14 @@
 
 #include <stdio.h>
 #include "vorbis/codec.h"
+#include "vorbis/book/lsp20_0a.h"
+#include "vorbis/book/lsp20_0b.h"
+#include "vorbis/book/lsp32_0a.h"
+#include "vorbis/book/lsp32_0b.h"
+
+static int _intvector_0_15[]={0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15};
+static *codebook _bookvector0[4]={_vq_book_lsp20_0a,_vq_book_lsp20_0b,
+				  _vq_book_lsp32_0a,_vq_book_lsp32_0b};
 
 /*
    0      1      2      3      4     5      6     7     8     9 
@@ -38,11 +46,23 @@ vorbis_info predef_modes[]={
     /* channels, sample rate, upperkbps, nominalkbps, lowerkbps */
   { 2, 44100, 0,0,0,
     /* dummy, dummy, dummy, dummy */
-    0, NULL, 0, NULL, 
-    /* smallblock, largeblock, LPC order (small, large) */
-    {256, 2048}, {20,32}, 
-    /* {bark mapping size}, spectral channels */
-    {64,256}, 2,
+    NULL, 0, NULL, 
+    /* smallblock, largeblock */
+    {256, 2048}, 
+
+    /* LSP/LPC order (small, large), LPC bark mapping size, floor channels */
+    {20,32}, {64,256}, 2,
+    /* LSP encoding */
+    2, _intvector_0_15, 2, _intvector_0_15+2,
+
+    /* channel mapping.  Right now, no balance, no coupling */
+    {0,0},
+
+    /* residue encoding */
+
+    /* codebooks */
+    _bookvector0, 4,
+
     /* thresh sample period, preecho clamp trigger threshhold, range, dummy */
     64, 10, 2, 
     /* tone masking curve dB attenuation levels [27] */
@@ -51,6 +71,7 @@ vorbis_info predef_modes[]={
       -12, -10, -8, -6, -6, -6, -4},
     /* tone masking rolloff settings (dB per octave), octave bias */
     24,10,
+
     NULL,NULL,NULL},
   
 };

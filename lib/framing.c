@@ -13,7 +13,7 @@
 
  function: code raw [Vorbis] packets into framed OggSquish stream and
            decode Ogg streams back into raw packets
- last mod: $Id: framing.c,v 1.13 2000/01/05 03:10:57 xiphmont Exp $
+ last mod: $Id: framing.c,v 1.14 2000/01/12 11:34:40 xiphmont Exp $
 
  note: The CRC code is directly derived from public domain code by
  Ross Williams (ross@guest.adelaide.edu.au).  See docs/framing.html
@@ -72,10 +72,10 @@ int ogg_page_pageno(ogg_page *og){
 
 /* helper to initialize lookup for direct-table CRC */
 
-static unsigned int32_t crc_lookup[256];
+static u_int32_t crc_lookup[256];
 static int crc_ready=0;
 
-static unsigned int32_t _ogg_crc_entry(unsigned long index){
+static u_int32_t _ogg_crc_entry(unsigned long index){
   int           i;
   unsigned long r;
 
@@ -169,7 +169,7 @@ static void _os_lacing_expand(ogg_stream_state *os,int needed){
    perform the checksum silmultaneously with other copies */
 
 static void _os_checksum(ogg_page *og){
-  unsigned int32_t crc_reg=0;
+  u_int32_t crc_reg=0;
   int i;
 
   for(i=0;i<og->header_len;i++)

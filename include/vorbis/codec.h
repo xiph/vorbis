@@ -12,26 +12,14 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.1 2000/01/05 03:10:47 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.2 2000/01/12 11:34:37 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
 
-#include <sys/types.h> /* get BSD style 16/32/64 bit types */
-
-/* if no BSD width types, get them from the configure script */
-#ifndef int64_t
-#  define int64_t size64
-#endif
-#ifndef int32_t
-#  define int32_t size32
-#endif
-#ifndef int16_t
-#  define int16_t size16
-#endif
-
+#include <sys/types.h>
 #include "vorbis/codebook.h"
 #include "vorbis/internal.h"
 
@@ -40,6 +28,32 @@
    channel setup, options, codebook etc) *********************************/
 
 #define MAX_BARK 27
+
+/* not used yet */
+typedef struct vorbis_info_time{
+}vorbis_info_time;
+
+typedef struct vorbis_info_floor{
+  int   order;
+  long  rate;
+  long  barkmap;
+  int   stages;
+  int  *books;
+} vorbis_info_floor;
+
+typedef struct vorbis_info_res{
+  long  begin;
+  long  end;
+
+  int   stages;
+  int  *books;
+} vorbis_info_res;
+
+typedef struct vorbis_psysettings{
+  double maskthresh[MAX_BARK];
+  double lrolldB;
+  double hrolldB;
+} vorbis_psysettings;
 
 typedef struct vorbis_info{
   int channels;
@@ -65,37 +79,44 @@ typedef struct vorbis_info{
   long bitrate_nominal;
   long bitrate_lower;
 
+  /* unlimited user comment fields.  libvorbis writes 'libvorbis'
+     whatever vedor is set to in encode */
   char **user_comments;
   int    comments;
   char  *vendor;
 
+  /* short and long block sizes */
   int blocksize[2];
-  int floororder[2];
-  int floormap[2];
 
-  int floorch;
+  /* no mapping so no balance yet */
+  int channelmapping[2];   /* mapping type: 0 == (independant channel) */
 
-  /*  int smallblock;
-  int largeblock;
-  int floororder;
-  int flooroctaves;
-  int floorch;*/
+  /* time domain setup */
+  int                timech;    
+  vorbis_info_time  *times[2];
 
-  /* no mapping, coupling, balance yet. */
+  /* mdct domain floor setup */
+  int                floorch;
+  vorbis_info_floor *floors[2]; /* [long,short][floorchannel] */
 
-  /*int balanceorder;
-    int balanceoctaves; 
-    this would likely need to be by channel and blocksize anyway*/
+  /* mdct domain residue setup */
+  int                residuech;
+  vorbis_info_res   *residues[2];
 
-  /* Encode-side settings for analysis */
+  /* Codebook storage for encode and decode.  Encode side is submitted
+     by the client (and memory must be managed by the client), decode
+     side is allocated by header_in */
+  codebook  *booklist;
+  int        books;
 
-  int envelopesa;
+  /* Encode-side settings for analysis. different mappings use them
+     differently. */
+  vorbis_psysettings *psy;
+
+  /* for block long/sort tuning */
+  int    envelopesa;
   double preecho_thresh;
   double preecho_clamp;
-
-  double maskthresh[MAX_BARK];
-  double lrolldB;
-  double hrolldB;
 
   /* local storage, only used on the encoding size.  This way the
      application does not need to worry about freeing some packets'
@@ -103,6 +124,8 @@ typedef struct vorbis_info{
   char *header;
   char *header1;
   char *header2;
+
+  int   freeall;     /* codebooks submitted or malloced? */
 
 } vorbis_info;
  

@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.8 1999/12/30 07:26:25 xiphmont Exp $
+# $Id: configure.in,v 1.9 2000/01/12 11:34:34 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -119,38 +119,34 @@ dummy="__noconf"
 #	X_LIBS="-L${srcdir}/libgtk/gtk/.libs -L${srcdir}/libgtk/gdk/.libs -L${srcdir}/libgtk/glib/.libs $X_LIBS"
 #fi
 
-TYPESIZES="" 
-
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(long long)
 
 case 2 in
-	$ac_cv_sizeof_short) TYPESIZES="$TYPESIZES -Dsize16='short'"
-		SIZE16=TRUE;;
-	$ac_cv_sizeof_int) TYPESIZES="$TYPESIZES -Dsize16='int'"
-		SIZE16=TRUE;;
+	$ac_cv_sizeof_short) SIZE16="short";;
+	$ac_cv_sizeof_int) SIZE16="int";;
 esac
 
 case 4 in
-	$ac_cv_sizeof_short) TYPESIZES="$TYPESIZES -Dsize32='short'"
-		SIZE32=TRUE;;
-	$ac_cv_sizeof_int) TYPESIZES="$TYPESIZES -Dsize32='int'"
-		SIZE32=TRUE;;
-	$ac_cv_sizeof_long) TYPESIZES="$TYPESIZES -Dsize32='long'"
-		SIZE32=TRUE;;
+	$ac_cv_sizeof_short) SIZE32="short";;
+	$ac_cv_sizeof_int) SIZE32="int";;
+	$ac_cv_sizeof_long) SIZE32="long";;
 esac
 
 case 8 in
-	$ac_cv_sizeof_int) TYPESIZES="$TYPESIZES -Dsize64='int'"
-		SIZE64=TRUE;;
-	$ac_cv_sizeof_long) TYPESIZES="$TYPESIZES -Dsize64='long'"
-		SIZE64=TRUE;;
-	$ac_cv_sizeof_long_long) TYPESIZES="$TYPESIZES -Dsize64='long long'"
-		SIZE64=TRUE;;
+	$ac_cv_sizeof_int) SIZE64="int";;
+	$ac_cv_sizeof_long) SIZE64="long";;
+	$ac_cv_sizeof_long_long) SIZE64="long long";;
 esac
 
+AC_CHECK_TYPE(int16_t,$SIZE16)
+AC_CHECK_TYPE(int32_t,$SIZE32)
+AC_CHECK_TYPE(int64_t,$SIZE64)
+AC_CHECK_TYPE(u_int16_t,unsigned $SIZE16)
+AC_CHECK_TYPE(u_int32_t,unsigned $SIZE32)
+AC_CHECK_TYPE(u_int64_t,unsigned $SIZE64)
 
 if test -z "$SIZE16"; then
 	AC_MSG_ERROR(No 16 bit type found on this platform!)

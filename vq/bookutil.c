@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.4 2000/01/10 10:42:01 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.5 2000/01/12 11:34:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -335,7 +335,6 @@ int codebook_entry(codebook *b,double *val){
 /* 24 bit float (not IEEE; nonnormalized mantissa +
    biased exponent ): neeeeemm mmmmmmmm mmmmmmmm */
 
-#define VQ_FEXP_BIAS 20 /* bias toward values smaller than 1. */
 long float24_pack(double val){
   int sign=0;
   long exp;

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.1 2000/01/05 03:10:47 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.2 2000/01/12 11:34:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,8 +59,6 @@ typedef struct encode_aux{
   long   *ptr0;
   long   *ptr1;
 
-  double *n;         /* decision hyperplanes: sum(x_i*n_i)[0<=i<dim]=c */ 
-  double *c;         /* decision hyperplanes: sum(x_i*n_i)[0<=i<dim]=c */ 
   long   *p;         /* decision points (each is an entry) */
   long   *q;         /* decision points (each is an entry) */
   long   aux;        /* number of tree entries */
@@ -70,7 +68,10 @@ typedef struct encode_aux{
 typedef struct decode_aux{
   long   *ptr0;
   long   *ptr1;
+  long   aux;        /* number of tree entries */
 } decode_aux;
+
+#define VQ_FEXP_BIAS 20 /* bias toward values smaller than 1. */
 
 #endif
 
