@@ -14,11 +14,9 @@
  function: PCM data vector blocking, windowing and dis/reassembly
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jun 26 1999
+ last modification date: Jul 13 1999
 
  ********************************************************************/
-
-/* $Id: codec.h,v 1.2 1999/07/13 08:00:15 mwhitson Exp $ */
 
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
@@ -76,12 +74,22 @@ typedef struct {
 } vorbis_page;
 
 typedef struct {
-  unsigned size32 crc_lookup[256];
+ 
+  /*             _________________________________________________
+     body_data: |_________________________________________________|
+     body_returned ----^       ^                          ^       ^
+     body_processed------------'                          |       |
+     body_fill     ---------------------------------------'       |     
+     body_storage  _______________________________________________' 
+
+     the header is labelled the same way.  Not all the pointers are 
+     used by both encode and decode */
 
   unsigned char   *body_data;    /* bytes from packet bodies */
-  long    body_storage;
-  long    body_fill;
-  long    body_processed;
+  long    body_storage;          /* storage elements allocated */
+  long    body_fill;             /* elements stored; fill mark */
+  long    body_returned;         /* elements of fill returned */
+
 
   int    *lacing_vals;    /* The values that will go to the segment table */
   size64 *pcm_vals;       /* pcm_pos values for headers. Not compact
@@ -89,9 +97,11 @@ typedef struct {
 			     lacing fifo */
   long    lacing_storage;
   long    lacing_fill;
+  long    lacing_packet;
+  long    lacing_returned;
 
-  unsigned char    header[282];    /* working space for header */
-  int              headerbytes;    
+  unsigned char    header[282];      /* working space for header encode */
+  int              header_fill;
 
   int     e_o_s;          /* set when we have buffered the last packet in the
 			     logical bitstream */
@@ -99,16 +109,30 @@ typedef struct {
 			     of a logical bitstream */
   long    serialno;
   long    pageno;
+  size64  pcmpos;
+
 } vorbis_stream_state;
 
 typedef struct {
   unsigned char *packet;
   long  bytes;
+  long  b_o_s;
   long  e_o_s;
 
   size64 pcm_pos;
 
 } vorbis_packet;
+
+typedef struct {
+  char *data;
+  int storage;
+  int fill;
+  int returned;
+
+  int unsynced;
+  int headerbytes;
+  int bodybytes;
+} vorbis_sync_state;
 
 /* libvorbis encodes in two abstraction layers; first we perform DSP
    and produce a packet (see docs/analysis.txt).  The packet is then
@@ -136,6 +160,14 @@ extern int vorbis_stream_clear(vorbis_stream_state *vs);
 extern int vorbis_stream_destroy(vorbis_stream_state *vs);
 extern int vorbis_stream_eof(vorbis_stream_state *vs);
 
+extern int vorbis_page_version(vorbis_page *vg);
+extern int vorbis_page_continued(vorbis_page *vg);
+extern int vorbis_page_bos(vorbis_page *vg);
+extern int vorbis_page_eos(vorbis_page *vg);
+extern size64 vorbis_page_pcmpos(vorbis_page *vg);
+extern int vorbis_page_serialno(vorbis_page *vg);
+extern int vorbis_page_pageno(vorbis_page *vg);
+
 /* ENCODING PRIMITIVES: packet streaming layer **********************/
 
 extern int vorbis_stream_encode(vorbis_stream_state *vs,vorbis_packet *vp);
@@ -143,21 +175,18 @@ extern int vorbis_stream_page(vorbis_stream_state *vs, vorbis_page *vg);
 
 /* DECODING PRIMITIVES: packet streaming layer **********************/
 
-/* returns nonzero when it has a complete vorbis packet synced and
-   framed for decoding. Generally, it wants to see two page headers at
-   proper spacing before returning 'yea'. An exception is the initial
-   header to make IDing the vorbis stream easier: it will return sync
-   on the page header + beginning-of-stream marker.
+extern int vorbis_sync_init(vorbis_sync_state *vs);
+extern int vorbis_sync_clear(vorbis_sync_state *vs);
+extern int vorbis_sync_destroy(vorbis_sync_state *vs);
 
-   _sync will also abort framing if is sees a problem in the packet
-   boundary lacing.  */
-
-extern int vorbis_stream_decode(vorbis_stream_state *vs,char *stream,int size);
-extern int vorbis_stream_sync(vorbis_stream_state *vs);
-extern int vorbis_stream_verify(vorbis_stream_state *vs);
-extern size64 vorbis_stream_position(vorbis_stream_state *vs);
-extern int vorbis_stream_skippage(vorbis_stream_state *vs);
+extern char *vorbis_decode_buffer(vorbis_sync_state *vs, long size);
+extern int vorbis_decode_wrote(vorbis_sync_state *vs, long bytes);
+extern int vorbis_decode_stream(vorbis_sync_state *vs, vorbis_page *vg);
+extern int vorbis_decode_page(vorbis_stream_state *vs, vorbis_page *vg);
 extern int vorbis_stream_packet(vorbis_stream_state *vs,vorbis_packet *vp);
+
+extern int vorbis_sync_reset(vorbis_sync_state *vs);
+extern int vorbis_stream_reset(vorbis_stream_state *vs);
 
 /* DECODING PRIMITIVES: synthesis layer *****************************/
 
