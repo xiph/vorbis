@@ -18,6 +18,8 @@ Package: libvorbisenc2
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}
+Conflicts: libvorbis0 (<< 1.0.0)
+Replaces: libvorbis0 (<< 1.0.0)
 Description: The Vorbis General Audio Compression Codec
  Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
  general-purpose compressed audio format for audio and music at fixed 
@@ -27,6 +29,8 @@ Package: libvorbisfile3
 Architecture: any
 Section: libs
 Depends: ${shlibs:Depends}
+Conflicts: libvorbis0 (<< 1.0.0)
+Replaces: libvorbis0 (<< 1.0.0)
 Description: The Vorbis General Audio Compression Codec
  Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
  general-purpose compressed audio format for audio and music at fixed 
