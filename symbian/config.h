@@ -30,14 +30,21 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-TARGET        vorbis.lib
-TARGETTYPE    lib
-UID           0
-MACRO         HAVE_CONFIG_H
-SOURCEPATH    ..\lib
-SOURCE        analysis.c barkmel.c bitrate.c block.c codebook.c envelope.c floor0.c floor1.c info.c
-SOURCE        lookup.c lpc.c lsp.c mapping0.c mdct.c psy.c registry.c res0.c sharedbook.c
-SOURCE        smallft.c synthesis.c vorbisfile.c window.c
+#ifndef CONFIG_H
+#define CONFIG_H
 
-USERINCLUDE   . ..\include
-SYSTEMINCLUDE \epoc32\include \epoc32\include\libc ..\include ..\..\ogg\include ..\..\ogg\symbian
+/* Disable some warnings */
+
+#pragma warning(disable: 4100) /* unreferenced formal parameter */
+#pragma warning(disable: 4127) /* conditional expression is constant */
+#pragma warning(disable: 4189) /* local variable is initialized but not referenced */
+#pragma warning(disable: 4244) /* conversion from '...' to '...', possible loss of data */
+#pragma warning(disable: 4305) /* truncation from '...' to '...' */
+#pragma warning(disable: 4505) /* unreferenced local function has been removed */
+#pragma warning(disable: 4514) /* unreferenced inline function has been removed */
+#pragma warning(disable: 4702) /* unreachable code */
+#pragma warning(disable: 4701) /* local variable may be be used without having been initialized */
+#pragma warning(disable: 4706) /* assignment within conditional expression */
+#pragma warning(disable: 4761) /* integral size mismatch in argument: conversion supplied */
+
+#endif /* ! CONFIG_H */
