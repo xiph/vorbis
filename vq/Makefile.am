@@ -6,7 +6,7 @@ INCLUDES = -I../lib -I$(top_srcdir)/include @OGG_CFLAGS@
 
 EXTRA_PROGRAMS = lspvqtrain genericvqtrain residuevqtrain vqbuild\
 	vqcascade vqmetrics latticebuild latticepare latticehint\
-	latticetune huffbuild residuesplit
+	latticetune huffbuild residuesplit distribution
 CLEANFILES = $(EXTRA_PROGRAMS)
 
 LDFLAGS = -static
@@ -36,6 +36,8 @@ huffbuild_SOURCES = huffbuild.c vqgen.c bookutil.c\
 	vqgen.h bookutil.h
 residuesplit_SOURCES = residuesplit.c vqgen.c bookutil.c\
 	vqgen.h bookutil.h
+distribution_SOURCES = distribution.c bookutil.c\
+	bookutil.h
 
 EXTRA_DIST = residue_entropy auxpartition.pl
 

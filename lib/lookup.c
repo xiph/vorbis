@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: lookup based functions
-  last mod: $Id: lookup.c,v 1.4 2000/12/21 21:04:39 xiphmont Exp $
+  last mod: $Id: lookup.c,v 1.5 2001/01/22 01:38:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,7 +46,7 @@ float vorbis_invsq2explook(int a){
 #include <stdio.h>
 /* interpolated lookup based fromdB function, domain -140dB to 0dB only */
 float vorbis_fromdBlook(float a){
-  int i=vorbis_ftoi(a*((float)(-(1<<FROMdB2_SHIFT)))-5.f);
+  int i=vorbis_ftoi(a*((float)(-(1<<FROMdB2_SHIFT)))-.5f);
   return (i<0)?1.f:
     ((i>=(FROMdB_LOOKUP_SZ<<FROMdB_SHIFT))?0.f:
      FROMdB_LOOKUP[i>>FROMdB_SHIFT]*FROMdB2_LOOKUP[i&FROMdB2_MASK]);

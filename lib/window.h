@@ -12,14 +12,13 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.h,v 1.5 2000/11/06 00:07:03 xiphmont Exp $
+ last mod: $Id: window.h,v 1.6 2001/01/22 01:38:26 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_WINDOW_
 #define _V_WINDOW_
 
-#define VI_WINDOWB 1
 extern float *_vorbis_window(int type,int window,int left,int right);
 
 #endif

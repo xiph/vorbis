@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.28 2000/12/21 21:04:39 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.29 2001/01/22 01:38:24 xiphmont Exp $
 
  Preecho calculation.
 
@@ -111,46 +111,27 @@ void _ve_envelope_clear(envelope_lookup *e){
   memset(e,0,sizeof(envelope_lookup));
 }
 
-static float _ve_deltai(envelope_lookup *ve,
-		      float *pre,float *post){
-  long n2=ve->winlength*2;
+/* straight threshhold based until we find something that works better
+   and isn't patented */
+static float _ve_deltai(envelope_lookup *ve,float *pre,float *post){
   long n=ve->winlength;
 
-  float *workA=alloca(sizeof(float)*n2),A=0.f;
-  float *workB=alloca(sizeof(float)*n2),B=0.f;
   long i;
+
+  /* we want to have a 'minimum bar' for energy, else we're just
+     basing blocks on quantization noise that outweighs the signal
+     itself (for low power signals) */
+
+  float min=ve->minenergy;
+  float A=min*min*n;
+  float B=A;
 
   /*_analysis_output("A",granulepos,pre,n,0,0);
     _analysis_output("B",granulepos,post,n,0,0);*/
 
   for(i=0;i<n;i++){
-    workA[i]=pre[i]*ve->window[i];
-    workB[i]=post[i]*ve->window[i];
-  }
-
-  /*_analysis_output("Awin",granulepos,workA,n,0,0);
-    _analysis_output("Bwin",granulepos,workB,n,0,0);*/
-
-  drft_forward(&ve->drft,workA);
-  drft_forward(&ve->drft,workB);
-
-  /* we want to have a 'minimum bar' for energy, else we're just
-     basing blocks on quantization noise that outweighs the signal
-     itself (for low power signals) */
-  {
-    float min=ve->minenergy;
-    for(i=0;i<n;i++){
-      if(fabs(workA[i])<min)workA[i]=min;
-      if(fabs(workB[i])<min)workB[i]=min;
-    }
-  }
-
-  /*_analysis_output("Afft",granulepos,workA,n,0,0);
-    _analysis_output("Bfft",granulepos,workB,n,0,0);*/
-
-  for(i=0;i<n;i++){
-    A+=workA[i]*workA[i];
-    B+=workB[i]*workB[i];
+    A+=pre[i]*pre[i];
+    B+=post[i]*post[i];
   }
 
   A=todB(A);
@@ -159,12 +140,32 @@ static float _ve_deltai(envelope_lookup *ve,
   return(B-A);
 }
 
+static float _ve_ampi(envelope_lookup *ve,float *pre){
+  long n=ve->winlength;
+
+  long i;
+
+  /* we want to have a 'minimum bar' for energy, else we're just
+     basing blocks on quantization noise that outweighs the signal
+     itself (for low power signals) */
+
+  float min=ve->minenergy;
+  float A=min*min*n;
+
+  for(i=0;i<n;i++){
+    A+=pre[i]*pre[i];
+  }
+
+  A=todB(A);
+  return(A);
+}
+
 long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
   envelope_lookup *ve=((backend_lookup_state *)(v->backend_state))->ve;
   long i,j;
-  
+
   /* make sure we have enough storage to match the PCM */
   if(v->pcm_storage>ve->storage){
     ve->storage=v->pcm_storage;
@@ -194,7 +195,7 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
     j=v->centerW+ci->blocksizes[1]/4-ci->blocksizes[0]/4;
   else
     j=v->centerW;
-
+  
   while(j+ve->winlength<=v->pcm_current){
     for(i=0;i<ve->ch;i++){
       float *filtered=ve->filtered[i]+j;
@@ -204,13 +205,20 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
 	/*granulepos++;*/
 	return(0);
       }
+      if(m<ci->postecho_thresh){
+	/*granulepos++;*/
+	return(0);
+      }
       /*granulepos++;*/
     }
     
-    j+=ci->blocksizes[0]/2;
-    if(j>=searchpoint)return(1);
+    j+=min(ci->blocksizes[0],ve->winlength)/2;
+
+    if(j>=searchpoint){
+      return(1);
+    }
   }
-  
+ 
   return(-1);
 }
 

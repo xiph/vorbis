@@ -58,7 +58,7 @@ binary-arch: build install
 
 	dh_movefiles
 
-	dh_installdocs debian/tmp/usr/share/doc/libvorbis-1.0beta3/*
+	dh_installdocs debian/tmp/usr/share/doc/libvorbis-1.0prebeta4/*
 	dh_installexamples
 	dh_installmanpages
 	dh_installchangelogs 

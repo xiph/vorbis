@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.18 2001/01/20 14:06:28 msmith Exp $
+ last mod: $Id: encoder_example.c,v 1.19 2001/01/22 01:38:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -80,7 +80,7 @@ int main(){
   /* choose an encoding mode */
   /* (mode 0: 44kHz stereo uncoupled, roughly 128kbps VBR) */
   vorbis_info_init(&vi);
-  vorbis_encode_init(&vi,2,44100, -1, 160000, -1);
+  vorbis_encode_init(&vi,2,44100, -1, 128000, -1);
 
   /* add a comment */
   vorbis_comment_init(&vc);

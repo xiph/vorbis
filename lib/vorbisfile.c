@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.35 2001/01/01 21:31:15 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.36 2001/01/22 01:38:26 xiphmont Exp $
 
  ********************************************************************/
 

@@ -1,13 +1,12 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
- * http://www.xiph.org/                                             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * by the XIPHOPHORUS Company, http://www.xiph.org/                 *
  *                                                                  *
  ********************************************************************
 
@@ -21,17 +20,17 @@
 
 static long _vq_quantlist_res0_128_128_1[] = {
 	1,
-	2,
 	0,
+	2,
 };
 
 static long _vq_lengthlist_res0_128_128_1[] = {
-	 1, 4, 4, 4, 7, 7, 5, 7, 7, 5, 8, 8, 7,10,10, 7,
-	10,10, 5, 7, 8, 7,10,10, 8,10,10, 5, 8, 8, 8,11,
-	11, 8,10,10, 8,10,10,10,12,13,10,13,13, 8,10,10,
-	10,13,13,10,13,13, 5, 8, 8, 8,10,10, 8,10,11, 8,
-	11,10,10,12,13,10,12,13, 8,10,10,11,13,13,10,13,
-	12,
+	 3, 4, 4, 5, 6, 6, 4, 6, 6, 5, 6, 6, 6, 8, 8, 6,
+	 7, 8, 5, 6, 6, 6, 8, 7, 6, 8, 8, 5, 6, 6, 6, 8,
+	 8, 6, 8, 8, 6, 8, 8, 8, 9,10, 8,10, 9, 6, 8, 8,
+	 8,10, 9, 8, 9,10, 5, 6, 6, 6, 8, 8, 6, 8, 8, 6,
+	 8, 8, 8,10, 9, 8, 9,10, 6, 8, 8, 8, 9,10, 8,10,
+	 9,
 };
 
 static float _vq_quantthresh_res0_128_128_1[] = {
@@ -39,7 +38,7 @@ static float _vq_quantthresh_res0_128_128_1[] = {
 };
 
 static long _vq_quantmap_res0_128_128_1[] = {
-	    2,    0,    1,
+	    1,    0,    2,
 };
 
 static encode_aux_threshmatch _vq_auxt_res0_128_128_1 = {

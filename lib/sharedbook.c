@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.13 2000/12/21 21:04:41 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.14 2001/01/22 01:38:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -60,9 +60,9 @@ long _float32_pack(float val){
 }
 
 float _float32_unpack(long val){
-  float mant=val&0x1fffff;
-  float sign=val&0x80000000;
-  float exp =(val&0x7fe00000)>>VQ_FMAN;
+  double mant=val&0x1fffff;
+  int    sign=val&0x80000000;
+  long   exp =(val&0x7fe00000L)>>VQ_FMAN;
   if(sign)mant= -mant;
   return(ldexp(mant,exp-(VQ_FMAN-1)-VQ_FEXP_BIAS));
 }

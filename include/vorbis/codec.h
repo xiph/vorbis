@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.34 2001/01/18 10:54:31 msmith Exp $
+ last mod: $Id: codec.h,v 1.35 2001/01/22 01:38:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -115,6 +115,8 @@ typedef struct vorbis_block{
   long time_bits;
   long floor_bits;
   long res_bits;
+
+  void *internal;
 
 } vorbis_block;
 

@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.3 2000/11/17 11:47:18 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.4 2001/01/22 01:38:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -62,9 +62,7 @@ typedef struct{
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
-		     float *,float *,vorbis_bitbuffer *);
-  float(*forward2)  (struct vorbis_block *,vorbis_look_floor *,
-		     long,float, vorbis_bitbuffer *);
+		     float *);
   int  (*inverse)   (struct vorbis_block *,vorbis_look_floor *,
 		     float *);
 } vorbis_func_floor;
@@ -79,6 +77,10 @@ typedef struct{
 
   int   numbooks; /* <= 16 */
   int   books[16];
+
+  float lessthan;     /* encode-only config setting hacks for libvorbis */
+  float greaterthan;  /* encode-only config setting hacks for libvorbis */
+
 } vorbis_info_floor0;
 
 /* Residue backend generic *****************************************/
@@ -91,7 +93,7 @@ typedef struct{
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
   int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
-			float **,int,vorbis_bitbuffer *);
+			float **,int);
   int  (*inverse)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int);
 } vorbis_func_residue;
