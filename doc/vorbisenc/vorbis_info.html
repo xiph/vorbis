@@ -57,8 +57,9 @@ The vorbis_info structure contains information about a vorbis bitstream.
 <dt><i>bitrate_lower</i></dt>
 <dd>Specifies the lower limit in a VBR bitstream.  If the value matches the bitrate_nominal and bitrate_upper parameters, the stream is fixed bitrate.  May be unset if no limit exists.</dd>
 <dt><i>bitrate_window</i></dt>
-<dd>Specifies the size of the bit reservoir in /
-lower limit in a VBR bitstream.  If the value matches the bitrate_nominal and bitrate_upper parameters, the stream is fixed bitrate.  May be unset if no limit exists.</dd>
+<dd>Specifies the size of the bit reservoir in seconds relative to the nominal bitrate.  May be unset.</dd>
+<dt><i>codec_setup</i></dt>
+<dd>Pointer to private encoder setup state.</dd>
 
 </dl>
 
