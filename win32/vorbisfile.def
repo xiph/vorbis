@@ -1,7 +1,7 @@
 ;
 ; vorbisfile.def
 ;
-; last modified: $Id: vorbisfile.def,v 1.5 2003/10/01 21:53:25 giles Exp $
+; last modified: $Id: vorbisfile.def,v 1.6 2003/10/01 22:27:26 giles Exp $
 ;
 LIBRARY
 EXPORTS
@@ -21,6 +21,11 @@ ov_pcm_seek
 ov_pcm_seek_page
 ov_time_seek
 ov_time_seek_page
+ov_raw_seek_lap
+ov_pcm_seek_lap
+ov_pcm_seek_page_lap
+ov_time_seek_lap
+ov_time_seek_page_lap
 ov_raw_tell
 ov_pcm_tell
 ov_time_tell
