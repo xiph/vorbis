@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.5 2000/05/08 20:49:49 xiphmont Exp $
+ last mod: $Id: os.h,v 1.6 2000/05/27 18:43:58 jon Exp $
 
  ********************************************************************/
 
@@ -38,6 +38,14 @@
 #  define FAST_HYPOT hypot
 #endif
 
+#endif
+
+#ifndef min
+#  define min(x,y)  ((x)>(y)?(y):(x))
+#endif
+
+#ifndef max
+#  define max(x,y)  ((x)<(y)?(y):(x))
 #endif
 
 #include "../include/vorbis/os_types.h"
