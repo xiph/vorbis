@@ -26,7 +26,16 @@ libvorbisenc_la_SOURCES = vorbisenc.c
 #libvorbisenc_la_LIBADD = -L$(top_srcdir)/lib/.libs -lvorbis
 libvorbisenc_la_LDFLAGS = -version-info @VE_LIB_CURRENT@:@VE_LIB_REVISION@:@VE_LIB_AGE@
 
-EXTRA_DIST = barkmel.c tone.c psytune.c lookups.pl
+EXTRA_PROGRAMS = barkmel tone psytune
+CLEANFILES = $(EXTRA_PROGRAMS)
+
+barkmel_SOURCES = barkmel.c
+tone_SOURCES = tone.c
+psytune_SOURCES = psytune.c
+psytune_LDFLAGS = -static
+psytune_LDADD = libvorbis.la
+
+EXTRA_DIST = lookups.pl
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"
