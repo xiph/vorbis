@@ -1,3 +1,10 @@
+libvorbis (1.0rc3-1) unstable; urgency=low
+
+  * New upstream.
+  * added autotools target (config.* updater) to rules
+
+ -- Christopher L Cheney <ccheney@debian.org>  Thu, 13 Dec 2001 11:00:00 -0600
+
 libvorbis (1.0rc2-1) unstable; urgency=low
 
   * New upstream.
@@ -68,5 +75,4 @@ vorbis (0.0-1) unstable; urgency=low
 
 Local variables:
 mode: debian-changelog
-add-log-mailing-address "ccheney@debian.org"
 End:

@@ -8,13 +8,16 @@
 # This is the debhelper compatability version to use.
 export DH_COMPAT=3
 
+export DEB_HOST_GNU_TYPE  ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+export DEB_BUILD_GNU_TYPE ?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
-	# Add here commands to configure the package.
 
-	# If compiling cvs version change to ./autogen.sh --prefix=/usr 
-	./configure --prefix=/usr
+	# If compiling cvs version change to ./autogen.sh --prefix=/usr
+	./configure --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE) \
+	--prefix=/usr
 
 	touch configure-stamp
 
@@ -22,17 +25,30 @@ build: configure-stamp build-stamp
 build-stamp:
 	dh_testdir
 
-	# Add here commands to compile the package.
 	$(MAKE)
 
 	touch build-stamp
 
-clean:
+autotools:
+	OLDDATESUB=`./config.sub -t | tr -d -` ;\
+	OLDDATEGUESS=`./config.guess -t | tr -d -` ;\
+	NEWDATESUB=`/usr/share/misc/config.sub -t | tr -d -` ;\
+	NEWDATEGUESS=`/usr/share/misc/config.guess -t | tr -d -` ;\
+	if [ $$OLDDATESUB -lt $$NEWDATESUB -o \
+	     $$OLDDATEGUESS -lt $$NEWDATEGUESS ]; then \
+	   dch -a -p "GNU config automated update: config.sub\
+	     ($$OLDDATESUB to $$NEWDATESUB), config.guess\
+	     ($$OLDDATEGUESS to $$NEWDATEGUESS)" ;\
+	   cp -f /usr/share/misc/config.sub config.sub ;\
+	   cp -f /usr/share/misc/config.guess config.guess ;\
+	   echo WARNING: GNU config scripts updated from master copies 1>&2 ;\
+	fi
+
+clean: autotools
 	dh_testdir
 	dh_testroot
 	rm -f build-stamp configure-stamp
 
-	# Add here commands to clean up after the build process.
 	-$(MAKE) distclean
 
 	dh_clean
@@ -43,7 +59,6 @@ install: build
 	dh_clean -k
 	dh_installdirs
 
-	# Add here commands to install the package into debian/tmp.
 	$(MAKE) install DESTDIR=`pwd`/debian/tmp
 
 
@@ -57,7 +72,7 @@ binary-arch: build install
 	dh_testroot
 	dh_movefiles
 
-	dh_installdocs debian/tmp/usr/share/doc/libvorbis-1.0rc2/*
+	dh_installdocs
 	dh_installexamples
 	dh_installmanpages
 	dh_installchangelogs 
@@ -73,4 +88,4 @@ binary-arch: build install
 	dh_builddeb
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+.PHONY: autotools build clean binary-indep binary-arch binary install configure
