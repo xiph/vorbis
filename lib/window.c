@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.4 2000/01/22 13:28:36 xiphmont Exp $
+ last mod: $Id: window.c,v 1.5 2000/01/28 15:25:12 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,7 @@
 #include <math.h>
 #include "os.h"
 
-double *vorbis_window(int type, int window,int left,int right){
+double *_vorbis_window(int type, int window,int left,int right){
   double *ret=calloc(window,sizeof(double));
 
   switch(type){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.5 2000/01/28 09:04:58 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.6 2000/01/28 15:25:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "vorbis/codec.h"
+#include "vorbis/modes.h"
 
 #define READ 1024
 signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
@@ -36,10 +36,10 @@ int main(){
   ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
   ogg_packet       op; /* one raw packet of data for decode */
   
-  vorbis_info      vi; /* struct that stores all the static vorbis bitstream
+  vorbis_info     *vi; /* struct that stores all the static vorbis bitstream
 			  settings */
   vorbis_comment   vc; /* struct that stores all the user comments */
-			  settings */
+
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
 
@@ -55,13 +55,14 @@ int main(){
 
   /* choose an encoding mode */
   /* (mode 0: 44kHz stereo uncoupled, roughly 128kbps VBR) */
-  vorbis_info_modeset(&vi,0); 
+  vi=&info_A;
 
   /* add a comment */
-  vorbis_info_addcomment(&vi,"Track encoded by encoder_example.c");
+  vorbis_comment_init(&vc);
+  vorbis_comment_add(&vc,"Track encoded by encoder_example.c");
 
   /* set up the analysis state and auxiliary encoding storage */
-  vorbis_analysis_init(&vd,&vi);
+  vorbis_analysis_init(&vd,vi);
   vorbis_block_init(&vd,&vb);
   
   /* set up our packet->stream encoder */
@@ -82,7 +83,7 @@ int main(){
     ogg_packet header_comm;
     ogg_packet header_code;
 
-    vorbis_info_headerout(&vi,&header,&header_comm,&header_code);
+    vorbis_analysis_headerout(&vd,&vc,&header,&header_comm,&header_code);
     ogg_stream_packetin(&os,&header); /* automatically placed in its own
 					 page */
     ogg_stream_packetin(&os,&header_comm);
@@ -152,7 +153,6 @@ int main(){
   ogg_stream_clear(&os);
   vorbis_block_clear(&vb);
   vorbis_dsp_clear(&vd);
-  vorbis_info_clear(&vi);
   
   /* ogg_page and ogg_packet structs always point to storage in
      libvorbis.  They're never freed or manipulated directly */

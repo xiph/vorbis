@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.7 2000/01/28 09:05:15 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.8 2000/01/28 15:25:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,7 +31,7 @@ typedef struct {
 extern void   _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate);
 extern void   _vp_psy_clear(vorbis_look_psy *p);
 extern void  *_vi_psy_dup(void *source);
-extern void   _vi_psy_free(void *i);
+extern void   _vi_psy_free(vorbis_info_psy *i);
 
 extern void   _vp_mask_floor(vorbis_look_psy *p,double *pcm,
 			     double *mask,double *floor);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.4 2000/01/22 13:28:08 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.5 2000/01/28 15:25:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -38,6 +38,7 @@ int main(){
   
   vorbis_info      vi; /* struct that stores all the static vorbis bitstream
 			  settings */
+  vorbis_comment   vc; /* struct that stores all the bitstream user comments */
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
   
@@ -85,6 +86,7 @@ int main(){
        useful to see that functionality seperated out. */
     
     vorbis_info_init(&vi);
+    vorbis_comment_init(&vc);
     if(ogg_stream_pagein(&os,&og)<0){ 
       /* error; stream version mismatch perhaps */
       fprintf(stderr,"Error reading first page of Ogg bitstream data.\n");
@@ -97,7 +99,7 @@ int main(){
       exit(1);
     }
     
-    if(vorbis_info_headerin(&vi,&op)<0){ 
+    if(vorbis_synthesis_headerin(&vi,&vc,&op)<0){ 
       /* error case; not a vorbis header */
       fprintf(stderr,"This Ogg bitstream does not contain Vorbis "
 	      "audio data.\n");
@@ -133,8 +135,8 @@ int main(){
 		 We can't tolerate that in a header.  Die. */
 	      fprintf(stderr,"Corrupt secondary header.  Exiting.\n");
 	      exit(1);
-	  }
-	    vorbis_info_headerin(&vi,&op);
+	    }
+	    vorbis_synthesis_headerin(&vi,&vc,&op);
 	    i++;
 	  }
 	}
@@ -152,13 +154,13 @@ int main(){
     /* Throw the comments plus a few lines about the bitstream we're
        decoding */
     {
-      char **ptr=vi.user_comments;
+      char **ptr=vc.user_comments;
       while(*ptr){
 	fprintf(stderr,"%s\n",*ptr);
 	++ptr;
       }
       fprintf(stderr,"\nBitstream is %d channel, %ldHz\n",vi.channels,vi.rate);
-      fprintf(stderr,"Encoded by: %s\n\n",vi.vendor);
+      fprintf(stderr,"Encoded by: %s\n\n",vc.vendor);
     }
     
     convsize=4096/vi.channels;

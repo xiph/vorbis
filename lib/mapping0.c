@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.5 2000/01/28 14:34:44 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.6 2000/01/28 15:25:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,14 +51,14 @@ typedef struct {
 
 } vorbis_look_mapping0;
 
-void free_info(vorbis_info_mapping *i){
+static void free_info(vorbis_info_mapping *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_mapping0));
     free(i);
   }
 }
 
-void free_look(vorbis_look_mapping *look){
+static void free_look(vorbis_look_mapping *look){
   int i;
   vorbis_look_mapping0 *l=(vorbis_look_mapping0 *)look;
   if(l){
@@ -80,7 +80,7 @@ void free_look(vorbis_look_mapping *look){
   }
 }
 
-vorbis_look_mapping *look(vorbis_info *vi,vorbis_info_mode *vm,
+static vorbis_look_mapping *look(vorbis_info *vi,vorbis_info_mode *vm,
 			  vorbis_info_mapping *m){
   int i;
   vorbis_look_mapping0 *ret=calloc(1,sizeof(vorbis_look_mapping0));
@@ -121,7 +121,7 @@ vorbis_look_mapping *look(vorbis_info *vi,vorbis_info_mode *vm,
   return(ret);
 }
 
-void pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer *opb){
+static void pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer *opb){
   int i;
   vorbis_info_mapping0 *d=(vorbis_info_mapping0 *)vm;
 
@@ -139,7 +139,7 @@ void pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer *opb){
 }
 
 /* also responsible for range checking */
-vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
+static vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
   int i;
   vorbis_info_mapping0 *d=calloc(1,sizeof(vorbis_info_mapping0));
   memset(d,0,sizeof(vorbis_info_mapping0));
@@ -179,7 +179,7 @@ vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
 #include "spectrum.h"
 
 /* no time mapping implementation for now */
-int forward(vorbis_block *vb,vorbis_look_mapping *l){
+static int forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state     *vd=vb->vd;
   vorbis_info          *vi=vd->vi;
   vorbis_look_mapping0 *look=(vorbis_look_mapping0 *)l;
@@ -261,7 +261,7 @@ int forward(vorbis_block *vb,vorbis_look_mapping *l){
   return(0);
 }
 
-int inverse(vorbis_block *vb,vorbis_look_mapping *l){
+static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state     *vd=vb->vd;
   vorbis_info          *vi=vd->vi;
   vorbis_look_mapping0 *look=(vorbis_look_mapping0 *)l;
@@ -319,5 +319,11 @@ int inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* all done! */
   return(0);
 }
+
+/* export hooks */
+vorbis_func_mapping mapping0_exportbundle={
+  &pack,&unpack,&look,&free_info,&free_look,&forward,&inverse
+};
+
 
 

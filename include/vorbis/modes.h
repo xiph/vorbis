@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.3 2000/01/28 14:31:24 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.4 2000/01/28 15:25:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,8 +22,8 @@
 #include <stdio.h>
 #include "vorbis/codec.h"
 #include "vorbis/backends.h"
-#include "vorbis/book/lsp20_0.h"
-#include "vorbis/book/lsp32_0.h"
+#include "vorbis/book/lsp20_0.vqh"
+#include "vorbis/book/lsp32_0.vqh"
 
 /*
    0      1      2      3      4     5      6     7     8     9 
@@ -43,49 +43,39 @@ static vorbis_info_psy _psy_set0={
 };
 
 /* with GNUisms, this could be short and readable. Oh well */
-static static_codebook *_book_vec0[2]={&_vq_book_lsp20_0,&_vq_book_lsp32_0};
 static vorbis_info_time0 _time_set0={0};
 static vorbis_info_floor0 _floor_set0={20, 44100,  64, 1, {0} };
 static vorbis_info_floor0 _floor_set1={32, 44100, 256, 1, {1} };
 static vorbis_info_residue0 _residue_set0={0,0};
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {0}, {0}};
-static vorbis_info mode _mode_set0={0,0,0,0};
-static vorbis_info mode _mode_set1={1,0,0,1};
-
-static vorbis_info_time *_time_A[1]={&_time_set0};
-static vorbis_info_floor *_floor_A[2]={&_floor_set0,&_floor_set1};
-static vorbis_info_residue *_res_A[1]={&_residue_set0};
-static vorbis_info_psy *_psy_A[1]={&_psy_set0};
-static vorbis_info_mode *_mode_A[2]=
-
+static vorbis_info_mode _mode_set0={0,0,0,0};
+static vorbis_info_mode _mode_set1={1,0,0,1};
 
 /* CD quality stereo, no channel coupling */
 vorbis_info info_A={
-  {
-    /* channels, sample rate, upperkbps, nominalkbps, lowerkbps */
-    2, 44100, 0,0,0,
-    /* smallblock, largeblock */
-    {256, 2048}, 
-    /* modes,maps,times,floors,residues,books,psys */
-    2,          2,    1,     2,       2,    2,   1,
-    /* modes */
-    {&_mode_set0,&mode_set1},
-    /* maps */
-    {0,0},{&_mapping_set0,&_mapping_set1},
-    /* times */
-    {0,0},{&_time_set0},
-    /* floors */
-    {0,0},{&_floor_set0,&_floor_set1},
-    /* residue */
-    {0,0},{&_residue_set0},
-    /* books */
-    {&_vq_book_lsp20_0,&_vq_book_lsp32_0},
-    /* psy */
-    {&_psy_set0},
-    /* thresh sample period, preecho clamp trigger threshhold, range */
-    64, 10, 2 
-  }
+  /* channels, sample rate, upperkbps, nominalkbps, lowerkbps */
+  0, 2, 44100, 0,0,0,
+  /* smallblock, largeblock */
+  {256, 2048}, 
+  /* modes,maps,times,floors,residues,books,psys */
+  2,          2,    1,     2,       2,    2,   1,
+  /* modes */
+  {&_mode_set0,&_mode_set1},
+  /* maps */
+  {0,0},{&_mapping_set0,&_mapping_set1},
+  /* times */
+  {0,0},{&_time_set0},
+  /* floors */
+  {0,0},{&_floor_set0,&_floor_set1},
+  /* residue */
+  {0,0},{&_residue_set0},
+  /* books */
+  {&_vq_book_lsp20_0,&_vq_book_lsp32_0},
+  /* psy */
+  {&_psy_set0},
+  /* thresh sample period, preecho clamp trigger threshhold, range */
+  64, 10, 2 
 };
 
 #define PREDEF_INFO_MAX 0

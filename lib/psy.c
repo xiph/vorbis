@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.13 2000/01/28 09:05:14 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.14 2000/01/28 15:25:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -140,3 +140,9 @@ static void time_convolve(double *s,double *r,int n,int m){
   }
 }
 
+void _vi_psy_free(vorbis_info_psy *i){
+  if(i){
+    memset(i,0,sizeof(vorbis_info_psy));
+    free(i);
+  }
+}
