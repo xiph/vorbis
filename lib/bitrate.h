@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.h,v 1.3 2001/12/19 07:33:51 xiphmont Exp $
+ last mod: $Id: bitrate.h,v 1.4 2001/12/23 10:12:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,7 @@
 
 /* encode side bitrate tracking */
 #define BITTRACK_DIVISOR 16
+#define BITTRACK_BPT     6
 typedef struct bitrate_manager_state {
   ogg_uint32_t  *queue_binned;
   ogg_uint32_t  *queue_actual;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.9 2001/12/20 01:00:38 segher Exp $
+ last mod: $Id: residue_44.h,v 1.10 2001/12/23 10:12:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,14 +20,14 @@
 
 static bitrate_manager_info _bm_44_default={
   /* progressive coding and bitrate controls */
-  2.,.5,
+  4.,.0,
   2.,       0,           0,  
             0,           0,
            
-  4.0,2.3, -1.,              .05, 
-            -.05,             .05,
+  4.0,2.3, -350,              .02, 
+            -.00,             .00,
   3.2,5.0,
-  -6.f,+2.f
+  0.,0.
 };
 
 /***** residue backends *********************************************/

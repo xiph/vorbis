@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.31 2001/12/22 09:40:39 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.32 2001/12/23 10:12:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -914,6 +914,7 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
 				long nominal_bitrate,
 				long min_bitrate){
 
+  double tnominal=nominal_bitrate;
   double approx_vbr=approx_bitrate_to_vbr(channels,(channels==2), 
 					  (float)nominal_bitrate,rate);
   int ret=0;
@@ -973,18 +974,15 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
     ci->bi.queue_hardmin=min_bitrate;
     ci->bi.queue_hardmax=max_bitrate;
     
-    ci->bi.queue_avgmin=nominal_bitrate;
-    ci->bi.queue_avgmax=nominal_bitrate;
+    ci->bi.queue_avgmin=tnominal;
+    ci->bi.queue_avgmax=tnominal;
 
     /* adjust management */
     if(max_bitrate<=0. && min_bitrate<=0.){
       /* just an average tracker; no reason for the window to be as small as 2s. */
-      ci->bi.queue_avg_time=4.;
+      //ci->bi.queue_avg_time=4.;
     }
     ci->bi.avgfloat_noise_maxval=_bm_max_noise_offset[(int)approx_vbr];
-    /*if(max_bitrate>0.){
-      ci->bi.avgfloat_minimum=0.;
-      }*/
 
   }
   return(ret);
@@ -1016,11 +1014,3 @@ int vorbis_encode_init(vorbis_info *vi,
 int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
   return(OV_EIMPL);
 }
-		       
-
-
-
-
-
-
-
