@@ -11,10 +11,11 @@
  ********************************************************************
 
  function: flexible, delayed bitpacking abstraction
- last mod: $Id: bitbuffer.c,v 1.3 2001/02/02 03:51:55 xiphmont Exp $
+ last mod: $Id: bitbuffer.c,v 1.4 2001/02/19 06:34:05 jack Exp $
 
  ********************************************************************/
 
+#include <string.h>
 #include <ogg/ogg.h>
 #include <vorbis/codec.h>
 #include "misc.h"

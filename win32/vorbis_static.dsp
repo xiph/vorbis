@@ -63,8 +63,8 @@ LIB32=link.exe -lib
 # PROP Output_Dir "Static_Debug"
 # PROP Intermediate_Dir "Static_Debug"
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ  /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /I "..\..\ogg\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "_WIN32" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /I "..\..\ogg\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /D "_WIN32" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -89,6 +89,10 @@ SOURCE=..\lib\analysis.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\lib\bitbuffer.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\lib\block.c
 # End Source File
 # Begin Source File
@@ -102,10 +106,6 @@ SOURCE=..\lib\envelope.c
 # Begin Source File
 
 SOURCE=..\lib\floor0.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\lib\iir.c
 # End Source File
 # Begin Source File
 
@@ -169,6 +169,10 @@ SOURCE=..\include\vorbis\backends.h
 # End Source File
 # Begin Source File
 
+SOURCE=..\lib\bitbuffer.h
+# End Source File
+# Begin Source File
+
 SOURCE=..\lib\bookinternal.h
 # End Source File
 # Begin Source File
@@ -210,6 +214,10 @@ SOURCE=..\lib\masking.h
 # Begin Source File
 
 SOURCE=..\lib\mdct.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\misc.h
 # End Source File
 # Begin Source File
 
