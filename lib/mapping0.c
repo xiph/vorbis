@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.46 2002/03/23 03:17:34 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.47 2002/03/24 21:04:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -284,7 +284,6 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 
 /* no time mapping implementation for now */
 static long seq=0;
-ogg_int64_t total=0;
 
 static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state      *vd=vb->vd;
@@ -333,13 +332,13 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     float *logmask =work+n/2;*/
 
     scale_dB=todB(&scale);
-    //_analysis_output_always("pcm",seq+i,pcm,n,0,0,total-n/2);
+    /*_analysis_output_always("pcm",seq+i,pcm,n,0,0,total-n/2);*/
 
     /* window the PCM data */
     _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
     memcpy(fft,pcm,sizeof(*fft)*n);
     
-    //_analysis_output_always("windowed",seq+i,pcm,n,0,0,total-n/2);
+    /*_analysis_output_always("windowed",seq+i,pcm,n,0,0,total-n/2);*/
 
     /* transform the PCM data */
     /* only MDCT right now.... */
@@ -359,7 +358,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     if(local_ampmax[i]>0.f)local_ampmax[i]=0.f;
     if(local_ampmax[i]>global_ampmax)global_ampmax=local_ampmax[i];
 
-    //_analysis_output("fft",seq+i,logfft,n/2,1,0);
+    /*_analysis_output("fft",seq+i,logfft,n/2,1,0);*/
   }
 
   for(i=0;i<vi->channels;i++){
@@ -375,9 +374,17 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     float *logmax  =mdct+n/2;
     float *logmask =work+n/2;
 
+    /*
+    for(j=0;j<n/2;j+=2){
+      logmdct[j>>1]=FABS(mdct+j)+FABS(mdct+j+1);
+      logmdct[j>>1]=todB(logmdct+(j>>1));
+    }
+    _analysis_output_always("mdct2",seq+i,logmdct,n/4,1,0,total-n/2);*/
+
+
     for(j=0;j<n/2;j++)
       logmdct[j]=todB(mdct+j);
-    //_analysis_output("mdct",seq+i,logmdct,n/2,1,0);
+    /*_analysis_output_always("mdct",seq+i,logmdct,n/2,1,0,total-n/2);*/
 
 
     /* perform psychoacoustics; do masking */
@@ -389,7 +396,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		     local_ampmax[i],
 		     bm->avgnoise);
 
-    //_analysis_output("mask",seq+i,logmask,n/2,1,0);
+    /*_analysis_output("mask",seq+i,logmask,n/2,1,0);*/
     /* perform floor encoding */
     nonzero[i]=look->floor_func[submap]->
       forward(vb,look->floor_look[submap],
@@ -412,7 +419,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	fprintf(stderr,"%ld ",seq+i);
 	}*/
 
-    //_analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
+    /*_analysis_output("codedflr",seq+i,codedflr,n/2,1,1);*/
       
   }
 
@@ -562,7 +569,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     seq+=vi->channels;
   } 
 
-  total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;
+  /*total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;*/
   look->lastframe=vb->sequence;
   return(0);
 }

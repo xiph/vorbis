@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.66 2002/03/18 03:30:23 segher Exp $
+ last mod: $Id: psy.c,v 1.67 2002/03/24 21:04:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -931,7 +931,6 @@ static void couple_point(float A, float B, float fA, float fB,
     *ang=0.f;
   }    
 }
-
 
 void _vp_quantize_couple(vorbis_look_psy *p,
 			 vorbis_info_mapping0 *vi,

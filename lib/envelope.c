@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.43 2002/03/23 03:17:33 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.44 2002/03/24 21:04:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,7 +37,7 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   int n=e->winlength=ci->blocksizes[0];
   e->searchstep=ci->blocksizes[0]/VE_DIV; /* not random */
 
-  e->minenergy=fromdB(gi->preecho_minenergy);
+  e->minenergy=gi->preecho_minenergy;
   e->ch=ch;
   e->storage=128;
   e->cursor=ci->blocksizes[1]/2;
@@ -53,32 +53,41 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
      to Hell with that) */
   /* 2(1.3-3) 4(2.6-6) 8(5.3-12) 16(10.6-18) */
 
-  e->band[0].begin=rint(1300.f/22050.f*n/4.f)*2.f;
-  e->band[0].end=rint(3000.f/22050.f*n/4.f)*2.f-e->band[0].begin;
-  e->band[1].begin=rint(2600.f/22050.f*n/4.f)*2.f;
-  e->band[1].end=rint(6000.f/22050.f*n/4.f)*2.f-e->band[1].begin;
-  e->band[2].begin=rint(5300.f/22050.f*n/4.f)*2.f;
-  e->band[2].end=rint(12000.f/22050.f*n/4.f)*2.f-e->band[2].begin;
-  e->band[3].begin=rint(10600.f/22050.f*n/4.f)*2.f;
-  e->band[3].end=rint(18000.f/22050.f*n/4.f)*2.f-e->band[3].begin;
+  e->band[0].begin=rint(3000.f/22050.f*n/4.f)*2.f;
+  e->band[0].end=rint(6000.f/22050.f*n/4.f)*2.f-e->band[0].begin;
+  e->band[1].begin=rint(5000.f/22050.f*n/4.f)*2.f;
+  e->band[1].end=rint(10000.f/22050.f*n/4.f)*2.f-e->band[1].begin;
+  e->band[2].begin=rint(8000.f/22050.f*n/4.f)*2.f;
+  e->band[2].end=rint(16000.f/22050.f*n/4.f)*2.f-e->band[2].begin;
+  e->band[3].begin=rint(12000.f/22050.f*n/4.f)*2.f;
+  e->band[3].end=rint(20000.f/22050.f*n/4.f)*2.f-e->band[3].begin;
 
-  e->band[0].window=_ogg_malloc((e->band[0].end)*sizeof(*e->band[0].window));
-  e->band[1].window=_ogg_malloc((e->band[1].end)*sizeof(*e->band[1].window));
-  e->band[2].window=_ogg_malloc((e->band[2].end)*sizeof(*e->band[2].window));
-  e->band[3].window=_ogg_malloc((e->band[3].end)*sizeof(*e->band[3].window));
+  e->band[0].window=_ogg_malloc((e->band[0].end)/2*sizeof(*e->band[0].window));
+  e->band[1].window=_ogg_malloc((e->band[1].end)/2*sizeof(*e->band[1].window));
+  e->band[2].window=_ogg_malloc((e->band[2].end)/2*sizeof(*e->band[2].window));
+  e->band[3].window=_ogg_malloc((e->band[3].end)/2*sizeof(*e->band[3].window));
   
-  n=e->band[0].end;
-  for(i=0;i<n;i++)
+  n=e->band[0].end/2;
+  for(i=0;i<n;i++){
     e->band[0].window[i]=sin((i+.5)/n*M_PI);
-  n=e->band[1].end;
-  for(i=0;i<n;i++)
+    e->band[0].total+=e->band[0].window[i];
+  }
+  n=e->band[1].end/2;
+  for(i=0;i<n;i++){
     e->band[1].window[i]=sin((i+.5)/n*M_PI);
-  n=e->band[2].end;
-  for(i=0;i<n;i++)
+    e->band[1].total+=e->band[1].window[i];
+  }
+  n=e->band[2].end/2;
+  for(i=0;i<n;i++){
     e->band[2].window[i]=sin((i+.5)/n*M_PI);
-  n=e->band[3].end;
-  for(i=0;i<n;i++)
+    e->band[2].total+=e->band[2].window[i];
+  }
+  n=e->band[3].end/2;
+  for(i=0;i<n;i++){
     e->band[3].window[i]=sin((i+.5)/n*M_PI);
+    e->band[3].total+=e->band[3].window[i];
+  }
+
   
   e->filter=_ogg_calloc(VE_BANDS*ch,sizeof(*e->filter));
   e->mark=_ogg_calloc(e->storage,sizeof(*e->mark));
@@ -99,7 +108,6 @@ void _ve_envelope_clear(envelope_lookup *e){
 
 /* fairly straight threshhold-by-band based until we find something
    that works better and isn't patented. */
-static int seq2=0;
 static int _ve_amp(envelope_lookup *ve,
 		   vorbis_info_psy_global *gi,
 		   float *data,
@@ -125,14 +133,15 @@ static int _ve_amp(envelope_lookup *ve,
 
   /* accumulate amplitude by band */
   for(j=0;j<VE_BANDS;j++){
-    for(i=0;i<bands[j].end;i++){
-      float val=vec[i+bands[j].begin];
-      acc[j]+=val*val*bands[j].window[i];
+    for(i=0;i<bands[j].end;i+=2){
+      float val=FABS(vec+i+bands[j].begin)+FABS(vec+i+bands[j].begin+1);
+      acc[j]+=todB(&val)*bands[j].window[i>>1];
     }
-    acc[j]/=i*.707f;
-    if(acc[j]<minV*minV)acc[j]=minV*minV;
-    acc[j]=todB(acc+j);
+    acc[j]/=bands[j].total;
+    if(acc[j]<minV)acc[j]=minV;
+    //fprintf(stderr,"%d %gdB :: ",j,acc[j]);
   }
+  //fprintf(stderr,"\n");
 
   /* convert amplitude to delta */
   for(j=0;j<VE_BANDS;j++){
@@ -149,21 +158,18 @@ static int _ve_amp(envelope_lookup *ve,
     float val=.14*buf[0]+.14*buf[1]+.72*acc[j];
     buf[0]=buf[1];buf[1]=acc[j];
     acc[j]=val;
-    filters[j].markers[pos+1]=val;
+    /*filters[j].markers[pos+1]=val;*/
   }
 
   /* look at local min/max */
   for(j=0;j<VE_BANDS;j++){
     float *buf=filters[j].convbuf;
-    if(buf[1]>gi->preecho_thresh[j] && buf[0]<buf[1] && acc[j]<buf[1])ret=1;
-    if(buf[1]<gi->postecho_thresh[j] && buf[0]>buf[1] && acc[j]>buf[1])ret=1;
+    if(buf[1]>gi->preecho_thresh[j] && buf[0]<buf[1] && acc[j]<buf[1])ret|=1;
+    if(buf[1]<gi->postecho_thresh[j] && buf[0]>buf[1] && acc[j]>buf[1])ret|=2;
     buf[0]=buf[1];buf[1]=acc[j];
   }
   return(ret);
 }
-
-static int seq=0;
-static ogg_int64_t totalshift=-1024;
 
 long _ve_envelope_search(vorbis_dsp_state *v){
   vorbis_info *vi=v->vi;
@@ -192,11 +198,17 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 
     /* we assume a 'transient' occupies half a short block; this way,
        it's contained in two short blocks, else the first block is
-       short and the second long, causing smearing */
+       short and the second long, causing smearing.
+
+      preecho triggers follow the impulse marker; postecho triger preceed it */
+
     ve->mark[j+VE_DIV/2]=0;
-    if(ret)
+    if(ret&1)
       for(i=0;i<=VE_DIV/2;i++)
-	ve->mark[j+i]=ret;
+	ve->mark[j+i]=1;
+    if(ret&2)
+      for(i=-1;i>=-VE_DIV/2 && j+i>=0;i--)
+	ve->mark[j+i]=1;
   }
 
   ve->current=last*ve->searchstep;
@@ -211,7 +223,12 @@ long _ve_envelope_search(vorbis_dsp_state *v){
     
     j=ve->cursor;
     
-    while(j<ve->current){
+    while(j<ve->current-(VE_DIV/2*ve->searchstep)){ /* modified to
+                                                       stay clear of
+                                                       possibly
+                                                       unfinished
+                                                       postecho
+                                                       detection */
       if(j>=testW)return(1);
       if(ve->mark[j/ve->searchstep]){
 	if(j>centerW){
@@ -221,12 +238,10 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 	    float *marker=alloca(v->pcm_current*sizeof(*marker));
 	    int l;
 	    memset(marker,0,sizeof(*marker)*v->pcm_current);
-
 	    fprintf(stderr,"mark! seq=%d, cursor:%fs time:%fs\n",
 		    seq,
 		    (totalshift+ve->cursor)/44100.,
 		    (totalshift+j)/44100.);
-
 	    _analysis_output_always("pcmL",seq,v->pcm[0],v->pcm_current,0,0,totalshift);
 	    _analysis_output_always("pcmR",seq,v->pcm[1],v->pcm_current,0,0,totalshift);
 
@@ -250,11 +265,10 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 	    _analysis_output_always("delR2",seq,marker,v->pcm_current,0,0,totalshift);
 	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[7].markers[l]*.01;
 	    _analysis_output_always("delR3",seq,marker,v->pcm_current,0,0,totalshift);
-	      
 	    seq++;
 
 	  }
-#endif
+#endif      
 
 	  ve->curmark=j;
 	  ve->cursor=j;
@@ -307,16 +321,18 @@ void _ve_envelope_shift(envelope_lookup *e,long shift){
 
   memmove(e->mark,e->mark+smallshift,(smallsize-smallshift)*sizeof(*e->mark));
   
+#if 0
   for(i=0;i<VE_BANDS*e->ch;i++)
     memmove(e->filter[i].markers,
 	    e->filter[i].markers+smallshift,
 	    (1024-smallshift)*sizeof(*(*e->filter).markers));
+  totalshift+=shift;
+#endif
 
   e->current-=shift;
   if(e->curmark>=0)
     e->curmark-=shift;
   e->cursor-=shift;
-  totalshift+=shift;
 }
 
 

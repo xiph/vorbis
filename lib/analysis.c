@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.49 2002/03/23 03:17:33 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.50 2002/03/24 21:04:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -58,9 +58,6 @@ int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
   if(vb->W){
     oggpack_write(&vb->opb,vb->lW,1);
     oggpack_write(&vb->opb,vb->nW,1);
-    /*fprintf(stderr,"*");
-  }else{
-  fprintf(stderr,".");*/
   }
 
   if((ret=_mapping_P[type]->forward(vb,b->mode[mode])))
