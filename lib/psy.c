@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48 2001/06/18 22:19:26 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.48.2.1 2001/07/08 08:48:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -34,8 +34,41 @@
 /* Why Bark scale for encoding but not masking computation? Because
    masking has a strong harmonic dependancy */
 
-/* the beginnings of real psychoacoustic infrastructure.  This is
-   still not tightly tuned */
+vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
+  int i,j;
+  codec_setup_info *ci=vi->codec_setup;
+  vorbis_info_psy_global *gi=ci->psy_g_param;
+  vorbis_look_psy_global *look=_ogg_calloc(1,sizeof(vorbis_look_psy_global));
+
+  int shiftoc=rint(log(gi->eighth_octave_lines*8)/log(2))-1;
+  look->decaylines=toOC(96000.f)*(1<<(shiftoc+1))+.5f; /* max sample
+							  rate of
+							  192000kHz
+							  for now */
+  look->decay=_ogg_calloc(vi->channels,sizeof(float *));
+  for(i=0;i<vi->channels;i++){
+    look->decay[i]=_ogg_calloc(look->decaylines,sizeof(float));
+    for(j=0;j<look->decaylines;j++)
+      look->decay[i][j]=-9999.;
+  }
+  look->channels=vi->channels;
+
+  look->ampmax=-9999.;
+  look->gi=gi;
+  return(look);
+}
+
+void _vp_global_free(vorbis_look_psy_global *look){
+  int i;
+  if(look->decay){
+    for(i=0;i<look->channels;i++)
+      _ogg_free(look->decay[i]);
+    _ogg_free(look->decay);
+  }
+  memset(look,0,sizeof(vorbis_look_psy_global));
+  _ogg_free(look);
+}
+
 void _vi_psy_free(vorbis_info_psy *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_psy));
@@ -178,16 +211,17 @@ static void setup_curve(float **c,
   }
 }
 
-void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
+void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
+		  vorbis_info_psy_global *gi,int n,long rate){
   long i,j,lo=0,hi=0;
   long maxoc;
   memset(p,0,sizeof(vorbis_look_psy));
 
 
-  p->eighth_octave_lines=vi->eighth_octave_lines;
-  p->shiftoc=rint(log(vi->eighth_octave_lines*8)/log(2))-1;
+  p->eighth_octave_lines=gi->eighth_octave_lines;
+  p->shiftoc=rint(log(gi->eighth_octave_lines*8)/log(2))-1;
 
-  p->firstoc=toOC(.25f*rate/n)*(1<<(p->shiftoc+1))-vi->eighth_octave_lines;
+  p->firstoc=toOC(.25f*rate/n)*(1<<(p->shiftoc+1))-gi->eighth_octave_lines;
   maxoc=toOC((n*.5f-.25f)*rate/n)*(1<<(p->shiftoc+1))+.5f;
   p->total_octave_lines=maxoc-p->firstoc+1;
 
@@ -197,9 +231,9 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   p->bark=_ogg_malloc(n*sizeof(unsigned long));
   p->vi=vi;
   p->n=n;
+  p->rate=rate;
 
   /* set up the lookups for a given blocksize and sample rate */
-  /* Vorbis max sample rate is currently limited by 26 Bark (54kHz) */
   if(vi->ath)
     set_curve(vi->ath, p->ath,n,rate);
   for(i=0;i<n;i++){
@@ -411,7 +445,7 @@ static void seed_loop(vorbis_look_psy *p,
 	if(f[i]>max)max=f[i];
       }
 
-      if(max>flr[i]){
+      if(max+6.f>flr[i]){
 	oc=oc>>p->shiftoc;
 	if(oc>=P_BANDS)oc=P_BANDS-1;
 	if(oc<0)oc=0;
@@ -508,7 +542,10 @@ static void seed_chase(float *seeds, int linesper, long n){
 }
 
 /* bleaugh, this is more complicated than it needs to be */
-static void max_seeds(vorbis_look_psy *p,float *minseed,float *maxseed,
+static void max_seeds(vorbis_look_psy *p,
+		      vorbis_look_psy_global *g,
+		      int channel,
+		      float *minseed,float *maxseed,
 		      float *flr){
   long   n=p->total_octave_lines;
   int    linesper=p->eighth_octave_lines;
@@ -516,6 +553,8 @@ static void max_seeds(vorbis_look_psy *p,float *minseed,float *maxseed,
   long   pos;
 
   seed_chase(minseed,linesper,n); /* for masking */
+  _vp_compute_mask_decay(p,g,minseed,channel);
+
   seed_chase(maxseed,linesper,n); /* for peak att */
  
   pos=p->octave[0]-p->firstoc-(linesper>>1);
@@ -666,11 +705,51 @@ static void bark_noise_median(int n,const long *b,const float *f,
 
 }
 
+static int seq=0;
+static void _vp_compute_mask_decay(vorbis_look_psy *p,
+				   vorbis_look_psy_global *g,
+				   float *seed,int channel){
+  if(g->gi->decaydBpms<0){
+    int i;
+
+    /* first decay the entire cached buffer */
+    float *decay=g->decay[channel];
+    float ms=p->n*1000.f/p->rate;
+    float decaydB=g->gi->decaydBpms*ms;
+
+    for(i=0;i<g->decaylines;i++){
+      decay[i]+=decaydB;
+      if(decay[i]<-9999.f)decay[i]=-9999.f;
+    }
+    _analysis_output("decay",seq,decay+200,g->decaylines-200,0,0);
+    _analysis_output("seed",seq++,seed-p->firstoc+200,p->total_octave_lines+p->firstoc-200,0,0);
+
+    /* now, apply decayed buffer to the valid range of the seeds,
+       copy back larger seeds into cache */
+    {
+      float end=p->total_octave_lines+p->firstoc-1;
+      int begin=-p->firstoc;
+
+      if(end>g->decaylines)end=g->decaylines;
+      if(begin<260)begin=260;
+      for(i=begin;i<end;i++){
+	if(decay[i]>seed[i-p->firstoc])
+	  seed[i-p->firstoc]=decay[i];
+	else
+	  decay[i]=seed[i-p->firstoc];
+      }
+    }
+  }
+}
+
 float _vp_compute_mask(vorbis_look_psy *p,
-		      float *fft, 
-		      float *mdct, 
-		      float *mask, 
-		      float specmax){
+		       vorbis_look_psy_global *g,
+		       int channel,
+		       float *fft, 
+		       float *mdct, 
+		       float *mask, 
+		       float specmax,
+		       int lastsize){
   int i,n=p->n;
   float localmax=NEGINF;
   static int seq=0;
@@ -693,7 +772,7 @@ float _vp_compute_mask(vorbis_look_psy *p,
 		      p->vi->noisewindowhimin,
 		      p->noisemedian,
 		      p->noiseoffset,
-		      (const long *)(p->vi->noisewindowfixed));
+		      p->vi->noisewindowfixed);
     /* suppress any noise curve > specmax+p->vi->noisemaxsupp */
     for(i=0;i<n;i++)
       if(mask[i]>specmax+p->vi->noisemaxsupp)
@@ -718,13 +797,12 @@ float _vp_compute_mask(vorbis_look_psy *p,
 
   /* tone/peak masking */
 
-  /* XXX apply decay to the fft here */
-
   seed_loop(p,
 	    (const float ***)p->tonecurves,
 	    (const float **)p->peakatt,fft,mask,minseed,maxseed,specmax);
+
   bound_loop(p,mdct,maxseed,mask,p->vi->bound_att_dB);
-  max_seeds(p,minseed,maxseed,mask);
+  max_seeds(p,g,channel,minseed,maxseed,mask);
 
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */
@@ -742,10 +820,12 @@ float _vp_compute_mask(vorbis_look_psy *p,
 float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
   vorbis_info *vi=vd->vi;
   codec_setup_info *ci=vi->codec_setup;
+  vorbis_info_psy_global *gi=ci->psy_g_param;
+
   int n=ci->blocksizes[vd->W]/2;
   float secs=(float)n/vi->rate;
 
-  amp+=secs*ci->ampmax_att_per_sec;
+  amp+=secs*gi->ampmax_att_per_sec;
   if(amp<-9999)amp=-9999;
   return(amp);
 }
