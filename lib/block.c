@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.36 2000/08/23 10:16:56 xiphmont Exp $
+ last mod: $Id: block.c,v 1.37 2000/08/23 10:27:14 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -353,18 +353,18 @@ double **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   return(v->pcmret);
 }
 
-static void _preinterpolate_helper(vorbis_dsp_state *v){
+static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
   int order=32;
   double *lpc=alloca(order*sizeof(double));
   double *work=alloca(v->pcm_current*sizeof(double));
   long j;
-  v->preinterp=1;
+  v->preextrapolate=1;
 
   if(v->pcm_current-v->centerW>order*2){ /* safety */
     for(i=0;i<v->vi->channels;i++){
       
-      /* need to run the interpolation in reverse! */
+      /* need to run the extrapolation in reverse! */
       for(j=0;j<v->pcm_current;j++)
 	work[j]=v->pcm[i][v->pcm_current-j-1];
       
@@ -393,8 +393,8 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
     double *lpc=alloca(order*sizeof(double));
 
     /* if it wasn't done earlier (very short sample) */
-    if(!v->preinterp)
-      _preinterpolate_helper(v);
+    if(!v->preextrapolate)
+      _preextrapolate_helper(v);
 
     /* We're encoding the end of the stream.  Just make sure we have
        [at least] a full block of zeroes at the end. */
@@ -420,7 +420,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
 	vorbis_lpc_predict(lpc,v->pcm[i]+v->eofflag-order,order,
 			   v->pcm[i]+v->eofflag,v->pcm_current-v->eofflag);
       }else{
-	/* not enough data to interpolate (unlikely to happen due to
+	/* not enough data to extrapolate (unlikely to happen due to
            guarding the overlap, but bulletproof in case that
            assumtion goes away). zeroes will do. */
 	memset(v->pcm[i]+v->eofflag,0,
@@ -435,11 +435,11 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
 
     v->pcm_current+=vals;
 
-    /* we may want to reverse interpolate the beginning of a stream
+    /* we may want to reverse extrapolate the beginning of a stream
        too... in case we're beginning on a cliff! */
     /* clumsy, but simple.  It only runs once, so simple is good. */
-    if(!v->preinterp && v->pcm_current-v->centerW>v->vi->blocksizes[1])
-      _preinterpolate_helper(v);
+    if(!v->preextrapolate && v->pcm_current-v->centerW>v->vi->blocksizes[1])
+      _preextrapolate_helper(v);
 
   }
   return(0);
@@ -453,7 +453,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   long beginW=v->centerW-vi->blocksizes[v->W]/2,centerNext;
 
   /* check to see if we're started... */
-  if(!v->preinterp)return(0);
+  if(!v->preextrapolate)return(0);
 
   /* check to see if we're done... */
   if(v->eofflag==-1)return(0);

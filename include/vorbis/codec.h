@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.26 2000/08/23 10:16:56 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.27 2000/08/23 10:27:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -240,7 +240,7 @@ typedef struct vorbis_dsp_state{
   int      pcm_current;
   int      pcm_returned;
 
-  int  preinterp;
+  int  preextrapolate;
   int  eofflag;
 
   long lW;
