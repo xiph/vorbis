@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.16 2000/06/15 09:18:34 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.17 2000/07/07 00:53:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,6 +21,7 @@
 #include "registry.h"
 #include "bitwise.h"
 #include "misc.h"
+#include "os.h"
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vorbis_dsp_state *vd=vb->vd;

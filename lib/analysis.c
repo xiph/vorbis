@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.29 2000/06/18 12:39:58 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.30 2000/07/07 00:53:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include "bitwise.h"
 #include "registry.h"
 #include "scales.h"
+#include "os.h"
 
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
