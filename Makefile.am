@@ -21,7 +21,9 @@ DISTCHECK_CONFIGURE_FLAGS = --enable-docs
 
 dist-hook:
 	rm -rf `find $(distdir)/macos -name CVS`
+	rm -rf `find $(distdir)/macos -name .svn`
 	rm -rf `find $(distdir)/macosx -name CVS`
+	rm -rf `find $(distdir)/macosx -name .svn`
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"
