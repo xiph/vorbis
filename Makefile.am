@@ -7,8 +7,8 @@ SUBDIRS = lib include doc examples win32 debian vq
 m4datadir = $(datadir)/aclocal
 m4data_DATA = vorbis.m4
 
-EXTRA_DIST = HACKING todo.txt libvorbis.spec vorbis.m4 \
-	mac macosx
+EXTRA_DIST = HACKING todo.txt mac macosx \
+	autogen.sh libvorbis.spec vorbis.m4
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"
