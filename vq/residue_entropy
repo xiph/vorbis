@@ -31,8 +31,11 @@ while (<STDIN>) {
     for(my$i=0;$i<$step;$i++){
 	my$key="";
 	for(my$j=$i;$j<$#nums;$j+=$step){
-	    
-	    $num=$quant[int(abs($nums[$j])*2)];
+	    if($nums[$j]<0){
+		$num=-$quant[int(-$nums[$j]*2)];
+	    }else{
+		$num=$quant[int($nums[$j]*2)];
+	    }
 	    $key.=":$num";
 	}
 	
@@ -45,6 +48,10 @@ while (<STDIN>) {
     if(($lines % 1000)==0){
 	print "\rworking... $lines lines, found $count values so far";
     }
+}
+
+foreach $key (keys %hash){
+    print "\t$key\n";
 }
 
 print "\r$count values total                                       \n";

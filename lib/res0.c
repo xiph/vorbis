@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.12.2.1 2000/05/24 21:17:02 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.12.2.2 2000/05/25 09:55:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -184,8 +184,8 @@ static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
   }
 
   for(i=0;i<look->parts-1;i++)
-    if(entropy[info->subgrp[j]]<=info->entmax[j] &&
-       max<=info->ampmax[j])
+    if(entropy[info->subgrp[i]]<=info->entmax[i] &&
+       max<=info->ampmax[i])
       break;
 
   return(i);

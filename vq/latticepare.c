@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.2.2.1 2000/05/24 21:17:02 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.2.2.2 2000/05/25 09:55:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -313,7 +313,7 @@ int main(int argc,char *argv[]){
 	  if((lines&0xff)==0)spinnit("counting samples...",lines*cols);
           line=setup_line(in);
         }
-	pointlist=malloc(cols*lines*sizeof(double));
+	pointlist=malloc((cols*lines+entries*dim)*sizeof(double));
 
 	rewind(in);
 	line=setup_line(in);
@@ -337,8 +337,12 @@ int main(int argc,char *argv[]){
   if(!entries || !points)usage();
   if(target==-1)usage();
 
+  /* add guard points */
+  for(i=0;i<entries;i++)
+    for(j=0;j<dim;j++)
+      pointlist[points++]=b->valuelist[i*dim+j];
+  
   points/=dim;
-
 
   /* set up auxiliary vectors for error tracking */
   {
@@ -375,25 +379,41 @@ int main(int argc,char *argv[]){
       membership[i]=cellhead[firstentry];
       cellhead[firstentry]=i;
 
-      cellerror1[firstentry]+=firstmetric;
-      cellcount[firstentry]++;
-      globalerror+=firstmetric;
-      cellerror2[firstentry]+=secondmetric;
+      if(i<points-entries){
+	cellerror1[firstentry]+=firstmetric;
+	cellcount[firstentry]++;
+	globalerror+=firstmetric;
+	cellerror2[firstentry]+=secondmetric;
+      }
+    }
 
+    {
+      fprintf(stderr,"\r");
+      for(i=0;i<entries;i++){
+	/* decompose index */
+	int entry=i;
+	for(j=0;j<dim;j++){
+	  fprintf(stderr,"%d:",entry%b->c->thresh_tree->quantvals);
+	  entry/=b->c->thresh_tree->quantvals;
+	}
+	
+	fprintf(stderr,":%ld, ",cellcount[i]);
+      }
+      fprintf(stderr,"\n");
     }
 
     /* handle the explicit cull list */
     for(i=0;i<culls;i++){
       long bestcell=cullist[i];
       char buf[80];
-      sprintf(buf,"explicit culls (%d left)... ",(int)culls-i);
+      sprintf(buf,"explicit culls (%ld left)... ",(int)culls-i);
       
       /* disperse cell.  move each point out, adding it (properly) to
          the second best */
       if(b->c->lengthlist[bestcell]>0){
 	long head=cellhead[bestcell];
 
-	fprintf(stderr,"\reliminating cell %d with a hit count of %d\n",
+	fprintf(stderr,"\reliminating cell %ld with a hit count of %ld\n",
 		bestcell,cellcount[bestcell]);
 
 	b->c->lengthlist[bestcell]=0;
@@ -406,12 +426,15 @@ int main(int argc,char *argv[]){
 	  double firstmetric=_dist(dim,b->valuelist+dim*newentry,ppt);
 	  double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
 	  long next=membership[head];
-	  cellcount[newentry]++;
-	  cellcount[bestcell]--;
-	  cellerror1[newentry]+=firstmetric;
-	  cellerror2[newentry]+=secondmetric;
-	  spinnit(buf,cellcount[bestcell]);
-	  
+
+	  if(head<points-entries){
+	    cellcount[newentry]++;
+	    cellcount[bestcell]--;
+	    cellerror1[newentry]+=firstmetric;
+	    cellerror2[newentry]+=secondmetric;
+	  }
+
+	  spinnit(buf,cellcount[bestcell]);	  
 	  membership[head]=cellhead[newentry];
 	  cellhead[newentry]=head;
 	  head=next;
@@ -439,7 +462,7 @@ int main(int argc,char *argv[]){
       }
 
       fprintf(stderr,"\reliminating cell %d with a dispersal error of %g\n"
-	      "     (%d hits)\n",bestcell,besterror,cellcount[bestcell]);
+	      "     (%ld hits)\n",bestcell,besterror,cellcount[bestcell]);
 
       /* disperse it.  move each point out, adding it (properly) to
          the second best */
@@ -454,10 +477,13 @@ int main(int argc,char *argv[]){
 	double firstmetric=_dist(dim,b->valuelist+dim*newentry,ppt);
 	double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
 	long next=membership[head];
-	cellcount[newentry]++;
-	cellcount[bestcell]--;
-	cellerror1[newentry]+=firstmetric;
-	cellerror2[newentry]+=secondmetric;
+
+	if(head<points-entries){
+	  cellcount[newentry]++;
+	  cellcount[bestcell]--;
+	  cellerror1[newentry]+=firstmetric;
+	  cellerror2[newentry]+=secondmetric;
+	}
 
 	membership[head]=cellhead[newentry];
 	cellhead[newentry]=head;
@@ -528,7 +554,7 @@ int main(int argc,char *argv[]){
     
     /* recount hits.  Build new lengthlist. reuse entryindex storage */
     for(i=0;i<entries;i++)entryindex[i]=1;
-    for(i=0;i<points;i++){
+    for(i=0;i<points-entries;i++){
       int best=_best(b,pointlist+i*dim,1);
       if(!(i&0xff))spinnit("counting hits...",i);
       if(best==-1){
