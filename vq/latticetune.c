@@ -13,7 +13,7 @@
 
  function: utility main for setting entropy encoding parameters
            for lattice codebooks
- last mod: $Id: latticetune.c,v 1.3.2.1 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: latticetune.c,v 1.3.2.2 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -80,8 +80,8 @@ int main(int argc,char *argv[]){
   entries=b->entries;
   dim=b->dim;
 
-  hits=malloc(entries*sizeof(long));
-  lengths=calloc(entries,sizeof(long));
+  hits=_ogg_malloc(entries*sizeof(long));
+  lengths=_ogg_calloc(entries,sizeof(long));
   for(j=0;j<entries;j++)hits[j]=guard;
 
   in=fopen(argv[2],"r");

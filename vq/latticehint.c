@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.3.2.1 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.3.2.2 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -58,10 +58,10 @@ static int addtosearch(int entry,long **tempstack,long *tempcount,int add){
   if(ptr){
     while(i--)
       if(*ptr++==add)return(0);
-    tempstack[entry]=realloc(tempstack[entry],
+    tempstack[entry]=_ogg_realloc(tempstack[entry],
 			     (tempcount[entry]+1)*sizeof(long));
   }else{
-    tempstack[entry]=malloc(sizeof(long));
+    tempstack[entry]=_ogg_malloc(sizeof(long));
   }
 
   tempstack[entry][tempcount[entry]++]=add;
@@ -166,14 +166,14 @@ int main(int argc,char *argv[]){
     /* yes. Discard any preexisting threshhold hint */
     long quantvals=_book_maptype1_quantvals(c);
     long **quantsort=alloca(quantvals*sizeof(long *));
-    encode_aux_threshmatch *t=calloc(1,sizeof(encode_aux_threshmatch));
+    encode_aux_threshmatch *t=_ogg_calloc(1,sizeof(encode_aux_threshmatch));
     c->thresh_tree=t;
 
     fprintf(stderr,"Adding threshold hint to %s...\n",name);
 
     /* simplest possible threshold hint only */
-    t->quantthresh=calloc(quantvals-1,sizeof(float));
-    t->quantmap=calloc(quantvals,sizeof(int));
+    t->quantthresh=_ogg_calloc(quantvals-1,sizeof(float));
+    t->quantmap=_ogg_calloc(quantvals,sizeof(int));
     t->threshvals=quantvals;
     t->quantvals=quantvals;
 
@@ -212,7 +212,7 @@ int main(int argc,char *argv[]){
     long quantvals=_book_maptype1_quantvals(c);
     int changep=1,factor;
 
-    encode_aux_pigeonhole *p=calloc(1,sizeof(encode_aux_pigeonhole));
+    encode_aux_pigeonhole *p=_ogg_calloc(1,sizeof(encode_aux_pigeonhole));
     c->pigeon_tree=p;
 
     fprintf(stderr,"Adding pigeonhole hint to %s...\n",name);
@@ -237,7 +237,7 @@ int main(int argc,char *argv[]){
       for(i=0;i<quantvals;i++)if(max<c->quantlist[i])max=c->quantlist[i];
       p->mapentries=max;
     }
-    p->pigeonmap=malloc(p->mapentries*sizeof(long));
+    p->pigeonmap=_ogg_malloc(p->mapentries*sizeof(long));
     p->quantvals=(quantvals+factor-1)/factor;
 
     /* pigeonhole roughly on the boundaries of the quantvals; the
@@ -274,11 +274,11 @@ int main(int argc,char *argv[]){
     subpigeons=1;
     for(i=0;i<dim;i++)subpigeons*=p->mapentries;
     for(i=0;i<dim;i++)pigeons*=p->quantvals;
-    temptrack=calloc(dim,sizeof(long));
-    tempmin=calloc(dim,sizeof(float));
-    tempmax=calloc(dim,sizeof(float));
-    tempstack=calloc(pigeons,sizeof(long *));
-    tempcount=calloc(pigeons,sizeof(long));
+    temptrack=_ogg_calloc(dim,sizeof(long));
+    tempmin=_ogg_calloc(dim,sizeof(float));
+    tempmax=_ogg_calloc(dim,sizeof(float));
+    tempstack=_ogg_calloc(pigeons,sizeof(long *));
+    tempcount=_ogg_calloc(pigeons,sizeof(long));
 
     while(1){
       float errorpost=-1;
@@ -338,7 +338,7 @@ int main(int argc,char *argv[]){
 
     /* pare the list of shortlists; merge contained and similar lists
        together */
-    p->fitmap=malloc(pigeons*sizeof(long));
+    p->fitmap=_ogg_malloc(pigeons*sizeof(long));
     for(i=0;i<pigeons;i++)p->fitmap[i]=-1;
     while(changep){
       char buffer[80];
@@ -388,8 +388,8 @@ int main(int argc,char *argv[]){
     
 
     p->fittotal=totalstack;
-    p->fitlist=malloc((totalstack+1)*sizeof(long));
-    p->fitlength=malloc(pigeons*sizeof(long));
+    p->fitlist=_ogg_malloc((totalstack+1)*sizeof(long));
+    p->fitlength=_ogg_malloc(pigeons*sizeof(long));
     {
       long usage=0;
       for(i=0;i<pigeons;i++){

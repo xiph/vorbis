@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.6.2.1 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.6.2.2 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -77,7 +77,7 @@ int main(int argc,char *argv[]){
 
   {
     char *ptr;
-    char *filename=calloc(strlen(argv[1])+4,1);
+    char *filename=_ogg_calloc(strlen(argv[1])+4,1);
 
     strcpy(filename,argv[1]);
     in=fopen(filename,"r");
@@ -107,13 +107,13 @@ int main(int argc,char *argv[]){
   entries=pow(quantvals,dim);
   c.dim=dim;
   c.entries=entries;
-  c.lengthlist=malloc(entries*sizeof(long));
+  c.lengthlist=_ogg_malloc(entries*sizeof(long));
   c.maptype=1;
   c.q_sequencep=sequencep;
-  c.quantlist=calloc(quantvals,sizeof(long));
+  c.quantlist=_ogg_calloc(quantvals,sizeof(long));
 
-  quantlist=malloc(sizeof(long)*c.dim*c.entries);
-  hits=malloc(c.entries*sizeof(long));
+  quantlist=_ogg_malloc(sizeof(long)*c.dim*c.entries);
+  hits=_ogg_malloc(c.entries*sizeof(long));
   for(j=0;j<entries;j++)hits[j]=1;
   for(j=0;j<entries;j++)c.lengthlist[j]=1;
 

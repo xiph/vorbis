@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.25.2.2 2000/11/04 06:21:44 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.25.2.3 2000/11/04 06:43:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -72,7 +72,7 @@ static long _f0_fit(codebook *book,
 
 static vorbis_info_floor *floor0_copy_info (vorbis_info_floor *i){
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
-  vorbis_info_floor0 *ret=malloc(sizeof(vorbis_info_floor0));
+  vorbis_info_floor0 *ret=_ogg_malloc(sizeof(vorbis_info_floor0));
   memcpy(ret,info,sizeof(vorbis_info_floor0));
   return(ret);
 }
@@ -112,7 +112,7 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
   codec_setup_info     *ci=vi->codec_setup;
   int j;
 
-  vorbis_info_floor0 *info=malloc(sizeof(vorbis_info_floor0));
+  vorbis_info_floor0 *info=_ogg_malloc(sizeof(vorbis_info_floor0));
   info->order=oggpack_read(opb,8);
   info->rate=oggpack_read(opb,16);
   info->barkmap=oggpack_read(opb,16);
@@ -151,7 +151,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
   vorbis_info        *vi=vd->vi;
   codec_setup_info   *ci=vi->codec_setup;
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
-  vorbis_look_floor0 *look=calloc(1,sizeof(vorbis_look_floor0));
+  vorbis_look_floor0 *look=_ogg_calloc(1,sizeof(vorbis_look_floor0));
   look->m=info->order;
   look->n=ci->blocksizes[mi->blockflag]/2;
   look->ln=info->barkmap;
@@ -171,7 +171,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
      the encoder may do what it wishes in filling them.  They're
      necessary in some mapping combinations to keep the scale spacing
      accurate */
-  look->linearmap=malloc((look->n+1)*sizeof(int));
+  look->linearmap=_ogg_malloc((look->n+1)*sizeof(int));
   for(j=0;j<look->n;j++){
     int val=floor( toBARK((info->rate/2.)/look->n*j) 
 		   *scale); /* bark numbers represent band edges */
@@ -180,7 +180,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
   }
   look->linearmap[j]=-1;
 
-  look->lsp_look=malloc(look->ln*sizeof(float));
+  look->lsp_look=_ogg_malloc(look->ln*sizeof(float));
   for(j=0;j<look->ln;j++)
     look->lsp_look[j]=2*cos(M_PI/look->ln*j);
 

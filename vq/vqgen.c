@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.34.2.1 2000/11/04 06:22:11 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.34.2.2 2000/11/04 06:43:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -250,13 +250,13 @@ void vqgen_init(vqgen *v,int elements,int aux,int entries,float mindist,
   v->aux=aux;
   v->mindist=mindist;
   v->allocated=32768;
-  v->pointlist=malloc(v->allocated*(v->elements+v->aux)*sizeof(float));
+  v->pointlist=_ogg_malloc(v->allocated*(v->elements+v->aux)*sizeof(float));
 
   v->entries=entries;
-  v->entrylist=malloc(v->entries*v->elements*sizeof(float));
-  v->assigned=malloc(v->entries*sizeof(long));
-  v->bias=calloc(v->entries,sizeof(float));
-  v->max=calloc(v->entries,sizeof(float));
+  v->entrylist=_ogg_malloc(v->entries*v->elements*sizeof(float));
+  v->assigned=_ogg_malloc(v->entries*sizeof(long));
+  v->bias=_ogg_calloc(v->entries,sizeof(float));
+  v->max=_ogg_calloc(v->entries,sizeof(float));
   if(metric)
     v->metric_func=metric;
   else
@@ -279,7 +279,7 @@ void vqgen_addpoint(vqgen *v, float *p,float *a){
 
   if(v->points>=v->allocated){
     v->allocated*=2;
-    v->pointlist=realloc(v->pointlist,v->allocated*(v->elements+v->aux)*
+    v->pointlist=_ogg_realloc(v->pointlist,v->allocated*(v->elements+v->aux)*
 			 sizeof(float));
   }
 
@@ -371,10 +371,10 @@ float vqgen_iterate(vqgen *v,int biasp){
   fdesired=(float)v->points/v->entries;
   desired=fdesired;
   desired2=desired*2;
-  new=malloc(sizeof(float)*v->entries*v->elements);
-  new2=malloc(sizeof(float)*v->entries*v->elements);
-  nearcount=malloc(v->entries*sizeof(long));
-  nearbias=malloc(v->entries*desired2*sizeof(float));
+  new=_ogg_malloc(sizeof(float)*v->entries*v->elements);
+  new2=_ogg_malloc(sizeof(float)*v->entries*v->elements);
+  nearcount=_ogg_malloc(v->entries*sizeof(long));
+  nearbias=_ogg_malloc(v->entries*desired2*sizeof(float));
 
   /* fill in nearest points for entry biasing */
   /*memset(v->bias,0,sizeof(float)*v->entries);*/

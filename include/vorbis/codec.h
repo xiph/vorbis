@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.32.2.4 2000/11/04 06:21:40 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.32.2.5 2000/11/04 06:43:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -102,7 +102,7 @@ typedef struct vorbis_block{
   ogg_int64_t sequence;
   vorbis_dsp_state *vd; /* For read-only access of configuration */
 
-  /* local storage to avoid remallocing; it's up to the mapping to
+  /* local storage to avoid re_ogg_mallocing; it's up to the mapping to
      structure it */
   void               *localstore;
   long                localtop;

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.23.2.2 2000/11/04 06:21:43 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.23.2.3 2000/11/04 06:43:49 xiphmont Exp $
 
  Preecho calculation.
 
@@ -79,18 +79,18 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   int i;
   e->winlength=window;
   e->minenergy=fromdB(ci->preecho_minenergy);
-  e->iir=calloc(ch,sizeof(IIR_state));
-  e->filtered=calloc(ch,sizeof(float *));
+  e->iir=_ogg_calloc(ch,sizeof(IIR_state));
+  e->filtered=_ogg_calloc(ch,sizeof(float *));
   e->ch=ch;
   e->storage=128;
   for(i=0;i<ch;i++){
     IIR_init(e->iir+i,cheb_highpass_stages,cheb_highpass_gain,
 	     cheb_highpass_A,cheb_highpass_B);
-    e->filtered[i]=calloc(e->storage,sizeof(float));
+    e->filtered[i]=_ogg_calloc(e->storage,sizeof(float));
   }
 
   drft_init(&e->drft,window);
-  e->window=malloc(e->winlength*sizeof(float));
+  e->window=_ogg_malloc(e->winlength*sizeof(float));
   /* We just use a straight sin(x) window for this */
   for(i=0;i<e->winlength;i++)
     e->window[i]=sin((i+.5)/e->winlength*M_PI);
@@ -166,7 +166,7 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   if(v->pcm_storage>ve->storage){
     ve->storage=v->pcm_storage;
     for(i=0;i<ve->ch;i++)
-      ve->filtered[i]=realloc(ve->filtered[i],ve->storage*sizeof(float));
+      ve->filtered[i]=_ogg_realloc(ve->filtered[i],ve->storage*sizeof(float));
   }
 
   /* catch up the highpass to match the pcm */

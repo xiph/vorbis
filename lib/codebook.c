@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.18.2.3 2000/11/04 06:21:42 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.18.2.4 2000/11/04 06:43:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -162,7 +162,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   switch(oggpack_read(opb,1)){
   case 0:
     /* unordered */
-    s->lengthlist=malloc(sizeof(long)*s->entries);
+    s->lengthlist=_ogg_malloc(sizeof(long)*s->entries);
 
     /* allocated but unused entries? */
     if(oggpack_read(opb,1)){
@@ -190,7 +190,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
     /* ordered */
     {
       long length=oggpack_read(opb,5)+1;
-      s->lengthlist=malloc(sizeof(long)*s->entries);
+      s->lengthlist=_ogg_malloc(sizeof(long)*s->entries);
 
       for(i=0;i<s->entries;){
 	long num=oggpack_read(opb,_ilog(s->entries-i));
@@ -232,7 +232,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
       }
       
       /* quantized values */
-      s->quantlist=malloc(sizeof(float)*quantvals);
+      s->quantlist=_ogg_malloc(sizeof(float)*quantvals);
       for(i=0;i<quantvals;i++)
 	s->quantlist[i]=oggpack_read(opb,s->q_quant);
       

@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.7.2.1 2000/11/04 06:21:45 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.7.2.2 2000/11/04 06:43:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -163,7 +163,7 @@ static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
 
   scale=look->ln/toBARK(22050.);
 
-  look->linearmap=malloc(look->n*sizeof(int));
+  look->linearmap=_ogg_malloc(look->n*sizeof(int));
   for(j=0;j<look->n;j++){
     int val=floor( toBARK(22050./n*j) *scale);
     if(val>look->ln)val=look->ln;
@@ -230,15 +230,15 @@ int main(int argc,char *argv[]){
     argv++;
   }
   
-  pcm[0]=malloc(framesize*sizeof(float));
-  pcm[1]=malloc(framesize*sizeof(float));
-  out[0]=calloc(framesize/2,sizeof(float));
-  out[1]=calloc(framesize/2,sizeof(float));
-  decay[0]=calloc(framesize/2,sizeof(float));
-  decay[1]=calloc(framesize/2,sizeof(float));
-  floor=malloc(framesize*sizeof(float));
-  lpc=malloc(order*sizeof(float));
-  buffer=malloc(framesize*4);
+  pcm[0]=_ogg_malloc(framesize*sizeof(float));
+  pcm[1]=_ogg_malloc(framesize*sizeof(float));
+  out[0]=_ogg_calloc(framesize/2,sizeof(float));
+  out[1]=_ogg_calloc(framesize/2,sizeof(float));
+  decay[0]=_ogg_calloc(framesize/2,sizeof(float));
+  decay[1]=_ogg_calloc(framesize/2,sizeof(float));
+  floor=_ogg_malloc(framesize*sizeof(float));
+  lpc=_ogg_malloc(order*sizeof(float));
+  buffer=_ogg_malloc(framesize*4);
   buffer2=buffer+framesize*2;
   window=_vorbis_window(0,framesize,framesize/2,framesize/2);
   mdct_init(&m_look,framesize);

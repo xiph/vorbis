@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.29.2.2 2000/11/04 06:21:45 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.29.2.3 2000/11/04 06:43:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,7 +42,7 @@ void _vi_psy_free(vorbis_info_psy *i){
 }
 
 vorbis_info_psy *_vi_psy_copy(vorbis_info_psy *i){
-  vorbis_info_psy *ret=malloc(sizeof(vorbis_info_psy));
+  vorbis_info_psy *ret=_ogg_malloc(sizeof(vorbis_info_psy));
   memcpy(ret,i,sizeof(vorbis_info_psy));
   return(ret);
 }
@@ -178,9 +178,9 @@ static void setup_curve(float **c,
 void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   long i,j;
   memset(p,0,sizeof(vorbis_look_psy));
-  p->ath=malloc(n*sizeof(float));
-  p->octave=malloc(n*sizeof(int));
-  p->bark=malloc(n*sizeof(float));
+  p->ath=_ogg_malloc(n*sizeof(float));
+  p->octave=_ogg_malloc(n*sizeof(int));
+  p->bark=_ogg_malloc(n*sizeof(float));
   p->vi=vi;
   p->n=n;
 
@@ -199,18 +199,18 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
     p->octave[i]=oc;
   }  
 
-  p->tonecurves=malloc(P_BANDS*sizeof(float **));
-  p->noiseatt=malloc(P_BANDS*sizeof(float **));
-  p->peakatt=malloc(P_BANDS*sizeof(float *));
+  p->tonecurves=_ogg_malloc(P_BANDS*sizeof(float **));
+  p->noiseatt=_ogg_malloc(P_BANDS*sizeof(float **));
+  p->peakatt=_ogg_malloc(P_BANDS*sizeof(float *));
   for(i=0;i<P_BANDS;i++){
-    p->tonecurves[i]=malloc(P_LEVELS*sizeof(float *));
-    p->noiseatt[i]=malloc(P_LEVELS*sizeof(float));
-    p->peakatt[i]=malloc(P_LEVELS*sizeof(float));
+    p->tonecurves[i]=_ogg_malloc(P_LEVELS*sizeof(float *));
+    p->noiseatt[i]=_ogg_malloc(P_LEVELS*sizeof(float));
+    p->peakatt[i]=_ogg_malloc(P_LEVELS*sizeof(float));
   }
 
   for(i=0;i<P_BANDS;i++)
     for(j=0;j<P_LEVELS;j++){
-      p->tonecurves[i][j]=malloc(EHMER_MAX*sizeof(float));
+      p->tonecurves[i][j]=_ogg_malloc(EHMER_MAX*sizeof(float));
     }
 
   /* OK, yeah, this was a silly way to do it */

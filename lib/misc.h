@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: miscellaneous prototypes
- last mod: $Id: misc.h,v 1.5.2.1 2000/11/04 06:21:45 xiphmont Exp $
+ last mod: $Id: misc.h,v 1.5.2.2 2000/11/04 06:43:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,18 +25,18 @@ extern void _vorbis_block_ripcord(vorbis_block *vb);
 extern void _analysis_output(char *base,int i,float *v,int n,int bark,int dB);
 
 #ifdef DEBUG_LEAKS
-extern void *_VDBG_malloc(void *ptr,long bytes,char *file,long line); 
+extern void *_VDBG__ogg_malloc(void *ptr,long bytes,char *file,long line); 
 extern void _VDBG_free(void *ptr,char *file,long line); 
 
 #ifndef MISC_C 
-#undef malloc
-#undef calloc
-#undef realloc
+#undef _ogg_malloc
+#undef _ogg_calloc
+#undef _ogg_realloc
 #undef free
 
-#define malloc(x) _VDBG_malloc(NULL,(x),__FILE__,__LINE__)
-#define calloc(x,y) _VDBG_malloc(NULL,(x)*(y),__FILE__,__LINE__)
-#define realloc(x,y) _VDBG_malloc((x),(y),__FILE__,__LINE__)
+#define _ogg_malloc(x) _VDBG__ogg_malloc(NULL,(x),__FILE__,__LINE__)
+#define _ogg_calloc(x,y) _VDBG__ogg_malloc(NULL,(x)*(y),__FILE__,__LINE__)
+#define _ogg_realloc(x,y) _VDBG__ogg_malloc((x),(y),__FILE__,__LINE__)
 #define free(x) _VDBG_free((x),__FILE__,__LINE__)
 #endif
 #endif

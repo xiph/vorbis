@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.30.2.4 2000/11/04 06:21:46 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.30.2.5 2000/11/04 06:43:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -194,7 +194,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
   
   if(searched>=end || ret<0){
     vf->links=m+1;
-    vf->offsets=malloc((m+2)*sizeof(ogg_int64_t));
+    vf->offsets=_ogg_malloc((m+2)*sizeof(ogg_int64_t));
     vf->offsets[m+1]=searched;
   }else{
     ret=_bisect_forward_serialno(vf,next,vf->offset,
@@ -275,11 +275,11 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
   ogg_page og;
   int i,ret;
   
-  vf->vi=calloc(vf->links,sizeof(vorbis_info));
-  vf->vc=calloc(vf->links,sizeof(vorbis_info));
-  vf->dataoffsets=malloc(vf->links*sizeof(ogg_int64_t));
-  vf->pcmlengths=malloc(vf->links*sizeof(ogg_int64_t));
-  vf->serialnos=malloc(vf->links*sizeof(long));
+  vf->vi=_ogg_calloc(vf->links,sizeof(vorbis_info));
+  vf->vc=_ogg_calloc(vf->links,sizeof(vorbis_info));
+  vf->dataoffsets=_ogg_malloc(vf->links*sizeof(ogg_int64_t));
+  vf->pcmlengths=_ogg_malloc(vf->links*sizeof(ogg_int64_t));
+  vf->serialnos=_ogg_malloc(vf->links*sizeof(long));
   
   for(i=0;i<vf->links;i++){
     if(first_i && first_c && i==0){
@@ -393,8 +393,8 @@ static int _open_nonseekable(OggVorbis_File *vf){
   int ret;
   /* we cannot seek. Set up a 'single' (current) logical bitstream entry  */
   vf->links=1;
-  vf->vi=calloc(vf->links,sizeof(vorbis_info));
-  vf->vc=calloc(vf->links,sizeof(vorbis_info));
+  vf->vi=_ogg_calloc(vf->links,sizeof(vorbis_info));
+  vf->vc=_ogg_calloc(vf->links,sizeof(vorbis_info));
 
   /* Try to fetch the headers, maintaining all the storage */
   if((ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,NULL))<0)

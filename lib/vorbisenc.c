@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.1.2.2 2000/11/04 06:21:46 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.1.2.3 2000/11/04 06:43:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -70,7 +70,7 @@ static void codec_setup_partialcopy(codec_setup_info *ci,
   
   /* mode settings */
   for(i=0;i<ci->modes;i++){
-    ci->mode_param[i]=calloc(1,sizeof(vorbis_info_mode));
+    ci->mode_param[i]=_ogg_calloc(1,sizeof(vorbis_info_mode));
     ci->mode_param[i]->blockflag=cs->mode_param[i]->blockflag;
     ci->mode_param[i]->windowtype=cs->mode_param[i]->windowtype;
     ci->mode_param[i]->transformtype=cs->mode_param[i]->transformtype;
@@ -140,7 +140,7 @@ int vorbis_encode_init(vorbis_info *vi,
     ((vorbis_info_floor0 *)(ci->floor_param[i]))->rate=rate;
 
   /* adjust for channels; all our mappings use submap zero now */
-  /* yeah, OK, calloc did this for us.  But it's a reminder/placeholder */
+  /* yeah, OK, _ogg_calloc did this for us.  But it's a reminder/placeholder */
   for(i=0;i<ci->maps;i++)
     for(j=0;j<channels;j++)
       ((vorbis_info_mapping0 *)ci->map_param[i])->chmuxlist[j]=0;

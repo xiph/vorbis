@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.17.2.4 2000/11/04 06:22:09 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.17.2.5 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -40,10 +40,10 @@ char *get_line(FILE *in){
       if(sofar+1>=lbufsize){
         if(!lbufsize){  
           lbufsize=1024;
-          linebuffer=malloc(lbufsize);
+          linebuffer=_ogg_malloc(lbufsize);
         }else{
           lbufsize*=2;
-          linebuffer=realloc(linebuffer,lbufsize);
+          linebuffer=_ogg_realloc(linebuffer,lbufsize);
         }
       }
       {
@@ -178,8 +178,8 @@ char *find_seek_to(FILE *in,char *s){
    header-ness will break this routine */
 
 codebook *codebook_load(char *filename){
-  codebook *b=calloc(1,sizeof(codebook));
-  static_codebook *c=(static_codebook *)(b->c=calloc(1,sizeof(static_codebook)));
+  codebook *b=_ogg_calloc(1,sizeof(codebook));
+  static_codebook *c=(static_codebook *)(b->c=_ogg_calloc(1,sizeof(static_codebook)));
   encode_aux_nearestmatch *a=NULL;
   encode_aux_threshmatch *t=NULL;
   encode_aux_pigeonhole *p=NULL;
@@ -215,7 +215,7 @@ codebook *codebook_load(char *filename){
   /* find the auxiliary encode struct[s] (if any) */
   if(find_seek_to(in,"static encode_aux_nearestmatch _vq_aux")){
     /* how big? */
-    c->nearest_tree=a=calloc(1,sizeof(encode_aux_nearestmatch));
+    c->nearest_tree=a=_ogg_calloc(1,sizeof(encode_aux_nearestmatch));
     line=get_line(in);
     line=get_line(in);
     line=get_line(in);
@@ -229,7 +229,7 @@ codebook *codebook_load(char *filename){
     /* load ptr0 */
     find_seek_to(in,"static long _vq_ptr0");
     reset_next_value();
-    a->ptr0=malloc(sizeof(long)*a->aux);
+    a->ptr0=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
       if(get_next_ivalue(in,a->ptr0+i)){
 	fprintf(stderr,"out of data while reading codebook %s\n",filename);
@@ -239,7 +239,7 @@ codebook *codebook_load(char *filename){
     /* load ptr1 */
     find_seek_to(in,"static long _vq_ptr1");
     reset_next_value();
-    a->ptr1=malloc(sizeof(long)*a->aux);
+    a->ptr1=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
       if(get_next_ivalue(in,a->ptr1+i)){
 	fprintf(stderr,"out of data while reading codebook %s\n",filename);
@@ -250,7 +250,7 @@ codebook *codebook_load(char *filename){
     /* load p */
     find_seek_to(in,"static long _vq_p_");
     reset_next_value();
-    a->p=malloc(sizeof(long)*a->aux);
+    a->p=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
       if(get_next_ivalue(in,a->p+i)){
 	fprintf(stderr,"out of data while reading codebook %s\n",filename);
@@ -260,7 +260,7 @@ codebook *codebook_load(char *filename){
     /* load q */
     find_seek_to(in,"static long _vq_q_");
     reset_next_value();
-    a->q=malloc(sizeof(long)*a->aux);
+    a->q=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
       if(get_next_ivalue(in,a->q+i)){
 	fprintf(stderr,"out of data while reading codebook %s\n",filename);
@@ -270,7 +270,7 @@ codebook *codebook_load(char *filename){
   
   if(find_seek_to(in,"static encode_aux_threshmatch _vq_aux")){
     /* how big? */
-    c->thresh_tree=t=calloc(1,sizeof(encode_aux_threshmatch));
+    c->thresh_tree=t=_ogg_calloc(1,sizeof(encode_aux_threshmatch));
     line=get_line(in);
     line=get_line(in);
     line=get_line(in);
@@ -286,7 +286,7 @@ codebook *codebook_load(char *filename){
     /* load quantthresh */
     find_seek_to(in,"static float _vq_quantthresh_");
     reset_next_value();
-    t->quantthresh=malloc(sizeof(float)*t->threshvals);
+    t->quantthresh=_ogg_malloc(sizeof(float)*t->threshvals);
     for(i=0;i<t->threshvals-1;i++)
       if(get_next_value(in,t->quantthresh+i)){
 	fprintf(stderr,"out of data 1 while reading codebook %s\n",filename);
@@ -295,7 +295,7 @@ codebook *codebook_load(char *filename){
     /* load quantmap */
     find_seek_to(in,"static long _vq_quantmap_");
     reset_next_value();
-    t->quantmap=malloc(sizeof(long)*t->threshvals);
+    t->quantmap=_ogg_malloc(sizeof(long)*t->threshvals);
     for(i=0;i<t->threshvals;i++)
       if(get_next_ivalue(in,t->quantmap+i)){
 	fprintf(stderr,"out of data 2 while reading codebook %s\n",filename);
@@ -306,7 +306,7 @@ codebook *codebook_load(char *filename){
   if(find_seek_to(in,"static encode_aux_pigeonhole _vq_aux")){
     int pigeons=1,i;
     /* how big? */
-    c->pigeon_tree=p=calloc(1,sizeof(encode_aux_pigeonhole));
+    c->pigeon_tree=p=_ogg_calloc(1,sizeof(encode_aux_pigeonhole));
     line=get_line(in);
     if(sscanf(line,"%f, %f, %d, %d",&(p->min),&(p->del),
 	      &(p->mapentries),&(p->quantvals))!=4){
@@ -322,7 +322,7 @@ codebook *codebook_load(char *filename){
     /* load pigeonmap */
     find_seek_to(in,"static long _vq_pigeonmap_");
     reset_next_value();
-    p->pigeonmap=malloc(sizeof(long)*p->mapentries);
+    p->pigeonmap=_ogg_malloc(sizeof(long)*p->mapentries);
     for(i=0;i<p->mapentries;i++)
       if(get_next_ivalue(in,p->pigeonmap+i)){
 	fprintf(stderr,"out of data (pigeonmap) while reading codebook %s\n",filename);
@@ -331,7 +331,7 @@ codebook *codebook_load(char *filename){
     /* load fitlist */
     find_seek_to(in,"static long _vq_fitlist_");
     reset_next_value();
-    p->fitlist=malloc(sizeof(long)*p->fittotal);
+    p->fitlist=_ogg_malloc(sizeof(long)*p->fittotal);
     for(i=0;i<p->fittotal;i++)
       if(get_next_ivalue(in,p->fitlist+i)){
 	fprintf(stderr,"out of data (fitlist) while reading codebook %s\n",filename);
@@ -341,7 +341,7 @@ codebook *codebook_load(char *filename){
     find_seek_to(in,"static long _vq_fitmap_");
     reset_next_value();
     for(i=0;i<c->dim;i++)pigeons*=p->quantvals;
-    p->fitmap=malloc(sizeof(long)*pigeons);
+    p->fitmap=_ogg_malloc(sizeof(long)*pigeons);
     for(i=0;i<pigeons;i++)
       if(get_next_ivalue(in,p->fitmap+i)){
 	fprintf(stderr,"out of data (fitmap) while reading codebook %s\n",filename);
@@ -351,7 +351,7 @@ codebook *codebook_load(char *filename){
     /* load fitlength */
     find_seek_to(in,"static long _vq_fitlength_");
     reset_next_value();
-    p->fitlength=malloc(sizeof(long)*pigeons);
+    p->fitlength=_ogg_malloc(sizeof(long)*pigeons);
     for(i=0;i<pigeons;i++)
       if(get_next_ivalue(in,p->fitlength+i)){
 	fprintf(stderr,"out of data (fitlength) while reading codebook %s\n",filename);
@@ -374,7 +374,7 @@ codebook *codebook_load(char *filename){
   /* load the quantized entries */
   find_seek_to(in,"static long _vq_quantlist_");
   reset_next_value();
-  c->quantlist=malloc(sizeof(long)*quant_to_read);
+  c->quantlist=_ogg_malloc(sizeof(long)*quant_to_read);
   for(i=0;i<quant_to_read;i++)
     if(get_next_ivalue(in,c->quantlist+i)){
       fprintf(stderr,"out of data while reading codebook %s\n",filename);
@@ -384,7 +384,7 @@ codebook *codebook_load(char *filename){
   /* load the lengthlist */
   find_seek_to(in,"static long _vq_lengthlist");
   reset_next_value();
-  c->lengthlist=malloc(sizeof(long)*c->entries);
+  c->lengthlist=_ogg_malloc(sizeof(long)*c->entries);
   for(i=0;i<c->entries;i++)
     if(get_next_ivalue(in,c->lengthlist+i)){
       fprintf(stderr,"out of data while reading codebook %s\n",filename);
@@ -433,7 +433,7 @@ void spinnit(char *s,int n){
 
 void build_tree_from_lengths(int vals, long *hist, long *lengths){
   int i,j;
-  long *membership=malloc(vals*sizeof(long));
+  long *membership=_ogg_malloc(vals*sizeof(long));
   long *histsave=alloca(vals*sizeof(long));
   memcpy(histsave,hist,vals*sizeof(long));
 
@@ -506,7 +506,7 @@ void build_tree_from_lengths0(int vals, long *hist, long *lengths){
      the lengths after the build */
 
   int upper=0,i;
-  long *lengthlist=calloc(vals,sizeof(long));
+  long *lengthlist=_ogg_calloc(vals,sizeof(long));
   long *newhist=alloca(vals*sizeof(long));
 
   for(i=0;i<vals;i++)

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.5.2.1 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.5.2.2 2000/11/04 06:43:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -162,9 +162,9 @@ int main(int argc, char *argv[]){
   /* how many parts?... */
   parts=argc-3;
   
-  ebound=malloc(sizeof(float)*parts);
-  mbound=malloc(sizeof(float)*parts);
-  subgrp=malloc(sizeof(int)*parts);
+  ebound=_ogg_malloc(sizeof(float)*parts);
+  mbound=_ogg_malloc(sizeof(float)*parts);
+  subgrp=_ogg_malloc(sizeof(int)*parts);
   
   for(i=0;i<parts-1;i++){
     char *pos=strchr(argv[4+i],',');
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]){
     }
   }
   
-  vec=malloc(sizeof(float)*n);
+  vec=_ogg_malloc(sizeof(float)*n);
   /* get the input line by line and process it */
   while(!feof(res)){
     if(getline(res,vec,begin,n))

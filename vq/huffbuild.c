@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.5.2.4 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.5.2.5 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -112,8 +112,8 @@ int main(int argc, char *argv[]){
 
   {
     long vals=pow(maxval,subn);
-    long *hist=malloc(vals*sizeof(long));
-    long *lengths=malloc(vals*sizeof(long));
+    long *hist=_ogg_malloc(vals*sizeof(long));
+    long *lengths=_ogg_malloc(vals*sizeof(long));
     
     for(j=0;j<vals;j++)hist[j]=guard;
     

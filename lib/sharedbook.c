@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.9.2.2 2000/11/04 06:21:45 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.9.2.3 2000/11/04 06:43:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -73,7 +73,7 @@ float _float32_unpack(long val){
 long *_make_words(long *l,long n){
   long i,j;
   long marker[33];
-  long *r=malloc(n*sizeof(long));
+  long *r=_ogg_malloc(n*sizeof(long));
   memset(marker,0,sizeof(marker));
 
   for(i=0;i<n;i++){
@@ -142,9 +142,9 @@ long *_make_words(long *l,long n){
 decode_aux *_make_decode_tree(codebook *c){
   const static_codebook *s=c->c;
   long top=0,i,j,n;
-  decode_aux *t=malloc(sizeof(decode_aux));
-  long *ptr0=t->ptr0=calloc(c->entries*2,sizeof(long));
-  long *ptr1=t->ptr1=calloc(c->entries*2,sizeof(long));
+  decode_aux *t=_ogg_malloc(sizeof(decode_aux));
+  long *ptr0=t->ptr0=_ogg_calloc(c->entries*2,sizeof(long));
+  long *ptr1=t->ptr1=_ogg_calloc(c->entries*2,sizeof(long));
   long *codelist=_make_words(s->lengthlist,s->entries);
 
   if(codelist==NULL)return(NULL);
@@ -176,8 +176,8 @@ decode_aux *_make_decode_tree(codebook *c){
   t->tabn = _ilog(c->entries)-4; /* this is magic */
   if(t->tabn<5)t->tabn=5;
   n = 1<<t->tabn;
-  t->tab = malloc(n*sizeof(long));
-  t->tabl = malloc(n*sizeof(int));
+  t->tab = _ogg_malloc(n*sizeof(long));
+  t->tabl = _ogg_malloc(n*sizeof(int));
   for (i = 0; i < n; i++) {
     long p = 0;
     for (j = 0; j < t->tabn && (p > 0 || j == 0); j++) {
@@ -236,7 +236,7 @@ float *_book_unquantize(const static_codebook *b){
     int quantvals;
     float mindel=_float32_unpack(b->q_min);
     float delta=_float32_unpack(b->q_delta);
-    float *r=calloc(b->entries*b->dim,sizeof(float));
+    float *r=_ogg_calloc(b->entries*b->dim,sizeof(float));
 
     /* maptype 1 and 2 both use a quantized value vector, but
        different sizes */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.4.2.1 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.4.2.2 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -154,7 +154,7 @@ void vqext_preprocess(vqgen *v){
     }
   }  
   vqext_quantize(v,&q);
-  quant_save=malloc(sizeof(float)*v->elements*v->entries);
+  quant_save=_ogg_malloc(sizeof(float)*v->elements*v->entries);
   memcpy(quant_save,_now(v,0),sizeof(float)*v->elements*v->entries);
   vqgen_unquantize(v,&q);
 

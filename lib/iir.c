@@ -12,13 +12,14 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.2.2.1 2000/11/04 06:21:44 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.2.2.2 2000/11/04 06:43:50 xiphmont Exp $
 
  ********************************************************************/
 
 /* LPC is actually a degenerate case of form I/II filters, but we need
    both */
 
+#include <ogg/ogg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -28,10 +29,10 @@ void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
   memset(s,0,sizeof(IIR_state));
   s->stages=stages;
   s->gain=gain;
-  s->coeff_A=malloc(stages*sizeof(float));
-  s->coeff_B=malloc((stages+1)*sizeof(float));
-  s->z_A=calloc(stages*2,sizeof(float));
-  s->z_B=calloc(stages*2,sizeof(float));
+  s->coeff_A=_ogg_malloc(stages*sizeof(float));
+  s->coeff_B=_ogg_malloc((stages+1)*sizeof(float));
+  s->z_A=_ogg_calloc(stages*2,sizeof(float));
+  s->z_B=_ogg_calloc(stages*2,sizeof(float));
 
   memcpy(s->coeff_A,A,stages*sizeof(float));
   memcpy(s->coeff_B,B,(stages+1)*sizeof(float));
@@ -267,7 +268,7 @@ int main(){
 
   /* run the pregenerated Chebyshev filter, then our own distillation
      through the generic and specialized code */
-  float *work=malloc(128*sizeof(float));
+  float *work=_ogg_malloc(128*sizeof(float));
   IIR_state iir;
   int i;
 

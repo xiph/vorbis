@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.18.2.2 2000/11/04 06:21:45 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.18.2.3 2000/11/04 06:43:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -47,7 +47,7 @@ typedef struct {
 
 vorbis_info_residue *res0_copy_info(vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
-  vorbis_info_residue0 *ret=malloc(sizeof(vorbis_info_residue0));
+  vorbis_info_residue0 *ret=_ogg_malloc(sizeof(vorbis_info_residue0));
   memcpy(ret,info,sizeof(vorbis_info_residue0));
   return(ret);
 }
@@ -96,7 +96,7 @@ void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
 /* vorbis_info is for range checking */
 vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
-  vorbis_info_residue0 *info=calloc(1,sizeof(vorbis_info_residue0));
+  vorbis_info_residue0 *info=_ogg_calloc(1,sizeof(vorbis_info_residue0));
   codec_setup_info     *ci=vi->codec_setup;
 
   info->begin=oggpack_read(opb,24);
@@ -127,7 +127,7 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
 vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
-  vorbis_look_residue0 *look=calloc(1,sizeof(vorbis_look_residue0));
+  vorbis_look_residue0 *look=_ogg_calloc(1,sizeof(vorbis_look_residue0));
   backend_lookup_state *be=vd->backend_state;
 
   int j,k,acc=0;
@@ -139,23 +139,23 @@ vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   look->phrasebook=be->fullbooks+info->groupbook;
   dim=look->phrasebook->dim;
 
-  look->partbooks=calloc(look->parts,sizeof(codebook **));
+  look->partbooks=_ogg_calloc(look->parts,sizeof(codebook **));
 
   for(j=0;j<look->parts;j++){
     int stages=info->secondstages[j];
     if(stages){
-      look->partbooks[j]=malloc(stages*sizeof(codebook *));
+      look->partbooks[j]=_ogg_malloc(stages*sizeof(codebook *));
       for(k=0;k<stages;k++)
 	look->partbooks[j][k]=be->fullbooks+info->booklist[acc++];
     }
   }
 
   look->partvals=rint(pow(look->parts,dim));
-  look->decodemap=malloc(look->partvals*sizeof(int *));
+  look->decodemap=_ogg_malloc(look->partvals*sizeof(int *));
   for(j=0;j<look->partvals;j++){
     long val=j;
     long mult=look->partvals/look->parts;
-    look->decodemap[j]=malloc(dim*sizeof(int));
+    look->decodemap[j]=_ogg_malloc(dim*sizeof(int));
     for(k=0;k<dim;k++){
       long deco=val/mult;
       val-=deco*mult;

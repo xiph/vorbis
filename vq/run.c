@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.11.2.1 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: run.c,v 1.11.2.2 2000/11/04 06:43:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -44,8 +44,8 @@ extern void process_usage(void);
 
 int main(int argc,char *argv[]){
   char *basename;
-  codebook **b=calloc(1,sizeof(codebook *));
-  int *addmul=calloc(1,sizeof(int));
+  codebook **b=_ogg_calloc(1,sizeof(codebook *));
+  int *addmul=_ogg_calloc(1,sizeof(int));
   int books=0;
   int input=0;
   int interleave=0;
@@ -115,9 +115,9 @@ int main(int argc,char *argv[]){
 	dot=strrchr(basename,'.');
 	if(dot)*dot='\0';
 
-	b=realloc(b,sizeof(codebook *)*(books+2));
+	b=_ogg_realloc(b,sizeof(codebook *)*(books+2));
 	b[books]=codebook_load(name);
-	addmul=realloc(addmul,sizeof(int)*(books+1));
+	addmul=_ogg_realloc(addmul,sizeof(int)*(books+1));
 	addmul[books++]=multp;
 	b[books]=NULL;
       }

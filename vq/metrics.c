@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.9.2.1 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.9.2.2 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -63,11 +63,11 @@ void process_preprocess(codebook **bs,char *basename){
   while(bs[books])books++;
   
   if(books){
-    histogram=calloc(books,sizeof(float *));
-    histogram_error=calloc(books,sizeof(float *));
-    histogram_errorsq=calloc(books,sizeof(float *));
-    histogram_hi=calloc(books,sizeof(float *));
-    histogram_lo=calloc(books,sizeof(float *));
+    histogram=_ogg_calloc(books,sizeof(float *));
+    histogram_error=_ogg_calloc(books,sizeof(float *));
+    histogram_errorsq=_ogg_calloc(books,sizeof(float *));
+    histogram_hi=_ogg_calloc(books,sizeof(float *));
+    histogram_lo=_ogg_calloc(books,sizeof(float *));
   }else{
     fprintf(stderr,"Specify at least one codebook\n");
     exit(1);
@@ -75,11 +75,11 @@ void process_preprocess(codebook **bs,char *basename){
 
   for(i=0;i<books;i++){
     codebook *b=bs[i];
-    histogram[i]=calloc(b->entries,sizeof(float));
-    histogram_error[i]=calloc(b->entries*b->dim,sizeof(float));
-    histogram_errorsq[i]=calloc(b->entries*b->dim,sizeof(float));
-    histogram_hi[i]=calloc(b->entries*b->dim,sizeof(float));
-    histogram_lo[i]=calloc(b->entries*b->dim,sizeof(float));
+    histogram[i]=_ogg_calloc(b->entries,sizeof(float));
+    histogram_error[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
+    histogram_errorsq[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
+    histogram_hi[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
+    histogram_lo[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
   }
 }
 

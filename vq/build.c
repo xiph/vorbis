@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.15.2.2 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: build.c,v 1.15.2.3 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,10 +41,10 @@ static char *rline(FILE *in,FILE *out){
       if(sofar>=lbufsize){
 	if(!lbufsize){	
 	  lbufsize=1024;
-	  linebuffer=malloc(lbufsize);
+	  linebuffer=_ogg_malloc(lbufsize);
 	}else{
 	  lbufsize*=2;
-	  linebuffer=realloc(linebuffer,lbufsize);
+	  linebuffer=_ogg_realloc(linebuffer,lbufsize);
 	}
       }
       {
@@ -147,7 +147,7 @@ int main(int argc,char *argv[]){
   /* save quant data; we don't want to requantize later as our method
      is currently imperfect wrt repeated application */
   i=0;
-  quantlist=malloc(sizeof(long)*v.elements*v.entries);
+  quantlist=_ogg_malloc(sizeof(long)*v.elements*v.entries);
   for(j=0;j<entries;j++){
     float a;
     for(k=0;k<dim;k++){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.8.2.1 2000/11/04 06:21:46 xiphmont Exp $
+ last mod: $Id: window.c,v 1.8.2.2 2000/11/04 06:43:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,7 @@
 #include "misc.h"
 
 float *_vorbis_window(int type, int window,int left,int right){
-  float *ret=calloc(window,sizeof(float));
+  float *ret=_ogg_calloc(window,sizeof(float));
 
   switch(type){
   case 0:

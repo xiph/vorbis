@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.13.2.2 2000/11/04 06:22:10 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.13.2.3 2000/11/04 06:43:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -153,6 +153,6 @@ void vqext_preprocess(vqgen *v){
     }
   }
 
-  weight=malloc(sizeof(float)*v->elements);
+  weight=_ogg_malloc(sizeof(float)*v->elements);
 }
 
