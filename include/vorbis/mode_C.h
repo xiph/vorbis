@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_C.h,v 1.1 2000/08/15 12:21:55 xiphmont Exp $
+ last mod: $Id: mode_C.h,v 1.2 2000/08/15 14:01:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,23 +26,19 @@
 #include "vorbis/book/lsp12_0.vqh"
 #include "vorbis/book/lsp30_0.vqh"
 
-#include "vorbis/book/resaux0_128a_160.vqh"
-#include "vorbis/book/resaux0_1024a_160.vqh"
+#include "vorbis/book/resaux0_128a_192.vqh"
+#include "vorbis/book/resaux0_1024a_192.vqh"
 
-#include "vorbis/book/res0_128a_160_1.vqh"
-#include "vorbis/book/res0_128a_160_2.vqh"
-#include "vorbis/book/res0_128a_160_3.vqh"
-#include "vorbis/book/res0_128a_160_4.vqh"
-#include "vorbis/book/res0_128a_160_5.vqh"
-#include "vorbis/book/res0_1024a_160_1.vqh"
-#include "vorbis/book/res0_1024a_160_2.vqh"
-#include "vorbis/book/res0_1024a_160_3.vqh"
-#include "vorbis/book/res0_1024a_160_4.vqh"
-#include "vorbis/book/res0_1024a_160_5.vqh"
-#include "vorbis/book/res0_1024a_160_6.vqh"
-#include "vorbis/book/res0_1024a_160_7.vqh"
-#include "vorbis/book/res0_1024a_160_8.vqh"
-#include "vorbis/book/res0_1024a_160_9.vqh"
+#include "vorbis/book/res0_128a_192_1.vqh"
+#include "vorbis/book/res0_128a_192_2.vqh"
+#include "vorbis/book/res0_128a_192_3.vqh"
+#include "vorbis/book/res0_128a_192_4.vqh"
+#include "vorbis/book/res0_128a_192_5.vqh"
+#include "vorbis/book/res0_1024a_192_1.vqh"
+#include "vorbis/book/res0_1024a_192_2.vqh"
+#include "vorbis/book/res0_1024a_192_3.vqh"
+#include "vorbis/book/res0_1024a_192_4.vqh"
+#include "vorbis/book/res0_1024a_192_5.vqh"
 
 static vorbis_info_psy _psy_set_C={
   1,/*athp*/
@@ -111,16 +107,16 @@ static vorbis_info_psy _psy_set_C={
    {-99.,-99.,-99.,-99.,-99.,-99.,-99.,-199.,-199.,-199.,-199.}, /*1000*/
    {-99.,-99.,-99.,-99.,-99.,-99.,-99.,-199.,-199.,-199.,-199.}, /*1400*/
 
-   { -4., -4., -4., -4., -6., -6., -7.,  -8.,  -9., -10., -11.}, /*2000*/
-   { -3., -3., -4., -4., -4., -5., -7.,  -8.,  -8.,  -8.,  -8.}, /*2800*/
-   { -2., -2., -4., -4., -4., -4., -4.,  -4.,  -4.,  -4.,  -4.}, /*4000*/
-   { -1., -1., -2., -2., -2., -2., -2.,  -4.,  -4.,  -4.,  -4.}, /*5600*/
-   {  0.,  0.,  0.,  0., -2., -2., -2.,  -2.,  -2.,  -4.,  -4.}, /*8000*/
-   {  0.,  0.,  0.,  0.,  0.,  0.,  0.,   0.,   0.,   0.,   0.}, /*11500*/
+   {  0., -4., -4., -4., -6., -6., -6.,  -6.,  -6.,  -6.,  -6.}, /*2000*/
+   {  0., -3., -4., -4., -4., -5., -6.,  -6.,  -6.,  -6.,  -6.}, /*2800*/
+   {  0., -2., -2., -2., -2., -2., -2.,  -2.,  -4.,  -4.,  -4.}, /*4000*/
+   {  0., -0., -0., -0., -0., -2., -2.,  -2.,  -2.,  -2.,  -2.}, /*5600*/
+   {  0.,  0.,  0.,  0.,  0.,  0.,  0.,   0.,   0.,  -2.,  -4.}, /*8000*/
+   {  2.,  2.,  2.,  2.,  2.,  2.,  0.,   0.,   0.,   0.,   0.}, /*11500*/
    {  2.,  2.,  2.,  2.,  2.,  4.,  4.,   4.,   4.,   4.,   4.}, /*16000*/
   },
  
-  110.,
+  100.,
 
   -0., -.004   /* attack/decay control */
 };
@@ -138,15 +134,14 @@ static vorbis_info_residue0 _residue_set0C={0,128, 32,6,2,
 					    {5,5,5,5,5},
 					    {99,99,99,99,99}};
 
-static vorbis_info_residue0 _residue_set1C={0,1024, 32,10,3,
-					    {0,1,1,1,1,1,1,1,1,1},
-					    {9,10,11,12,13,14,15,16,17},
+static vorbis_info_residue0 _residue_set1C={0,1024, 32,6,3,
+					    {0,1,1,1,1,1},
+					    {9,10,11,12,13},
 					   
-					    {0,9,9999,17,9999,
-					     27,9999,9999,9999},
-					    {99,1.5,1.5,2.5,2.5,3.5,3.5,7,13},
-					    {5,5,5,5,5,5,5,5,5},
-					    {99,99,99,99,99,99,99,99,99}};
+					    {0,99999,9999,9999,9999},
+					    {99,1.5,2.5,3.5,5},
+					    {5,5,5,5,5},
+					    {99,99,99,99,99}};
 
 static vorbis_info_mapping0 _mapping_set0C={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1C={1, {0,0}, {0}, {1}, {1}, {0}};
@@ -160,7 +155,7 @@ vorbis_info info_C={
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   18,   1,
+  2,          2,    1,     2,       2,   14,   1,
   /* modes */
   {&_mode_set0C,&_mode_set1C},
   /* maps */
@@ -175,23 +170,19 @@ vorbis_info info_C={
   {&_vq_book_lsp12_0,      /* 0 */
    &_vq_book_lsp30_0,      /* 1 */
 
-   &_huff_book_resaux0_128a_160,
-   &_huff_book_resaux0_1024a_160,
+   &_huff_book_resaux0_128a_192,
+   &_huff_book_resaux0_1024a_192,
 
-   &_vq_book_res0_128a_160_1,
-   &_vq_book_res0_128a_160_2,
-   &_vq_book_res0_128a_160_3,
-   &_vq_book_res0_128a_160_4,
-   &_vq_book_res0_128a_160_5,
-   &_vq_book_res0_1024a_160_1,
-   &_vq_book_res0_1024a_160_2,
-   &_vq_book_res0_1024a_160_3,
-   &_vq_book_res0_1024a_160_4,
-   &_vq_book_res0_1024a_160_5,
-   &_vq_book_res0_1024a_160_6,
-   &_vq_book_res0_1024a_160_7,
-   &_vq_book_res0_1024a_160_8,
-   &_vq_book_res0_1024a_160_9,
+   &_vq_book_res0_128a_192_1,
+   &_vq_book_res0_128a_192_2,
+   &_vq_book_res0_128a_192_3,
+   &_vq_book_res0_128a_192_4,
+   &_vq_book_res0_128a_192_5,
+   &_vq_book_res0_1024a_192_1,
+   &_vq_book_res0_1024a_192_2,
+   &_vq_book_res0_1024a_192_3,
+   &_vq_book_res0_1024a_192_4,
+   &_vq_book_res0_1024a_192_5,
 
   },
   /* psy */

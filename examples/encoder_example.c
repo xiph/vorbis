@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.12 2000/08/15 11:53:18 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.13 2000/08/15 14:01:02 xiphmont Exp $
 
  ********************************************************************/
 
