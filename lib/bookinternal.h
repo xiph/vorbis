@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: bookinternal.h,v 1.2 2000/01/12 11:16:36 xiphmont Exp $
+ last mod: $Id: bookinternal.h,v 1.3 2000/01/20 04:42:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,7 +33,7 @@
 */ 
 
 extern void vorbis_book_dup(codebook *dest,const codebook *source);
-extern void vorbis_book_free(codebook *b);
+extern void vorbis_book_clear(codebook *b);
 extern int vorbis_book_pack(codebook *c,oggpack_buffer *b);
 extern int vorbis_book_unpack(oggpack_buffer *b,codebook *c);
 

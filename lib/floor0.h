@@ -11,38 +11,24 @@
  *                                                                  *
  ********************************************************************
 
- function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.13 2000/01/20 04:43:04 xiphmont Exp $
+ function: floor backend 0 implementation
+ last mod: $Id: floor0.h,v 1.1 2000/01/20 04:42:55 xiphmont Exp $
 
  ********************************************************************/
 
-#include <stdio.h>
-#include "vorbis/codec.h"
-#include "registry.h"
-#include "bitwise.h"
+typedef struct vorbis_info_floor0{
+  int   order;
+  long  rate;
+  long  barkmap;
 
-int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  vorbis_dsp_state *vd=vb->vd;
-  vorbis_info      *vi=vd->vi;
-  oggpack_buffer   *opb=&vb->opb;
-  int              type;
-  int              mode;
+  int   stages;
+  int  *books;
+} vorbis_info_floor0;
 
-  /* first things first.  Make sure decode is ready */
-  _vorbis_block_ripcord(vb);
-  _oggpack_readinit(opb,op->packet,op->bytes);
-
-  /* Check the packet type */
-  if(_oggpack_read(opb,1)!=0){
-    /* Oops.  This is not an audio data packet */
-    return(-1);
-  }
-
-  /* read our mode */
-  mode=_oggpack_read(&vb->opb,vd->modebits);
-  type=vi->mappingtypes[mode]; /* unpack_header enforces range checking */
-
-  return(vorbis_map_synthesis_P[type](vb,vi->modelist[mode],op));
-}
-
+extern _vi_info_floor *_vorbis_floor0_dup(_vi_info_floor *source);
+extern void            _vorbis_floor0_free(_vi_info_floor *vi);
+extern void            _vorbis_floor0_pack(oggpack_buffer *opb,
+					   _vi_info_floor *vi);
+extern _vi_info_floor *_vorbis_floor0_unpack(vorbis_info *vi,
+					     oggpack_buffer *opb);
 

@@ -11,38 +11,18 @@
  *                                                                  *
  ********************************************************************
 
- function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.13 2000/01/20 04:43:04 xiphmont Exp $
+ function: time backend 0 (dummy)
+ last mod: $Id: time0.h,v 1.1 2000/01/20 04:43:05 xiphmont Exp $
 
  ********************************************************************/
 
-#include <stdio.h>
-#include "vorbis/codec.h"
-#include "registry.h"
-#include "bitwise.h"
+typedef struct vorbis_info_time0{
+  long  dummy;
+} vorbis_info_time0;
 
-int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  vorbis_dsp_state *vd=vb->vd;
-  vorbis_info      *vi=vd->vi;
-  oggpack_buffer   *opb=&vb->opb;
-  int              type;
-  int              mode;
-
-  /* first things first.  Make sure decode is ready */
-  _vorbis_block_ripcord(vb);
-  _oggpack_readinit(opb,op->packet,op->bytes);
-
-  /* Check the packet type */
-  if(_oggpack_read(opb,1)!=0){
-    /* Oops.  This is not an audio data packet */
-    return(-1);
-  }
-
-  /* read our mode */
-  mode=_oggpack_read(&vb->opb,vd->modebits);
-  type=vi->mappingtypes[mode]; /* unpack_header enforces range checking */
-
-  return(vorbis_map_synthesis_P[type](vb,vi->modelist[mode],op));
-}
-
-
+extern _vi_info_time *_vorbis_time0_dup   (_vi_info_time *source);
+extern void           _vorbis_time0_free  (_vi_info_time *i);
+extern void           _vorbis_time0_pack  (oggpack_buffer *opb,
+					   _vi_info_time *i);
+extern _vi_info_time *_vorbis_time0_unpack(vorbis_info *vi,
+					   oggpack_buffer *opb);

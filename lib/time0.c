@@ -11,30 +11,29 @@
  *                                                                  *
  ********************************************************************
 
- function: dup/clear the psy setup
- last mod: $Id: infopsy.c,v 1.1 2000/01/19 08:57:56 xiphmont Exp $
+ function: time backend 0 (dummy)
+ last mod: $Id: time0.c,v 1.1 2000/01/20 04:43:05 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
 #include "vorbis/codec.h"
-#include "bitwise.h"
-#include "bookinternal.h"
+#include "registry.h"
+#include "time0.h"
 
-static vorbis_info_psy *vorbis_psy_dup(vorbis_info_psy *source){
-  if(source){
-    vorbis_info_psy *d=malloc(sizeof(vorbis_info_psy));
-    memcpy(d,source,sizeof(vorbis_info_psy));
-    return(d);
-  }else
-    return(NULL);
+extern _vi_info_time *_vorbis_time0_dup(_vi_info_time *source){
+  return(calloc(1,sizeof(vorbis_info_time0)));
 }
 
-static void vorbis_psy_free(vorbis_info_psy *i){
-  if(i){
-    memset(i,0,sizeof(vorbis_info_psy));
-    free(i);
-  }
+extern void _vorbis_time0_free(_vi_info_time *i){
+  if(i)free(i);
 }
 
+extern void _vorbis_time0_pack(oggpack_buffer *opb,_vi_info_time *i){
+}  
+
+extern _vi_info_time *_vorbis_time0_unpack(vorbis_info *vi,
+					   oggpack_buffer *opb){
+  return(_vorbis_time0_dup(NULL));
+}

@@ -11,8 +11,8 @@
  *                                                                  *
  ********************************************************************
 
- function: pack/unpack/dup/clear the various residue backend setups
- last mod: $Id: infores.c,v 1.1 2000/01/19 08:57:56 xiphmont Exp $
+ function: residue backend 0 implementation
+ last mod: $Id: res0.c,v 1.1 2000/01/20 04:43:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,12 +20,11 @@
 #include <string.h>
 #include "vorbis/codec.h"
 #include "bitwise.h"
-#include "bookinternal.h"
-
-/* handlers for residue backend 0 ***********************************/
+#include "registry.h"
+#include "res0.h"
 
 /* unfinished as of 20000118 */
-static void *_vorbis_res0_dup(void *source){
+extern _vi_info_res *_vorbis_res0_dup(_vi_info_res *source){
   vorbis_info_res0 *d=malloc(sizeof(vorbis_info_res0));
   memcpy(d,source,sizeof(vorbis_info_res0));
   d->books=malloc(sizeof(int)*d->stages);
@@ -34,7 +33,7 @@ static void *_vorbis_res0_dup(void *source){
   return(d); 
 }
 
-static void _vorbis_res0_free(void *i){
+extern void _vorbis_res0_free(_vi_info_res *i){
   vorbis_info_res0 *d=(vorbis_info_res0 *)i;
   if(d){
     if(d->books)free(d->books);
@@ -44,31 +43,12 @@ static void _vorbis_res0_free(void *i){
 }
 
 /* not yet */
-static void _vorbis_res0_pack(oggpack_buffer *opb, void *vi){
+extern void _vorbis_res0_pack(oggpack_buffer *opb, _vi_info_res *vi){
 }
 
-static void *_vorbis_res0_unpack(oggpack_buffer *opb){
-  vorbis_info_floor0 d;
+extern _vi_info_res *_vorbis_res0_unpack(vorbis_info *vi,
+					 oggpack_buffer *opb){
+  vorbis_info_res0 d;
   memset(&d,0,sizeof(d));
   return(_vorbis_res0_dup(&d));
 }
-
-/* stuff em into arrays ************************************************/
-#define VI_RESB 1
-
-static void *(*vorbis_res_dup_P[])(void *)={ 
-  _vorbis_res0_dup,
-};
-
-static void (*vorbis_res_free_P[])(void *)={ 
-  _vorbis_res0_free,
-};
-
-static void (*vorbis_res_pack_P[])(oggpack_buffer *,void *)={ 
-  _vorbis_res0_pack,
-};
-
-static void *(*vorbis_res_unpack_P[])(oggpack_buffer *)={ 
-  _vorbis_res0_unpack,
-};
-

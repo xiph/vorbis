@@ -12,24 +12,37 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.4 1999/12/30 07:26:48 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.5 2000/01/20 04:43:03 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_PSY_H_
 #define _V_PSY_H_
 
-extern void _vp_psy_init(psy_lookup *p,vorbis_info *vi,int n);
-extern void _vp_psy_clear(psy_lookup *p);
+typedef struct vorbis_info_psy{
+  double maskthresh[MAX_BARK];
+  double lrolldB;
+  double hrolldB;
+} vorbis_info_psy;
 
-extern void _vp_noise_floor(psy_lookup *p, double *f, double *m);
-extern void _vp_mask_floor(psy_lookup *p,double *f, double *m);
+typedef struct {
+  int n;
+  struct vorbis_info_psy *vi;
+
+  double *maskthresh;
+  double *barknum;
+
+} psy_lookup;
 
 
-extern double _vp_balance_compute(double *A, double *B, double *lpc,
-			   lpc_lookup *vb);
-extern void _vp_balance_apply(double *A, double *B, double *lpc, double amp,
-			      lpc_lookup *vb,int divp);
+extern void   _vp_psy_init(psy_lookup *p,vorbis_info_psy *vi,int n,long rate);
+extern void   _vp_psy_clear(psy_lookup *p);
+extern void  *_vi_psy_dup(void *source);
+extern void   _vi_psy_free(void *i);
 
+extern void   _vp_noise_floor(psy_lookup *p, double *f, double *m);
+extern void   _vp_mask_floor(psy_lookup *p,double *f, double *m);
 
 #endif
+
+

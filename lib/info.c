@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.15 2000/01/19 08:57:55 xiphmont Exp $
+ last mod: $Id: info.c,v 1.16 2000/01/20 04:42:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,10 +24,8 @@
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "bookinternal.h"
-
-/* these modules were split out only to make this file more readable.
-   I don't want to expose the symbols */
-#include "infomap.c"
+#include "registry.h"
+#include "psy.h"
 
 /* helpers */
 
@@ -96,17 +94,56 @@ int vorbis_info_dup(vorbis_info *dest,vorbis_info *source){
   /* dup mode maps, blockflags and map types */
   if(source->modes){
     dest->blockflags=malloc(source->modes*sizeof(int));
-    dest->maptypes=malloc(source->modes*sizeof(int));
-    dest->maplist=calloc(source->modes,sizeof(void *));
+    dest->windowtypes=malloc(source->modes*sizeof(int));
+    dest->transformtypes=malloc(source->modes*sizeof(int));
+    dest->mappingtypes=malloc(source->modes*sizeof(int));
+    dest->modelist=calloc(source->modes,sizeof(void *));
 
     memcpy(dest->blockflags,source->blockflags,sizeof(int)*dest->modes);
-    memcpy(dest->maptypes,source->maptypes,sizeof(int)*dest->modes);
+    memcpy(dest->windowtypes,source->windowtypes,sizeof(int)*dest->modes);
+    memcpy(dest->transformtypes,source->transformtypes,sizeof(int)*dest->modes);
+    memcpy(dest->mappingtypes,source->mappingtypes,sizeof(int)*dest->modes);
     for(i=0;i<source->modes;i++){
-      void *dup;
-      if(dest->maptypes[i]<0|| dest->maptypes[i]>=VI_MAPB)goto err_out;
-      if(!(dup=vorbis_map_dup_P[dest->maptypes[i]](source->maplist[i])))
-	goto err_out; 
-      dest->maplist[i]=dup;
+      if(dest->mappingtypes[i]<0|| dest->mappingtypes[i]>=VI_MAPB)goto err_out;
+      dest->modelist[i]=
+	vorbis_map_dup_P[dest->mappingtypes[i]](source,source->modelist[i]);
+    }
+  }
+
+  /* dup times */
+  if(source->times){
+    dest->timetypes=malloc(source->times*sizeof(int));
+    dest->timelist=calloc(source->times,sizeof(void *));
+    memcpy(dest->timetypes,source->timetypes,sizeof(int)*dest->times);
+    for(i=0;i<source->times;i++){
+      if(dest->timetypes[i]<0|| dest->timetypes[i]>=VI_TIMEB)goto err_out;
+      dest->timelist[i]=
+	vorbis_time_dup_P[dest->timetypes[i]](source->timelist[i]);
+    }
+  }
+
+  /* dup floors */
+  if(source->floors){
+    dest->floortypes=malloc(source->floors*sizeof(int));
+    dest->floorlist=calloc(source->floors,sizeof(void *));
+    memcpy(dest->floortypes,source->floortypes,sizeof(int)*dest->floors);
+    for(i=0;i<source->floors;i++){
+      if(dest->floortypes[i]<0|| dest->floortypes[i]>=VI_FLOORB)goto err_out;
+      dest->floorlist[i]=
+	vorbis_floor_dup_P[dest->floortypes[i]](source->floorlist[i]);
+    }
+  }
+
+  /* dup residues */
+  if(source->residues){
+    dest->residuetypes=malloc(source->residues*sizeof(int));
+    dest->residuelist=calloc(source->residues,sizeof(void *));
+    memcpy(dest->residuetypes,source->residuetypes,sizeof(int)*dest->residues);
+    for(i=0;i<source->residues;i++){
+      if(dest->residuetypes[i]<0|| dest->residuetypes[i]>=VI_RESB)
+	goto err_out;
+      dest->residuelist[i]=
+	vorbis_res_dup_P[dest->residuetypes[i]](source->residuelist[i]);
     }
   }
 
@@ -118,6 +155,15 @@ int vorbis_info_dup(vorbis_info *dest,vorbis_info *source){
       vorbis_book_dup(dest->booklist[i],source->booklist[i]);
     }
   }
+
+  /* dup psychoacoustics (if any) */
+  if(source->psys){
+    dest->psylist=calloc(source->psys,sizeof(void *));
+    for(i=0;i<source->psys;i++){
+      dest->psylist[i]=_vi_psy_dup(source->psylist[i]);
+    }
+  }
+
   /* we do *not* dup local storage */
   dest->header=NULL;
   dest->header1=NULL;
@@ -137,13 +183,36 @@ void vorbis_info_clear(vorbis_info *vi){
     free(vi->user_comments);
   }
   if(vi->vendor)free(vi->vendor);
+  if(vi->windowtypes)free(vi->windowtypes);
+  if(vi->transformtypes)free(vi->transformtypes);
   if(vi->modes){
     for(i=0;i<vi->modes;i++)
-      if(vi->maptypes[i]>=0 && vi->maptypes[i]<VI_MAPB)
-	vorbis_map_free_P[vi->maptypes[i]](vi->maplist[i]);
-    free(vi->maplist);
-    free(vi->maptypes);
+      if(vi->mappingtypes[i]>=0 && vi->mappingtypes[i]<VI_MAPB)
+	vorbis_map_free_P[vi->mappingtypes[i]](vi->modelist[i]);
+    free(vi->modelist);
+    free(vi->mappingtypes);
     free(vi->blockflags);
+  }
+  if(vi->times){
+    for(i=0;i<vi->times;i++)
+      if(vi->timetypes[i]>=0 && vi->timetypes[i]<VI_TIMEB)
+	vorbis_time_free_P[vi->timetypes[i]](vi->timelist[i]);
+    free(vi->timelist);
+    free(vi->timetypes);
+  }
+  if(vi->floors){
+    for(i=0;i<vi->floors;i++)
+      if(vi->floortypes[i]>=0 && vi->floortypes[i]<VI_FLOORB)
+	vorbis_floor_free_P[vi->floortypes[i]](vi->floorlist[i]);
+    free(vi->floorlist);
+    free(vi->floortypes);
+  }
+  if(vi->residues){
+    for(i=0;i<vi->residues;i++)
+      if(vi->residuetypes[i]>=0 && vi->residuetypes[i]<VI_RESB)
+	vorbis_res_free_P[vi->residuetypes[i]](vi->residuelist[i]);
+    free(vi->residuelist);
+    free(vi->residuetypes);
   }
   if(vi->books){
     for(i=0;i<vi->books;i++){
@@ -153,6 +222,11 @@ void vorbis_info_clear(vorbis_info *vi){
       }
     }
     free(vi->booklist);
+  }
+  if(vi->psys){
+    for(i=0;i<vi->psys;i++)
+      _vi_psy_free(vi->psylist[i]);
+    free(vi->psylist);
   }
   
   if(vi->header)free(vi->header);
@@ -181,8 +255,9 @@ static int _vorbis_unpack_info(vorbis_info *vi,oggpack_buffer *opb){
   if(vi->rate<1)goto err_out;
   if(vi->channels<1)goto err_out;
   if(vi->blocksizes[0]<8)goto err_out; 
-  if(vi->blocksizes[1]<vi->blocksizes[0])
-    goto err_out; /* doubles as EOF check */
+  if(vi->blocksizes[1]<vi->blocksizes[0])goto err_out;
+  
+  if(_oggpack_read(opb,1)!=1)goto err_out; /* EOP check */
 
   return(0);
  err_out:
@@ -206,6 +281,8 @@ static int _vorbis_unpack_comments(vorbis_info *vi,oggpack_buffer *opb){
     vi->user_comments[i]=calloc(len+1,1);
     _v_readstring(opb,vi->user_comments[i],len);
   }	  
+  if(_oggpack_read(opb,1)!=1)goto err_out; /* EOP check */
+
   return(0);
  err_out:
   vorbis_info_clear(vi);
@@ -217,25 +294,69 @@ static int _vorbis_unpack_comments(vorbis_info *vi,oggpack_buffer *opb){
 static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   int i;
 
-  vi->modes=_oggpack_read(opb,16);
-  vi->blockflags=malloc(vi->modes*sizeof(int));
-  vi->maptypes=malloc(vi->modes*sizeof(int));
-  vi->maplist=calloc(vi->modes,sizeof(void *));
-
-  for(i=0;i<vi->modes;i++){
-    vi->blockflags[i]=_oggpack_read(opb,1);
-    vi->maptypes[i]=_oggpack_read(opb,8);
-    if(vi->maptypes[i]<0 || vi->maptypes[i]>VI_MAPB)goto err_out;
-    vi->maplist[i]=vorbis_map_unpack_P[vi->maptypes[i]](opb);
-    if(!vi->maplist[i])goto err_out;
+  /* time backend settings */
+  vi->times=_oggpack_read(opb,8);
+  vi->timetypes=malloc(vi->times*sizeof(int));
+  vi->timelist=calloc(vi->times,sizeof(void *));
+  for(i=0;i<vi->times;i++){
+    vi->timetypes[i]=_oggpack_read(opb,16);
+    if(vi->timetypes[i]<0 || vi->timetypes[i]>VI_TIMEB)goto err_out;
+    vi->timelist[i]=vorbis_time_unpack_P[vi->timetypes[i]](vi,opb);
+    if(!vi->timelist[i])goto err_out;
   }
 
+  /* floor backend settings */
+  vi->floors=_oggpack_read(opb,8);
+  vi->floortypes=malloc(vi->floors*sizeof(int));
+  vi->floorlist=calloc(vi->floors,sizeof(void *));
+  for(i=0;i<vi->floors;i++){
+    vi->floortypes[i]=_oggpack_read(opb,16);
+    if(vi->floortypes[i]<0 || vi->floortypes[i]>VI_FLOORB)goto err_out;
+    vi->floorlist[i]=vorbis_floor_unpack_P[vi->floortypes[i]](vi,opb);
+    if(!vi->floorlist[i])goto err_out;
+  }
+
+  /* residue backend settings */
+  vi->residues=_oggpack_read(opb,8);
+  vi->residuetypes=malloc(vi->residues*sizeof(int));
+  vi->residuelist=calloc(vi->residues,sizeof(void *));
+  for(i=0;i<vi->residues;i++){
+    vi->residuetypes[i]=_oggpack_read(opb,16);
+    if(vi->residuetypes[i]<0 || vi->residuetypes[i]>VI_RESB)goto err_out;
+    vi->residuelist[i]=vorbis_res_unpack_P[vi->residuetypes[i]](vi,opb);
+    if(!vi->residuelist[i])goto err_out;
+  }
+
+  /* codebooks */
   vi->books=_oggpack_read(opb,16);
   vi->booklist=calloc(vi->books,sizeof(codebook *));
   for(i=0;i<vi->books;i++){
     vi->booklist[i]=calloc(1,sizeof(codebook));
     if(vorbis_book_unpack(opb,vi->booklist[i]))goto err_out;
   }
+
+  /* modes/mappings; these are loaded last in order that the mappings
+     can range-check their time/floor/res/book settings */
+  vi->modes=_oggpack_read(opb,8);
+  vi->blockflags=malloc(vi->modes*sizeof(int));
+  vi->windowtypes=malloc(vi->modes*sizeof(int));
+  vi->transformtypes=malloc(vi->modes*sizeof(int));
+  vi->mappingtypes=malloc(vi->modes*sizeof(int));
+  vi->modelist=calloc(vi->modes,sizeof(void *));
+  for(i=0;i<vi->modes;i++){
+    vi->blockflags[i]=_oggpack_read(opb,1);
+    vi->windowtypes[i]=_oggpack_read(opb,16);
+    vi->transformtypes[i]=_oggpack_read(opb,16);
+    vi->mappingtypes[i]=_oggpack_read(opb,16);
+    if(vi->windowtypes[i]!=0)goto err_out;
+    if(vi->transformtypes[i]!=0)goto err_out;
+    if(vi->mappingtypes[i]<0 || vi->mappingtypes[i]>VI_MAPB)goto err_out;
+    vi->modelist[i]=vorbis_map_unpack_P[vi->mappingtypes[i]](vi,opb);
+    if(!vi->modelist[i])goto err_out;
+  }
+
+  if(_oggpack_read(opb,1)!=1)goto err_out; /* top level EOP check */
+
   return(0);
 err_out:
   vorbis_info_clear(vi);
@@ -326,7 +447,8 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 
   _oggpack_write(opb,ilog2(vi->blocksizes[0]),4);
   _oggpack_write(opb,ilog2(vi->blocksizes[1]),4);
-  
+  _oggpack_write(opb,1,1);
+
   return(0);
 }
 
@@ -355,6 +477,7 @@ static int _vorbis_pack_comments(oggpack_buffer *opb,vorbis_info *vi){
       }
     }
   }
+  _oggpack_write(opb,1,1);
 
   return(0);
 }
@@ -364,17 +487,45 @@ static int _vorbis_pack_books(oggpack_buffer *opb,vorbis_info *vi){
   _v_writestring(opb,"vorbis");
   _oggpack_write(opb,0x82,8);
 
-  _oggpack_write(opb,vi->modes,16);
-  for(i=0;i<vi->modes;i++){
-    _oggpack_write(opb,vi->blockflags[i],1);
-    _oggpack_write(opb,vi->maptypes[i],8);
-    if(vi->maptypes[i]<0 || vi->maptypes[i]>VI_MAPB)goto err_out;
-    vorbis_map_pack_P[vi->maptypes[i]](opb,vi->maplist[i]);
+  /* times */
+  _oggpack_write(opb,vi->times,8);
+  for(i=0;i<vi->times;i++){
+    _oggpack_write(opb,vi->timetypes[i],16);
+    vorbis_time_pack_P[vi->timetypes[i]](opb,vi->timelist[i]);
   }
 
+  /* floors */
+  _oggpack_write(opb,vi->floors,8);
+  for(i=0;i<vi->floors;i++){
+    _oggpack_write(opb,vi->floortypes[i],16);
+    vorbis_floor_pack_P[vi->floortypes[i]](opb,vi->floorlist[i]);
+  }
+
+  /* residues */
+  _oggpack_write(opb,vi->residues,8);
+  for(i=0;i<vi->residues;i++){
+    _oggpack_write(opb,vi->residuetypes[i],16);
+    vorbis_res_pack_P[vi->residuetypes[i]](opb,vi->residuelist[i]);
+  }
+
+  /* books */
   _oggpack_write(opb,vi->books,16);
   for(i=0;i<vi->books;i++)
     if(vorbis_book_pack(vi->booklist[i],opb))goto err_out;
+
+  /* mode mappings */
+
+  _oggpack_write(opb,vi->modes,8);
+  for(i=0;i<vi->modes;i++){
+    _oggpack_write(opb,vi->blockflags[i],1);
+    _oggpack_write(opb,vi->windowtypes[i],16);
+    _oggpack_write(opb,vi->transformtypes[i],16);
+    _oggpack_write(opb,vi->mappingtypes[i],16);
+    vorbis_map_pack_P[vi->mappingtypes[i]](vi,opb,vi->modelist[i]);
+  }
+
+  _oggpack_write(opb,1,1);
+
   return(0);
 err_out:
   return(-1);

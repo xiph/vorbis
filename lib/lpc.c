@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.13 2000/01/04 09:05:01 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.14 2000/01/20 04:43:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -318,12 +318,12 @@ void _vlpc_de_helper(double *curve,double *lpc,double amp,
 void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
   double *lcurve=alloca(sizeof(double)*(l->ln*2));
   int i;
-  static int frameno=0;
 
   _vlpc_de_helper(lcurve,lpc,amp,l);
 
 #ifdef ANALYSIS
   {
+    static int frameno=0;
     int j;
     FILE *out;
     char buffer[80];
@@ -333,7 +333,7 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
     for(j=0;j<l->ln;j++)
       fprintf(out,"%g\n",lcurve[j]);
     fclose(out);
-  }
+  
 #endif
 
   if(amp==0)return;
@@ -342,10 +342,6 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
   for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
 
 #ifdef ANALYSIS
-  {
-    int j;
-    FILE *out;
-    char buffer[80];
     
     sprintf(buffer,"lpc%d.m",frameno-1);
     out=fopen(buffer,"w+");
@@ -359,27 +355,12 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
 void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
   double *lcurve=alloca(sizeof(double)*((l->ln+l->n)*2));
   int i;
-  static int frameno=0;
 
   if(amp==0){
     memset(residue,0,l->n*sizeof(double));
   }else{
     
     _vlpc_de_helper(lcurve,lpc,amp,l);
-
-#ifdef ANALYSIS
-  {
-    int j;
-    FILE *out;
-    char buffer[80];
-    
-    sprintf(buffer,"loglpc%d.m",frameno++);
-    out=fopen(buffer,"w+");
-    for(j=0;j<l->ln;j++)
-      fprintf(out,"%g\n",lcurve[j]);
-    fclose(out);
-  }
-#endif
 
     for(i=0;i<l->ln;i++)lcurve[i]/=l->barknorm[i];
     for(i=0;i<l->n;i++)

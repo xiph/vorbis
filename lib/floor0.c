@@ -11,8 +11,8 @@
  *                                                                  *
  ********************************************************************
 
- function: pack/unpack/dup/clear the various floor backend setups
- last mod: $Id: infofloor.c,v 1.1 2000/01/19 08:57:56 xiphmont Exp $
+ function: floor backend 0 implementation
+ last mod: $Id: floor0.c,v 1.1 2000/01/20 04:42:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,10 +20,10 @@
 #include <string.h>
 #include "vorbis/codec.h"
 #include "bitwise.h"
-#include "bookinternal.h"
+#include "registry.h"
+#include "floor0.h"
 
-/* calls for floor backend 0 *********************************************/
-static void *_vorbis_floor0_dup(void *source){
+extern _vi_info_floor *_vorbis_floor0_dup(_vi_info_floor *source){
   vorbis_info_floor0 *d=malloc(sizeof(vorbis_info_floor0));
   memcpy(d,source,sizeof(vorbis_info_floor0));
   if(d->stages){
@@ -34,7 +34,7 @@ static void *_vorbis_floor0_dup(void *source){
   return(d);
 }
 
-static void _vorbis_floor0_free(void *i){
+extern void _vorbis_floor0_free(_vi_info_floor *i){
   vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
   if(d){
     if(d->books)free(d->books);
@@ -42,7 +42,7 @@ static void _vorbis_floor0_free(void *i){
   }
 }
 
-static void _vorbis_floor0_pack(oggpack_buffer *opb,void *vi){
+extern void _vorbis_floor0_pack(oggpack_buffer *opb,_vi_info_floor *vi){
   vorbis_info_floor0 *d=(vorbis_info_floor0 *)vi;
   int i;
   _oggpack_write(opb,d->order,8);
@@ -53,8 +53,8 @@ static void _vorbis_floor0_pack(oggpack_buffer *opb,void *vi){
     _oggpack_write(opb,d->books[i],8);
 }
 
-/* type is read earlier (so that we know to call this type) */
-static void *_vorbis_floor0_unpack(oggpack_buffer *opb){
+extern _vi_info_floor *_vorbis_floor0_unpack(vorbis_info *vi,
+					     oggpack_buffer *opb){
   vorbis_info_floor0 d;
   int i;
   d.order=_oggpack_read(opb,8);
@@ -68,28 +68,9 @@ static void *_vorbis_floor0_unpack(oggpack_buffer *opb){
   if(d.stages<1)return(NULL);
 
   d.books=alloca(sizeof(int)*d.stages);
-  for(i=0;i<d.stages;i++)
+  for(i=0;i<d.stages;i++){
     d.books[i]=_oggpack_read(opb,8);
-  if(d.books[d.stages-1]<0)return(NULL);
+    if(d.books[i]<0 || d.books[i]>=vi->books)return(NULL);
+  }
   return(_vorbis_floor0_dup(&d));
 }
-
-/* stuff em into arrays ************************************************/
-#define VI_FLOORB 1
-
-static void *(*vorbis_floor_dup_P[])(void *)={ 
-  _vorbis_floor0_dup,
-};
-
-static void (*vorbis_floor_free_P[])(void *)={ 
-  _vorbis_floor0_free,
-};
-
-static void (*vorbis_floor_pack_P[])(oggpack_buffer *,void *)={ 
-  _vorbis_floor0_pack,
-};
-
-static void *(*vorbis_floor_unpack_P[])(oggpack_buffer *)={ 
-  _vorbis_floor0_unpack,
-};
-

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.21 2000/01/05 03:10:55 xiphmont Exp $
+ last mod: $Id: block.c,v 1.22 2000/01/20 04:42:52 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -35,6 +35,15 @@
 #include "bitwise.h"
 #include "psy.h"
 #include "scales.h"
+
+static int ilog2(unsigned int v){
+  int ret=0;
+  while(v>1){
+    ret++;
+    v>>=1;
+  }
+  return(ret);
+}
 
 /* pcm accumulator examples (not exhaustive):
 
@@ -76,55 +85,40 @@
 
 /* block abstraction setup *********************************************/
 
+#ifndef WORD_ALIGN
+#define WORD_ALIGN 8
+#endif
+
 int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
-  int i;
-  vorbis_info *vi=v->vi;
   memset(vb,0,sizeof(vorbis_block));
   vb->vd=v;
-
-  vb->pcm_storage=vi->blocksize[1];
-  vb->pcm_channels=vi->channels;
-  vb->floor_channels=vi->floorch;
-  vb->floor_storage=max(vi->floororder[0],vi->floororder[1]);
-  
-  vb->pcm=malloc(vb->pcm_channels*sizeof(double *));
-  for(i=0;i<vb->pcm_channels;i++)
-    vb->pcm[i]=malloc(vb->pcm_storage*sizeof(double));
-  
-  vb->lsp=malloc(vb->floor_channels*sizeof(double *));
-  vb->lpc=malloc(vb->floor_channels*sizeof(double *));
-  vb->amp=malloc(vb->floor_channels*sizeof(double));
-  for(i=0;i<vb->floor_channels;i++){
-    vb->lsp[i]=malloc(vb->floor_storage*sizeof(double));
-    vb->lpc[i]=malloc(vb->floor_storage*sizeof(double));
-  }
+  vb->localalloc=64*1024;
+  vb->localstore=malloc(vb->localalloc);
   if(v->analysisp)
     _oggpack_writeinit(&vb->opb);
 
   return(0);
 }
 
+void *_vorbis_block_alloc(vorbis_block *vb,long bytes){
+  bytes=(bytes+(WORD_ALIGN-1)) & ~(WORD_ALIGN-1);
+  if(bytes+vb->localtop>vb->localalloc){
+    /* eh, conservative.  After the first few frames, it won't grow */
+    vb->localalloc+=bytes;
+    vb->localstore=realloc(vb->localstore,vb->localalloc);
+  }
+  return(vb->localstore+vb->localtop);
+}
+
+void _vorbis_block_ripcord(vorbis_block *vb){
+  vb->localtop=0;
+}
+
 int vorbis_block_clear(vorbis_block *vb){
-  int i;
-  if(vb->pcm){
-    for(i=0;i<vb->pcm_channels;i++)
-      free(vb->pcm[i]);
-    free(vb->pcm);
-  }
-  if(vb->lpc){
-    for(i=0;i<vb->floor_channels;i++)
-      free(vb->lpc[i]);
-    free(vb->lpc);
-  }
-  if(vb->lsp){
-    for(i=0;i<vb->floor_channels;i++)
-      free(vb->lsp[i]);
-    free(vb->lsp);
-  }
-  if(vb->amp)free(vb->amp);
   if(vb->vd)
     if(vb->vd->analysisp)
       _oggpack_writeclear(&vb->opb);
+  if(vb->localstore)free(vb->localstore);
 
   memset(vb,0,sizeof(vorbis_block));
   return(0);
@@ -138,23 +132,25 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   memset(v,0,sizeof(vorbis_dsp_state));
 
   v->vi=vi;
-  mdct_init(&v->vm[0],vi->blocksize[0]);
-  mdct_init(&v->vm[1],vi->blocksize[1]);
+  v->modebits=ilog2(vi->modes);
 
-  v->window[0][0][0]=_vorbis_window(vi->blocksize[0],
-				   vi->blocksize[0]/2,vi->blocksize[0]/2);
+  mdct_init(&v->vm[0],vi->blocksizes[0]);
+  mdct_init(&v->vm[1],vi->blocksizes[1]);
+
+  v->window[0][0][0]=_vorbis_window(vi->blocksizes[0],
+				   vi->blocksizes[0]/2,vi->blocksizes[0]/2);
   v->window[0][0][1]=v->window[0][0][0];
   v->window[0][1][0]=v->window[0][0][0];
   v->window[0][1][1]=v->window[0][0][0];
 
-  v->window[1][0][0]=_vorbis_window(vi->blocksize[1],
-				   vi->blocksize[0]/2,vi->blocksize[0]/2);
-  v->window[1][0][1]=_vorbis_window(vi->blocksize[1],
-				   vi->blocksize[0]/2,vi->blocksize[1]/2);
-  v->window[1][1][0]=_vorbis_window(vi->blocksize[1],
-				   vi->blocksize[1]/2,vi->blocksize[0]/2);
-  v->window[1][1][1]=_vorbis_window(vi->blocksize[1],
-				    vi->blocksize[1]/2,vi->blocksize[1]/2);
+  v->window[1][0][0]=_vorbis_window(vi->blocksizes[1],
+				   vi->blocksizes[0]/2,vi->blocksizes[0]/2);
+  v->window[1][0][1]=_vorbis_window(vi->blocksizes[1],
+				   vi->blocksizes[0]/2,vi->blocksizes[1]/2);
+  v->window[1][1][0]=_vorbis_window(vi->blocksizes[1],
+				   vi->blocksizes[1]/2,vi->blocksizes[0]/2);
+  v->window[1][1][1]=_vorbis_window(vi->blocksizes[1],
+				    vi->blocksizes[1]/2,vi->blocksizes[1]/2);
 
   /* initialize the storage vectors to a decent size greater than the
      minimum */
@@ -176,7 +172,7 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   v->W=0;  /* current window size */
 
   /* all vector indexes; multiples of samples_per_envelope_step */
-  v->centerW=vi->blocksize[1]/2;
+  v->centerW=vi->blocksizes[1]/2;
 
   v->pcm_current=v->centerW;
   return(0);
@@ -194,24 +190,8 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   /* the coder init is different for read/write */
   v->analysisp=1;
-  _vp_psy_init(&v->vp[0],vi,vi->blocksize[0]/2);
-  _vp_psy_init(&v->vp[1],vi,vi->blocksize[1]/2);
-
-  /* Yes, wasteful to have four lookups.  This will get collapsed once
-     things crystallize */
-
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->floormap[0],vi->rate,
-	   vi->floororder[0]);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->floormap[1],vi->rate,
-	   vi->floororder[1]);
-
-  /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
-	   vi->balanceorder,vi->balanceoctaves,1);
-  lpc_init(&v->vbal[1],vi->blocksize[1]/2,256,
-           vi->balanceorder,vi->balanceoctaves,1);*/
 
   v->envelope_current=v->centerW/vi->envelopesa;
-
   return(0);
 }
 
@@ -235,12 +215,6 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     _ve_envelope_clear(&v->ve);
     mdct_clear(&v->vm[0]);
     mdct_clear(&v->vm[1]);
-    lpc_clear(&v->vl[0]);
-    lpc_clear(&v->vl[1]);
-    _vp_psy_clear(&v->vp[0]);
-    _vp_psy_clear(&v->vp[1]);
-    /*lpc_clear(&v->vbal[0]);
-      lpc_clear(&v->vbal[1]);*/
     memset(v,0,sizeof(vorbis_dsp_state));
   }
 }
@@ -277,9 +251,9 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
        [at least] a full block of zeroes at the end. */
 
     int i;
-    vorbis_analysis_buffer(v,v->vi->blocksize[1]*2);
+    vorbis_analysis_buffer(v,v->vi->blocksizes[1]*2);
     v->eofflag=v->pcm_current;
-    v->pcm_current+=v->vi->blocksize[1]*2;
+    v->pcm_current+=v->vi->blocksizes[1]*2;
     for(i=0;i<vi->channels;i++)
       memset(v->pcm[i]+v->eofflag,0,
 	     (v->pcm_current-v->eofflag)*sizeof(double));
@@ -298,7 +272,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
 int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   int i;
   vorbis_info *vi=v->vi;
-  long beginW=v->centerW-vi->blocksize[v->W]/2,centerNext;
+  long beginW=v->centerW-vi->blocksizes[v->W]/2,centerNext;
 
   /* check to see if we're done... */
   if(v->eofflag==-1)return(0);
@@ -316,12 +290,12 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      the next boundary so we can determine nW (the next window size)
      which lets us compute the shape of the current block's window */
   
-  if(vi->blocksize[0]<vi->blocksize[1]){
+  if(vi->blocksizes[0]<vi->blocksizes[1]){
     
     if(v->W)
       /* this is a long window; we start the search forward of centerW
 	 because that's the fastest we could react anyway */
-      i=v->centerW+vi->blocksize[1]/4-vi->blocksize[0]/4;
+      i=v->centerW+vi->blocksizes[1]/4-vi->blocksizes[0]/4;
     else
       /* short window.  Search from centerW */
       i=v->centerW;
@@ -349,10 +323,10 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       long largebound;
       if(v->W)
 	/* min boundary; nW large, next small */
-	largebound=v->centerW+vi->blocksize[1]*3/4+vi->blocksize[0]/4;
+	largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]/4;
       else
 	/* min boundary; nW large, next small */
-	largebound=v->centerW+vi->blocksize[0]/2+vi->blocksize[1]/2;
+	largebound=v->centerW+vi->blocksizes[0]/2+vi->blocksizes[1]/2;
       largebound/=vi->envelopesa;
       
       if(i>=largebound)
@@ -374,7 +348,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      know the size of the next block for sure and we need that now to
      figure out the window shape of this block */
   
-  centerNext=v->centerW+vi->blocksize[v->W]/4+vi->blocksize[v->nW]/4;
+  centerNext=v->centerW+vi->blocksizes[v->W]/4+vi->blocksizes[v->nW]/4;
 
   {
     /* center of next block + next block maximum right side.  Note
@@ -382,13 +356,14 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
        to actually be written (for the last multiplier), but we didn't
        need that to determine its size */
 
-    long blockbound=centerNext+vi->blocksize[v->nW]/2;
+    long blockbound=centerNext+vi->blocksizes[v->nW]/2;
     if(v->pcm_current<blockbound)return(0); /* not enough data yet */    
   }
   
   /* fill in the block.  Note that for a short window, lW and nW are *short*
      regardless of actual settings in the stream */
 
+  _vorbis_block_ripcord(vb);
   if(v->W){
     vb->lW=v->lW;
     vb->W=v->W;
@@ -401,11 +376,16 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   vb->vd=v;
   vb->sequence=v->sequence;
   vb->frameno=v->frameno;
+  vb->pcmend=vi->blocksizes[v->W];
   
-  /* copy the vectors */
-  vb->pcmend=vi->blocksize[v->W];
-  for(i=0;i<vi->channels;i++)
-    memcpy(vb->pcm[i],v->pcm[i]+beginW,vi->blocksize[v->W]*sizeof(double));
+  /* copy the vectors; this uses the local storage in vb */
+  {
+    vb->pcm=_vorbis_block_alloc(vb,sizeof(double *)*vi->channels);
+    for(i=0;i<vi->channels;i++){
+      vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(double));
+      memcpy(vb->pcm[i],v->pcm[i]+beginW,vi->blocksizes[v->W]*sizeof(double));
+    }
+  }
   
   /* handle eof detection: eof==0 means that we've not yet received EOF
                            eof>0  marks the last 'real' sample in pcm[]
@@ -420,11 +400,11 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* advance storage vectors and clean up */
   {
-    int new_centerNext=vi->blocksize[1]/2;
+    int new_centerNext=vi->blocksizes[1]/2;
     int movementW=centerNext-new_centerNext;
     int movementM=movementW/vi->envelopesa;
 
-    /* the multipliers and pcm stay synced up because the blocksizes
+    /* the multipliers and pcm stay synced up because the blocksize
        must be multiples of samples_per_envelope_step (minimum
        multiple is 2) */
 
@@ -456,21 +436,9 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
   _vds_shared_init(v,vi);
 
-  /* Yes, wasteful to have four lookups.  This will get collapsed once
-     things crystallize */
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->floormap[0],vi->rate,
-	   vi->floororder[0]);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->floormap[1],vi->rate,
-	   vi->floororder[1]);
-  /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
-	   vi->balanceorder,vi->balanceoctaves,0);
-  lpc_init(&v->vbal[1],vi->blocksize[1]/2,256,
-           vi->balanceorder,vi->balanceoctaves,0);*/
-
-
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;
-  v->centerW-= vi->blocksize[v->W]/4+vi->blocksize[v->lW]/4;
+  v->centerW-= vi->blocksizes[v->W]/4+vi->blocksizes[v->lW]/4;
   return(0);
 }
 
@@ -483,12 +451,12 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* Shift out any PCM/multipliers that we returned previously */
   /* centerW is currently the center of the last block added */
-  if(v->pcm_returned  && v->centerW>vi->blocksize[1]/2){
+  if(v->pcm_returned  && v->centerW>vi->blocksizes[1]/2){
 
     /* don't shift too much; we need to have a minimum PCM buffer of
        1/2 long block */
 
-    int shiftPCM=v->centerW-vi->blocksize[1]/2;
+    int shiftPCM=v->centerW-vi->blocksizes[1]/2;
     shiftPCM=(v->pcm_returned<shiftPCM?v->pcm_returned:shiftPCM);
 
     v->pcm_current-=shiftPCM;
@@ -507,15 +475,15 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   v->W=vb->W;
   v->nW=-1;
 
-  v->gluebits+=vb->gluebits;
-  v->time_envelope_bits+=vb->time_envelope_bits;
-  v->spectral_envelope_bits+=vb->spectral_envelope_bits;
-  v->spectral_residue_bits+=vb->spectral_residue_bits;
+  v->glue_bits+=vb->glue_bits;
+  v->time_bits+=vb->time_bits;
+  v->floor_bits+=vb->floor_bits;
+  v->res_bits+=vb->res_bits;
   v->sequence=vb->sequence;
 
   {
-    int sizeW=vi->blocksize[v->W];
-    int centerW=v->centerW+vi->blocksize[v->lW]/4+sizeW/4;
+    int sizeW=vi->blocksizes[v->W];
+    int centerW=v->centerW+vi->blocksizes[v->lW]/4+sizeW/4;
     int beginW=centerW-sizeW/2;
     int endW=beginW+sizeW;
     int beginSl;
@@ -525,7 +493,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     /* Do we have enough PCM/mult storage for the block? */
     if(endW>v->pcm_storage){
       /* expand the storage */
-      v->pcm_storage=endW+vi->blocksize[1];
+      v->pcm_storage=endW+vi->blocksizes[1];
    
       for(i=0;i<vi->channels;i++)
 	v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(double)); 
@@ -536,11 +504,11 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     switch(v->W){
     case 0:
       beginSl=0;
-      endSl=vi->blocksize[0]/2;
+      endSl=vi->blocksizes[0]/2;
       break;
     case 1:
-      beginSl=vi->blocksize[1]/4-vi->blocksize[v->lW]/4;
-      endSl=beginSl+vi->blocksize[v->lW]/2;
+      beginSl=vi->blocksizes[1]/4-vi->blocksizes[v->lW]/4;
+      endSl=beginSl+vi->blocksizes[v->lW]/2;
       break;
     }
 

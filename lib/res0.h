@@ -11,38 +11,24 @@
  *                                                                  *
  ********************************************************************
 
- function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.13 2000/01/20 04:43:04 xiphmont Exp $
+ function: residue backend 0 implementation
+ last mod: $Id: res0.h,v 1.1 2000/01/20 04:43:04 xiphmont Exp $
 
  ********************************************************************/
 
-#include <stdio.h>
-#include "vorbis/codec.h"
-#include "registry.h"
-#include "bitwise.h"
+typedef struct vorbis_info_res0{
+/* block-partitioned VQ coded straight residue */
+  long  begin;
+  long  end;
 
-int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  vorbis_dsp_state *vd=vb->vd;
-  vorbis_info      *vi=vd->vi;
-  oggpack_buffer   *opb=&vb->opb;
-  int              type;
-  int              mode;
+  /* way unfinished, just so you know while poking around CVS ;-) */
+  int   stages;
+  int  *books;
+} vorbis_info_res0;
 
-  /* first things first.  Make sure decode is ready */
-  _vorbis_block_ripcord(vb);
-  _oggpack_readinit(opb,op->packet,op->bytes);
-
-  /* Check the packet type */
-  if(_oggpack_read(opb,1)!=0){
-    /* Oops.  This is not an audio data packet */
-    return(-1);
-  }
-
-  /* read our mode */
-  mode=_oggpack_read(&vb->opb,vd->modebits);
-  type=vi->mappingtypes[mode]; /* unpack_header enforces range checking */
-
-  return(vorbis_map_synthesis_P[type](vb,vi->modelist[mode],op));
-}
-
-
+extern _vi_info_res *_vorbis_res0_dup   (_vi_info_res *source);
+extern void          _vorbis_res0_free  (_vi_info_res *i);
+extern void          _vorbis_res0_pack  (oggpack_buffer *opb, 
+					 _vi_info_res *vi);
+extern _vi_info_res *_vorbis_res0_unpack(vorbis_info *vi,
+					 oggpack_buffer *opb);

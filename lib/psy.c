@@ -11,8 +11,8 @@
  *                                                                  *
  ********************************************************************
 
- function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.c,v 1.10 2000/01/05 03:11:01 xiphmont Exp $
+ function: psychoacoustics not including preecho
+ last mod: $Id: psy.c,v 1.11 2000/01/20 04:43:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -43,7 +43,7 @@ static void set_curve(double *ref,double *c,int n, double crate){
   }
 }
 
-void _vp_psy_init(psy_lookup *p,vorbis_info *vi,int n){
+void _vp_psy_init(psy_lookup *p,vorbis_info_psy *vi,int n,long rate){
   long i;
   memset(p,0,sizeof(psy_lookup));
   p->maskthresh=malloc(n*sizeof(double));
@@ -53,10 +53,10 @@ void _vp_psy_init(psy_lookup *p,vorbis_info *vi,int n){
 
   /* set up the lookups for a given blocksize and sample rate */
   /* Vorbis max sample rate is limited by 26 Bark (54kHz) */
-  set_curve(vi->maskthresh, p->maskthresh, n,vi->rate);
+  set_curve(vi->maskthresh, p->maskthresh, n,rate);
 
   for(i=0;i<n;i++)
-    p->barknum[i]=toBARK(vi->rate/2.*i/n);
+    p->barknum[i]=toBARK(rate/2.*i/n);
 
 #ifdef ANALYSIS
   {
@@ -135,6 +135,25 @@ static void time_convolve(double *s,double *r,int n,int m){
       acc+=s[i+j]*r[m-j-1];
 
     s[i]=acc;
+  }
+}
+
+/* for duplicating the info struct */
+
+void *_vi_psy_dup(void *i){
+  vorbis_info_psy *source=i;
+  if(source){
+    vorbis_info_psy *d=malloc(sizeof(vorbis_info_psy));
+    memcpy(d,source,sizeof(vorbis_info_psy));
+    return(d);
+  }else
+    return(NULL);
+}
+
+void _vi_psy_free(void *i){
+  if(i){
+    memset(i,0,sizeof(vorbis_info_psy));
+    free(i);
   }
 }
 
