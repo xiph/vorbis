@@ -37,7 +37,8 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
   int bits=rint(log(n)/log(2));
   int i;
   
-  _oggpack_write(&vb->opb,amp*32768,15);
+
+  _oggpack_write(&vb->opb,amp*327680,18);
   
   for(i=0;i<vb->vd->vi->floororder[scale];i++){
     int val=rint(lsp[i]/M_PI*n-last);
@@ -54,7 +55,7 @@ int _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp){
   int bits=rint(log(n)/log(2));
   int i;
 
-  *amp=_oggpack_read(&vb->opb,15)/32768.;
+  *amp=_oggpack_read(&vb->opb,18)/327680.;
 
   for(i=0;i<vb->vd->vi->floororder[scale];i++){
     int val=_oggpack_read(&vb->opb,bits);

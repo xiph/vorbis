@@ -202,9 +202,9 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   /* Yes, wasteful to have four lookups.  This will get collapsed once
      things crystallize */
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/2,
+  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/8,
 	   vi->floororder[0],vi->flooroctaves[0],1);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/2,
+  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/8,
 	   vi->floororder[0],vi->flooroctaves[0],1);
 
   /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
@@ -364,7 +364,6 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     }
   }else
     v->nW=1;
-    v->nW=1;
 
   /* Do we actually have enough data *now* for the next block? The
      reason to check is that if we had no multipliers, that could
@@ -453,9 +452,9 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   /* Yes, wasteful to have four lookups.  This will get collapsed once
      things crystallize */
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/2,
+  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/8,
 	   vi->floororder[0],vi->flooroctaves[0],0);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/2,
+  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/8,
 	   vi->floororder[1],vi->flooroctaves[1],0);
   /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
 	   vi->balanceorder,vi->balanceoctaves,0);
@@ -509,7 +508,8 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     int beginSl;
     int endSl;
     int i,j;
-    double *window;
+    double *windowL;
+    double *windowN;
 
     /* Do we have enough PCM storage for the block? */
     if(endW>v->pcm_storage){
@@ -533,14 +533,15 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       break;
     }
 
-    window=v->window[v->W][0][v->lW]+vi->blocksize[v->W]/2;
+    windowN=v->window[v->W][v->lW][v->lW];
+    windowL=windowN+vi->blocksize[v->W]/2;
 
     for(j=0;j<vi->channels;j++){
       double *pcm=v->pcm[j]+beginW;
 
-      /* the add section */
+      /* the overlap/add section */
       for(i=beginSl;i<endSl;i++)
-	pcm[i]=pcm[i]*window[i]+vb->pcm[j][i];
+	pcm[i]=pcm[i]*windowL[i]+vb->pcm[j][i]*windowN[i];
       /* the remaining section */
       for(;i<sizeW;i++)
 	pcm[i]=vb->pcm[j][i];

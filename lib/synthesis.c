@@ -33,7 +33,6 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vorbis_info      *vi=vd->vi;
   oggpack_buffer   *opb=&vb->opb;
   lpc_lookup       *vl;
-  double           *window;
   int              spectral_order;
   int              n,i;
 
@@ -59,10 +58,6 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   n=vb->pcmend=vi->blocksize[vb->W];
   vb->multend=vb->pcmend/vi->envelopesa;
   
-  /* we don't know the size of the following window, but we don't need
-     it yet.  We only use the first half of the window */
-  window=vb->vd->window[vb->W][vb->lW][0];
-  
   /* recover the time envelope */
   /*if(_ve_envelope_decode(vb)<0)return(-1);*/
 
@@ -84,7 +79,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
     vorbis_lpc_apply(vb->pcm[i],lpc,vb->amp[i],vl);
       
     /* MDCT->time */
-    mdct_backward(&vb->vd->vm[vb->W],vb->pcm[i],vb->pcm[i],window);
+    mdct_backward(&vb->vd->vm[vb->W],vb->pcm[i],vb->pcm[i]);
     
     /* apply time domain envelope */
     /*_ve_envelope_apply(vb,1);*/

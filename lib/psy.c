@@ -27,9 +27,9 @@
 #include "smallft.h"
 #include "xlogmap.h"
 
-#define NOISEdB 0
+#define NOISEdB -6
 
-#define MASKdB  18
+#define MASKdB  20
 #define HROLL   60
 #define LROLL   90
 #define MASKBIAS  10
@@ -204,7 +204,7 @@ double _vp_balance_compute(double *A, double *B, double *lpc,lpc_lookup *vb){
 
 }
 
-void _vp_balance_apply(double *A, double *B, double *lpc, double amp,
+/*void _vp_balance_apply(double *A, double *B, double *lpc, double amp,
 		     lpc_lookup *vb,int divp){
   int i;
   for(i=0;i<vb->n;i++){
@@ -220,4 +220,4 @@ void _vp_balance_apply(double *A, double *B, double *lpc, double amp,
     A[i]=mag*sin(phi);
     B[i]=mag*cos(phi);
   }
-}
+  }*/

@@ -14,7 +14,7 @@
   function: LPC low level routines
   author: Monty <monty@xiph.org>
   modifications by: Monty
-  last modification date: Aug 22 1999
+  last modification date: Oct 11 1999
 
  ********************************************************************/
 
@@ -67,11 +67,13 @@ double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l){
   int n=l->ln;
   int m=l->m;
   double aut[m+1],work[n+n],error;
+  double fscale=1./n;
   int i,j;
   
   /* input is a real curve. make it complex-real */
+  /* This mixes phase, but the LPC generation doesn't care. */
   for(i=0;i<n;i++){
-    work[i*2]=curve[i];
+    work[i*2]=curve[i]*fscale;
     work[i*2+1]=0;
   }
 
@@ -134,24 +136,6 @@ double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l){
   return error;
 }
 
-/* One can do this the long way by generating the transfer function in
-   the time domain and taking the forward FFT of the result.  The
-   results from direct calculation are cleaner and faster. If one
-   looks at the below in the context of the calling function, there's
-   lots of redundant trig, but at least it's clear */
-
-double vorbis_lpc_magnitude(double w,double *lpc, int m){
-  int k;
-  double real=1,imag=0;
-  double wn=w;
-  for(k=0;k<m;k++){
-    real+=lpc[k]*cos(wn);
-    imag+=lpc[k]*sin(wn);
-    wn+=w;
-  }  
-  return(1./sqrt(real*real+imag*imag));
-}
-
 /* On top of this basic LPC infrastructure we introduce two modifications:
 
    1) Filter generation is limited in the resolution of features it
@@ -191,7 +175,7 @@ void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
   l->n=n;
   l->ln=mapped;
   l->m=m;
-  l->dscale=malloc(n*sizeof(double));
+  l->iscale=malloc(n*sizeof(int));
   l->norm=malloc(n*sizeof(double));
 
   for(i=0;i<n;i++){
@@ -214,14 +198,16 @@ void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
       l->bscale[i]=rint(LOG_X(i,bias)*scale);
     }   
 
-    drft_init(&l->fft,mapped*2);
   }
   /* decode; encode may use this too */
   
+  drft_init(&l->fft,mapped*2);
   {
     double w=1./oct*M_PI;
-    for(i=0;i<n;i++)
-      l->dscale[i]=LOG_X(i,bias)*w;   
+    for(i=0;i<n;i++){
+      l->iscale[i]=rint(LOG_X(i,bias)/oct*mapped);
+      if(l->iscale[i]>=l->ln)l->iscale[i]=l->ln-1;
+    }
   }
 }
 
@@ -230,7 +216,7 @@ void lpc_clear(lpc_lookup *l){
     if(l->bscale)free(l->bscale);
     if(l->escale)free(l->escale);
     drft_clear(&l->fft);
-    free(l->dscale);
+    free(l->iscale);
     free(l->norm);
   }
 }
@@ -246,14 +232,12 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
      'em equal is a decent rule of thumb. The below must be reworked
      slightly if mapped != n */
   
-  int n=l->n;
-  int mapped=n;
+  int mapped=l->ln;
   double work[mapped];
   int i;
 
   /* fairly correct for low frequencies, naieve for high frequencies
      (suffers from undersampling) */
-
   for(i=0;i<mapped;i++){
     double lin=l->escale[i];
     int a=floor(lin);
@@ -268,22 +252,62 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
   return vorbis_gen_lpc(work,lpc,l);
 }
 
+
+/* One can do this the long way by generating the transfer function in
+   the time domain and taking the forward FFT of the result.  The
+   results from direct calculation are cleaner and faster. If one
+   looks at the below in the context of the calling function, there's
+   lots of redundant trig, but at least it's clear */
+
+/* This version does a linear curve generation and then later
+   interpolates the log curve from the linear curve.  This could stand
+   optimization; it could both be more precise as well as not compute
+   quite a few unused values */
+
+static void _vlpc_de_helper(double *curve,double *lpc,double amp,
+			    lpc_lookup *l){
+  int i;
+  memset(curve,0,sizeof(double)*l->ln*2);
+  
+  for(i=0;i<l->m;i++){
+    curve[i*2+1]=lpc[i]/4/amp;
+    curve[i*2+2]=-lpc[i]/4/amp;
+  }
+
+  drft_backward(&l->fft,curve); /* reappropriated ;-) */
+
+  {
+    int l2=l->ln*2;
+    double unit=1./amp;
+    curve[0]=(1./(curve[0]+unit));
+    for(i=1;i<l->ln;i++){
+      double real=(curve[i]+curve[l2-i]);
+      double imag=(curve[i]-curve[l2-i]);
+      curve[i]=(1./hypot(real+unit,imag));
+    }
+  }
+}
+  
+
 /* generate the whole freq response curve on an LPC IIR filter */
 
 void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
+  double lcurve[l->ln*2];
   int i;
-  for(i=0;i<l->n;i++)
-    curve[i]=vorbis_lpc_magnitude(l->dscale[i],lpc,l->m)*amp*l->norm[i];
-}
 
-/* find frequency response of LPC filter only at nonsero residue
-   points and apply the envelope to the residue */
+  _vlpc_de_helper(lcurve,lpc,amp,l);
+
+  for(i=0;i<l->n;i++)
+    curve[i]=lcurve[l->iscale[i]]*l->norm[i];
+}
 
 void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
+  double lcurve[l->ln*2];
   int i;
-  for(i=0;i<l->n;i++)
-    if(residue[i])
-      residue[i]*=vorbis_lpc_magnitude(l->dscale[i],lpc,l->m)*amp*l->norm[i];
-}
 
+  _vlpc_de_helper(lcurve,lpc,amp,l);
+
+  for(i=0;i<l->n;i++)
+    residue[i]*=lcurve[l->iscale[i]]*l->norm[i];
+}
 

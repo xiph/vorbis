@@ -4,10 +4,15 @@
  *
  * FFT implementation from OggSquish, minus cosine transforms,
  * minus all but radix 2/4 case.  In Vorbis we only need this
- * cut-down version (used by the encoder, not decoder).
+ * cut-down version.
  *
  * To do more than just power-of-two sized vectors, see the full
  * version I wrote for NetLib.
+ *
+ * Note that the packing is a little strange; rather than the FFT r/i
+ * packing following R_0, I_n, R_1, I_1, R_2, I_2 ... R_n-1, I_n-1,
+ * it follows R_0, R_1, I_1, R_2, I_2 ... R_n-1, I_n-1, I_n like the
+ * FORTRAN version
  *
  ******************************************************************/
 
@@ -1216,11 +1221,8 @@ void drft_forward(drft_lookup *l,double *data){
 }
 
 void drft_backward(drft_lookup *l,double *data){
-  int i;
-  double n1=1./l->n;
   if (l->n==1)return;
   drftb1(l->n,data,l->trigcache,l->trigcache+l->n,l->splitcache);
-  for(i=0;i<l->n;i++)data[i]*=n1;
 }
 
 void drft_init(drft_lookup *l,int n){

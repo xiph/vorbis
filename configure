@@ -931,8 +931,8 @@ else
 	case $host in 
 	i?86-*-linux*)
 		DEBUG="-g -Wall -fsigned-char"
-		OPT="-O20 -ffast-math -fsigned-char"
-		PROFILE="-pg -g -O20 -fsigned-char";;
+		OPT="-O20 -ffast-math -malign-double -fsigned-char"
+		PROFILE="-pg -g -O20 -malign-double -fsigned-char";;
 	sparc-sun-*)
 		DEBUG="-g -Wall -fsigned-char -mv8"
 		OPT="-O20 -ffast-math -fsigned-char -mv8"
