@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.14.4.5.2.3 2001/08/07 03:47:33 xiphmont Exp $
+ last mod: $Id: mode_A.h,v 1.14.4.5.2.4 2001/08/07 05:03:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -203,8 +203,8 @@ static vorbis_info_psy _psy_set_A={
       10,10,100,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  -3,  -3,  0,   0,  0,  0,  0},
-  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.6f,.6f,.6f,.5f,.7f,.75f,.8f,.8f,.8f},
+  {  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, -3, -3,  0,   0,  0,  0,  0},
+  {.3f,.3f,.3f,.3f,.3f,.3f,.3f,.3f,.5f,.5f,.5f,.5f,.7f,.75f,.8f,.8f,.8f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
@@ -230,7 +230,7 @@ static vorbis_info_psy _psy_set_AT={
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
   {-20,-20,-20,-20,-20,-20,-20,-10,  0,  0,  -3,  -3,  0,   0,  0,  0,  0},
-  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.6f,.6f,.6f,.5f,.7f,.75f,.8f,.8f,.8f},
+  {.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.5f,.7f,.75f,.8f,.8f,.8f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */

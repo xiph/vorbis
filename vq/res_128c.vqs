@@ -40,7 +40,7 @@ haux res0_128_128aux.vqd 0,24,2
 >res0_128_1024 noninterleaved
 haux res0_128_1024aux.vqd 0,48,2
 
-:_1 res0_128_1024_1.vqd, 2, nonseq cull, 0 +- 1 2 3 4 5 6 7
+:_1 res0_128_1024_1.vqd, 2, nonseq cull, 0 +- 1 2 3 4 5 6 7 8 9 10 11 12
 :_2 res0_128_1024_2.vqd, 4, nonseq cull, 0 +- 1
 :_3 res0_128_1024_3.vqd, 4, nonseq cull, 0 +- 1
 :_4 res0_128_1024_4.vqd, 4, nonseq cull, 0 +- 1 2
