@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.42 2003/03/03 19:52:22 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.43 2003/03/04 21:23:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -182,6 +182,7 @@ extern double   vorbis_granule_time(vorbis_dsp_state *v,
 /* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
 
 extern int      vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi);
+extern int      vorbis_analysis_restart(vorbis_dsp_state *v);
 extern int      vorbis_commentheader_out(vorbis_comment *vc, ogg_packet *op);
 extern int      vorbis_analysis_headerout(vorbis_dsp_state *v,
 					  vorbis_comment *vc,
@@ -202,6 +203,7 @@ extern int      vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,
 					  ogg_packet *op);
 
 extern int      vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi);
+extern int      vorbis_synthesis_restart(vorbis_dsp_state *v);
 extern int      vorbis_synthesis(vorbis_block *vb,ogg_packet *op);
 extern int      vorbis_synthesis_trackonly(vorbis_block *vb,ogg_packet *op);
 extern int      vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
