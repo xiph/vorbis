@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.23 2002/03/29 07:10:39 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.24 2002/03/29 08:18:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,7 +31,7 @@ static float unitnorm(float x){
 }
 
 static float FABS(float *x){
-  ogg_uint32_t *ix=(ogg_uint32_t *)&x;
+  ogg_uint32_t *ix=(ogg_uint32_t *)x;
   *ix&=0x7fffffffUL;
   return(*x);
 }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.45 2002/03/29 07:10:39 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.46 2002/03/29 08:18:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -245,7 +245,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 
     if(ret&2){
       ve->mark[j]=1;
-      ve->mark[j-1]=1;
+      if(j>0)ve->mark[j-1]=1;
     }
   }
 
@@ -264,10 +264,13 @@ long _ve_envelope_search(vorbis_dsp_state *v){
     while(j<ve->current-(ve->searchstep)){/* account for postecho
                                              working back one window */
       if(j>=testW)return(1);
+ 
+      ve->cursor=j;
+
       if(ve->mark[j/ve->searchstep]){
 	if(j>centerW){
 
-	  #if 0
+#if 0
 	  if(j>ve->curmark){
 	    float *marker=alloca(v->pcm_current*sizeof(*marker));
 	    int l,m;
@@ -295,17 +298,16 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 	      for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->filter[m+VE_BANDS].markers[l]*.1;
 	      _analysis_output_always(buf,seq,marker,v->pcm_current,0,0,totalshift);
 	    }
-
+	    
 	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->stretchm[l]*.1;
 	    _analysis_output_always("stretch",seq,marker,v->pcm_current,0,0,totalshift);
-
+	    
 	    seq++;
-
+	    
 	  }
-	  #endif
+#endif
 
 	  ve->curmark=j;
-	  ve->cursor=j;
 	  if(j>=testW)return(1);
 	  return(0);
 	}
@@ -313,8 +315,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
       j+=ve->searchstep;
     }
   }
-  ve->cursor=j;
- 
+  
   return(-1);
 }
 
@@ -367,5 +368,9 @@ void _ve_envelope_shift(envelope_lookup *e,long shift){
     e->curmark-=shift;
   e->cursor-=shift;
 }
+
+
+
+
 
 
