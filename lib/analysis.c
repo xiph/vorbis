@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.44 2001/05/27 06:43:59 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.45 2001/08/07 13:04:41 msmith Exp $
 
  ********************************************************************/
 
@@ -80,7 +80,7 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB){
   FILE *of;
   char buffer[80];
 
-  //  if(i==5870){
+  /*  if(i==5870){*/
     sprintf(buffer,"%s_%d.m",base,i);
     of=fopen(buffer,"w");
     
@@ -103,7 +103,7 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB){
       }
     }
     fclose(of);
-    //  }
+    /*  } */
 }
 
 void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
