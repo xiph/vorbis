@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.11.4.3 2002/06/26 00:37:37 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.11.4.4 2002/06/26 03:28:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -53,12 +53,7 @@ static int floater_interpolate(bitrate_manager_state *bm,vorbis_info *vi,
 
   if(bin+1<bm->queue_bins){
     hibitrate=(double)(bm->avg_binacc[bin+1]*8)/bm->avg_sampleacc*vi->rate;
-    while(bin+1<bm->queue_bins &&
-	  fabs(hibitrate-desired_rate) < fabs(lobitrate-desired_rate)){
-      bin++;
-      if(bin+1<bm->queue_bins)
-	hibitrate=(double)(bm->avg_binacc[bin+1]*8)/bm->avg_sampleacc*vi->rate;
-    }
+    if(fabs(hibitrate-desired_rate) < fabs(lobitrate-desired_rate))bin++;
   }
   return(bin);
 }
@@ -303,6 +298,16 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	    bm->avg_sampleacc*vi->rate;
 	  fprintf(stderr,"upper:%f lower:%f float: %f, bitrate=%f\n",
 		  upper,lower,new,bitrate);
+
+	  fprintf(stderr,"  8:%.0f %.0f 9:%.0f 10:%.0f 11:%.0f 12:%.0f 13:%.0f 14:%.0f\n",
+		  (bm->avg_binacc[7]*8.)/bm->avg_sampleacc*vi->rate,
+		  (bm->avg_binacc[8]*8.)/bm->avg_sampleacc*vi->rate,
+		  (bm->avg_binacc[9]*8.)/bm->avg_sampleacc*vi->rate,
+		  (bm->avg_binacc[10]*8.)/bm->avg_sampleacc*vi->rate,
+		  (bm->avg_binacc[11]*8.)/bm->avg_sampleacc*vi->rate,
+		  (bm->avg_binacc[12]*8.)/bm->avg_sampleacc*vi->rate,
+		  (bm->avg_binacc[13]*8.)/bm->avg_sampleacc*vi->rate,
+		  (bm->avg_binacc[14]*8.)/bm->avg_sampleacc*vi->rate);
 	}
 
 	
