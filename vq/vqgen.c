@@ -14,7 +14,7 @@
  function: build a VQ codebook 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 08 1999
+ last modification date: Dec 08 1999
 
  ********************************************************************/
 
@@ -39,6 +39,8 @@
  * used to train the algorithm monte-carlo style.  */
 
 typedef struct vqgen{
+  int it;
+
   int    elements;
   double errspread;
 
@@ -98,12 +100,11 @@ double _dist_and_pos(vqgen *v,double *b, double *a){
     if(actualdist>0 && testdist>0){
       double val;
       if(actualdist>testdist)
-	val=actualdist/testdist;
+	val=actualdist/testdist-1.;
       else
-	val=testdist/actualdist;
-      acc+=val*val-1.;
+	val=testdist/actualdist-1.;
+      acc+=val;
     }else{
-      fprintf(stderr,"\nA zero (shouldn't happen in our data) \n");
       acc+=999999.;
     }
     lastb=b[i];
@@ -153,117 +154,42 @@ void vqgen_addpoint(vqgen *v, double *p){
   if(v->points==v->entries)_vqgen_seed(v);
 }
 
-static long it=0;
-void vqgen_recenter(vqgen *v){
+double vqgen_iterate(vqgen *v){
   long   i,j,k;
   double fdesired=(double)v->points/v->entries;
+  long  desired=fdesired;
   double asserror=0.;
   double meterror=0.;
+  double *new=malloc(sizeof(double)*v->entries*v->elements);
+  long   *nearcount=malloc(v->entries*sizeof(long));
+  double *nearbias=malloc(v->entries*desired*sizeof(double));
+  long biascount;
 
 #ifdef NOISY
   char buff[80];
-  FILE *cells;
   FILE *assig;
   FILE *bias;
-  sprintf(buff,"cells%d.m",it);
+  FILE *cells;
+  sprintf(buff,"cells%d.m",v->it);
   cells=fopen(buff,"w");
-  sprintf(buff,"assig%d.m",it);
+  sprintf(buff,"assig%d.m",v->it);
   assig=fopen(buff,"w");
-  sprintf(buff,"bias%d.m",it);
+  sprintf(buff,"bias%d.m",v->it);
   bias=fopen(buff,"w");
 #endif
 
-  if(v->entries<2)exit(1);
+  fprintf(stderr,"Pass #%ld... ",v->it);
 
-  /* first round: new midpoints */
-  {
-    double *newlo=malloc(sizeof(double)*v->entries*v->elements);
-    double *newhi=malloc(sizeof(double)*v->entries*v->elements);
-
-    memset(v->assigned,0,sizeof(long)*v->entries);
-
-    for(i=0;i<v->points;i++){
-      double firstmetric=v->metric_func(v,_now(v,0),_point(v,i))+v->bias[0];
-      long   firstentry=0;
-    
-      for(j=1;j<v->entries;j++){
-	double thismetric=v->metric_func(v,_now(v,j),_point(v,i))+v->bias[j];
-	if(thismetric<firstmetric){
-	  firstmetric=thismetric;
-	  firstentry=j;
-	}
-      }
-
-      j=firstentry;
-#ifdef NOISY
-      fprintf(cells,"%g %g\n%g %g\n\n",_now(v,j)[0],_now(v,j)[1],
-	      _point(v,i)[0],_point(v,i)[1]);
-#endif
-      meterror+=firstmetric-v->bias[firstentry];
-      if(v->assigned[j]++){
-	for(k=0;k<v->elements;k++){
-	  vN(newlo,j)[k]+=_point(v,i)[k];
-	  /*if(_point(v,i)[k]<vN(newlo,j)[k])vN(newlo,j)[k]=_point(v,i)[k];
-	    if(_point(v,i)[k]>vN(newhi,j)[k])vN(newhi,j)[k]=_point(v,i)[k];*/
-	}
-      }else{
-	for(k=0;k<v->elements;k++){
-	  vN(newlo,j)[k]=_point(v,i)[k];
-	  /*vN(newlo,j)[k]=_point(v,i)[k];
-	    vN(newhi,j)[k]=_point(v,i)[k];*/
-	}	
-      }
-    }
-
-    for(j=0;j<v->entries;j++){
-      if(v->assigned[j]){
-	for(k=0;k<v->elements;k++){
-	  _now(v,j)[k]=vN(newlo,j)[k]/v->assigned[j];
-	  /*_now(v,j)[k]=(vN(newlo,j)[k]+vN(newhi,j)[k])/2.;*/
-	}
-      }
-    }
-    free(newlo);
-    free(newhi);
+  if(v->entries<2){
+    fprintf(stderr,"generation requires at least two entries\n");
+    exit(1);
   }
 
-  for(i=0;i<v->entries;i++){
-    asserror+=fabs(fdesired-v->assigned[i]);
-#ifdef NOISY
-    fprintf(assig,"%ld\n",v->assigned[i]);
-    fprintf(bias,"%g\n",v->bias[i]);
-#endif
-  }
-
-  fprintf(stderr,"recenter: dist error=%g(%g) metric error=%g\n",
-	  asserror/v->entries,fdesired,meterror/v->points);
-  
-  it++;
-
-#ifdef NOISY
-  fclose(cells);
-  fclose(assig);
-  fclose(bias);
-#endif
-}
-
-void vqgen_rebias(vqgen *v){
-  long   i,j,k;
-  double fdesired=(float)v->points/v->entries;
-  long   desired=fdesired;
-
-  double asserror=0.;
-  double meterror=0.;
-  long   *nearcount=calloc(v->entries,sizeof(long));
-  double *nearbias=malloc(v->entries*desired*sizeof(double));
-
-  if(v->entries<2)exit(1);
-
-  /* second round: fill in nearest points for entries */
-
+  /* fill in nearest points for entries */
+  /*memset(v->bias,0,sizeof(double)*v->entries);*/
+  memset(nearcount,0,sizeof(long)*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
   for(i=0;i<v->points;i++){
-    /* not clear this should be biased */
     double firstmetric=v->metric_func(v,_now(v,0),_point(v,i))+v->bias[0];
     double secondmetric=v->metric_func(v,_now(v,1),_point(v,i))+v->bias[1];
     long   firstentry=0;
@@ -275,7 +201,7 @@ void vqgen_rebias(vqgen *v){
       firstentry=1;
       secondentry=0;
     }
-      
+    
     for(j=2;j<v->entries;j++){
       double thismetric=v->metric_func(v,_now(v,j),_point(v,i))+v->bias[j];
       if(thismetric<secondmetric){
@@ -290,9 +216,24 @@ void vqgen_rebias(vqgen *v){
 	}
       }
     }
-    v->assigned[firstentry]++;
+      
+    j=firstentry;
     meterror+=firstmetric-v->bias[firstentry];
-    
+    /* set up midpoints for next iter */
+    if(v->assigned[j]++)
+      for(k=0;k<v->elements;k++)
+	vN(new,j)[k]+=_point(v,i)[k];
+    else
+      for(k=0;k<v->elements;k++)
+	vN(new,j)[k]=_point(v,i)[k];
+
+   
+#ifdef NOISY
+    fprintf(cells,"%g %g\n%g %g\n\n",
+	    _now(v,j)[0],_now(v,j)[1],
+	    _point(v,i)[0],_point(v,i)[1]);
+#endif
+
     for(j=0;j<v->entries;j++){
       
       double thismetric;
@@ -300,7 +241,7 @@ void vqgen_rebias(vqgen *v){
       long k=nearcount[j]-1;
       
       /* 'thismetric' is to be the bias value necessary in the current
-         arrangement for entry j to capture point i */
+	 arrangement for entry j to capture point i */
       if(firstentry==j){
 	/* use the secondary entry as the threshhold */
 	thismetric=secondmetric-v->metric_func(v,_now(v,j),_point(v,i));
@@ -308,7 +249,7 @@ void vqgen_rebias(vqgen *v){
 	/* use the primary entry as the threshhold */
 	thismetric=firstmetric-v->metric_func(v,_now(v,j),_point(v,i));
       }
-
+      
       if(k>=0 && thismetric>nearbiasptr[k]){
 	
 	/* start at the end and search backward for where this entry
@@ -332,22 +273,35 @@ void vqgen_rebias(vqgen *v){
     }
   }
   
-  /* third round: inflate/deflate */
-  {
-    for(i=0;i<v->entries;i++){
-      v->bias[i]=nearbias[(i+1)*desired-1];
-    }
+  /* inflate/deflate */
+  for(i=0;i<v->entries;i++)
+    v->bias[i]=nearbias[(i+1)*desired-1];
+
+  /* last, assign midpoints */
+  for(j=0;j<v->entries;j++){
+    asserror+=fabs(v->assigned[j]-fdesired);
+    if(v->assigned[j])
+      for(k=0;k<v->elements;k++)
+	_now(v,j)[k]=vN(new,j)[k]/v->assigned[j];
+#ifdef NOISY
+    fprintf(assig,"%ld\n",v->assigned[j]);
+    fprintf(bias,"%g\n",v->bias[j]);
+#endif
   }
 
-  for(i=0;i<v->entries;i++){
-    asserror+=fabs(fdesired-v->assigned[i]);
-  }
-
-  fprintf(stderr,"rebias: dist error=%g(%g) metric error=%g\n",
+  fprintf(stderr,": dist %g(%g) metric error=%g \n",
 	  asserror/v->entries,fdesired,meterror/v->points);
-  
+  v->it++;
+
+  free(new);
   free(nearcount);
   free(nearbias);
+#ifdef NOISY
+  fclose(assig);
+  fclose(bias);
+  fclose(cells);
+#endif
+  return(asserror);
 }
 
 /* the additional fields are the hyperplanes we've already used to
@@ -874,7 +828,7 @@ int main(int argc,char *argv[]){
   char buffer[160];
   int i,j;
 
-  vqgen_init(&v,4,256,_dist_sq,0.);
+  vqgen_init(&v,4,256,_dist_and_pos,0.);
   
   while(fgets(buffer,160,in)){
     double a[8];
@@ -883,21 +837,10 @@ int main(int argc,char *argv[]){
       vqgen_addpoint(&v,a);
   }
   fclose(in);
-  
-  for(i=0;i<10;i++)
-    vqgen_recenter(&v);
-  
-  for(i=0;i<200;i++){
-    vqgen_rebias(&v);
-    vqgen_rebias(&v);
-    vqgen_rebias(&v);
-    vqgen_rebias(&v);
-    vqgen_rebias(&v);
-    vqgen_recenter(&v);
-    fprintf(stderr,"%d ",i);
-  }
 
-  vqgen_recenter(&v);
+  for(i=0;i<200;i++){
+    vqgen_iterate(&v);
+  }
 
   exit(0);
 
