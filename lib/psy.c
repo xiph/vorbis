@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.24 2000/08/15 09:09:43 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.25 2000/08/15 11:53:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -311,7 +311,7 @@ static void compute_decay_fixed(vorbis_look_psy *p,double *f, double *decay, int
 
   static int frameno=0;
 
-  for(i=0;i<n;i++){
+  for(i=10;i<n;i++){
     double pre=decay[i];
     if(decay[i]){
       double val=decay[i]*decscale;
