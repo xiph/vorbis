@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.33 2000/06/18 12:33:47 xiphmont Exp $
+ last mod: $Id: block.c,v 1.34 2000/07/10 06:48:18 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -525,12 +525,13 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       v->eofflag-=movementW;
       /* do not add padding to end of stream! */
       if(v->centerW>=v->eofflag){
-	v->frameno+=v->eofflag;
+	v->frameno+=movementW-(v->centerW-v->eofflag);
       }else{
 	v->frameno+=movementW;
       }
-    }else
+    }else{
       v->frameno+=movementW;
+    }
   }
 
   /* done */
