@@ -41,6 +41,27 @@ CFLAGS="$cflags_save"
 
 AM_PROG_LIBTOOL
 
+dnl docbook xml transform and processing tools
+AC_ARG_ENABLE(docs,
+  AC_HELP_STRING([--disable-docs],[don't build the documentation]),
+  [case "${enableval}" in
+    yes) build_docs=true;;
+    no)  build_docs=false;;
+    *)   AC_MSG_ERROR(unknown value ${enableval} for --enable-docs);;
+  esac],[build_docs=true])
+
+dnl ideally we'd look for other tools and support them
+if test x$build_docs = xtrue; then
+  AC_CHECK_PROGS([XSLTPROC], xsltproc, [/bin/false])
+  AC_CHECK_PROGS([PDFXMLTEX], pdfxmltex, [/bin/false])
+  if test "x$XSLTPROC" = "x/bin/false" || test "x$PDFXMLTEX" = "x/bin/false"; then
+    build_docs=false
+    AC_MSG_WARN([Documentation will not be built])
+  fi
+fi
+
+AM_CONDITIONAL(BUILD_DOCS, [test x$build_docs = xtrue])
+
 dnl --------------------------------------------------
 dnl Set build flags based on environment
 dnl --------------------------------------------------
