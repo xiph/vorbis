@@ -200,6 +200,8 @@ void _ve_envelope_sparsify(vorbis_block *vb){
 	  
 	  mult[i]=floor(log(mult[i]/clamp/vi->preecho_clamp)/log(2))-1;
 	  if(mult[i]>15)mult[i]=15;
+	  if(mult[i]<1)mult[i]=1;
+
 	}else{
 	  mult[i]=0;
 	}
@@ -213,7 +215,7 @@ void _ve_envelope_apply(vorbis_block *vb,int multp){
   vorbis_info *vi=vb->vd->vi;
   double env[vb->multend*vi->envelopesa];
   envelope_lookup *look=&vb->vd->ve;
-  int i,j,k;
+  int i,j;
   
   for(i=0;i<vi->envelopech;i++){
     double *mult=vb->mult[i];
@@ -224,29 +226,21 @@ void _ve_envelope_apply(vorbis_block *vb,int multp){
     for(j=0;j<vb->multend;j++){
       if(mult[j]){
 	last=mult[j];
-      }else
+      }else{
 	mult[j]=last;
+      }
     }
 
     /* compute the envelope curve */
     if(_ve_envelope_generate(mult,env,look->window,vb->multend,
 			     vi->envelopesa)){
-      
-      /* apply the envelope curve */
-      for(j=0;j<vi->channels;j++){
-	
-	/* check to see if the generated envelope applies to this channel */
-	/*if(vi->envelopemap[j]==i){ not mapping yet */
-	if(j==i){
-	  
-	  if(multp)
-	    for(k=0;k<vb->multend*vi->envelopesa;k++)
-	      vb->pcm[j][k]*=env[k];
-	  else
-	    for(k=0;k<vb->multend*vi->envelopesa;k++)
-	      vb->pcm[j][k]/=env[k];
-	}
-      }
+      if(multp)
+	for(j=0;j<vb->multend*vi->envelopesa;j++)
+	  vb->pcm[i][j]*=env[j];
+      else
+	for(j=0;j<vb->multend*vi->envelopesa;j++)
+	  vb->pcm[i][j]/=env[j];
+
     }
   }
 }
@@ -263,8 +257,9 @@ int _ve_envelope_encode(vorbis_block *vb){
 
   for(i=0;i<vi->envelopech;i++){
     double *mult=vb->mult[i];
-    for(j=0;j<n;j++)
+    for(j=0;j<n;j++){
       _oggpack_write(&vb->opb,(int)(mult[j]),4);
+    }
   }
   return(0);
 }
@@ -286,5 +281,8 @@ int _ve_envelope_decode(vorbis_block *vb){
   }
   return(0);
 }
+
+
+
 
 

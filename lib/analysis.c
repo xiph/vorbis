@@ -58,11 +58,11 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   _oggpack_write(opb,vb->W,1);
 
   /* we have the preecho metrics; decide what to do with them */
-  /*_ve_envelope_sparsify(vb);
-    _ve_envelope_apply(vb,0);*/
+  _ve_envelope_sparsify(vb);
+  _ve_envelope_apply(vb,0);
 
   /* Encode the envelope */
-  /*if(_ve_envelope_encode(vb))return(-1);*/
+  if(_ve_envelope_encode(vb))return(-1);
   
   /* time domain PCM -> MDCT domain */
   for(i=0;i<vi->channels;i++)

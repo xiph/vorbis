@@ -56,10 +56,10 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
 
   /* The storage vectors are large enough; set the use markers */
   n=vb->pcmend=vi->blocksize[vb->W];
-  vb->multend=vb->pcmend/vi->envelopesa;
+  vb->multend=n/vi->envelopesa;
   
   /* recover the time envelope */
-  /*if(_ve_envelope_decode(vb)<0)return(-1);*/
+  if(_ve_envelope_decode(vb)<0)return(-1);
 
   for(i=0;i<vi->channels;i++){
     double *lpc=vb->lpc[i];
@@ -81,9 +81,10 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
     /* MDCT->time */
     mdct_backward(&vb->vd->vm[vb->W],vb->pcm[i],vb->pcm[i]);
     
-    /* apply time domain envelope */
-    /*_ve_envelope_apply(vb,1);*/
   }
+
+  /* apply time domain envelope */
+  _ve_envelope_apply(vb,1);
   
   return(0);
 }
