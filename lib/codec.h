@@ -11,10 +11,10 @@
  *                                                                  *
  ********************************************************************
 
- function: PCM data vector blocking, windowing and dis/reassembly
+ function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 13 1999
+ last modification date: Jul 25 1999
 
  ********************************************************************/
 
@@ -31,41 +31,6 @@ typedef struct vorbis_info{
 
 } vorbis_info;
  
-typedef struct vorbis_dsp_state{
-  int samples_per_envelope_step;
-  int block_size[2];
-  double *window[2][2][2]; /* windowsize, leadin, leadout */
-
-  double **pcm;
-  int      pcm_storage;
-  int      pcm_channels;
-  int      pcm_current;
-
-  double **deltas;
-  int    **multipliers;
-  int      envelope_storage;
-  int      envelope_channels;
-  int      envelope_current;
-
-  int  initflag;
-
-  long lW;
-  long W;
-  long Sl;
-  long Sr;
-
-  long beginW;
-  long endW;
-  long beginSl;
-  long endSl;
-  long beginSr;
-  long endSr;
-
-  long frame;
-  long samples;
-
-} vorbis_dsp_state;
-
 typedef struct {
   unsigned char *header;
   long header_len;
@@ -74,17 +39,6 @@ typedef struct {
 } ogg_page;
 
 typedef struct {
- 
-  /*             _________________________________________________
-     body_data: |_________________________________________________|
-     body_returned ----^       ^                          ^       ^
-     body_processed------------'                          |       |
-     body_fill     ---------------------------------------'       |     
-     body_storage  _______________________________________________' 
-
-     the header is labelled the same way.  Not all the pointers are 
-     used by both encode and decode */
-
   unsigned char   *body_data;    /* bytes from packet bodies */
   long    body_storage;          /* storage elements allocated */
   long    body_fill;             /* elements stored; fill mark */
@@ -134,6 +88,63 @@ typedef struct {
   int bodybytes;
 } ogg_sync_state;
 
+typedef struct {
+    int divisor;
+  double *window;
+} _ve_lookup;
+
+
+typedef struct vorbis_dsp_state{
+  int samples_per_envelope_step;
+  int block_size[2];
+  double *window[2][2][2]; /* windowsize, leadin, leadout */
+
+  _ve_lookup ve;
+  vorbis_info vi;
+
+  double **pcm;
+  double **pcmret;
+  int      pcm_storage;
+  int      pcm_channels;
+  int      pcm_current;
+
+  double **deltas;
+  int    **multipliers;
+  int      envelope_storage;
+  int      envelope_channels;
+  int      envelope_current;
+
+  int  eofflag;
+
+  long lW;
+  long W;
+  long nW;
+  long centerW;
+
+  long frame;
+  long samples;
+
+} vorbis_dsp_state;
+
+typedef struct vorbis_block{
+  double **pcm;
+  int    **mult;
+  int    pcm_channels; /* allocated, not used */
+  int    pcm_storage;  /* allocated, not used */
+  int    mult_channels; /* allocated, not used */
+  int    mult_storage;  /* allocated, not used */
+
+  long  lW;
+  long  W;
+  long  nW;
+  int   pcmend;
+  int   multend;
+
+  int eofflag;
+  int frameno;
+  vorbis_dsp_state *vd; /* For read-only access of configuration */
+} vorbis_block;
+
 /* libvorbis encodes in two abstraction layers; first we perform DSP
    and produce a packet (see docs/analysis.txt).  The packet is then
    coded into a framed OggSquish bitstream by the second layer (see
@@ -182,16 +193,25 @@ extern int    ogg_page_pageno(ogg_page *og);
 
 /* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
 
-extern int  vorbis_analysis_init(vorbis_dsp_state *vd,vorbis_info *vi);
-extern void vorbis_dsp_state_free(vorbis_dsp_state *vd);
-extern int  vorbis_analysis_input(vorbis_dsp_state *vd,double **pcm,int vals);
-extern int  vorbis_analysis(vorbis_dsp_state *vd,ogg_packet *op);
+extern int      vorbis_analysis_init(vorbis_dsp_state *vd,vorbis_info *vi);
+extern int      vorbis_analysis_reset(vorbis_dsp_state *vd);
+extern void     vorbis_analysis_free(vorbis_dsp_state *vd);
+extern double **vorbis_analysis_buffer(vorbis_dsp_state *vd,int vals);
+extern int      vorbis_analysis_wrote(vorbis_dsp_state *vd,int vals);
+extern int      vorbis_analysis_block(vorbis_dsp_state *vd,vorbis_block *vb);
+extern int      vorbis_analysis_packetout(vorbis_dsp_state *vd,
+					  vorbis_block *vb,
+					  ogg_packet *op);
 
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
 
+extern void vorbis_synthesis_free(vorbis_dsp_state *vd);
+extern int  vorbis_synthesis_init(vorbis_dsp_state *vd);
 extern int  vorbis_synthesis_info(vorbis_dsp_state *vd,vorbis_info *vi);
-extern int  vorbis_synthesis_packet(vorbis_dsp_state *vd,ogg_packet *op);
-extern int  vorbis_synthesis_output(vorbis_dsp_state *vd,double **pcm);
+extern int  vorbis_synthesis_packetin(vorbis_dsp_state *vd,vorbis_block *vb,
+				      ogg_packet *op);
+extern int  vorbis_synthesis_pcmout(vorbis_dsp_state *vd,vorbis_block *vb,
+				      double **pcm);
 
 #endif
 
