@@ -7,13 +7,13 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: fft transform
- last mod: $Id: smallft.h,v 1.10 2001/02/26 03:50:43 xiphmont Exp $
+ last mod: $Id: smallft.h,v 1.11 2001/12/20 01:00:30 segher Exp $
 
-********************************************************************/
+ ********************************************************************/
 
 #ifndef _V_SMFT_H_
 #define _V_SMFT_H_

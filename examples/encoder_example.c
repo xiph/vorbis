@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.31 2001/12/19 08:10:02 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.32 2001/12/20 01:00:24 segher Exp $
 
  ********************************************************************/
 
@@ -97,7 +97,7 @@ int main(){
   vorbis_info_init(&vi);
 
   vorbis_encode_init_vbr(&vi,2,44100,.1);
-  //vorbis_encode_init(&vi,2,44100,70000,64000,-1);
+  /*vorbis_encode_init(&vi,2,44100,70000,64000,-1);*/
 
   /* add a comment */
   vorbis_comment_init(&vc);

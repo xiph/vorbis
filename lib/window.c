@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.14 2001/10/02 00:14:33 segher Exp $
+ last mod: $Id: window.c,v 1.15 2001/12/20 01:00:30 segher Exp $
 
  ********************************************************************/
 

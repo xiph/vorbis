@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.15 2001/12/12 09:45:23 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.16 2001/12/20 01:00:25 segher Exp $
 
  ********************************************************************/
 

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.26 2001/12/19 01:08:15 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.27 2001/12/20 01:00:29 segher Exp $
 
  ********************************************************************/
 

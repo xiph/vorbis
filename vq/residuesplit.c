@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.12 2001/12/12 09:45:57 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.13 2001/12/20 01:00:40 segher Exp $
 
  ********************************************************************/
 

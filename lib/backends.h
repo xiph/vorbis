@@ -7,12 +7,12 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.11 2001/12/12 09:45:24 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.12 2001/12/20 01:00:26 segher Exp $
 
  ********************************************************************/
 

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.40 2001/12/19 23:13:33 segher Exp $
+ last mod: $Id: envelope.c,v 1.41 2001/12/20 01:00:26 segher Exp $
 
  Preecho calculation.
 
@@ -195,7 +195,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
     int flag=-1;
     long centerW=v->centerW;
     long beginW=centerW-ci->blocksizes[v->W]/4;
-    //long endW=centerW+ci->blocksizes[v->W]/4+ci->blocksizes[0]/4;
+    /*long endW=centerW+ci->blocksizes[v->W]/4+ci->blocksizes[0]/4;*/
     long testW=centerW+ci->blocksizes[v->W]/4+ci->blocksizes[1]/2+ci->blocksizes[0]/4;
     if(v->W)
       beginW-=ci->blocksizes[v->lW]/4;

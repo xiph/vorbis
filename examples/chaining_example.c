@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id: chaining_example.c,v 1.14 2001/12/12 09:45:22 xiphmont Exp $
+ last mod: $Id: chaining_example.c,v 1.15 2001/12/20 01:00:24 segher Exp $
 
  ********************************************************************/
 

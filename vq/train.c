@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.23 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: train.c,v 1.24 2001/12/20 01:00:40 segher Exp $
 
  ********************************************************************/
 

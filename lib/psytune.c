@@ -7,12 +7,12 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.17 2001/08/21 19:05:06 giles Exp $
+ last mod: $Id: psytune.c,v 1.18 2001/12/20 01:00:29 segher Exp $
 
  ********************************************************************/
 

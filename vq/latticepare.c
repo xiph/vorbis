@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.10 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.11 2001/12/20 01:00:39 segher Exp $
 
  ********************************************************************/
 

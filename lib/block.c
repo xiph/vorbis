@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.52 2001/12/19 01:08:13 xiphmont Exp $
+ last mod: $Id: block.c,v 1.53 2001/12/20 01:00:26 segher Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -502,7 +502,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     if(bp==-1)return(0); /* not enough data currently to search for a
                             full long block */
     v->nW=bp;
-    //v->nW=0;
+    /*v->nW=0;*/
 
   }else
     v->nW=0;

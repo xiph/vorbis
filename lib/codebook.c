@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.33 2001/12/19 23:13:33 segher Exp $
+ last mod: $Id: codebook.c,v 1.34 2001/12/20 01:00:26 segher Exp $
 
  ********************************************************************/
 

@@ -7,13 +7,13 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: *unnormalized* fft transform
- last mod: $Id: smallft.c,v 1.15 2001/10/02 00:14:32 segher Exp $
+ last mod: $Id: smallft.c,v 1.16 2001/12/20 01:00:30 segher Exp $
 
-********************************************************************/
+ ********************************************************************/
 
 /* FFT implementation from OggSquish, minus cosine transforms,
  * minus all but radix 2/4 case.  In Vorbis we only need this

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.17 2001/02/26 03:50:42 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.18 2001/12/20 01:00:27 segher Exp $
 
  ********************************************************************/
 

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.50 2001/12/19 01:08:13 xiphmont Exp $
+ last mod: $Id: info.c,v 1.51 2001/12/20 01:00:27 segher Exp $
 
  ********************************************************************/
 

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: vorbis encode-engine setup
- last mod: $Id: vorbisenc.h,v 1.7 2001/12/19 08:10:03 xiphmont Exp $
+ last mod: $Id: vorbisenc.h,v 1.8 2001/12/20 01:00:25 segher Exp $
 
  ********************************************************************/
 

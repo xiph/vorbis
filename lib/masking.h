@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: masking curve data for psychoacoustics
- last mod: $Id: masking.h,v 1.19 2001/12/12 09:45:25 xiphmont Exp $
+ last mod: $Id: masking.h,v 1.20 2001/12/20 01:00:28 segher Exp $
 
  ********************************************************************/
 

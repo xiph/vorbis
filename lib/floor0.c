@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.47 2001/12/12 09:45:25 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.48 2001/12/20 01:00:26 segher Exp $
 
  ********************************************************************/
 

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.24 2001/10/02 00:14:32 segher Exp $
+ last mod: $Id: synthesis.c,v 1.25 2001/12/20 01:00:30 segher Exp $
 
  ********************************************************************/
 

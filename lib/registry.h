@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.h,v 1.10 2001/10/18 23:29:29 cwolf Exp $
+ last mod: $Id: registry.h,v 1.11 2001/12/20 01:00:29 segher Exp $
 
  ********************************************************************/
 

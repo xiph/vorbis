@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: build a VQ codebook decision tree 
- last mod: $Id: vqsplit.h,v 1.7 2001/02/26 03:51:13 xiphmont Exp $
+ last mod: $Id: vqsplit.h,v 1.8 2001/12/20 01:00:40 segher Exp $
 
  ********************************************************************/
 

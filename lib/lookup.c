@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
   function: lookup based functions
-  last mod: $Id: lookup.c,v 1.7 2001/02/26 03:50:42 xiphmont Exp $
+  last mod: $Id: lookup.c,v 1.8 2001/12/20 01:00:27 segher Exp $
 
  ********************************************************************/
 

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.8 2001/12/12 09:45:56 xiphmont Exp $
+ last mod: $Id: distribution.c,v 1.9 2001/12/20 01:00:39 segher Exp $
 
  ********************************************************************/
 

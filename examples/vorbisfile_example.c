@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: simple example decoder using vorbisfile
- last mod: $Id: vorbisfile_example.c,v 1.8 2001/12/18 01:07:54 segher Exp $
+ last mod: $Id: vorbisfile_example.c,v 1.9 2001/12/20 01:00:24 segher Exp $
 
  ********************************************************************/
 

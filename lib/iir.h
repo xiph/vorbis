@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.h,v 1.7 2001/02/26 03:50:41 xiphmont Exp $
+  last mod: $Id: iir.h,v 1.8 2001/12/20 01:00:27 segher Exp $
 
  ********************************************************************/
 

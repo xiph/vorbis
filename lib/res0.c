@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.41 2001/12/19 23:13:33 segher Exp $
+ last mod: $Id: res0.c,v 1.42 2001/12/20 01:00:29 segher Exp $
 
  ********************************************************************/
 
@@ -578,7 +578,6 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
       if(s==0){
 	for(j=0;j<ch;j++){
 	  long val=partword[j][i];
-	  long ret;
 	  for(k=1;k<partitions_per_word;k++){
 	    val*=possible_partitions;
 	    if(i+k<partvals)
