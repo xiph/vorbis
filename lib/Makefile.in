@@ -1,5 +1,5 @@
 # vorbis makefile configured for use with gcc on any platform
-# $Id: Makefile.in,v 1.33 2000/07/12 09:36:17 xiphmont Exp $
+# $Id: Makefile.in,v 1.34 2000/08/30 06:09:21 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -15,7 +15,7 @@
 # (unless, of course, you know what you are doing :) ##########################
 
 @SET_MAKE@
-FLAGS=-I. -I../include @CFLAGS@ -Dvorbis_size32_t='@SIZE32@'
+FLAGS=-I. -I../include @CFLAGS@
 OPT=@OPT@ $(FLAGS)
 DEBUG=@DEBUG@ $(FLAGS)
 PROFILE=@PROFILE@ $(FLAGS)

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.11 2000/08/15 01:05:26 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.12 2000/08/30 06:09:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,7 +36,7 @@
 #include <console.h>      /* CodeWarrior's Mac "command-line" support */
 #endif
 
-int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
+ogg_int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
 int convsize=4096;
 
 int main(int argc, char **argv){
@@ -236,7 +236,7 @@ int main(int argc, char **argv){
 		/* convert doubles to 16 bit signed ints (host order) and
 		   interleave */
 		for(i=0;i<vi.channels;i++){
-		  int16_t *ptr=convbuffer+i;
+		  ogg_int16_t *ptr=convbuffer+i;
 		  double  *mono=pcm[i];
 		  for(j=0;j<bout;j++){
 		    int val=mono[j]*32767.;

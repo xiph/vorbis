@@ -14,26 +14,41 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os_types.h,v 1.7 2000/08/30 01:40:12 xiphmont Exp $
+ last mod: $Id: os_types.h.in,v 1.1 2000/08/30 06:09:21 xiphmont Exp $
 
  ********************************************************************/
 
 #if defined (_WIN32) 
 #if !defined(__GNUC__)
 
-typedef __int64 int64_t;
-typedef __int16 int16_t;
-#define vorbis_size32_t int
+/* MSVC/Borland */
+typedef __int64 ogg_int64_t;
+typedef __int32 ogg_int32_t;
+typedef unsigned __int32 ogg_int32_t;
+typedef __int16 ogg_int16_t;
+
 #else
+
+/* Cygwin */
 #include <_G_config.h>
-typedef _G_int64_t int64_t;
-typedef _G_int32_t int32_t;
-typedef _G_int16_t int16_t;
+typedef _G_int64_t ogg_int64_t;
+typedef _G_int32_t ogg_int32_t;
+typedef unsigned _G_int32_t ogg_int32_t;
+typedef _G_int16_t ogg_int16_t;
 #endif
-#endif
+#else
 
 #ifdef __BEOS__
+/* Be */
 #include <inttypes.h>
+#endif
+
+/* filled in by configure */
+typedef @SIZE16@ ogg_int16_t;
+typedef @SIZE32@ ogg_int32_t;
+typedef @USIZE32@ ogg_uint32_t;
+typedef @SIZE64@ ogg_int64_t;
+
 #endif
 
 #endif 

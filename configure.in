@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.20 2000/08/15 09:09:31 xiphmont Exp $
+# $Id: configure.in,v 1.21 2000/08/30 06:09:21 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -176,33 +176,151 @@ dummy="__noconf"
 #	X_LIBS="-L${srcdir}/libgtk/gtk/.libs -L${srcdir}/libgtk/gdk/.libs -L${srcdir}/libgtk/glib/.libs $X_LIBS"
 #fi
 
+# check macro modified from Jon Shiring's to compensate for autoconf's lagging
+# behind the times on type madness
+
+AC_MSG_CHECKING(for int16_t)
+AC_CACHE_VAL(has_int16_t,
+[AC_TRY_RUN([
+#ifdef __BEOS__
+#include <inttypes.h>
+#else
+#include <sys/types.h>
+#endif
+int16_t foo;
+int main() {return 0;}
+],
+has_int16_t=yes,
+has_int16_t=no,
+has_int16_t=no
+)])
+AC_MSG_RESULT($has_int16_t)
+
+AC_MSG_CHECKING(for int32_t)
+AC_CACHE_VAL(has_int32_t,
+[AC_TRY_RUN([
+#ifdef __BEOS__
+#include <inttypes.h>
+#else
+#include <sys/types.h>
+#endif
+int32_t foo;
+int main() {return 0;}
+],
+has_int32_t=yes,
+has_int32_t=no,
+has_int32_t=no
+)])
+AC_MSG_RESULT($has_int32_t)
+
+AC_MSG_CHECKING(for uint32_t)
+AC_CACHE_VAL(has_uint32_t,
+[AC_TRY_RUN([
+#ifdef __BEOS__
+#include <inttypes.h>
+#else
+#include <sys/types.h>
+#endif
+uint32_t foo;
+int main() {return 0;}
+],
+has_uint32_t=yes,
+has_uint32_t=no,
+has_uint32_t=no
+)])
+AC_MSG_RESULT($has_uint32_t)
+
+AC_MSG_CHECKING(for u_int32_t)
+AC_CACHE_VAL(has_u_int32_t,
+[AC_TRY_RUN([
+#ifdef __BEOS__
+#include <inttypes.h>
+#else
+#include <sys/types.h>
+#endif
+u_int32_t foo;
+int main() {return 0;}
+],
+has_u_int32_t=yes,
+has_u_int32_t=no,
+has_u_int32_t=no
+)])
+AC_MSG_RESULT($has_u_int32_t)
+
+AC_MSG_CHECKING(for int64_t)
+AC_CACHE_VAL(has_int64_t,
+[AC_TRY_RUN([
+#ifdef __BEOS__
+#include <inttypes.h>
+#else
+#include <sys/types.h>
+#endif
+int64_t foo;
+int main() {return 0;}
+],
+has_int64_t=yes,
+has_int64_t=no,
+has_int64_t=no
+)])
+AC_MSG_RESULT($has_int64_t)
+
 AC_CHECK_SIZEOF(short)
 AC_CHECK_SIZEOF(int)
 AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(long long)
 
-case 2 in
-	$ac_cv_sizeof_short) SIZE16="short";;
-	$ac_cv_sizeof_int) SIZE16="int";;
-esac
 
-case 4 in
-	$ac_cv_sizeof_short) SIZE32="short";;
-	$ac_cv_sizeof_int) SIZE32="int";;
-	$ac_cv_sizeof_long) SIZE32="long";;
-esac
+if test x$has_int16_t = "xyes" ; then
+	SIZE16="int16_t"
+else
+	case 2 in
+		$ac_cv_sizeof_short) SIZE16="short";;
+		$ac_cv_sizeof_int) SIZE16="int";;
+	esac
+fi
 
+if test x$has_int32_t = "xyes" ; then
+	SIZE32="int32_t"
+else
+	case 4 in
+		$ac_cv_sizeof_short) SIZE32="short";;
+		$ac_cv_sizeof_int) SIZE32="int";;
+		$ac_cv_sizeof_long) SIZE32="long";;
+	esac
+fi
+
+if test x$has_uint32_t = "xyes" ; then
+	USIZE32="uint32_t"
+else
+	if test x$has_u_int32_t = "xyes" ; then
+		USIZE32="u_int32_t"
+	else
+		case 4 in
+			$ac_cv_sizeof_short) USIZE32="unsigned short";;
+			$ac_cv_sizeof_int) USIZE32="unsigned int";;
+			$ac_cv_sizeof_long) USIZE32="unsigned long";;
+		esac
+	fi
+fi
+
+if test x$has_int64_t = "xyes" ; then
+	SIZE64="int64_t"
+else
 case 8 in
 	$ac_cv_sizeof_int) SIZE64="int";;
 	$ac_cv_sizeof_long) SIZE64="long";;
 	$ac_cv_sizeof_long_long) SIZE64="long long";;
 esac
+fi
 
 if test -z "$SIZE16"; then
 	AC_MSG_ERROR(No 16 bit type found on this platform!)
 fi
 if test -z "$SIZE32"; then
 	AC_MSG_ERROR(No 32 bit type found on this platform!)
+fi
+if test -z "$USIZE32"; then
+	AC_MSG_ERROR(No unsigned 32 bit type found on this platform!)
 fi
 if test -z "$SIZE64"; then
 	AC_MSG_WARN(No 64 bit type found on this platform!)
@@ -225,6 +343,7 @@ AC_CHECK_FUNCS(gettimeofday select strcspn strerror strspn sigaction)
 
 AC_SUBST(SIZE16)
 AC_SUBST(SIZE32)
+AC_SUBST(USIZE32)
 AC_SUBST(SIZE64)
 AC_SUBST(OPT)
 AC_SUBST(LIBS)
@@ -238,6 +357,7 @@ AC_SUBST(pthread_lib)
 
 AC_CONFIG_SUBDIRS(vorbis-tools/libao)
 
-AC_OUTPUT(Makefile lib/Makefile examples/Makefile vorbis-tools/Makefile\
+AC_OUTPUT(Makefile lib/Makefile examples/Makefile include/vorbis/os_types.h\
+	vorbis-tools/Makefile\
 	vq/Makefile huff/Makefile cmdline/Makefile xmms/Makefile kmpg/Makefile)
 
