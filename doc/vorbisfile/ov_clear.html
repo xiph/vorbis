@@ -18,7 +18,7 @@
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
 <p> After a bitstream has been opened using <a href="ov_open.html">ov_open()</a>/<a href="ov_open_callbacks.html">ov_open_callbacks()</a> and decoding is complete, the application must call <tt>ov_clear()</tt> to clear
-the decoder's buffers and close the file.<p>
+the decoder's buffers.  <tt>ov_clear()</tt> will also close the file.<p>
 
 <tt>ov_clear()</tt> must also be called after a successful call to <a href="ov_test.html">ov_test()</a> or <a href="ov_test_callbacks.html">ov_test_callbacks()</a>.<p>
 
