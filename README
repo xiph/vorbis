@@ -45,8 +45,8 @@ the Vorbis specification by the Xiphophorus company (http://www.xiph.org/).
 
 CONTACT:
 
-The OggSquish homepage is located at 'http://www.xiph.org/OggSquish'.
-Vorbis's homepage is located at 'http://www.xiph.org/OggSquish/vorbis.html'.
+The OggSquish homepage is located at 'http://www.xiph.org/ogg/'.
+Vorbis's homepage is located at 'http://www.xiph.org/ogg/vorbis/'.
 Up to date technical documents, contact information, source code and
 pre-built utilities may be found there.
 
@@ -67,4 +67,4 @@ into /usr/local/bin, the ogg player and libvorbis manpages into
 
 Monty <monty@xiph.org>, <xiphmont@mit.edu>
 
-$Id: README,v 1.1 1999/07/13 06:50:34 mwhitson Exp $
+$Id: README,v 1.2 2000/04/29 18:02:36 pjones Exp $
