@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.44.4.2 2001/05/02 22:14:06 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.44.4.3 2001/05/11 22:07:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -607,8 +607,7 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 float _vp_compute_mask(vorbis_look_psy *p,
 		      float *fft, 
 		      float *mdct, 
-		      float *flr, 
-		      float *decay,
+		      float *mask, 
 		      float specmax){
   int i,n=p->n;
   float localmax=NEGINF;
@@ -618,24 +617,14 @@ float _vp_compute_mask(vorbis_look_psy *p,
   float *maxseed=alloca(sizeof(float)*p->total_octave_lines);
   for(i=0;i<p->total_octave_lines;i++)minseed[i]=maxseed[i]=NEGINF;
 
-  /* go to dB scale. Also find the highest peak so we know the limits */
-  for(i=0;i<n;i++){
-    fft[i]=todB_nn(fft[i]);
+  /* Find the highest peak so we know the limits */
+  for(i=0;i<n;i++)
     if(fft[i]>localmax)localmax=fft[i];
-  }
   if(specmax<localmax)specmax=localmax;
-
-
-  for(i=0;i<n;i++){
-    mdct[i]=todB(mdct[i]);
-  }
-
-  /*_analysis_output("mdct",seq,mdct,n,0,0);
-    _analysis_output("fft",seq,fft,n,0,0);*/
 
   /* noise masking */
   if(p->vi->noisemaskp){
-    bark_noise_median(n,p->bark,mdct,flr,
+    bark_noise_median(n,p->bark,mdct,mask,
 		      p->vi->noisewindowlo,
 		      p->vi->noisewindowhi,
 		      p->vi->noisewindowlomin,
@@ -644,11 +633,11 @@ float _vp_compute_mask(vorbis_look_psy *p,
 		      p->noiseoffset);
     /* suppress any noise curve > specmax+p->vi->noisemaxsupp */
     for(i=0;i<n;i++)
-      if(flr[i]>specmax+p->vi->noisemaxsupp)
-	flr[i]=specmax+p->vi->noisemaxsupp;
+      if(mask[i]>specmax+p->vi->noisemaxsupp)
+	mask[i]=specmax+p->vi->noisemaxsupp;
     /*_analysis_output("noise",seq,flr,n,0,0);*/
   }else{
-    for(i=0;i<n;i++)flr[i]=NEGINF;
+    for(i=0;i<n;i++)mask[i]=NEGINF;
   }
 
   /* set the ATH (floating below localmax, not global max by a
@@ -659,57 +648,30 @@ float _vp_compute_mask(vorbis_look_psy *p,
 
     for(i=0;i<n;i++){
       float av=p->ath[i]+att;
-      if(av>flr[i])flr[i]=av;
+      if(av>mask[i])mask[i]=av;
     }
   }
 
-  /*_analysis_output("ath",seq,flr,n,0,0);*/
 
   /* tone/peak masking */
 
   /* XXX apply decay to the fft here */
 
-  seed_loop(p,p->tonecurves,p->peakatt,fft,flr,minseed,maxseed,specmax);
-  bound_loop(p,mdct,maxseed,flr,p->vi->bound_att_dB);
-  /*_analysis_output("minseed",seq,minseed,p->total_octave_lines,0,0);
-    _analysis_output("maxseed",seq,maxseed,p->total_octave_lines,0,0);*/
-  max_seeds(p,minseed,maxseed,flr);
-  /*_analysis_output("final",seq,flr,n,0,0);*/
+  seed_loop(p,p->tonecurves,p->peakatt,fft,mask,minseed,maxseed,specmax);
+  bound_loop(p,mdct,maxseed,mask,p->vi->bound_att_dB);
+  max_seeds(p,minseed,maxseed,mask);
 
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */
 
-  if(p->vi->floor_cullp){
-    for(i=0;i<n;i++)
-      if(mdct[i]+6.<flr[i])
-	flr[i]=NEGINF;
-  }else{
-    for(i=0;i<n;i++)if(mdct[i]>=flr[i])break;
-    if(i==n)for(i=0;i<n;i++)flr[i]=NEGINF;
-  }
-
+  for(i=0;i<n;i++)if(mdct[i]>=mask[i])break;
+  if(i==n)
+    for(i=0;i<n;i++)mask[i]=NEGINF;
+  else
+    for(i=0;i<n;i++)fft[i]=max(mdct[i],fft[i]);
   seq++;
 
   return(specmax);
-}
-
-
-/* this applies the floor and (optionally) tries to preserve noise
-   energy in low resolution portions of the spectrum */
-/* f and flr are *linear* scale, not dB */
-void _vp_apply_floor(vorbis_look_psy *p,float *f, float *flr){
-  float *work=alloca(p->n*sizeof(float));
-  int j;
-
-  /* subtract the floor */
-  for(j=0;j<p->n;j++){
-    if(flr[j]<=0)
-      work[j]=0.f;
-    else
-      work[j]=f[j]/flr[j];
-  }
-
-  memcpy(f,work,p->n*sizeof(float));
 }
 
 float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.c,v 1.6.4.1 2001/04/05 00:22:48 xiphmont Exp $
+ last mod: $Id: registry.c,v 1.6.4.2 2001/05/11 22:07:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,6 +26,7 @@ extern vorbis_func_time      time0_exportbundle;
 extern vorbis_func_floor     floor0_exportbundle;
 extern vorbis_func_floor     floor1_exportbundle;
 extern vorbis_func_residue   residue0_exportbundle;
+extern vorbis_func_residue   residue1_exportbundle;
 extern vorbis_func_mapping   mapping0_exportbundle;
 
 vorbis_func_time      *_time_P[]={
@@ -39,6 +40,7 @@ vorbis_func_floor     *_floor_P[]={
 
 vorbis_func_residue   *_residue_P[]={
   &residue0_exportbundle,
+  &residue1_exportbundle,
 };
 
 vorbis_func_mapping   *_mapping_P[]={

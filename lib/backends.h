@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.6.4.2 2001/04/29 22:21:04 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.6.4.3 2001/05/11 22:07:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,7 +61,9 @@ typedef struct{
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
-		     float *);
+		     const float *, const float *, /* in */
+		     const float *, const float *, /* in */
+		     float *, float *);            /* out */
   int  (*inverse)   (struct vorbis_block *,vorbis_look_floor *,
 		     float *);
 } vorbis_func_floor;
@@ -99,10 +101,18 @@ typedef struct{
   int   postlist[VIF_POSIT+2];    /* first two implicit */ 
 
 
-  float maxover;     /* encode side analysis parameter */
-  float maxunder;    /* encode side analysis parameter */
-  float maxerr;      /* encode side analysis parameter */
-  int   searchstart; /* encode side analysis parameter */
+  /* encode side analysis parameters */
+  float maxover;     
+  float maxunder;  
+  float maxerr;    
+
+  int   twofitminsize;
+  int   twofitminused;
+  int   twofitweight;  
+  float twofitatten;
+  int   unusedminsize;
+  int   unusedmin_n;
+
 } vorbis_info_floor1;
 
 /* Residue backend generic *****************************************/

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.1.2.4 2001/05/02 22:14:06 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.1.2.5 2001/05/11 22:07:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,7 +30,7 @@
 
 #define VORBIS_IEEE_FLOAT32
 
-#define floor1_rangedB 140 /* floor 0 fixed at -140dB to 0dB range */
+#define floor1_rangedB 140 /* floor 1 fixed at -140dB to 0dB range */
 
 
 typedef struct {
@@ -45,6 +45,13 @@ typedef struct {
   int n;
   int quant_q;
   vorbis_info_floor1 *vi;
+
+
+  long seq;
+  long postbits;
+  long classbits;
+  long subbits;
+  float mse;
 } vorbis_look_floor1;
 
 typedef struct lsfit_acc{
@@ -55,11 +62,36 @@ typedef struct lsfit_acc{
   long ya;
   long x2a;
   long y2a;
-  long xya;
+  long xya; 
   long n;
+  long an;
+  long un;
   long edgey0;
   long edgey1;
 } lsfit_acc;
+
+static void vorbis_msecheck(vorbis_look_floor1 *look,
+			    const float *flr,const float *mdct,
+			    const float *out,int n){
+  float fn=22050./n;
+  float lastbark=toBARK(0);
+  float att=look->vi->twofitatten;
+  int i;
+  float count=0;
+  float mse=0;
+  for(i=0;i<n;i++){
+    float bark=toBARK((i+1)*fn);
+    if(mdct[i]+att>=flr[i]){
+      float imse=(todB(out+i)-flr[i]);
+      imse*=imse;
+      mse+=imse*(bark-lastbark);
+      count+=(bark-lastbark);
+    }
+    lastbark=bark;
+  }
+
+  if(count)look->mse+=mse/count;
+}
 
 /***********************************************/
  
@@ -80,6 +112,11 @@ static void floor1_free_info(vorbis_info_floor *i){
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
   if(i){
+    fprintf(stderr,"floor 1 bit usage: %ld:%ld:%ld (%ld/frame), mse:%gdB\n",
+	    look->postbits/look->seq,look->classbits/look->seq,look->subbits/look->seq,
+	    (look->postbits+look->subbits+look->classbits)/look->seq,
+	    sqrt(look->mse/look->seq));
+
     memset(look,0,sizeof(vorbis_look_floor1));
     free(i);
   }
@@ -421,7 +458,7 @@ static float FLOOR_fromdB_LOOKUP[256]={
 };
 
 #ifdef VORBIS_IEEE_FLOAT32
-static int vorbis_floor1_dBquant(float *x){
+static int vorbis_floor1_dBquant(const float *x){
   float temp=*x-256.f;
   ogg_uint32_t *i=(ogg_uint32_t *)(&temp);
   if(*i<(ogg_uint32_t)0xc3800000)return(1023);
@@ -429,7 +466,7 @@ static int vorbis_floor1_dBquant(float *x){
   return FLOOR_quantdB_LOOKUP[(*i-0xc3800000)>>13];
 }
 #else
-static int vorbis_floor1_dBquant(float *x){
+static int vorbis_floor1_dBquant(const float *x){
   int i= ((*x)+140.)/140.*1024.+.5;
   if(i>1023)return(1023);
   if(i<0)return(0);
@@ -463,49 +500,89 @@ static void render_line(int x0,int x1,int y0,int y1,float *d){
 }
 
 /* the floor has already been filtered to only include relevant sections */
-static int accumulate_fit(float *floor,int x0, int x1,lsfit_acc *a,int n){
+static int accumulate_fit(const float *flr,const float *mdct,
+			  int x0, int x1,lsfit_acc *a,
+			  int n,vorbis_info_floor1 *info){
   long i;
+  int quantized=vorbis_floor1_dBquant(flr);
+
+  long xa=0,ya=0,x2a=0,y2a=0,xya=0,na=0, xb=0,yb=0,x2b=0,y2b=0,xyb=0,nb=0;
 
   memset(a,0,sizeof(lsfit_acc));
   a->x0=x0;
   a->x1=x1;
-  a->edgey0=-999;
+  a->edgey0=quantized;
+  if(x1>n)x1=n;
 
   for(i=x0;i<x1;i++){
-    int quantized=vorbis_floor1_dBquant(floor+i);
-    if(quantized){
-      a->xa  += i;
-      a->ya  += quantized;
-      a->x2a += (i*i);
-      a->y2a += quantized*quantized;
-      a->xya += i*quantized;
-      a->n++;
-      if(i==x0)
-	a->edgey0=quantized;
+    int quantized=vorbis_floor1_dBquant(flr+i);
+    if(mdct[i]+info->twofitatten>=flr[i]){
+      xa  += i;
+      ya  += quantized;
+      x2a += i*i;
+      y2a += quantized*quantized;
+      xya += i*quantized;
+      na++;
+    }else{
+      xb  += i;
+      yb  += quantized;
+      x2b += i*i;
+      y2b += quantized*quantized;
+      xyb += i*quantized;
+      nb++;
     }
   }
-  a->edgey1=-999;
+
+  xb+=xa;
+  yb+=ya;
+  x2b+=x2a;
+  y2b+=y2a;
+  xyb+=xya;
+  nb+=na;
+
+  /* weight toward the actually used frequencies if we meet the threshhold */
+  {
+    int weight;
+    if(nb<info->twofitminsize || na<info->twofitminused){
+      weight=0;
+    }else{
+      weight=nb*info->twofitweight/na;
+    }
+    a->xa=xa*weight+xb;
+    a->ya=ya*weight+yb;
+    a->x2a=x2a*weight+x2b;
+    a->y2a=y2a*weight+y2b;
+    a->xya=xya*weight+xyb;
+    a->an=na*weight+nb;
+    a->n=nb;
+    a->un=na;
+    if(nb>=info->unusedminsize)a->un++;
+  }
+
+  a->edgey1=-200;
   if(x1<n){
-    int quantized=vorbis_floor1_dBquant(floor+i);
-    if(quantized)
-      a->edgey1=quantized;
+    int quantized=vorbis_floor1_dBquant(flr+i);
+    a->edgey1=quantized;
   }
   return(a->n);
 }
 
 /* returns < 0 on too few points to fit, >=0 (meansq error) on success */
 static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
-  long x=0,y=0,x2=0,y2=0,xy=0,n=0,i;
+  long x=0,y=0,x2=0,y2=0,xy=0,n=0,an=0,i;
   long x0=a[0].x0;
   long x1=a[fits-1].x1;
 
   for(i=0;i<fits;i++){
-    x+=a[i].xa;
-    y+=a[i].ya;
-    x2+=a[i].x2a;
-    y2+=a[i].y2a;
-    xy+=a[i].xya;
-    n+=a[i].n;
+    if(a[i].un){
+      x+=a[i].xa;
+      y+=a[i].ya;
+      x2+=a[i].x2a;
+      y2+=a[i].y2a;
+      xy+=a[i].xya;
+      n+=a[i].n;
+      an+=a[i].an;
+    }
   }
 
   if(*y0>=0){  /* hint used to break degenerate cases */
@@ -515,6 +592,7 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     y2+= *y0 * *y0;
     xy+= *y0 *  x0;
     n++;
+    an++;
   }
 
   if(*y1>=0){  /* hint used to break degenerate cases */
@@ -524,16 +602,10 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     y2+= *y1 * *y1;
     xy+= *y1 *  x1;
     n++;
+    an++;
   }
 
-
-  switch(n){
-  case 0:
-    return(-3);
-  case 1:
-    if(a[0].edgey0>=0)return(-1);
-    return(-2);
-  }
+  if(n<2)return(n-2);
   
   {
     /* need 64 bit multiplies, which C doesn't give portably as int */
@@ -542,13 +614,19 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     double fx2=x2;
     double fy2=y2;
     double fxy=xy;
-    double a=(fy*fx2-fxy*fx)/(n*fx2-fx*fx);
-    double b=(n*fxy-fx*fy)/(n*fx2-fx*fx);
-    int s=rint((a*a*n + a*b*(2*fx) - a*(2*fy) + b*b*fx2 - b*(2*fxy) + fy2)/(n*n));
-    if(s<0)s=0;
+    double denom=1./(an*fx2-fx*fx);
+    double a=(fy*fx2-fxy*fx)*denom;
+    double b=(an*fxy-fx*fy)*denom;
     *y0=rint(a+b*x0);
     *y1=rint(a+b*x1);
-    return(s);
+
+    /* limit to our range! */
+    if(*y0>1023)*y0=1023;
+    if(*y1>1023)*y1=1023;
+    if(*y0<0)*y0=0;
+    if(*y1<0)*y1=0;
+
+    return(0);
   }
 }
 
@@ -562,7 +640,8 @@ static void fit_line_point(lsfit_acc *a,int fits,int *y0,int *y1){
   *y0=*y1=y;
 }
 
-static int inspect_error(int x0,int x1,int y0,int y1,float *flr,
+static int inspect_error(int x0,int x1,int y0,int y1,const float *flr,
+			 const float *mdct,
 			 vorbis_info_floor1 *info){
   int dy=y1-y0;
   int adx=x1-x0;
@@ -572,13 +651,13 @@ static int inspect_error(int x0,int x1,int y0,int y1,float *flr,
   int x=x0;
   int y=y0;
   int err=0;
-  int mse=0;
   int val=vorbis_floor1_dBquant(flr+x);
+  int mse=0;
   int n=0;
 
   ady-=abs(base*adx);
   
-  if(val){
+  if(mdct[x]+info->twofitatten>=flr[x]){
     if(y+info->maxover<val)return(1);
     if(y-info->maxunder>val)return(1);
     mse=(y-val);
@@ -595,15 +674,19 @@ static int inspect_error(int x0,int x1,int y0,int y1,float *flr,
       y+=base;
     }
 
-    val=vorbis_floor1_dBquant(flr+x);
-    if(val){
-      if(y+info->maxover<val)return(1);
-      if(y-info->maxunder>val)return(1);
-      mse+=((y-val)*(y-val));
-      n++;
+    if(mdct[x]+info->twofitatten>=flr[x]){
+      val=vorbis_floor1_dBquant(flr+x);
+      if(val){
+	if(y+info->maxover<val)return(1);
+	if(y-info->maxunder>val)return(1);
+	mse+=((y-val)*(y-val));
+	n++;
+      }
     }
   }
   
+  if(info->maxover*info->maxover/n>info->maxerr)return(0);
+  if(info->maxunder*info->maxunder/n>info->maxerr)return(0);
   if(mse/n>info->maxerr)return(1);
   return(0);
 }
@@ -616,10 +699,10 @@ static int post_Y(int *A,int *B,int pos){
   return (A[pos]+B[pos])>>1;
 }
 
-/* didn't need in->out seperation, modifies the flr[] vector; takes in
-   a dB scale floor, puts out linear */
 static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
-		    float *flr){
+			  const float *mdct, const float *logmdct,   /* in */
+			  const float *logmask, const float *logmax, /* in */
+			  float *residue, float *codedflr){          /* out */
   static int seq=0;
   long i,j,k,l;
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
@@ -645,27 +728,35 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
   for(i=0;i<posts;i++)hineighbor[i]=1; /* 1 for the implicit post at n */
   for(i=0;i<posts;i++)memo[i]=-1;      /* no neighbor yet */
 
+  /* Scan back from high edge to first 'used' frequency */
+  for(;n>info->unusedmin_n;n--)
+    if(logmdct[n-1]>-floor1_rangedB && 
+       logmdct[n-1]+info->twofitatten>logmask[n-1])break;
+
   /* quantize the relevant floor points and collect them into line fit
      structures (one per minimal division) at the same time */
   if(posts==0){
-    nonzero+=accumulate_fit(flr,0,n,fits,n);
+    nonzero+=accumulate_fit(logmask,logmdct,0,n,fits,n,info);
   }else{
     for(i=0;i<posts-1;i++)
-      nonzero+=accumulate_fit(flr,look->sorted_index[i],
-			      look->sorted_index[i+1],fits+i,n);
+      nonzero+=accumulate_fit(logmask,logmdct,look->sorted_index[i],
+			      look->sorted_index[i+1],fits+i,
+			      n,info);
   }
   
   if(nonzero){
     /* start by fitting the implicit base case.... */
-    int y0=-999;
-    int y1=-999;
+    int y0=-200;
+    int y1=-200;
     int mse=fit_line(fits,posts-1,&y0,&y1);
     if(mse<0){
       /* Only a single nonzero point */
-      y0=-999;
+      y0=-200;
       y1=0;
       fit_line(fits,posts-1,&y0,&y1);
     }
+
+    look->seq++;
 
     fit_flag[0]=1;
     fit_flag[1]=1;
@@ -694,14 +785,14 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	  /* if this is an empty segment, its endpoints don't matter.
 	     Mark as such */
 	  for(j=lsortpos;j<hsortpos;j++)
-	    if(fits[j].n)break;
+	    if(fits[j].un)break;
 	  if(j==hsortpos){
 	    /* empty segment; important to note that this does not
                break 0/n post case */
-	    fit_valueB[ln]=-999;
+	    fit_valueB[ln]=-200;
 	    if(fit_valueA[ln]<0)
 	      fit_flag[ln]=0;
-	    fit_valueA[hn]=-999;
+	    fit_valueA[hn]=-200;
 	    if(fit_valueB[hn]<0)
 	      fit_flag[hn]=0;
  
@@ -712,18 +803,19 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	    int ly=post_Y(fit_valueA,fit_valueB,ln);
 	    int hy=post_Y(fit_valueA,fit_valueB,hn);
 	    
-	    if(i<info->searchstart ||
-	       inspect_error(lx,hx,ly,hy,flr,info)){
+	    if(inspect_error(lx,hx,ly,hy,logmask,logmdct,info)){
 	      /* outside error bounds/begin search area.  Split it. */
-	      int ly0=-999;
-	      int ly1=-999;
-	      int hy0=-999;
-	      int hy1=-999;
+	      int ly0=-200;
+	      int ly1=-200;
+	      int hy0=-200;
+	      int hy1=-200;
 	      int lmse=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
 	      int hmse=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
 	      
-	      /* the boundary/sparsity cases are the hard part.  Pay
-                 them detailed attention */
+	      /* the boundary/sparsity cases are the hard part.  They
+                 don't happen often given that we use the full mask
+                 curve (weighted) now, but when they do happen they
+                 can go boom. Pay them detailed attention */
 	      /* cases for a segment:
 		 >=0) normal fit (>=2 unique points)
 		 -1) one point on x0;
@@ -732,71 +824,22 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 		 -3) no points */
 
 	      switch(lmse){ 
-	      case -3:  
+	      case -2:  
 		/* no points in the low segment */
 		break;
 	      case -1:
 		ly0=fits[lsortpos].edgey0;
 		break;
-	      case -2:
-		if(fit_valueA[ln]>=0){
-		  ly0=fit_valueA[ln];
-		  fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-		}else{
-		  /* nothing preexisting to base lo on. look to hi */
-		  switch(hmse){
-		  case -3:
-		    /* nothing in hi either */
-		    fit_line_point(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-		    break;
-		  case -2:case -1:
-		    /* one point in hi not on x1 */
-		    if(fit_valueB[hn]>=0){
-		      /* ah, something to base hi on */
-		      hy1=fit_valueB[hn];
-		      fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
-		      ly1=hy0;
-		      fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-		    }else{
-		      /* lo and hi are both in the midst of of
-                         emptiness.  We don't need to split, just
-                         refit */
-		      fit_line(fits+sortpos,hsortpos-lsortpos,&ly0,&hy1);
-		    }
-		    break;
-		  default:
-		    ly1=hy0;
-		    fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-		    break;
-		  }
-		}
-		break;
 	      default:
 	      }
 
 	      switch(hmse){ 
-	      case -3:  
+	      case -2:  
 		/* no points in the hi segment */
 		break;
 	      case -1:
 		hy0=fits[sortpos].edgey0;
 		break;
-	      case -2: /* one point in middle */
-		if(fit_valueB[hn]>=0){
-		  hy1=fit_valueB[hn];
-		  fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
-		}else{
-		  /* nothing preexisting to base hi on. look to lo */
-		  if(ly1>=0){
-		    hy0=ly1;
-		    fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
-		  }else{
-		    /* nothing relevant in lo */
-		    fit_line_point(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
-		  }
-		}
-		break;
-	      default:
 	      }
 
 	      /* store new edge values */
@@ -834,50 +877,27 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       }
     }
 
-    /* generate quantized floor equivalent to what we'd unpack in decode */
-    {
-      int hx;
-      int lx=0;
-      int ly=(post_Y(fit_valueA,fit_valueB,0)+4)>>3;
-
-      for(j=1;j<posts;j++){
-	int current=look->forward_index[j];
-	if(fit_flag[current]){
-	  int hy=(post_Y(fit_valueA,fit_valueB,current)+4)>>3;
-	  hx=info->postlist[current];
-	  
-	  render_line(lx,hx,ly*2,hy*2,flr);
-	  
-	  lx=hx;
-	  ly=hy;
-	}
-      }
-      for(j=hx;j<n;j++)flr[j]=0.f; /* be certain */
-      _analysis_output("infloor",seq,flr,n,0,1);
-
-    }    
-     
     /* quantize values to multiplier spec */
     switch(info->mult){
     case 1: /* 1024 -> 256 */
       for(i=0;i<posts;i++)
 	if(fit_flag[i])
-	  fit_valueA[i]=(post_Y(fit_valueA,fit_valueB,i)+2)>>2;
+	  fit_valueA[i]=post_Y(fit_valueA,fit_valueB,i)>>2;
       break;
     case 2: /* 1024 -> 128 */
       for(i=0;i<posts;i++)
 	if(fit_flag[i])
-	  fit_valueA[i]=(post_Y(fit_valueA,fit_valueB,i)+4)>>3;
+	  fit_valueA[i]=post_Y(fit_valueA,fit_valueB,i)>>3;
       break;
     case 3: /* 1024 -> 86 */
       for(i=0;i<posts;i++)
 	if(fit_flag[i])
-	  fit_valueA[i]=(post_Y(fit_valueA,fit_valueB,i)+6)/12;
+	  fit_valueA[i]=post_Y(fit_valueA,fit_valueB,i)/12;
       break;
     case 4: /* 1024 -> 64 */
       for(i=0;i<posts;i++)
 	if(fit_flag[i])
-	  fit_valueA[i]=(post_Y(fit_valueA,fit_valueB,i)+8)>>4;
+	  fit_valueA[i]=post_Y(fit_valueA,fit_valueB,i)>>4;
       break;
     }
 
@@ -900,10 +920,10 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	int val=fit_valueA[i]-predicted;
 	
 	/* at this point the 'deviation' value is in the range +/- max
-	   range, but the real, unique range can be mapped to only
-	   [0-maxrange).  So we want to wrap the deviation into this
-	   limited range, but do it in the way that least screws an
-	   essentially gaussian probability distribution. */
+	   range, but the real, unique range can always be mapped to
+	   only [0-maxrange).  So we want to wrap the deviation into
+	   this limited range, but do it in the way that least screws
+	   an essentially gaussian probability distribution. */
 	
 	if(val<0)
 	  if(val<-headroom)
@@ -941,8 +961,22 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
     oggpack_write(&vb->opb,1,1);
 
     /* beginning/end post */
+    look->postbits+=ilog(look->quant_q-1)*2;
     oggpack_write(&vb->opb,fit_valueA[0],ilog(look->quant_q-1));
     oggpack_write(&vb->opb,fit_valueA[1],ilog(look->quant_q-1));
+
+#ifdef TRAIN_FLOOR1
+    {
+      FILE *of;
+      char buffer[80];
+      sprintf(buffer,"line%d_full.vqd",vb->mode);
+      of=fopen(buffer,"a");
+      for(j=2;j<posts;j++)
+	fprintf(of,"%d\n",fit_valueB[j]);
+      fclose(of);
+    }
+#endif
+
     
     /* partition by partition */
     for(i=0,j=2;i<info->partitions;i++){
@@ -977,7 +1011,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	  cshift+=csubbits;
 	}
 	/* write it */
-	vorbis_book_encode(books+info->class_book[class],cval,&vb->opb);
+	look->classbits+=vorbis_book_encode(books+info->class_book[class],cval,&vb->opb);
 
 #ifdef TRAIN_FLOOR1
 	{
@@ -995,7 +1029,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       for(k=0;k<cdim;k++){
 	int book=info->class_subbook[class][bookas[k]];
 	if(book>=0){
-	  vorbis_book_encode(books+book,
+	  look->subbits+=vorbis_book_encode(books+book,
 			     fit_valueB[j+k],&vb->opb);
 
 #ifdef TRAIN_FLOOR1
@@ -1013,8 +1047,8 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       j+=cdim;
     }
     
-    /* generate quantized floor equivalent to what we'd unpack in decode */
     {
+      /* generate quantized floor equivalent to what we'd unpack in decode */
       int hx;
       int lx=0;
       int ly=fit_valueA[0]*info->mult;
@@ -1023,17 +1057,33 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	int hy=fit_valueA[current]*info->mult;
 	hx=info->postlist[current];
 	
-	render_line(lx,hx,ly,hy,flr);
+	render_line(lx,hx,ly,hy,codedflr);
 	
 	lx=hx;
 	ly=hy;
       }
-      for(j=hx;j<n;j++)flr[j]=0.f; /* be certain */
+      for(j=hx;j<look->n;j++)codedflr[j]=codedflr[j-1]; /* be certain */
+
+      /* use it to create residue vector.  Eliminate residue elements
+         that were below the error training attenuation relative to
+         the original mask.  This avoids portions of the floor fit
+         that were considered 'unused' in fitting from being used in
+         coding residue if the unfit values are significantly below
+         the original input mask */
+      for(j=0;j<n;j++)
+	if(logmdct[j]+info->twofitatten<logmask[j])
+	  residue[j]=0.f;
+	else
+	  residue[j]=mdct[j]/codedflr[j];
+      for(j=n;j<look->n;j++)residue[j]=0.f;
+
     }    
+
+    vorbis_msecheck(look,logmask,logmdct,codedflr,n);
 
   }else{
     oggpack_write(&vb->opb,0,1);
-    memset(flr,0,n*sizeof(float));
+    memset(codedflr,0,n*sizeof(float));
   }
   seq++;
   return(nonzero);
@@ -1129,7 +1179,7 @@ static int floor1_inverse(vorbis_block *vb,vorbis_look_floor *in,float *out){
 	lx=hx;
 	ly=hy;
       }
-      for(j=hx;j<n;j++)out[j]=0.f; /* be certain */
+      for(j=hx;j<n;j++)out[j]=out[j-1]; /* be certain */
     }    
     return(1);
   }

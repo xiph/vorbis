@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.19.4.1 2001/04/29 22:21:05 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.19.4.2 2001/05/11 22:07:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -57,7 +57,6 @@ typedef struct vorbis_info_psy{
   float max_curve_dB;
   float bound_att_dB;
 
-  int floor_cullp;
 } vorbis_info_psy;
 
 typedef struct {
@@ -90,10 +89,8 @@ extern vorbis_info_psy *_vi_psy_copy(vorbis_info_psy *i);
 extern float  _vp_compute_mask(vorbis_look_psy *p,
 			       float *fft, 
 			       float *mdct, 
-			       float *floor,
-			       float *decay,
+			       float *mask,
 			       float prev_maxamp);
-extern void _vp_apply_floor(vorbis_look_psy *p,float *f,float *flr);
 extern float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd);
 
 #endif

@@ -12,7 +12,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.14.4.1 2001/04/05 00:22:48 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.14.4.2 2001/05/11 22:07:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,12 +46,9 @@ static vorbis_info_psy _psy_set0={
    1,/* tonemaskp */
   /*  0   10   20   30   40   50   60   70   80   90   100 */
   {
-   {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f
-}, /*63*/
-   {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f
-}, /*88*/
-   {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f
-}, /*125*/
+   {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f}, /*63*/
+   {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f}, /*88*/
+   {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f}, /*125*/
 
    {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*175*/
    {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*250*/
@@ -121,11 +118,9 @@ static vorbis_info_psy _psy_set0={
             tight loop) */
   -28.,
 
-  -0.f, -.004f,   /* attack/decay control */
-
 };
 
-static int noisy=0;
+static int noisy=1;
 void analysis(char *base,int i,float *v,int n,int bark,int dB){
   if(noisy){
     int j;
@@ -144,7 +139,7 @@ void analysis(char *base,int i,float *v,int n,int bark,int dB){
 	  fprintf(of,"%g ",(float)j);
       
 	if(dB){
-	  fprintf(of,"%g\n",todB(fabs(v[j])));
+	  fprintf(of,"%g\n",todB(fabs(v+j)));
 	}else{
 	  fprintf(of,"%g\n",v[j]);
 	}
@@ -154,108 +149,7 @@ void analysis(char *base,int i,float *v,int n,int bark,int dB){
   }
 }
 
-typedef struct {
-  long n;
-  int ln;
-  int  m;
-  int *linearmap;
-
-  void *vi;
-  lpc_lookup lpclook;
-  float *lsp_look;
-
-} vorbis_look_floor0;
-
-extern float _curve_to_lpc(float *curve,float *lpc,
-			   vorbis_look_floor0 *l);
-
 long frameno=0;
-
-/* hacked from floor0.c */
-static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
-  int j;
-  float scale;
-  look->m=m;
-  look->n=n;
-  look->ln=ln;
-  lpc_init(&look->lpclook,look->ln,look->m);
-
-  scale=look->ln/toBARK(22050.f);
-
-  look->linearmap=_ogg_malloc(look->n*sizeof(int));
-  for(j=0;j<look->n;j++){
-    int val=floor( toBARK(22050.f/n*j) *scale);
-    if(val>look->ln)val=look->ln;
-    look->linearmap[j]=val;
-  }
-}
-
-/*****************************************************************/
-/* fine floor partitioner */
-
-static char amplitude_split[8000];
-static char frequency_split[8000];
-
-/* brute force it for now */
-void partition_split(float *floor,int f0,int f1,int a0,int a1,char *list,int d){
-  int i;
-  for(i=f0;i<f1;i++)
-    if(floor[i]>=a0 && floor[i]<a1)break;
-
-  if(i<f1)
-    strcat(list,"1");
-  else{
-    strcat(list,"0");
-    return;
-  }
-
-  if(f1-f0 >= a1-a0){
-    if(f1-f0==2)return;
-
-    partition_split(floor,f0,(f1+f0)/2,a0,a1,frequency_split,d+1);
-    partition_split(floor,(f1+f0)/2,f1,a0,a1,frequency_split,d+1);
-
-  }else{
-
-    partition_split(floor,f0,f1,a0,(a1+a0)/2,amplitude_split,d+1);
-    partition_split(floor,f0,f1,(a1+a0)/2,a1,amplitude_split,d+1);
-
-  }
-}
-
-
-void partition_setup(float *floor,float *data,int n){
-  int i;
-  float foo[n];
-  amplitude_split[0]='\0';
-  frequency_split[0]='\0';
-
-  for(i=0;i<n;i++){
-    if(data[i]>0){
-      if(data[i]/fromdB(floor[i])>.5){
-	foo[i]=todB(data[i]);
-	data[i]=fromdB(rint(todB(data[i])));
-      }else{
-	foo[i]=-999;
-	data[i]=0.;
-      }
-    }else{
-      if(data[i]/fromdB(floor[i])<-.5){
-	foo[i]=todB(data[i]);
-	data[i]=-fromdB(rint(todB(data[i])));
-      }else{
-	foo[i]=-999;
-	data[i]=0.;
-      }
-    }
-  }
-
-  partition_split(foo,0,n,-128,0,frequency_split,0);
-
-  fprintf(stderr,"%d:%d,  ",strlen(frequency_split),strlen(amplitude_split));
-}
-
-
 
 /****************************************************************/
 
@@ -275,10 +169,9 @@ int main(int argc,char *argv[]){
   signed char *buffer,*buffer2;
   mdct_lookup m_look;
   drft_lookup f_look;
+  drft_lookup f_look2;
   vorbis_look_psy p_look;
   long i,j,k;
-
-  vorbis_look_floor0 floorlook;
 
   int ath=0;
   int decayp=0;
@@ -325,8 +218,8 @@ int main(int argc,char *argv[]){
   window=_vorbis_window(0,framesize,framesize/2,framesize/2);
   mdct_init(&m_look,framesize);
   drft_init(&f_look,framesize);
+  drft_init(&f_look2,framesize/2);
   _vp_psy_init(&p_look,&_psy_set0,framesize/2,44100);
-  floorinit(&floorlook,framesize/2,order,map);
 
   for(i=0;i<P_BANDS;i++)
     for(j=0;j<P_LEVELS;j++)
@@ -395,36 +288,41 @@ int main(int argc,char *argv[]){
 
 	analysis("mask",frameno,flr,framesize/2,0,0);
 
-	partition_setup(flr,pcm[i],framesize/2);
+	mask[framesize-1]=0.;
+	mask[0]=0.;
+	for(j=1;j<framesize-1;j+=2){
+	  mask[j]=todB(pcm[i]+((j+1)>>1));
+	  mask[j+1]=0;
+	}
 
-	/*
-	for(j=0;j<framesize/2;j++)
-	  mask[j]=flr[j]+140.;
+	analysis("lfft",frameno,mask,framesize,0,0);
+	drft_backward(&f_look,mask);
 
-	amp=sqrt(_curve_to_lpc(mask,mask,&floorlook));
-	vorbis_lpc_to_lsp(mask,mask,floorlook.m);
-	vorbis_lsp_to_curve(flr,floorlook.linearmap,floorlook.n,floorlook.ln,
-			    mask,floorlook.m,amp,140.);
-
-	analysis("floor",frameno,flr,framesize/2,0,1);
-
-	_vp_apply_floor(&p_look,pcm[i],flr);
+	analysis("cep",frameno,mask,framesize,0,0);
+	analysis("logcep",frameno,mask,framesize,0,1);
+	
 
 
-	analysis("quant",frameno,pcm[i],framesize/2,0,0);
+	/*for(j=0;j<framesize/2;j++){
+	  float val=fromdB(flr[j]);
+	  int p=rint(pcm[i][j]/val);
+	  pcm[i][j]=p*val;
+	  }*/
+
+	/*for(j=0;j<framesize/2;j++){
+	  float val=todB(pcm[i]+j);
+	  if(val+6.<flr[j])
+	    pcm[i][j]=0.;
+	    }*/
 
 	for(j=0;j<framesize/2;j++){
-	  float val=rint(pcm[i][j]);
-	  tot++;
-	  if(val){
-	    nonz++;
-	    acc+=log(fabs(val)*2.f+1.f)/log(2);
-	    pcm[i][j]=val*flr[j];
-	  }else{
-	    pcm[i][j]=0.f;
-	  }
+	  float val=rint(todB(pcm[i]+j)/6);
+	  if(pcm[i][j]>0)
+	    pcm[i][j]=fromdB(val*6);
+	  else
+	    pcm[i][j]=-fromdB(val*6);
 	}
-	*/
+
 
 	analysis("final",frameno,pcm[i],framesize/2,0,1);
 
