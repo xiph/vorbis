@@ -36,6 +36,7 @@ dnl save $CFLAGS since AC_PROG_CC likes to insert "-g -O2"
 dnl if $CFLAGS is blank
 cflags_save="$CFLAGS"
 AC_PROG_CC
+AC_PROG_CPP
 CFLAGS="$cflags_save"
 
 AM_PROG_LIBTOOL
