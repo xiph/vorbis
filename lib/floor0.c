@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.23.2.5 2000/09/27 06:20:59 jack Exp $
+ last mod: $Id: floor0.c,v 1.23.2.6 2000/10/03 00:36:04 jack Exp $
 
  ********************************************************************/
 
@@ -351,7 +351,7 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
   if(ampraw>0){ /* also handles the -1 out of data case */
     long maxval=(1<<info->ampbits)-1;
     float amp=(float)ampraw/maxval*info->ampdB;
-    int booknum=_oggpack_read(&vb->opb,_ilog(info->numbooks));
+    int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
     float *lsp=alloca(sizeof(float)*look->m);
 
     if(booknum!=-1){
