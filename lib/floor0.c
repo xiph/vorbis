@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.19 2000/07/17 12:55:37 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.20 2000/08/15 09:09:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -280,7 +280,7 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   FILE *ef;
   char buffer[80];
 
-#if 0
+#if 1
   sprintf(buffer,"lsp0coeff_%d.vqd",vb->mode);
   of=fopen(buffer,"a");
 #endif
@@ -349,10 +349,15 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 	
 #endif
 
-#if 0
+#if 1
 #ifdef TRAIN_LSP
-    for(j=0;j<look->m;j++)
-      fprintf(of,"%.12g, ",out[j]);
+    {
+      double last=0.;
+      for(j=0;j<look->m;j++){
+	fprintf(of,"%.12g, ",out[j]-last);
+	last=out[j];
+      }
+    }
     fprintf(of,"\n");
     fclose(of);
 #endif

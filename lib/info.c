@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.29 2000/08/13 13:55:39 msmith Exp $
+ last mod: $Id: info.c,v 1.30 2000/08/15 09:09:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -125,7 +125,6 @@ int vorbis_comment_query_count(vorbis_comment *vc, char *tag){
 
   return count;
 }
-
 
 void vorbis_comment_clear(vorbis_comment *vc){
   if(vc){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.1 2000/07/19 18:10:02 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.2 2000/08/15 09:09:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,7 +23,10 @@
 #include <errno.h>
 #include "vorbis/codebook.h"
 #include "../lib/sharedbook.h"
+#include "../lib/scales.h"
 #include "bookutil.h"
+#include "vqgen.h"
+#include "vqsplit.h"
 
 /* The purpose of this util is to build encode hints for lattice
    codebooks so that brute forcing each codebook entry isn't needed.
@@ -120,16 +123,17 @@ int main(int argc,char *argv[]){
   codebook *b;
   static_codebook *c;
   int entries=-1,dim=-1;
-  double min,del,cutoff=1.;
+  double min,del;
   char *name;
   long i,j;
+  long dB=0;
 
   if(argv[1]==NULL){
     fprintf(stderr,"Need a lattice book on the command line.\n");
     exit(1);
   }
 
-  if(argv[2])cutoff=atof(argv[2]);
+  if(argv[2])dB=1;
 
   {
     char *ptr;
@@ -179,8 +183,19 @@ int main(int argc,char *argv[]){
 
     /* ok, gen the map and thresholds */
     for(i=0;i<quantvals;i++)t->quantmap[i]=quantsort[i]-c->quantlist;
-    for(i=0;i<quantvals-1;i++)
-      t->quantthresh[i]=(*(quantsort[i])+*(quantsort[i+1]))*.5*del+min;
+    for(i=0;i<quantvals-1;i++){
+      double v1=*(quantsort[i])*del+min;
+      double v2=*(quantsort[i+1])*del+min;
+      if(dB){
+	if(fabs(v1)<.01)v1=(v1+v2)*.5;
+	if(fabs(v2)<.01)v2=(v1+v2)*.5;
+	t->quantthresh[i]=fromdB((todB(v1)+todB(v2))*.5);
+	if(v1<0 || v2<0)t->quantthresh[i]*=-1;
+
+      }else{
+	t->quantthresh[i]=(v1+v2)*.5;
+      }
+    }
   }
 
   /* Do we want to gen a pigeonhole hint? */
@@ -192,9 +207,10 @@ int main(int argc,char *argv[]){
     double *tempmin;
     double *tempmax;
     long totalstack=0;
+    long pigeons;
     long subpigeons;
     long quantvals=_book_maptype1_quantvals(c);
-    int changep=1;
+    int changep=1,factor;
 
     encode_aux_pigeonhole *p=calloc(1,sizeof(encode_aux_pigeonhole));
     c->pigeon_tree=p;
@@ -212,8 +228,9 @@ int main(int argc,char *argv[]){
 
     /* find our pigeonhole-specific quantization values, fill in the
        quant value->pigeonhole map */
+    factor=3;
     p->del=del;
-    p->min=min-del*.5;
+    p->min=min;
     p->quantvals=quantvals;
     {
       int max=0;
@@ -221,18 +238,19 @@ int main(int argc,char *argv[]){
       p->mapentries=max;
     }
     p->pigeonmap=malloc(p->mapentries*sizeof(long));
+    p->quantvals=(quantvals+factor-1)/factor;
 
     /* pigeonhole roughly on the boundaries of the quantvals; the
        exact pigeonhole grouping is an optimization issue, not a
        correctness issue */
     for(i=0;i<p->mapentries;i++){
-      double thisval=del*(i+.5)+min; /* middle of the quant zone */
+      double thisval=del*i+min; /* middle of the quant zone */
       int quant=0;
       double err=fabs(c->quantlist[0]*del+min-thisval);
       for(j=1;j<quantvals;j++){
 	double thiserr=fabs(c->quantlist[j]*del+min-thisval);
 	if(thiserr<err){
-	  quant=j;
+	  quant=j/factor;
 	  err=thiserr;
 	}
       }
@@ -252,13 +270,15 @@ int main(int argc,char *argv[]){
     /* must iterate over both pigeonholes and entries */
     /* temporarily (in order to avoid thinking hard), we grow each
        pigeonhole seperately, the build a stack of 'em later */
+    pigeons=1;
     subpigeons=1;
     for(i=0;i<dim;i++)subpigeons*=p->mapentries;
+    for(i=0;i<dim;i++)pigeons*=p->quantvals;
     temptrack=calloc(dim,sizeof(long));
     tempmin=calloc(dim,sizeof(double));
     tempmax=calloc(dim,sizeof(double));
-    tempstack=calloc(entries,sizeof(long *));
-    tempcount=calloc(entries,sizeof(long));
+    tempstack=calloc(pigeons,sizeof(long *));
+    tempcount=calloc(pigeons,sizeof(long));
 
     while(1){
       double errorpost=-1;
@@ -267,7 +287,7 @@ int main(int argc,char *argv[]){
       /* map our current pigeonhole to a 'big pigeonhole' so we know
          what list we're after */
       int entry=0;
-      for(i=dim-1;i>=0;i--)entry=entry*quantvals+p->pigeonmap[temptrack[i]];
+      for(i=dim-1;i>=0;i--)entry=entry*p->quantvals+p->pigeonmap[temptrack[i]];
       setvals(dim,p,temptrack,tempmin,tempmax,c->q_sequencep);
       sprintf(buffer,"Building pigeonhole search list [%ld]...",totalstack);
 
@@ -308,25 +328,25 @@ int main(int argc,char *argv[]){
     /* pare the index of lists for improbable quantizations (where
        improbable is determined by c->lengthlist; we assume that
        pigeonholing is in sync with the codeword cells, which it is */
-    for(i=0;i<entries;i++){
+    /*for(i=0;i<entries;i++){
       double probability= 1./(1<<c->lengthlist[i]);
       if(c->lengthlist[i]==0 || probability*entries<cutoff){
 	totalstack-=tempcount[i];
 	tempcount[i]=0;
       }
-    }
+      }*/
 
     /* pare the list of shortlists; merge contained and similar lists
        together */
-    p->fitmap=malloc(entries*sizeof(long));
-    for(i=0;i<entries;i++)p->fitmap[i]=-1;
+    p->fitmap=malloc(pigeons*sizeof(long));
+    for(i=0;i<pigeons;i++)p->fitmap[i]=-1;
     while(changep){
       char buffer[80];
       changep=0;
 
-      for(i=0;i<entries;i++){
+      for(i=0;i<pigeons;i++){
 	if(p->fitmap[i]<0 && tempcount[i]){
-	  for(j=i+1;j<entries;j++){
+	  for(j=i+1;j<pigeons;j++){
 	    if(p->fitmap[j]<0 && tempcount[j]){
 	      /* is one list a superset, or are they sufficiently similar? */
 	      int amiss=0,bmiss=0,ii,jj;
@@ -342,8 +362,8 @@ int main(int argc,char *argv[]){
 	      }
 	      if(amiss==0 ||
 		 bmiss==0 ||
-		 (amiss*4<tempcount[i] && bmiss*4<tempcount[j] &&
-		  tempcount[i]+bmiss<entries/30)){
+		 (amiss*2<tempcount[i] && bmiss*2<tempcount[j] &&
+		 tempcount[i]+bmiss<entries/30)){
 
 		/*superset/similar  Add all of one to the other. */
 		for(jj=0;jj<tempcount[j];jj++)
@@ -357,19 +377,22 @@ int main(int argc,char *argv[]){
 	  }
 	  sprintf(buffer,"Consolidating [%ld total, %s]... ",totalstack,
 		  changep?"reit":"nochange");
-	  spinnit(buffer,entries-i);
+	  spinnit(buffer,pigeons-i);
 	}
       }
     }
 
     /* repack the temp stack in final form */
+    fprintf(stderr,"\r                                                       "
+	    "\rFinal total list size: %ld\n",totalstack);
+    
 
     p->fittotal=totalstack;
     p->fitlist=malloc((totalstack+1)*sizeof(long));
-    p->fitlength=malloc(entries*sizeof(long));
+    p->fitlength=malloc(pigeons*sizeof(long));
     {
       long usage=0;
-      for(i=0;i<entries;i++){
+      for(i=0;i<pigeons;i++){
 	if(p->fitmap[i]==-1){
 	  if(tempcount[i])
 	    memcpy(p->fitlist+usage,tempstack[i],tempcount[i]*sizeof(long));

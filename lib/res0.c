@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.16 2000/08/14 21:53:49 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.17 2000/08/15 09:09:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -35,6 +35,7 @@
 
 typedef struct {
   vorbis_info_residue0 *info;
+  int         map;
   
   int         parts;
   codebook   *phrasebook;
@@ -122,6 +123,7 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   int j,k,acc=0;
   int dim;
   look->info=info;
+  look->map=vm->mapping;
 
   look->parts=info->partitions;
   look->phrasebook=vd->fullbooks+info->groupbook;
@@ -167,12 +169,14 @@ static int _testhack(double *vec,int n,vorbis_look_residue0 *look,
   double entropy[8];
 
   /* setup */
-  for(i=0;i<n;i++)temp[i]=fabs(rint(vec[i]));
+  for(i=0;i<n;i++)temp[i]=fabs(vec[i]);
 
   /* handle case subgrp==1 outside */
   for(i=0;i<n;i++)
     if(temp[i]>localmax)localmax=temp[i];
   max=localmax;
+
+  for(i=0;i<n;i++)temp[i]=rint(temp[i]);
   
   while(1){
     entropy[j]=localmax;
@@ -198,15 +202,26 @@ static int _testhack(double *vec,int n,vorbis_look_residue0 *look,
 }
 
 static int _encodepart(oggpack_buffer *opb,double *vec, int n,
-		       int stages, codebook **books){
+		       int stages, codebook **books,int mode,int part){
   int i,j,bits=0;
 
   for(j=0;j<stages;j++){
     int dim=books[j]->dim;
     int step=n/dim;
-    for(i=0;i<step;i++)
-      bits+=vorbis_book_encodevs(books[j],vec+i,opb,step,0);
- 
+    for(i=0;i<step;i++){
+      int entry=vorbis_book_besterror(books[j],vec+i,step,0);
+#ifdef TRAIN_RESENT      
+      {
+	char buf[80];
+	FILE *f;
+	sprintf(buf,"res0_%da%d_%d.vqd",mode,j,part);
+	f=fopen(buf,"a");
+	fprintf(f,"%d\n",entry);
+	fclose(f);
+      }
+#endif
+      bits+=vorbis_book_encode(books[j],entry,opb);
+    }
   }
 
   return(bits);
@@ -291,7 +306,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
 	resbits[partword[j][l]]+=
 	  _encodepart(&vb->opb,in[j]+i,samples_per_partition,
 		      info->secondstages[partword[j][l]],
-		      look->partbooks[partword[j][l]]);
+		      look->partbooks[partword[j][l]],look->map,partword[j][l]);
 	resvals[partword[j][l]]+=samples_per_partition;
       }
       

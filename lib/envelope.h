@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.8 2000/07/12 09:36:17 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.9 2000/08/15 09:09:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,6 +28,7 @@ typedef struct {
   int ch;
   int winlength;
   int searchstep;
+  double minenergy;
 
   IIR_state *iir;
   double    **filtered;

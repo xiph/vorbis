@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.14 2000/07/12 09:36:18 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.15 2000/08/15 09:09:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -251,6 +251,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       /* perform psychoacoustics; do masking */
       _vp_compute_mask(look->psy_look+submap,pcm,floor,decay);
  
+      _analysis_output("decay",seq,decay,n/2,0,1);
       _analysis_output("mdct",seq,pcm,n/2,0,1);
       _analysis_output("lmdct",seq,pcm,n/2,0,0);
       _analysis_output("prefloor",seq,floor,n/2,0,1);
@@ -275,7 +276,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
 	sprintf(buffer,"residue_%d.vqd",vb->mode);
 	of=fopen(buffer,"a");
 	for(i=0;i<n/2;i++)
-	  fprintf(of,"%g, ",pcm[i]);
+	  fprintf(of,"%.2f, ",pcm[i]);
 	fprintf(of,"\n");
 	fclose(of);
       }

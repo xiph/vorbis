@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.22 2000/07/12 09:36:18 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.23 2000/08/15 09:09:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -141,6 +141,10 @@ double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l){
     work[j++]=temp;
   }
   
+  /* we *could* shave speed here by skimping on the edges (thus
+     speeding up the autocorrelation in vorbis_lpc_from_data) but we
+     don't right now. */
+
   return(vorbis_lpc_from_data(work,lpc,n,m));
 }
 

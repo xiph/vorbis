@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.3 2000/06/14 01:38:26 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.4 2000/08/15 09:09:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,11 +31,13 @@ static void _testhack(double *vec,int n,double *entropy){
   double temp[128];
 
   /* setup */
-  for(i=0;i<n;i++)temp[i]=fabs(rint(vec[i]));
+  for(i=0;i<n;i++)temp[i]=fabs(vec[i]);
 
   /* handle case subgrp==1 outside */
   for(i=0;i<n;i++)
     if(temp[i]>max)max=temp[i];
+
+  for(i=0;i<n;i++)temp[i]=rint(temp[i]);
 
   while(1){
     entropy[j]=max;

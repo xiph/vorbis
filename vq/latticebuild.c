@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.4 2000/07/17 12:55:37 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.5 2000/08/15 09:09:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -133,10 +133,10 @@ int main(int argc,char *argv[]){
     int fac=1;
     for(j=1;j<quantvals;j++)if(quantlist[j]<min)min=quantlist[j];
     for(j=0;j<quantvals;j++)
-      if(min!=quantlist[j] && (mindel==-1 || quantlist[j]-min<mindel))
-	mindel=quantlist[j]-min;
+      for(i=j+1;i<quantvals;i++)
+	if(mindel==-1 || fabs(quantlist[j]-quantlist[i])<mindel)
+	  mindel=fabs(quantlist[j]-quantlist[i]);
 
-    fprintf(stderr,"min=%g mindel=%g\n",min,mindel);
     j=0;
     while(j<quantvals){
       for(j=0;j<quantvals;j++){
@@ -147,6 +147,7 @@ int main(int argc,char *argv[]){
     }
 
     mindel/=fac;
+    fprintf(stderr,"min=%g mindel=%g\n",min,mindel);
 
     c.q_min=_float32_pack(min);
     c.q_delta=_float32_pack(mindel);

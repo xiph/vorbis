@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.32 2000/08/04 01:14:40 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.33 2000/08/15 09:09:42 xiphmont Exp $
 
  ********************************************************************/
 

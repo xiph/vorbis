@@ -13,7 +13,7 @@
 
  function: utility main for setting entropy encoding parameters
            for lattice codebooks
- last mod: $Id: latticetune.c,v 1.1 2000/07/17 12:55:37 xiphmont Exp $
+ last mod: $Id: latticetune.c,v 1.2 2000/08/15 09:09:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -90,7 +90,7 @@ int main(int argc,char *argv[]){
     exit(1);
   }
 
-  {
+  if(!strcmp(argv[0],"latticetune")){
     long lines=0;
     line=setup_line(in);
     while(line){      
@@ -104,6 +104,44 @@ int main(int argc,char *argv[]){
       line=setup_line(in);
     }
   }
+
+  if(!strcmp(argv[0],"restune")){
+    long step;
+    long lines=0;
+    long cols=-1;
+    double *vec;
+    line=setup_line(in);
+    while(line){
+      int code;
+      if(!(lines&0xfff))spinnit("codewords so far...",lines);
+
+      if(cols==-1){
+	char *temp=line;
+	while(*temp==' ')temp++;
+	for(cols=0;*temp;cols++){
+	  while(*temp>32)temp++;
+	  while(*temp==' ')temp++;
+	}
+	vec=alloca(sizeof(double)*cols);
+	step=cols/dim;
+      }
+      
+      for(j=0;j<cols;j++)
+	if(get_line_value(in,vec+j)){
+	  fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
+	  exit(1);
+	}
+      
+      for(j=0;j<step;j++){
+	lines++;
+	code=_best(b,vec+j,step);
+      	hits[code]++;
+      }
+
+      line=setup_line(in);
+    }
+  }
+
   fclose(in);
 
   /* build the codeword lengths */

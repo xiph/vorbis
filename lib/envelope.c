@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.20 2000/07/12 09:36:17 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.21 2000/08/15 09:09:42 xiphmont Exp $
 
  Preecho calculation.
 
@@ -76,6 +76,7 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   int window=vi->envelopesa;
   int i;
   e->winlength=window;
+  e->minenergy=fromdB(vi->preecho_minenergy);
   e->iir=calloc(ch,sizeof(IIR_state));
   e->filtered=calloc(ch,sizeof(double *));
   e->ch=ch;
@@ -148,6 +149,18 @@ static double _ve_deltai(envelope_lookup *ve,IIR_state *iir,
 
   drft_forward(&ve->drft,workA);
   drft_forward(&ve->drft,workB);
+
+  /* we want to have a 'minimum bar' for energy, else we're just
+     basing blocks on quantization noise that outweighs the signal
+     itself (for low power signals) */
+  {
+    double min=ve->minenergy;
+    for(i=0;i<n;i++){
+      if(fabs(workA[i])<min)workA[i]=min;
+      if(fabs(workB[i])<min)workB[i]=min;
+    }
+  }
+
   /*_analysis_output("Afft",frameno,workA,n,0,0);
     _analysis_output("Bfft",frameno,workB,n,0,0);*/
 
