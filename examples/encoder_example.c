@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.7 2000/05/12 08:38:20 msmith Exp $
+ last mod: $Id: encoder_example.c,v 1.8 2000/06/15 09:18:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -142,7 +142,7 @@ int main(){
 
       /* analysis */
       vorbis_analysis(&vb,&op);
-
+      
       /* weld the packet into the bitstream */
       ogg_stream_packetin(&os,&op);
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.15 2000/06/14 01:38:31 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.16 2000/06/15 09:18:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -417,31 +417,35 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
   int j,k;
   
   int ampraw=_oggpack_read(&vb->opb,info->ampbits);
-  if(ampraw>0){
+  if(ampraw>0){ /* also handles the -1 out of data case */
     long maxval=(1<<info->ampbits)-1;
     double amp=(float)ampraw/maxval*info->ampdB;
     int booknum=_oggpack_read(&vb->opb,_ilog(info->numbooks));
-    codebook *b=vb->vd->fullbooks+info->books[booknum];
-    double last=0.;
 
-    memset(out,0,sizeof(double)*look->m);    
-
-    for(j=0;j<look->m;j+=b->dim)
-      vorbis_book_decodevs(b,out+j,&vb->opb,1,-1);
-    for(j=0;j<look->m;){
-      for(k=0;k<b->dim;k++,j++)out[j]+=last;
-      last=out[j-1];
+    if(booknum!=-1){
+      codebook *b=vb->vd->fullbooks+info->books[booknum];
+      double last=0.;
+      
+      memset(out,0,sizeof(double)*look->m);    
+      
+      for(j=0;j<look->m;j+=b->dim)
+	if(vorbis_book_decodevs(b,out+j,&vb->opb,1,-1)==-1)goto eop;
+      for(j=0;j<look->m;){
+	for(k=0;k<b->dim;k++,j++)out[j]+=last;
+	last=out[j-1];
+      }
+      
+      /* take the coefficients back to a spectral envelope curve */
+      vorbis_lsp_to_lpc(out,out,look->m); 
+      _lpc_to_curve(out,out,amp,look,"",0);
+      
+      for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
+      return(1);
     }
+  }
 
-    /* take the coefficients back to a spectral envelope curve */
-    vorbis_lsp_to_lpc(out,out,look->m); 
-    _lpc_to_curve(out,out,amp,look,"",0);
-
-    for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
-    return(1);
-  }else
-    memset(out,0,sizeof(double)*look->n);
-
+ eop:
+  memset(out,0,sizeof(double)*look->n);
   return(0);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.15 2000/02/12 08:33:10 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.16 2000/06/15 09:18:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,7 +27,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vorbis_info      *vi=vd->vi;
   oggpack_buffer   *opb=&vb->opb;
   int              type,mode,i;
-
+ 
   /* first things first.  Make sure decode is ready */
   _vorbis_block_ripcord(vb);
   _oggpack_readinit(opb,op->packet,op->bytes);
@@ -40,11 +40,14 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
 
   /* read our mode and pre/post windowsize */
   mode=_oggpack_read(opb,vd->modebits);
+  if(mode==-1)return(-1);
+  
   vb->mode=mode;
   vb->W=vi->mode_param[mode]->blockflag;
   if(vb->W){
     vb->lW=_oggpack_read(opb,1);
     vb->nW=_oggpack_read(opb,1);
+    if(vb->nW==-1)   return(-1);
   }else{
     vb->lW=0;
     vb->nW=0;

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.8 2000/06/14 10:13:35 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.9 2000/06/15 09:18:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -210,8 +210,8 @@ int main(int argc, char **argv){
 	      double **pcm;
 	      int samples;
 	      
-	      vorbis_synthesis(&vb,&op);
-	      vorbis_synthesis_blockin(&vd,&vb);
+	      if(vorbis_synthesis(&vb,&op)==0) /* test for success! */
+		vorbis_synthesis_blockin(&vd,&vb);
 	      /* 
 		 
 	      **pcm is a multichannel double vector.  In stereo, for

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.14 2000/06/14 08:19:22 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.15 2000/06/15 09:18:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -217,7 +217,8 @@ static int _decodepart(oggpack_buffer *opb,double *work,double *vec, int n,
     int dim=books[j]->dim;
     int step=n/dim;
     for(i=0;i<step;i++)
-      vorbis_book_decodevs(books[j],work+i,opb,step,0);
+      if(vorbis_book_decodevs(books[j],work+i,opb,step,0)==-1)
+	return(-1);
   }
   
   for(i=0;i<n;i++)
@@ -303,8 +304,9 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   return(0);
 }
 
+/* a truncated packet here just means 'stop working'; it's not an error */
 int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
-  long i,j,k,l;
+  long i,j,k,l,transend=vb->pcmend/2;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
 
@@ -319,24 +321,40 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
   double *work=alloca(sizeof(double)*samples_per_partition);
   partvals=partwords*partitions_per_word;
 
+  /* make sure we're zeroed up to the start */
+  for(j=0;j<ch;j++)
+    memset(in[j],0,sizeof(double)*info->begin);
+
   for(i=info->begin,l=0;i<info->end;){
     /* fetch the partition word for each channel */
     for(j=0;j<ch;j++){
       int temp=vorbis_book_decode(look->phrasebook,&vb->opb);
+      if(temp==-1)goto eopbreak;
       partword[j]=look->decodemap[temp];
-      if(partword[j]==NULL)exit(1);
+      if(partword[j]==NULL)goto errout;
     }
     
     /* now we decode interleaved residual values for the partitions */
     for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition)
       for(j=0;j<ch;j++){
 	int part=partword[j][k];
-	_decodepart(&vb->opb,work,in[j]+i,samples_per_partition,
+	if(_decodepart(&vb->opb,work,in[j]+i,samples_per_partition,
 		    info->secondstages[part],
-		    look->partbooks[part]);
+		       look->partbooks[part])==-1)goto eopbreak;
       }
   }
 
+ eopbreak:
+  if(i<transend){
+    for(j=0;j<ch;j++)
+      memset(in[j]+i,0,sizeof(double)*(transend-i));
+  }
+
+  return(0);
+
+ errout:
+  for(j=0;j<ch;j++)
+    memset(in[j],0,sizeof(double)*transend);
   return(0);
 }
 
