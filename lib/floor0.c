@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.17 2000/06/19 10:05:57 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.18 2000/07/12 09:36:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,6 +30,20 @@
 #include "misc.h"
 #include "os.h"
 
+#include "misc.h"
+#include <stdio.h>
+
+/* error relationship from coefficient->curve is nonlinear, so fit
+   using curve lookups, not the coefficients */
+typedef struct {
+  int usage;
+  long *entrymap;
+  double **fits;
+  int fitsize;
+  codebook *book;
+  lpc_lookup lpclook;
+} LSP_fit_lookup;
+
 typedef struct {
   long n;
   int ln;
@@ -38,14 +52,129 @@ typedef struct {
 
   vorbis_info_floor0 *vi;
   lpc_lookup lpclook;
+
+  LSP_fit_lookup *encodefit;
 } vorbis_look_floor0;
 
-typedef struct {
-  long *codewords;
-  double *curve;
-  long frameno;
-  long codes;
-} vorbis_echstate_floor0;
+/* infrastructure for setting up, finding and encoding fit */
+static void _f0_fit_init(LSP_fit_lookup *f,codebook *b){
+  int i,j,usage=0;
+  double max=0;
+  int dim=b->dim;
+  double *work;
+  double *lsp;
+
+  memset(f,0,sizeof(LSP_fit_lookup));
+
+  /* count actual codeword usage in case the book is sparse */
+  for(i=0;i<b->entries;i++)
+    if(b->c->lengthlist[i]>0){
+      if(b->valuelist[(i+1)*b->dim-1]>max)
+	max=b->valuelist[(i+1)*b->dim-1];
+      usage++;
+    }
+
+  /* allocate memory */
+  f->usage=usage;
+  f->entrymap=malloc(usage*sizeof(long));
+  f->fits=malloc(usage*sizeof(double *));
+  f->fitsize=16;
+  f->book=b;
+  lpc_init(&f->lpclook,f->fitsize,dim-1);
+
+  usage=0;
+  work=alloca(f->fitsize*2*sizeof(double));
+  lsp=alloca(dim*sizeof(double));
+  for(i=0;i<b->entries;i++)
+    if(b->c->lengthlist[i]>0){
+      double *orig=b->valuelist+i*b->dim;
+      double norm=orig[b->dim-1];
+      f->fits[usage]=malloc(f->fitsize*sizeof(double));
+
+      for(j=0;j<dim-1;j++)
+	lsp[j]=orig[j]/norm*M_PI;
+      vorbis_lsp_to_lpc(lsp,lsp,dim-1); 
+      vorbis_lpc_to_curve(work,lsp,norm*norm,&f->lpclook);
+      memcpy(f->fits[usage],work,f->fitsize*sizeof(double));
+
+      f->entrymap[usage]=i;
+
+      usage++;
+    }
+}
+
+static void _f0_fit_clear(LSP_fit_lookup *f){
+  if(f){
+    int i;
+    for(i=0;i<f->usage;i++)
+      free(f->fits[i]);
+    free(f->fits);
+    free(f->entrymap);
+    lpc_clear(&f->lpclook);
+    memset(f,0,sizeof(LSP_fit_lookup));
+  }
+}
+
+double _curve_error1(double *curve1,double *curve2,long n){
+  double acc=0.;
+  long i;
+  for(i=0;i<n;i++){
+    double val=curve1[i]-curve2[i];
+    acc+=val*val;
+  }
+  return(acc);
+}
+
+double _curve_error2(double *curve1,double *curve2,long n,double max){
+  double acc=0.;
+  long i;
+  for(i=0;i<n;i++){
+    double val=curve1[i]-curve2[i];
+    acc+=val*val;
+    if(acc>max)return(acc);
+  }
+  return(acc);
+}
+
+static long _f0_fit(LSP_fit_lookup *f, 
+		    codebook *book,
+		    double *orig,
+		    double *workfit,
+		    int cursor){
+  int dim=book->dim;
+  double norm,base=0.,err=0.;
+  int i,best=0;
+  double *lsp=alloca(dim*sizeof(double));
+  double *ref=alloca(f->fitsize*2*sizeof(double));
+
+  if(f->usage<=0)return(-1);
+
+  /* gen a curve for fitting */
+  if(cursor)base=workfit[cursor-1];
+  norm=orig[cursor+dim-1]-base;
+  for(i=0;i<dim-1;i++)
+    lsp[i]=(orig[i+cursor]-base)/norm*M_PI;
+  vorbis_lsp_to_lpc(lsp,lsp,dim-1); 
+  vorbis_lpc_to_curve(ref,lsp,norm*norm,&f->lpclook);
+
+  err=_curve_error1(f->fits[0],ref,f->fitsize);
+  for(i=1;i<f->usage;i++){
+    double this=_curve_error2(f->fits[i],ref,f->fitsize,err);
+    if(this<err){
+      err=this;
+      best=i;
+    }
+  }
+
+  /* choose the best fit from the tests and set workfit to it */
+  best=f->entrymap[best];
+  memcpy(workfit+cursor,book->valuelist+best*dim,dim*sizeof(double));
+  for(i=0;i<dim;i++)
+    workfit[i+cursor]+=base;
+  return(best);
+}
+
+/***********************************************/
 
 static void free_info(vorbis_info_floor *i){
   if(i){
@@ -57,6 +186,10 @@ static void free_info(vorbis_info_floor *i){
 static void free_look(vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   if(i){
+    int j;
+    for(j=0;j<look->vi->numbooks;j++)
+      _f0_fit_clear(look->encodefit+j);
+    free(look->encodefit);
     if(look->linearmap)free(look->linearmap);
     lpc_clear(&look->lpclook);
     memset(look,0,sizeof(vorbis_look_floor0));
@@ -142,40 +275,15 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
     look->linearmap[j]=val;
   }
 
+  if(vd->analysisp){
+    look->encodefit=calloc(info->numbooks,sizeof(LSP_fit_lookup));
+    for(j=0;j<info->numbooks;j++){
+      codebook *b=vd->fullbooks+info->books[j];
+      _f0_fit_init(look->encodefit+j,b);
+    }
+  }
+    
   return look;
-}
-
-static vorbis_echstate_floor *state (vorbis_info_floor *i){
-  vorbis_echstate_floor0 *state=calloc(1,sizeof(vorbis_echstate_floor0));
-  vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
-
-  /* a safe size if usually too big (dim==1) */
-  state->codewords=malloc(info->order*sizeof(long)); 
-  state->curve=malloc(info->barkmap*sizeof(double));
-  state->frameno=-1;
-  return(state);
-}
-
-static void free_state (vorbis_echstate_floor *vs){
-  vorbis_echstate_floor0 *state=(vorbis_echstate_floor0 *)vs;
-  if(state){
-    free(state->codewords);
-    free(state->curve);
-    memset(state,0,sizeof(vorbis_echstate_floor0));
-    free(state);
-  }
-}
-
-#include <stdio.h>
-
-double _curve_error(double *curve1,double *curve2,long n){
-  double acc=0.;
-  long i;
-  for(i=0;i<n;i++){
-    double val=curve1[i]-curve2[i];
-    acc+=val*val;
-  }
-  return(acc);
 }
 
 /* less efficient than the decode side (written for clarity).  We're
@@ -276,19 +384,38 @@ void _lpc_to_curve(double *curve,double *lpc,double amp,
 
 static long seq=0;
 static int forward(vorbis_block *vb,vorbis_look_floor *i,
-		    double *in,double *out,vorbis_echstate_floor *vs){
-  long j,k,l;
+		    double *in,double *out){
+  long j;
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
-  vorbis_echstate_floor0 *state=(vorbis_echstate_floor0 *)vs;
-  double *work=alloca(look->n*sizeof(double));
+  double *work=alloca((look->ln+look->n)*sizeof(double));
   double amp;
   long bits=0;
+
+#ifdef TRAIN_LSP
+  FILE *of;
+  FILE *ef;
+  char buffer[80];
+
+#if 0
+  sprintf(buffer,"lsp0coeff_%d.vqd",vb->mode);
+  of=fopen(buffer,"a");
+#endif
+
+  sprintf(buffer,"lsp0ent_%d.vqd",vb->mode);
+  ef=fopen(buffer,"a");
+#endif
 
   /* our floor comes in on a linear scale; go to a [-Inf...0] dB
      scale.  The curve has to be positive, so we offset it. */
 
-  for(j=0;j<look->n;j++)work[j]=todB(in[j])+info->ampdB;
+  for(j=0;j<look->n;j++){
+    double val=todB(in[j])+info->ampdB;
+    if(val<1.)
+      work[j]=1.;
+    else
+      work[j]=val;
+  }
 
   /* use 'out' as temp storage */
   /* Convert our floor to a set of lpc coefficients */ 
@@ -313,96 +440,78 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   }
 
   if(amp>0){
-    double *refcurve=alloca(sizeof(double)*max(look->ln*2,look->m*2+2));
-    double *newcurve=alloca(sizeof(double)*max(look->ln*2,look->m*2+2));
-    long *codelist=alloca(sizeof(long)*look->m);
-    int codes=0;
 
-
-    if(state->frameno == vb->sequence){
-      /* generate a reference curve for testing */
-      vorbis_lpc_to_curve(refcurve,out,1,&(look->lpclook));
-    }
+    /* the spec supports using one of a number of codebooks.  Right
+       now, encode using this lib supports only one */
+    codebook *b=vb->vd->fullbooks+info->books[0];
+    LSP_fit_lookup *f=look->encodefit;
+    _oggpack_write(&vb->opb,0,_ilog(info->numbooks));
 
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
 
-#ifdef TRAIN
+#ifdef ANALYSIS
+    if(vb->W==0){fprintf(stderr,"%d ",seq);} 
+    vorbis_lsp_to_lpc(out,work,look->m); 
+    _lpc_to_curve(work,work,amp,look,"Ffloor",seq);
+    for(j=0;j<look->n;j++)work[j]-=info->ampdB;
+    _analysis_output("rawfloor",seq,work,look->n,0,0);
     {
-      int j;
-      FILE *of;
-      char buffer[80];
-      sprintf(buffer,"lsp0coeff_%d.vqd",vb->mode);
-      of=fopen(buffer,"a");
-      for(j=0;j<look->m;j++)
-	fprintf(of,"%.12g, ",out[j]);
-      fprintf(of,"\n");
-      fclose(of);
+      double last=0;
+      for(j=0;j<look->m;j++){
+	work[j]=out[j]-last;
+	last=out[j];
+      }
     }
+    _analysis_output("rawlsp",seq,work,look->m,0,0);
+	
+#endif
+
+#if 0
+#ifdef TRAIN_LSP
+    for(j=0;j<look->m;j++)
+      fprintf(of,"%.12g, ",out[j]);
+    fprintf(of,"\n");
+    fclose(of);
+#endif
 #endif
 
     /* code the spectral envelope, and keep track of the actual
        quantized values; we don't want creeping error as each block is
        nailed to the last quantized value of the previous block. */
 
-    /* A new development: the code selection is based on error against
-       the LSP coefficients and not the curve it produces.  Because
-       the coefficient error is not linearly related to the curve
-       error, the fit we select is usually nonoptimal (but
-       sufficient).  This is fine, but flailing about causes a problem
-       in generally consistent spectra... so we add hysterisis. */
+    for(j=0;j<look->m;j+=b->dim){
+      int entry=_f0_fit(f,b,out,work,j);
+      bits+=vorbis_book_encode(b,entry,&vb->opb);
+#ifdef ANALYSIS
+      if(entry==2921)fprintf(stderr,"\n*************found\n");
+#endif
 
-    /* select a new fit, but don't code it.  Just grab it for testing */
+#ifdef TRAIN_LSP
+      fprintf(ef,"%d,\n",entry);
+#endif
+
+    }
+
+#ifdef ANALYSIS
     {
-      /* the spec supports using one of a number of codebooks.  Right
-	 now, encode using this lib supports only one */
-      codebook *b=vb->vd->fullbooks+info->books[0];
-      double last=0.;
-      
-      for(j=0;j<look->m;){
-	for(k=0;k<b->dim;k++)out[j+k]-=last;
-	codelist[codes++]=vorbis_book_errorv(b,out+j);
-	for(k=0;k<b->dim;k++,j++)out[j]+=last;
-	last=out[j-1];
+      double last=0;
+      for(j=0;j<look->m;j++){
+	out[j]=work[j]-last;
+	last=work[j];
       }
     }
-    vorbis_lsp_to_lpc(out,out,look->m); 
-    vorbis_lpc_to_curve(newcurve,out,1,&(look->lpclook));
-    
-    /* if we're out of sequence, no hysterisis this frame, else check it */
-    if(state->frameno != vb->sequence ||
-       _curve_error(refcurve,newcurve,look->ln)<
-       _curve_error(refcurve,state->curve,look->ln)){
-      /* new curve is the fit to use.  replace the state */
-      memcpy(state->curve,newcurve,sizeof(double)*look->ln);
-      memcpy(state->codewords,codelist,sizeof(long)*codes);
-      state->codes=codes;
-    }else{
-      /* use state */
-      /*fprintf(stderr,"X");*/
-      codelist=state->codewords;
-      codes=state->codes;
-    }
+    _analysis_output("lsp",seq,out,look->m,0,0);
+	
+#endif
 
-    state->frameno=vb->sequence+1;
-
-    /* the spec supports using one of a number of codebooks.  Right
-       now, encode using this lib supports only one */
-    _oggpack_write(&vb->opb,0,_ilog(info->numbooks));
-
-    {
-      codebook *b=vb->vd->fullbooks+info->books[0];
-      double last=0.;
-      for(l=0,j=0;l<codes;l++){
-	bits+=vorbis_book_encodev(b,codelist[l],out+j,&vb->opb);
-	for(k=0;k<b->dim;k++,j++)out[j]+=last;
-	last=out[j-1];
-      }
-    }
+#ifdef TRAIN_LSP
+    fclose(ef);
+#endif
 
     /* take the coefficients back to a spectral envelope curve */
-    vorbis_lsp_to_lpc(out,out,look->m); 
-    _lpc_to_curve(out,out,amp,look,"Ffloor",seq);
+    vorbis_lsp_to_lpc(work,out,look->m); 
+    _lpc_to_curve(out,out,amp,look,"Ffloor",seq++);
     for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
     return(1);
   }
@@ -452,7 +561,7 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
 
 /* export hooks */
 vorbis_func_floor floor0_exportbundle={
-  &pack,&unpack,&look,&state,&free_info,&free_look,&free_state,&forward,&inverse
+  &pack,&unpack,&look,&free_info,&free_look,&forward,&inverse
 };
 
 

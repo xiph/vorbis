@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.3 2000/06/14 01:38:32 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.4 2000/07/12 09:36:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,6 +27,7 @@
 #include "bookutil.h"
 #include "vqgen.h"
 #include "vqsplit.h"
+#include "../lib/os.h"
 
 /* Lattice codebooks have two strengths: important fetaures that are
    poorly modelled by global error minimization training (eg, strong

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.13 2000/06/14 01:38:31 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.14 2000/07/12 09:36:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,7 +42,6 @@ typedef struct {
 
   vorbis_look_time **time_look;
   vorbis_look_floor **floor_look;
-  vorbis_echstate_floor **floor_state;
 
   vorbis_look_residue **residue_look;
   vorbis_look_psy *psy_look;
@@ -54,7 +53,7 @@ typedef struct {
   int ch;
   double **decay;
   long lastframe; /* if a different mode is called, we need to 
-		     invalidate decay and floor state */
+		     invalidate decay */
 } vorbis_look_mapping0;
 
 static void free_info(vorbis_info_mapping *i){
@@ -67,19 +66,12 @@ static void free_info(vorbis_info_mapping *i){
 static void free_look(vorbis_look_mapping *look){
   int i;
   vorbis_look_mapping0 *l=(vorbis_look_mapping0 *)look;
-  vorbis_info_mapping0 *info=l->map;
   if(l){
     for(i=0;i<l->map->submaps;i++){
       l->time_func[i]->free_look(l->time_look[i]);
       l->floor_func[i]->free_look(l->floor_look[i]);
       l->residue_func[i]->free_look(l->residue_look[i]);
       if(l->psy_look)_vp_psy_clear(l->psy_look+i);
-    }
-
-    if(l->floor_state){
-      for(i=0;i<l->ch;i++)
-	l->floor_func[info->chmuxlist[i]]->free_state(l->floor_state[i]);
-      free(l->floor_state);
     }
 
     if(l->decay){
@@ -111,8 +103,7 @@ static vorbis_look_mapping *look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
   
   look->time_look=calloc(info->submaps,sizeof(vorbis_look_time *));
   look->floor_look=calloc(info->submaps,sizeof(vorbis_look_floor *));
-  if(vd->analysisp)
-    look->floor_state=calloc(vi->channels,sizeof(vorbis_echstate_floor *));
+
   look->residue_look=calloc(info->submaps,sizeof(vorbis_look_residue *));
   if(vi->psys)look->psy_look=calloc(info->submaps,sizeof(vorbis_look_psy));
 
@@ -148,15 +139,6 @@ static vorbis_look_mapping *look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
     for(i=0;i<vi->channels;i++)
       look->decay[i]=calloc(vi->blocksizes[vm->blockflag]/2,sizeof(double));
   }
-
-  if(vd->analysisp)
-    for(i=0;i<vi->channels;i++){
-     int mapnumber=info->chmuxlist[i];
-     int floornum=info->floorsubmap[mapnumber];
-     
-     look->floor_state[i]=look->floor_func[mapnumber]->
-       state(vi->floor_param[floornum]);
-    }
 
   return(look);
 }
@@ -275,7 +257,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
 
       /* perform floor encoding */
       nonzero[i]=look->floor_func[submap]->
-	forward(vb,look->floor_look[submap],floor,floor,look->floor_state[i]);
+	forward(vb,look->floor_look[submap],floor,floor);
 
       _analysis_output("floor",seq,floor,n/2,0,1);
 
@@ -284,7 +266,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       
       _analysis_output("res",seq++,pcm,n/2,0,0);
       
-#ifdef TRAIN
+#ifdef TRAIN_RES
       if(nonzero[i]){
 	FILE *of;
 	char buffer[80];
@@ -365,7 +347,7 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     double *pcm=vb->pcm[i];
-    _analysis_output("out",seq+i,pcm,n/2,0,0);
+    _analysis_output("out",seq+i,pcm,n/2,0,1);
     mdct_backward(vd->transform[vb->W][0],pcm,pcm);
   }
 

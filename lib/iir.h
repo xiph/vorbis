@@ -11,30 +11,27 @@
  *                                                                  *
  ********************************************************************
 
- function: libvorbis codec internal types.  These structures are 
-           'visible', but generally uninteresting to the developer
- last mod: $Id: internal.h,v 1.7 2000/07/12 09:36:17 xiphmont Exp $
+  function: Direct Form I, II IIR filters, plus some specializations
+  last mod: $Id: iir.h,v 1.1 2000/07/12 09:36:18 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _vorbis_internal_h_
-#define _vorbis_internal_h_
-
-/* structures for various internal data abstractions ********************/
+#ifndef _V_IIR_H_
+#define _V_IIR_H_
 
 typedef struct {
-  long endbyte;     
-  int  endbit;      
+  int stages;
+  double *coeff_A;
+  double *coeff_B;
+  double *z_A;
+  double *z_B;
+  int ring;
+  double gain;
+} IIR_state;
 
-  unsigned char *buffer;
-  unsigned char *ptr;
-  long storage;
-  
-} oggpack_buffer;
+void IIR_init(IIR_state *s,int stages,double gain, double *A, double *B);
+void IIR_clear(IIR_state *s);
+double IIR_filter(IIR_state *s,double in);
+double IIR_filter_ChebBand(IIR_state *s,double in);
 
 #endif
-
-
-
-
-

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.34 2000/07/10 06:48:18 xiphmont Exp $
+ last mod: $Id: block.c,v 1.35 2000/07/12 09:36:17 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -234,7 +234,7 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   v->lW=0; /* previous window size */
   v->W=0;  /* current window size */
 
-  /* all vector indexes; multiples of samples_per_envelope_step */
+  /* all vector indexes */
   v->centerW=vi->blocksizes[1]/2;
 
   v->pcm_current=v->centerW;
@@ -255,13 +255,10 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   _vds_shared_init(v,vi,1);
 
-  /* Initialize the envelope multiplier storage */
+  /* Initialize the envelope state storage */
+  v->ve=calloc(1,sizeof(envelope_lookup));
+  _ve_envelope_init(v->ve,vi);
 
-  v->envelope_storage=v->pcm_storage/vi->envelopesa;
-  v->multipliers=calloc(v->envelope_storage,sizeof(double));
-  _ve_envelope_init(&v->ve,vi->envelopesa);
-
-  v->envelope_current=v->centerW/vi->envelopesa;
   return(0);
 }
 
@@ -289,9 +286,12 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       free(v->pcm);
       if(v->pcmret)free(v->pcmret);
     }
-    if(v->multipliers)free(v->multipliers);
 
-    _ve_envelope_clear(&v->ve);
+    if(v->ve){
+      _ve_envelope_clear(v->ve);
+      free(v->ve);
+    }
+
     if(v->transform[0]){
       mdct_clear(v->transform[0][0]);
       free(v->transform[0][0]);
@@ -341,12 +341,10 @@ double **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
     
   if(v->pcm_current+vals>=v->pcm_storage){
     v->pcm_storage=v->pcm_current+vals*2;
-    v->envelope_storage=v->pcm_storage/v->vi->envelopesa;
    
     for(i=0;i<vi->channels;i++){
       v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(double));
     }
-    v->multipliers=realloc(v->multipliers,v->envelope_storage*sizeof(double));
   }
 
   for(i=0;i<vi->channels;i++)
@@ -390,69 +388,42 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   /* check to see if we're done... */
   if(v->eofflag==-1)return(0);
 
-  /* if we have any unfilled envelope blocks for which we have PCM
-     data, fill them up in before proceeding. */
-
-  if(v->pcm_current/vi->envelopesa>v->envelope_current){
-    /* This generates the multipliers, but does not sparsify the vector.
-       That's done by block before coding */
-    _ve_envelope_deltas(v);
-  }
-
   /* By our invariant, we have lW, W and centerW set.  Search for
      the next boundary so we can determine nW (the next window size)
      which lets us compute the shape of the current block's window */
   
   if(vi->blocksizes[0]<vi->blocksizes[1]){
-    long i=v->centerW/vi->envelopesa;
+    long largebound;
+    long bp;
 
-    for(;i<v->envelope_current-1;i++){
-      /* Compare last with current; do we have an abrupt energy change? */
-      if(v->multipliers[i]>vi->preecho_thresh)break;
-      if(v->multipliers[i]+v->multipliers[i+1]>vi->preecho_thresh)break;
-    }
-    
-    if(i<v->envelope_current-1){
-      /* Ooo, we hit a multiplier. Is it beyond the boundary to make the
-	 upcoming block large ? */
-      long largebound;
-      if(v->W)
-	/* min boundary; nW large, next small */
-	largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]/4;
-      else
-	/* min boundary; nW large, next small */
-	largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]*3/4;
-      largebound/=vi->envelopesa;
-      
-      if(i>largebound)
-	v->nW=1;
-      else
-	v->nW=0;
-      
-    }else{
-      /* Assume maximum; if the block is incomplete given current
-	 buffered data, this will be detected below */
-      v->nW=1;
-    }
+    if(v->W)
+      /* min boundary; nW large, next small */
+      largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]/4;
+    else
+      /* min boundary; nW large, next small */
+      largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]*3/4;
+
+    bp=_ve_envelope_search(v,largebound);
+    if(bp==-1)return(0); /* not enough data currently to search for a
+                            full long block */
+    v->nW=bp;
+
   }else
     v->nW=0;
-
-  /* Do we actually have enough data *now* for the next block? The
-     reason to check is that if we had no multipliers, that could
-     simply been due to running out of data.  In that case, we don't
-     know the size of the next block for sure and we need that now to
-     figure out the window shape of this block */
   
   centerNext=v->centerW+vi->blocksizes[v->W]/4+vi->blocksizes[v->nW]/4;
 
   {
-    /* center of next block + next block maximum right side.  Note
-       that the next block needs an additional vi->envelopesa samples 
-       to actually be written (for the last multiplier), but we didn't
-       need that to determine its size */
+    /* center of next block + next block maximum right side. */
 
     long blockbound=centerNext+vi->blocksizes[v->nW]/2;
-    if(v->pcm_current<blockbound)return(0); /* not enough data yet */    
+    if(v->pcm_current<blockbound)return(0); /* not enough data yet;
+                                               although this check is
+                                               less strict that the
+                                               _ve_envelope_search,
+                                               the search is not run
+                                               if we only use one
+                                               block size */
   }
   
   /* fill in the block.  Note that for a short window, lW and nW are *short*
@@ -498,22 +469,14 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   {
     int new_centerNext=vi->blocksizes[1]/2;
     int movementW=centerNext-new_centerNext;
-    int movementM=movementW/vi->envelopesa;
 
-
-    /* the multipliers and pcm stay synced up because the blocksize
-       must be multiples of samples_per_envelope_step (minimum
-       multiple is 2) */
-
+    _ve_envelope_shift(v->ve,movementW);
     v->pcm_current-=movementW;
-    v->envelope_current-=movementM;
 
     for(i=0;i<vi->channels;i++)
       memmove(v->pcm[i],v->pcm[i]+movementW,
 	      v->pcm_current*sizeof(double));
-    
-    memmove(v->multipliers,v->multipliers+movementM,
-	    v->envelope_current*sizeof(double));
+
 
     v->lW=v->W;
     v->W=v->nW;
@@ -557,7 +520,7 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
 int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   vorbis_info *vi=v->vi;
 
-  /* Shift out any PCM/multipliers that we returned previously */
+  /* Shift out any PCM that we returned previously */
   /* centerW is currently the center of the last block added */
   if(v->pcm_returned  && v->centerW>vi->blocksizes[1]/2){
 

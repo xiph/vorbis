@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.2 2000/05/08 20:49:50 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.3 2000/07/12 09:36:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,7 +33,7 @@
 
    the lattice description file contains five lines:
 
-   <n> <dim> <multiplicitavep>
+   <n> <dim> <multiplicitavep> <sequentialp>
    <value_0> <value_1> <value_2> ... <value_n-1>
    <m>
    <thresh_0> <thresh_1> <thresh_2> ... <thresh_m-2>
@@ -58,7 +58,7 @@ int main(int argc,char *argv[]){
   double *quantlist;
   long *hits;
 
-  int entries=-1,dim=-1,quantvals=-1,addmul=-1,threshvals=-1;
+  int entries=-1,dim=-1,quantvals=-1,addmul=-1,threshvals=-1,sequencep=0;
   FILE *out=NULL;
   FILE *in=NULL;
   char *line,*name;
@@ -103,9 +103,11 @@ int main(int argc,char *argv[]){
   
   /* read the description */
   line=get_line(in);
-  if(sscanf(line,"%d %d %d",&quantvals,&dim,&addmul)!=3){
-    fprintf(stderr,"Syntax error reading book file (line 1)\n");
-    exit(1);
+  if(sscanf(line,"%d %d %d %d",&quantvals,&dim,&addmul,&sequencep)!=4){
+    if(sscanf(line,"%d %d %d",&quantvals,&dim,&addmul)!=3){
+      fprintf(stderr,"Syntax error reading book file (line 1)\n");
+      exit(1);
+    }
   }
   entries=pow(quantvals,dim);
   c.thresh_tree=&t;
@@ -113,7 +115,7 @@ int main(int argc,char *argv[]){
   c.entries=entries;
   c.lengthlist=malloc(entries*sizeof(long));
   c.maptype=1;
-  c.q_sequencep=0;
+  c.q_sequencep=sequencep;
   c.quantlist=calloc(quantvals,sizeof(long));
 
   quantlist=malloc(sizeof(long)*c.dim*c.entries);
@@ -160,16 +162,25 @@ int main(int argc,char *argv[]){
   /* gen a real quant list from the more easily human-grokked input */
   {
     double min=quantlist[0];
-    double mindel=1;
-    for(j=1;j<quantvals;j++){  
-      if(quantlist[j]<min)min=quantlist[j];
-      for(k=0;k<j;k++){
-	double del=quantlist[k]-min;
-	/* really underpowered :-P know that this will only factor
-           powers of two (duh) */
-	while((int)(del/mindel)+.01<del/mindel){mindel/=2;}
+    double mindel=-1;
+    int fac=1;
+    for(j=1;j<quantvals;j++)if(quantlist[j]<min)min=quantlist[j];
+    for(j=0;j<quantvals;j++)
+      if(min!=quantlist[j] && (mindel==-1 || quantlist[j]-min<mindel))
+	mindel=quantlist[j]-min;
+
+    fprintf(stderr,"min=%g mindel=%g\n",min,mindel);
+    j=0;
+    while(j<quantvals){
+      for(j=0;j<quantvals;j++){
+	double test=(quantlist[j]-min)/(mindel/fac);
+	if( fabs(rint(test)-test)>.000001) break;
       }
+      if(j<quantvals)fac++;
     }
+
+    mindel/=fac;
+
     c.q_min=_float32_pack(min);
     c.q_delta=_float32_pack(mindel);
     c.q_quant=0;

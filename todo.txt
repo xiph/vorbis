@@ -4,6 +4,8 @@ libvorbis:
 
 Meaningful error code returns
 
+still some padding at EOS
+
 Option for brute-forcing vq search on maptype 2 (helps on undertrained
 sets).
 

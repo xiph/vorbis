@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.13 2000/05/08 20:49:50 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.14 2000/07/12 09:36:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -437,6 +437,37 @@ void build_tree_from_lengths(int vals, long *hist, long *lengths){
   }
 
   free(membership);
+}
+
+/* wrap build_tree_from_lengths to allow zero entries in the histogram */
+void build_tree_from_lengths0(int vals, long *hist, long *lengths){
+
+  /* pack the 'sparse' hit list into a dense list, then unpack
+     the lengths after the build */
+
+  int upper=0,i;
+  long *lengthlist=calloc(vals,sizeof(long));
+  long *newhist=alloca(vals*sizeof(long));
+
+  for(i=0;i<vals;i++)
+    if(hist[i]>0)
+      newhist[upper++]=hist[i];
+
+  if(upper != vals){
+    fprintf(stderr,"\rEliminating %d unused entries; %d entries remain\n",
+	    vals-upper,upper);
+  }
+    
+  build_tree_from_lengths(upper,newhist,lengthlist);
+      
+  upper=0;
+  for(i=0;i<vals;i++)
+    if(hist[i]>0)
+      lengths[i]=lengthlist[upper++];
+    else
+      lengths[i]=0;
+
+  free(lengthlist);
 }
 
 void write_codebook(FILE *out,char *name,const static_codebook *c){

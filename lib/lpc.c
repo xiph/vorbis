@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.21 2000/06/14 01:38:31 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.22 2000/07/12 09:36:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -131,7 +131,7 @@ double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l){
   
   n*=2;
   drft_backward(&l->fft,work);
-  
+
   /* The autocorrelation will not be circular.  Shift, else we lose
      most of the power in the edges. */
   
@@ -195,7 +195,36 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,
   }
 }  
 
-/* subtract or add an lpc filter to data.  Vorbis doesn't actually use this. */
+/* subtract or add an lpc filter to data. */
+
+void vorbis_lpc_filter(double *coeff,double *prime,int m,
+			double *data,long n,double amp){
+
+  /* in: coeff[0...m-1] LPC coefficients 
+         prime[0...m-1] initial values 
+         data[0...n-1] data samples 
+    out: data[0...n-1] residuals from LPC prediction */
+
+  long i,j;
+  double *work=alloca(sizeof(double)*(m+n));
+  double y;
+
+  if(!prime)
+    for(i=0;i<m;i++)
+      work[i]=0;
+  else
+    for(i=0;i<m;i++)
+      work[i]=prime[i];
+
+  for(i=0;i<n;i++){
+    y=0;
+    for(j=0;j<m;j++)
+      y-=work[i+j]*coeff[m-j-1];
+    
+    data[i]=work[i+m]=data[i]+y;
+
+  }
+}
 
 void vorbis_lpc_residue(double *coeff,double *prime,int m,
 			double *data,long n){
@@ -225,7 +254,6 @@ void vorbis_lpc_residue(double *coeff,double *prime,int m,
     data[i]-=y;
   }
 }
-
 
 void vorbis_lpc_predict(double *coeff,double *prime,int m,
                      double *data,long n){

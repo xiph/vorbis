@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.3 2000/05/08 20:49:42 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.4 2000/07/12 09:36:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,7 @@ static int getval(FILE *in,int begin,int n,int group,int max){
 static void usage(){
   fprintf(stderr,
 	  "usage:\n" 
-	  "huffbuild <input>.vqd <begin,n,group>\n"
+	  "huffbuild <input>.vqd <begin,n,group> [noguard]\n"
 	  "   where begin,n,group is first scalar, \n"
 	  "                          number of scalars of each in line,\n"
 	  "                          number of scalars in a group\n"
@@ -63,11 +63,12 @@ static void usage(){
 int main(int argc, char *argv[]){
   char *base;
   char *infile;
-  int i,j,k,begin,n,subn;
+  int i,j,k,begin,n,subn,guard=1;
   FILE *file;
   int maxval=0;
 
   if(argc<3)usage();
+  if(argc==4)guard=0;
 
   infile=strdup(argv[1]);
   base=strdup(infile);
@@ -114,7 +115,7 @@ int main(int argc, char *argv[]){
     long *hist=malloc(vals*sizeof(long));
     long *lengths=malloc(vals*sizeof(long));
     
-    for(j=0;j<vals;j++)hist[j]=1;
+    for(j=0;j<vals;j++)hist[j]=guard;
     
     reset_next_value();
     i/=subn;
@@ -128,8 +129,8 @@ int main(int argc, char *argv[]){
  
     /* we have the probabilities, build the tree */
     fprintf(stderr,"Building tree for %ld entries\n",vals);
-    build_tree_from_lengths(vals,hist,lengths);
- 
+    build_tree_from_lengths0(vals,hist,lengths);
+
     /* save the book */
     {
       char *buffer=alloca(strlen(base)+5);

@@ -12,17 +12,36 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.7 1999/12/30 07:26:37 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.8 2000/07/12 09:36:17 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_ENVELOPE_
 #define _V_ENVELOPE_
 
-extern void _ve_envelope_init(envelope_lookup *e,int samples_per);
+#include "iir.h"
+#include "smallft.h"
 
-extern void _ve_envelope_deltas(vorbis_dsp_state *v);
+#define EORDER 16
+
+typedef struct {
+  int ch;
+  int winlength;
+  int searchstep;
+
+  IIR_state *iir;
+  double    **filtered;
+  long storage;
+  long current;
+
+  drft_lookup drft;
+  double *window;
+} envelope_lookup;
+
+extern void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi);
 extern void _ve_envelope_clear(envelope_lookup *e);
+extern long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint);
+extern void _ve_envelope_shift(envelope_lookup *e,long shift);
 
 
 #endif
