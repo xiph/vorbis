@@ -50,11 +50,10 @@ typedef struct vqgen{
 
 
 /*************************************************************************
- * Vector quantization is a *bit* like an n-body problem in
- * m-dimensional space implemented as a monte-carlo simulation.  But
- * not really.  We're first-order only, and the 'forces' are
- * attractive or repulsive. Think 'xspringies' but without velocity or
- * mass. */
+ * Generating a vector quantization codebook is a *bit* like
+ * simulating a weird m-dimensional foam, building a number of bubbles
+ * with a [supposedly] constant, minimum error.  We train the 'foam'
+ * with data points like a monte-carlo simulation. */
 
 /* internal helpers *****************************************************/
 double *_point(vqgen *v,long ptr){
@@ -94,7 +93,7 @@ void vqgen_init(vqgen *v,int elements,int entries){
   {
     int i;
     for(i=0;i<v->entries;i++)
-      v->bias[i]=1.;
+      v->bias[i]=0.;
   }
   
   /*v->lasterror=-1;*/
@@ -117,7 +116,7 @@ void vqgen_addpoint(vqgen *v, double *p){
   if(v->points==v->entries)_vqgen_seed(v);
 }
 
-void vqgen_iterate(vqgen *v){
+void vqgen_iterate(vqgen *v,int biasp){
   static int iteration=0;
   long i,j;
   double averror=0.;
@@ -145,10 +144,10 @@ void vqgen_iterate(vqgen *v){
 
   /* assign all the points, accumulate error */
   for(i=0;i<v->points;i++){
-    double besterror=v->error_func(v,_now(v,0),_point(v,i))*v->bias[0];
+    double besterror=v->error_func(v,_now(v,0),_point(v,i))+v->bias[0];
     long   bestentry=0;
     for(j=1;j<v->entries;j++){
-      double thiserror=v->error_func(v,_now(v,j),_point(v,i))*v->bias[j];
+      double thiserror=v->error_func(v,_now(v,j),_point(v,i))+v->bias[j];
       if(thiserror<besterror){
 	besterror=thiserror;
 	bestentry=j;
@@ -192,20 +191,25 @@ void vqgen_iterate(vqgen *v){
 
   /* positive/negative 'pressure' */
   
-  if(iteration%10){
+  if(biasp){
     for(i=0;i<v->entries;i++){
       double bias=0;
-      if(v->error[i])
-	bias=1.+ (averror-v->error[i])/v->error[i];
+      if(v->error[i]){
+	bias=(averror-v->error[i])/v->assigned[i]*.05;
+	v->bias[i]-=bias;
+      }else{
+	fprintf(stderr,"de-biasing\n");
+	memset(v->bias,0,sizeof(double)*v->entries);
+	break;
+      }
       
-      if(bias>5)bias=5;
-      if(bias<.02)bias=.2;
-      v->bias[i]/=bias;
+      /*if(bias>.1)bias=.1;
+	if(bias<-.1)bias=-.1;*/
     }
+    fprintf(stderr,"\n");
   }else{
-    int i;
-    for(i=0;i<v->entries;i++)
-      v->bias[i]=1.;
+    fprintf(stderr,"de-biasing\n");
+    memset(v->bias,0,sizeof(double)*v->entries);
   }
 
   /* dump state, report error */
@@ -229,7 +233,7 @@ int main(int argc,char *argv[]){
   char buffer[80];
   int i;
 
-  vqgen_init(&v,2,128);
+  vqgen_init(&v,2,16);
 
   while(fgets(buffer,80,in)){
     double a[2];
@@ -238,8 +242,28 @@ int main(int argc,char *argv[]){
   }
   fclose(in);
 
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+
   for(i=0;i<100;i++)
-    vqgen_iterate(&v);
+    vqgen_iterate(&v,1);
+
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
+    vqgen_iterate(&v,0);
 
   return(0);
 }
+
+
