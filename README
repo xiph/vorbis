@@ -38,7 +38,7 @@ the Ogg Vorbis audio coding format.
 
 Directory:
 
-./lib  		The source for the libraries, an LGPLed inplementation of 
+./lib  		The source for the libraries, an LGPLed implementation of 
 		the public domain Ogg Vorbis audio encoding
 		format.
 
@@ -140,4 +140,4 @@ VorbisLib at least) and #include "ogg/ogg.h" and "vorbis/codec.h"
 wherever you need to acces Ogg and Vorbis functionality.
 
 
-$Id: README,v 1.9 2001/03/22 00:27:26 xiphmont Exp $
+$Id: README,v 1.10 2001/03/22 01:16:22 segher Exp $
