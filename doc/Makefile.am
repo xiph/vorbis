@@ -6,14 +6,7 @@ SUBDIRS = vorbisfile vorbisenc
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
-# conditionally make the generated documentation
-if BUILD_DOCS
-built_docs = Vorbis_I_spec.html Vorbis_I_spec.pdf
-else
-built_docs =
-endif
-
-doc_DATA = components.png \
+static_docs = components.png \
 	draft-moffitt-vorbis-rtp-00.txt \
 	eightphase.png \
 	evenlsp.png \
@@ -48,9 +41,17 @@ doc_DATA = components.png \
 	white-ogg.png \
 	white-xifish.png \
 	window1.png \
-	window2.png \
-	Vorbis_I_spec.html \
-	$(built_docs)
+	window2.png
+
+# conditionally make the generated documentation
+if BUILD_DOCS
+doc_DATA = $(static_docs) Vorbis_I_spec.html Vorbis_I_spec.pdf
+else
+doc_DATA = $(static_docs)
+endif
+
+## this requires automake 1.6
+EXTRA_DIST = $(doc_DATA)
 
 doc_sources = xml/Vorbis_I_spec.xml \
 	xml/01-introduction.xml \
@@ -70,7 +71,6 @@ doc_sources = xml/Vorbis_I_spec.xml \
 	xml/spec-fo.xsl \
 	xml/spec-html.xsl
 
-EXTRA_DIST = $(doc_DATA)
 nobase_EXTRA_DIST = $(doc_sources)
 
 # explicit rules for generating docs
