@@ -4,10 +4,10 @@
 
 
 <h1><font color=#000070>
-Stereo Channel Coupling in the Vorbis CODEC
+Ogg Vorbis stereo-specific channel coupling discussion
 </font></h1>
 
-<em>Last update to this document: July 2, 2002</em><br> 
+<em>Last update to this document: July 16, 2002</em><br> 
 
 <h2>Abstract</h2> The Vorbis audio CODEC provides a channel coupling
 mechanisms designed to reduce effective bitrate by both eliminating
@@ -16,104 +16,7 @@ labeled inaudible or undesirable according to spatial psychoacoustic
 models.  This document describes both the mechanical coupling
 mechanisms available within the Vorbis specification, as well as the
 specific stereo coupling models used by the reference
-<tt>libvorbis</tt> CODEC provided by xiph.org.
-
-<h2>Terminology</h2> Terminology as used in this document is based on
-common terminology associated with contemporary CODECs such as MPEG I
-audio layer 3 (mp3).  However, some differences in terminology are
-useful in the context of Vorbis as Vorbis functions somewhat
-differently than most current formats.  For clarity, a few terms are
-defined beforehand here, and others will be defined where they first
-appear in context.<p>
-
-<h3>Subjective and Objective</h3>
-
-<em>Objective</em> fidelity is a measure, based on a computable,
-mechanical metric, of how carefully an output matches an input.  For
-example, a stereo amplifier may claim to introduce less that .01%
-total harmonic distortion when amplifying an input signal; this claim
-is easy to verify given proper equipment, and any number of testers are
-likely to arrive at the same, exact results.  One need not listen to
-the equipment to make this measurement.<p>
-
-However, given two amplifiers with identical, verifiable objective
-specifications, listeners may strongly prefer the sound quality of one
-over the other.  This is actually the case in the decades old debate
-[some would say jihad] among audiophiles involving vacuum tube versus
-solid state amplifiers.  There are people who can tell the difference,
-and strongly prefer one over the other despite seemingly identical,
-measurable quality.  This preference is <em>subjective</em> and
-difficult to measure but nonetheless real.
-
-Individual elements of subjective differences often can be qualified,
-but overall subjective quality generally is not measurable.  Different
-observers are likely to disagree on the exact results of a subjective
-test as each observer's perspective differs.  When measuring
-subjective qualities, the best one can hope for is average, empirical
-results that show statistical significance across a group.<p>
-
-Perceptual codecs are most concerned with subjective, not objective,
-quality.  This is why evaluating a perceptual codec via distortion
-measures and sonograms alone is useless; these objective measures may
-provide insight into the quality or functioning of a codec, but cannot
-answer the much squishier subjective question, "Does it sound
-good?". The tube amplifier example is perhaps not the best as very few
-people can hear, or care to hear, the minute differences between tubes
-and transistors, whereas the subjective differences in perceptual
-codecs tend to be quite large even when objective differences are
-not.<p>
-
-<h3>Fidelity, Artifacts and Differences</h3> Audio <em>artifacts</em>
-and loss of fidelity or more simply put, audio <em>differences</em>
-are not the same thing.<p>
-
-A loss of fidelity implies differences between the perceived input and
-output signal; it does not necessarily imply that the differences in
-output are displeasing or that the output sounds poor (although this
-is often the case).  Tube amplifiers are <em>not</em> higher fidelity
-than modern solid state and digital systems.  They simply produce a
-form of distortion and coloring that is either unnoticeable or actually
-pleasing to many ears.<p>
-
-As compared to an original signal using hard metrics, all perceptual
-codecs [ASPEC, ATRAC, MP3, WMA, AAC, TwinVQ, AC3 and Vorbis included]
-lose objective fidelity in order to reduce bitrate.  This is fact. The
-idea is to lose fidelity in ways that cannot be perceived.  However,
-most current streaming applications demand bitrates lower than what
-can be achieved by sacrificing only objective fidelity; this is also
-fact, despite whatever various company press releases might claim.
-Subjective fidelity eventually must suffer in one way or another.<p>
-
-The goal is to choose the best possible tradeoff such that the
-fidelity loss is graceful and not obviously noticeable.  Most listeners
-of FM radio do not realize how much lower fidelity that medium is as
-compared to compact discs or DAT.  However, when compared directly to
-source material, the difference is obvious.  A cassette tape is lower
-fidelity still, and yet the degredation, relatively speaking, is
-graceful and generally easy not to notice.  Compare this graceful loss
-of quality to an average 44.1kHz stereo mp3 encoded at 80 or 96kbps.
-The mp3 might actually be higher objective fidelity but subjectively
-sounds much worse.<p>
-
-Thus, when a CODEC <em>must</em> sacrifice subjective quality in order
-to satisfy a user's requirements, the result should be a
-<em>difference</em> that is generally either difficult to notice
-without comparison, or easy to ignore.  An <em>artifact</em>, on the
-other hand, is an element introduced into the output that is
-immediately noticeable, obviously foreign, and undesired.  The famous
-'underwater' or 'twinkling' effect synonymous with low bitrate (or
-poorly encoded) mp3 is an example of an <em>artifact</em>.  This
-working definition differs slightly from common usage, but the coined
-distinction between differences and artifacts is useful for our
-discussion.<p>
-
-The goal, when it is absolutely necessary to sacrifice subjective
-fidelity, is obviously to strive for differences and not artifacts.
-The vast majority of CODECs today fail at this task miserably,
-predictably, and regularly in one way or another.  Avoiding such
-failures when it is necessary to sacrifice subjective quality is a
-fundamental design objective of Vorbis and that objective is reflected
-in Vorbis's channel coupling design.<p>
+<tt>libvorbis</tt> codec provided by xiph.org.
 
 <h2>Mechanisms</h2>
 
@@ -122,31 +25,31 @@ channel encoding, but the channels were encoded entirely separately
 with no cross-analysis or redundancy elimination between channels.
 This multichannel strategy is very similar to the mp3's <em>dual
 stereo</em> mode and Vorbis uses the same name for its analogous
-uncoupled multichannel modes.
+uncoupled multichannel modes.<p>
 
 However, the Vorbis spec provides for, and Vorbis release 1.0 rc1 and
 later implement a coupled channel strategy.  Vorbis has two specific
 mechanisms that may be used alone or in conjunction to implement
 channel coupling.  The first is <em>channel interleaving</em> via
-residue backend #2, and the second is <em>square polar mapping</em>.
-These two general mechanisms are particularly well suited to coupling
-due to the structure of Vorbis encoding, as we'll explore below, and
-using both we can implement both totally <em>lossless stereo image
-coupling</em> [bit-for-bit decode-identical to uncoupled modes], as
-well as various lossy models that seek to eliminate inaudible or
-unimportant aspects of the stereo image in order to enhance
-bitrate. The exact coupling implementation is generalized to allow the
-encoder a great deal of flexibility in implementation of a stereo
-model without requiring any significant complexity increase over the
-combinatorically simpler mid/side joint stereo of mp3 and other
-current audio codecs.<p>
+residue backend type 2, and the second is <em>square polar
+mapping</em>.  These two general mechanisms are particularly well
+suited to coupling due to the structure of Vorbis encoding, as we'll
+explore below, and using both we can implement both totally
+<em>lossless stereo image coupling</em> [bit-for-bit decode-identical
+to uncoupled modes], as well as various lossy models that seek to
+eliminate inaudible or unimportant aspects of the stereo image in
+order to enhance bitrate. The exact coupling implementation is
+generalized to allow the encoder a great deal of flexibility in
+implementation of a stereo or surround model without requiring any
+significant complexity increase over the combinatorially simpler
+mid/side joint stereo of mp3 and other current audio codecs.<p>
 
-An encoder may apply channel coupling directly to more than a single
-channel and polar mapping is hierarchical such that polar coupling may be
-extrapolated to an arbitrary number of channels and is not restricted
-to only stereo, quadriphonics, ambisonics or 5.1 surround.  However,
-the scope of this document restricts itself to the stereo coupling
-case.<p>
+A particular Vorbis bitstream may apply channel coupling directly to
+more than a pair of channels; polar mapping is hierarchical such that
+polar coupling may be extrapolated to an arbitrary number of channels
+and is not restricted to only stereo, quadraphonics, ambisonics or 5.1
+surround.  However, the scope of this document restricts itself to the
+stereo coupling case.<p>
 
 <h3>Square Polar Mapping</h3>
 
@@ -182,7 +85,7 @@ strong. <p>
 <h4>point and diffuse imaging</h4>
 
 The first advantage of a polar representation is that it effectively
-seperates the spatial audio information into a 'point image'
+separates the spatial audio information into a 'point image'
 (magnitude) at a given frequency and located somewhere in the sound
 field, and a 'diffuse image' (angle) that fills a large amount of
 space simultaneously.  Even if we preserve only the magnitude (point)
@@ -308,7 +211,7 @@ of the angle is bounded by its corresponding magnitude value.<p>
 
 Entropy coding the results, then, further benefits from the entropy
 model being able to compress magnitude and angle simultaneously.  For
-this reason, Vorbis implements residuebackend #2 which preinterleaves
+this reason, Vorbis implements residue backend #2 which pre-interleaves
 a number of input vectors (in the stereo case, two, A and B) into a
 single output vector (with the elements in the order of
 A_0, B_0, A_1, B_1, A_2 ... A_n-1, B_n-1) before entropy encoding.  Thus
@@ -353,7 +256,7 @@ mode in all high-bitrate encoding.<p>
 
 Overall, this stereo mode is overkill; however, it offers a safe
 alternative to users concerned about the slightest possible
-degredation to the stereo image or archival quality audio.<p>
+degradation to the stereo image or archival quality audio.<p>
 
 <h3>Phase Stereo</h3>
 
@@ -365,7 +268,7 @@ about 4kHz; this is nearly true and a passable rule of thumb, but it
 can be demonstrated that even an average user can tell the difference
 between high frequency in-phase and out-of-phase noise.  Obviously
 then, the statement is not entirely true.  However, it's also the case
-that one must resort to nearly such an extreme demostration before
+that one must resort to nearly such an extreme demonstration before
 finding the counterexample.<p>
 
 'Phase stereo' is simply a more aggressive quantization of the polar
@@ -411,7 +314,7 @@ to the left, then the point of localization in point stereo would be
 to the left).  This effect is most noticeable at low and mid
 frequencies and using headphones (which grant perfect stereo
 separation). Point stereo is is a graceful but generally easy to
-detect degrdation to the sound quality and is thus used in frequency
+detect degradation to the sound quality and is thus used in frequency
 ranges where it is least noticeable.<p>
 
 <h3>Mixed Stereo</h3>
@@ -428,7 +331,7 @@ lossless coupling to avoid frame blocking artifacts.<p>
 Vorbis, as of 1.0, uses lossless stereo and a number of mixed modes
 constructed out of lossless and point stereo.  Phase stereo was used
 in the rc2 encoder, but is not currently used for simplicity's sake.  It
-will likely be readded to the stereo model in the future.
+will likely be re-added to the stereo model in the future.
 
 <p>
 <hr>

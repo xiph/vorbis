@@ -4,20 +4,20 @@
 
 
 <h1><font color=#000070>
-Ogg Vorbis comment field specification
+Ogg Vorbis I format specification: comment field and header specification
 </font></h1>
 
-<em>Last update to this document: July 11, 2002</em><p>
+<em>Last update to this document: July 16, 2002</em><p>
 
-<p>The text comment header is the second (of three) header packets that
-begin a Vorbis bitstream. It is meant for short, text comments,
-not arbitrary metadata; arbitrary metadata belongs in a separate
-logical bitream (usually an XML stream type) that provides greater
-structure and machine parseability.</p>
+<h1>Overview</h1>
 
-<h2>Comment use rationale</h2>
+<p>The Vorbis text comment header is the second (of three) header
+packets that begin a Vorbis bitstream. It is meant for short, text
+comments, not arbitrary metadata; arbitrary metadata belongs in a
+separate logical bitstream (usually an XML stream type) that provides
+greater structure and machine parseability.
 
-The comment field is meant to be used much like someone jotting a
+<p>The comment field is meant to be used much like someone jotting a
 quick note on the bottom of a CDR. It should be a little information to
 remember the disc by and explain it to others; a short, to-the-point
 text note that need not only be a couple words, but isn't going to be
@@ -29,15 +29,39 @@ they turn out to be, eg:
 opening for Moxy Fruvous, 1997"
 </blockquote>
 
+<h1>Comment encoding</h1>
+
+
 <h2>Structure</h2>
 
 The comment header logically is a list of eight-bit-clean vectors; the
 number of vectors is bounded to 2^32-1 and the length of each vector
 is limited to 2^32-1 bytes. The vector length is encoded; the vector
-is not null terminated. In addition to the vector list, there is a
-single vector for vendor name (also 8 bit clean, length encoded in 32
-bits). Libvorbis currently sets the vendor string to "Xiph.Org
-libVorbis I 20020711".<p>
+contents themselves are not null terminated. In addition to the vector
+list, there is a single vector for vendor name (also 8 bit clean,
+length encoded in 32 bits). Libvorbis currently sets the vendor string
+to "Xiph.Org libVorbis I 20020713".<p>
+
+The comment header is decoded as follows:<p>
+
+<pre>
+  1) [vendor_length] = read an unsigned integer of 32 bits
+  2) [vendor_string] = read a UTF-8 vector as [vendor_length] octets
+  3) [user_comment_list_length] = read an unsigned integer of 32 bits
+  4) iterate [user_comment_list_length] times {
+
+       5) [length] = read an unsigned integer of 32 bits
+       6) this iteration's user comment = read a UTF-8 vector as [length] octets
+
+     }
+
+  7) [framing_bit] = read a single bit as boolean
+  8) if ( [framing_bit]  unset or end of packet ) then ERROR
+  9) done.
+</pre>
+
+
+<h2>Content vector format</h2>
 
 The comment vectors are structured similarly to a UNIX environment variable.
 That is, comment fields consist of a field name and a field value and
@@ -45,10 +69,8 @@ look like:
 
 <pre>
 comment[0]="ARTIST=me"; 
-comment[1]="TITLE=the sound of vorbis"; 
+comment[1]="TITLE=the sound of Vorbis"; 
 </pre>
-
-<h2>Content vector format</h2>
 
 <ul>
 <li>A case-insensitive field name that may consist of ASCII 0x20 through
@@ -82,9 +104,9 @@ versions of the same track title in a single collection. (e.g. remix info)
 
 <dt>ARTIST<dd>The artist generally considered responsible for the work. In popular music this is usually the performing band or singer. For classical music it would be the composer. For an audio book it would be the author of the original text.
 
-<dt>PERFORMER<dd>The artist(s) who performed the work. In classical music this would be the conductor, orchestra, soloists. In an audio book it would be the actor who did the reading. In popular music this is typically the same as the ARTIST and is ommitted.
+<dt>PERFORMER<dd>The artist(s) who performed the work. In classical music this would be the conductor, orchestra, soloists. In an audio book it would be the actor who did the reading. In popular music this is typically the same as the ARTIST and is omitted.
 
-<dt>COPYRIGHT<dd>Copyright attribution, e.g., '2001 Nobody's Band' or '1999 Jack Moffit'
+<dt>COPYRIGHT<dd>Copyright attribution, e.g., '2001 Nobody's Band' or '1999 Jack Moffitt'
 
 <dt>LICENSE<dd>License information, eg, 'All Rights Reserved', 'Any
 Use Permitted', a URL to a license such as a Creative Commons license
