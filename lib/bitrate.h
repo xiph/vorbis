@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.h,v 1.2 2001/12/12 09:45:24 xiphmont Exp $
+ last mod: $Id: bitrate.h,v 1.3 2001/12/19 07:33:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -56,7 +56,7 @@ typedef struct bitrate_manager_state {
   double         avgfloat;
   double         avgnoise;
   long           noisetrigger_postpone;
-  long           noisetrigger_request;
+  double         noisetrigger_request;
 
   /* unfortunately, we need to hold queued packet data somewhere */
   oggpack_buffer *queue_packet_buffers;

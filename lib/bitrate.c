@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.4 2001/12/19 01:08:13 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.5 2001/12/19 07:33:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -283,7 +283,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       bm->avg_tail++;
       if(bm->avg_tail>=bm->queue_size)bm->avg_tail=0;
     }
-
+    
     /* update the avg center */
     if(bm->avg_centeracc>desired_center){
       /* choose the new average floater */
@@ -310,7 +310,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       
       /* apply the average floater to new blocks */
       bin=bm->avgfloat*BITTRACK_DIVISOR; /* truncate on purpose */
-      fprintf(stderr,"float:%d ",bin);
+      fprintf(stderr,"u:%f l:%f float:%d ",upper,lower,bin);
       while(bm->avg_centeracc>desired_center){
 	int samples=
 	  samples=ci->blocksizes[bm->queue_actual[bm->avg_center]&
@@ -328,14 +328,20 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       /* track noise bias triggers and noise bias */
       if(bm->avgfloat<bi->avgfloat_noise_lowtrigger)
 	bm->noisetrigger_request+=1.f;
-      
+      else
+	if(bm->noisetrigger_request>0. && bm->avgnoise>0.)
+	  bm->noisetrigger_request-=.2f;
+
       if(bm->avgfloat>bi->avgfloat_noise_hightrigger)
 	bm->noisetrigger_request-=1.f;
-      
+      else
+	if(bm->noisetrigger_request<0 && bm->avgnoise<0.)
+	  bm->noisetrigger_request+=.2f;
+
       if(bm->noisetrigger_postpone<=0){
 	if(bm->noisetrigger_request<0.){
 	  bm->avgnoise-=1.f;
-	  if(bm->noisetrigger_request<(signed long)(bm->avg_sampleacc)/2)
+	  if(-bm->noisetrigger_request>(signed long)(bm->avg_sampleacc)/2)
             bm->avgnoise-=1.f;
 	  bm->noisetrigger_postpone=bm->avg_sampleacc/2;
 	}
@@ -358,7 +364,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	if(bm->avgnoise>bi->avgfloat_noise_maxval)
 	  bm->avgnoise=bi->avgfloat_noise_maxval;
       }
-      fprintf(stderr,"noise:%f req:%ld trigger:%ld\n",bm->avgnoise,
+      fprintf(stderr,"noise:%f req:%f trigger:%ld\n",bm->avgnoise,
 	      bm->noisetrigger_request,bm->noisetrigger_postpone);
 
     }
@@ -435,7 +441,8 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       int limit=0;
       
       fprintf(stderr,"prelimit:%dkbps ",(int)bitrate/1000);
-      if(bitrate>bi->queue_hardmax || bitrate<bi->queue_hardmin){
+      if((bi->queue_hardmax>0 && bitrate>bi->queue_hardmax) || 
+	 (bi->queue_hardmin>0 && bitrate<bi->queue_hardmin)){
 	int newstack;
 	int stackctr;
 	long bitsum=limit_sum(bm,0);

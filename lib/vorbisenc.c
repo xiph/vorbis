@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.25 2001/12/19 01:18:40 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.26 2001/12/19 07:33:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -609,7 +609,7 @@ static int vorbis_encode_lowpass_setup(vorbis_info *vi,double q,int block){
 /* the final setup call */
 int vorbis_encode_setup_init(vorbis_info *vi){
   int ret=0;
-  long rate=vi->rate;
+  /*long rate=vi->rate;*/
   long channels=vi->channels;
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
@@ -667,9 +667,16 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 				3,_psy_tone_masterguard,_psy_tone_suppress,
 				_vp_peakguard);
 
-  ret|=vorbis_encode_noisebias_setup(vi,hi->blocktype[0].noise_bias_quality,
-				    0,_psy_noise_suppress,_psy_noisebias_impulse,
-				    _psy_noiseguards_short);
+  if(hi->impulse_block_p){
+    ret|=vorbis_encode_noisebias_setup(vi,hi->blocktype[0].noise_bias_quality,
+				       0,_psy_noise_suppress,_psy_noisebias_impulse,
+				       _psy_noiseguards_short);
+  }else{
+    ret|=vorbis_encode_noisebias_setup(vi,hi->blocktype[0].noise_bias_quality,
+				       0,_psy_noise_suppress,_psy_noisebias_other,
+				       _psy_noiseguards_short);
+  }
+
   ret|=vorbis_encode_noisebias_setup(vi,hi->blocktype[1].noise_bias_quality,
 				    1,_psy_noise_suppress,_psy_noisebias_other,
 				      _psy_noiseguards_short);
@@ -745,6 +752,68 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 
 }
 
+/* this is only tuned for 44.1kHz right now.  S'ok, for other rates it
+   just doesn't guess */
+static double ratepch_un44[11]=
+    {40000.,50000.,60000.,70000.,75000.,85000.,105000.,
+     115000.,135000.,160000.,250000.};
+static double ratepch_st44[11]=
+    {32000.,40000.,48000.,56000.,64000.,
+     80000.,96000.,112000.,128000.,160000.,250000.};
+
+static double vbr_to_approx_bitrate(int ch,int coupled,
+				    double q,long srate){
+  int iq=q*10.;
+  double dq;
+  double *r=NULL;
+
+  if(iq==10){
+    iq=9;
+    dq=1.;
+  }else{
+    dq=q*10.-iq;
+  }
+
+  if(srate>42000 && srate<46000){
+    if(coupled)
+      r=ratepch_st44;
+    else
+      r=ratepch_un44;
+  }
+  
+  if(r==NULL)
+    return(-1);
+  
+  return((r[iq]*(1.-dq)+r[iq+1]*dq)*ch);  
+}
+
+static double approx_bitrate_to_vbr(int ch,int coupled,
+				    double bitrate,long srate){
+  double *r=NULL,del;
+  int i;
+
+  if(srate>42000 && srate<46000){
+    if(coupled)
+      r=ratepch_st44;
+    else
+      r=ratepch_un44;
+  }
+  
+  if(r==NULL)
+    return(-1.);
+
+  bitrate/=ch;
+
+  if(bitrate<r[0])return(0.);
+  for(i=0;i<10;i++)
+    if(r[i]<bitrate && r[i+1]>=bitrate)break;
+  if(i==10)return(10.);
+
+  del=(bitrate-r[i])/(r[i+1]-r[i]);
+  
+  return((i+del)*.1);
+}
+
 /* only populates the high-level settings so that we can tweak with ctl before final setup */
 int vorbis_encode_setup_vbr(vorbis_info *vi,
 			    long channels,
@@ -808,7 +877,11 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
     _psy_lowpass_44[iq]*(1.-dq)+_psy_lowpass_44[iq+1]*dq;
 
   /* set bitrate approximation */
-
+  vi->bitrate_nominal=vbr_to_approx_bitrate(vi->channels,hi->stereo_couple_p,
+					    base_quality,vi->rate);
+  vi->bitrate_lower=-1;
+  vi->bitrate_upper=-1;
+  vi->bitrate_window=-1;
 
   return(ret);
 }
@@ -833,6 +906,81 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
   return(ret);
 }
 
+int vorbis_encode_setup_managed(vorbis_info *vi,
+				long channels,
+				long rate,
+				
+				long max_bitrate,
+				long nominal_bitrate,
+				long min_bitrate){
+
+  double approx_vbr=approx_bitrate_to_vbr(channels,(channels==2), 
+					  nominal_bitrate,rate);
+  int ret=0;
+  if(approx_vbr<0)return(OV_EIMPL);
+
+  if(nominal_bitrate<=0.){
+    if(max_bitrate>0.){
+      nominal_bitrate=max_bitrate*.875;
+    }else{
+      if(min_bitrate>0.){
+	nominal_bitrate=min_bitrate;
+      }else{
+	return(OV_EINVAL);
+      }
+    }
+  }
+
+  ret=vorbis_encode_setup_vbr(vi,channels,rate,approx_vbr);
+  if(ret){
+    vorbis_info_clear(vi);
+    return ret; 
+  }
+
+  /* adjust to make management's life easier.  Use the ctl() interface
+     once it's implemented */
+  {
+    codec_setup_info *ci=vi->codec_setup;
+    highlevel_encode_setup *hi=&ci->hi;
+
+    /* backfills */
+    hi->stereo_backfill_p=1;
+    hi->residue_backfill_p=1;
+
+    /* no impulse blocks */
+    hi->impulse_block_p=0;
+    /* de-rate stereo */
+    if(hi->stereo_point_dB && hi->stereo_couple_p && channels==2){
+      hi->stereo_point_dB++;
+      if(hi->stereo_point_dB>3)hi->stereo_point_dB=3;
+    }else{
+      /* else, slug the vbr noise setting */
+      int i;
+      for(i=0;i<4;i++){
+	hi->blocktype[i].noise_bias_quality-=.1;
+	if(hi->blocktype[i].noise_bias_quality<0.)
+	  hi->blocktype[i].noise_bias_quality=0.;
+      }
+    }
+
+    /* initialize management.  Currently hardcoded for 44, but so is above. */
+    memcpy(&ci->bi,&_bm_44_default,sizeof(ci->bi));
+    ci->bi.queue_hardmin=min_bitrate;
+    ci->bi.queue_hardmax=max_bitrate;
+    
+    ci->bi.queue_avgmin=nominal_bitrate;
+    ci->bi.queue_avgmax=nominal_bitrate;
+
+    /* adjust management */
+    if(max_bitrate<=0. && min_bitrate<=0.){
+      /* just an average tracker; no reason for the window to be as small as 2s. */
+      ci->bi.queue_avg_time=4.;
+    }
+
+  }
+  return(ret);
+}
+
 int vorbis_encode_init(vorbis_info *vi,
 		       long channels,
 		       long rate,
@@ -841,34 +989,15 @@ int vorbis_encode_init(vorbis_info *vi,
 		       long nominal_bitrate,
 		       long min_bitrate){
 
-  /* it's temporary while I do the merge; relax */
-  if(rate>40000){
-    if(nominal_bitrate>360000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, 1.));
-    }else if(nominal_bitrate>270000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .9));
-    }else if(nominal_bitrate>230000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .8));
-    }else if(nominal_bitrate>200000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .7));
-    }else if(nominal_bitrate>180000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .6));
-    }else if(nominal_bitrate>140000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .5));
-    }else if(nominal_bitrate>120000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .4));
-    }else if(nominal_bitrate>100000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .3));
-    }else if(nominal_bitrate>90000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .2));
-    }else if(nominal_bitrate>75000){
-      return(vorbis_encode_init_vbr(vi,channels,rate, .1));
-    }else{
-      return(vorbis_encode_init_vbr(vi,channels,rate, .0));
-    }
-  }
-
-  return(OV_EIMPL);
+  int ret=vorbis_encode_setup_managed(vi,channels,rate,
+				      max_bitrate,
+				      nominal_bitrate,
+				      min_bitrate);
+  
+  ret=vorbis_encode_setup_init(vi);
+  if(ret)
+    vorbis_info_clear(vi);
+  return(ret);
 }
 
 int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
