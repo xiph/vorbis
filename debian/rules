@@ -38,7 +38,7 @@ clean:
 
 
 # Build architecture-independent files here.
-binary-arch: libvorbis-dev ogg123 vorbize xmms-vorbis
+binary-arch: libvorbis-dev ogg123 vorbize xmms-vorbis mp3tovorbis
 
 libvorbis-dev: DH_OPTIONS=-plibvorbis-dev
 libvorbis-dev: build
@@ -114,13 +114,12 @@ vorbize: build
 	dh_installdirs
 
 	install -m 755 vorbis-tools/vorbize `pwd`/debian/vorbize/usr/bin/
-	install -m 755 vorbis-tools/mp3tovorbis `pwd`/debian/vorbize/usr/bin/
 
 	dh_installdocs
 #	dh_installmenu
 	dh_installmanpages
 #	dh_installinfo
-	dh_undocumented vorbise.1 mp3tovorbis.1
+	dh_undocumented vorbise.1
 	dh_installchangelogs vorbis-tools/Changelog
 	dh_strip
 	dh_link
@@ -129,6 +128,36 @@ vorbize: build
 	dh_installdeb
 #	dh_makeshlibs
 	dh_shlibdeps
+	dh_gencontrol -u -isp
+	dh_md5sums
+	dh_builddeb
+
+
+
+mp3tovorbis: DH_OPTIONS=-pmp3tovorbis
+mp3tovorbis: build
+	# Need this version of debhelper for DH_OPTIONS to work.
+	dh_testversion 1.1.17
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	install -m 755 vorbis-tools/mp3tovorbis `pwd`/debian/mp3tovorbis/usr/bin/
+
+	dh_installdocs
+#	dh_installmenu
+	dh_installmanpages
+#	dh_installinfo
+	dh_undocumented mp3tovorbis.1
+	dh_installchangelogs vorbis-tools/Changelog
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+#	dh_makeshlibs
+#	dh_shlibdeps
 	dh_gencontrol -u -isp
 	dh_md5sums
 	dh_builddeb
