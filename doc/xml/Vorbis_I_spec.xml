@@ -2,11 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 		"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
 [
-<!-- parser isn't finding %isolat1; -->
-<!ENTITY uuml "&#x00FC;"> <!-- Latin small letter u with diaeresis -->
-<!-- parser isn't finding %isogrk3; -->
-<!ENTITY pi	"&#x03C0;"> <!-- GREEK SMALL LETTER PI -->
-<!ENTITY colophon SYSTEM "footer.xml">
+  <!ENTITY colophon SYSTEM "footer.xml">
 ]>
 
 <article>

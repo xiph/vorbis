@@ -1,13 +1,14 @@
 <?xml version="1.0" standalone="no"?>
 <!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
                 "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
-<!ENTITY uuml "&#x00FC;"> <!-- Latin small letter u with diaeresis -->
+<!ENTITY % isolat1 SYSTEM "http://www.oasis-open.org/docbook/xml/4.2/ent/iso-lat1.ent">
+%isolat1;
 ]>
 
 <section id="vorbis-spec-comment">
 <sectioninfo>
  <releaseinfo>
- $Id: 05-comment.xml,v 1.4 2002/10/27 14:55:31 giles Exp $
+ $Id: 05-comment.xml,v 1.5 2002/10/31 19:37:57 giles Exp $
  <emphasis>Last update to this document: July 16, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
