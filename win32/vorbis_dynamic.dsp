@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\ogg\include" /I "..\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DLL" /D "STANDALONE_VORBISENC_DLL" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\ogg\include" /I "..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DLL" /D "STANDALONE_VORBISENC_DLL" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\ogg\include" /I "..\include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DLL" /D "STANDALONE_VORBISENC_DLL" /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\ogg\include" /I "..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DLL" /D "STANDALONE_VORBISENC_DLL" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -110,10 +110,6 @@ SOURCE=..\lib\codebook.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\dllmain.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\envelope.c
 # End Source File
 # Begin Source File
@@ -151,6 +147,15 @@ SOURCE=..\lib\psy.c
 # Begin Source File
 
 SOURCE=..\lib\registry.c
+
+!IF  "$(CFG)" == "vorbis_dynamic - Win32 Release"
+
+!ELSEIF  "$(CFG)" == "vorbis_dynamic - Win32 Debug"
+
+# ADD CPP /I "..\include" /I "..\src"
+
+!ENDIF 
+
 # End Source File
 # Begin Source File
 
@@ -251,10 +256,6 @@ SOURCE=..\lib\registry.h
 # Begin Source File
 
 SOURCE=..\lib\scales.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\lib\shmmap.h
 # End Source File
 # Begin Source File
 
