@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.2 1999/07/13 07:48:11 mwhitson Exp $
+# $Id: Makefile.in,v 1.1 1999/07/13 07:48:14 mwhitson Exp $
 
 ###############################################################################
 #                                                                             #
@@ -16,8 +16,45 @@
 # (unless, of course, you know what you are doing :) ##########################
 
 @SET_MAKE@
+FLAGS=-I. @TYPESIZES@ @CFLAGS@
+OPT=@OPT@ $(FLAGS)
+DEBUG=@DEBUG@ $(FLAGS)
+PROFILE=@PROFILE@ $(FLAGS)
+CC=@CC@
+LD=@CC@
+LDFLAGS=@LDFLAGS@ $(FLAGS)
+AR=@AR@
+RANLIB=@RANLIB@
+LIBS=@LIBS@ -lm
 
-SUBDIRS =	lib cmdline
+OFILES = 	framing.o
+TARGETFILES =	libvorbis.a
 
-all debug profile selftest target clean:
-	@for dir in $(SUBDIRS); do (cd $$dir && $(MAKE) $(MFLAGS) $@) || exit 1; done
+all:
+	$(MAKE) target CFLAGS="$(OPT)" 
+
+debug: 
+	$(MAKE) target CFLAGS="$(DEBUG)"
+
+profile: 
+	$(MAKE) target CFLAGS="$(PROFILE)"
+
+selftest:
+	$(MAKE) clean
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
+	@echo
+	@./test_framing
+
+target:	$(TARGETFILES)
+
+libvorbis.a: 	$(OFILES)	
+		$(AR) -r libvorbis.a $(OFILES)
+		$(RANLIB) libvorbis.a
+
+$(OFILES): 	mdct.h
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	-rm -f *.o *.a test* *~ *.out ogg config.*

@@ -1,7 +1,6 @@
-# $Id: configure.in,v 1.1 1999/07/13 06:50:34 mwhitson Exp $
-# $Date: 1999/07/13 06:50:34 $
+# $Id: configure.in,v 1.2 1999/07/13 07:48:13 mwhitson Exp $
 
-AC_INIT(mdct.c)
+AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
 
 cp configure.guess config.guess
@@ -63,8 +62,8 @@ AC_HEADER_STDC
 
 CFLAGS=""
 
-AC_PATH_X
-AC_PATH_XTRA
+dnl AC_PATH_X
+dnl AC_PATH_XTRA
 
 AC_CHECK_LIB(pthread, pthread_create, 
 	pthread_lib="-lpthread"; AC_DEFINE(HAVE_LIBPTHREAD), :)
@@ -150,13 +149,13 @@ esac
 
 
 if test -z "$SIZE16"; then
-	AC_MSG_ERROR(No 16 bit tupe found on this platform!)
+	AC_MSG_ERROR(No 16 bit type found on this platform!)
 fi
 if test -z "$SIZE32"; then
-	AC_MSG_ERROR(No 32 bit tupe found on this platform!)
+	AC_MSG_ERROR(No 32 bit type found on this platform!)
 fi
 if test -z "$SIZE64"; then
-	AC_MSG_WARN(No 64 bit tupe found on this platform!)
+	AC_MSG_WARN(No 64 bit type found on this platform!)
 fi
 	
 AC_HEADER_SYS_WAIT
@@ -181,4 +180,4 @@ AC_SUBST(RANLIB)
 #AC_SUBST(LIBGTKDIR)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile)
+AC_OUTPUT(Makefile lib/Makefile cmdline/Makefile)
