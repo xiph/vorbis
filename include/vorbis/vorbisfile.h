@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.18 2003/03/03 19:52:22 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.19 2003/03/06 22:03:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -111,6 +111,12 @@ extern int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos);
 extern int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos);
 extern int ov_time_seek(OggVorbis_File *vf,double pos);
 extern int ov_time_seek_page(OggVorbis_File *vf,double pos);
+
+extern int ov_raw_seek_lap(OggVorbis_File *vf,ogg_int64_t pos);
+extern int ov_pcm_seek_lap(OggVorbis_File *vf,ogg_int64_t pos);
+extern int ov_pcm_seek_page_lap(OggVorbis_File *vf,ogg_int64_t pos);
+extern int ov_time_seek_lap(OggVorbis_File *vf,double pos);
+extern int ov_time_seek_page_lap(OggVorbis_File *vf,double pos);
 
 extern ogg_int64_t ov_raw_tell(OggVorbis_File *vf);
 extern ogg_int64_t ov_pcm_tell(OggVorbis_File *vf);
