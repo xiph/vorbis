@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.21 2002/07/11 06:40:49 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.22 2002/07/17 21:28:37 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification and a
   few bugfixes) from "On the Computation of the LSP Frequencies" by
@@ -51,7 +51,7 @@
    ARM family. */
 
 /* undefine both for the 'old' but more precise implementation */
-#undef   FLOAT_LOOKUP
+#define   FLOAT_LOOKUP
 #undef    INT_LOOKUP
 
 #ifdef FLOAT_LOOKUP
