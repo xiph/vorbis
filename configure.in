@@ -12,9 +12,9 @@ dnl Library versioning
 V_LIB_CURRENT=1
 V_LIB_REVISION=0
 V_LIB_AGE=1
-VF_LIB_CURRENT=2
+VF_LIB_CURRENT=3
 VF_LIB_REVISION=0
-VF_LIB_AGE=2
+VF_LIB_AGE=0
 VE_LIB_CURRENT=1
 VE_LIB_REVISION=0
 VE_LIB_AGE=1
@@ -119,6 +119,10 @@ else
   		CFLAGS=${OPT}" -D__NO_MATH_INLINES"
   		PROFILE=${PROFILE}" -D__NO_MATH_INLINES"
   		fi;;
+	powerpc-*-linux*)
+		DEBUG="-g -Wall -W -D_REENTRANT -D__NO_MATH_INLINES"
+		CFLAGS="-O3 -ffast-math -mfused-madd -mpowerpc-gpopt -mpowerpc-gfxopt -D_REENTRANT"
+		PROFILE="-pg -g -O3 -ffast-math -mfused-madd -mpowerpc-gpopt -mpowerpc-gfxopt -D_REENTRANT";;
 	*-*-linux*)
 		DEBUG="-g -Wall -W -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
 		CFLAGS="-O20 -ffast-math -D_REENTRANT -fsigned-char"
