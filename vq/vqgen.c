@@ -254,24 +254,22 @@ double vqgen_iterate(vqgen *v){
   {
     /* midpoints must be quantized.  but we need to know the range in
        order to do so */
-    double *min=alloca(sizeof(double)*v->elements);
-    double *max=alloca(sizeof(double)*v->elements);
+    double min,max;
    
-    for(k=0;k<v->elements;k++)
-      min[k]=max[k]=_now(v,0)[k];
-    for(j=1;j<v->entries;j++){
-      for(k=0;k<v->elements;k++){
-	double val=_now(v,0)[k];
-	if(val<min[k])min[k]=val;
-	if(val>max[k])max[k]=val;
-      }
-    }
     for(k=0;k<v->elements;k++){
-      double base=min[k];
-      double delta=(max[k]-min[k])/((1<<v->quantbits)-1);
+      double delta;
+      min=max=_now(v,0)[k];
+
+      for(j=1;j<v->entries;j++){
+	double val=_now(v,0)[k];
+	if(val<min)min=val;
+	if(val>max)max=val;
+      }
+    
+      delta=(max-min)/((1<<v->quantbits)-1);
       for(j=0;j<v->entries;j++){
 	double val=_now(v,j)[k];
-	_now(v,j)[k]=base+delta*rint((val-base)/delta);
+	_now(v,j)[k]=min+delta*rint((val-min)/delta);
       }
     }
   }
