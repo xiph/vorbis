@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.20 2001/12/14 07:21:16 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.21 2001/12/14 09:27:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -591,6 +591,8 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   ){
   int ret=0;
 
+  base_quality=0.;
+
   base_quality+=.001;
   if(base_quality<0.)base_quality=0.;
   if(base_quality>.999)base_quality=.999;
@@ -684,6 +686,39 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 
       break;
     default:
+      /* setup specific to non-stereo (mono or uncoupled polyphonic)
+         coupling */
+
+      /* unmanaged, one iteration residue setup */
+      ret|=vorbis_encode_residue_init(vi,base_quality,0,
+				      0, /* uncoupled */
+				      0, /* no mid stereo backfill */
+				      1, /* residue backfill */
+				      _residue_template_44_uncoupled,
+				      0,0,0,0,0,0,0,0,0,0,0,
+				      4.,4.,4.,6.,6.,6.,6.,4.,4.,4.,4.);
+      
+      ret|=vorbis_encode_residue_init(vi,base_quality,1,
+				      0, /* uncoupled */
+				      0, /* no mid stereo backfill */
+				      1, /* residue backfill */
+				      _residue_template_44_uncoupled,
+				      0,0,0,0,0,0,0,0,0,0,0,
+				      4.,4.,4.,6.,6.,6.,6.,4.,4.,4.,4.);      
+
+      ret|=vorbis_encode_lowpass_init(vi,base_quality,0,
+				      15.1,15.8,16.5,17.9,20.5,
+				      999.,999.,999.,999.,999.,999.);
+      ret|=vorbis_encode_lowpass_init(vi,base_quality,1,
+				      15.1,15.8,16.5,17.9,20.5,
+				      999.,999.,999.,999.,999.,999.);
+      
+      return(ret);
+
+
+
+
+
       return(OV_EIMPL);
       
       break;
@@ -708,25 +743,25 @@ int vorbis_encode_init(vorbis_info *vi,
 
   /* it's temporary while I do the merge; relax */
   if(rate>40000){
-    if(nominal_bitrate>360){
+    if(nominal_bitrate>360000){
       return(vorbis_encode_init_vbr(vi,channels,rate, 1.));
-    }else if(nominal_bitrate>270){
+    }else if(nominal_bitrate>270000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .9));
-    }else if(nominal_bitrate>230){
+    }else if(nominal_bitrate>230000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .8));
-    }else if(nominal_bitrate>200){
+    }else if(nominal_bitrate>200000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .7));
-    }else if(nominal_bitrate>180){
+    }else if(nominal_bitrate>180000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .6));
-    }else if(nominal_bitrate>140){
+    }else if(nominal_bitrate>140000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .5));
-    }else if(nominal_bitrate>120){
+    }else if(nominal_bitrate>120000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .4));
-    }else if(nominal_bitrate>100){
+    }else if(nominal_bitrate>100000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .3));
-    }else if(nominal_bitrate>90){
+    }else if(nominal_bitrate>90000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .2));
-    }else if(nominal_bitrate>75){
+    }else if(nominal_bitrate>75000){
       return(vorbis_encode_init_vbr(vi,channels,rate, .1));
     }else{
       return(vorbis_encode_init_vbr(vi,channels,rate, .0));
