@@ -81,7 +81,7 @@ static static_codebook _vq_book_res0_128_1024_2 = {
 	_vq_quantlist_res0_128_1024_2,
 	NULL,
 	&_vq_auxt_res0_128_1024_2,
-	NULL,//&_vq_auxp_res0_128_1024_2,
+	&_vq_auxp_res0_128_1024_2,
 	0
 };
 
