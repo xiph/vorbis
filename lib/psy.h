@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.21.2.3 2001/08/02 22:14:22 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.21.2.4 2001/08/03 06:48:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -118,7 +118,6 @@ typedef struct {
   struct vorbis_info_psy *vi;
 
   float ***tonecurves;
-  float **peakatt;
   int   *noisemedian;
   float *noiseoffset;
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48.2.4 2001/08/02 22:14:21 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.48.2.5 2001/08/03 06:48:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -199,11 +199,11 @@ static void setup_curve(float **c,
   /* add fenceposts */
   for(j=0;j<P_LEVELS;j++){
 
-    for(i=0;i<EHMER_MAX;i++)
+    for(i=0;i<EHMER_OFFSET;i++)
       if(c[j][i+2]>-200.f)break;  
     c[j][0]=i;
 
-    for(i=EHMER_MAX-1;i>=0;i--)
+    for(i=EHMER_MAX-1;i>EHMER_OFFSET+1;i--)
       if(c[j][i+2]>-200.f)
 	break;
     c[j][1]=i;
@@ -255,16 +255,13 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->tonecurves=_ogg_malloc(P_BANDS*sizeof(float **));
   p->noisemedian=_ogg_malloc(n*sizeof(int));
   p->noiseoffset=_ogg_malloc(n*sizeof(float));
-  p->peakatt=_ogg_malloc(P_BANDS*sizeof(float *));
-  for(i=0;i<P_BANDS;i++){
+  for(i=0;i<P_BANDS;i++)
     p->tonecurves[i]=_ogg_malloc(P_LEVELS*sizeof(float *));
-    p->peakatt[i]=_ogg_malloc(P_LEVELS*sizeof(float));
-  }
 
   for(i=0;i<P_BANDS;i++)
-    for(j=0;j<P_LEVELS;j++){
+    for(j=0;j<P_LEVELS;j++)
       p->tonecurves[i][j]=_ogg_malloc((EHMER_MAX+2)*sizeof(float));
-    }
+    
 
   /* OK, yeah, this was a silly way to do it */
   memcpy(p->tonecurves[0][4]+2,tone_125_40dB_SL,sizeof(float)*EHMER_MAX);
@@ -316,23 +313,9 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
      optionally specifies maximum dynamic depth, but also [always]
      limits the masking curves to a minimum depth */
   for(i=0;i<P_BANDS;i+=2)
-    for(j=4;j<P_LEVELS;j+=2){
-      float neutraldB=-vi->toneatt[i][j];
-      for(k=2;k<EHMER_MAX+2;k++){
+    for(j=4;j<P_LEVELS;j+=2)
+      for(k=2;k<EHMER_MAX+2;k++)
 	p->tonecurves[i][j][k]+=vi->tone_masteratt;
-	if(p->tonecurves[i][j][k]-neutraldB>vi->peakatt[i][j])
-	  p->tonecurves[i][j][k]=neutraldB+vi->peakatt[i][j];
-      }
-    }
-
-  if(vi->peakattp) /* we limit depth only optionally */
-    for(i=0;i<P_BANDS;i+=2)
-      for(j=4;j<P_LEVELS;j+=2){
-	float neutraldB=-vi->toneatt[i][j];
-	if(p->tonecurves[i][j][EHMER_OFFSET]-neutraldB<vi->peakatt[i][j])
-	  p->tonecurves[i][j][EHMER_OFFSET]=neutraldB+vi->peakatt[i][j];
-      }
-
 
   /* interpolate curves between */
   for(i=1;i<P_BANDS;i+=2)
@@ -348,11 +331,20 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   for(i=0;i<P_BANDS;i++)
     setup_curve(p->tonecurves[i],i,vi->toneatt[i]);
 
-  /* set up attenuation levels */
+  /* value limit the tonal masking curves; the peakatt not only
+     optionally specifies maximum dynamic depth, but also [always]
+     limits the masking curves to a minimum depth */
   for(i=0;i<P_BANDS;i++)
-    for(j=0;j<P_LEVELS;j++){
-      p->peakatt[i][j]=p->vi->peakatt[i][j];
-    }
+    for(j=0;j<P_LEVELS;j++)
+      for(k=2;k<EHMER_MAX+2;k++)
+	if(p->tonecurves[i][j][k]>vi->peakatt[i][j])
+	  p->tonecurves[i][j][k]=vi->peakatt[i][j];
+
+  if(vi->peakattp) /* we limit depth only optionally */
+    for(i=0;i<P_BANDS;i++)
+      for(j=0;j<P_LEVELS;j++)
+	if(p->tonecurves[i][j][EHMER_OFFSET+2]<vi->peakatt[i][j])
+	  p->tonecurves[i][j][EHMER_OFFSET+2]=vi->peakatt[i][j];
 
   /* set up rolling noise median */
   for(i=0;i<n;i++){
@@ -388,12 +380,10 @@ void _vp_psy_clear(vorbis_look_psy *p){
 	  _ogg_free(p->tonecurves[i][j]);
 	}
 	_ogg_free(p->tonecurves[i]);
-	_ogg_free(p->peakatt[i]);
       }
       _ogg_free(p->tonecurves);
       _ogg_free(p->noisemedian);
       _ogg_free(p->noiseoffset);
-      _ogg_free(p->peakatt);
     }
     memset(p,0,sizeof(vorbis_look_psy));
   }
@@ -427,27 +417,8 @@ static void seed_curve(float *seed,
   }
 }
 
-static void seed_peak(float *seed,
-		      const float *att,
-		      float amp,
-		      int oc,
-		      int linesper,
-		      float dBoffset){
-  long seedptr;
-
-  int choice=(int)((amp+dBoffset)*.1f);
-  choice=max(choice,0);
-  choice=min(choice,P_LEVELS-1);
-  seedptr=oc-(linesper>>1);
-
-  amp+=att[choice];
-  if(seed[seedptr]<amp)seed[seedptr]=amp;
-
-}
-
 static void seed_loop(vorbis_look_psy *p,
 		      const float ***curves,
-		      const float **att,
 		      const float *f, 
 		      const float *flr,
 		      float *seed,
@@ -459,53 +430,26 @@ static void seed_loop(vorbis_look_psy *p,
   /* prime the working vector with peak values */
 
   for(i=0;i<n;i++){
-      float max=f[i];
-      long oc=p->octave[i];
-      while(i+1<n && p->octave[i+1]==oc){
-	i++;
-	if(f[i]>max)max=f[i];
-      }
-
-      if(max+6.f>flr[i]){
-	oc=oc>>p->shiftoc;
-	if(oc>=P_BANDS)oc=P_BANDS-1;
-	if(oc<0)oc=0;
-	if(vi->tonemaskp)
-	  seed_curve(seed,
-		     curves[oc],
-		     max,
-		     p->octave[i]-p->firstoc,
-		     p->total_octave_lines,
-		     p->eighth_octave_lines,
-		     dBoffset);
-
-	if(vi->peakattp && !vi->tonemaskp) /* if tonemaskp is set,
-					      it's built into the
-					      masking curve */
-	  seed_peak(seed,
-		    att[oc],
-		    max,
-		    p->octave[i]-p->firstoc,
-		    p->eighth_octave_lines,
-		    dBoffset);
-      }
-  }
-}
-
-static void bound_loop(vorbis_look_psy *p,
-		       float *f, 
-		       float *seeds,
-		       float *flr,
-		       float att){
-  long n=p->n,i;
-
-  long off=(p->eighth_octave_lines>>1)+p->firstoc;
-  long *ocp=p->octave;
-
-  for(i=0;i<n;i++){
-    long oc=ocp[i]-off;
-    float v=f[i]+att;
-    if(seeds[oc]<v)seeds[oc]=v;
+    float max=f[i];
+    long oc=p->octave[i];
+    while(i+1<n && p->octave[i+1]==oc){
+      i++;
+      if(f[i]>max)max=f[i];
+    }
+    
+    if(max+6.f>flr[i]){
+      oc=oc>>p->shiftoc;
+      if(oc>=P_BANDS)oc=P_BANDS-1;
+      if(oc<0)oc=0;
+      if(vi->tonemaskp)
+	seed_curve(seed,
+		   curves[oc],
+		   max,
+		   p->octave[i]-p->firstoc,
+		   p->total_octave_lines,
+		   p->eighth_octave_lines,
+		   dBoffset);
+    }
   }
 }
 
@@ -788,8 +732,7 @@ void _vp_compute_mask(vorbis_look_psy *p,
 
 
   /* tone/peak masking */
-  seed_loop(p,(const float ***)p->tonecurves,
-	    (const float **)p->peakatt,fft,mask,seed,global_specmax);
+  seed_loop(p,(const float ***)p->tonecurves,fft,mask,seed,global_specmax);
   max_seeds(p,g,channel,seed,mask);
 
   /* doing this here is clean, but we need to find a faster way to do
