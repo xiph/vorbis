@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.71 2003/03/04 21:22:11 xiphmont Exp $
+ last mod: $Id: block.c,v 1.72 2003/03/06 22:05:26 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -186,8 +186,8 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   mdct_init(b->transform[1][0],ci->blocksizes[1]);
 
   /* Vorbis I uses only window type 0 */
-  b->window[0]=_vorbis_window_create(0,ci->blocksizes[0]/2);
-  b->window[1]=_vorbis_window_create(0,ci->blocksizes[1]/2);
+  b->window[0]=_vorbis_window_get(0,ci->blocksizes[0]/2);
+  b->window[1]=_vorbis_window_get(0,ci->blocksizes[1]/2);
 
   if(encp){ /* encode/decode differ here */
 
@@ -286,10 +286,6 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     private_state *b=v->backend_state;
 
     if(b){
-      if(b->window[0])
-	_ogg_free(b->window[0]);
-      if(b->window[1])
-	_ogg_free(b->window[1]);
 	
       if(b->ve){
 	_ve_envelope_clear(b->ve);
