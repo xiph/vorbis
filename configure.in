@@ -179,6 +179,7 @@ AC_CHECK_FUNCS(acosf)
 AC_CHECK_FUNCS(atanf)
 AC_CHECK_FUNCS(frexpf)
 AC_CHECK_FUNCS(rintf)
+AC_CHECK_FUNCS(floorf)
 
 dnl --------------------------------------------------
 dnl Do substitutions
