@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.9 2001/06/15 23:31:00 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.10 2001/06/15 23:59:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -43,12 +43,6 @@ typedef struct {
   int quant_q;
   vorbis_info_floor1 *vi;
 
-
-  long seq;
-  long postbits;
-  long classbits;
-  long subbits;
-  float mse;
 } vorbis_look_floor1;
 
 typedef struct lsfit_acc{
@@ -86,11 +80,6 @@ static void floor1_free_info(vorbis_info_floor *i){
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
   if(i){
-    fprintf(stderr,"floor 1 bit usage: %ld:%ld:%ld (%ld/frame), mse:%gdB\n",
-	    look->postbits/look->seq,look->classbits/look->seq,look->subbits/look->seq,
-	    (look->postbits+look->subbits+look->classbits)/look->seq,
-	    sqrt(look->mse/look->seq));
-
     memset(look,0,sizeof(vorbis_look_floor1));
     free(i);
   }
@@ -680,8 +669,6 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       fit_line(fits,posts-1,&y0,&y1);
     }
 
-    look->seq++;
-
     fit_flag[0]=1;
     fit_flag[1]=1;
     fit_valueA[0]=y0;
@@ -892,7 +879,6 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
     oggpack_write(&vb->opb,1,1);
 
     /* beginning/end post */
-    look->postbits+=ilog(look->quant_q-1)*2;
     oggpack_write(&vb->opb,fit_valueA[0],ilog(look->quant_q-1));
     oggpack_write(&vb->opb,fit_valueA[1],ilog(look->quant_q-1));
 
@@ -942,7 +928,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	  cshift+=csubbits;
 	}
 	/* write it */
-	look->classbits+=vorbis_book_encode(books+info->class_book[class],cval,&vb->opb);
+	vorbis_book_encode(books+info->class_book[class],cval,&vb->opb);
 
 #ifdef TRAIN_FLOOR1
 	{
@@ -960,7 +946,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       for(k=0;k<cdim;k++){
 	int book=info->class_subbook[class][bookas[k]];
 	if(book>=0){
-	  look->subbits+=vorbis_book_encode(books+book,
+	  vorbis_book_encode(books+book,
 			     fit_valueB[j+k],&vb->opb);
 
 #ifdef TRAIN_FLOOR1

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.31 2001/06/15 23:31:00 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.32 2001/06/15 23:59:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -348,9 +348,12 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   /* channel coupling */
   for(i=0;i<info->coupling_steps;i++){
-    float *pcmM=vb->pcm[info->coupling_mag[i]];
-    float *pcmA=vb->pcm[info->coupling_ang[i]];
-
+    if(nonzero[info->coupling_mag[i]] ||
+       nonzero[info->coupling_ang[i]]){
+      
+      float *pcmM=vb->pcm[info->coupling_mag[i]];
+      float *pcmA=vb->pcm[info->coupling_ang[i]];
+      
     /*     +- 
             B
             |       A-B
@@ -367,42 +370,47 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
            --
 
     */
-    for(j=n/2-1;j>=0;j--){
-      float A=rint(pcmM[j]);
-      float B=rint(pcmA[j]);
-      float mag;
-      float ang;
-      
-      if(fabs(A)>fabs(B)){
-	mag=A;
-	if(A>0)
-	  ang=A-B;
-	else
-	  ang=B-A;
-      }else{
-	mag=B;
+
+      nonzero[info->coupling_mag[i]]=1; 
+      nonzero[info->coupling_ang[i]]=1; 
+
+      for(j=n/2-1;j>=0;j--){
+	float A=rint(pcmM[j]);
+	float B=rint(pcmA[j]);
+	float mag;
+	float ang;
+	
+	if(fabs(A)>fabs(B)){
+	  mag=A;
+	  if(A>0)
+	    ang=A-B;
+	  else
+	    ang=B-A;
+	}else{
+	  mag=B;
 	if(B>0)
 	  ang=A-B;
 	else
 	  ang=B-A;
+	}
+	
+	/*if(fabs(mag)<3.5f)
+	  ang=rint(ang/(mag*2.f))*mag*2.f;*/
+	
+	if(fabs(mag)<1.5)
+	ang=0;
+      
+	if(j>(n*3/16))
+	  ang=0;
+	
+	if(ang>=fabs(mag*2))ang=-fabs(mag*2);
+	
+	pcmM[j]=mag;
+	pcmA[j]=ang;
       }
-
-      /*if(fabs(mag)<3.5f)
-	ang=rint(ang/(mag*2.f))*mag*2.f;*/
-      
-      if(fabs(mag)<1.5)
-	ang=0;
-      
-      if(j>(n*3/16))
-	ang=0;
-      
-      if(ang>=fabs(mag*2))ang=-fabs(mag*2);
-
-      pcmM[j]=mag;
-      pcmA[j]=ang;
     }
   }
-
+  
   /* perform residue encoding with residue mapping; this is
      multiplexed.  All the channels belonging to one submap are
      encoded (values interleaved), then the next submap, etc */
@@ -441,7 +449,9 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
   float **pcmbundle=alloca(sizeof(float *)*vi->channels);
   int    *zerobundle=alloca(sizeof(int)*vi->channels);
-  void **nonzero=alloca(sizeof(void *)*vi->channels);
+
+  int   *nonzero  =alloca(sizeof(int)*vi->channels);
+  void **floormemo=alloca(sizeof(void *)*vi->channels);
   
   /* time domain information decode (note that applying the
      information would have to happen later; we'll probably add a
@@ -451,13 +461,25 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* recover the spectral envelope; store it in the PCM vector for now */
   for(i=0;i<vi->channels;i++){
     int submap=info->chmuxlist[i];
-    nonzero[i]=look->floor_func[submap]->
+    floormemo[i]=look->floor_func[submap]->
       inverse1(vb,look->floor_look[submap]);
+    if(floormemo[i])
+      nonzero[i]=1;
+    else
+      nonzero[i]=0;      
     memset(vb->pcm[i],0,sizeof(float)*n/2);
   }
 
-  /* recover the residue into our working vectors */
+  /* channel coupling can 'dirty' the nonzero listing */
+  for(i=0;i<info->coupling_steps;i++){
+    if(nonzero[info->coupling_mag[i]] ||
+       nonzero[info->coupling_ang[i]]){
+      nonzero[info->coupling_mag[i]]=1; 
+      nonzero[info->coupling_ang[i]]=1; 
+    }
+  }
 
+  /* recover the residue into our working vectors */
   for(i=0;i<info->submaps;i++){
     int ch_in_bundle=0;
     for(j=0;j<vi->channels;j++){
@@ -507,7 +529,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
     float *pcm=vb->pcm[i];
     int submap=info->chmuxlist[i];
     look->floor_func[submap]->
-      inverse2(vb,look->floor_look[submap],nonzero[i],pcm);
+      inverse2(vb,look->floor_look[submap],floormemo[i],pcm);
   }
 
   /* transform the PCM data; takes PCM vector, vb; modifies PCM vector */
