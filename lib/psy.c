@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.2 2000/03/30 11:46:18 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.3 2000/03/30 11:54:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -485,13 +485,13 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 	    
 	    if(val<original_SL){
 	      addcount++;
-	      if(f[p]<0)
+	      if(f[p]>0)
 		work[p]=.01;
 	      else
 		work[p]=-.01;
 	      current_SL=val;
 	    }else
-	    break;
+	      break;
 	  }
 	}
       }
