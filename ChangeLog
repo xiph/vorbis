@@ -1,5 +1,13 @@
 2004-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
 
+	* include/vorbis/codec.h:
+	* include/vorbis/vorbisenc.h:
+	* include/vorbis/vorbisfile.h:
+	  remove end-of-line whitespace, synchronize declarations
+	  with definitions
+
+2004-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
 	* Makefile.am:
 	* doc/Makefile.am:
 	* doc/xml/a2-encapsulation_rtp.xml:
