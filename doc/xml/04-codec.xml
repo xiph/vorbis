@@ -1,7 +1,7 @@
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.4 2002/10/21 23:37:00 giles Exp $
+ $Id: 04-codec.xml,v 1.5 2002/10/25 14:41:13 giles Exp $
  <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -344,7 +344,7 @@ illustration of overlapping dissimilar
 </orderedlist>
 
 <para>
-Vorbis windows all use the slope function y=sin(0.5 * \pi * sin^2((x+.5)/n * \pi)),
+Vorbis windows all use the slope function y=sin(0.5 * &pi; * sin^2((x+.5)/n * &pi;)),
 where n is window size and x ranges 0...n-1, but dissimilar
 lapping requirements can affect overall shape.  Window generation
 proceeds as follows:</para>
@@ -385,9 +385,9 @@ set) then
  </listitem>
  <listitem><simpara> window from range 0 ... <varname>[left_window_start]</varname>-1 inclusive is zero</simpara></listitem>
  <listitem><simpara> for <varname>[i]</varname> in range <varname>[left_window_start]</varname> ...
-<varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * \pi * sin^2( (<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5) / <varname>[left_n]</varname> * .5 * \pi) )</simpara></listitem>
+<varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5) / <varname>[left_n]</varname> * .5 * &pi;) )</simpara></listitem>
  <listitem><simpara> window from range <varname>[left_window_end]</varname> ... <varname>[right_window_start]</varname>-1
-inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * \pi * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * \pi/2. + .5 * \pi) )</simpara></listitem>
+inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * &pi;/2. + .5 * &pi;) )</simpara></listitem>
 <listitem><simpara> window from range <varname>[rigth_window_start]</varname> ... <varname>[n]</varname>-1 is
 zero</simpara></listitem>
 </orderedlist>
