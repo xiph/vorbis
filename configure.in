@@ -162,4 +162,4 @@ AC_SUBST(PROFILE)
 AC_SUBST(CC)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile lib/Makefile doc/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)
+AC_OUTPUT(Makefile vorbis-config lib/Makefile doc/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)

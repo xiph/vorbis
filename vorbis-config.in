@@ -1,0 +1,100 @@
+#!/bin/sh
+
+# vorbis-config
+#
+# Tool for retrieving the library/include paths Vorbis was compiled with.
+#
+# Written 21 October 2000 by Jack Moffitt <jack@icecast.org>
+# Based *HEAVILY* on xmms-config from the XMMS package
+# which was
+# Based *HEAVILY* on gtk-config from the GTK+ library package.
+#
+# This work is released under the GNU GPL, version 2 or later.
+
+prefix="@prefix@"
+exec_prefix="@exec_prefix@"
+exec_prefix_set=no
+data_dir="@datadir@/@PACKAGE@"
+
+version="@VERSION@"
+include_dir="@includedir@"
+vorbis_include_dir="@includedir@/@PACKAGE@"
+lib_dir="@libdir@"
+
+usage()
+{
+    cat <<EOF
+Usage: vorbis-config [OPTIONS]
+Options:
+    [--prefix[=DIR]]
+    [--version]
+    [--libs]
+    [--cflags]
+
+EOF
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1 1>&2
+fi
+
+while test $# -gt 0; do
+    case "$1" in
+	-*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+	*) optarg= ;;
+    esac
+
+    case $1 in
+	--prefix=*)
+	    prefix=$optarg
+	    ;;
+
+	--prefix)
+	    echo_prefix=yes
+	    ;;
+
+	--version)
+	    echo $version
+	    ;;
+
+	--cflags)
+	    echo_cflags=yes
+	    ;;
+
+	--libs)
+	    echo_libs=yes
+	    ;;
+
+	*)
+	    usage 1 1>&2
+	    ;;
+    esac
+  shift
+done
+
+if test "$echo_prefix" = "yes"; then
+    echo $prefix
+fi
+
+if test "$echo_exec_prefix" = "yes"; then
+    echo $exec_prefix
+fi
+
+if test "$include_dir" != "/usr/include"; then
+    cflags="-I$include_dir"
+fi
+
+if test "$lib_dir" != "/usr/lib"; then
+    libs="-L$lib_dir -lvorbisfile -lvorbis -logg"
+else
+    libs="-lvorbisfile -lvorbis -logg"
+fi
+
+if test "$echo_cflags" = "yes"; then
+    echo $cflags
+fi
+
+if test "$echo_libs" = "yes"; then
+    echo $libs
+fi
