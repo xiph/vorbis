@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.5 2000/01/28 15:25:06 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.6 2000/05/12 05:50:11 msmith Exp $
 
  ********************************************************************/
 
@@ -144,7 +144,7 @@ int main(){
       /* no harm in not checking before adding more */
       buffer=ogg_sync_buffer(&oy,4096);
       bytes=fread(buffer,1,4096,stdin);
-      if(bytes==0){
+      if(bytes==0 && i < 2){
 	fprintf(stderr,"End of file before finding all Vorbis headers!\n");
 	exit(1);
       }
