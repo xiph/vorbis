@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.32 2000/11/14 00:05:32 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.33 2000/11/29 21:13:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1106,7 +1106,7 @@ int host_is_big_endian() {
 		 word) word size for output.  currently 1 (byte) or 
 		       2 (16 bit short)
 
-   return values: -1) error/hole in data (OV_HOLE)
+   return values: <0) error/hole in data (OV_HOLE)
                    0) EOF
 		   n) number of bytes of PCM actually returned.  The
 		   below works on a packet-by-packet basis, so the
