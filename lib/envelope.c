@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.52 2002/07/13 10:18:33 giles Exp $
+ last mod: $Id: envelope.c,v 1.53 2002/10/11 11:14:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -218,7 +218,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
-  envelope_lookup *ve=((backend_lookup_state *)(v->backend_state))->ve;
+  envelope_lookup *ve=((private_state *)(v->backend_state))->ve;
   long i,j;
 
   int first=ve->current/ve->searchstep;
@@ -329,7 +329,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 }
 
 int _ve_envelope_mark(vorbis_dsp_state *v){
-  envelope_lookup *ve=((backend_lookup_state *)(v->backend_state))->ve;
+  envelope_lookup *ve=((private_state *)(v->backend_state))->ve;
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
   long centerW=v->centerW;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.60 2002/09/23 21:46:59 xiphmont Exp $
+ last mod: $Id: info.c,v 1.61 2002/10/11 11:14:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -529,7 +529,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   int ret=OV_EIMPL;
   vorbis_info *vi=v->vi;
   oggpack_buffer opb;
-  backend_lookup_state *b=v->backend_state;
+  private_state *b=v->backend_state;
 
   if(!b){
     ret=OV_EFAULT;

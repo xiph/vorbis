@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.53 2002/07/13 06:12:46 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.54 2002/10/11 11:14:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -243,7 +243,7 @@ static int mapping0_forward(vorbis_block *vb){
   vorbis_dsp_state      *vd=vb->vd;
   vorbis_info           *vi=vd->vi;
   codec_setup_info      *ci=vi->codec_setup;
-  backend_lookup_state  *b=vb->vd->backend_state;
+  private_state         *b=vb->vd->backend_state;
   vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
   int                    n=vb->pcmend;
   int i,j,k;
@@ -652,7 +652,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_info_mapping *l){
   vorbis_dsp_state     *vd=vb->vd;
   vorbis_info          *vi=vd->vi;
   codec_setup_info     *ci=vi->codec_setup;
-  backend_lookup_state *b=vd->backend_state;
+  private_state        *b=vd->backend_state;
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)l;
 
   int                   i,j;

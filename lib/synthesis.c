@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.28 2002/07/11 06:40:50 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.29 2002/10/11 11:14:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vorbis_dsp_state     *vd=vb->vd;
-  backend_lookup_state *b=vd->backend_state;
+  private_state        *b=vd->backend_state;
   vorbis_info          *vi=vd->vi;
   codec_setup_info     *ci=vi->codec_setup;
   oggpack_buffer       *opb=&vb->opb;
@@ -61,7 +61,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   
   /* more setup */
   vb->granulepos=op->granulepos;
-  vb->sequence=op->packetno-3; /* first block is third packet */
+  vb->sequence=op->packetno;
   vb->eofflag=op->e_o_s;
 
   /* alloc pcm passback storage */
@@ -81,7 +81,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
    Useful for sequential 'fast forward' */
 int vorbis_synthesis_trackonly(vorbis_block *vb,ogg_packet *op){
   vorbis_dsp_state     *vd=vb->vd;
-  backend_lookup_state *b=vd->backend_state;
+  private_state        *b=vd->backend_state;
   vorbis_info          *vi=vd->vi;
   codec_setup_info     *ci=vi->codec_setup;
   oggpack_buffer       *opb=&vb->opb;
@@ -114,7 +114,7 @@ int vorbis_synthesis_trackonly(vorbis_block *vb,ogg_packet *op){
   
   /* more setup */
   vb->granulepos=op->granulepos;
-  vb->sequence=op->packetno-3; /* first block is third packet */
+  vb->sequence=op->packetno;
   vb->eofflag=op->e_o_s;
 
   /* no pcm */

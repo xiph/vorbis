@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.15 2002/06/28 22:19:35 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.16 2002/10/11 11:14:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -55,7 +55,7 @@ typedef void vorbis_info_mapping;
 #include "psy.h"
 #include "bitrate.h"
 
-typedef struct backend_lookup_state {
+typedef struct private_state {
   /* local lookup storage */
   envelope_lookup        *ve; /* envelope lookup */    
   float                  *window[2];
@@ -78,7 +78,9 @@ typedef struct backend_lookup_state {
 
   bitrate_manager_state bms;
 
-} backend_lookup_state;
+  ogg_int64_t sample_count;
+
+} private_state;
 
 /* codec_setup_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,
