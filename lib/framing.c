@@ -207,7 +207,7 @@ int ogg_stream_packetin(ogg_stream_state *os,ogg_packet *op){
     os->pcm_vals[os->lacing_fill+i]=os->pcmpos;
   }
   os->lacing_vals[os->lacing_fill+i]=(op->bytes)%255;
-  os->pcmpos=os->pcm_vals[os->lacing_fill+i]=op->pcm_pos;
+  os->pcmpos=os->pcm_vals[os->lacing_fill+i]=op->frameno;
 
   /* flag the first segment as the beginning of the packet */
   os->lacing_vals[os->lacing_fill]|= 0x100;
@@ -682,7 +682,7 @@ int ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op){
       if(val&0x200)op->e_o_s=0x200;
       bytes+=size;
     }
-    op->pcm_pos=os->pcm_vals[ptr];
+    op->frameno=os->pcm_vals[ptr];
     op->bytes=bytes;
 
     os->body_returned+=bytes;
@@ -703,7 +703,7 @@ void checkpacket(ogg_packet *op,int len, int no, int pos){
     fprintf(stderr,"incorrect packet length!\n");
     exit(1);
   }
-  if(op->pcm_pos!=pos){
+  if(op->frameno!=pos){
     fprintf(stderr,"incorrect packet position!\n");
     exit(1);
   }
@@ -809,7 +809,7 @@ void test_pack(int *pl, int **headers){
     op.packet=data+inptr;
     op.bytes=len;
     op.e_o_s=(pl[i+1]<0?1:0);
-    op.pcm_pos=pcm_pos;
+    op.frameno=pcm_pos;
 
     pcm_pos+=1024;
 
@@ -888,8 +888,8 @@ void test_pack(int *pl, int **headers){
 	      if(op_de.e_o_s)eosflag=1;
 
 	      /* check pcmpos flag */
-	      if(op_de.pcm_pos!=-1){
-		fprintf(stderr," pcm:%ld ",(long)op_de.pcm_pos);
+	      if(op_de.frameno!=-1){
+		fprintf(stderr," pcm:%ld ",(long)op_de.frameno);
 	      }
 	    }
 	  }
@@ -1177,7 +1177,7 @@ int main(void){
       op.packet=data+inptr;
       op.bytes=len;
       op.e_o_s=(pl[i+1]<0?1:0);
-      op.pcm_pos=(i+1)*1000;
+      op.frameno=(i+1)*1000;
 
       for(j=0;j<len;j++)data[inptr++]=i+j;
       ogg_stream_packetin(&os_en,&op);

@@ -119,7 +119,7 @@ typedef struct {
   long  b_o_s;
   long  e_o_s;
 
-  size64 pcm_pos;
+  size64 frameno;
 
 } ogg_packet;
 
