@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>libvorbisenc - function - vorbis_encode_init</title>
+<title>libvorbisenc - function - vorbis_encode_setup_vbr</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
@@ -13,26 +13,32 @@
 </tr>
 </table>
 
-<h1>vorbis_encode_init</h1>
+<h1>vorbis_encode_setup_vbr</h1>
 
 <p><i>declared in "vorbis/libvorbisenc.h";</i></p>
 
-<p>This is the primary function within libvorbisenc for setting up managed bitrate modes.
+<p>This function performs step-one of a three-step variable bitrate
+(quality-based) encode setup.  It functions similarly to the one-step
+setup performed by <a
+href="vorbis_encode_init_vbr.html">vorbis_encode_init_vbr()</a> but
+allows an application to make further encode setup tweaks using <a
+href="vorbis_encode_ctl.html">vorbis_encode_ctl()</a> before finally
+calling <a
+href="vorbis_encode_setup_init.html">vorbis_encode_setup_init()</a> to
+complete the setup process.
+
 <p>Before this function is called, the <a href="vorbis_info.html">vorbis_info</a> struct should be initialized by using vorbis_info_init() from the libvorbis API.  After encoding, vorbis_info_clear should be called.
-<p>The max_bitrate, nominal_bitrate, and min_bitrate settings are used to set constraints for the encoded file.  This function uses these settings to select the appropriate encoding mode and set it up.
 <p>
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>
-extern int vorbis_encode_init(<a href="vorbis_info.html">vorbis_info</a> *vi,
+extern int vorbis_encode_init_vbr(<a href="vorbis_info.html">vorbis_info</a> *vi,
 			      long channels,
 			      long rate,
 			      
-			      long max_bitrate,
-			      long nominal_bitrate,
-			      long min_bitrate);
+			      float base_quality);
 
 </b></pre>
 	</td>
@@ -47,12 +53,8 @@ extern int vorbis_encode_init(<a href="vorbis_info.html">vorbis_info</a> *vi,
 <dd>The number of channels to be encoded.</dd>
 <dt><i>rate</i></dt>
 <dd>The sampling rate of the source audio.</dd>
-<dt><i>max_bitrate</i></dt>
-<dd>Desired maximum bitrate (limit). -1 indicates unset.</dd>
-<dt><i>nominal_bitrate</i></dt>
-<dd>Desired average, or central, bitrate. -1 indicates unset.</dd>
-<dt><i>min_bitrate</i></dt>
-<dd>Desired minimum bitrate. -1 indicates unset.</dd>
+<dt><i>base_quality</i></dt>
+<dd>Desired quality level, currently from -0.1 to 1.0 (lo to hi).</dd>
 </dl>
 
 
@@ -65,7 +67,7 @@ extern int vorbis_encode_init(<a href="vorbis_info.html">vorbis_info</a> *vi,
 <ul>
 <li>OV_EFAULT - Internal logic fault; indicates a bug or heap/stack corruption.</li>
 <li>OV_EINVAL - Invalid setup request, eg, out of range argument. </li>
-<li>OV_EIMPL  - Unimplemented mode; unable to comply with bitrate request.</li>
+<li>OV_EIMPL  - Unimplemented mode; unable to comply with quality level request.</li>
 </ul>
 </blockquote>
 <p>

@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>libvorbisenc - function - vorbis_encode_init_vbr</title>
+<title>libvorbisenc - function - vorbis_encode_setup_init</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
@@ -13,23 +13,32 @@
 </tr>
 </table>
 
-<h1>vorbis_encode_init_vbr</h1>
+<h1>vorbis_encode_setup_init</h1>
 
 <p><i>declared in "vorbis/libvorbisenc.h";</i></p>
 
-<p>This is the primary function within libvorbisenc for setting up variable bitrate ("quality" based) modes.
-<p>Before this function is called, the <a href="vorbis_info.html">vorbis_info</a> struct should be initialized by using vorbis_info_init() from the libvorbis API.  After encoding, vorbis_info_clear should be called.
+<p>This function performs the last stage of three-step encoding setup, as described in the API overview under <a href="overview.html#BBR">managed bitrate modes</a>.
+
+<p>Before this function is called, the <a
+href="vorbis_info.html">vorbis_info</a> struct should be initialized
+by using vorbis_info_init() from the libvorbis API, one of <a
+href="vorbis_encode_setup_managed.html">vorbis_encode_setup_managed()</a>
+or <a
+href="vorbis_encode_setup_vbr.html">vorbis_encode_setup_vbr()</a>
+called to initialize the high-level encoding setup, and <a
+href="vorbis_encode_ctl.html">vorbis_encode_ctl()</a> called if
+necessary to make encoding setup changes.  vorbis_encode_setup_init()
+finalizes the highlevel encoding structure into a complete encoding
+setup after which the application may make no further setup changes.<p>
+
+After encoding, vorbis_info_clear should be called.
 <p>
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>
-extern int vorbis_encode_init_vbr(<a href="vorbis_info.html">vorbis_info</a> *vi,
-			      long channels,
-			      long rate,
-			      
-			      float base_quality);
+extern int vorbis_encode_setup_init(<a href="vorbis_info.html">vorbis_info</a> *vi);
 
 </b></pre>
 	</td>
@@ -40,12 +49,6 @@ extern int vorbis_encode_init_vbr(<a href="vorbis_info.html">vorbis_info</a> *vi
 <dl>
 <dt><i>vi</i></dt>
 <dd>File pointer to an initialized <a href="vorbis_info.html">vorbis_info</a> struct.</dd>
-<dt><i>channels</i></dt>
-<dd>The number of channels to be encoded.</dd>
-<dt><i>rate</i></dt>
-<dd>The sampling rate of the source audio.</dd>
-<dt><i>base_quality</i></dt>
-<dd>Desired quality level, currently from -0.1 to 1.0 (lo to hi).</dd>
 </dl>
 
 
@@ -57,8 +60,12 @@ extern int vorbis_encode_init_vbr(<a href="vorbis_info.html">vorbis_info</a> *vi
 <li>less than zero for failure:</li>
 <ul>
 <li>OV_EFAULT - Internal logic fault; indicates a bug or heap/stack corruption.</li>
-<li>OV_EINVAL - Invalid setup request, eg, out of range argument. </li>
-<li>OV_EIMPL  - Unimplemented mode; unable to comply with quality level request.</li>
+<li>OV_EINVAL - Attempt to use vorbis_encode_setup_init() without first calling one of <a
+href="vorbis_encode_setup_managed.html">vorbis_encode_setup_managed()</a>
+or <a
+href="vorbis_encode_setup_vbr.html">vorbis_encode_setup_vbr()</a>
+to initialize the high-level encoding setup
+</li>
 </ul>
 </blockquote>
 <p>

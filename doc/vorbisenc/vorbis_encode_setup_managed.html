@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>libvorbisenc - function - vorbis_encode_init</title>
+<title>libvorbisenc - function - vorbis_encode_setup_managed</title>
 <link rel=stylesheet href="style.css" type="text/css">
 </head>
 
@@ -13,13 +13,27 @@
 </tr>
 </table>
 
-<h1>vorbis_encode_init</h1>
+<h1>vorbis_encode_setup_managed</h1>
 
 <p><i>declared in "vorbis/libvorbisenc.h";</i></p>
 
-<p>This is the primary function within libvorbisenc for setting up managed bitrate modes.
-<p>Before this function is called, the <a href="vorbis_info.html">vorbis_info</a> struct should be initialized by using vorbis_info_init() from the libvorbis API.  After encoding, vorbis_info_clear should be called.
-<p>The max_bitrate, nominal_bitrate, and min_bitrate settings are used to set constraints for the encoded file.  This function uses these settings to select the appropriate encoding mode and set it up.
+<p>This function performs step-one of a three-step bitrate-managed
+encode setup.  It functions similarly to the one-step setup performed
+by <a href="vorbis_encode_init.html">vorbis_encode_init()</a> but
+allows an application to make further encode setup tweaks using <a
+href="vorbis_encode_ctl.html">vorbis_encode_ctl()</a> before finally
+calling <a
+href="vorbis_encode_setup_init.html">vorbis_encode_setup_init()</a> to
+complete the setup process.
+
+<p>Before this function is called, the <a
+href="vorbis_info.html">vorbis_info</a> struct should be initialized
+by using vorbis_info_init() from the libvorbis API.  After encoding,
+vorbis_info_clear should be called.
+
+<p>The max_bitrate, nominal_bitrate, and min_bitrate settings are used
+to set constraints for the encoded file.  This function uses these
+settings to select the appropriate encoding mode and set it up.
 <p>
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
