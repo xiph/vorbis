@@ -52,7 +52,7 @@ int main(){
     printf("\t\tcompressed length: %ld bytes ",ov_raw_total(&ov,i));
     printf(" play time: %lds\n",(long)ov_time_total(&ov,i));
   }
-  
+
   ov_clear(&ov);
   return 0;
 }

@@ -357,7 +357,7 @@ extern int    ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op);
 
 extern int    ogg_stream_init(ogg_stream_state *os,int serialno);
 extern int    ogg_stream_clear(ogg_stream_state *os);
-extern int    ogg_stream_reset(ogg_stream_state *os);
+extern int    ogg_stream_reset(ogg_stream_state *os,long expected_pageno);
 extern int    ogg_stream_destroy(ogg_stream_state *os);
 extern int    ogg_stream_eof(ogg_stream_state *os);
 

@@ -473,6 +473,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
       
       /* reload */
       ogg_stream_init(&vf->os,vf->current_serialno);
+      ogg_stream_reset(&vf->os,ogg_page_pageno(&og));
       vorbis_synthesis_init(&vf->vd,vf->vi+link);
       vorbis_block_init(&vf->vd,&vf->vb);
       vf->decode_ready=1;
@@ -744,7 +745,7 @@ int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
     if(pos>=total)break;
   }
 
-  /* seach within the logical bitstream for the page with the highest
+  /* search within the logical bitstream for the page with the highest
      pcm_pos preceeding (or equal to) pos.  There is a danger here;
      missing pages or incorrect frame number information in the
      bitstream could make our task impossible.  Account for that (it
@@ -758,7 +759,7 @@ int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
     ogg_page og;
     while(begin<end){
       long bisect;
-      long ret,acc;
+      long ret;
     
       if(end-begin<CHUNKSIZE){
 	bisect=begin;
@@ -767,25 +768,18 @@ int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
       }
     
       _seek_helper(vf,bisect);
-
-      acc=0;
-      while(1){
-	ret=_get_next_page(vf,&og,-1);
-	
-	if(ret==-1){
-	  end=bisect;
+      ret=_get_next_page(vf,&og,-1);
+      
+      if(ret==-1){
+	end=bisect;
+      }else{
+	size64 frameno=ogg_page_frameno(&og);
+	if(ogg_page_serialno(&og)==vf->serialnos[link] && frameno<target){
+	  best=ret;  /* raw offset of packet with frameno */ 
+	  begin=vf->offset; /* raw offset of next packet */
 	}else{
-	  size64 frameno=ogg_page_frameno(&og);
-	  acc+=ret;
-	  if(frameno==-1)continue;
-	  if(frameno<target){
-	    best=bisect+acc;  /* raw offset of packet with frameno */ 
-	    begin=vf->offset; /* raw offset of next packet */
-	  }else{
-	    end=bisect;
-	  }
+	  end=bisect;
 	}
-	break;
       }
     }
 

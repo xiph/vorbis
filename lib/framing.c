@@ -268,7 +268,7 @@ int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
       for(vals=0;vals<maxvals;vals++){
 	if(acc>4096)break;
 	acc+=os->lacing_vals[vals]&0x0ff;
-	if((os->lacing_vals[vals]&0x0ff)<255)pcm_pos=os->pcm_vals[vals];
+	pcm_pos=os->pcm_vals[vals];
       }
     }
 
@@ -685,7 +685,7 @@ int ogg_sync_reset(ogg_sync_state *oy){
   return(0);
 }
 
-int ogg_stream_reset(ogg_stream_state *os){
+int ogg_stream_reset(ogg_stream_state *os,long expected_pageno){
   os->body_fill=0;
   os->body_returned=0;
 
@@ -697,7 +697,7 @@ int ogg_stream_reset(ogg_stream_state *os){
 
   os->e_o_s=0;
   os->b_o_s=0;
-  os->pageno=0;
+  os->pageno=expected_pageno;
   os->packetno=0;
   os->pcmpos=0;
 
@@ -874,8 +874,8 @@ void test_pack(int *pl, int **headers){
   int eosflag=0;
   int bosflag=0;
 
-  ogg_stream_reset(&os_en);
-  ogg_stream_reset(&os_de);
+  ogg_stream_reset(&os_en,0);
+  ogg_stream_reset(&os_de,0);
   ogg_sync_reset(&oy);
 
   for(packets=0;;packets++)if(pl[packets]==-1)break;
@@ -1302,7 +1302,7 @@ int main(void){
     int inptr=0,i,j;
     ogg_page og[5];
     
-    ogg_stream_reset(&os_en);
+    ogg_stream_reset(&os_en,0);
 
     for(i=0;pl[i]!=-1;i++){
       ogg_packet op;
@@ -1336,7 +1336,7 @@ int main(void){
       fprintf(stderr,"Testing loss of pages... ");
 
       ogg_sync_reset(&oy);
-      ogg_stream_reset(&os_de);
+      ogg_stream_reset(&os_de,0);
       for(i=0;i<5;i++){
 	memcpy(ogg_sync_buffer(&oy,og[i].header_len),og[i].header,
 	       og[i].header_len);
@@ -1381,7 +1381,7 @@ int main(void){
       fprintf(stderr,"Testing loss of pages (rollback required)... ");
 
       ogg_sync_reset(&oy);
-      ogg_stream_reset(&os_de);
+      ogg_stream_reset(&os_de,0);
       for(i=0;i<5;i++){
 	memcpy(ogg_sync_buffer(&oy,og[i].header_len),og[i].header,
 	       og[i].header_len);
