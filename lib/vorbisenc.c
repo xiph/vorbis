@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17.2.3 2001/12/06 07:33:30 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.17.2.4 2001/12/06 08:56:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -366,15 +366,14 @@ static int vorbis_encode_ath_init(vorbis_info *vi,double q,int block,
 
 static double stereo_threshholds[]={0.0, 2.5, 4.5, 7.5, 12.5, 22.5};
 static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
+				      int coupled_p,
+				      int stereo_backfill_p,
+				      int residue_backfill_p,
 				      vorbis_residue_template *in, ...){
 
   int i,iq=q*10;
-  int t[11];
   int a[11];
   double c[11];
-  int coupled_p;
-  int stereo_backfill_p;
-  int residue_backfill_p;
   int n;
   int partition_position;
   int res_position;
@@ -388,11 +387,6 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
   
   va_start(ap,in);
   for(i=0;i<11;i++)
-    t[i]=va_arg(ap,int);
-  coupled_p=va_arg(ap,int);
-  stereo_backfill_p=va_arg(ap,int);
-  residue_backfill_p=va_arg(ap,int);
-  for(i=0;i<11;i++)
     a[i]=va_arg(ap,int);
   for(i=0;i<11;i++)
     c[i]=va_arg(ap,double);
@@ -404,7 +398,7 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     residue_free_info(ci->residue_param[block],ci->residue_type[block]);
 
   r=ci->residue_param[block]=malloc(sizeof(*r));
-  memcpy(r,in+t[iq],sizeof(*r));
+  memcpy(r,in[iq].res,sizeof(*r));
 
   n=r->end=ci->blocksizes[block?1:0]>>1; /* to be adjusted by lowpass later */
 
@@ -560,7 +554,7 @@ static int vorbis_encode_lowpass_init(vorbis_info *vi,double q,int block,...){
   /* in the floor, the granularity can be very fine; it doesn't alter
      the encoding structure, only the samples used to fit the floor
      approximation */
-  f->n=freq/nyq*blocksize;
+  f->n=freq*1000/nyq*blocksize;
 
   /* in the residue, we're constrained, physically, by partition
      boundaries.  We still lowpass 'wherever', but we have to round up
@@ -585,6 +579,13 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   float base_quality /* 0. to 1. */
 			   ){
   int ret=0;
+  int stereo_backfill_p=0;
+  int residue_backfill_p=0;
+
+#ifdef TRAIN_RES
+  stereo_backfill_p=1;
+  residue_backfill_p=1;
+#endif
 
   base_quality=0.;
 
@@ -638,22 +639,24 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
       /* setup specific to stereo coupling */
 
       /* unmanaged, one iteration residue setup */
-      ret|=vorbis_encode_residue_init(vi,base_quality,0,_residue_template_44_stereo_temp,
+      ret|=vorbis_encode_residue_init(vi,base_quality,0,
 				      1, /* coupled */
-				      0, /* no mid stereo backfill */
-				      0, /* no residue backfill */
+				      stereo_backfill_p, /* no mid stereo backfill */
+				      residue_backfill_p, /* no residue backfill */
+				      _residue_template_44_stereo_temp,
 				      4,  3,  3,  2,   1,  0,  0,  0,  0,  0,  0,
 				      4., 4., 6., 6., 10., 4., 4., 4., 4., 4., 4.);
       
-      ret|=vorbis_encode_residue_init(vi,base_quality,1,_residue_template_44_stereo_temp,
+      ret|=vorbis_encode_residue_init(vi,base_quality,1,
 				      1, /* coupled */
-				      0, /* no mid stereo backfill */
-				      0, /* no residue backfill */
+				      stereo_backfill_p, /* no mid stereo backfill */
+				      residue_backfill_p, /* no residue backfill */
+				      _residue_template_44_stereo_temp,
 				      4,  3,  3,   2,   1,  0,  0,  0,  0,  0,  0,
 				      4., 6., 6., 10., 10., 4., 4., 4., 4., 4., 4.);      
 
       ret|=vorbis_encode_lowpass_init(vi,base_quality,0,
-				      15.1,15.9,16.9,17.9,19.9,
+				      12.1,14.9,16.9,17.9,19.9,
 				      999.,999.,999.,999.,999.,999.);
       ret|=vorbis_encode_lowpass_init(vi,base_quality,1,
 				      15.1,15.9,16.9,17.9,19.9,
