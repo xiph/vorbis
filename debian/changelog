@@ -1,3 +1,26 @@
+libvorbis (1.0.1-1) unstable; urgency=low
+
+  * New upstream.
+  * Improved descriptions. (Closes: #166649)
+
+ -- Christopher L Cheney <ccheney@debian.org>  Wed,  3 Sep 2003 00:15:00 -0500
+
+libvorbis (1.0.0-3) unstable; urgency=low
+
+  * Add libvorbis0 conflict to libvorbis0a.
+
+ -- Christopher L Cheney <ccheney@debian.org>  Wed, 12 Mar 2003 17:00:00 -0600
+
+libvorbis (1.0.0-2) unstable; urgency=low
+
+  * Rename libvorbis0 -> libvorbis0a to keep packages from upgrading to it
+    by mistake. (Closes: #156227, #156365, #161961, #171548, #172466,
+    #172469, #178756)
+  * GNU config automated update: config.sub (20020621 to 20030103),
+    config.guess (20020529 to 20030110)
+
+ -- Christopher L Cheney <ccheney@debian.org>  Sat,  8 Mar 2003 13:00:00 -0600
+
 libvorbis (1.0.0-1) unstable; urgency=low
 
   * New upstream.

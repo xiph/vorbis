@@ -1,6 +1,9 @@
 #!/usr/bin/make -f
 # Sample debian/rules that uses debhelper.
 # GNU copyright 1997 to 1999 by Joey Hess.
+#
+# Modified to make a template file for a multi-binary package with separated
+# build-arch and build-indep targets  by Bill Allombert 2001
 
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
@@ -18,8 +21,12 @@ DEB_BUILD_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 
 objdir = $(CURDIR)/obj-$(DEB_BUILD_GNU_TYPE)
 
-ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -g
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
 endif
 ifeq (,$(findstring nostrip,$(DEB_BUILD_OPTIONS)))
 	INSTALL_PROGRAM += -s
@@ -36,33 +43,27 @@ configure-stamp:
 	# change ../configure to ../autogen.sh for CVS build
 	cd $(objdir) && \
 	../configure --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE) \
-	--prefix=/usr
+	--prefix=/usr --enable-static
 
 	touch configure-stamp
 
-build: build-stamp
-build-stamp: configure-stamp 
-	dh_testdir
+#Architecture
+build: build-arch build-indep
+
+build-arch: build-arch-stamp
+build-arch-stamp: configure-stamp
 
 	cd $(objdir) && \
 	$(MAKE)
 
-	touch build-stamp
+	touch build-arch-stamp
 
-autotools:
-	OLDDATESUB=`./config.sub -t | tr -d -` ;\
-	OLDDATEGUESS=`./config.guess -t | tr -d -` ;\
-	NEWDATESUB=`/usr/share/misc/config.sub -t | tr -d -` ;\
-	NEWDATEGUESS=`/usr/share/misc/config.guess -t | tr -d -` ;\
-	if [ $$OLDDATESUB -lt $$NEWDATESUB -o \
-	     $$OLDDATEGUESS -lt $$NEWDATEGUESS ]; then \
-	   dch -a -p "GNU config automated update: config.sub\
-	     ($$OLDDATESUB to $$NEWDATESUB), config.guess\
-	     ($$OLDDATEGUESS to $$NEWDATEGUESS)" ;\
-	   cp -f /usr/share/misc/config.sub config.sub ;\
-	   cp -f /usr/share/misc/config.guess config.guess ;\
-	   echo WARNING: GNU config scripts updated from master copies 1>&2 ;\
-	fi
+build-indep: build-indep-stamp
+build-indep-stamp: configure-stamp
+
+	# Add here commands to compile the indep part of the package.
+	#$(MAKE) doc
+	touch build-indep-stamp
 
 debian-clean:
 	dh_testdir
@@ -70,10 +71,10 @@ debian-clean:
 
 	dh_clean
 
-clean: autotools
+clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp configure-stamp
+	rm -f build-arch-stamp build-indep-stamp configure-stamp
 
 	# Remove build tree
 	rm -rf $(objdir)
@@ -89,26 +90,32 @@ clean: autotools
 
 	dh_clean
 
-install: DH_OPTIONS=
-install: build
+install: install-indep install-arch
+install-indep:
 	dh_testdir
 	dh_testroot
-	dh_clean -k
-	dh_installdirs
+#	dh_clean -k -i
+#	dh_installdirs -i
+
+#	dh_install -i --list-missing
+
+install-arch:
+	dh_testdir
+	dh_testroot
+	dh_clean -k -s
+	dh_installdirs -s
 
 	cd $(objdir) && \
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
 
-	dh_install
+	dh_install -s --list-missing
 
-# This single target is used to build all the packages, all at once, or
-# one at a time. So keep in mind: any options passed to commands here will
-# affect _all_ packages. Anything you want to only affect one package
-# should be put in another target, such as the install target.
+# Must not depend on anything. This is to be called by
+# binary-arch/binary-indep
+# in another 'make' thread.
 binary-common:
 	dh_testdir
 	dh_testroot
-#	dh_installxfonts
 	dh_installchangelogs
 	dh_installdocs
 	dh_installexamples
@@ -121,31 +128,27 @@ binary-common:
 #	dh_installinit
 #	dh_installcron
 #	dh_installinfo
-#	dh_undocumented
 	dh_installman
-	dh_strip
 	dh_link
+	dh_strip
 	dh_compress
 	dh_fixperms
+#	dh_perl
+#	dh_python
 	dh_makeshlibs -V
 	dh_installdeb
-#	dh_perl
-	dh_shlibdeps
+	dh_shlibdeps -ldebian/libvorbis0a/usr/lib
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb
 
 # Build architecture independant packages using the common target.
-binary-indep: build install
+binary-indep: build-indep install-indep
 #	$(MAKE) -f debian/rules DH_OPTIONS=-i binary-common
 
 # Build architecture dependant packages using the common target.
-binary-arch: build install
+binary-arch: build-arch install-arch
 	$(MAKE) -f debian/rules DH_OPTIONS=-a binary-common
 
-# Any other binary targets build just one binary package at a time.
-binary-%: build install
-	$(MAKE) -f debian/rules binary-common DH_OPTIONS=-p$*
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure
+binary: binary-arch binary-indep
+.PHONY: build clean binary-indep binary-arch binary install install-indep install-arch configure
