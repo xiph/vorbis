@@ -16,14 +16,14 @@
 
  created:  06-Sep-2001, Chris Wolf 
 
- last mod: $Id: shmmap_c.h,v 1.1 2001/09/07 08:44:59 cwolf Exp $
+ last mod: $Id: shmmap_c.h,v 1.1 2001/09/11 20:16:11 cwolf Exp $
 
  This module gets conditionally appended to the end of registry.c
  ********************************************************************/
 #include <malloc.h>
 #include <memory.h>
 
-#include "shmmap.h"
+#include <shmmap.h>
 
 /**
  * Create image of mappings defined in regsitry.c.

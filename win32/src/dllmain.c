@@ -18,7 +18,7 @@
 
  created:  06-Sep-2001, Chris Wolf 
                         Adopted from "dllskel" MSDN COM tutorial
- last mod: $Id: dllmain.c,v 1.1 2001/09/07 08:44:59 cwolf Exp $
+ last mod: $Id: dllmain.c,v 1.1 2001/09/11 20:16:11 cwolf Exp $
 
  This module is used in both vorbis.dll and vorbisenc.dll.  If vorbisenc.c
  is built into a separate DLL, then define STANDALONE_VORBISENC_DLL so

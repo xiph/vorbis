@@ -17,12 +17,12 @@
 
  created:  06-Sep-2001, Chris Wolf 
 
- last mod: $Id: shmmap.h,v 1.1 2001/09/07 08:44:59 cwolf Exp $
+ last mod: $Id: shmmap.h,v 1.1 2001/09/11 20:16:11 cwolf Exp $
  ********************************************************************/
 #ifndef _shmmap_h_
 # define _shmmap_h_
 
-#include "codec_internal.h"
+#include <codec_internal.h>
 
 #define NUMELEMENTS(x) (sizeof(x)/sizeof(x[0]))
 
