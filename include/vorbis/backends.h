@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.3 2000/01/28 09:04:59 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.4 2000/01/28 14:31:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -66,8 +66,8 @@ typedef struct{
   int   order;
   long  rate;
   long  barkmap;
-  int   stages;
-  int  *books;
+  int   stages; /* <= 16 */
+  int   books[16];
 } vorbis_info_floor0;
 
 /* Residue backend generic *****************************************/
@@ -90,8 +90,7 @@ typedef struct vorbis_info_residue0{
   long  end;
 
   /* way unfinished, just so you know while poking around CVS ;-) */
-  int   stages;
-  int  *books;
+
 } vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/
@@ -108,13 +107,13 @@ typedef struct{
 } vorbis_func_mapping;
 
 typedef struct vorbis_info_mapping0{
-  int    submaps;
-  int   *chmuxlist;
+  int   submaps;  /* <= 16 */
+  int   chmuxlist[256];   /* up to 256 channels in a Vorbis stream */
   
-  int   *timesubmap;    /* [mux] */
-  int   *floorsubmap;   /* [mux] submap to floors */
-  int   *residuesubmap; /* [mux] submap to residue */
-  int   *psysubmap;     /* [mux]; encode only */
+  int   timesubmap[16];    /* [mux] */
+  int   floorsubmap[16];   /* [mux] submap to floors */
+  int   residuesubmap[16]; /* [mux] submap to residue */
+  int   psysubmap[16];     /* [mux]; encode only */
 } vorbis_info_mapping0;
 
 #endif

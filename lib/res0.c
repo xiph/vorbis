@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.2 2000/01/28 09:05:16 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.3 2000/01/28 14:31:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,11 +25,9 @@
 /* unfinished as of 20000118 */
 
 void free_info(vorbis_info_residue *i){
-  vorbis_info_residue0 *d=(vorbis_info_residue0 *)i;
-  if(d){
-    if(d->books)free(d->books);
-    memset(d,0,sizeof(vorbis_info_residue0));
-    free(d);
+  if(i){
+    memset(i,0,sizeof(vorbis_info_residue0));
+    free(i);
   }
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.6 2000/01/28 09:05:01 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.7 2000/01/28 14:31:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -98,17 +98,17 @@ typedef struct vorbis_info{
   int        books;
   int        psys;     /* encode only */
 
-  vorbis_info_mode    **mode_param;
-  int                  *map_type;
-  vorbis_info_mapping **map_param;
-  int                  *time_type;
-  vorbis_info_time    **time_param;
-  int                  *floor_type;
-  vorbis_info_floor   **floor_param;
-  int                  *residue_type;
-  vorbis_info_residue **residue_param;
-  static_codebook     **book_param;
-  vorbis_info_psy     **psy_param; /* encode only */
+  vorbis_info_mode    *mode_param[64];
+  int                  map_type[64];
+  vorbis_info_mapping *map_param[64];
+  int                  time_type[64];
+  vorbis_info_time    *time_param[64];
+  int                  floor_type[64];
+  vorbis_info_floor   *floor_param[64];
+  int                  residue_type[64];
+  vorbis_info_residue *residue_param[64];
+  static_codebook     *book_param[256];
+  vorbis_info_psy     *psy_param[64]; /* encode only */
   
   /* for block long/sort tuning; encode only */
   int        envelopesa;

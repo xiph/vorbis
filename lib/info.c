@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.18 2000/01/28 09:05:10 xiphmont Exp $
+ last mod: $Id: info.c,v 1.19 2000/01/28 14:31:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -84,23 +84,23 @@ void vorbis_info_clear(vorbis_info *vi){
 
   for(i=0;i<vi->modes;i++)
     if(vi->mode_param[i])free(vi->mode_param[i]);
-  if(vi->mode_param)free(vi->mode_param);
+  /*if(vi->mode_param)free(vi->mode_param);*/
  
   for(i=0;i<vi->maps;i++) /* unpack does the range checking */
     _mapping_P[i]->free_info(vi->map_param[i]);
-  if(vi->map_param)free(vi->map_param);
+  /*if(vi->map_param)free(vi->map_param);*/
     
   for(i=0;i<vi->times;i++) /* unpack does the range checking */
     _time_P[i]->free_info(vi->time_param[i]);
-  if(vi->time_param)free(vi->time_param);
+  /*if(vi->time_param)free(vi->time_param);*/
     
   for(i=0;i<vi->floors;i++) /* unpack does the range checking */
     _floor_P[i]->free_info(vi->floor_param[i]);
-  if(vi->floor_param)free(vi->floor_param);
+  /*if(vi->floor_param)free(vi->floor_param);*/
     
   for(i=0;i<vi->residues;i++) /* unpack does the range checking */
     _residue_P[i]->free_info(vi->residue_param[i]);
-  if(vi->residue_param)free(vi->residue_param);
+  /*if(vi->residue_param)free(vi->residue_param);*/
 
   /* the static codebooks *are* freed if you call info_clear, because
      decode side does alloc a 'static' codebook. Calling clear on the
@@ -113,11 +113,11 @@ void vorbis_info_clear(vorbis_info *vi){
       free(vi->book_param[i]);
     }
   }
-  if(vi->book_param)free(vi->book_param);
+  /*if(vi->book_param)free(vi->book_param);*/
 
   for(i=0;i<vi->psys;i++)
     _vi_psy_free(vi->psy_param[i]);
-  if(vi->psy_param)free(vi->psy_param);
+  /*if(vi->psy_param)free(vi->psy_param);*/
   
   memset(vi,0,sizeof(vorbis_info));
 }
@@ -181,17 +181,17 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   int i;
 
   /* codebooks */
-  vi->books=_oggpack_read(opb,16);
-  vi->book_param=calloc(vi->books,sizeof(static_codebook *));
+  vi->books=_oggpack_read(opb,8)+1;
+  /*vi->book_param=calloc(vi->books,sizeof(static_codebook *));*/
   for(i=0;i<vi->books;i++){
     vi->book_param[i]=calloc(1,sizeof(static_codebook));
     if(vorbis_staticbook_unpack(opb,vi->book_param[i]))goto err_out;
   }
 
   /* time backend settings */
-  vi->times=_oggpack_read(opb,8);
-  vi->time_type=malloc(vi->times*sizeof(int));
-  vi->time_param=calloc(vi->times,sizeof(void *));
+  vi->times=_oggpack_read(opb,6)+1;
+  /*vi->time_type=malloc(vi->times*sizeof(int));*/
+  /*vi->time_param=calloc(vi->times,sizeof(void *));*/
   for(i=0;i<vi->times;i++){
     vi->time_type[i]=_oggpack_read(opb,16);
     if(vi->time_type[i]<0 || vi->time_type[i]>=VI_TIMEB)goto err_out;
@@ -200,9 +200,9 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   }
 
   /* floor backend settings */
-  vi->floors=_oggpack_read(opb,8);
-  vi->floor_type=malloc(vi->floors*sizeof(int));
-  vi->floor_param=calloc(vi->floors,sizeof(void *));
+  vi->floors=_oggpack_read(opb,6)+1;
+  /*vi->floor_type=malloc(vi->floors*sizeof(int));*/
+  /*vi->floor_param=calloc(vi->floors,sizeof(void *));*/
   for(i=0;i<vi->floors;i++){
     vi->floor_type[i]=_oggpack_read(opb,16);
     if(vi->floor_type[i]<0 || vi->floor_type[i]>=VI_FLOORB)goto err_out;
@@ -211,9 +211,9 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   }
 
   /* residue backend settings */
-  vi->residues=_oggpack_read(opb,8);
-  vi->residue_type=malloc(vi->residues*sizeof(int));
-  vi->residue_param=calloc(vi->residues,sizeof(void *));
+  vi->residues=_oggpack_read(opb,6)+1;
+  /*vi->residue_type=malloc(vi->residues*sizeof(int));*/
+  /*vi->residue_param=calloc(vi->residues,sizeof(void *));*/
   for(i=0;i<vi->residues;i++){
     vi->residue_type[i]=_oggpack_read(opb,16);
     if(vi->residue_type[i]<0 || vi->residue_type[i]>=VI_RESB)goto err_out;
@@ -222,9 +222,9 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   }
 
   /* map backend settings */
-  vi->maps=_oggpack_read(opb,8);
-  vi->map_type=malloc(vi->maps*sizeof(int));
-  vi->map_param=calloc(vi->maps,sizeof(void *));
+  vi->maps=_oggpack_read(opb,6)+1;
+  /*vi->map_type=malloc(vi->maps*sizeof(int));*/
+  /*vi->map_param=calloc(vi->maps,sizeof(void *));*/
   for(i=0;i<vi->maps;i++){
     vi->map_type[i]=_oggpack_read(opb,16);
     if(vi->map_type[i]<0 || vi->map_type[i]>=VI_MAPB)goto err_out;
@@ -233,8 +233,8 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   }
   
   /* mode settings */
-  vi->modes=_oggpack_read(opb,8);
-  vi->mode_param=calloc(vi->modes,sizeof(void *));
+  vi->modes=_oggpack_read(opb,6)+1;
+  /*vi->mode_param=calloc(vi->modes,sizeof(void *));*/
   for(i=0;i<vi->modes;i++){
     vi->mode_param[i]=calloc(1,sizeof(vorbis_info_mode));
     vi->mode_param[i]->blockflag=_oggpack_read(opb,1);
@@ -374,40 +374,40 @@ static int _vorbis_pack_books(oggpack_buffer *opb,vorbis_info *vi){
   _oggpack_write(opb,0x82,8);
 
   /* books */
-  _oggpack_write(opb,vi->books,16);
+  _oggpack_write(opb,vi->books-1,8);
   for(i=0;i<vi->books;i++)
     if(vorbis_staticbook_pack(vi->book_param[i],opb))goto err_out;
 
   /* times */
-  _oggpack_write(opb,vi->times,8);
+  _oggpack_write(opb,vi->times-1,6);
   for(i=0;i<vi->times;i++){
     _oggpack_write(opb,vi->time_type[i],16);
     _time_P[vi->time_type[i]]->pack(vi->time_param[i],opb);
   }
 
   /* floors */
-  _oggpack_write(opb,vi->floors,8);
+  _oggpack_write(opb,vi->floors-1,6);
   for(i=0;i<vi->floors;i++){
     _oggpack_write(opb,vi->floor_type[i],16);
     _floor_P[vi->floor_type[i]]->pack(vi->floor_param[i],opb);
   }
 
   /* residues */
-  _oggpack_write(opb,vi->residues,8);
+  _oggpack_write(opb,vi->residues-1,6);
   for(i=0;i<vi->residues;i++){
     _oggpack_write(opb,vi->residue_type[i],16);
     _residue_P[vi->residue_type[i]]->pack(vi->residue_param[i],opb);
   }
 
   /* maps */
-  _oggpack_write(opb,vi->maps,8);
+  _oggpack_write(opb,vi->maps-1,6);
   for(i=0;i<vi->maps;i++){
     _oggpack_write(opb,vi->map_type[i],16);
     _mapping_P[vi->map_type[i]]->pack(vi,vi->map_param[i],opb);
   }
 
   /* modes */
-  _oggpack_write(opb,vi->modes,8);
+  _oggpack_write(opb,vi->modes-1,6);
   for(i=0;i<vi->modes;i++){
     _oggpack_write(opb,vi->mode_param[i]->blockflag,1);
     _oggpack_write(opb,vi->mode_param[i]->windowtype,16);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.3 2000/01/28 09:05:09 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.4 2000/01/28 14:31:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,10 +23,9 @@
 #include "registry.h"
 
 static void free_info(vorbis_info_floor *i){
-  vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
-  if(d){
-    if(d->books)free(d->books);
+  if(i){
     memset(i,0,sizeof(vorbis_info_floor0));
+    free(i);
   }
 }
 static void free_look(vorbis_look_floor *i){
@@ -38,7 +37,7 @@ static void pack (vorbis_info_floor *i,oggpack_buffer *opb){
   _oggpack_write(opb,d->order,8);
   _oggpack_write(opb,d->rate,16);
   _oggpack_write(opb,d->barkmap,16);
-  _oggpack_write(opb,d->stages,8);
+  _oggpack_write(opb,d->stages,4);
   for(j=0;j<d->stages;j++)
     _oggpack_write(opb,d->books[j],8);
 }
@@ -49,14 +48,13 @@ static vorbis_info_floor *unpack (vorbis_info *vi,oggpack_buffer *opb){
   d->order=_oggpack_read(opb,8);
   d->rate=_oggpack_read(opb,16);
   d->barkmap=_oggpack_read(opb,16);
-  d->stages=_oggpack_read(opb,8);
+  d->stages=_oggpack_read(opb,4);
   
   if(d->order<1)goto err_out;
   if(d->rate<1)goto err_out;
   if(d->barkmap<1)goto err_out;
   if(d->stages<1)goto err_out;
 
-  d->books=alloca(sizeof(int)*d->stages);
   for(j=0;j<d->stages;j++){
     d->books[j]=_oggpack_read(opb,8);
     if(d->books[j]<0 || d->books[j]>=vi->books)goto err_out;

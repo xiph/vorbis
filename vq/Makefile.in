@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.7 2000/01/06 13:57:09 xiphmont Exp $
+# $Id: Makefile.in,v 1.8 2000/01/28 14:31:29 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -69,7 +69,7 @@ $(OFILES):	$(HFILES)
 
 clean:
 	-rm -f *.o *.a test* *~ *.out *.m config.* \
-		lspvqtrain
+		lspvqtrain genericvqtrain vqbuild vqmetrics vqpartition vqcascade
 
 distclean:	clean
 	-rm -f Makefile

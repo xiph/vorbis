@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.3 2000/01/28 09:05:13 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.4 2000/01/28 14:31:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -52,16 +52,9 @@ typedef struct {
 } vorbis_look_mapping0;
 
 void free_info(vorbis_info_mapping *i){
-  vorbis_info_mapping0 *d=(vorbis_info_mapping0 *)i;
-
-  if(d){
-    if(d->chmuxlist)free(d->chmuxlist);
-    if(d->timesubmap)free(d->timesubmap);
-    if(d->floorsubmap)free(d->floorsubmap);
-    if(d->residuesubmap)free(d->residuesubmap);
-    if(d->psysubmap)free(d->psysubmap);
-    memset(d,0,sizeof(vorbis_info_mapping0));
-    free(d);
+  if(i){
+    memset(i,0,sizeof(vorbis_info_mapping0));
+    free(i);
   }
 }
 
@@ -152,11 +145,6 @@ vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
   memset(d,0,sizeof(vorbis_info_mapping0));
 
   d->submaps=_oggpack_read(opb,4);
-
-  d->chmuxlist=calloc(vi->channels,sizeof(int));
-  d->timesubmap=malloc(sizeof(int)*d->submaps);
-  d->floorsubmap=malloc(sizeof(int)*d->submaps);
-  d->residuesubmap=malloc(sizeof(int)*d->submaps);
 
   if(d->submaps>1){
     for(i=0;i<vi->channels;i++){
