@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.27 2000/05/17 22:34:22 xiphmont Exp $
+# $Id: Makefile.in,v 1.28 2000/05/26 23:08:36 dbt Exp $
 
 ###############################################################################
 #                                                                             #
@@ -42,6 +42,9 @@ VF_HFILES = ../include/vorbis/vorbisfile.h ../include/vorbis/codec.h \
 		os.h misc.h
 VF_LFILES = vorbisfile.o
 
+PSY_FILES = mdct.o psy.o lpc.o smallft.o window.o psytune.o floor0.o \
+	bitwise.o lsp.o codebook.o sharedbook.o
+
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
 
@@ -74,16 +77,15 @@ selftest:
 	@./test_codebook
 
 libvorbis.a: 	$(LFILES)	
-		$(AR) -r libvorbis.a $^
+		$(AR) -r libvorbis.a $(LFILES)
 		$(RANLIB) libvorbis.a
 
 vorbisfile.a:	$(VF_LFILES)
-		$(AR) -r vorbisfile.a $^
+		$(AR) -r vorbisfile.a $(VF_LFILES)
 		$(RANLIB) vorbisfile.a
 
-psytune:	mdct.o psy.o lpc.o smallft.o window.o psytune.o floor0.o \
-		bitwise.o lsp.o codebook.o sharedbook.o
-	        $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+psytune:	$(PSY_FILES)
+	        $(CC) $(CFLAGS) $(LDFLAGS) $(PSY_FILES) -o $@ $(LIBS)
 
 
 $(LFILES): 	$(HFILES)
