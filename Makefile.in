@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.10 2000/08/19 09:41:04 omnic Exp $
+# $Id: Makefile.in,v 1.11 2000/08/24 01:10:02 kcarnold Exp $
 
 ###############################################################################
 #                                                                             #
@@ -30,3 +30,4 @@ all debug profile selftest target clean:
 distclean:
 	@for dir in $(SUBDIRS) $(DCLEAN_DIRS); do (cd $$dir && $(MAKE) $(MFLAGS) $(MAKECMDGOALS)) || exit 1; done
 	-rm -f Makefile config.* 
+
