@@ -268,10 +268,10 @@ double vqgen_iterate(vqgen *v){
     }
     for(k=0;k<v->elements;k++){
       double base=min[k];
-      double delta=max[k]-min[k]/((1<<v->quantbits)-1);
+      double delta=(max[k]-min[k])/((1<<v->quantbits)-1);
       for(j=0;j<v->entries;j++){
 	double val=_now(v,j)[k];
-	_now(v,j)[k]=rint((val-base)/delta);
+	_now(v,j)[k]=base+delta*rint((val-base)/delta);
       }
     }
   }
