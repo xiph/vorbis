@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17 2001/10/02 00:14:32 segher Exp $
+ last mod: $Id: vorbisenc.c,v 1.18 2001/10/18 17:39:34 cwolf Exp $
 
  ********************************************************************/
 
@@ -29,34 +29,11 @@
 #include "os.h"
 #include "misc.h"
 
-/*
- * If this module gets built into a separate shared library 
- * on win32 (DLL), then the backend mappings from registry.c
- * need to be referenced from a file-mapped shared memory segment.
- */
-#if defined(_MSC_VER) && defined(STANDALONE_VORBISENC_DLL)
-# include "shmmap.h"
-
-  SHARED_MAP *g_shared_map;
-
-# define _time_P    g_shared_map->p_time_P
-# define _floor_P   g_shared_map->p_floor_P
-# define _residue_P g_shared_map->p_residue_P
-# define _mapping_P g_shared_map->p_mapping_P
-#endif
-
 /* deepcopy all but the codebooks; in this usage, they're static
    (don't copy as they could be big) */
 static void codec_setup_partialcopy(codec_setup_info *ci,
 				 codec_setup_info *cs){
   int i;
-
-#if defined(_MSC_VER) && defined(STANDALONE_VORBISENC_DLL)
-  int maplen;
-
-  if ((g_shared_map = table_map2mem(&maplen)) == (SHARED_MAP*)0)
-  ; /* some error handling for memory exhaustion */
-#endif
 
   memcpy(ci,cs,sizeof(*ci)); /* to get the flat numbers */
 
