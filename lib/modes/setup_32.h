@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel settings for 32kHz
- last mod: $Id: setup_32.h,v 1.3 2002/07/11 06:41:04 xiphmont Exp $
+ last mod: $Id: setup_32.h,v 1.4 2002/07/13 06:12:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,7 +26,7 @@ static double rate_mapping_32_un[11]={
 };
 
 static double rate_mapping_32_low[2]={
-  18000.,28000.
+  20000.,28000.
 };
 
 static double rate_mapping_32_un_low[2]={

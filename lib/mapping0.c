@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.52 2002/07/01 11:20:11 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.53 2002/07/13 06:12:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -513,8 +513,9 @@ static int mapping0_forward(vorbis_block *vb){
 
     if(info->coupling_steps){
       mag_memo=_vp_quantize_couple_memo(vb,
+					&ci->psy_g_param,
 					psy_look,
-				      info,
+					info,
 					gmdct);    
       
       mag_sort=_vp_quantize_couple_sort(vb,

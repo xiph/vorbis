@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.48 2002/07/12 15:07:52 giles Exp $
+ last mod: $Id: encoder_example.c,v 1.49 2002/07/13 06:12:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -126,7 +126,7 @@ int main(){
 
    *********************************************************************/
 
-  ret=vorbis_encode_init_vbr(&vi,2,44100,.3);
+  ret=vorbis_encode_init_vbr(&vi,2,44100,.5);
 
   /* do not continue if setup failed; this can happen if we ask for a
      mode that libVorbis does not support (eg, too low a bitrate, etc,

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.72 2002/07/11 06:40:49 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.73 2002/07/13 06:12:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -903,7 +903,7 @@ static void precomputed_couple_point(float premag,
 
 /* doing the real circular magnitude calculation is audibly superior
    to (A+B)/sqrt(2) */
-static float cardoid_hypot(float a, float b){
+static float dipole_hypot(float a, float b){
   if(a>0.){
     if(b>0.)return sqrt(a*a+b*b);
     if(a>-b)return sqrt(a*a-b*b);
@@ -913,21 +913,36 @@ static float cardoid_hypot(float a, float b){
   if(-a>b)return -sqrt(a*a-b*b);
   return sqrt(b*b-a*a);
 }
+static float round_hypot(float a, float b){
+  if(a>0.){
+    if(b>0.)return sqrt(a*a+b*b);
+    if(a>-b)return sqrt(a*a+b*b);
+    return -sqrt(b*b+a*a);
+  }
+  if(b<0.)return -sqrt(a*a+b*b);
+  if(-a>b)return -sqrt(a*a+b*b);
+  return sqrt(b*b+a*a);
+}
 
+/* revert to round hypot for now */
 float **_vp_quantize_couple_memo(vorbis_block *vb,
+				 vorbis_info_psy_global *g,
 				 vorbis_look_psy *p,
 				 vorbis_info_mapping0 *vi,
 				 float **mdct){
   
   int i,j,n=p->n;
   float **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
+  int limit=g->coupling_pointlimit[p->vi->blockflag][PACKETBLOBS/2];
   
   for(i=0;i<vi->coupling_steps;i++){
     float *mdctM=mdct[vi->coupling_mag[i]];
     float *mdctA=mdct[vi->coupling_ang[i]];
     ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
-    for(j=0;j<n;j++)
-      ret[i][j]=cardoid_hypot(mdctM[j],mdctA[j]);
+    for(j=0;j<limit;j++)
+      ret[i][j]=dipole_hypot(mdctM[j],mdctA[j]);
+    for(;j<n;j++)
+      ret[i][j]=round_hypot(mdctM[j],mdctA[j]);
   }
 
   return(ret);
@@ -940,9 +955,9 @@ static int apsort(const void *a, const void *b){
 }
 
 int **_vp_quantize_couple_sort(vorbis_block *vb,
-				 vorbis_look_psy *p,
-				 vorbis_info_mapping0 *vi,
-				 float **mags){
+			       vorbis_look_psy *p,
+			       vorbis_info_mapping0 *vi,
+			       float **mags){
 
 
   if(p->vi->normal_point_p){
@@ -1085,9 +1100,12 @@ void _vp_couple(int blobno,
 	  if(l<sliding_lowpass){
 	    if((l>=limit && fabs(rM[l])<postpoint && fabs(rA[l])<postpoint) ||
 	       (fabs(rM[l])<prepoint && fabs(rA[l])<prepoint)){
+
+
 	      precomputed_couple_point(mag_memo[i][l],
 				       floorM[l],floorA[l],
 				       qM+l,qA+l);
+
 	      if(rint(qM[l])==0.f)acc+=qM[l]*qM[l];
 	    }else{
 	      couple_lossless(rM[l],rA[l],qM+l,qA+l);
