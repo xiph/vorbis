@@ -101,7 +101,7 @@
 			buildSettings = {
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
-				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks ../ogg/macosx/build";
+				FRAMEWORK_SEARCH_PATHS = "/Library/Frameworks ../../ogg/macosx/build";
 				FRAMEWORK_VERSION = A;
 				HEADER_SEARCH_PATHS = "";
 				INSTALL_PATH = /Library/Frameworks;
