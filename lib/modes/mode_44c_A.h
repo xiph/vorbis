@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_A.h,v 1.4.2.7 2001/10/20 03:00:11 xiphmont Exp $
+ last mod: $Id: mode_44c_A.h,v 1.4.2.8 2001/10/22 07:34:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -54,27 +54,23 @@
 
 #include "books/res_Ac_0.vqh"
 #include "books/res_Ac_0a.vqh"
-#include "books/res_Ac_0b.vqh"
 #include "books/res_Ac_1.vqh"
 #include "books/res_Ac_1a.vqh"
+#include "books/res_Ac_1b.vqh"
 #include "books/res_Ac_2.vqh"
 #include "books/res_Ac_2a.vqh"
-#include "books/res_Ac_2b.vqh"
-#include "books/res_Ac_2c.vqh"
 #include "books/res_Ac_3.vqh"
 #include "books/res_Ac_3a.vqh"
-#include "books/res_Ac_3b.vqh"
 #include "books/res_Ac_4.vqh"
 #include "books/res_Ac_4a.vqh"
 #include "books/res_Ac_4b.vqh"
-#include "books/res_Ac_4c.vqh"
 #include "books/res_Ac_5.vqh"
 #include "books/res_Ac_5a.vqh"
-#include "books/res_Ac_5b.vqh"
 #include "books/res_Ac_6.vqh"
-#include "books/res_Ac_6a.vqh"
 #include "books/res_Ac_7.vqh"
 #include "books/res_Ac_7a.vqh"
+#include "books/res_Ac_7b.vqh"
+#include "books/res_Ac_7c.vqh"
 #include "books/res_Ac_8.vqh"
 #include "books/res_Ac_8a.vqh"
 #include "books/res_Ac_8b.vqh"
@@ -98,8 +94,7 @@ static vorbis_info_psy_global _psy_set_44c_AG={
 static struct vp_couple_pass _psy_pass_44c_A0[]={
   {1.f,1.f,
    {{  24,       0, 9e10,      0},
-    {  64,       0, 9e10,    4.5},
-    {9999,       0, 9e10,    7.5}}
+    {9999,       0, 9e10,    4.5}}
   },
   {1.f,1.f,
    {{  64,       0, 9e10,      0},
@@ -118,8 +113,7 @@ static struct vp_couple_pass _psy_pass_44c_A0[]={
 static vp_couple_pass _psy_pass_44c_A[]={
   {1.f,1.f,
    {{ 288,       0, 9e10,      0},
-    { 512,       0, 9e10,    4.5},
-    {9999,       0, 9e10,    7.5}}
+    {9999,       0, 9e10,    4.5}}
   },
   {1.f,1.f,
    {{ 512,       0, 9e10,      0},
@@ -134,6 +128,27 @@ static vp_couple_pass _psy_pass_44c_A[]={
     {9999,       0, 9e10,    2.5}}
   },
 };
+
+static vorbis_info_residue0 _residue_set_44c_A0={
+  0,224, 16, 10,23,
+  /*    0         1            2            3         4            5         6            7                  8               9 */
+  {   80,      161,         163,          92,       84,          92,       84,         169,               175,            167},
+  {25,26, 27,28,29, 30,31,28,29, 32,33,28,29, 34,35,36, 37,38,28,29, 39,35,36, 40,41,42,43, 44,45,46,41,28,29, 47,48,49,28,29},
+  { 9999,     9999,        9999,        9999,     9999,        9999,     9999,        9999,              9999,           9999},
+  {   .5,      4.5,        20.5,         1.5,      1.5,         2.5,      2.5,         4.5,              98.5},
+  {0},
+  {   99,        3,           3,           8,       99,           8,       99,          99,                99}};
+
+static vorbis_info_residue0 _residue_set_44c_A={
+  0,1792, 32,10,24,
+  /*    0         1            2            3         4            5         6            7                  8               9 */
+  {   80,      161,         163,          92,       84,          92,       84,         169,               175,            167},
+  {25,26, 27,28,29, 30,31,28,29, 32,33,28,29, 34,35,36, 37,38,28,29, 39,35,36, 40,41,42,43, 44,45,46,41,28,29, 47,48,49,28,29},
+  { 9999,     9999,        9999,        9999,     9999,        9999,     9999,        9999,              9999,           9999},
+  {   .5,      4.5,        20.5,         1.5,      1.5,         2.5,      2.5,         4.5,              98.5},
+  {0},
+  {   99,       18,          18,          32,       99,          32,       99,          99,                99}};
+
 
 static float _psy_compand_44c_A[NOISE_COMPAND_LEVELS]={
   0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f,  7.f,     /* 7dB */
@@ -274,24 +289,6 @@ static vorbis_info_floor1 _floor_set_44c_A={
   20,600,
   896};
 
-static vorbis_info_residue0 _residue_set_44c_A0={
-  0,224, 16, 10,23,
-  {      97,     3,         120,      104,         116,      104,    17,     3,        7,        7},
-  {25,26,27, 28,29, 30,31,32,33, 34,35,36, 37,38,39,40, 41,42,43, 44,45, 46,47, 48,49,50, 51,52,53},
-  {    9999,  9999,        9999,     9999,        9999,     9999,  9999,  9999,     9999,     9999},
-  {     4.5,  20.5,         1.5,      1.5,         2.5,      2.5,   4.5,  20.5,     98.5},
-  {0},
-  {       3,     3,           8,       99,           8,       99,    99,    99,       99}};
-
-static vorbis_info_residue0 _residue_set_44c_A={
-  0,1792, 32,10,24,
-  {      97,     3,         116,      100,         114,       98,    17,     3,        7,        7},
-  {25,26,27, 28,29, 30,31,32,33, 34,35,36, 37,38,39,40, 41,42,43, 44,45, 46,47, 48,49,50, 51,52,53},
-  {    9999,  9999,        9999,     9999,        9999,     9999,  9999,  9999,     9999,     9999},
-  {     4.5,  20.5,         1.5,      1.5,         2.5,      2.5,   4.5,  20.5,     98.5},
-  {0},
-  {      18,    18,          32,       99,          32,       99,    99,    99,       99}};
-
 static vorbis_info_mapping0 _mapping_set_44c_A0={
   1, {0,0}, {0}, {0}, {0}, {0,0}, 1,{0},{1}};
 static vorbis_info_mapping0 _mapping_set_44c_A={
@@ -305,7 +302,7 @@ codec_setup_info info_44c_A={
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   54,   3,
+  2,          2,    1,     2,       2,   50,   3,
   /* modes */
   {&_mode_set_44c_A0,&_mode_set_44c_A},
   /* maps */
@@ -351,31 +348,27 @@ codec_setup_info info_44c_A={
 
     &_vq_book_res_Ac_0, /* 25 */
     &_vq_book_res_Ac_0a,
-    &_vq_book_res_Ac_0b,
-    &_vq_book_res_Ac_1, /* 28 */
+    &_vq_book_res_Ac_1, /* 27 */
     &_vq_book_res_Ac_1a,
+    &_vq_book_res_Ac_1b,
     &_vq_book_res_Ac_2, /* 30 */
     &_vq_book_res_Ac_2a,
-    &_vq_book_res_Ac_2b,
-    &_vq_book_res_Ac_2c,
-    &_vq_book_res_Ac_3, /* 34 */
+    &_vq_book_res_Ac_3, /* 32 */
     &_vq_book_res_Ac_3a,
-    &_vq_book_res_Ac_3b,
-    &_vq_book_res_Ac_4, /* 37 */
+    &_vq_book_res_Ac_4, /* 34 */
     &_vq_book_res_Ac_4a,
     &_vq_book_res_Ac_4b,
-    &_vq_book_res_Ac_4c,
-    &_vq_book_res_Ac_5, /* 41 */
+    &_vq_book_res_Ac_5, /* 37 */
     &_vq_book_res_Ac_5a,
-    &_vq_book_res_Ac_5b,
-    &_vq_book_res_Ac_6, /* 44 */
-    &_vq_book_res_Ac_6a,
-    &_vq_book_res_Ac_7, /* 46 */
+    &_vq_book_res_Ac_6, /* 39 */
+    &_vq_book_res_Ac_7, /* 40 */
     &_vq_book_res_Ac_7a,
-    &_vq_book_res_Ac_8, /* 48 */
+    &_vq_book_res_Ac_7b,
+    &_vq_book_res_Ac_7c,
+    &_vq_book_res_Ac_8, /* 44 */
     &_vq_book_res_Ac_8a,
     &_vq_book_res_Ac_8b,
-    &_vq_book_res_Ac_9, /* 51 */
+    &_vq_book_res_Ac_9, /* 47 */
     &_vq_book_res_Ac_9a,
     &_vq_book_res_Ac_9b,
 
@@ -387,13 +380,13 @@ codec_setup_info info_44c_A={
 
   /* progressive coding and bitrate controls */
             110000,90000,     0,0,
-  4.,       112000,           140000,  
+  3.,       112000,           140000,  
             124000,           128000,
            
   4.0, 0.,  -1.,              .05, 
             -.05,             .05,
 
-  {4,5,6,7},
+  {3,4,6,8},
   4,
 };
 
