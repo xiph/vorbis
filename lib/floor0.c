@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.10 2000/02/23 09:24:27 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.11 2000/02/23 11:22:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -191,11 +191,11 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_lpc(out,out,look->m); 
     vorbis_lpc_to_curve(out,out,amp,&look->lpclook);
-    fprintf(stderr,"Encoded %d LSP coefficients in %d bits\n",look->m,bits);
+    fprintf(stderr,"Encoded %ld LSP coefficients in %ld bits\n",look->m,bits);
     return(1);
   }
 
-  fprintf(stderr,"Encoded %d LSP coefficients in %d bits\n",look->m,bits);
+  fprintf(stderr,"Encoded %ld LSP coefficients in %ld bits\n",look->m,bits);
 
   memset(out,0,sizeof(double)*look->n);
   return(0);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.7 2000/02/23 09:24:31 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.8 2000/02/23 11:22:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -68,7 +68,6 @@ void free_look(vorbis_look_residue *i){
   }
 }
 
-/* not yet */
 void pack(vorbis_info_residue *vr,oggpack_buffer *opb){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   int j,acc=0;
@@ -314,7 +313,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   }
 
   for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];
-  fprintf(stderr,"Encoded %ld res vectors in %d phrasing and %d res bits\n\t",
+  fprintf(stderr,"Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
 	  ch*(info->end-info->begin),phrasebits,resbitsT);
   for(i=0;i<possible_partitions;i++)
     fprintf(stderr,"%ld(%ld):%ld ",i,resvals[i],resbits[i]);
@@ -345,7 +344,7 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
       partword[j]=look->decodemap[vorbis_book_decode(look->phrasebook,
 						     &vb->opb)];
     
-    /* now we encode interleaved residual values for the partitions */
+    /* now we decode interleaved residual values for the partitions */
     for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition)
       for(j=0;j<ch;j++){
 	int part=partword[j][k];

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.20 2000/02/06 13:39:41 xiphmont Exp $
+ last mod: $Id: info.c,v 1.21 2000/02/23 11:22:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -270,14 +270,15 @@ int vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,ogg_packet *op)
     /* Also verify header-ness, vorbis */
     {
       char buffer[6];
+      int packtype=_oggpack_read(&opb,8);
       memset(buffer,0,6);
       _v_readstring(&opb,buffer,6);
       if(memcmp(buffer,"vorbis",6)){
 	/* not a vorbis header */
 	return(-1);
       }
-      switch(_oggpack_read(&opb,8)){
-      case 0x80:
+      switch(packtype){
+      case 0x01: /* least significant *bit* is read first */
 	if(!op->b_o_s){
 	  /* Not the initial packet */
 	  return(-1);
@@ -289,7 +290,7 @@ int vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,ogg_packet *op)
 
 	return(_vorbis_unpack_info(vi,&opb));
 
-      case 0x81:
+      case 0x03: /* least significant *bit* is read first */
 	if(vi->rate==0){
 	  /* um... we didn't get the initial header */
 	  return(-1);
@@ -297,7 +298,7 @@ int vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,ogg_packet *op)
 
 	return(_vorbis_unpack_comment(vc,&opb));
 
-      case 0x82:
+      case 0x05: /* least significant *bit* is read first */
 	if(vi->rate==0 || vc->vendor==NULL){
 	  /* um... we didn;t get the initial header or comments yet */
 	  return(-1);
@@ -319,8 +320,8 @@ int vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,ogg_packet *op)
 
 static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
   /* preamble */  
+  _oggpack_write(opb,0x01,8);
   _v_writestring(opb,"vorbis");
-  _oggpack_write(opb,0x80,8);
 
   /* basic information about the stream */
   _oggpack_write(opb,0x00,32);
@@ -342,8 +343,8 @@ static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
   char temp[]="Xiphophorus libVorbis I 20000121";
 
   /* preamble */  
+  _oggpack_write(opb,0x03,8);
   _v_writestring(opb,"vorbis");
-  _oggpack_write(opb,0x81,8);
 
   /* vendor */
   _oggpack_write(opb,strlen(temp),32);
@@ -370,8 +371,8 @@ static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
  
 static int _vorbis_pack_books(oggpack_buffer *opb,vorbis_info *vi){
   int i;
+  _oggpack_write(opb,0x05,8);
   _v_writestring(opb,"vorbis");
-  _oggpack_write(opb,0x82,8);
 
   /* books */
   _oggpack_write(opb,vi->books-1,8);

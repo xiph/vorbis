@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.26 2000/02/23 09:24:23 xiphmont Exp $
+ last mod: $Id: block.c,v 1.27 2000/02/23 11:22:43 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -268,12 +268,14 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
   if(v){
     vorbis_info *vi=v->vi;
 
-    for(i=0;i<VI_WINDOWB;i++){
-      if(v->window[0][0][0][i])free(v->window[0][0][0][i]);
-      for(j=0;j<2;j++)
-	for(k=0;k<2;k++)
-	  if(v->window[1][j][k][i])free(v->window[1][j][k][i]);
-    }
+    if(v->window[0][0][0])
+      for(i=0;i<VI_WINDOWB;i++){
+	if(v->window[0][0][0][i])free(v->window[0][0][0][i]);
+	for(j=0;j<2;j++)
+	  for(k=0;k<2;k++)
+	    if(v->window[1][j][k][i])free(v->window[1][j][k][i]);
+      }
+ 
     if(v->pcm){
       for(i=0;i<vi->channels;i++)
 	if(v->pcm[i])free(v->pcm[i]);
@@ -283,25 +285,30 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     if(v->multipliers)free(v->multipliers);
 
     _ve_envelope_clear(&v->ve);
-    mdct_clear(v->transform[0][0]);
-    mdct_clear(v->transform[1][0]);
-    free(v->transform[0][0]);
-    free(v->transform[1][0]);
-
-    free(v->transform[0]);
-    free(v->transform[1]);
+    if(v->transform[0]){
+      mdct_clear(v->transform[0][0]);
+      free(v->transform[0][0]);
+      free(v->transform[0]);
+    }
+    if(v->transform[1]){
+      mdct_clear(v->transform[1][0]);
+      free(v->transform[1][0]);
+      free(v->transform[1]);
+    }
 
     /* free mode lookups; these are actually vorbis_look_mapping structs */
-    for(i=0;i<vi->modes;i++){
-      int mapnum=vi->mode_param[i]->mapping;
-      int maptype=vi->map_type[mapnum];
-      _mapping_P[maptype]->free_look(v->mode[i]);
+    if(vi){
+      for(i=0;i<vi->modes;i++){
+	int mapnum=vi->mode_param[i]->mapping;
+	int maptype=vi->map_type[mapnum];
+	_mapping_P[maptype]->free_look(v->mode[i]);
+      }
+      /* free codebooks */
+      for(i=0;i<vi->books;i++)
+	vorbis_book_clear(v->fullbooks+i);
     }
-    if(v->mode)free(v->mode);
-    
-    /* free codebooks */
-    for(i=0;i<vi->books;i++)
-      vorbis_book_clear(v->fullbooks+i);
+
+    if(v->mode)free(v->mode);    
     if(v->fullbooks)free(v->fullbooks);
 
     /* free header, header1, header2 */

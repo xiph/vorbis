@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.14 2000/01/28 09:05:18 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.15 2000/02/23 11:22:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -261,6 +261,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
   int i,ret;
   
   vf->vi=calloc(vf->links,sizeof(vorbis_info));
+  vf->vc=calloc(vf->links,sizeof(vorbis_info));
   vf->dataoffsets=malloc(vf->links*sizeof(long));
   vf->pcmlengths=malloc(vf->links*sizeof(int64_t));
   vf->serialnos=malloc(vf->links*sizeof(long));
