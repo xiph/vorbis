@@ -12,11 +12,11 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.13.2.1 2001/01/04 04:05:08 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.13.2.2 2001/01/04 05:28:13 xiphmont Exp $
 
-  The LSP generation code is taken (with minimal modification) from
-  "On the Computation of the LSP Frequencies" by Joseph Rothweiler
-  <rothwlr@altavista.net>, available at:
+  The LSP generation code is taken (with minimal modification and a
+  few bugfixes) from "On the Computation of the LSP Frequencies" by
+  Joseph Rothweiler <rothwlr@altavista.net>, available at:
   
   http://www2.xtdl.com/~rothwlr/lsfpaper/lsfpage.html 
 
@@ -52,8 +52,8 @@
    ARM family. */
 
 /* undefine both for the 'old' but more precise implementation */
-#undef   FLOAT_LOOKUP
-#undef   INT_LOOKUP
+#define   FLOAT_LOOKUP
+#undef    INT_LOOKUP
 
 #ifdef FLOAT_LOOKUP
 #include "lookup.c" /* catch this in the build system; we #include for
@@ -81,12 +81,24 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
     int c=m>>1;
 
     do{
-      p*=ftmp[0]-w;
-      q*=ftmp[1]-w;
+      q*=ftmp[0]-w;
+      p*=ftmp[1]-w;
       ftmp+=2;
     }while(--c);
 
-    q=frexp(p*p*(1.f+w)+q*q*(1.f-w),&qexp);
+    if(m&1){
+      /* odd order filter; slightly assymetric */
+      /* the last coefficient */
+      q*=ftmp[0]-w;
+      q*=q;
+      p*=p*(1.f-w*w);
+    }else{
+      /* even order filter; still symmetric */
+      q*=q*(1.f+w);
+      p*=p*(1.f-w);
+    }
+
+    q=frexp(p+q,&qexp);
     q=vorbis_fromdBlook(amp*             
 			vorbis_invsqlook(q)*
 			vorbis_invsq2explook(qexp+m)- 
@@ -144,37 +156,68 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
     int qexp=0,shift;
     long wi=vorbis_coslook_i(k*65536/ln);
 
-    pi*=labs(ilsp[0]-wi);
-    qi*=labs(ilsp[1]-wi);
+    qi*=labs(ilsp[0]-wi);
+    pi*=labs(ilsp[1]-wi);
 
-    for(j=2;j<m;j+=2){
+    for(j=3;j<m;j+=2){
       if(!(shift=MLOOP_1[(pi|qi)>>25]))
 	if(!(shift=MLOOP_2[(pi|qi)>>19]))
 	  shift=MLOOP_3[(pi|qi)>>16];
+      qi=(qi>>shift)*labs(ilsp[j-1]-wi);
       pi=(pi>>shift)*labs(ilsp[j]-wi);
-      qi=(qi>>shift)*labs(ilsp[j+1]-wi);
       qexp+=shift;
     }
     if(!(shift=MLOOP_1[(pi|qi)>>25]))
       if(!(shift=MLOOP_2[(pi|qi)>>19]))
 	shift=MLOOP_3[(pi|qi)>>16];
-    pi>>=shift;
-    qi>>=shift;
-    qexp+=shift-7*m;
 
     /* pi,qi normalized collectively, both tracked using qexp */
 
-    /* p*=p(1-w), q*=q(1+w), let normalization drift because it isn't
-       worth tracking step by step */
+    if(m&1){
+      /* odd order filter; slightly assymetric */
+      /* the last coefficient */
+      qi=(qi>>shift)*labs(ilsp[j-1]-wi);
+      pi=(pi>>shift)<<14;
+      qexp+=shift;
 
-    pi=((pi*pi)>>16);
-    qi=((qi*qi)>>16);
-    qexp=qexp*2+m;
+      if(!(shift=MLOOP_1[(pi|qi)>>25]))
+	if(!(shift=MLOOP_2[(pi|qi)>>19]))
+	  shift=MLOOP_3[(pi|qi)>>16];
+      
+      pi>>=shift;
+      qi>>=shift;
+      qexp+=shift-14*((m+1)>>1);
 
-    qi*=(1<<14)-wi;
-    pi*=(1<<14)+wi;
+      pi=((pi*pi)>>16);
+      qi=((qi*qi)>>16);
+      qexp=qexp*2+m;
+
+      pi*=(1<<14)-((wi*wi)>>14);
+      qi+=pi>>14;
+
+      //q*=ftmp[0]-w;
+      //q*=q;
+      //p*=p*(1.f-w*w);
+    }else{
+      /* even order filter; still symmetric */
+
+      /* p*=p(1-w), q*=q(1+w), let normalization drift because it isn't
+	 worth tracking step by step */
+      
+      pi>>=shift;
+      qi>>=shift;
+      qexp+=shift-7*m;
+
+      pi=((pi*pi)>>16);
+      qi=((qi*qi)>>16);
+      qexp=qexp*2+m;
+      
+      pi*=(1<<14)-wi;
+      qi*=(1<<14)+wi;
+      qi=(qi+pi)>>14;
+      
+    }
     
-    qi=(qi+pi)>>14;
 
     /* we've let the normalization drift because it wasn't important;
        however, for the lookup, things must be normalized again.  We
@@ -203,15 +246,12 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
    figure out what the hell this code does, or wants the other
    fraction of a dB precision */
 
-#include <stdio.h>
 /* side effect: changes *lsp to cosines of lsp */
 void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 			    float amp,float ampoffset){
   int i;
   float wdel=M_PI/ln;
   for(i=0;i<m;i++)lsp[i]=2.f*cos(lsp[i]);
-
-  fprintf(stderr,"m=%d ",m);
 
   i=0;
   while(i<n){
