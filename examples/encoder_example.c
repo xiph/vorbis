@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.27.2.1 2001/10/09 04:34:44 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.27.2.2 2001/10/11 20:34:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -86,6 +86,7 @@ int main(){
     {
       founddata = 1;
       fread(readbuffer,1,6,stdin);
+      break;
     }
   }
 

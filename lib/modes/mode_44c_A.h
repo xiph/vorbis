@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_A.h,v 1.4.2.2 2001/10/11 15:41:55 xiphmont Exp $
+ last mod: $Id: mode_44c_A.h,v 1.4.2.3 2001/10/11 20:34:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -77,7 +77,7 @@ static vorbis_info_psy_global _psy_set_44c_AG={
   8,   /* lines per eighth octave */
   
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
-  256, {26.f,26.f,26.f,30.f}, {-26.f,-26.f,-26.f,-30.f}, -90.f,
+  256, {26.f,26.f,26.f,30.f}, {-30.f,-30.f,-30.f,-34.f}, -90.f,
   -6.f, 
   
   0,
@@ -130,7 +130,7 @@ static vorbis_info_psy _psy_set_44c_A0={
   2, 2, 15,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-30,-30,-30,-30,-26,-22,-20,-14,-10,-2,  -3,  -3,  0,  0,  0,  0,  2},
+  {-30,-30,-30,-30,-26,-22,-20,-14,-10,-2,  -3,  -3,  0,  0,  0,  1,  4},
   _psy_compand_44c_A,
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
@@ -155,7 +155,7 @@ static vorbis_info_psy _psy_set_44c_AT={
       4,4,100,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-30,-30,-30,-30,-26,-20,-20,-10, -6,  -2,  -5,  -5,  0,   0,  0,  0,  2},
+  {-30,-30,-30,-30,-26,-20,-20,-10, -6,  -2,  -3,  -3,  0,   0,  0,  0,  3},
   _psy_compand_44c_A,
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
@@ -172,7 +172,7 @@ static vorbis_info_psy _psy_set_44c_A={
   0.f,-26.f,-30.f,
   &_vp_tonemask_consbass_A,
   /* peakattp, curvelimitp */
-  0, 4, &_vp_peakatt_A,
+  1, 4, &_vp_peakatt_A,
 
   /*noisemaskp */
   1,  -10.f,     /* suppress any noise curve over maxspec+n */
@@ -180,7 +180,7 @@ static vorbis_info_psy _psy_set_44c_A={
       4,4,100,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-20,-20,-20,-20,-20,-20,-20,-10, -6, -2, -5, -5,  0,  0,  0,  0,  2},
+  {-20,-20,-20,-20,-20,-20,-20,-10, -6, -2, -3, -3,  0,  0,  0,  0,  3},
   _psy_compand_44c_A,
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
@@ -243,7 +243,7 @@ static vorbis_info_floor1 _floor_set_44c_A={
   60,30,400,
   20,8,1,18.,
   20,600,
-  928};
+  896};
 
 static vorbis_info_residue0 _residue_set_44c_A0={
   0,192, 16, 10,23,
@@ -263,7 +263,7 @@ static vorbis_info_residue0 _residue_set_44c_A0={
   {99,8,99,3,8,99,99,99,99,99}};
 
 static vorbis_info_residue0 _residue_set_44c_A={
-  0,1856, 32,10,24,
+  0,1792, 32,10,24,
   {64,4,40,
    2,2,20,
    18,22,22,7},
@@ -365,13 +365,11 @@ codec_setup_info info_44c_A={
   4.0,
   1.,4.,
 
-  0,
-  100000,
+  0,0,
 
-  0,
-  0000,
+  0,0,
 
-  120000,0,
+  0,0,
 
   {4,7},
   2,
