@@ -1,0 +1,6 @@
+examples/Makefile
+examples/chaining_example.c
+examples/decoder_example.c
+examples/encoder_example.c
+examples/seeking_test.c
+examples/vorbisfile_example.c
