@@ -51,13 +51,11 @@ make DESTDIR=$RPM_BUILD_ROOT install
 /usr/lib/libvorbisfile.so.*
 
 %files devel
-%doc doc/programming.html
-%doc doc/v-comment.html
-%doc doc/vorbis.html
-%doc doc/wait.png
-%doc doc/vorbisword2.png
-%doc doc/white-ogg.png
-%doc doc/white-xifish.png
+%doc doc/*.html
+%doc doc/*.txt
+%doc doc/*.png
+%doc doc/vorbisfile/*.html
+%doc doc/vorbisfile/*.css
 /usr/include/vorbis/codec.h
 /usr/include/vorbis/backends.h
 /usr/include/vorbis/codebook.h
