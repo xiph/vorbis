@@ -11,7 +11,7 @@ if BUILD_DOCS
 built_docs = Vorbis_I_spec.html Vorbis_I_spec.pdf
 else
 built_docs =
-endif !BUILD_DOCS
+endif
 
 doc_DATA = components.png \
 	draft-moffitt-vorbis-rtp-00.txt \
