@@ -1,0 +1,64 @@
+huffbuild line0_class1.vqd 0-64
+huffbuild line0_class2.vqd 0-64
+
+huffbuild line0_0sub0.vqd 0-64
+huffbuild line0_1sub1.vqd 1-9
+huffbuild line0_1sub2.vqd 9-25
+huffbuild line0_1sub3.vqd 25-64
+huffbuild line0_2sub1.vqd 1-9
+huffbuild line0_2sub2.vqd 9-25
+huffbuild line0_2sub3.vqd 25-64
+
+huffbuild line1_class0.vqd 0-8
+huffbuild line1_class1.vqd 0-16
+huffbuild line1_class2.vqd 0-64
+huffbuild line1_class3.vqd 0-64
+
+huffbuild line1_0sub0.vqd 0-32
+huffbuild line1_0sub1.vqd 32-128
+
+huffbuild line1_1sub0.vqd 0-32
+huffbuild line1_1sub1.vqd 32-128
+
+huffbuild line1_2sub1.vqd 1-18
+huffbuild line1_2sub2.vqd 18-50
+huffbuild line1_2sub3.vqd 50-128
+huffbuild line1_3sub1.vqd 1-18
+huffbuild line1_3sub2.vqd 18-50
+huffbuild line1_3sub3.vqd 50-128
+
+
+
+residuesplit residue_0#0.vqd 0,224,16 res0_128_128 ,.7,    7,1.5,8 ,1.5,8 ,1.5 11,2.5 ,2.5 ,4.5 ,16.5 ,84.5 
+
+residuesplit residue_1#0.vqd 0,1792,32 res0_128_1024 ,.7, 10,1.5,32 ,1.5,32 ,1.5 20,2.5 ,2.5 ,4.5 ,16.5 ,84.5
+
+GO
+
+>res0_128_128 noninterleaved
+haux res0_128_128aux.vqd 0,14,2
+
+>res0_128_1024 noninterleaved
+haux res0_128_1024aux.vqd 0,56,2
+
+:_1 res0_128_1024_1.vqd, 4, nonseq cull, 0 +- 1
+:_2 res0_128_1024_2.vqd, 4, nonseq cull, 0 +- 1
+:_3 res0_128_1024_3.vqd, 4, nonseq cull, 0 +- 1
+:_4 res0_128_1024_4.vqd, 4, nonseq cull, 0 +- 1 2
+:_5 res0_128_1024_5.vqd, 4, nonseq cull, 0 +- 1 2
+:_6 res0_128_1024_6.vqd, 2, nonseq cull, 0 +- 1 2 3 4
+:_7 res0_128_1024_7.vqd, 2, nonseq cull, 0 +- 3 6 9 12 15
++_7a, 4, nonseq cull, 0 +- 1 
+
+:_8 res0_128_1024_8.vqd, 2, nonseq cull, 0 +- 13 26 39 52 65 78 
++_8a, 2, nonseq cull, 0 +- 1 2 3 4 5 6 
+
+:_9 res0_128_1024_9.vqd, 2, nonseq, 0 +- 169 338
++_9a, 2, nonseq, 0 +- 13 26 39 52 65 78 
++_9b, 2, nonseq, 0 +- 1 2 3 4 5 6
+
+
+
+
+
+

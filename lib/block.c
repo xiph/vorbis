@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.48 2001/05/27 06:43:59 xiphmont Exp $
+ last mod: $Id: block.c,v 1.49 2001/08/13 01:36:56 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -174,7 +174,6 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
   v->vi=vi;
   b->modebits=ilog2(ci->modes);
-  b->ampmax=-9999;
 
   b->transform[0]=_ogg_calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
   b->transform[1]=_ogg_calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
@@ -263,11 +262,11 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   _vds_shared_init(v,vi,1);
   b=v->backend_state;
+  b->psy_g_look=_vp_global_look(vi);
 
   /* Initialize the envelope state storage */
   b->ve=_ogg_calloc(1,sizeof(envelope_lookup));
   _ve_envelope_init(b->ve,vi);
-
   return(0);
 }
 
@@ -307,6 +306,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	_ogg_free(b->transform[1][0]);
 	_ogg_free(b->transform[1]);
       }
+      if(b->psy_g_look)_vp_global_free(b->psy_g_look);
       
     }
     
@@ -406,6 +406,7 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
 int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
+  /*backend_lookup_state *b=v->backend_state;*/
 
   if(vals<=0){
     int order=32;
@@ -472,6 +473,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
   backend_lookup_state *b=v->backend_state;
+  vorbis_look_psy_global *g=b->psy_g_look;
+  vorbis_info_psy_global *gi=ci->psy_g_param;
   long beginW=v->centerW-ci->blocksizes[v->W]/2,centerNext;
 
   /* check to see if we're started... */
@@ -542,9 +545,10 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
 
     /* this tracks 'strongest peak' for later psychoacoustics */
-    if(vbi->ampmax>b->ampmax)b->ampmax=vbi->ampmax;
-    b->ampmax=_vp_ampmax_decay(b->ampmax,v);
-    vbi->ampmax=b->ampmax;
+    /* moved to the global psy state; clean this mess up */
+    if(vbi->ampmax>g->ampmax)g->ampmax=vbi->ampmax;
+    g->ampmax=_vp_ampmax_decay(g->ampmax,v);
+    vbi->ampmax=g->ampmax;
 
     vb->pcm=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
     vbi->pcmdelay=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
@@ -576,7 +580,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* advance storage vectors and clean up */
   {
-    int new_centerNext=ci->blocksizes[1]/2+ci->delaycache;
+    int new_centerNext=ci->blocksizes[1]/2+gi->delaycache;
     int movementW=centerNext-new_centerNext;
 
     if(movementW>0){
@@ -614,7 +618,6 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 }
 
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
-  codec_setup_info *ci=vi->codec_setup;
   _vds_shared_init(v,vi,0);
 
   v->pcm_returned=-1;

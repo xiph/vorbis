@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.44 2001/06/18 09:07:31 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.45 2001/08/13 01:36:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,6 +42,8 @@ typedef struct {
   lpc_lookup lpclook;
   float *lsp_look;
 
+  long bits;
+  long frames;
 } vorbis_look_floor0;
 
 /* infrastructure for finding fit */
@@ -86,6 +88,10 @@ static void floor0_free_info(vorbis_info_floor *i){
 static void floor0_free_look(vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   if(i){
+
+    /*fprintf(stderr,"floor 0 bit usage %f\n",
+      (float)look->bits/look->frames);*/
+
     if(look->linearmap)_ogg_free(look->linearmap);
     if(look->lsp_look)_ogg_free(look->lsp_look);
     lpc_clear(&look->lpclook);
@@ -252,9 +258,9 @@ float _curve_to_lpc(float *curve,float *lpc,
 }
 
 static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
-			  const float *mdct, const float *logmdct,   /* in */
+			  float *mdct, const float *logmdct,   /* in */
 			  const float *logmask, const float *logmax, /* in */
-			  float *residue, float *codedflr){          /* out */
+			  float *codedflr){          /* out */
   long j;
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)in;
   vorbis_info_floor0 *info=look->vi;
@@ -313,6 +319,8 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
   }
 
   oggpack_write(&vb->opb,val,info->ampbits);
+  look->bits+=info->ampbits+1;
+  look->frames++;
 
   if(val){
     float *lspwork=alloca(look->m*sizeof(float));
@@ -342,7 +350,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
 
     b=be->fullbooks+info->books[booknum];
     oggpack_write(&vb->opb,booknum,_ilog(info->numbooks));
-
+    look->bits+=_ilog(info->numbooks);
 
 #ifdef TRAIN_LSP
     {
@@ -366,7 +374,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
 
     for(j=0;j<look->m;j+=b->dim){
       int entry=_f0_fit(b,codedflr,lspwork,j);
-      bits+=vorbis_book_encode(b,entry,&vb->opb);
+      look->bits+=vorbis_book_encode(b,entry,&vb->opb);
 
 #ifdef TRAIN_LSP
       fprintf(ef,"%d,\n",entry);
@@ -389,10 +397,6 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
     _analysis_output("barklsp",seq-1,codedflr,look->n,1,1);
     _analysis_output("lsp3",seq-1,codedflr,look->n,0,1);
 
-    /* generate residue output */
-    for(j=0;j<look->n;j++)
-      residue[j]=mdct[j]/codedflr[j];
-    
     return(val);
   }
 
@@ -401,7 +405,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
 #endif
 
   memset(codedflr,0,sizeof(float)*look->n);
-  memset(residue,0,sizeof(float)*look->n);
+  memset(mdct,0,sizeof(float)*look->n);
   return(val);
 }
 

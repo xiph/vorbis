@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.9 2001/06/15 23:31:00 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.10 2001/08/13 01:36:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,9 +61,9 @@ typedef struct{
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
+		     float *, const float *, /* in */
 		     const float *, const float *, /* in */
-		     const float *, const float *, /* in */
-		     float *, float *);            /* out */
+		     float *);                     /* out */
   void *(*inverse1)  (struct vorbis_block *,vorbis_look_floor *);
   int   (*inverse2)  (struct vorbis_block *,vorbis_look_floor *,
 		     void *buffer,float *);
@@ -114,6 +114,8 @@ typedef struct{
   int   unusedminsize;
   int   unusedmin_n;
 
+  int   n;
+
 } vorbis_info_floor1;
 
 /* Residue backend generic *****************************************/
@@ -125,8 +127,10 @@ typedef struct{
   vorbis_info_residue *(*copy_info)(vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
-  int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
+  long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);
+  int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
+			float **,float **,int *,int,int,long **);
   int  (*inverse)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);
 } vorbis_func_residue;
@@ -148,7 +152,7 @@ typedef struct vorbis_info_residue0{
   float  ampmax[64];       /* book amp threshholds*/
   int    subgrp[64];       /* book heuristic subgroup size */
   int    blimit[64];       /* subgroup position limits */
-
+  int    passlimit[32];     /* iteration limit per couple/quant pass */
 } vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/
@@ -172,7 +176,9 @@ typedef struct vorbis_info_mapping0{
   int   timesubmap[16];    /* [mux] */
   int   floorsubmap[16];   /* [mux] submap to floors */
   int   residuesubmap[16]; /* [mux] submap to residue */
-  int   psysubmap[16];     /* [mux]; encode only */
+
+  int   psy[2]; /* by blocktype; impulse/padding for short,
+                   transition/normal for long */
 
   int   coupling_steps;
   int   coupling_mag[256];

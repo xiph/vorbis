@@ -11,13 +11,14 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.22 2001/05/27 06:44:01 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.23 2001/08/13 01:36:57 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdio.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 #include "registry.h"
 #include "misc.h"
 #include "os.h"
@@ -75,7 +76,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
 long vorbis_packet_blocksize(vorbis_info *vi,ogg_packet *op){
   codec_setup_info     *ci=vi->codec_setup;
   oggpack_buffer       opb;
-  int                  type,mode,i;
+  int                  mode;
  
   oggpack_readinit(&opb,op->packet,op->bytes);
 

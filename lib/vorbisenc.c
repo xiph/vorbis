@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.7 2001/05/27 06:44:01 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.8 2001/08/13 01:36:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -83,11 +83,21 @@ static void codec_setup_partialcopy(codec_setup_info *ci,
 
 }
 
-/* right now, this just encapsultes the old modes behind the interface
-   we'll be using from here on out.  After beta 3, the new bitrate
-   tracking/modding/tuning engine will lurk inside */
 /* encoders will need to use vorbis_info_init beforehand and call
    vorbis_info clear when all done */
+
+int vorbis_encode_init_vbr(vorbis_info *vi,
+			   long channels,
+			   long rate,
+			   
+			   float base_quality /* 0. to 1. */
+			   ){
+
+
+
+
+}
+
 
 int vorbis_encode_init(vorbis_info *vi,
 		       long channels,
@@ -114,8 +124,12 @@ int vorbis_encode_init(vorbis_info *vi,
 
   /* copy a mode into our allocated storage */
   bpch=nominal_bitrate/channels;
+
+  mode=&info_44c_Z;
+
+#if 0
   if(bpch<60000){
-    /* mode A */
+    /* mode AA */
     mode=&info_AA;
   }else if(bpch<75000){
     /* mode A */
@@ -133,6 +147,7 @@ int vorbis_encode_init(vorbis_info *vi,
     /* mode E */
     mode=&info_E;
   }
+#endif
 
   /* now we have to deepcopy */
   codec_setup_partialcopy(ci,mode);

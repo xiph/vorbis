@@ -13,7 +13,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.26 2001/06/04 05:50:10 xiphmont Exp $
+ last mod: $Id: os.h,v 1.27 2001/08/13 01:36:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -50,9 +50,6 @@
 #endif
 #ifdef HAVE_EXPF
 #  define exp expf
-#endif
-#ifdef HAVE_POWF
-#  define pow powf
 #endif
 #ifdef HAVE_ACOSF
 #  define acos acosf

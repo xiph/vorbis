@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.10 2001/06/15 23:59:47 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.11 2001/08/13 01:36:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -43,6 +43,9 @@ typedef struct {
   int quant_q;
   vorbis_info_floor1 *vi;
 
+  long phrasebits;
+  long postbits;
+  long frames;
 } vorbis_look_floor1;
 
 typedef struct lsfit_acc{
@@ -80,6 +83,11 @@ static void floor1_free_info(vorbis_info_floor *i){
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
   if(i){
+    /*fprintf(stderr,"floor 1 bit usage %f:%f (%f total)\n",
+	    (float)look->phrasebits/look->frames,
+	    (float)look->postbits/look->frames,
+	    (float)(look->postbits+look->phrasebits)/look->frames);*/
+
     memset(look,0,sizeof(vorbis_look_floor1));
     free(i);
   }
@@ -613,14 +621,14 @@ static int post_Y(int *A,int *B,int pos){
 }
 
 static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
-			  const float *mdct, const float *logmdct,   /* in */
+			  float *mdct, const float *logmdct,   /* in */
 			  const float *logmask, const float *logmax, /* in */
-			  float *residue, float *codedflr){          /* out */
+			  float *codedflr){          /* out */
   static int seq=0;
   long i,j,k,l;
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
   vorbis_info_floor1 *info=look->vi;
-  long n=look->n;
+  long n=info->n;
   long posts=look->posts;
   long nonzero=0;
   lsfit_acc fits[VIF_POSIT+1];
@@ -633,8 +641,14 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
   int memo[VIF_POSIT+2];
   codec_setup_info *ci=vb->vd->vi->codec_setup;
   static_codebook **sbooks=ci->book_param;
-  codebook *books=((backend_lookup_state *)(vb->vd->backend_state))->
-    fullbooks;   
+  codebook *books=NULL;
+  int writeflag=0;
+
+  if(vb->vd->backend_state){
+    books=((backend_lookup_state *)(vb->vd->backend_state))->
+      fullbooks;   
+    writeflag=1;
+  }
 
   memset(fit_flag,0,sizeof(fit_flag));
   for(i=0;i<posts;i++)loneighbor[i]=0; /* 0 for the implicit 0 post */
@@ -876,94 +890,93 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 
     /* we have everything we need. pack it out */
     /* mark nontrivial floor */
-    oggpack_write(&vb->opb,1,1);
-
-    /* beginning/end post */
-    oggpack_write(&vb->opb,fit_valueA[0],ilog(look->quant_q-1));
-    oggpack_write(&vb->opb,fit_valueA[1],ilog(look->quant_q-1));
-
-#ifdef TRAIN_FLOOR1
-    {
-      FILE *of;
-      char buffer[80];
-      sprintf(buffer,"line%d_full.vqd",vb->mode);
-      of=fopen(buffer,"a");
-      for(j=2;j<posts;j++)
-	fprintf(of,"%d\n",fit_valueB[j]);
-      fclose(of);
-    }
-#endif
-
-    
-    /* partition by partition */
-    for(i=0,j=2;i<info->partitions;i++){
-      int class=info->partitionclass[i];
-      int cdim=info->class_dim[class];
-      int csubbits=info->class_subs[class];
-      int csub=1<<csubbits;
-      int bookas[8]={0,0,0,0,0,0,0,0};
-      int cval=0;
-      int cshift=0;
-
-      /* generate the partition's first stage cascade value */
-      if(csubbits){
-	int maxval[8];
-	for(k=0;k<csub;k++){
-	  int booknum=info->class_subbook[class][k];
-	  if(booknum<0){
-	    maxval[k]=1;
-	  }else{
-	    maxval[k]=sbooks[info->class_subbook[class][k]]->entries;
-	  }
-	}
-	for(k=0;k<cdim;k++){
-	  for(l=0;l<csub;l++){
-	    int val=fit_valueB[j+k];
-	    if(val<maxval[l]){
-	      bookas[k]=l;
-	      break;
+    if(writeflag){
+      oggpack_write(&vb->opb,1,1);
+      
+      /* beginning/end post */
+      look->frames++;
+      look->postbits+=ilog(look->quant_q-1)*2;
+      oggpack_write(&vb->opb,fit_valueA[0],ilog(look->quant_q-1));
+      oggpack_write(&vb->opb,fit_valueA[1],ilog(look->quant_q-1));
+      
+      
+      /* partition by partition */
+      for(i=0,j=2;i<info->partitions;i++){
+	int class=info->partitionclass[i];
+	int cdim=info->class_dim[class];
+	int csubbits=info->class_subs[class];
+	int csub=1<<csubbits;
+	int bookas[8]={0,0,0,0,0,0,0,0};
+	int cval=0;
+	int cshift=0;
+	
+	/* generate the partition's first stage cascade value */
+	if(csubbits){
+	  int maxval[8];
+	  for(k=0;k<csub;k++){
+	    int booknum=info->class_subbook[class][k];
+	    if(booknum<0){
+	      maxval[k]=1;
+	    }else{
+	      maxval[k]=sbooks[info->class_subbook[class][k]]->entries;
 	    }
 	  }
-	  cval|= bookas[k]<<cshift;
-	  cshift+=csubbits;
-	}
-	/* write it */
-	vorbis_book_encode(books+info->class_book[class],cval,&vb->opb);
-
-#ifdef TRAIN_FLOOR1
-	{
-	  FILE *of;
-	  char buffer[80];
-	  sprintf(buffer,"line%d_class%d.vqd",vb->mode,class);
-	  of=fopen(buffer,"a");
-	  fprintf(of,"%d\n",cval);
-	  fclose(of);
-	}
-#endif
-      }
-      
-      /* write post values */
-      for(k=0;k<cdim;k++){
-	int book=info->class_subbook[class][bookas[k]];
-	if(book>=0){
-	  vorbis_book_encode(books+book,
-			     fit_valueB[j+k],&vb->opb);
-
+	  for(k=0;k<cdim;k++){
+	    for(l=0;l<csub;l++){
+	      int val=fit_valueB[j+k];
+	      if(val<maxval[l]){
+		bookas[k]=l;
+		break;
+	      }
+	    }
+	    cval|= bookas[k]<<cshift;
+	    cshift+=csubbits;
+	  }
+	  /* write it */
+	  look->phrasebits+=
+	  vorbis_book_encode(books+info->class_book[class],cval,&vb->opb);
+	  
 #ifdef TRAIN_FLOOR1
 	  {
 	    FILE *of;
 	    char buffer[80];
-	    sprintf(buffer,"line%d_%dsub%d.vqd",vb->mode,class,bookas[k]);
+	    sprintf(buffer,"line_%dx%d_class%d.vqd",
+		    vb->pcmend/2,posts-2,class);
 	    of=fopen(buffer,"a");
-	    fprintf(of,"%d\n",fit_valueB[j+k]);
+	    fprintf(of,"%d\n",cval);
 	    fclose(of);
 	  }
 #endif
 	}
+	
+	/* write post values */
+	for(k=0;k<cdim;k++){
+	  int book=info->class_subbook[class][bookas[k]];
+	  if(book>=0){
+	    /* hack to allow training with 'bad' books */
+	    if(fit_valueB[j+k]<(books+book)->entries)
+	      look->postbits+=vorbis_book_encode(books+book,
+						 fit_valueB[j+k],&vb->opb);
+	    /*else
+	      fprintf(stderr,"+!");*/
+
+#ifdef TRAIN_FLOOR1
+	    {
+	      FILE *of;
+	      char buffer[80];
+	      sprintf(buffer,"line_%dx%d_%dsub%d.vqd",
+		      vb->pcmend/2,posts-2,class,bookas[k]);
+	      of=fopen(buffer,"a");
+	      fprintf(of,"%d\n",fit_valueB[j+k]);
+	      fclose(of);
+	    }
+#endif
+	  }
+	}
+	j+=cdim;
       }
-      j+=cdim;
     }
-    
+
     {
       /* generate quantized floor equivalent to what we'd unpack in decode */
       int hx;
@@ -982,27 +995,26 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	  ly=hy;
 	}
       }
-      for(j=hx;j<look->n;j++)codedflr[j]=codedflr[j-1]; /* be certain */
+      for(j=lx;j<vb->pcmend/2;j++)codedflr[j]=codedflr[j-1]; /* be certain */
 
-      /* use it to create residue vector.  Eliminate residue elements
+      /* use it to create residue vector.  Eliminate mdct elements
          that were below the error training attenuation relative to
          the original mask.  This avoids portions of the floor fit
          that were considered 'unused' in fitting from being used in
          coding residue if the unfit values are significantly below
          the original input mask */
+
       for(j=0;j<n;j++)
 	if(logmdct[j]+info->twofitatten<logmask[j])
-	  residue[j]=0.f;
-	else
-	  residue[j]=mdct[j]/codedflr[j];
-      for(j=n;j<look->n;j++)residue[j]=0.f;
+	  mdct[j]=0.f;
+      for(j=n;j<vb->pcmend/2;j++)mdct[j]=0.f;
 
     }    
 
   }else{
-    oggpack_write(&vb->opb,0,1);
+    if(writeflag)oggpack_write(&vb->opb,0,1);
     memset(codedflr,0,n*sizeof(float));
-    memset(residue,0,n*sizeof(float));
+    memset(mdct,0,n*sizeof(float));
   }
   seq++;
   return(nonzero);

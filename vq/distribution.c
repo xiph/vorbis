@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.6 2001/06/15 21:15:43 xiphmont Exp $
+ last mod: $Id: distribution.c,v 1.7 2001/08/13 01:37:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -107,14 +107,14 @@ int main(int argc,char *argv[]){
 	for(j=0;j<b->entries;j++){
 	  if(c->lengthlist[j]){
 	    int indexdiv=1;
-	    printf("%4ld: ",j);
+	    printf("%4d: ",j);
 	    for(k=0;k<b->dim;k++){	
 	      int index= (j/indexdiv)%bins;
 	      printf("%+3.1f,", c->quantlist[index]*_float32_unpack(c->q_delta)+
 		     _float32_unpack(c->q_min));
 	      indexdiv*=bins;
 	    }
-	    printf("\t|",(1<<(base-c->lengthlist[j])));
+	    printf("\t|");
 	    for(k=0;k<base-c->lengthlist[j];k++)printf("*");
 	    printf("\n");
 	  }
@@ -194,7 +194,7 @@ int main(int argc,char *argv[]){
     printf("Minimum scalar value: %f\n",min);
     printf("Maximum scalar value: %f\n",max);
     
-    printf("\n counting hits into %d bins...\n",bins+1);
+    printf("\n counting hits into %ld bins...\n",bins+1);
     countarray=calloc(bins+1,sizeof(long));
     
     rewind(in);

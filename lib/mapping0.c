@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.33 2001/06/17 22:25:50 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.34 2001/08/13 01:36:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,6 +37,8 @@
    blocksize is set by the mode, and low backend lookups may require
    parameters from other areas of the mode/mapping */
 
+extern int analysis_noisy;
+
 typedef struct {
   drft_lookup fft_look;
   vorbis_info_mode *mode;
@@ -46,7 +48,7 @@ typedef struct {
   vorbis_look_floor **floor_look;
 
   vorbis_look_residue **residue_look;
-  vorbis_look_psy *psy_look;
+  vorbis_look_psy *psy_look[2];
 
   vorbis_func_time **time_func;
   vorbis_func_floor **floor_func;
@@ -81,16 +83,21 @@ static void mapping0_free_look(vorbis_look_mapping *look){
       l->time_func[i]->free_look(l->time_look[i]);
       l->floor_func[i]->free_look(l->floor_look[i]);
       l->residue_func[i]->free_look(l->residue_look[i]);
-      if(l->psy_look)_vp_psy_clear(l->psy_look+i);
     }
-
+    if(l->psy_look[1] && l->psy_look[1]!=l->psy_look[0]){
+      _vp_psy_clear(l->psy_look[1]);
+      _ogg_free(l->psy_look[1]);
+    }
+    if(l->psy_look[0]){
+      _vp_psy_clear(l->psy_look[0]);
+      _ogg_free(l->psy_look[0]);
+    }
     _ogg_free(l->time_func);
     _ogg_free(l->floor_func);
     _ogg_free(l->residue_func);
     _ogg_free(l->time_look);
     _ogg_free(l->floor_look);
     _ogg_free(l->residue_look);
-    if(l->psy_look)_ogg_free(l->psy_look);
     memset(l,0,sizeof(vorbis_look_mapping0));
     _ogg_free(l);
   }
@@ -109,7 +116,6 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
   look->floor_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_floor *));
 
   look->residue_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_residue *));
-  if(ci->psys)look->psy_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_psy));
 
   look->time_func=_ogg_calloc(info->submaps,sizeof(vorbis_func_time *));
   look->floor_func=_ogg_calloc(info->submaps,sizeof(vorbis_func_floor *));
@@ -130,10 +136,30 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
     look->residue_look[i]=look->residue_func[i]->
       look(vd,vm,ci->residue_param[resnum]);
     
-    if(ci->psys && vd->analysisp){
-      int psynum=info->psysubmap[i];
-      _vp_psy_init(look->psy_look+i,ci->psy_param[psynum],
+  }
+  if(ci->psys && vd->analysisp){
+    if(info->psy[0] != info->psy[1]){
+
+      int psynum=info->psy[0];
+      look->psy_look[0]=_ogg_calloc(1,sizeof(vorbis_look_psy));      
+      _vp_psy_init(look->psy_look[0],ci->psy_param[psynum],
+		   ci->psy_g_param,
 		   ci->blocksizes[vm->blockflag]/2,vi->rate);
+
+      psynum=info->psy[1];
+      look->psy_look[1]=_ogg_calloc(1,sizeof(vorbis_look_psy));      
+      _vp_psy_init(look->psy_look[1],ci->psy_param[psynum],
+		   ci->psy_g_param,
+		   ci->blocksizes[vm->blockflag]/2,vi->rate);
+    }else{
+
+      int psynum=info->psy[0];
+      look->psy_look[0]=_ogg_calloc(1,sizeof(vorbis_look_psy));      
+      look->psy_look[1]=look->psy_look[0];
+      _vp_psy_init(look->psy_look[0],ci->psy_param[psynum],
+		   ci->psy_g_param,
+		   ci->blocksizes[vm->blockflag]/2,vi->rate);
+
     }
   }
 
@@ -259,6 +285,7 @@ static long seq=0;
 static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state      *vd=vb->vd;
   vorbis_info           *vi=vd->vi;
+  codec_setup_info      *ci=vi->codec_setup;
   backend_lookup_state  *b=vb->vd->backend_state;
   vorbis_look_mapping0  *look=(vorbis_look_mapping0 *)l;
   vorbis_info_mapping0  *info=look->map;
@@ -267,30 +294,49 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   int                    n=vb->pcmend;
   int i,j;
   float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
-
-  float **pcmbundle=alloca(sizeof(float *)*vi->channels);
-  int    *zerobundle=alloca(sizeof(int)*vi->channels);
-
-  int    *nonzero=alloca(sizeof(int)*vi->channels);
+  int   *nonzero=alloca(sizeof(int)*vi->channels);
 
   float *work=_vorbis_block_alloc(vb,n*sizeof(float));
-  float newmax=vbi->ampmax;
+
+  float global_ampmax=vbi->ampmax;
+  float *local_ampmax=alloca(sizeof(float)*vi->channels);
+  int blocktype;
+
+  /* we differentiate between short and long block types to help the
+     masking engine; the window shapes also matter.
+     impulse block (a short block in which an impulse occurs)
+     padding block (a short block that pads between a transitional 
+          long block and an impulse block, or vice versa)
+     transition block (the wqeird one; a long block with the transition 
+          window; affects bass/midrange response and that must be 
+	  accounted for in masking) 
+     long block (run of the mill long block)
+  */
+
+  if(vb->W){
+    if(!vb->lW || !vb->nW)
+      blocktype=BLOCKTYPE_TRANSITION;
+    else
+      blocktype=BLOCKTYPE_LONG;
+  }else{
+    /* right now we're missing the infrastructure to distingush the
+       two short types */
+    blocktype=BLOCKTYPE_IMPULSE;
+  }
 
   for(i=0;i<vi->channels;i++){
     float scale=4.f/n;
-    int submap=info->chmuxlist[i];
-    float ret;
 
     /* the following makes things clearer to *me* anyway */
     float *pcm     =vb->pcm[i]; 
-    float *mdct    =pcm;
-    float *logmdct =pcm+n/2;
-    float *res     =pcm;
-    float *codedflr=pcm+n/2;
     float *fft     =work;
-    float *logfft  =work;
+    float *logfft  =pcm+n/2;
+
+    /*float *res     =pcm;
+    float *mdct    =pcm;
+    float *codedflr=pcm+n/2;
     float *logmax  =work;
-    float *logmask =work+n/2;
+    float *logmask =work+n/2;*/
 
     /* window the PCM data */
     for(j=0;j<n;j++)
@@ -299,30 +345,52 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     /* transform the PCM data */
     /* only MDCT right now.... */
     mdct_forward(b->transform[vb->W][0],pcm,pcm);
-    for(j=0;j<n/2;j++)
-      logmdct[j]=todB(mdct+j);
     
     /* FFT yields more accurate tonal estimation (not phase sensitive) */
     drft_forward(&look->fft_look,fft);
     fft[0]*=scale;
-    fft[0]=todB(fft);
+    logfft[0]=todB(fft);
+    local_ampmax[i]=logfft[0];
     for(j=1;j<n-1;j+=2){
       float temp=scale*FAST_HYPOT(fft[j],fft[j+1]);
-      logfft[(j+1)>>1]=todB(&temp);
+      temp=logfft[(j+1)>>1]=todB(&temp);
+      if(temp>local_ampmax[i])local_ampmax[i]=temp;
     }
+    if(local_ampmax[i]>global_ampmax)global_ampmax=local_ampmax[i];
 
-    _analysis_output("fft",seq,logfft,n/2,0,0);
-    _analysis_output("mdct",seq,logmdct,n/2,0,0);
+    _analysis_output("fft",seq+i,logfft,n/2,1,0);
+  }
+
+  for(i=0;i<vi->channels;i++){
+    int submap=info->chmuxlist[i];
+
+    /* the following makes things clearer to *me* anyway */
+    float *mdct    =vb->pcm[i]; 
+    float *res     =mdct;
+    float *codedflr=mdct+n/2;
+    float *logfft  =mdct+n/2;
+
+    float *logmdct =work;
+    float *logmax  =mdct+n/2;
+    float *logmask =work+n/2;
+
+    for(j=0;j<n/2;j++)
+      logmdct[j]=todB(mdct+j);
+    _analysis_output("mdct",seq+i,logmdct,n/2,1,0);
+
 
     /* perform psychoacoustics; do masking */
-    ret=_vp_compute_mask(look->psy_look+submap,
-			 logfft, /* -> logmax */
-			 logmdct,
-			 logmask,
-			 vbi->ampmax);
-    if(ret>newmax)newmax=ret;
+    _vp_compute_mask(look->psy_look[blocktype],
+		     b->psy_g_look,
+		     i,
+		     logfft, /* -> logmax */
+		     logmdct,
+		     logmask,
+		     global_ampmax,
+		     local_ampmax[i],
+		     ci->blocksizes[vb->lW]/2);
 
-    _analysis_output("mask",seq,logmask,n/2,0,0);
+    _analysis_output("mask",seq+i,logmask,n/2,1,0);
     
     /* perform floor encoding */
     nonzero[i]=look->floor_func[submap]->
@@ -331,103 +399,151 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      logmdct,
 	      logmask,
 	      logmax,
-	      res,
+
 	      codedflr);
 
-    /*for(j=0;j<n/2;j++)
-      if(fabs(vb->pcm[i][j]>200))
-      fprintf(stderr,"%ld ",seq);*/
-    
-    _analysis_output("res",seq-vi->channels+j,vb->pcm[i],n,0,0);
-    _analysis_output("codedflr",seq++,codedflr,n/2,0,1);
+
+    _analysis_output("mdct2",seq+i,mdct,n/2,1,1);
+    _vp_remove_floor(look->psy_look[blocktype],
+		     b->psy_g_look,
+		     logmdct,
+		     mdct,
+		     codedflr,
+		     res,
+		     local_ampmax[i]);
+
+    for(j=0;j<n/2;j++)
+      if(fabs(res[j])>1200){
+	analysis_noisy=1;
+	/*fprintf(stderr,"%ld ",seq+i);*/
+      }
+
+    _analysis_output("res",seq+i,res,n/2,1,0);
+    _analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
       
   }
 
-  vbi->ampmax=newmax;
+  vbi->ampmax=global_ampmax;
 
-  /* channel coupling */
-  for(i=0;i<info->coupling_steps;i++){
-    if(nonzero[info->coupling_mag[i]] ||
-       nonzero[info->coupling_ang[i]]){
-      
-      float *pcmM=vb->pcm[info->coupling_mag[i]];
-      float *pcmA=vb->pcm[info->coupling_ang[i]];
-      
-    /*     +- 
-            B
-            |       A-B
-     -4 -3 -2 -1  0                    
-            |
-      3     |     1
-            |
-  -+  2-----+-----2----A ++  
-            |
-      1     |     3
-            |
-      0 -1 -2 -3 -4
-  B-A       |
-           --
+  /* partition based prequantization and channel coupling */
+  /* Steps in prequant and coupling:
+     
+     down-couple/down-quantize from perfect residue ->  quantized vector 
+     classify by this first quantized vector
+     
+     do{ 
+        encode quantized vector; add encoded values to 'so-far' vector
+        more? [not yet at bitrate/not yet at target]
+          yes{
+              down-couple/down-quantize from perfect-'so-far' -> 
+	        quantized vector; when subtracting coupling, 
+		account for +/- out-of-phase component
+          }no{  
+              break
+          }
+     }
+     done.
 
-    */
+     quantization in each iteration is done (after circular normalization 
+     in coupling) using a by-iteration quantization granule value.
+  */
+   
+  {
+    float  **pcm=vb->pcm;
+    float  **quantized=alloca(sizeof(float*)*vi->channels);
+    float  **sofar=alloca(sizeof(float*)*vi->channels);
 
-      nonzero[info->coupling_mag[i]]=1; 
-      nonzero[info->coupling_ang[i]]=1; 
+    long  ***classifications=alloca(sizeof(long**)*info->submaps);
+    float ***pcmbundle=alloca(sizeof(float **)*info->submaps);
+    float ***sobundle=alloca(sizeof(float **)*info->submaps);
+    int    **zerobundle=alloca(sizeof(int *)*info->submaps);
+    int     *chbundle=alloca(sizeof(int)*info->submaps);
+    int      chcounter=0;
 
-      for(j=n/2-1;j>=0;j--){
-	float A=rint(pcmM[j]);
-	float B=rint(pcmA[j]);
-	float mag;
-	float ang;
-	
-	if(fabs(A)>fabs(B)){
-	  mag=A;
-	  if(A>0)
-	    ang=A-B;
+    /* play a little loose with this abstraction */
+    int   quant_passes=look->psy_look[blocktype]->vi->coupling_passes;
+    int   stopflag=0;
+
+    for(i=0;i<vi->channels;i++){
+      quantized[i]=pcm[i]+n/2;
+      sofar[i]=_vorbis_block_alloc(vb,n/2*sizeof(float));
+      memset(sofar[i],0,sizeof(float)*n/2);
+    }
+
+    pcmbundle[0]=alloca(sizeof(float *)*vi->channels);
+    sobundle[0]=alloca(sizeof(float *)*vi->channels);
+    zerobundle[0]=alloca(sizeof(int)*vi->channels);
+
+    /* initial down-quantized coupling */
+    _vp_quantize_couple(look->psy_look[blocktype],
+			info,
+			pcm,
+			sofar,
+			quantized,
+			nonzero,
+			0);
+
+    for(i=0;i<vi->channels;i++)
+      _analysis_output("quant",seq+i,quantized[i],n/2,1,0);
+
+  
+    /* classify, by submap */
+
+    for(i=0;i<info->submaps;i++){
+      int ch_in_bundle=0;
+      pcmbundle[i]=pcmbundle[0]+chcounter;
+      sobundle[i]=sobundle[0]+chcounter;
+      zerobundle[i]=zerobundle[0]+chcounter;
+
+      for(j=0;j<vi->channels;j++){
+	if(info->chmuxlist[j]==i){
+	  if(nonzero[j])
+	    zerobundle[i][ch_in_bundle]=1;
 	  else
-	    ang=B-A;
-	}else{
-	  mag=B;
-	if(B>0)
-	  ang=A-B;
-	else
-	  ang=B-A;
+	    zerobundle[i][ch_in_bundle]=0;
+	  pcmbundle[i][ch_in_bundle]=quantized[j];
+	  sobundle[i][ch_in_bundle++]=sofar[j];
 	}
-	
-	/*if(fabs(mag)<3.5f)
-	  ang=rint(ang/(mag*2.f))*mag*2.f;*/
-	
-	/*if(fabs(mag)<1.5)
-	ang=0;
-      
-	if(j>(n*3/16))
-	  ang=0;
-	
-	  if(ang>=fabs(mag*2))ang=-fabs(mag*2);*/
-	
-	pcmM[j]=mag;
-	pcmA[j]=ang;
       }
+      chbundle[i]=ch_in_bundle;
+      chcounter+=ch_in_bundle;
+
+      classifications[i]=look->residue_func[i]->
+	class(vb,look->residue_look[i],pcmbundle[i],zerobundle[i],chbundle[i]);
     }
-  }
-  
-  /* perform residue encoding with residue mapping; this is
-     multiplexed.  All the channels belonging to one submap are
-     encoded (values interleaved), then the next submap, etc */
-  
-  for(i=0;i<info->submaps;i++){
-    int ch_in_bundle=0;
-    for(j=0;j<vi->channels;j++){
-      if(info->chmuxlist[j]==i){
-	if(nonzero[j])
-	  zerobundle[ch_in_bundle]=1;
-	else
-	  zerobundle[ch_in_bundle]=0;
-	pcmbundle[ch_in_bundle++]=vb->pcm[j];
-      }
-    }
+
+    /* actual encoding loop */
+    for(i=0;!stopflag;){
+
+      /* perform residue encoding of this pass's quantized residue
+         vector, according residue mapping */
     
-    look->residue_func[i]->forward(vb,look->residue_look[i],
-				   pcmbundle,zerobundle,ch_in_bundle);
+      for(j=0;j<info->submaps;j++)
+	look->residue_func[j]->
+	  forward(vb,look->residue_look[j],
+		  pcmbundle[j],sobundle[j],zerobundle[j],chbundle[j],
+		  i,classifications[j]);
+      i++;
+      
+      /* bitrate management decision hook; the following if() is where
+         we tell progressive encoding to halt, right now it just
+         avoids falling off the edge */
+      if(i>=quant_passes /* || yadda yadda */)stopflag=1;
+
+      if(!stopflag){
+	/* down-couple/down-quantize from perfect-'so-far' -> 
+	   new quantized vector */
+	_vp_quantize_couple(look->psy_look[blocktype],
+			    info,
+			    pcm,
+			    sofar,
+			    quantized,
+			    nonzero,
+			    i);
+      }
+      /* steady as she goes */
+    }
+    seq+=vi->channels;
   }
   
   look->lastframe=vb->sequence;
@@ -535,7 +651,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
-    _analysis_output("out",seq+i,pcm,n/2,0,1);
+    _analysis_output("out",seq+i,pcm,n/2,1,1);
     mdct_backward(b->transform[vb->W][0],pcm,pcm);
   }
 
@@ -560,6 +676,12 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 
 /* export hooks */
 vorbis_func_mapping mapping0_exportbundle={
-  &mapping0_pack,&mapping0_unpack,&mapping0_look,&mapping0_copy_info,
-  &mapping0_free_info,&mapping0_free_look,&mapping0_forward,&mapping0_inverse
+  &mapping0_pack,
+  &mapping0_unpack,
+  &mapping0_look,
+  &mapping0_copy_info,
+  &mapping0_free_info,
+  &mapping0_free_look,
+  &mapping0_forward,
+  &mapping0_inverse
 };

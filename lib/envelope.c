@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.36 2001/05/27 06:43:59 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.37 2001/08/13 01:36:56 xiphmont Exp $
 
  Preecho calculation.
 
@@ -82,11 +82,12 @@ static float cheb_bandpass1k_A[]={
 
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
+  vorbis_info_psy_global *gi=ci->psy_g_param;
   int ch=vi->channels;
-  int window=ci->envelopesa;
+  int window=gi->envelopesa;
   int i;
   e->winlength=window;
-  e->minenergy=fromdB(ci->preecho_minenergy);
+  e->minenergy=fromdB(gi->preecho_minenergy);
   e->iir=_ogg_calloc(ch*4,sizeof(IIR_state));
   e->filtered=_ogg_calloc(ch*4,sizeof(float *));
   e->ch=ch;
@@ -132,8 +133,8 @@ static float _ve_deltai(envelope_lookup *ve,float *pre,float *post){
      basing blocks on quantization noise that outweighs the signal
      itself (for low power signals) */
 
-  float min=ve->minenergy;
-  float A=min*min*n;
+  float minV=ve->minenergy;
+  float A=minV*minV*n;
   float B=A;
 
   for(i=0;i<n;i++){
@@ -150,10 +151,9 @@ static float _ve_deltai(envelope_lookup *ve,float *pre,float *post){
 long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
+  vorbis_info_psy_global *gi=ci->psy_g_param;
   envelope_lookup *ve=((backend_lookup_state *)(v->backend_state))->ve;
-  long i,j,k,l;
-  float *work=alloca(sizeof(float)*ve->winlength*2);
-  static int seq=0;
+  long i,j,k;
 
   /* make sure we have enough storage to match the PCM */
   if(v->pcm_storage>ve->storage){
@@ -210,8 +210,8 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
 	float *filtered=ve->filtered[i*4+k]+j;
 	float m=_ve_deltai(ve,filtered-ve->winlength,filtered);
       
-	if(m>ci->preecho_thresh[k])return(0);
-	if(m<ci->postecho_thresh[k])return(0);
+	if(m>gi->preecho_thresh[k])return(0);
+	if(m<gi->postecho_thresh[k])return(0);
 
       }
     }

@@ -11,13 +11,14 @@
  ********************************************************************
 
  function: time backend 0 (dummy)
- last mod: $Id: time0.c,v 1.9 2001/02/26 03:50:43 xiphmont Exp $
+ last mod: $Id: time0.c,v 1.10 2001/08/13 01:36:57 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 #include "registry.h"
 #include "misc.h"
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.10 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.11 2001/08/13 01:37:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,10 +23,11 @@
 
 /* does not guard against invalid settings; eg, a subn of 16 and a
    subgroup request of 32.  Max subn of 128 */
-static void _testhack(float *vec,int n,float *entropy){
+static float _testhack(float *vec,int n){
   int i,j=0;
   float max=0.f;
   float temp[128];
+  float entropy=0.;
 
   /* setup */
   for(i=0;i<n;i++)temp[i]=fabs(vec[i]);
@@ -37,7 +38,11 @@ static void _testhack(float *vec,int n,float *entropy){
 
   for(i=0;i<n;i++)temp[i]=rint(temp[i]);
 
-  while(1){
+  for(i=0;i<n;i++)
+    entropy+=temp[i];
+  return entropy;
+
+  /*while(1){
     entropy[j]=max;
     n>>=1;
     j++;
@@ -49,7 +54,7 @@ static void _testhack(float *vec,int n,float *entropy){
     max=0.f;
     for(i=0;i<n;i++)
       if(temp[i]>max)max=temp[i];
-  }
+      }*/
 }
 
 static FILE *of;
@@ -60,20 +65,22 @@ static FILE **or;
    will need to change in the future when we get real multichannel
    mappings */
 int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts, int subn){
-  long i,j;
-  float entropy[8];
+  long i,j,part=0;
   int aux;
 
-  for(i=0;i<=n-subn;i+=subn){
+  for(i=0;i<=n-subn;i+=subn,part++){
     float max=0.f;
+    float lentropy=0.f;
 
-    _testhack(res+i,subn,entropy);
+    lentropy=_testhack(res+i,subn);
+
     for(j=0;j<subn;j++)
       if(fabs(res[i+j])>max)max=fabs(res[i+j]);
 
     for(j=0;j<parts-1;j++)
-      if(entropy[subgrp[j]]<=ebound[j] &&
-	 max<=mbound[j])
+      if(lentropy<=ebound[j] &&
+	 max<=mbound[j] &&
+	 part<subgrp[j])
 	break;
     aux=j;
     
@@ -121,9 +128,9 @@ static void usage(){
 	  "                          number of scalars in a group\n"
 	  "         ent is the maximum entropy value allowed for membership in a group\n"
 	  "         peak is the maximum amplitude value allowed for membership in a group\n"
-	  "         subn is the maximum entropy value allowed for membership in a group\n"
+	  "         subn is the maximum subpartiton number allowed in the group\n"
 	           
-	  "eg: residuesplit mask.vqd floor.vqd 0,1024,16 res 0,.5,16 3,1.5,8 \n"
+	  "eg: residuesplit mask.vqd floor.vqd 0,1024,16 res 0,.5,2 3,1.5,4 \n"
 	  "produces resaux.vqd and res_0...n.vqd\n\n");
   exit(1);
 }
@@ -166,6 +173,7 @@ int main(int argc, char *argv[]){
   
   for(i=0;i<parts-1;i++){
     char *pos=strchr(argv[4+i],',');
+    subgrp[i]=0;
     if(*argv[4+i]==',')
       ebound[i]=1e50f;
     else
@@ -173,25 +181,23 @@ int main(int argc, char *argv[]){
 
     if(!pos){
       mbound[i]=1e50f;
-      subgrp[i]=_ilog(subn)-1;
-     }else{
-       if(*(pos+1)==',')
-	 mbound[i]=1e50f;
-       else
-	 mbound[i]=atof(pos+1);
-       pos=strchr(pos+1,',');
+    }else{
+      if(*(pos+1)==',')
+	mbound[i]=1e50f;
+      else
+	mbound[i]=atof(pos+1);
+      pos=strchr(pos+1,',');
+      
+       if(pos)
+	 subgrp[i]=atoi(pos+1);
        
-       if(!pos){
-	 subgrp[i]=_ilog(subn)-1;
-       }else{
-	 subgrp[i]=_ilog(atoi(pos+1))-1;
-       }
-     }
+    }
+    if(subgrp[i]<=0)subgrp[i]=99999;
   }
 
   ebound[i]=1e50f;
   mbound[i]=1e50f;
-  subgrp[i]=_ilog(subn)-1;
+  subgrp[i]=9999999;
 
   res=fopen(argv[1],"r");
   if(!res){

@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.45 2001/08/07 13:04:41 msmith Exp $
+ last mod: $Id: analysis.c,v 1.46 2001/08/13 01:36:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,9 +20,12 @@
 #include <math.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 #include "registry.h"
 #include "scales.h"
 #include "os.h"
+
+int analysis_noisy=1;
 
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
@@ -108,7 +111,7 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB){
 
 void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
 #ifdef ANALYSIS
-  _analysis_output_always(base,i,v,n,bark,dB);
+  if(analysis_noisy)_analysis_output_always(base,i,v,n,bark,dB);
 #endif
 }
 

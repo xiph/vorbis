@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.27 2001/06/18 22:19:26 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.28 2001/08/13 01:36:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -424,7 +424,7 @@ long vorbis_book_decodevv_add(codebook *book,float **a,long offset,int ch,
     entry = vorbis_book_decode(book,b);
     if(entry==-1)return(-1);
     {
-      const float *t     = book->valuelist+entry*book->dim;
+      const float *t = book->valuelist+entry*book->dim;
       for (j=0;j<book->dim;j++){
 	a[chptr++][i]+=t[j];
 	if(chptr==ch){

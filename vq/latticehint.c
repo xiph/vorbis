@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.9 2001/05/27 06:44:07 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.10 2001/08/13 01:37:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -40,7 +40,7 @@
      to the threshhold hint 
 
    command line:
-   latticehint book.vqh
+   latticehint book.vqh [threshlist]
 
    latticehint produces book.vqh on stdout */
 
@@ -123,14 +123,13 @@ int main(int argc,char *argv[]){
   float min,del;
   char *name;
   long i,j;
-  long dB=0;
+  float *suggestions;
+  int suggcount=0;
 
   if(argv[1]==NULL){
     fprintf(stderr,"Need a lattice book on the command line.\n");
     exit(1);
   }
-
-  if(argv[2])dB=1;
 
   {
     char *ptr;
@@ -168,6 +167,19 @@ int main(int argc,char *argv[]){
 
     fprintf(stderr,"Adding threshold hint to %s...\n",name);
 
+    /* partial/complete suggestions */
+    if(argv[2]){
+      char *ptr=strdup(argv[2]);
+      suggestions=alloca(sizeof(float)*quantvals);
+			 
+      for(suggcount=0;ptr && suggcount<quantvals;suggcount++){
+	char *ptr2=strchr(ptr,',');
+	if(ptr2)*ptr2++='\0';
+	suggestions[suggcount]=atof(ptr);
+	ptr=ptr2;
+      }
+    }
+
     /* simplest possible threshold hint only */
     t->quantthresh=_ogg_calloc(quantvals-1,sizeof(float));
     t->quantmap=_ogg_calloc(quantvals,sizeof(int));
@@ -183,13 +195,14 @@ int main(int argc,char *argv[]){
     for(i=0;i<quantvals-1;i++){
       float v1=*(quantsort[i])*del+min;
       float v2=*(quantsort[i+1])*del+min;
-      if(dB){
-	if(fabs(v1)<.01)v1=(v1+v2)*.5;
-	if(fabs(v2)<.01)v2=(v1+v2)*.5;
-	t->quantthresh[i]=fromdB((todB(&v1)+todB(&v2))*.5);
-	if(v1<0 || v2<0)t->quantthresh[i]*=-1;
-
-      }else{
+      
+      for(j=0;j<suggcount;j++)
+	if(v1<suggestions[j] && suggestions[j]<v2){
+	  t->quantthresh[i]=suggestions[j];
+	  break;
+	}
+      
+      if(j==suggcount){
 	t->quantthresh[i]=(v1+v2)*.5;
       }
     }
