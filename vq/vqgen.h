@@ -18,7 +18,6 @@ typedef struct vqgen{
   int it;
 
   int    elements;
-  int    quantbits;
 
   /* point cache */
   double *pointlist; 
@@ -54,13 +53,13 @@ typedef struct vqbook{
 } vqbook;
 
 extern void vqgen_init(vqgen *v,int elements,int entries,
-		       double (*metric)(vqgen *,double *, double *),
-		       int quant);
+		       double (*metric)(vqgen *,double *, double *));
 extern void vqgen_addpoint(vqgen *v, double *p);
 extern double *vqgen_midpoint(vqgen *v);
 extern double vqgen_iterate(vqgen *v);
 extern int vqenc_entry(vqbook *b,double *val);
 extern void vqgen_book(vqgen *v,vqbook *b);
+extern double *_now(vqgen *v,long ptr);
 
 #endif
 

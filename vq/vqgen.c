@@ -85,12 +85,10 @@ void _vqgen_seed(vqgen *v){
 /* External calls *******************************************************/
 
 void vqgen_init(vqgen *v,int elements,int entries,
-		double (*metric)(vqgen *,double *, double *),
-		int quant){
+		double (*metric)(vqgen *,double *, double *)){
   memset(v,0,sizeof(vqgen));
 
   v->elements=elements;
-  v->quantbits=quant;
   v->allocated=32768;
   v->pointlist=malloc(v->allocated*v->elements*sizeof(double));
 
@@ -249,29 +247,6 @@ double vqgen_iterate(vqgen *v){
     fprintf(assig,"%ld\n",v->assigned[j]);
     fprintf(bias,"%g\n",v->bias[j]);
 #endif
-  }
-
-  {
-    /* midpoints must be quantized.  but we need to know the range in
-       order to do so */
-    double min,max;
-   
-    for(k=0;k<v->elements;k++){
-      double delta;
-      min=max=_now(v,0)[k];
-
-      for(j=1;j<v->entries;j++){
-	double val=_now(v,j)[k];
-	if(val<min)min=val;
-	if(val>max)max=val;
-      }
-    
-      delta=(max-min)/((1<<v->quantbits)-1);
-      for(j=0;j<v->entries;j++){
-	double val=_now(v,j)[k];
-	_now(v,j)[k]=min+delta*rint((val-min)/delta);
-      }
-    }
   }
 
   asserror/=(v->entries*fdesired);
@@ -592,7 +567,7 @@ void vqgen_book(vqgen *v,vqbook *b){
   b->lengthlist=malloc(b->entries*sizeof(long));
   
   /* first, generate the encoding decision heirarchy */
-  fprintf(stderr,"Total leaves: %ld\n",
+  fprintf(stderr,"Total leaves: %d\n",
 	  lp_split(v,b,entryindex,v->entries, pointindex,v->points,0,0));
   
   /* run all training points through the decision tree to get a final

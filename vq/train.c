@@ -14,7 +14,7 @@
  function: utility main for training codebooks
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Dec 14 1999
+ last modification date: Dec 15 1999
 
  ********************************************************************/
 
@@ -25,43 +25,7 @@
 #include <errno.h>
 #include <signal.h>
 #include "vqgen.h"
-
-/* A metric for LSP codes */
-                            /* candidate,actual */
-static double _dist_and_pos(vqgen *v,double *b, double *a){
-  int i;
-  int el=v->elements;
-  double acc=0.;
-  double lastb=0.;
-  for(i=0;i<el;i++){
-    double actualdist=(a[i]-lastb);
-    double testdist=(b[i]-lastb);
-    if(actualdist>0 && testdist>0){
-      double val;
-      if(actualdist>testdist)
-	val=actualdist/testdist-1.;
-      else
-	val=testdist/actualdist-1.;
-      acc+=val;
-    }else{
-      acc+=999999.;
-    }
-    lastb=b[i];
-  }
-  return acc;
-}
-
-static void *set_metric(int m){
-  switch(m){
-  case 0:
-    return(NULL);
-  case 1:
-    return(_dist_and_pos);
-  default:
-    fprintf(stderr,"Invalid metric number\n");
-    exit(0);
-  }
-}
+#include "vqext.h"
 
 static int rline(FILE *in,FILE *out,char *line,int max,int pass){
   while(fgets(line,160,in)){
@@ -75,7 +39,7 @@ static int rline(FILE *in,FILE *out,char *line,int max,int pass){
 }
 
 /* command line:
-   trainvq [vq=file | [entries=n] [dim=n] [quant=n]] met=n in=file,firstcol 
+   trainvq [vq=file | [entries=n] [dim=n] [quant=n]] in=file,firstcol 
            [in=file,firstcol]
 */
 
@@ -87,10 +51,10 @@ void setexit(int dummy){
 
 int main(int argc,char *argv[]){
   vqgen v;
+  quant_return q;
+
   int entries=-1,dim=-1,quant=-1;
   FILE *out=NULL;
-  int met=0;
-  double (*metric)(vqgen *,double *, double *)=NULL;
   char line[1024];
   long i,j,k;
 
@@ -124,23 +88,37 @@ int main(int argc,char *argv[]){
 	fprintf(stderr,"Unable to open %s for writing\n",filename);
 	exit(1);
       }
-      fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
 
       if(in){
 	/* we wish to suck in a preexisting book and continue to train it */
 	double a;
+
+	rline(in,out,line,160,1);
+	if(strlen(line)>0)line[strlen(line)-1]='\0';
+	if(strcmp(line,vqext_booktype)){
+	  fprintf(stderr,"wrong book type; %s!=%s\n",line,vqext_booktype);
+	  exit(1);
+	} 
 	    
 	rline(in,out,line,160,1);
-	if(sscanf(line,"%d %d %d %d",&entries,&dim,&met,&quant)!=3){
+	if(sscanf(line,"%d %d",&entries,&dim)!=2){
+	  fprintf(stderr,"Syntax error reading book file\n");
+	  exit(1);
+	}
+	
+
+	vqgen_init(&v,dim,entries,vqext_metric);
+	init=1;
+
+	/* quant setup */
+	rline(in,out,line,160,1);
+	if(sscanf(line,"%lf %lf %d %d",&q.minval,&q.delt,
+		  &q.addtoquant,&quant)!=4){
 	  fprintf(stderr,"Syntax error reading book file\n");
 	  exit(1);
 	}
 
-	metric=set_metric(met);
-	vqgen_init(&v,dim,entries,metric,quant);
-	init=1;
-
-	/* entries, bias, points */
+	/* entries */
 	i=0;
 	for(j=0;j<entries;j++){
 	  for(k=0;k<dim;k++){
@@ -149,7 +127,11 @@ int main(int argc,char *argv[]){
 	    v.entrylist[i++]=a;
 	  }
 	}
+	
+	/* dequantize */
+	vqext_unquantize(&v,&q);
 
+	/* bias, points */
 	i=0;
 	for(j=0;j<entries;j++){
 	  rline(in,out,line,160,0);
@@ -183,17 +165,14 @@ int main(int argc,char *argv[]){
     if(!strncmp(*argv,"entries=",8)){
       sscanf(*argv,"entries=%d",&entries);
     }
-    if(!strncmp(*argv,"desired=",8)){
-      sscanf(*argv,"desired=%lf",&desired);
-    }
     if(!strncmp(*argv,"dim=",4)){
       sscanf(*argv,"dim=%d",&dim);
     }
-
-    /* which error metric (0==euclidian distance default) */
-    if(!strncmp(*argv,"met=",4)){
-      sscanf(*argv,"met=%d",&met);
-      metric=set_metric(met);
+    if(!strncmp(*argv,"desired=",8)){
+      sscanf(*argv,"desired=%lf",&desired);
+    }
+    if(!strncmp(*argv,"iter=",5)){
+      sscanf(*argv,"iter=%d",&iter);
     }
 
     if(!strncmp(*argv,"in=",3)){
@@ -212,7 +191,7 @@ int main(int argc,char *argv[]){
 		  " first input file\n");
 	  exit(1);
 	}
-	vqgen_init(&v,dim,entries,metric,quant);
+	vqgen_init(&v,dim,entries,vqext_metric);
 	init=1;
       }
 
@@ -246,12 +225,19 @@ int main(int argc,char *argv[]){
   signal(SIGINT,setexit);
 
   for(i=0;i<iter && !exiting;i++){
-    if(vqgen_iterate(&v)<desired)break;
+    double result;
+    if(i!=0)vqext_unquantize(&v,&q);
+    result=vqgen_iterate(&v);
+    q=vqext_quantize(&v,quant);
+    if(result<desired)break;
   }
 
   /* save the book */
 
-  fprintf(out,"%d %d %d %d\n",entries,dim,met,quant);
+  fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
+  fprintf(out,"%s\n",vqext_booktype);
+  fprintf(out,"%d %d\n",entries,dim);
+  fprintf(out,"%g %g %d %d\n",q.minval,q.delt,q.addtoquant,quant);
 
   i=0;
   for(j=0;j<entries;j++)
