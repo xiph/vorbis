@@ -29,15 +29,11 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 
-	# CVS does not have configure
-	#if test ! -f configure; then \
-		./autogen.sh ;\
-	fi
-
 	# make build directory
 	mkdir $(objdir)
 
 	# run configure with build tree $(objdir)
+	# change ../configure to ../autogen.sh for CVS build
 	cd $(objdir) && \
 	../configure --build=$(DEB_BUILD_GNU_TYPE) --host=$(DEB_HOST_GNU_TYPE) \
 	--prefix=/usr
