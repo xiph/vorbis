@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.56.2.4 2001/11/16 08:17:05 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.56.2.5 2001/12/04 11:16:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -67,6 +67,13 @@ void _vp_global_free(vorbis_look_psy_global *look){
   }
   memset(look,0,sizeof(*look));
   _ogg_free(look);
+}
+
+void _vi_gpsy_free(vorbis_info_psy_global *i){
+  if(i){
+    memset(i,0,sizeof(*i));
+    _ogg_free(i);
+  }
 }
 
 void _vi_psy_free(vorbis_info_psy *i){

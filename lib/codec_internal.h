@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.9.4.6 2001/11/22 06:21:07 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.9.4.7 2001/12/04 11:16:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -111,8 +111,8 @@ typedef struct codec_setup_info {
   static_codebook        *book_param[256];
 
   vorbis_info_psy        *psy_param[64]; /* encode only */
-  vorbis_info_psy_global *psy_g_param;
-  bitrate_manager_info   *bi;
+  vorbis_info_psy_global psy_g_param;
+  bitrate_manager_info   bi;
 
   int    passlimit[32];     /* iteration limit per couple/quant pass */
   int    coupling_passes;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.1.2.4 2001/11/24 05:26:10 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.1.2.5 2001/12/04 11:16:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -87,67 +87,70 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
   codec_setup_info *ci=vi->codec_setup;
   bitrate_manager_info *bi=ci->bi;
   long maxlatency;
-  
+
   memset(bm,0,sizeof(*bm));
   
-  bm->avg_sampledesired=bi->queue_avg_time*vi->rate;
-  bm->avg_centerdesired=bi->queue_avg_time*vi->rate*bi->queue_avg_center;
-  bm->minmax_sampledesired=bi->queue_minmax_time*vi->rate;
-  
-  if(bm->avg_sampledesired<0)bm->avg_sampledesired=0;
-  if(bm->avg_centerdesired<0)bm->avg_centerdesired=0;
-  if(bm->minmax_sampledesired<0)bm->minmax_sampledesired=0;
-  
-  /* first find the max possible needed queue size */
-  maxlatency=max(bm->avg_sampledesired-bm->avg_centerdesired,
-		 bm->minmax_sampledesired)+bm->avg_centerdesired;
-  
-  if(maxlatency>0 &&
-     (bi->queue_avgmin>0 || bi->queue_avgmax>0 || bi->queue_hardmax>0 ||
-      bi->queue_hardmin>0)){
-    long maxpackets=maxlatency/(ci->blocksizes[0]>>1)+3;
-    long bins=BITTRACK_DIVISOR*ci->passlimit[ci->coupling_passes-1];
+  if(bi){
     
-    bm->queue_size=maxpackets;
-    bm->queue_bins=bins;
-    bm->queue_binned=_ogg_malloc(maxpackets*bins*sizeof(*bm->queue_binned));
-    bm->queue_actual=_ogg_malloc(maxpackets*sizeof(*bm->queue_actual));
+    bm->avg_sampledesired=bi->queue_avg_time*vi->rate;
+    bm->avg_centerdesired=bi->queue_avg_time*vi->rate*bi->queue_avg_center;
+    bm->minmax_sampledesired=bi->queue_minmax_time*vi->rate;
     
-    if((bi->queue_avgmin>0 || bi->queue_avgmax>0) &&
-       bi->queue_avg_time>0){
-      
-      bm->avg_binacc=_ogg_malloc(bins*sizeof(*bm->avg_binacc));
-      bm->avgfloat=bi->avgfloat_initial;
-      
-      
-    }else{
-      bm->avg_tail= -1;
-    }
+    if(bm->avg_sampledesired<0)bm->avg_sampledesired=0;
+    if(bm->avg_centerdesired<0)bm->avg_centerdesired=0;
+    if(bm->minmax_sampledesired<0)bm->minmax_sampledesired=0;
     
-    if((bi->queue_hardmin>0 || bi->queue_hardmax>0) &&
+    /* first find the max possible needed queue size */
+    maxlatency=max(bm->avg_sampledesired-bm->avg_centerdesired,
+		   bm->minmax_sampledesired)+bm->avg_centerdesired;
+    
+    if(maxlatency>0 &&
+       (bi->queue_avgmin>0 || bi->queue_avgmax>0 || bi->queue_hardmax>0 ||
+	bi->queue_hardmin>0)){
+      long maxpackets=maxlatency/(ci->blocksizes[0]>>1)+3;
+      long bins=BITTRACK_DIVISOR*ci->passlimit[ci->coupling_passes-1];
+      
+      bm->queue_size=maxpackets;
+      bm->queue_bins=bins;
+      bm->queue_binned=_ogg_malloc(maxpackets*bins*sizeof(*bm->queue_binned));
+      bm->queue_actual=_ogg_malloc(maxpackets*sizeof(*bm->queue_actual));
+      
+      if((bi->queue_avgmin>0 || bi->queue_avgmax>0) &&
+	 bi->queue_avg_time>0){
+	
+	bm->avg_binacc=_ogg_malloc(bins*sizeof(*bm->avg_binacc));
+	bm->avgfloat=bi->avgfloat_initial;
+	
+	
+      }else{
+	bm->avg_tail= -1;
+      }
+      
+      if((bi->queue_hardmin>0 || bi->queue_hardmax>0) &&
 	 bi->queue_minmax_time>0){
-      
-      bm->minmax_binstack=_ogg_malloc((bins+1)*bins*2*
-				      sizeof(bm->minmax_binstack));
-      bm->minmax_posstack=_ogg_malloc((bins+1)*
+	
+	bm->minmax_binstack=_ogg_malloc((bins+1)*bins*2*
+					sizeof(bm->minmax_binstack));
+	bm->minmax_posstack=_ogg_malloc((bins+1)*
 				      sizeof(bm->minmax_posstack));
-      bm->minmax_limitstack=_ogg_malloc((bins+1)*
-					sizeof(bm->minmax_limitstack));
+	bm->minmax_limitstack=_ogg_malloc((bins+1)*
+					  sizeof(bm->minmax_limitstack));
+      }else{
+	bm->minmax_tail= -1;
+      }
+      
+      /* space for the packet queueing */
+      bm->queue_packet_buffers=calloc(maxpackets,sizeof(*bm->queue_packet_buffers));
+      bm->queue_packets=calloc(maxpackets,sizeof(*bm->queue_packets));
+      for(i=0;i<maxpackets;i++)
+	oggpack_writeinit(bm->queue_packet_buffers+i);
+      
     }else{
-      bm->minmax_tail= -1;
-    }
-    
-    /* space for the packet queueing */
-    bm->queue_packet_buffers=calloc(maxpackets,sizeof(*bm->queue_packet_buffers));
-    bm->queue_packets=calloc(maxpackets,sizeof(*bm->queue_packets));
-    for(i=0;i<maxpackets;i++)
-      oggpack_writeinit(bm->queue_packet_buffers+i);
-    
-  }else{
-    bm->queue_packet_buffers=calloc(1,sizeof(*bm->queue_packet_buffers));
-    bm->queue_packets=calloc(1,sizeof(*bm->queue_packets));
-    oggpack_writeinit(bm->queue_packet_buffers);
-  }      
+      bm->queue_packet_buffers=calloc(1,sizeof(*bm->queue_packet_buffers));
+      bm->queue_packets=calloc(1,sizeof(*bm->queue_packets));
+      oggpack_writeinit(bm->queue_packet_buffers);
+    }      
+  }
 }
 
 void vorbis_bitrate_clear(bitrate_manager_state *bm){
@@ -322,7 +325,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	
 	bm->avg_centeracc-=samples;
 	bm->avg_center++;
-	if(bm->noisetrigger_postpone)bm->noisetrigger_postpone--;
+	if(bm->noisetrigger_postpone)bm->noisetrigger_postpone-=samples;
 	if(bm->avg_center>=bm->queue_size)bm->avg_center=0;
       }
       new_minmax_head=bm->avg_center;
@@ -334,18 +337,18 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       if(bm->avgfloat>bi->avgfloat_noise_hightrigger)
 	bm->noisetrigger_request-=1.f;
       
-      if(bm->noisetrigger_postpone==0){
+      if(bm->noisetrigger_postpone<=0){
 	if(bm->noisetrigger_request<0.){
 	  bm->avgnoise-=1.f;
 	  if(bm->noisetrigger_request<bm->avg_sampleacc/2)
             bm->avgnoise-=1.f;
-	  bm->noisetrigger_postpone=bm->avg_sampleacc;
+	  bm->noisetrigger_postpone=bm->avg_sampleacc/2;
 	}
 	if(bm->noisetrigger_request>0.){
 	  bm->avgnoise+=1.f;
 	  if(bm->noisetrigger_request>bm->avg_sampleacc/2)
 	    bm->avgnoise+=1.f;
-	  bm->noisetrigger_postpone=bm->avg_sampleacc;
+	  bm->noisetrigger_postpone=bm->avg_sampleacc/2;
 	}
 
 	/* we generally want the noise bias to drift back to zero */
@@ -360,6 +363,9 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	if(bm->avgnoise>bi->avgfloat_noise_maxval)
 	  bm->avgnoise=bi->avgfloat_noise_maxval;
       }
+      fprintf(stderr,"noise:%f req:%d trigger:%d\n",bm->avgnoise,
+	      bm->noisetrigger_request,bm->noisetrigger_postpone);
+
     }
   }else{
     /* if we're not using an average tracker, the 'float' is nailed to

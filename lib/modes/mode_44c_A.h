@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_A.h,v 1.4.2.11 2001/11/24 05:26:11 xiphmont Exp $
+ last mod: $Id: mode_44c_A.h,v 1.4.2.12 2001/12/04 11:16:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -81,18 +81,7 @@
 #include "maskadj_A.h"
 
 static bitrate_manager_info _bm_set_44c_A={
-  /* progressive coding and bitrate controls */
-  2.,.5,
-  //2.,       128000,           128000,  
-  //          128000,           128000,
-
-  2.,       0,           0,  
-            0,           0,
-           
-  4.0, 0.,  -1.,              .05, 
-            -.05,             .05,
-  3.0,5.0,
-  -10.f,+4.f
+  0
 };
 
 static vorbis_info_psy_global _psy_set_44c_AG={
@@ -100,7 +89,7 @@ static vorbis_info_psy_global _psy_set_44c_AG={
   8,   /* lines per eighth octave */
   
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
-  256, {26.f,26.f,26.f,30.f}, {-30.f,-30.f,-30.f,-34.f}, -90.f,
+  256, {26.f,26.f,26.f,30.f}, {-26.f,-26.f,-26.f,-30.f}, -90.f,
   -6.f, 
   
   0,
@@ -108,18 +97,6 @@ static vorbis_info_psy_global _psy_set_44c_AG={
 
 static struct vp_couple_pass _psy_pass_44c_A0[]={
   {1.f,1.f,
-   {{  24,       0, 9e10,      0},
-    {9999,       0, 9e10,    4.5}}
-  },
-  {1.f,1.f,
-   {{  64,       0, 9e10,      0},
-    {9999,       0, 9e10,    2.5}}
-  },
-  {.333333f,3.f,
-   {{  64,       0, 9e10,      0},
-    {9999,       0, 9e10,    2.5}}
-  },
-  {.111111f,9.f,
    {{  64,       0, 9e10,      0},
     {9999,       0, 9e10,    2.5}}
   },
@@ -127,18 +104,6 @@ static struct vp_couple_pass _psy_pass_44c_A0[]={
 
 static vp_couple_pass _psy_pass_44c_A[]={
   {1.f,1.f,
-   {{ 288,       0, 9e10,      0},
-    {9999,       0, 9e10,    4.5}}
-  },
-  {1.f,1.f,
-   {{ 512,       0, 9e10,      0},
-    {9999,       0, 9e10,    2.5}}
-  },
-  {.333333f,3.f,
-   {{ 512,       0, 9e10,      0},
-    {9999,       0, 9e10,    2.5}}
-  },
-  {.111111f,9.f,
    {{ 512,       0, 9e10,      0},
     {9999,       0, 9e10,    2.5}}
   },
