@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.13 2001/08/16 01:36:57 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.14 2001/08/16 20:31:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -226,7 +226,7 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,vorbis_info_mode *mi,
 
   /* also store a sorted position index */
   for(i=0;i<n;i++)sortpointer[i]=info->postlist+i;
-  qsort(sortpointer,n,sizeof(int),icomp);
+  qsort(sortpointer,n,sizeof(int *),icomp);
 
   /* points from sort order back to range number */
   for(i=0;i<n;i++)look->forward_index[i]=sortpointer[i]-info->postlist;
