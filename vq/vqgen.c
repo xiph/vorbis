@@ -14,7 +14,7 @@
  function: build a VQ codebook 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 04 1999
+ last modification date: Oct 08 1999
 
  ********************************************************************/
 
@@ -86,43 +86,34 @@ double _dist_sq(vqgen *v,double *a, double *b){
   }
   return acc;
 }
-
-/* *must* be beefed up.  Perhaps a Floyd-Steinberg like scattering? */
-void _vqgen_seed(vqgen *v){
-  memcpy(v->entrylist,v->pointlist,sizeof(double)*v->entries*v->elements);
+                            /* candidate,actual */
+double _dist_and_pos(vqgen *v,double *b, double *a){
+  int i;
+  int el=v->elements;
+  double acc=0.;
+  double lastb=0.;
+  for(i=0;i<el;i++){
+    double actualdist=(a[i]-lastb);
+    double testdist=(b[i]-lastb);
+    if(actualdist>0 && testdist>0){
+      double val;
+      if(actualdist>testdist)
+	val=actualdist/testdist;
+      else
+	val=testdist/actualdist;
+      acc+=val*val-1.;
+    }else{
+      fprintf(stderr,"\nA zero (shouldn't happen in our data) \n");
+      acc+=999999.;
+    }
+    lastb=b[i];
+  }
+  return acc;
 }
 
-void _limited_sort(double *vals,long *index,long total,int desired){
-  if(total>1){
-    long bisect=total>>1;
-    if(bisect>1)_limited_sort(vals,index,bisect,desired);
-    if(total-bisect>1)_limited_sort(vals,index+bisect,total-bisect,
-				    desired);
-    if(desired>total)desired=total;
-
-    {
-      int i;
-      long ptra=0;
-      long ptrb=bisect;
-      long *temp=alloca(desired*sizeof(long));
-
-      for(i=0;i<desired;i++){
-	if(vals[index[ptra]]>vals[index[ptrb]]){
-	  temp[i]=index[ptra++];
-	}else{
-	  temp[i]=index[ptrb++];
-	}
-	if(ptra==bisect)
-	  for(i++;i<desired;i++)temp[i]=index[ptrb++];
-	else
-	  if(ptrb==total)
-	    for(i++;i<desired;i++)temp[i]=index[ptra++];
-	   
-      }
-
-      memcpy(index,temp,desired*sizeof(long));
-    }
-  }
+/* *must* be beefed up. */
+void _vqgen_seed(vqgen *v){
+  memcpy(v->entrylist,v->pointlist,sizeof(double)*v->entries*v->elements);
 }
 
 /* External calls *******************************************************/
@@ -146,7 +137,7 @@ void vqgen_init(vqgen *v,int elements,int entries,
   if(metric)
     v->metric_func=metric;
   else
-    v->metric_func=_dist_sq;
+    v->metric_func=_dist_and_pos;
 }
 
 void vqgen_addpoint(vqgen *v, double *p){
@@ -169,11 +160,18 @@ void vqgen_recenter(vqgen *v){
   double asserror=0.;
   double meterror=0.;
 
+#ifdef NOISY
   char buff[80];
-  FILE *out;
-  sprintf(buff,"recenter%d.m",it);
-  out=fopen(buff,"w");
-
+  FILE *cells;
+  FILE *assig;
+  FILE *bias;
+  sprintf(buff,"cells%d.m",it);
+  cells=fopen(buff,"w");
+  sprintf(buff,"assig%d.m",it);
+  assig=fopen(buff,"w");
+  sprintf(buff,"bias%d.m",it);
+  bias=fopen(buff,"w");
+#endif
 
   if(v->entries<2)exit(1);
 
@@ -197,24 +195,32 @@ void vqgen_recenter(vqgen *v){
       }
 
       j=firstentry;
+#ifdef NOISY
+      fprintf(cells,"%g %g\n%g %g\n\n",_now(v,j)[0],_now(v,j)[1],
+	      _point(v,i)[0],_point(v,i)[1]);
+#endif
       meterror+=firstmetric-v->bias[firstentry];
       if(v->assigned[j]++){
 	for(k=0;k<v->elements;k++){
-	  if(_point(v,i)[k]<vN(newlo,j)[k])vN(newlo,j)[k]=_point(v,i)[k];
-	  if(_point(v,i)[k]>vN(newhi,j)[k])vN(newhi,j)[k]=_point(v,i)[k];
+	  vN(newlo,j)[k]+=_point(v,i)[k];
+	  /*if(_point(v,i)[k]<vN(newlo,j)[k])vN(newlo,j)[k]=_point(v,i)[k];
+	    if(_point(v,i)[k]>vN(newhi,j)[k])vN(newhi,j)[k]=_point(v,i)[k];*/
 	}
       }else{
 	for(k=0;k<v->elements;k++){
 	  vN(newlo,j)[k]=_point(v,i)[k];
-	  vN(newhi,j)[k]=_point(v,i)[k];
+	  /*vN(newlo,j)[k]=_point(v,i)[k];
+	    vN(newhi,j)[k]=_point(v,i)[k];*/
 	}	
       }
     }
 
     for(j=0;j<v->entries;j++){
       if(v->assigned[j]){
-	for(k=0;k<v->elements;k++)
-	  _now(v,j)[k]=(vN(newlo,j)[k]+vN(newhi,j)[k])/2.;
+	for(k=0;k<v->elements;k++){
+	  _now(v,j)[k]=vN(newlo,j)[k]/v->assigned[j];
+	  /*_now(v,j)[k]=(vN(newlo,j)[k]+vN(newhi,j)[k])/2.;*/
+	}
       }
     }
     free(newlo);
@@ -223,20 +229,28 @@ void vqgen_recenter(vqgen *v){
 
   for(i=0;i<v->entries;i++){
     asserror+=fabs(fdesired-v->assigned[i]);
+#ifdef NOISY
+    fprintf(assig,"%ld\n",v->assigned[i]);
+    fprintf(bias,"%g\n",v->bias[i]);
+#endif
   }
 
   fprintf(stderr,"recenter: dist error=%g(%g) metric error=%g\n",
 	  asserror/v->entries,fdesired,meterror/v->points);
   
-  memset(v->bias,0,sizeof(double)*v->entries);
   it++;
-  fclose(out);
+
+#ifdef NOISY
+  fclose(cells);
+  fclose(assig);
+  fclose(bias);
+#endif
 }
 
 void vqgen_rebias(vqgen *v){
   long   i,j,k;
   double fdesired=(float)v->points/v->entries;
-  long   desired=(v->points+v->entries-1)/v->entries;
+  long   desired=fdesired;
 
   double asserror=0.;
   double meterror=0.;
@@ -250,8 +264,8 @@ void vqgen_rebias(vqgen *v){
   memset(v->assigned,0,sizeof(long)*v->entries);
   for(i=0;i<v->points;i++){
     /* not clear this should be biased */
-    double firstmetric=v->metric_func(v,_now(v,0),_point(v,i));
-    double secondmetric=v->metric_func(v,_now(v,1),_point(v,i));
+    double firstmetric=v->metric_func(v,_now(v,0),_point(v,i))+v->bias[0];
+    double secondmetric=v->metric_func(v,_now(v,1),_point(v,i))+v->bias[1];
     long   firstentry=0;
     long   secondentry=1;
     if(firstmetric>secondmetric){
@@ -263,7 +277,7 @@ void vqgen_rebias(vqgen *v){
     }
       
     for(j=2;j<v->entries;j++){
-      double thismetric=v->metric_func(v,_now(v,j),_point(v,i));
+      double thismetric=v->metric_func(v,_now(v,j),_point(v,i))+v->bias[j];
       if(thismetric<secondmetric){
 	if(thismetric<firstmetric){
 	  secondmetric=firstmetric;
@@ -277,7 +291,7 @@ void vqgen_rebias(vqgen *v){
       }
     }
     v->assigned[firstentry]++;
-    meterror+=firstmetric;
+    meterror+=firstmetric-v->bias[firstentry];
     
     for(j=0;j<v->entries;j++){
       
@@ -873,7 +887,11 @@ int main(int argc,char *argv[]){
   for(i=0;i<10;i++)
     vqgen_recenter(&v);
   
-  for(i=0;i<100;i++){
+  for(i=0;i<200;i++){
+    vqgen_rebias(&v);
+    vqgen_rebias(&v);
+    vqgen_rebias(&v);
+    vqgen_rebias(&v);
     vqgen_rebias(&v);
     vqgen_recenter(&v);
     fprintf(stderr,"%d ",i);
