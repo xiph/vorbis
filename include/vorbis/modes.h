@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.6 2000/02/12 08:33:03 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.7 2000/02/16 22:34:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,17 +37,17 @@
 
 /* a good set of rolloffs for nigh-transparent masking */
 static vorbis_info_psy _psy_set0={
-  { -10, -10, -10, -10, -10, -10, -10, -10, -10, -10,
-    -12, -14, -16, -16, -16, -16, -18, -18, -16, -16,
-    -12, -10, -8, -6, -6, -6, -4}, 24,10
+  { -20, -20, -14, -14, -14, -14, -14, -14, -14, -14,
+    -14, -14, -16, -16, -16, -16, -18, -18, -16, -16,
+    -12, -10, -6, -3, -2, -1, -0}, 16,8
 };
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0={0};
 static vorbis_info_floor0 _floor_set0={20, 44100,  64, 12,140, 1, {0} };
 static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,140, 1, {1} };
-static vorbis_info_residue0 _residue_set0={0, 128, 32,4,4,3,{0,1,1,1},{0,0,0}};
-static vorbis_info_residue0 _residue_set1={0,1024, 32,4,4,3,{0,1,1,1},{0,0,0}};
+static vorbis_info_residue0 _residue_set0={0, 128, 32,4,4,0,{0,1,1,1},{0,0,0}};
+static vorbis_info_residue0 _residue_set1={0,1024, 32,4,4,0,{0,1,1,1},{0,0,0}};
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {1}, {0}};
 static vorbis_info_mode _mode_set0={0,0,0,0};
