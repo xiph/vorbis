@@ -8,7 +8,7 @@
 <appendixinfo>
  <releaseinfo>
   <emphasis>Last update to this document: July 14, 2002</emphasis>
-  $Id: a1-encapsulation_ogg.xml,v 1.2 2002/10/27 14:55:31 giles Exp $
+  $Id: a1-encapsulation_ogg.xml,v 1.3 2003/10/08 01:42:20 giles Exp $
  </releaseinfo>
 </appendixinfo>
 <title>Embedding Vorbis into an Ogg stream</title>
@@ -71,7 +71,7 @@ handling).
 <section><title>MIME type</title>
 
 <para>
-The correct MIME type of any Ogg file is <literal>application/x-ogg</literal>.
+The correct MIME type of any Ogg file is <literal>application/ogg</literal>.
 However, if a file is a Vorbis I audio file (which implies a
 degenerate Ogg stream including only unmultiplexed Vorbis audio), the
 mime type <literal>audio/x-vorbis</literal> is also allowed.</para>
