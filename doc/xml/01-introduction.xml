@@ -7,7 +7,7 @@
 <section id="vorbis-spec-intro">
 <sectioninfo>
 <releaseinfo>
- $Id: 01-introduction.xml,v 1.7 2002/10/27 16:20:47 giles Exp $
+ $Id: 01-introduction.xml,v 1.8 2002/12/19 06:10:12 xiphmont Exp $
 <emphasis>Last update to this document: July 18, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -486,11 +486,11 @@ The use of multirate filter banks for coding of high quality digital
 audio</ulink></citetitle>, by T. Sporer, K. Brandenburg and B. Edler.  Vorbis windows
 all use the slope function 
   <inlineequation>
-    <!-- this equation is incorrect -->
-    <alt>y=sin(2PI*sin^2(x/n))</alt>
+
+    <alt>y=sin(.5*PI*sin^2((x+.5)/n*pi))</alt>
     <inlinemediaobject>
      <textobject>
-      <phrase>$y = \sin(2\pi \, \sin^2(x/n))$</phrase>
+      <phrase>$y = \sin(.5*\pi \, \sin^2((x+.5)/n*\pi))$</phrase>
      </textobject>
     </inlinemediaobject>
   </inlineequation>.
