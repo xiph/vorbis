@@ -12,7 +12,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.16 2001/08/13 01:36:57 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.17 2001/08/21 19:05:06 giles Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,7 @@ static vorbis_info_psy_global _psy_set0G={
 static vp_part _vp_part0[]={
   {    1,9e10f, 9e10f,       1.f,9999.f},
   { 9999,  .75f, 9e10f,       .5f,9999.f},
-  //{ 9999, 1.5f, 9e10f,       .5f,9999.f},
+/*{ 9999, 1.5f, 9e10f,       .5f,9999.f},*/
   {   18,9e10f, 9e10f,       .5f,  30.f},
   { 9999,9e10f, 9e10f,       .5f,  30.f}
 };
