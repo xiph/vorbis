@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.13 2000/11/06 11:55:44 msmith Exp $
+ last mod: $Id: os.h,v 1.14 2000/11/06 20:36:07 jack Exp $
 
  ********************************************************************/
 
@@ -97,20 +97,31 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
 
 #else
 
-static int vorbis_ftoi(double f){
-  return (int)(f+.5);
-}
-
 
 typedef int vorbis_fpu_control;
 
 #ifdef _WIN32
+
+static __inline int vorbis_ftoi(double f){
+	int i;
+	__asm{
+		fld f
+		fistp i
+	}
+	return i;
+}
+
 static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
 }
 
 static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
 }
 #else 
+
+static int vorbis_ftoi(double f){
+  return (int)(f+.5);
+}
+
 /* We don't have special code for this compiler/arch, so do it the slow way */
 #define vorbis_fpu_setround(vorbis_fpu_control) {}
 #define vorbis_fpu_restore(vorbis_fpu_control) {}
