@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.33 2001/08/13 01:36:57 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.34 2001/08/13 10:01:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -71,10 +71,10 @@ void res0_free_look(vorbis_look_residue *i){
 
     vorbis_look_residue0 *look=(vorbis_look_residue0 *)i;
 
-    /*fprintf(stderr,"residue bit usage %f:%f (%f total)\n",
+    fprintf(stderr,"residue bit usage %f:%f (%f total)\n",
 	    (float)look->phrasebits/look->frames,
 	    (float)look->postbits/look->frames,
-	    (float)(look->postbits+look->phrasebits)/look->frames);*/
+	    (float)(look->postbits+look->phrasebits)/look->frames);
 
     /*vorbis_info_residue0 *info=look->info;
 
@@ -531,8 +531,8 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	  /* training hack */
 	  if(val<look->phrasebook->entries)
 	    ret=vorbis_book_encode(look->phrasebook,val,&vb->opb);
-	  /*else
-	    fprintf(stderr,"!");*/
+	  else
+	    fprintf(stderr,"!");
 	  
 	  look->phrasebits+=ret;
 	
@@ -559,7 +559,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     }
   }
 
-  /*{
+  {
     long total=0;
     long totalbits=0;
     fprintf(stderr,"%d :: ",vb->mode);
@@ -568,9 +568,9 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
       total+=resvals[k];
       totalbits+=resbits[k];
     }
-
+    
     fprintf(stderr,":: %ld:%1.2g\n",total,(double)totalbits/total);
-    }*/
+  }
   return(0);
 }
 
