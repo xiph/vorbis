@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.23 2000/08/04 01:05:45 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.24 2000/08/13 13:55:41 msmith Exp $
 
  ********************************************************************/
 
@@ -403,6 +403,7 @@ extern void     vorbis_comment_add(vorbis_comment *vc, char *comment);
 extern void     vorbis_comment_add_tag(vorbis_comment *vc, 
 				       char *tag, char *contents);
 extern char    *vorbis_comment_query(vorbis_comment *vc, char *tag, int count);
+extern int      vorbis_comment_query_count(vorbis_comment *vc, char *tag);
 extern void     vorbis_comment_clear(vorbis_comment *vc);
 
 extern int      vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
