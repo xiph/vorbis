@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.61 2002/03/29 07:58:05 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.62 2002/07/06 04:20:03 msmith Exp $
 
  ********************************************************************/
 
@@ -400,8 +400,8 @@ static void _make_decode_ready(OggVorbis_File *vf){
 }
 
 static int _open_seekable2(OggVorbis_File *vf){
-  long serialno=vf->current_serialno,end;
-  ogg_int64_t dataoffset=vf->offset;
+  long serialno=vf->current_serialno;
+  ogg_int64_t dataoffset=vf->offset, end;
   ogg_page og;
 
   /* we're partially open and have a first link header state in
