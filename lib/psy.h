@@ -18,6 +18,13 @@
 #ifndef _V_PSY_H_
 #define _V_PSY_H_
 
+extern void _vp_psy_init(psy_lookup *p,vorbis_info *vi,int n);
+extern void _vp_psy_clear(psy_lookup *p);
+
+extern void _vp_noise_floor(psy_lookup *p, double *f, double *m);
+extern void _vp_mask_floor(psy_lookup *p,double *f, double *m);
+
+
 extern double _vp_balance_compute(double *A, double *B, double *lpc,
 			   lpc_lookup *vb);
 extern void _vp_balance_apply(double *A, double *B, double *lpc, double amp,

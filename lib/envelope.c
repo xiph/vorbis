@@ -14,7 +14,7 @@
  function: PCM data envelope analysis and manipulation
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 06 1999
+ last modification date: Oct 17 1999
 
  Vorbis manipulates the dynamic range of the incoming PCM data
  envelope to minimise time-domain energy leakage from percussive and
@@ -28,6 +28,7 @@
 #include <math.h>
 
 #include "codec.h"
+#include "mdct.h"
 #include "envelope.h"
 #include "bitwise.h"
 
@@ -98,26 +99,40 @@ static int _ve_envelope_generate(double *mult,double *env,double *look,
   return(1);
 }
 
-/* right now, we do things simple and dirty (read: our current preecho
-   is a joke).  Should this prove inadequate, then we'll think of
-   something different.  The details of the encoding format do not
-   depend on the exact behavior, only the format of the bits that come
-   out.
-
-   Mark Taylor probably has much witter ways of doing this...  Let's
-   see if simple delta analysis gives us acceptible results for now.  */
+/* use MDCT for spectral power estimation */
 
 static void _ve_deltas(double *deltas,double *pcm,int n,double *win,
 		       int winsize){
-  int i,j,p=winsize/2;
+  int i,j;
+  mdct_lookup m;
+  double out[winsize/2];
+
+  mdct_init(&m,winsize);
+
   for(j=0;j<n;j++){
-    p-=winsize/2;
-    for(i=0;i<winsize-1;i++,p++){
-      double temp=fabs(win[i]*pcm[p]-win[i+1]*pcm[p+1]);
-      if(deltas[j]<temp)deltas[j]=temp;
-    }
-    p++;
+    double acc=0.;
+
+    mdct_forward(&m,pcm+j*winsize/2,out,win);
+    for(i=0;i<winsize/2;i++)
+      acc+=fabs(out[i]);
+    if(deltas[j]<acc)deltas[j]=acc;
   }
+
+  mdct_clear(&m);
+
+#ifdef ANALYSIS
+  {
+    static int frameno=0;
+    FILE *out;
+    char buffer[80];
+    
+    sprintf(buffer,"delta%d.m",frameno++);
+    out=fopen(buffer,"w+");
+    for(j=0;j<n;j++)
+      fprintf(out,"%g\n",deltas[j]);
+    fclose(out);
+  }
+#endif
 }
 
 void _ve_envelope_multipliers(vorbis_dsp_state *v){
@@ -171,6 +186,21 @@ void _ve_envelope_sparsify(vorbis_block *vb){
     double clamp;
     int i;
 
+#ifdef ANALYSIS
+    {
+      static int frameno=0.;
+      FILE *out;
+      int j;
+      char buffer[80];
+      
+      sprintf(buffer,"del%d.m",frameno++);
+      out=fopen(buffer,"w+");
+      for(j=0;j<n;j++)
+	fprintf(out,"%g\n",mult[j]);
+      fclose(out);
+    }
+#endif
+
     /* are we going to multiply anything? */
     
     for(i=1;i<n;i++){
@@ -193,12 +223,11 @@ void _ve_envelope_sparsify(vorbis_block *vb){
       
       for(i=0;i<begin;i++)mult[i]=0;
       
-      last=1;
       for(;i<n;i++){
-	if(mult[i]/last>clamp*vi->preecho_thresh){
-	  last=mult[i]/vi->preecho_clamp;
+	if(mult[i]>=last*vi->preecho_thresh){
+	  last=mult[i];
 	  
-	  mult[i]=floor(log(mult[i]/clamp/vi->preecho_clamp)/log(2))-1;
+	  mult[i]=floor(log(mult[i]/clamp)/log(2));
 	  if(mult[i]>15)mult[i]=15;
 	  if(mult[i]<1)mult[i]=1;
 
@@ -208,14 +237,32 @@ void _ve_envelope_sparsify(vorbis_block *vb){
       }  
     }else
       memset(mult,0,sizeof(double)*n);
+
+#ifdef ANALYSIS
+    {
+      static int frameno=0.;
+      FILE *out;
+      int j;
+      char buffer[80];
+      
+      sprintf(buffer,"sparse%d.m",frameno++);
+      out=fopen(buffer,"w+");
+      for(j=0;j<n;j++)
+	fprintf(out,"%g\n",mult[j]);
+      fclose(out);
+    }
+#endif
+
+
   }
 }
 
 void _ve_envelope_apply(vorbis_block *vb,int multp){
+  static int frameno=0;
   vorbis_info *vi=vb->vd->vi;
   double env[vb->multend*vi->envelopesa];
   envelope_lookup *look=&vb->vd->ve;
-  int i,j;
+  int i,j,k;
   
   for(i=0;i<vi->envelopech;i++){
     double *mult=vb->mult[i];
@@ -234,14 +281,49 @@ void _ve_envelope_apply(vorbis_block *vb,int multp){
     /* compute the envelope curve */
     if(_ve_envelope_generate(mult,env,look->window,vb->multend,
 			     vi->envelopesa)){
-      if(multp)
+#ifdef ANALYSIS
+      {
+	FILE *out;
+	char buffer[80];
+	
+	sprintf(buffer,"env%d.m",frameno);
+	out=fopen(buffer,"w+");
 	for(j=0;j<vb->multend*vi->envelopesa;j++)
-	  vb->pcm[i][j]*=env[j];
-      else
+	  fprintf(out,"%g\n",env[j]);
+	fclose(out);
+	sprintf(buffer,"prepcm%d.m",frameno);
+	out=fopen(buffer,"w+");
 	for(j=0;j<vb->multend*vi->envelopesa;j++)
-	  vb->pcm[i][j]/=env[j];
+	  fprintf(out,"%g\n",vb->pcm[i][j]);
+	fclose(out);
+      }
+#endif
 
+      for(k=0;k<vi->channels;k++){
+
+	if(multp)
+	  for(j=0;j<vb->multend*vi->envelopesa;j++)
+	    vb->pcm[k][j]*=env[j];
+	else
+	  for(j=0;j<vb->multend*vi->envelopesa;j++)
+	    vb->pcm[k][j]/=env[j];
+
+      }
+
+#ifdef ANALYSIS
+      {
+	FILE *out;
+	char buffer[80];
+	
+	sprintf(buffer,"pcm%d.m",frameno);
+	out=fopen(buffer,"w+");
+	for(j=0;j<vb->multend*vi->envelopesa;j++)
+	  fprintf(out,"%g\n",vb->pcm[i][j]);
+	fclose(out);
+      }
+#endif
     }
+    frameno++;
   }
 }
 

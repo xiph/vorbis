@@ -197,6 +197,7 @@ int main(){
 	    
 	    while((samples=vorbis_synthesis_pcmout(&vd,&pcm))>0){
 	      int j;
+	      int clipflag=0;
 	      int out=(samples<convsize?samples:convsize);
 	      
 	      /* convert doubles to 16 bit signed ints (host order) and
@@ -207,12 +208,23 @@ int main(){
 		for(j=0;j<out;j++){
 		  int val=rint(mono[j]*32767.);
 		  /* might as well guard clipping */
-		  if(val>32767)val=32767;
-		  if(val<-32768)val=-32768;
+		  if(val>32767){
+		    val=32767;
+		    clipflag=1;
+		  }
+		  if(val<-32768){
+		    val=-32768;
+		    clipflag=1;
+		  }
 		  *ptr=val;
 		  ptr+=2;
 		}
 	      }
+
+	      if(clipflag)
+		fprintf(stderr,"Clipping in frame %ld\n",vd.sequence);
+
+
 	      fwrite(convbuffer,2*vi.channels,out,stdout);
 	      
 	      vorbis_synthesis_read(&vd,out); /* tell libvorbis how

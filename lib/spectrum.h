@@ -19,5 +19,6 @@ extern int  _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp);
 extern void _vs_residue_quantize(double *data,double *curve,
 				 vorbis_info *vi,int n);
 extern int  _vs_residue_encode(vorbis_block *vb,double *data);
+extern int  _vs_residue_decode(vorbis_block *vb,double *data);
 
 #endif

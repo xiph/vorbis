@@ -37,8 +37,9 @@ int vorbis_info_modeset(vorbis_info *vi, int mode){
 
   /* handle the flat settings first */
   memcpy(vi,&(predef_modes[mode]),sizeof(vorbis_info));
+  vi->threshhold_points=threshhold_points;
   vi->user_comments=calloc(1,sizeof(char *));
-  vi->vendor=strdup("Xiphophorus libVorbis I 19991012");
+  vi->vendor=strdup("Xiphophorus libVorbis I 19991018");
 
   return(0);
 }

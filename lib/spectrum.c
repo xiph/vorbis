@@ -14,7 +14,7 @@
  function: spectrum envelope and residue code/decode
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 10 1999
+ last modification date: Oct 17 1999
 
  ********************************************************************/
 
@@ -27,39 +27,57 @@
 /* this code is still seriously abbreviated.  I'm filling in pieces as
    we go... --Monty 19991004 */
 
+/* unlike other LPC-based coders, we never apply the filter, only
+   inspect the frequency response, thus we don't need to guard against
+   instability.  However, two coefficients quantising to the same
+   value will cause the response to explode.  */
+
 int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
   /* no real coding yet.  Just write out full sized words for now
      because people need bitstreams to work with */
 
   int scale=vb->W;
+  int m=vb->vd->vi->floororder[scale];
   int n=vb->pcmend/2;
   int last=0;
+  double dlast=0.;
+  double min=M_PI/n/2.;
+  
   int bits=rint(log(n)/log(2));
   int i;
   
-
   _oggpack_write(&vb->opb,amp*327680,18);
   
-  for(i=0;i<vb->vd->vi->floororder[scale];i++){
+  for(i=0;i<m;i++){
     int val=rint(lsp[i]/M_PI*n-last);
-    lsp[i]=(last+=val)*M_PI/n;
     _oggpack_write(&vb->opb,val,bits);
+    lsp[i]=(last+=val)*M_PI/n;
+
+    /* Underpowered but sufficient */
+    if(lsp[i]<dlast+min)lsp[i]=dlast+min;
+    dlast=lsp[i];
   }
   return(0);
 }
 
 int _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp){
   int scale=vb->W;
+  int m=vb->vd->vi->floororder[scale];
   int n=vb->pcmend/2;
   int last=0;
+  double dlast=0.;
   int bits=rint(log(n)/log(2));
   int i;
+  double min=M_PI/n/2.;
 
   *amp=_oggpack_read(&vb->opb,18)/327680.;
 
-  for(i=0;i<vb->vd->vi->floororder[scale];i++){
+  for(i=0;i<m;i++){
     int val=_oggpack_read(&vb->opb,bits);
     lsp[i]=(last+=val)*M_PI/n;
+    /* Underpowered but sufficient */
+    if(lsp[i]<dlast+min)lsp[i]=dlast+min;
+    dlast=lsp[i];
   }
   return(0);
 }
@@ -77,13 +95,13 @@ void _vs_residue_quantize(double *data,double *curve,
     if(val>16)val=16;
     if(val<-16)val=-16;
 
-    /*if(val==0){
+    if(val==0 || val==2 || val==-2){
       if(data[i]<0){
 	val=-1;
       }else{
 	val=1;
       }
-      }*/
+    }
     
     data[i]=val;
     /*if(val<0){

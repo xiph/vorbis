@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.11 1999/10/10 20:32:17 xiphmont Exp $
+# $Id: Makefile.in,v 1.12 1999/10/18 09:41:07 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -27,7 +27,7 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-HFILES =	mdct.h codec.h bitwise.h envelope.h lpc.h lsp.h modes.h\
+HFILES =	mdct.h codec.h bitwise.h envelope.h lpc.h lsp.h \
 		psy.h smallft.h window.h xlogmap.h
 
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
@@ -41,6 +41,9 @@ all:
 
 debug:	
 	$(MAKE) target CFLAGS="$(DEBUG)"
+
+analysis:	
+	$(MAKE) target CFLAGS="$(DEBUG) -DANALYSIS"
 
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
@@ -69,6 +72,8 @@ libvorbis.a: 	$(LFILES)
 		$(RANLIB) libvorbis.a
 
 $(LFILES): 	$(HFILES)
+
+info.o:		modes.h
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<

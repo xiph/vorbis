@@ -38,6 +38,15 @@
 
 typedef struct {
   int n;
+  struct vorbis_info *vi;
+
+  double *noisethresh;
+  double *maskthresh;
+
+} psy_lookup;
+
+typedef struct {
+  int n;
   int log2n;
   
   double *trig;
@@ -87,6 +96,8 @@ typedef struct {
    compression/decompression mode in progress (eg, psychoacoustic settings,
    channel setup, options, codebook etc) *********************************/
 
+#define THRESH_POINTS 20
+
 typedef struct vorbis_info{
   int channels;
   int rate;
@@ -116,8 +127,20 @@ typedef struct vorbis_info{
     int balanceoctaves; 
     this would likely need to be by channel and blocksize anyway*/
 
+  /* Encode-side settings for analysis */
+
   double preecho_thresh;
   double preecho_clamp;
+
+  double *threshhold_points;
+  double noisethresh[THRESH_POINTS];
+  double lnoise;
+  double hnoise;
+  double noisebias;
+  double maskthresh[THRESH_POINTS];
+  double lroll;
+  double hroll;
+  double maskbias;
 
   /* local storage, only used on the encoding size.  This way the
      application does not need to worry about freeing some packets'
@@ -206,6 +229,7 @@ typedef struct vorbis_dsp_state{
   mdct_lookup vm[2];
   lpc_lookup vl[2];
   lpc_lookup vbal[2];
+  psy_lookup vp[2];
 
   double **pcm;
   double **pcmret;
@@ -224,8 +248,8 @@ typedef struct vorbis_dsp_state{
   long nW;
   long centerW;
 
-  long frame;
-  long samples;
+  long frameno;
+  long sequence;
 
   size64 gluebits;
   size64 time_envelope_bits;
@@ -262,6 +286,7 @@ typedef struct vorbis_block{
 
   int eofflag;
   int frameno;
+  int sequence;
   vorbis_dsp_state *vd; /* For read-only access of configuration */
 
   long gluebits;

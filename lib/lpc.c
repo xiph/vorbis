@@ -67,7 +67,7 @@ double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l){
   int n=l->ln;
   int m=l->m;
   double aut[m+1],work[n+n],error;
-  double fscale=1./n;
+  double fscale=.5/n;
   int i,j;
   
   /* input is a real curve. make it complex-real */
@@ -181,8 +181,8 @@ void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
   for(i=0;i<n;i++){
     /* how much 'real estate' in the log domain does the bin in the
        linear domain represent? */
-    double logA=LOG_X(i-.5,bias);
-    double logB=LOG_X(i+.5,bias);
+    double logA=LOG_X(i,bias);
+    double logB=LOG_X(i+1.,bias);
     l->norm[i]=logB-logA;  /* this much */
   }
 
@@ -202,12 +202,9 @@ void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
   /* decode; encode may use this too */
   
   drft_init(&l->fft,mapped*2);
-  {
-    double w=1./oct*M_PI;
-    for(i=0;i<n;i++){
-      l->iscale[i]=rint(LOG_X(i,bias)/oct*mapped);
-      if(l->iscale[i]>=l->ln)l->iscale[i]=l->ln-1;
-    }
+  for(i=0;i<n;i++){
+    l->iscale[i]=rint(LOG_X(i,bias)/oct*mapped);
+    if(l->iscale[i]>=l->ln)l->iscale[i]=l->ln-1;
   }
 }
 
@@ -264,11 +261,12 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
    optimization; it could both be more precise as well as not compute
    quite a few unused values */
 
-static void _vlpc_de_helper(double *curve,double *lpc,double amp,
+void _vlpc_de_helper(double *curve,double *lpc,double amp,
 			    lpc_lookup *l){
   int i;
   memset(curve,0,sizeof(double)*l->ln*2);
-  
+  if(amp==0)return;
+
   for(i=0;i<l->m;i++){
     curve[i*2+1]=lpc[i]/4/amp;
     curve[i*2+2]=-lpc[i]/4/amp;
@@ -279,7 +277,7 @@ static void _vlpc_de_helper(double *curve,double *lpc,double amp,
   {
     int l2=l->ln*2;
     double unit=1./amp;
-    curve[0]=(1./(curve[0]+unit));
+    curve[0]=(1./(curve[0]*2+unit));
     for(i=1;i<l->ln;i++){
       double real=(curve[i]+curve[l2-i]);
       double imag=(curve[i]-curve[l2-i]);
@@ -296,6 +294,7 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
   int i;
 
   _vlpc_de_helper(lcurve,lpc,amp,l);
+  if(amp==0)return;
 
   for(i=0;i<l->n;i++)
     curve[i]=lcurve[l->iscale[i]]*l->norm[i];
@@ -305,9 +304,15 @@ void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
   double lcurve[l->ln*2];
   int i;
 
-  _vlpc_de_helper(lcurve,lpc,amp,l);
+  if(amp==0){
+    memset(residue,0,l->n*sizeof(double));
+  }else{
+    
+    _vlpc_de_helper(lcurve,lpc,amp,l);
 
-  for(i=0;i<l->n;i++)
-    residue[i]*=lcurve[l->iscale[i]]*l->norm[i];
+    for(i=0;i<l->n;i++)
+      residue[i]*=lcurve[l->iscale[i]]*l->norm[i];
+  }
 }
+
 

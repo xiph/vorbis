@@ -14,7 +14,7 @@
  function: single-block PCM analysis
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 7 1999
+ last modification date: Oct 15 1999
 
  ********************************************************************/
 
@@ -34,10 +34,9 @@
    we go... --Monty 19991004 */
 
 int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
-  static int frameno=0;
-  
   int i;
   double           *window=vb->vd->window[vb->W][vb->lW][vb->nW];
+  psy_lookup       *vp=&vb->vd->vp[vb->W];
   lpc_lookup       *vl=&vb->vd->vl[vb->W];
   vorbis_dsp_state *vd=vb->vd;
   vorbis_info      *vi=vd->vi;
@@ -45,6 +44,11 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 
   int              n=vb->pcmend;
   int              spectral_order=vi->floororder[vb->W];
+
+  vb->gluebits=0;
+  vb->time_envelope_bits=0;
+  vb->spectral_envelope_bits=0;
+  vb->spectral_residue_bits=0;
 
   /*lpc_lookup       *vbal=&vb->vd->vbal[vb->W];
     double balance_v[vbal->m];
@@ -74,6 +78,8 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   /* just do by channel.  No coupling yet */
   {
     for(i=0;i<vi->channels;i++){
+      static int frameno=0;
+      int j;
       double floor[n/2];
       double curve[n/2];
       double *lpc=vb->lpc[i];
@@ -81,8 +87,41 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 
       memset(floor,0,sizeof(double)*n/2);
       
-      _vp_noise_floor(vb->pcm[i],floor,n/2);
-      _vp_mask_floor(vb->pcm[i],floor,n/2);
+      _vp_noise_floor(vp,vb->pcm[i],floor);
+
+#ifdef ANALYSIS
+      {
+	FILE *out;
+	char buffer[80];
+	
+	sprintf(buffer,"spectrum.m");
+	out=fopen(buffer,"w+");
+	for(j=0;j<n/2;j++)
+	  fprintf(out,"%g\n",vb->pcm[i][j]);
+	fclose(out);
+
+	sprintf(buffer,"noise.m");
+	out=fopen(buffer,"w+");
+	for(j=0;j<n/2;j++)
+	  fprintf(out,"%g\n",floor[j]);
+	fclose(out);
+      }
+#endif
+
+      _vp_mask_floor(vp,vb->pcm[i],floor);
+
+#ifdef ANALYSIS
+      {
+	FILE *out;
+	char buffer[80];
+	
+	sprintf(buffer,"premask.m");
+	out=fopen(buffer,"w+");
+	for(j=0;j<n/2;j++)
+	  fprintf(out,"%g\n",floor[j]);
+	fclose(out);
+      }
+#endif
 
       /* Convert our floor to a set of lpc coefficients */
       vb->amp[i]=sqrt(vorbis_curve_to_lpc(floor,lpc,vl));
@@ -103,6 +142,25 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
       
       /* this may do various interesting massaging too...*/
       _vs_residue_quantize(vb->pcm[i],curve,vi,n/2);
+
+#ifdef ANALYSIS
+      {
+	FILE *out;
+	char buffer[80];
+	
+	sprintf(buffer,"mask.m");
+	out=fopen(buffer,"w+");
+	for(j=0;j<n/2;j++)
+	  fprintf(out,"%g\n",curve[j]);
+	fclose(out);
+
+	sprintf(buffer,"res.m");
+	out=fopen(buffer,"w+");
+	for(j=0;j<n/2;j++)
+	  fprintf(out,"%g\n",vb->pcm[i][j]);
+	fclose(out);
+      }
+#endif
 
       /* encode the residue */
       _vs_residue_encode(vb,vb->pcm[i]);

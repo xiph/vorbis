@@ -28,7 +28,6 @@
 #include "spectrum.h"
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  static int frameno=0;
   vorbis_dsp_state *vd=vb->vd;
   vorbis_info      *vi=vd->vi;
   oggpack_buffer   *opb=&vb->opb;

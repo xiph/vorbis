@@ -14,7 +14,7 @@
  function: PCM data vector blocking, windowing and dis/reassembly
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 2 1999
+ last modification date: Oct 15 1999
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -32,6 +32,8 @@
 #include "envelope.h"
 #include "mdct.h"
 #include "lpc.h"
+#include "bitwise.h"
+#include "psy.h"
 
 /* pcm accumulator examples (not exhaustive):
 
@@ -199,12 +201,15 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   /* the coder init is different for read/write */
   v->analysisp=1;
+  _vp_psy_init(&v->vp[0],vi,vi->blocksize[0]/2);
+  _vp_psy_init(&v->vp[1],vi,vi->blocksize[1]/2);
 
   /* Yes, wasteful to have four lookups.  This will get collapsed once
      things crystallize */
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/8,
+
+  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/2,
 	   vi->floororder[0],vi->flooroctaves[0],1);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/8,
+  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/2,
 	   vi->floororder[0],vi->flooroctaves[0],1);
 
   /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
@@ -240,6 +245,8 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     mdct_clear(&v->vm[1]);
     lpc_clear(&v->vl[0]);
     lpc_clear(&v->vl[1]);
+    _vp_psy_clear(&v->vp[0]);
+    _vp_psy_clear(&v->vp[1]);
     /*lpc_clear(&v->vbal[0]);
       lpc_clear(&v->vbal[1]);*/
     memset(v,0,sizeof(vorbis_dsp_state));
@@ -394,7 +401,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     memcpy(vb->mult[i],v->multipliers[i]+beginM,vi->blocksize[v->W]/
 	   vi->envelopesa*sizeof(double));
 
-  vb->frameno=v->frame;
+  vb->sequence=v->sequence;
+  vb->frameno=v->frameno;
 
   /* handle eof detection: eof==0 means that we've not yet received EOF
                            eof>0  marks the last 'real' sample in pcm[]
@@ -433,8 +441,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     v->W=v->nW;
     v->centerW=new_centerNext;
 
-    v->frame++;
-    v->samples+=movementW;
+    v->sequence++;
+    v->frameno+=movementW;
 
     if(v->eofflag)
       v->eofflag-=movementW;
@@ -452,9 +460,9 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   /* Yes, wasteful to have four lookups.  This will get collapsed once
      things crystallize */
-  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/8,
+  lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/2,
 	   vi->floororder[0],vi->flooroctaves[0],0);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/8,
+  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[0]/2,
 	   vi->floororder[1],vi->flooroctaves[1],0);
   /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
 	   vi->balanceorder,vi->balanceoctaves,0);
@@ -477,6 +485,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* Shift out any PCM that we returned previously */
 
+  v->sequence++;
   if(v->pcm_returned  && v->centerW>vi->blocksize[1]/2){
 
     /* don't shift too much; we need to have a minimum PCM buffer of
@@ -499,6 +508,11 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
   v->lW=v->W;
   v->W=vb->W;
+
+  v->gluebits+=vb->gluebits;
+  v->time_envelope_bits+=vb->time_envelope_bits;
+  v->spectral_envelope_bits+=vb->spectral_envelope_bits;
+  v->spectral_residue_bits+=vb->spectral_residue_bits;
 
   {
     int sizeW=vi->blocksize[v->W];
