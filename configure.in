@@ -185,7 +185,8 @@ AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
 XIPH_PATH_OGG(, AC_MSG_ERROR(must have Ogg installed!))
-dnl AC_CHECK_LIB(ogg, oggpack_writealign, , AC_MSG_ERROR(Ogg >= 1.0 required !))
+LIBS="$LIBS $OGG_LIBS"
+AC_CHECK_FUNC(oggpack_writealign, , AC_MSG_ERROR(Ogg >= 1.0 required !))
 
 dnl --------------------------------------------------
 dnl Check for library functions
@@ -197,8 +198,6 @@ AC_FUNC_MEMCMP
 dnl --------------------------------------------------
 dnl Do substitutions
 dnl --------------------------------------------------
-
-LIBS="$LIBS $OGG_LIBS"
 
 AC_SUBST(LIBS)
 AC_SUBST(DEBUG)
