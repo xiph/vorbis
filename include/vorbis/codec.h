@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.33.2.1 2000/12/27 23:46:34 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.33.2.2 2001/01/15 00:35:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -89,7 +89,6 @@ typedef struct vorbis_dsp_state{
 typedef struct vorbis_block{
   /* necessary stream state for linking to the framing abstraction */
   float  **pcm;       /* this is a pointer into local storage */ 
-  float  **pcmdelay;  /* this is a pointer into local storage */ 
   oggpack_buffer opb;
   
   long  lW;
@@ -116,6 +115,8 @@ typedef struct vorbis_block{
   long time_bits;
   long floor_bits;
   long res_bits;
+
+  void *internal;
 
 } vorbis_block;
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.3.2.1 2000/12/27 23:46:35 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.3.2.2 2001/01/15 00:35:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,11 @@
 #include "codebook.h"
 #include "psy.h"
 #include "bitbuffer.h"
+
+typedef struct vorbis_block_internal{
+  float  **pcmdelay;  /* this is a pointer into local storage */ 
+  float  ampmax;
+} vorbis_block_internal;
 
 typedef void vorbis_look_time;
 typedef void vorbis_look_mapping;
@@ -48,6 +53,8 @@ typedef struct backend_lookup_state {
   unsigned char *header;
   unsigned char *header1;
   unsigned char *header2;
+
+  float ampmax;
 
 } backend_lookup_state;
 
@@ -107,6 +114,8 @@ typedef struct codec_setup_info {
   float     preecho_thresh;
   float     postecho_thresh;
   float     preecho_minenergy;
+
+  float     ampmax_att_per_sec;
 
   /* delay caching... how many samples to keep around prior to our
      current block to aid in analysis? */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.23.2.1 2001/01/09 19:13:15 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.23.2.2 2001/01/15 00:35:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -210,7 +210,7 @@ static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
   return(i);
 }
 
-static int _encodepart(vorbis_bitbuffer *vbb,float *vec, int n,
+static int _encodepart(oggpack_buffer *opb,float *vec, int n,
 		       int stages, codebook **books,int mode,int part){
   int i,j=0,bits=0;
   if(stages){
@@ -228,7 +228,7 @@ static int _encodepart(vorbis_bitbuffer *vbb,float *vec, int n,
 	fclose(f);
       }
 #endif
-      bits+=vorbis_book_encode(books[j],entry,vbb);
+      bits+=vorbis_book_encode(books[j],entry,opb);
     }
   }
   return(bits);
@@ -305,7 +305,7 @@ int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
       long val=partword[j][l];
       for(k=1;k<partitions_per_word;k++)
 	val= val*possible_partitions+partword[j][l+k];
-      phrasebits+=vorbis_book_encode(look->phrasebook,val,vbb);
+      phrasebits+=vorbis_book_encode(look->phrasebook,val,&vb->opb);
     }
     /* now we encode interleaved residual values for the partitions */
     for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition)

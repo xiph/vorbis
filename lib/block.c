@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.42.2.2 2001/01/09 19:13:14 xiphmont Exp $
+ last mod: $Id: block.c,v 1.42.2.3 2001/01/15 00:35:36 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 
 #include "window.h"
 #include "envelope.h"
@@ -33,6 +34,7 @@
 #include "codebook.h"
 #include "misc.h"
 #include "os.h"
+#include "psy.h"
 
 static int ilog2(unsigned int v){
   int ret=0;
@@ -92,9 +94,12 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   vb->vd=v;
   vb->localalloc=0;
   vb->localstore=NULL;
-  if(v->analysisp)
+  if(v->analysisp){
     oggpack_writeinit(&vb->opb);
-
+    vb->internal=_ogg_calloc(1,sizeof(vorbis_block_internal));
+    ((vorbis_block_internal *)vb->internal)->ampmax=-9999;
+  }
+  
   return(0);
 }
 
@@ -150,6 +155,7 @@ int vorbis_block_clear(vorbis_block *vb){
       oggpack_writeclear(&vb->opb);
   _vorbis_block_ripcord(vb);
   if(vb->localstore)_ogg_free(vb->localstore);
+  if(vb->internal)_ogg_free(vb->internal);
 
   memset(vb,0,sizeof(vorbis_block));
   return(0);
@@ -169,6 +175,7 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
   v->vi=vi;
   b->modebits=ilog2(ci->modes);
+  b->ampmax=-9999;
 
   b->transform[0]=_ogg_calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
   b->transform[1]=_ogg_calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
@@ -529,16 +536,24 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   vb->sequence=v->sequence;
   vb->granulepos=v->granulepos;
   vb->pcmend=ci->blocksizes[v->W];
+
   
   /* copy the vectors; this uses the local storage in vb */
   {
+    vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
+
+    /* this tracks 'strongest peak' for later psychoacoustics */
+    if(vbi->ampmax>b->ampmax)b->ampmax=vbi->ampmax;
+    b->ampmax=_vp_ampmax_decay(b->ampmax,v);
+    vbi->ampmax=b->ampmax;
+
     vb->pcm=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
-    vb->pcmdelay=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
+    vbi->pcmdelay=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
     for(i=0;i<vi->channels;i++){
-      vb->pcmdelay[i]=
+      vbi->pcmdelay[i]=
 	_vorbis_block_alloc(vb,(vb->pcmend+beginW)*sizeof(float));
-      memcpy(vb->pcmdelay[i],v->pcm[i],(vb->pcmend+beginW)*sizeof(float));
-      vb->pcm[i]=vb->pcmdelay[i]+beginW;
+      memcpy(vbi->pcmdelay[i],v->pcm[i],(vb->pcmend+beginW)*sizeof(float));
+      vb->pcm[i]=vbi->pcmdelay[i]+beginW;
       
       /* before we added the delay 
       vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(float));

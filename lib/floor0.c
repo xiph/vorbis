@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.34.2.2 2001/01/09 19:13:14 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.34.2.3 2001/01/15 00:35:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -335,7 +335,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
       booknum=0;
 
     b=be->fullbooks+info->books[booknum];
-    bitbuf_write(vbb,booknum,_ilog(info->numbooks));
+    oggpack_write(&vb->opb,booknum,_ilog(info->numbooks));
 
 
 #ifdef TRAIN_LSP
@@ -360,7 +360,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 
     for(j=0;j<look->m;j+=b->dim){
       int entry=_f0_fit(b,flr,lspwork,j);
-      bits+=vorbis_book_encode(b,entry,)&vb->opb;
+      bits+=vorbis_book_encode(b,entry,&vb->opb);
 
 #ifdef TRAIN_LSP
       fprintf(ef,"%d,\n",entry);

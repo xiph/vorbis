@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.22.2.2 2001/01/09 19:13:15 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.22.2.3 2001/01/15 00:35:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -203,13 +203,14 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 /* no time mapping implementation for now */
 static long seq=0;
 static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
-  vorbis_dsp_state     *vd=vb->vd;
-  vorbis_info          *vi=vd->vi;
-  backend_lookup_state *b=vb->vd->backend_state;
-  vorbis_look_mapping0 *look=(vorbis_look_mapping0 *)l;
-  vorbis_info_mapping0 *info=look->map;
-  vorbis_info_mode     *mode=look->mode;
-  int                   n=vb->pcmend;
+  vorbis_dsp_state      *vd=vb->vd;
+  vorbis_info           *vi=vd->vi;
+  backend_lookup_state  *b=vb->vd->backend_state;
+  vorbis_look_mapping0  *look=(vorbis_look_mapping0 *)l;
+  vorbis_info_mapping0  *info=look->map;
+  vorbis_info_mode      *mode=look->mode;
+  vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
+  int                    n=vb->pcmend;
   int i,j;
   float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
 
@@ -219,15 +220,13 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   float **floor=_vorbis_block_alloc(vb,vi->channels*sizeof(float *));
   float *additional=_vorbis_block_alloc(vb,n*sizeof(float));
+  float newmax=vbi->ampmax;
 
-  for(i=0;i<vi->channels;i++)
-    bitbuf_init(vbb_flr+i,vb);
-  bitbuf_init(&vbb_res,vb);
-  
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
     float scale=4.f/n;
     int submap=info->chmuxlist[i];
+    float ret;
 
     _analysis_output("pcm",seq,pcm,n,0,0);
 
@@ -262,8 +261,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     //_analysis_output("lmdct",seq,additional+n/2,n/2,0,0);
 
     /* perform psychoacoustics; do masking */
-    _vp_compute_mask(look->psy_look+submap,additional,additional+n/2,
-		     floor[i],NULL);
+    ret=_vp_compute_mask(look->psy_look+submap,additional,additional+n/2,
+			 floor[i],NULL,vbi->ampmax);
+    if(ret>newmax)newmax=ret;
 
     _analysis_output("prefloor",seq,floor[i],n/2,0,0);
     
@@ -295,6 +295,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     
   }
     
+  vbi->ampmax=newmax;
+
   /* perform residue encoding with residue mapping; this is
      multiplexed.  All the channels belonging to one submap are
      encoded (values interleaved), then the next submap, etc */

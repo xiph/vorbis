@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.34.2.2 2001/01/09 19:13:15 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.34.2.3 2001/01/15 00:35:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,7 @@
 #include <math.h>
 #include <string.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 
 #include "masking.h"
 #include "psy.h"
@@ -421,7 +422,6 @@ static void bound_loop(vorbis_look_psy *p,
 		       float *seeds,
 		       float *flr,
 		       float att){
-  vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
 
   long off=(p->eighth_octave_lines>>1)+p->firstoc;
@@ -493,7 +493,7 @@ static void seed_chase(float *seeds, int linesper, long n){
 /* bleaugh, this is more complicated than it needs to be */
 static void max_seeds(vorbis_look_psy *p,float *minseed,float *maxseed,
 		      float *flr){
-  long   n=p->total_octave_lines,i;
+  long   n=p->total_octave_lines;
   int    linesper=p->eighth_octave_lines;
   long   linpos=0;
   long   pos;
@@ -587,11 +587,12 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 
 }
 
-void _vp_compute_mask(vorbis_look_psy *p,
+float _vp_compute_mask(vorbis_look_psy *p,
 		      float *fft, 
 		      float *mdct, 
 		      float *flr, 
-		      float *decay){
+		      float *decay,
+		      float prev_maxamp){
   int i,n=p->n;
   float specmax=NEGINF;
   static int seq=0;
@@ -605,6 +606,9 @@ void _vp_compute_mask(vorbis_look_psy *p,
     fft[i]=todB(fft[i]);
     if(fft[i]>specmax)specmax=fft[i];
   }
+  if(specmax<prev_maxamp)specmax=prev_maxamp;
+
+
   for(i=0;i<n;i++){
     mdct[i]=todB(mdct[i]);
   }
@@ -661,6 +665,8 @@ void _vp_compute_mask(vorbis_look_psy *p,
 
 
   seq++;
+
+  return(specmax);
 }
 
 
@@ -682,7 +688,16 @@ void _vp_apply_floor(vorbis_look_psy *p,float *f, float *flr){
   memcpy(f,work,p->n*sizeof(float));
 }
 
+float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
+  vorbis_info *vi=vd->vi;
+  codec_setup_info *ci=vi->codec_setup;
+  int n=ci->blocksizes[vd->W]/2;
+  float secs=(float)n/vi->rate;
 
+  amp+=secs*ci->ampmax_att_per_sec;
+  if(amp<-9999)amp=-9999;
+  return(amp);
+}
 
 
 
