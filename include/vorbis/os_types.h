@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os_types.h,v 1.6 2000/07/07 06:16:24 xiphmont Exp $
+ last mod: $Id: os_types.h,v 1.7 2000/08/30 01:40:12 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,7 +26,7 @@ typedef __int16 int16_t;
 #define vorbis_size32_t int
 #else
 #include <_G_config.h>
-pedef _G_int64_t int64_t;
+typedef _G_int64_t int64_t;
 typedef _G_int32_t int32_t;
 typedef _G_int16_t int16_t;
 #endif
