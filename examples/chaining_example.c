@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id: chaining_example.c,v 1.13.2.1 2001/11/22 06:19:52 xiphmont Exp $
+ last mod: $Id: chaining_example.c,v 1.13.2.2 2001/11/22 06:21:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,8 +61,6 @@ int main(){
     printf("\t\theader length: %ld bytes\n",(long)
 	   (ov.dataoffsets[i]-ov.offsets[i]));
     printf("\t\tcompressed length: %ld bytes\n",(long)(ov_raw_total(&ov,i)));
-    printf("\t\tuncompressed length: %ld bytes\n",
-	   (long)(ov_pcm_total(&ov,i))*vi->channels*2+44);
     printf("\t\tplay time: %lds\n",(long)ov_time_total(&ov,i));
   }
 

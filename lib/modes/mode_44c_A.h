@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_A.h,v 1.4.2.8 2001/10/22 07:34:22 xiphmont Exp $
+ last mod: $Id: mode_44c_A.h,v 1.4.2.9 2001/11/22 06:21:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -79,6 +79,19 @@
 #include "books/res_Ac_9b.vqh"
 
 #include "maskadj_A.h"
+
+static bitrate_manager_info _bm_set_44c_A={
+  /* progressive coding and bitrate controls */
+            110000,90000,     -1,-1,
+  2.,.5,
+  1.,       112000,           140000,  
+            124000,           128000,
+           
+  4.0, 0.,  -1.,              .05, 
+            -.05,             .05,
+  3.0,5.0,
+  -10.f,+4.f
+};
 
 static vorbis_info_psy_global _psy_set_44c_AG={
   0, /* decaydBpms */
@@ -377,14 +390,7 @@ codec_setup_info info_44c_A={
   /* psy */
   {&_psy_set_44c_A0,&_psy_set_44c_AT,&_psy_set_44c_A},
   &_psy_set_44c_AG,
-
-  /* progressive coding and bitrate controls */
-            110000,90000,     0,0,
-  3.,       112000,           140000,  
-            124000,           128000,
-           
-  4.0, 0.,  -1.,              .05, 
-            -.05,             .05,
+  &_bm_set_44c_A,
 
   {3,4,6,8},
   4,

@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.9.4.5 2001/11/16 08:17:06 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.9.4.6 2001/11/22 06:21:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,8 @@
 typedef struct vorbis_block_internal{
   float  **pcmdelay;  /* this is a pointer into local storage */ 
   float  ampmax;
+
+  ogg_uint32_t *packet_markers;
 } vorbis_block_internal;
 
 typedef void vorbis_look_time;
@@ -45,7 +47,7 @@ typedef void vorbis_info_residue;
 typedef void vorbis_info_mapping;
 
 #include "psy.h"
-#inclide "bitrate.h"
+#include "bitrate.h"
 
 typedef struct backend_lookup_state {
   /* local lookup storage */

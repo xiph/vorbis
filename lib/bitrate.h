@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.h,v 1.1.2.1 2001/11/16 08:17:06 xiphmont Exp $
+ last mod: $Id: bitrate.h,v 1.1.2.2 2001/11/22 06:21:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,10 +59,8 @@ typedef struct bitrate_manager_state {
   long           noisetrigger_request;
 
   /* unfortunately, we need to hold queued packet data somewhere */
-  unsigned char *packetdoublebuffer[2];
-  unsigned char doublebufferhead[2];
-  unsigned char doublebuffertail[2];
-  oggpack_buffer *queue_packets;
+  oggpack_buffer *queue_packet_buffers;
+  ogg_packet     *queue_packets;
 
 } bitrate_manager_state;
 
@@ -74,6 +72,7 @@ typedef struct bitrate_manager_info{
   double absolute_max_long;
 
   double queue_avg_time;
+  double queue_avg_center;
   double queue_minmax_time;
   double queue_hardmin;
   double queue_hardmax;
@@ -94,7 +93,9 @@ typedef struct bitrate_manager_info{
 
 extern void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bs);
 extern void vorbis_bitrate_clear(bitrate_manager_state *bs);
+extern int vorbis_bitrate_managed(vorbis_block *vb);
+extern int vorbis_bitrate_maxmarkers(void);
 extern int vorbis_bitrate_addblock(vorbis_block *vb);
-extern int vorbis_bitrate_flushpacket(vorbis_block *vb, vorbis_packet *op);
+extern int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd, ogg_packet *op);
 
 #endif
