@@ -14,7 +14,7 @@
  function: build a VQ codebook 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Nov 11 1999
+ last modification date: Nov 18 1999
 
  ********************************************************************/
 
@@ -36,7 +36,7 @@
  * they converge (if the damping is dome properly) on a steady-state
  * solution.
  *
- * We use the ratio of local to average error as the metric to bias a
+ * We use the ratio of local to average 'error' as the metric to bias a
  * variable-length word codebook, and probability of occurrence within
  * that bubble as the metric to bias fixed length word
  * codebooks. Individual input points, collected from libvorbis, are
@@ -44,9 +44,12 @@
 
 typedef struct vqgen{
   int    elements;
+  double errspread;
 
   /* point cache */
   double *pointlist; 
+  long   *first;
+  long   *second;
   long   points;
   long   allocated;
 
@@ -54,12 +57,11 @@ typedef struct vqgen{
   double *entry_now;
   double *entry_next;
   long   *assigned;
-  double *error;
+  double *metric;
   double *bias;
   long   entries;
 
-  double (*error_func)   (struct vqgen *v,double *a,double *b);
-  double (*bias_func)     (struct vqgen *v,int entry);
+  double (*metric_func)   (struct vqgen *v,double *a,double *b);
 } vqgen;
 
 /* internal helpers *****************************************************/
@@ -75,46 +77,42 @@ double *_next(vqgen *v,long ptr){
   return v->entry_next+(v->elements*ptr);
 }
 
-double _error_func(vqgen *v,double *a, double *b){
+double _dist_sq(vqgen *v,double *a, double *b){
   int i;
   int el=v->elements;
   double acc=0.;
-  for(i=0;i<el;i++)
-    acc+=(a[i]-b[i])*(a[i]-b[i]);
+  for(i=0;i<el;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
   return acc;
 }
 
-double _vqgen_distance(vqgen *v,double *a, double *b){
-  int i;
-  double acc=0.;
-  for(i=0;i<v->elements;i++)acc+=(a[i]-b[i])*(a[i]-b[i]);
-  return sqrt(acc);
-}
-
-void vqgen_init(vqgen *v,int elements,int entries){
+void vqgen_init(vqgen *v,int elements,int entries,
+		double (*metric)(vqgen *,double *, double *),
+		double spread){
   memset(v,0,sizeof(vqgen));
 
   v->elements=elements;
-  v->allocated=8192;
+  v->errspread=spread;
+  v->allocated=32768;
   v->pointlist=malloc(v->allocated*v->elements*sizeof(double));
+  v->first=malloc(v->allocated*sizeof(long));
+  v->second=malloc(v->allocated*sizeof(long));
 
   v->entries=entries;
   v->entry_now=malloc(v->entries*v->elements*sizeof(double));
   v->entry_next=malloc(v->entries*v->elements*sizeof(double));
   v->assigned=malloc(v->entries*sizeof(long));
-  v->error=malloc(v->entries*sizeof(double));
-  v->bias=malloc(v->entries*sizeof(double));
-  {
-    int i;
-    for(i=0;i<v->entries;i++)
-      v->bias[i]=10.;
-  }
-  
-  /*v->lasterror=-1;*/
-
-  v->error_func=_error_func;
+  v->metric=malloc(v->entries*sizeof(double));
+  v->bias=calloc(v->entries,sizeof(double));
+  if(metric)
+    v->metric_func=metric;
+  else
+    v->metric_func=_dist_sq;
 }
 
+/* *must* be beefed up.  Perhaps a Floyd-Steinberg like scattering? */
 void _vqgen_seed(vqgen *v){
   memcpy(v->entry_now,v->pointlist,sizeof(double)*v->entries*v->elements);
 }
@@ -123,6 +121,8 @@ void vqgen_addpoint(vqgen *v, double *p){
   if(v->points>=v->allocated){
     v->allocated*=2;
     v->pointlist=realloc(v->pointlist,v->allocated*v->elements*sizeof(double));
+    v->first=realloc(v->first,v->allocated*sizeof(long));
+    v->second=realloc(v->second,v->allocated*sizeof(long));
   }
   
   memcpy(_point(v,v->points),p,sizeof(double)*v->elements);
@@ -130,20 +130,27 @@ void vqgen_addpoint(vqgen *v, double *p){
   if(v->points==v->entries)_vqgen_seed(v);
 }
 
+double *sort_t_vals;
+int sort_t_compare(const void *ap,const void *bp){
+  long a=*(long *)ap;
+  long b=*(long *)bp;
+  double val=sort_t_vals[a]-sort_t_vals[b];
+  if(val<0)return(1);
+  if(val>0)return(-1);
+  return(0);
+}
+
 void vqgen_iterate(vqgen *v,int biasp){
   static int iteration=0;
   long i,j;
-  double averror=0.;
-  double realerror=0.;
-  double *distance=alloca(sizeof(double)*v->entries);
+  double avmetric=0.;
 
+  FILE *as;
   FILE *graph;
   FILE *err;
   FILE *bias;
-  FILE *assi;
   char name[80];
   
-  memset(distance,0,sizeof(double)*v->entries);
 
   sprintf(name,"space%d.m",iteration);
   graph=fopen(name,"w");
@@ -155,41 +162,58 @@ void vqgen_iterate(vqgen *v,int biasp){
   bias=fopen(name,"w");
 
   sprintf(name,"as%d.m",iteration);
-  assi=fopen(name,"w");
+  as=fopen(name,"w");
 
 
   /* init */
   memset(v->entry_next,0,sizeof(double)*v->elements*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
-  memset(v->error,0,sizeof(double)*v->entries);
+  memset(v->metric,0,sizeof(double)*v->entries);
 
-  /* assign all the points, accumulate error */
+  if(v->entries<2)exit(1);
+
+  /* assign all the points, accumulate metric */
   for(i=0;i<v->points;i++){
-    double besterror=v->error_func(v,_now(v,0),_point(v,i))+v->bias[0];
-    long   bestentry=0;
-    for(j=1;j<v->entries;j++){
-      double thiserror=v->error_func(v,_now(v,j),_point(v,i))+v->bias[j];
-      if(thiserror<besterror){
-	besterror=thiserror;
-	bestentry=j;
+    double firstmetric=v->metric_func(v,_now(v,0),_point(v,i))+v->bias[0];
+    double secondmetric=v->metric_func(v,_now(v,1),_point(v,i))+v->bias[1];
+    long   firstentry=0;
+    long   secondentry=0;
+    
+    if(firstmetric>secondmetric){
+      double tempmetric=firstmetric;
+      firstmetric=secondmetric;
+      secondmetric=tempmetric;
+      firstentry=1;
+      secondentry=1;
+    }
+
+    for(j=2;j<v->entries;j++){
+      double thismetric=v->metric_func(v,_now(v,j),_point(v,i))+v->bias[j];
+      if(thismetric<secondmetric){
+	if(thismetric<firstmetric){
+	  secondmetric=firstmetric;
+	  secondentry=firstentry;
+	  firstmetric=thismetric;
+	  firstentry=j;
+	}else{
+	  secondmetric=thismetric;
+	  secondentry=j;
+	}
       }
     }
     
-    v->error[bestentry]+=v->error_func(v,_now(v,bestentry),_point(v,i));
-    distance[bestentry]+=_vqgen_distance(v,_now(v,bestentry),_point(v,i));
-    realerror+=sqrt(v->error_func(v,_now(v,bestentry),_point(v,i))/v->elements);
-    v->assigned[bestentry]++;
-    {
-      double *n=_next(v,bestentry);
-      double *p=_point(v,i);
-      for(j=0;j<v->elements;j++)
-	n[j]+=p[j];
-    }
+    v->first[i]=firstentry;
+    v->second[i]=secondentry;
+    v->metric[firstentry]+=firstmetric-v->bias[firstentry];
+    v->assigned[firstentry]++;
 
     {
-      double *n=_now(v,bestentry);
+      double *no=_now(v,firstentry);
+      double *ne=_next(v,firstentry);
       double *p=_point(v,i);
-      fprintf(graph,"%g %g\n%g %g\n\n",p[0],p[1],n[0],n[1]);
+      for(j=0;j<v->elements;j++)
+	ne[j]+=p[j];
+      fprintf(graph,"%g %g\n%g %g\n\n",p[0],p[1],no[0],no[1]);
     }
   }
 
@@ -206,40 +230,78 @@ void vqgen_iterate(vqgen *v,int biasp){
     }
   }
   
-  /* average global error */
+  /* average global metric */
   for(i=0;i<v->entries;i++){
-    averror+=v->error[i];
-    if(v->error[i]==0)fprintf(stderr,"%d ",i);
+    avmetric+=v->metric[i];
   }
-  fprintf(stderr,"\n");
+  avmetric/=v->entries;
+  fprintf(stderr,"%ld... ",iteration);
 
-  averror/=v->entries;
-
-  /* positive/negative 'pressure' */
-  
+  /* positive/negative 'pressure' */  
   if(biasp){
+    /* Another round of n*m. Above we had to index by point.  Now, we
+       have to index by entry */
+    long   *index=alloca(v->points*sizeof(long));
+    double *vals =alloca(v->points*sizeof(double));
+    double *met  =alloca(v->points*sizeof(double));
     for(i=0;i<v->entries;i++){
-      double ratio=(float)v->assigned[i]*v->entries/v->points;
-      double averr=v->error[i]/v->assigned[i];
-      ratio=(ratio-1.)*averr*.1+1.;
-      v->bias[i]*=ratio;
+
+      /* sort all n-thousand points by effective metric */
+
+      for(j=0;j<v->points;j++){
+	int threshentry;
+	index[j]=j;
+	if(v->first[j]==i){
+	  /* use the secondary entry as the threshhold */
+	  threshentry=v->second[j];
+	}else{
+	  /* use the primary entry as the threshhold */
+	  threshentry=v->first[j];
+	}
+	
+	/* bias value right at the threshhold to grab this point */
+	met[j]=v->metric_func(v,_now(v,i),_point(v,j));
+	vals[j]=
+	  v->metric_func(v,_now(v,threshentry),_point(v,j))+
+	  v->bias[threshentry]-
+	  v->metric_func(v,_now(v,i),_point(v,j));
+      }
+      
+      sort_t_vals=vals;
+      qsort(index,v->points,sizeof(long),sort_t_compare);
+
+      {
+	/* find the desired number of points and level of bias.  We
+	   nominally want all entries to represent the same number of
+	   points, but we may also have a metric range restriction */
+	int desired=(v->points+v->entries-1)/v->entries;
+	
+	if(v->errspread>=1.){
+	  double acc=0.;
+	  for(j=0;j<desired;j++){
+	    acc+=met[index[j]];
+	    if(acc*v->errspread>avmetric)break;
+	  }
+	}else
+	  j=desired;
+	v->bias[i]=vals[index[j-1]];
+      }
     }
   }else{
-    int i;
-    fprintf(stderr,"de-biasing\n");
-    for(i=0;i<v->entries;i++)v->bias[i]=10.;
+    memset(v->bias,0,sizeof(double)*v->entries);
   }
 
-  /* dump state, report error */
+  /* dump state, report metric */
   for(i=0;i<v->entries;i++){
-    fprintf(err,"%g\n",v->error[i]);
-    fprintf(assi,"%ld\n",v->assigned[i]);
+    for(j=0;j<v->assigned[i];j++)
+      fprintf(err,"%g\n",v->metric[i]/v->assigned[i]);
     fprintf(bias,"%g\n",v->bias[i]);
+    fprintf(as,"%ld\n",v->assigned[i]);
   }
 
-  fprintf(stderr,"average error: %g\n",realerror/v->points);
+  fprintf(stderr,"average metric: %g\n",avmetric/v->elements/v->points*v->entries);
 
-  fclose(assi);
+  fclose(as);
   fclose(err);
   fclose(bias);
   fclose(graph);
@@ -253,7 +315,7 @@ int main(int argc,char *argv[]){
   char buffer[160];
   int i;
 
-  vqgen_init(&v,4,128);
+  vqgen_init(&v,4,24,_dist_sq,1.);
 
   while(fgets(buffer,160,in)){
     double a[8];
@@ -263,25 +325,13 @@ int main(int argc,char *argv[]){
   }
   fclose(in);
 
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
+  for(i=0;i<20;i++)
     vqgen_iterate(&v,0);
 
   for(i=0;i<100;i++)
-    vqgen_iterate(&v,i%20);
+    vqgen_iterate(&v,1);
 
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
-    vqgen_iterate(&v,0);
+  for(i=0;i<5;i++)
     vqgen_iterate(&v,0);
 
   return(0);
