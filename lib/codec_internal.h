@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.14.4.4 2002/05/31 00:16:10 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.14.4.5 2002/06/11 04:44:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,8 +27,6 @@
 #define BLOCKTYPE_LONG       1
 
 #define PACKETBLOBS 15
-
-static double stereo_threshholds[]={0.0, 2.5, 4.5, 8.5, 16.5};
 
 typedef struct vorbis_block_internal{
   float  **pcmdelay;  /* this is a pointer into local storage */ 
@@ -82,50 +80,13 @@ typedef struct backend_lookup_state {
 
 } backend_lookup_state;
 
-/* high level configuration information for setting things up
-   step-by-step with the detaile vorbis_encode_ctl interface */
-
-typedef struct highlevel_block {
-  double tone_mask_quality;
-  double tone_peaklimit_quality;
-
-  double noise_bias_quality;
-  double noise_compand_quality;
-
-  double ath_quality;
-
-} highlevel_block;
-
-typedef struct highlevel_encode_setup {
-  int    managed;
-  double base_quality;       /* these have to be tracked by the ctl */
-  double base_quality_short; /* interface so that the right books get */
-  double base_quality_long;  /* chosen... */
-
-  int short_block_p;
-  int long_block_p;
-  int impulse_block_p;
-  int stereo_couple_p;
-
-  double stereo_point_q;
-  double lowpass_kHz[2];
-
-  double ath_floating_dB;
-  double ath_absolute_dB;
-
-  double amplitude_track_dBpersec;
-  double trigger_quality;
-
-  highlevel_block blocktype[4]; /* impulse, padding, trans, long */
-  
-} highlevel_encode_setup;
-
 /* codec_setup_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,
    psychoacoustic settings, channel setup, options, codebook
    etc).  
 *********************************************************************/
 
+#include "highlevel.h"
 typedef struct codec_setup_info {
 
   /* Vorbis supports only short and long blocks, but allows the
@@ -159,7 +120,9 @@ typedef struct codec_setup_info {
   vorbis_info_psy_global psy_g_param;
 
   bitrate_manager_info   bi;
-  highlevel_encode_setup hi;
+  highlevel_encode_setup hi; /* used only by vorbisenc.c.  It's a
+                                highly redundant structure, but
+                                improves clarity of program flow. */
   
 } codec_setup_info;
 

@@ -11,21 +11,12 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.11.6.4 2002/05/31 00:16:17 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.11.6.5 2002/06/11 04:44:49 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "backends.h"
-
-static bitrate_manager_info _bm_44_default={
-  /* progressive coding and bitrate controls */
-  4.,.5,
-  2.,       0,           0,  
-            0,           0,
-           
-  -9999,              9999, 
-};
 
 /***** residue backends *********************************************/
 
@@ -295,9 +286,10 @@ static vorbis_info_residue0 _residue_44_high_un={
 /* residue backfill is entered in the template array as if stereo
    backfill is not in use.  It's up to vorbisenc to make the
    appropriate index adjustment */
-static vorbis_residue_template _residue_template_44_stereo[11]={
+static vorbis_residue_template _residue_template_44_stereo[10]={
   /* mode 0; 64-ish */
   {{&_residue_44_low, &_residue_44_low},  
+   {&_huff_book__44c0_short,&_huff_book__44c0_long},
    {&_huff_book__44c0_short,&_huff_book__44c0_long},
    { 
      {0},{0,0,&_44c0_s0_p1_0},{0,0,&_44c0_s0_p2_0},{0,0,&_44c0_s0_p3_0},
@@ -308,6 +300,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 1; 80-ish */
   {{&_residue_44_low, &_residue_44_low},  
    {&_huff_book__44c1_short,&_huff_book__44c1_long},
+   {&_huff_book__44c1_short,&_huff_book__44c1_long},
    { 
      {0},{0,0,&_44c1_s0_p1_0},{0,0,&_44c1_s0_p2_0},{0,0,&_44c1_s0_p3_0},
      {&_44c1_s0_p4_0,&_44c1_s0_p4_1},{0,0,&_44c1_s0_p5_0},{0,0,&_44c1_s0_p6_0},
@@ -317,6 +310,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 2; 96-ish */
   {{&_residue_44_low, &_residue_44_low},  
    {&_huff_book__44c2_short,&_huff_book__44c2_long},
+   {&_huff_book__44c2_short,&_huff_book__44c2_long},
    { 
      {0},{0,0,&_44c2_s0_p1_0},{0,0,&_44c2_s0_p2_0},{0,0,&_44c2_s0_p3_0},
      {&_44c2_s0_p4_0,&_44c2_s0_p4_1},{0,0,&_44c2_s0_p5_0},{0,0,&_44c2_s0_p6_0},
@@ -325,6 +319,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   },
   /* mode 3; 112-ish */
   {{&_residue_44_low, &_residue_44_low},  
+   {&_huff_book__44c3_short,&_huff_book__44c3_long},
    {&_huff_book__44c3_short,&_huff_book__44c3_long},
    { 
      {0},{0,0,&_44c3_s0_p1_0},{0,0,&_44c3_s0_p2_0},{0,0,&_44c3_s0_p3_0},
@@ -336,6 +331,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 4; 128-ish */
   {{&_residue_44_mid, &_residue_44_mid},  
    {&_huff_book__44c4_s_short,&_huff_book__44c4_s_long},
+   {&_huff_book__44c4_sm_short,&_huff_book__44c4_sm_long},
    {
      {0},{0,0,&_44c4_s_p1_0},{0,0,&_44c4_s_p2_0},{0,0,&_44c4_s_p3_0},
      {0,0,&_44c4_s_p4_0},{0,0,&_44c4_s_p5_0},{0,0,&_44c4_s_p6_0},
@@ -346,6 +342,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
 
   /* mode 5; 160-ish */
   {{&_residue_44_mid, &_residue_44_mid},  
+   {&_huff_book__44c5_short,&_huff_book__44c5_long},
    {&_huff_book__44c5_short,&_huff_book__44c5_long},
    {
      {0},{0,0,&_44c5_s0_p1_0},{0,0,&_44c5_s0_p2_0},{0,0,&_44c5_s0_p3_0},
@@ -358,6 +355,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 6; 192-ish */
   {{&_residue_44_mid, &_residue_44_mid},  
    {&_huff_book__44c6_short,&_huff_book__44c6_long},
+   {&_huff_book__44c6_short,&_huff_book__44c6_long},
    { 
      {0},{0,0,&_44c6_s0_p1_0},{0,0,&_44c6_s0_p2_0},{0,0,&_44c6_s0_p3_0},
      {0,0,&_44c6_s0_p4_0},{0,0,&_44c6_s0_p5_0},{0,0,&_44c6_s0_p6_0},
@@ -368,6 +366,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
 
   /* mode 7; 224-ish */
   {{&_residue_44_high, &_residue_44_high},  
+   {&_huff_book__44c7_short,&_huff_book__44c7_long},
    {&_huff_book__44c7_short,&_huff_book__44c7_long},
    { 
      {0},{&_44c7_s0_p1_0,&_44c7_s0_p1_1},
@@ -383,6 +382,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 8; 256-ish */
   {{&_residue_44_high, &_residue_44_high},  
    {&_huff_book__44c8_short,&_huff_book__44c8_long},
+   {&_huff_book__44c8_short,&_huff_book__44c8_long},
    { 
      {0},{&_44c8_s0_p1_0,&_44c8_s0_p1_1},
      {&_44c8_s0_p2_0,&_44c8_s0_p2_1},
@@ -396,6 +396,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 9; 320-ish */
   {{&_residue_44_high, &_residue_44_high},  
    {&_huff_book__44c9_short,&_huff_book__44c9_long},
+   {&_huff_book__44c9_short,&_huff_book__44c9_long},
    { 
      {0},{&_44c9_s0_p1_0,&_44c9_s0_p1_1},
      {&_44c9_s0_p2_0,&_44c9_s0_p2_1},
@@ -408,42 +409,6 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   }
 };
 
-static vorbis_residue_template _residue_template_44_stereo_m[11]={
-  /* mode 0; 64-ish */
-  { },
-  /* mode 1; 80-ish */
-  { },
-  /* mode 2; 96-ish */
-  { },
-  /* mode 3; 112-ish */
-  { },
-
-  /* mode 4; 128-ish */
-  {{&_residue_44_mid, &_residue_44_mid},  
-   {&_huff_book__44c4_sm_short,&_huff_book__44c4_sm_long},
-   {
-     {0},{0,0,&_44c4_sm_p1_0},{0,0,&_44c4_sm_p2_0},{0,0,&_44c4_sm_p3_0},
-     {0,0,&_44c4_sm_p4_0},{0,0,&_44c4_sm_p5_0},{0,0,&_44c4_sm_p6_0},
-     {&_44c4_sm_p7_0,&_44c4_sm_p7_1},{&_44c4_sm_p8_0,&_44c4_sm_p8_1},
-     {&_44c4_sm_p9_0,&_44c4_sm_p9_1,&_44c4_sm_p9_2}
-   },
-  },
-
-  /* mode 5; 160-ish */
-  { },
-
-  /* mode 6; 192-ish */
-  { },
-
-  /* mode 7; 224-ish */
-  { },
-
-  /* mode 8; 256-ish */
-  { },
-
-  /* mode 9; 320-ish */
-  { }
-};
 
 #include "books/uncoupled/_44u0_p1_0.vqh"
 #include "books/uncoupled/_44u0_p2_0.vqh"
@@ -485,9 +450,10 @@ static vorbis_residue_template _residue_template_44_stereo_m[11]={
 #include "books/uncoupled/_44u7_p9_1.vqh"
 #include "books/uncoupled/_44u7_p9_2.vqh"
 
-static vorbis_residue_template _residue_template_44_uncoupled[11]={
+static vorbis_residue_template _residue_template_44_uncoupled[10]={
   /* mode 0; 40/c-ish */
   {{&_residue_44_low_un, &_residue_44_low_un},  
+   {&_huff_book__44c0_short,&_huff_book__44c0_long},
    {&_huff_book__44c0_short,&_huff_book__44c0_long},
    { {0},
       {0,0,&_44u0_p1_0},
@@ -502,6 +468,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   /* mode 1; 50-ish */
   {{&_residue_44_low_un, &_residue_44_low_un},  
    {&_huff_book__44c1_short,&_huff_book__44c1_long},
+   {&_huff_book__44c1_short,&_huff_book__44c1_long},
    { {0},
       {0,0,&_44u0_p1_0},
       {0,0,&_44u0_p2_0},
@@ -514,6 +481,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   },
   /* mode 2; 60-ish */
   {{&_residue_44_low_un, &_residue_44_low_un},  
+   {&_huff_book__44c2_short,&_huff_book__44c2_long},
    {&_huff_book__44c2_short,&_huff_book__44c2_long},
    { {0},
       {0,0,&_44u0_p1_0},
@@ -528,6 +496,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   /* mode 3; 70-ish */
   {{&_residue_44_low_un, &_residue_44_low_un},  
    {&_huff_book__44c3_short,&_huff_book__44c3_long},
+   {&_huff_book__44c3_short,&_huff_book__44c3_long},
    { {0},
       {0,0,&_44u0_p1_0},
       {0,0,&_44u0_p2_0},
@@ -540,6 +509,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   },
   /* mode 4; 80-ish */
   {{&_residue_44_mid, &_residue_44_mid},  
+   {&_huff_book__44c4_s_short,&_huff_book__44c4_s_long},
    {&_huff_book__44c4_s_short,&_huff_book__44c4_s_long},
    { {0},
       {0,0,&_44u4_p1_0},
@@ -556,6 +526,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   /* mode 5; 90-ish */
   {{&_residue_44_mid, &_residue_44_mid},  
    {&_huff_book__44c5_short,&_huff_book__44c5_long},
+   {&_huff_book__44c5_short,&_huff_book__44c5_long},
    { {0},
       {0,0,&_44u4_p1_0},
       {0,0,&_44u4_p2_0},
@@ -570,6 +541,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   },
   /* mode 6; 100-ish */
   {{&_residue_44_mid, &_residue_44_mid},  
+   {&_huff_book__44c6_short,&_huff_book__44c6_long},
    {&_huff_book__44c6_short,&_huff_book__44c6_long},
    { {0},
       {0,0,&_44u4_p1_0},
@@ -586,6 +558,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   /* mode 7 */
   {{&_residue_44_high_un, &_residue_44_high_un},  
    {&_huff_book__44c7_short,&_huff_book__44c7_long},
+   {&_huff_book__44c7_short,&_huff_book__44c7_long},
    { {0},
       {0,0,&_44u7_p1_0},
       {&_44u7_p2_0,&_44u7_p2_1},
@@ -601,6 +574,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   /* mode 8 */
   {{&_residue_44_high_un, &_residue_44_high_un},  
    {&_huff_book__44c8_short,&_huff_book__44c8_long},
+   {&_huff_book__44c8_short,&_huff_book__44c8_long},
    { {0},
       {0,0,&_44u7_p1_0},
       {&_44u7_p2_0,&_44u7_p2_1},
@@ -615,6 +589,7 @@ static vorbis_residue_template _residue_template_44_uncoupled[11]={
   },
   /* mode 9 */
   {{&_residue_44_high_un, &_residue_44_high_un},  
+   {&_huff_book__44c9_short,&_huff_book__44c9_long},
    {&_huff_book__44c9_short,&_huff_book__44c9_long},
    { {0},
       {0,0,&_44u7_p1_0},

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.5 2002/05/31 00:16:10 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.6 2002/06/11 04:44:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,6 +30,7 @@
 #include "misc.h"
 
 #define NEGINF -9999.f
+static double stereo_threshholds[]={0.0, 2.5, 4.5, 8.5, 16.5};
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -359,57 +360,6 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     _analysis_output("curve_11.5kHz",i,p->tonecurves[15][i]+2,EHMER_MAX,0,0);
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("curve_16kHz",i,p->tonecurves[16][i]+2,EHMER_MAX,0,0);
-  analysis_noisy=0;
-
-  if(vi->curvelimitp){
-    /* value limit the tonal masking curves; the peakatt not only
-       optionally specifies maximum dynamic depth, but also
-       limits the masking curves to a minimum depth  */
-    for(i=0;i<P_BANDS;i++)
-      for(j=0;j<P_LEVELS;j++){
-	for(k=2;k<EHMER_OFFSET+2+vi->curvelimitp;k++)
-	  if(p->tonecurves[i][j][k]> vi->peakatt.block[i][j])
-	    p->tonecurves[i][j][k]=  vi->peakatt.block[i][j];
-	  else
-	    break;
-      }
-  }
-
-  analysis_noisy=0;
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_63Hz",i,p->tonecurves[0][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_88Hz",i,p->tonecurves[1][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_125Hz",i,p->tonecurves[2][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_170Hz",i,p->tonecurves[3][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_250Hz",i,p->tonecurves[4][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_350Hz",i,p->tonecurves[5][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_500Hz",i,p->tonecurves[6][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_700Hz",i,p->tonecurves[7][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_1kHz",i,p->tonecurves[8][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_1.4Hz",i,p->tonecurves[9][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_2kHz",i,p->tonecurves[10][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_2.4kHz",i,p->tonecurves[11][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_4kHz",i,p->tonecurves[12][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_5.6kHz",i,p->tonecurves[13][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_8kHz",i,p->tonecurves[14][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_11.5kHz",i,p->tonecurves[15][i]+2,EHMER_MAX,0,0);
-  for(i=0;i<P_LEVELS;i++)
-    _analysis_output("licurve_16kHz",i,p->tonecurves[16][i]+2,EHMER_MAX,0,0);
   analysis_noisy=0;
 
   if(vi->peakattp) /* we limit maximum depth only optionally */
@@ -1080,23 +1030,25 @@ int **_vp_quantize_couple_sort(vorbis_block *vb,
 				 vorbis_look_psy *p,
 				 vorbis_info_mapping0 *vi,
 				 float **mags){
-  
-  int i,j,k,n=p->n;
-  int **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
-  int partition=p->vi->normal_partition;
-  float **work=alloca(sizeof(*work)*partition);
-  
-  for(i=0;i<vi->coupling_steps;i++){
-    ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
 
-    for(j=0;j<n;j+=partition){
-      for(k=0;k<partition;k++)work[k]=mags[i]+k+j;
-      qsort(work,partition,sizeof(*work),apsort);
-      for(k=0;k<partition;k++)ret[i][k+j]=work[k]-mags[i];
+  if(p->vi->normal_point_p){
+    int i,j,k,n=p->n;
+    int **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
+    int partition=p->vi->normal_partition;
+    float **work=alloca(sizeof(*work)*partition);
+    
+    for(i=0;i<vi->coupling_steps;i++){
+      ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+      
+      for(j=0;j<n;j+=partition){
+	for(k=0;k<partition;k++)work[k]=mags[i]+k+j;
+	qsort(work,partition,sizeof(*work),apsort);
+	for(k=0;k<partition;k++)ret[i][k+j]=work[k]-mags[i];
+      }
     }
+    return(ret);
   }
-  
-  return(ret);
+  return(NULL);
 }
 
 void _vp_noise_normalize_sort(vorbis_look_psy *p,
@@ -1119,45 +1071,47 @@ void _vp_noise_normalize_sort(vorbis_look_psy *p,
 
 void _vp_noise_normalize(vorbis_look_psy *p,
 			 float *in,float *out,int *sortedindex){
-  int i,j,n=p->n;
+  int i,j=0,n=p->n;
   vorbis_info_psy *vi=p->vi;
   int partition=vi->normal_partition;
   int start=vi->normal_start;
 
-  for(j=0;j<start;j++)
-    out[j]=rint(in[j]);
+  if(vi->normal_channel_p){
+    for(;j<start;j++)
+      out[j]=rint(in[j]);
     
-  for(;j+partition<=n;j+=partition){
-    float acc=0.,qacc=0.;
-    int flag=0;
-    for(i=0;i<partition;i++)
-      acc+=in[i+j]*in[i+j];
-    
-    for(i=0;i<partition;i++){
-      int k=sortedindex[i+j-start];
-      float qval=rint(in[k]);
+    for(;j+partition<=n;j+=partition){
+      float acc=0.,qacc=0.;
+      int flag=0;
+      for(i=0;i<partition;i++)
+	acc+=in[i+j]*in[i+j];
       
-      if(qval){
-	qacc+=in[k]*in[k];
-	flag=1;
-	out[k]=qval;
-      }else{
-	if(qacc>acc)break;
-	qacc+=1.;
-	out[k]=unitnorm(in[k]);
+      for(i=0;i<partition;i++){
+	int k=sortedindex[i+j-start];
+	float qval=rint(in[k]);
+	
+	if(qval){
+	  qacc+=in[k]*in[k];
+	  flag=1;
+	  out[k]=qval;
+	}else{
+	  if(qacc>acc)break;
+	  qacc+=1.;
+	  out[k]=unitnorm(in[k]);
+	}
       }
-    }
-
-    if(!flag && i<2)i=0;
-    for(;i<partition;i++){
-      int k=sortedindex[i+j-start];
-      out[k]=0.;
+      
+      if(!flag && i<2)i=0;
+      for(;i<partition;i++){
+	int k=sortedindex[i+j-start];
+	out[k]=0.;
+      }
     }
   }
 
   for(;j<n;j++)
     out[j]=rint(in[j]);
-
+  
 }
 
 void _vp_couple(int blobno,
@@ -1198,7 +1152,7 @@ void _vp_couple(int blobno,
       int *floorA=ifloor[vi->coupling_ang[i]];
       int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
       float point=stereo_threshholds[g->coupling_pointamp[blobno]];
-      int partition=p->vi->normal_partition;
+      int partition=(p->vi->normal_point_p?p->vi->normal_partition:p->n);
 
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
@@ -1218,14 +1172,15 @@ void _vp_couple(int blobno,
 	    couple_lossless(rM[l],rA[l],qM+l,qA+l);
 	  }
 	}
-
-	for(k=0;k<partition && qacc<acc;k++){
-	  int l=mag_sort[i][j+k];
-	  if(l>=limit && rint(qM[l])==0.f){
-	    qM[l]=unitnorm(qM[l]);
-	    qacc+=1.f;
-	  }
-	} 
+	
+	if(p->vi->normal_point_p)
+	  for(k=0;k<partition && qacc<acc;k++){
+	    int l=mag_sort[i][j+k];
+	    if(l>=limit && rint(qM[l])==0.f){
+	      qM[l]=unitnorm(qM[l]);
+	      qacc+=1.f;
+	    }
+	  } 
       }
     }
   }

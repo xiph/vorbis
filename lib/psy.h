@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.28.2.3 2002/05/31 00:16:11 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.28.2.4 2002/06/11 04:44:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,6 @@ typedef struct vorbis_info_psy{
   vp_attenblock toneatt;
 
   int peakattp;
-  int curvelimitp;
   vp_attenblock peakatt;
 
   int noisemaskp;
@@ -66,6 +65,8 @@ typedef struct vorbis_info_psy{
 
   float max_curve_dB;
 
+  int normal_channel_p;
+  int normal_point_p;
   int normal_start;
   int normal_partition;
 } vorbis_info_psy;
@@ -81,12 +82,7 @@ typedef struct{
 
   float ampmax_att_per_sec;
 
-  /* delay caching... how many samples to keep around prior to our
-     current block to aid in analysis? */
-  int   delaycache;
-
   /* channel coupling config */
-  float monofilter_kHz[PACKETBLOBS];  
   int   coupling_pointlimit[2][PACKETBLOBS];  
   int   coupling_pointamp[PACKETBLOBS];  
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.49.2.4 2002/05/31 00:16:10 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.49.2.5 2002/06/11 04:44:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -455,10 +455,13 @@ static int mapping0_forward(vorbis_block *vb){
 				      info,
 				      mag_memo);    
 
-    for(i=0;i<vi->channels;i++){
-      float *mdct    =gmdct[i];
-      sortindex[i]=alloca(sizeof(**sortindex)*n/2);
-      _vp_noise_normalize_sort(psy_look,mdct,sortindex[i]);
+    memset(sortindex,0,sizeof(*sortindex)*vi->channels);
+    if(psy_look->vi->normal_channel_p){
+      for(i=0;i<vi->channels;i++){
+	float *mdct    =gmdct[i];
+	sortindex[i]=alloca(sizeof(**sortindex)*n/2);
+	_vp_noise_normalize_sort(psy_look,mdct,sortindex[i]);
+      }
     }
 
     for(k=(vorbis_bitrate_managed(vb)?0:PACKETBLOBS/2);

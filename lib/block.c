@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.64.2.3 2002/05/18 01:39:27 xiphmont Exp $
+ last mod: $Id: block.c,v 1.64.2.4 2002/06/11 04:44:45 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -496,16 +496,18 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   /* By our invariant, we have lW, W and centerW set.  Search for
      the next boundary so we can determine nW (the next window size)
      which lets us compute the shape of the current block's window */
-  
-  if(ci->blocksizes[0]<ci->blocksizes[1]){
+
+  /* we do an envelope search even on a single blocksize; we may still
+     be throwing more bits at impulses, and envelope search handles
+     marking impulses too. */
+  {  
     long bp=_ve_envelope_search(v);
     if(bp==-1)return(0); /* not enough data currently to search for a
                             full long block */
-    v->nW=bp;
 
-  }else
-    v->nW=0;
-  
+    v->nW=bp;
+  }
+
   centerNext=v->centerW+ci->blocksizes[v->W]/4+ci->blocksizes[v->nW]/4;
 
   {
@@ -593,7 +595,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* advance storage vectors and clean up */
   {
-    int new_centerNext=ci->blocksizes[1]/2+gi->delaycache;
+    int new_centerNext=ci->blocksizes[1]/2;
     int movementW=centerNext-new_centerNext;
 
     if(movementW>0){

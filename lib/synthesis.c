@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.26.4.1 2002/05/18 01:39:29 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.26.4.2 2002/06/11 04:44:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,6 +48,9 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vb->mode=mode;
   vb->W=ci->mode_param[mode]->blockflag;
   if(vb->W){
+
+    /* this doesn;t get mapped through mode selection as it's used
+       only for window selection */
     vb->lW=oggpack_read(opb,1);
     vb->nW=oggpack_read(opb,1);
     if(vb->nW==-1)   return(OV_EBADPACKET);
