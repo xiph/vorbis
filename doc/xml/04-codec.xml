@@ -7,8 +7,7 @@
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.8 2003/03/11 11:02:17 xiphmont Exp $
- <emphasis>Last update to this document: March 11, 2003</emphasis>
+ $Id$
 </releaseinfo>
 </sectioninfo>
 <title>Codec Setup and Packet Decode</title>

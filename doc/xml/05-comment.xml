@@ -8,8 +8,7 @@
 <section id="vorbis-spec-comment">
 <sectioninfo>
  <releaseinfo>
- $Id: 05-comment.xml,v 1.6 2004/02/19 04:07:41 msmith Exp $
- <emphasis>Last update to this document: July 16, 2002</emphasis>
+ $Id$
 </releaseinfo>
 </sectioninfo>
 <title>comment field and header specification</title>

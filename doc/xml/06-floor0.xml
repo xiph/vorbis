@@ -7,8 +7,7 @@
 <section id="vorbis-spec-floor0">
 <sectioninfo>
 <releaseinfo>
-  $Id: 06-floor0.xml,v 1.7 2002/10/27 16:20:47 giles Exp $
-  <emphasis>Last update to this document: July 19, 2002</emphasis>
+  $Id$
 </releaseinfo>
 </sectioninfo>  
 <title>Floor type 0 setup and decode</title>
