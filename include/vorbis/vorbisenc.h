@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: vorbis encode-engine setup
- last mod: $Id: vorbisenc.h,v 1.6 2001/12/19 02:08:55 jack Exp $
+ last mod: $Id: vorbisenc.h,v 1.7 2001/12/19 08:10:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,12 +33,29 @@ extern int vorbis_encode_init(vorbis_info *vi,
 			      long nominal_bitrate,
 			      long min_bitrate);
 
+extern int vorbis_encode_setup_managed(vorbis_info *vi,
+				       long channels,
+				       long rate,
+				       
+				       long max_bitrate,
+				       long nominal_bitrate,
+				       long min_bitrate);
+  
+extern int vorbis_encode_setup_vbr(vorbis_info *vi,
+				  long channels,
+				  long rate,
+				  
+				  float /* quality level from 0. (lo) to 1. (hi) */
+				  );
+
 extern int vorbis_encode_init_vbr(vorbis_info *vi,
 				  long channels,
 				  long rate,
 				  
 				  float base_quality /* quality level from 0. (lo) to 1. (hi) */
 				  );
+
+extern int vorbis_encode_setup_init(vorbis_info *vi);
 
 extern int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg);
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.5 2001/12/19 07:33:51 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.6 2001/12/19 08:10:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -310,7 +310,6 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       
       /* apply the average floater to new blocks */
       bin=bm->avgfloat*BITTRACK_DIVISOR; /* truncate on purpose */
-      fprintf(stderr,"u:%f l:%f float:%d ",upper,lower,bin);
       while(bm->avg_centeracc>desired_center){
 	int samples=
 	  samples=ci->blocksizes[bm->queue_actual[bm->avg_center]&
@@ -364,9 +363,6 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	if(bm->avgnoise>bi->avgfloat_noise_maxval)
 	  bm->avgnoise=bi->avgfloat_noise_maxval;
       }
-      fprintf(stderr,"noise:%f req:%f trigger:%ld\n",bm->avgnoise,
-	      bm->noisetrigger_request,bm->noisetrigger_postpone);
-
     }
   }else{
     /* if we're not using an average tracker, the 'float' is nailed to
@@ -440,7 +436,6 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       double bitrate=(double)bm->minmax_acctotal/bm->minmax_sampleacc*vi->rate;
       int limit=0;
       
-      fprintf(stderr,"prelimit:%dkbps ",(int)bitrate/1000);
       if((bi->queue_hardmax>0 && bitrate>bi->queue_hardmax) || 
 	 (bi->queue_hardmin>0 && bitrate<bi->queue_hardmin)){
 	int newstack;
@@ -451,7 +446,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	/* we're off rate.  Iteratively try out new hard floater
            limits until we find one that brings us inside.  Here's
            where we see the whole point of the limit stacks.  */
-	if(bitrate>bi->queue_hardmax){
+	if(bi->queue_hardmax>0 && bitrate>bi->queue_hardmax){
 	  for(limit=-1;limit>-bins;limit--){
 	    long bitsum=limit_sum(bm,limit);
 	    bitrate=(double)bitsum/bm->minmax_sampleacc*vi->rate;
@@ -468,7 +463,6 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 
 	bitsum=limit_sum(bm,limit);
 	bitrate=(double)bitsum/bm->minmax_sampleacc*vi->rate;
-	fprintf(stderr,"postlimit:%dkbps ",(int)bitrate/1000);
 
 	/* trace the limit backward, stop when we see a lower limit */
 	newstack=bm->minmax_stackptr-1;
@@ -495,7 +489,6 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	stackctr++;
 	bm->minmax_posstack[stackctr]=bm->minmax_posstack[bm->minmax_stackptr];
 	bm->minmax_limitstack[stackctr]=limit;
-	fprintf(stderr,"limit:%d\n",limit);
 
 	/* set up new blank stack entry */
 	stackctr++;

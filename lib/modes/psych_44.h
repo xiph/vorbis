@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: key psychoacoustic settings for 44.1/48kHz
- last mod: $Id: psych_44.h,v 1.4 2001/12/19 01:10:27 xiphmont Exp $
+ last mod: $Id: psych_44.h,v 1.5 2001/12/19 08:10:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -638,4 +638,10 @@ static double _psy_stereo_point_kHz_44[2][11]={
 /* lowpass **************/
 static double _psy_lowpass_44[11]={
   15.1,15.8,16.5,17.9,20.5,48.,999.,999.,999.,999.,999.
+};
+
+/* management noise offset */
+
+static double _bm_max_noise_offset[11]={
+  1.,2.,3.,3.,4.,4.,4.,4.,4.,4.,4.
 };

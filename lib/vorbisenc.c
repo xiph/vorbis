@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.26 2001/12/19 07:33:51 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.27 2001/12/19 08:10:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -804,7 +804,7 @@ static double approx_bitrate_to_vbr(int ch,int coupled,
 
   bitrate/=ch;
 
-  if(bitrate<r[0])return(0.);
+  if(bitrate<=r[0])return(0.);
   for(i=0;i<10;i++)
     if(r[i]<bitrate && r[i+1]>=bitrate)break;
   if(i==10)return(10.);
@@ -953,16 +953,21 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
     if(hi->stereo_point_dB && hi->stereo_couple_p && channels==2){
       hi->stereo_point_dB++;
       if(hi->stereo_point_dB>3)hi->stereo_point_dB=3;
-    }else{
-      /* else, slug the vbr noise setting */
-      int i;
-      for(i=0;i<4;i++){
-	hi->blocktype[i].noise_bias_quality-=.1;
-	if(hi->blocktype[i].noise_bias_quality<0.)
-	  hi->blocktype[i].noise_bias_quality=0.;
-      }
-    }
-
+    }      
+    /* slug the vbr noise setting*/
+    hi->blocktype[0].noise_bias_quality-=.1;
+    if(hi->blocktype[0].noise_bias_quality<0.)
+      hi->blocktype[0].noise_bias_quality=0.;
+    hi->blocktype[1].noise_bias_quality-=.1;
+    if(hi->blocktype[1].noise_bias_quality<0.)
+      hi->blocktype[1].noise_bias_quality=0.;
+    hi->blocktype[2].noise_bias_quality-=.05;
+    if(hi->blocktype[2].noise_bias_quality<0.)
+      hi->blocktype[2].noise_bias_quality=0.;
+    hi->blocktype[3].noise_bias_quality-=.05;
+    if(hi->blocktype[3].noise_bias_quality<0.)
+      hi->blocktype[3].noise_bias_quality=0.;
+   
     /* initialize management.  Currently hardcoded for 44, but so is above. */
     memcpy(&ci->bi,&_bm_44_default,sizeof(ci->bi));
     ci->bi.queue_hardmin=min_bitrate;
@@ -976,6 +981,8 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
       /* just an average tracker; no reason for the window to be as small as 2s. */
       ci->bi.queue_avg_time=4.;
     }
+    ci->bi.avgfloat_noise_maxval=_bm_max_noise_offset[(int)approx_vbr];
+
 
   }
   return(ret);
