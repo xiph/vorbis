@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.63 2002/10/11 08:22:18 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.64 2002/10/26 13:37:03 msmith Exp $
 
  ********************************************************************/
 
@@ -782,9 +782,15 @@ long ov_bitrate(OggVorbis_File *vf,int i){
   if(i<0){
     ogg_int64_t bits=0;
     int i;
+    float br;
     for(i=0;i<vf->links;i++)
       bits+=(vf->offsets[i+1]-vf->dataoffsets[i])*8;
-    return(rint(bits/ov_time_total(vf,-1)));
+    /* This once read: return(rint(bits/ov_time_total(vf,-1)));
+     * gcc 3.x on x86 miscompiled this at optimisation level 2 and above,
+     * so this is slightly transformed to make it work.
+     */
+    br = bits/ov_time_total(vf,-1);
+    return(rint(br));
   }else{
     if(vf->seekable){
       /* return the actual bitrate */
