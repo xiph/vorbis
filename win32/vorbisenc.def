@@ -1,0 +1,5 @@
+; vorbisenc.def
+LIBRARY vorbisenc
+EXPORTS
+vorbis_encode_init
+vorbis_encode_ctl
