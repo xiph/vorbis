@@ -2,4 +2,4 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = res_books_44u.h
+EXTRA_DIST = res_books_uncoupled.h
