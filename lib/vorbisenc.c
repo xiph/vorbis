@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.24 2001/12/19 01:08:15 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.25 2001/12/19 01:18:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -807,6 +807,9 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
     hi->lowpass_kHz[1]=
     _psy_lowpass_44[iq]*(1.-dq)+_psy_lowpass_44[iq+1]*dq;
 
+  /* set bitrate approximation */
+
+
   return(ret);
 }
 
@@ -818,15 +821,8 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   ){
   int ret=0;
 
-  ret=vorbis_encode_setup_vbr(vi,channels,rate,1.);
+  ret=vorbis_encode_setup_vbr(vi,channels,rate,base_quality);
   
-  {
-    codec_setup_info *ci=vi->codec_setup;
-    highlevel_encode_setup *hi=&ci->hi;
-    hi->stereo_couple_p=0;
-    hi->residue_backfill_p=1;
-  }
-
   if(ret){
     vorbis_info_clear(vi);
     return ret; 
