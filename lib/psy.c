@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.41 2001/02/02 03:51:57 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.42 2001/02/17 10:13:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -620,7 +620,7 @@ float _vp_compute_mask(vorbis_look_psy *p,
 
   /* go to dB scale. Also find the highest peak so we know the limits */
   for(i=0;i<n;i++){
-    fft[i]=todB(fft[i]);
+    fft[i]=todB_nn(fft[i]);
     if(fft[i]>localmax)localmax=fft[i];
   }
   if(specmax<localmax)specmax=localmax;

@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.29 2001/02/02 03:51:56 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.30 2001/02/17 10:13:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -75,13 +75,14 @@ float vorbis_lpc_from_data(float *data,float *lpc,int n,int m){
   /* Generate lpc coefficients from autocorr values */
 
   error=aut[0];
-  if(error==0){
-    memset(lpc,0,m*sizeof(float));
-    return 0;
-  }
   
   for(i=0;i<m;i++){
     float r=-aut[i+1];
+
+    if(error==0){
+      memset(lpc,0,m*sizeof(float));
+      return 0;
+    }
 
     /* Sum up this iteration's reflection coefficient; note that in
        Vorbis we don't save it.  If anyone wants to recycle this code
@@ -101,7 +102,7 @@ float vorbis_lpc_from_data(float *data,float *lpc,int n,int m){
     }
     if(i%2)lpc[j]+=lpc[j]*r;
     
-    error*=1.0f-r*r;
+    error*=1.f-r*r;
   }
   
   /* we need the error value to know how big an impulse to hit the

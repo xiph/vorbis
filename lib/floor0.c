@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.37 2001/02/10 02:06:59 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.38 2001/02/17 10:13:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -260,6 +260,9 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 #endif
 #endif
 
+  seq++;
+
+
   /* our floor comes in on a [-Inf...0] dB scale.  The curve has to be
      positive, so we offset it. */
 
@@ -281,12 +284,21 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     if(val<0)val=0;           /* likely */
     if(val>maxval)val=maxval; /* not bloody likely */
 
-    oggpack_write(&vb->opb,val,info->ampbits);
     if(val>0)
       amp=(float)val/maxval*info->ampdB;
     else
       amp=0;
   }
+
+  if(val){
+    /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
+    _analysis_output("lpc",seq-1,flr,look->m,0,0);
+    if(vorbis_lpc_to_lsp(flr,flr,look->m))
+      val=0;
+
+  }
+
+  oggpack_write(&vb->opb,val,info->ampbits);
 
   if(val){
     float *lspwork=alloca(look->m*sizeof(float));
@@ -297,26 +309,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     codebook *b;
     int booknum;
 
-    /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
-    _analysis_output("lpc",seq,flr,look->m,0,0);
-
-    vorbis_lpc_to_lsp(flr,flr,look->m);
-
-    _analysis_output("lsp",seq,flr,look->m,0,0);
-
-#ifdef ANALYSIS
-    {
-      float *lspwork2=alloca(look->m*sizeof(float));
-      memcpy(lspwork2,flr,sizeof(float)*look->m);
-      memcpy(lspwork,flr,sizeof(float)*look->m);
-      vorbis_lsp_to_curve(flr,look->linearmap,look->n,look->ln,
-			  lspwork2,look->m,amp,info->ampdB);
-
-      _analysis_output("prefit",seq++,flr,look->n,0,1);
-      memcpy(flr,lspwork,sizeof(float)*look->m);
-    }
-
-#endif
+    _analysis_output("lsp",seq-1,flr,look->m,0,0);
 
     /* which codebook to use? We do it only by range right now. */
     if(info->numbooks>1){
@@ -371,9 +364,12 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     fclose(ef);
 #endif
 
+    _analysis_output("lsp2",seq-1,lspwork,look->m,0,0);
+
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_curve(flr,look->linearmap,look->n,look->ln,
 			lspwork,look->m,amp,info->ampdB);
+    _analysis_output("lsp3",seq-1,flr,look->n,0,1);
     return(val);
   }
 
@@ -382,7 +378,6 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 #endif
 
   memset(flr,0,sizeof(float)*look->n);
-  seq++;
   return(val);
 }
 

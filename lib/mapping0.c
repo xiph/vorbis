@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.24 2001/02/02 03:51:56 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.25 2001/02/17 10:13:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -254,10 +254,10 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     /* begin masking work */
     floor[i]=_vorbis_block_alloc(vb,n*sizeof(float)/2);
 
-    //_analysis_output("fft",seq,additional,n/2,0,1);
-    //_analysis_output("mdct",seq,additional+n/2,n/2,0,1);
-    //_analysis_output("lfft",seq,additional,n/2,0,0);
-    //_analysis_output("lmdct",seq,additional+n/2,n/2,0,0);
+    _analysis_output("fft",seq,additional,n/2,0,1);
+    _analysis_output("mdct",seq,additional+n/2,n/2,0,1);
+    _analysis_output("lfft",seq,additional,n/2,0,0);
+    _analysis_output("lmdct",seq,additional+n/2,n/2,0,0);
 
     /* perform psychoacoustics; do masking */
     ret=_vp_compute_mask(look->psy_look+submap,additional,additional+n/2,
@@ -285,15 +285,19 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       
       sprintf(buffer,"residue_%d.vqd",vb->mode);
       of=fopen(buffer,"a");
-      for(i=0;i<n/2;i++)
+      for(i=0;i<n/2;i++){
 	fprintf(of,"%.2f, ",pcm[i]);
+	if(fabs(pcm[i])>1000){
+	  fprintf(stderr," %d ",seq-1);
+	}
+      }
       fprintf(of,"\n");
       fclose(of);
     }
 #endif      
-    
   }
 
+  seq++;
   vbi->ampmax=newmax;
 
   /* perform residue encoding with residue mapping; this is

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.32 2001/02/15 19:05:45 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.33 2001/02/17 10:13:47 xiphmont Exp $
 
  Preecho calculation.
 
@@ -31,8 +31,6 @@
 #include "misc.h"
 
 /* Digital filter designed by mkfilter/mkshape/gencode A.J. Fisher */
-
-
 
 static int   cheb_highpass_stages=6;
 static float cheb_highpass_B[]={1.f,-6.f,15.f,-20.f,15.f,-6.f,1.f};
@@ -54,33 +52,32 @@ static float cheb_highpass10k_A[]={
 /* 6kHz-10kHz Chebyshev bandpass */
 static float cheb_bandpass6k_gain=113.4643935f;
 static float cheb_bandpass6k_A[]={
-   -0.5712621337f,
-    1.5626130710f,
-   -3.3348854983f,
-    4.0471340821f,
-   -4.0051680331f,
-   2.2786325610f};
+  -0.5712621337f,
+  1.5626130710f,
+  -3.3348854983f,
+  4.0471340821f,
+  -4.0051680331f,
+  2.2786325610f};
 
 /* 3kHz-6kHz Chebyshev bandpass */
 static float cheb_bandpass3k_gain= 248.8359377f;
 static float cheb_bandpass3k_A[]={
-     -0.6564230022f,
-      3.3747911257f,
-     -8.0098635981f,
-     11.0040876874f,
-     -9.2250963484f,
-      4.4760355389f};
+  -0.6564230022f,
+  3.3747911257f,
+  -8.0098635981f,
+  11.0040876874f,
+  -9.2250963484f,
+  4.4760355389f};
 
 /* 1.5kHz-3kHz Chebyshev bandpass */
 static float cheb_bandpass1k_gain= 1798.537183f;
 static float cheb_bandpass1k_A[]={
-     -0.8097527363f,
-      4.7725742682f,
-    -11.9800219408f,
-     16.3770336223f,
-    -12.8553129536f,
-     5.4948074309f};
-
+  -0.8097527363f,
+  4.7725742682f,
+  -11.9800219408f,
+  16.3770336223f,
+  -12.8553129536f,
+  5.4948074309f};
 
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -138,9 +135,6 @@ static float _ve_deltai(envelope_lookup *ve,float *pre,float *post){
   float A=min*min*n;
   float B=A;
 
-  /*_analysis_output("A",granulepos,pre,n,0,0);
-    _analysis_output("B",granulepos,post,n,0,0);*/
-
   for(i=0;i<n;i++){
     A+=pre[i]*pre[i];
     B+=post[i]*post[i];
@@ -194,16 +188,6 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
       IIR_reset(iir3);
     }
 
-    _analysis_output("pcm",seq,pcm+v->centerW,v->pcm_current-v->centerW,0,0);
-    _analysis_output("f0",seq,filtered0+v->centerW,v->pcm_current-v->centerW,
-		     0,0);
-    _analysis_output("f1",seq,filtered1+v->centerW,v->pcm_current-v->centerW,
-		     0,0);
-    _analysis_output("f2",seq,filtered2+v->centerW,v->pcm_current-v->centerW,
-		     0,0);
-    _analysis_output("f3",seq++,filtered3+v->centerW,v->pcm_current-v->centerW,
-		     0,0);
-
   }
 
   ve->current=v->pcm_current;
@@ -214,6 +198,8 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
     j=v->centerW+ci->blocksizes[1]/4-ci->blocksizes[0]/4;
   else
     j=v->centerW;
+
+  if(j<ve->lastmark)j=ve->lastmark;
   
   while(j+ve->winlength<=v->pcm_current){
     for(i=0;i<ve->ch;i++){
@@ -223,10 +209,12 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
       
 	if(m>ci->preecho_thresh[k]){
 	  /*granulepos++;*/
+	  ve->lastmark=j;
 	  return(0);
 	}
 	if(m<ci->postecho_thresh[k]){
 	  /*granulepos++;*/
+	  ve->lastmark=j;
 	  return(0);
 	}
 	/*granulepos++;*/
@@ -249,6 +237,7 @@ void _ve_envelope_shift(envelope_lookup *e,long shift){
     memmove(e->filtered[i],e->filtered[i]+shift,(e->current-shift)*
 	    sizeof(float));
   e->current-=shift;
+  e->lastmark-=shift;
 }
 
 
