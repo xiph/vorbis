@@ -6,8 +6,18 @@ SUBDIRS = vorbisfile vorbisenc
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
-doc_DATA = v-comment.html vorbisword2.png white-ogg.png programming.html\
-	vorbis.html wait.png white-xifish.png vorbis-clip.txt\
-	vorbis-errors.txt
+doc_DATA = eightphase.png \
+           fourphase.png \
+           programming.html \
+           squarepolar.png \
+           stereo.html \
+           v-comment.html \
+           vorbis-clip.txt \
+           vorbis-errors.txt \
+           vorbis.html \
+           vorbisword2.png \
+           wait.png \
+           white-ogg.png \
+           white-xifish.png
 
 EXTRA_DIST = $(doc_DATA)
