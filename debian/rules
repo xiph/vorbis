@@ -119,7 +119,7 @@ vorbize: build
 #	dh_installmenu
 	dh_installmanpages
 #	dh_installinfo
-	dh_undocumented vorbise.1
+	dh_undocumented vorbize.1
 	dh_installchangelogs vorbis-tools/Changelog
 	dh_strip
 	dh_link
