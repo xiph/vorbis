@@ -4,8 +4,11 @@ Makefile.in
 Makefile
 config.status
 libtool
+ltmain.sh
 config.cache
 config.log
+config.sub
+config.guess
 configure
 *.gz
 .libs
