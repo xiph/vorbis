@@ -1,3 +1,7 @@
+Makefile
+Makefile.in
+.libs
+.deps
 encoder_example
 decoder_example
 chaining_example
