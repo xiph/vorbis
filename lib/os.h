@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.19 2000/12/21 21:04:40 xiphmont Exp $
+ last mod: $Id: os.h,v 1.20 2001/01/30 09:40:11 msmith Exp $
 
  ********************************************************************/
 
@@ -129,8 +129,8 @@ static int vorbis_ftoi(double f){
 
 typedef int vorbis_fpu_control;
 
-#ifdef _WIN32
-
+#ifdef _MSC_VER 
+/* MSVC++ */
 static __inline int vorbis_ftoi(double f){
 	int i;
 	__asm{
