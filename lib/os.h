@@ -5,13 +5,14 @@
  * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
  * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
-  function: #ifdef jail to whip a few platforms into the UNIX ideal.
+ function: #ifdef jail to whip a few platforms into the UNIX ideal.
+ last mod: $Id: os.h,v 1.2 1999/12/30 07:26:46 xiphmont Exp $
 
  ********************************************************************/
 

@@ -5,21 +5,19 @@
  * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
  * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and the XIPHOPHORUS Company       *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: code raw [Vorbis] packets into framed OggSquish stream and
            decode Ogg streams back into raw packets
- author: Monty <xiphmont@mit.edu>
- modifications by: Monty
- last modification date: Jul 22 1999
+ last mod: $Id: framing.c,v 1.12 1999/12/30 07:26:38 xiphmont Exp $
 
  note: The CRC code is directly derived from public domain code by
- Ross Williams (ross@guest.adelaide.edu.au).  See framing.txt for
- details.
+ Ross Williams (ross@guest.adelaide.edu.au).  See docs/framing.html
+ for details.
 
  ********************************************************************/
 

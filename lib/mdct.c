@@ -5,18 +5,15 @@
  * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
  * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: modified discrete cosine transform
            power of two length transform only [16 <= n ]
-
- author: Monty <xiphmont@mit.edu>
- modifications by: Monty
- last modification date: Oct 10 1999
+ last mod: $Id: mdct.c,v 1.13 1999/12/30 07:26:44 xiphmont Exp $
 
  Algorithm adapted from _The use of multirate filter banks for coding
  of high quality digital audio_, by T. Sporer, K. Brandenburg and

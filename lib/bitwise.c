@@ -5,16 +5,14 @@
  * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
  * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  author: Monty <monty@xiph.org>
-  modifications by: Monty
-  last modification date: Aug 04 1999
+  last mod: $Id: bitwise.c,v 1.5 1999/12/30 07:26:33 xiphmont Exp $
 
  ********************************************************************/
 

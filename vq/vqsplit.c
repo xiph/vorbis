@@ -5,16 +5,14 @@
  * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
  * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
- function: build a VQ codebook 
- author: Monty <xiphmont@mit.edu>
- modifications by: Monty
- last modification date: Dec 10 1999
+ function: build a VQ codebook and the encoding decision 'tree'
+ last mod: $Id: vqsplit.c,v 1.7 1999/12/30 07:27:06 xiphmont Exp $
 
  ********************************************************************/
 

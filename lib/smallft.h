@@ -1,10 +1,20 @@
-/******************************************************************
- * CopyPolicy: GNU Public License 2 applies
- * Copyright (C) 1998-1999 Monty xiphmont@mit.edu, monty@xiph.org
- *
- * Stripped down FFT implementation from OggSquish.
- *
- ******************************************************************/
+/********************************************************************
+ *                                                                  *
+ * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
+ * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
+ * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ *                                                                  *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * http://www.xiph.org/                                             *
+ *                                                                  *
+ ********************************************************************
+
+ function: fft transform
+ last mod: $Id: smallft.h,v 1.4 1999/12/30 07:26:50 xiphmont Exp $
+
+********************************************************************/
 
 #ifndef _V_SMFT_H_
 #define _V_SMFT_H_

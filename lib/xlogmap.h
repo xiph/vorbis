@@ -5,16 +5,14 @@
  * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
  * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
-  function: linear x scale -> log x scale mappings (with bias)
-  author: Monty <monty@xiph.org>
-  modifications by: Monty
-  last modification date: Aug 18 1999
+ function: linear x scale -> log x scale mappings (with bias)
+ last mod: $Id: xlogmap.h,v 1.2 1999/12/30 07:26:57 xiphmont Exp $
 
  ********************************************************************/
 

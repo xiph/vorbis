@@ -1,8 +1,22 @@
-/******************************************************************
- * CopyPolicy: GNU Public License 2 applies
- * Copyright (C) 1998 Monty xiphmont@mit.edu, monty@xiph.org
- *
- * FFT implementation from OggSquish, minus cosine transforms,
+/********************************************************************
+ *                                                                  *
+ * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
+ * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
+ * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ *                                                                  *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * http://www.xiph.org/                                             *
+ *                                                                  *
+ ********************************************************************
+
+ function: fft transform
+ last mod: $Id: smallft.c,v 1.6 1999/12/30 07:26:49 xiphmont Exp $
+
+********************************************************************/
+
+/* FFT implementation from OggSquish, minus cosine transforms,
  * minus all but radix 2/4 case.  In Vorbis we only need this
  * cut-down version.
  *
@@ -13,8 +27,7 @@
  * packing following R_0, I_n, R_1, I_1, R_2, I_2 ... R_n-1, I_n-1,
  * it follows R_0, R_1, I_1, R_2, I_2 ... R_n-1, I_n-1, I_n like the
  * FORTRAN version
- *
- ******************************************************************/
+ */
 
 #include <stdlib.h>
 #include <string.h>

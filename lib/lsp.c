@@ -5,16 +5,14 @@
  * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
  * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  author: Monty <monty@xiph.org>
-  modifications by: Monty
-  last modification date: Nov 16 1999
+  last mod: $Id: lsp.c,v 1.4 1999/12/30 07:26:42 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler

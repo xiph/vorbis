@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.7 1999/12/30 03:46:18 xiphmont Exp $
+# $Id: configure.in,v 1.8 1999/12/30 07:26:25 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -184,4 +184,4 @@ AC_SUBST(RANLIB)
 #AC_SUBST(LIBGTKDIR)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile lib/Makefile examples/Makefile vq/Makefile cmdline/Makefile)
+AC_OUTPUT(Makefile lib/Makefile examples/Makefile vq/Makefile cmdline/Makefile xmms/Makefile)
