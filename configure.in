@@ -43,12 +43,12 @@ AM_PROG_LIBTOOL
 
 dnl docbook xml transform and processing tools
 AC_ARG_ENABLE(docs,
-  [  --disable-docs          don't build the documentation],
+  [  --enable-docs          build the documentation],
   [case "${enableval}" in
     yes) build_docs=true;;
     no)  build_docs=false;;
     *)   AC_MSG_ERROR(unknown value ${enableval} for --enable-docs);;
-  esac],[build_docs=true])
+  esac],[build_docs=false])
 
 dnl ideally we'd look for other tools and support them
 if test x$build_docs = xtrue; then
