@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.8 2001/08/13 01:36:58 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.9 2001/08/13 06:25:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -93,9 +93,17 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   float base_quality /* 0. to 1. */
 			   ){
 
+  switch(channels){
+  case 2:
+    return(OV_EIMPL);
 
 
+    break;
+  default:
+    return(OV_EIMPL);
 
+    break;
+  }
 }
 
 
@@ -125,43 +133,65 @@ int vorbis_encode_init(vorbis_info *vi,
   /* copy a mode into our allocated storage */
   bpch=nominal_bitrate/channels;
 
-  mode=&info_44c_Z;
+  switch(channels){
+  case 2:
+    //if(rate>40000){
 
+    if(bpch<35000){
+      mode=&info_44c_Z;
+    }else if(bpch<45000){
+      mode=&info_44c_Y;
+    }else if(bpch<55000){
+      mode=&info_44c_X;
+    }else if(bpch<75000){
+      mode=&info_44c_A;
+    }else if(bpch<90000){
+      mode=&info_44c_X;
+    }else if(bpch<110000){
+      mode=&info_44c_X;
+    }else if(bpch<160000){
+      mode=&info_44c_X;
+    }else{
+      mode=&info_44c_X;
+    }
+    //}
+
+    break;
+  default:
 #if 0
-  if(bpch<60000){
-    /* mode AA */
-    mode=&info_AA;
-  }else if(bpch<75000){
-    /* mode A */
-    mode=&info_A;
-  }else if(bpch<90000){
-    /* mode B */
-    mode=&info_B;
-  }else if(bpch<110000){
-    /* mode C */
-    mode=&info_C;
-  }else if(bpch<160000){
-    /* mode D */
-    mode=&info_D;
-  }else{
-    /* mode E */
-    mode=&info_E;
-  }
+    if(bpch<60000){
+      /* mode AA */
+      mode=&info_AA;
+    }else if(bpch<75000){
+      /* mode A */
+      mode=&info_A;
+    }else if(bpch<90000){
+      /* mode B */
+      mode=&info_B;
+    }else if(bpch<110000){
+      /* mode C */
+      mode=&info_C;
+    }else if(bpch<160000){
+      /* mode D */
+      mode=&info_D;
+    }else{
+      /* mode E */
+      mode=&info_E;
+    }
 #endif
+  }
 
   /* now we have to deepcopy */
   codec_setup_partialcopy(ci,mode);
 
   /* adjust for sample rate */
+  /* we don't have any floor 0 modes anymore 
   for(i=0;i<ci->floors;i++)
     if(ci->floor_type[i]==0)
-      ((vorbis_info_floor0 *)(ci->floor_param[i]))->rate=rate;
+    ((vorbis_info_floor0 *)(ci->floor_param[i]))->rate=rate; */
 
-  /* adjust for channels; all our mappings use submap zero now */
-  /* yeah, OK, _ogg_calloc did this for us.  But it's a reminder/placeholder */
-  for(i=0;i<ci->maps;i++)
-    for(j=0;j<channels;j++)
-      ((vorbis_info_mapping0 *)ci->map_param[i])->chmuxlist[j]=0;
+  /* adjust for channels */
+  /* but all our mappings use submap zero now! */
 
   return(0);
 }
