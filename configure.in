@@ -123,6 +123,10 @@ else
 		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char -mv8"
 		CFLAGS="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char -mv8"
 		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char -mv8" ;;
+	*-*-darwin*)
+		DEBUG="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O0 -fsigned-char"
+		CFLAGS="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O4 -ffast-math -fsigned-char"
+		PROFILE="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -pg -O4 -ffast-math -fsigned-char";;
 	*)
 		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char"
 		CFLAGS="-O20 -D__NO_MATH_INLINES -fsigned-char"
