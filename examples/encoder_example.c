@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.21 2001/02/26 03:50:38 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.22 2001/08/13 11:33:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,7 +36,7 @@
 #endif
 
 #define READ 1024
-signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
+signed char readbuffer[READ*2+44]; /* out of the data segment, not the stack */
 
 int main(){
   ogg_stream_state os; /* take physical pages, weld into a logical
@@ -79,7 +79,7 @@ int main(){
   /* choose an encoding mode */
   /* (mode 0: 44kHz stereo uncoupled, roughly 128kbps VBR) */
   vorbis_info_init(&vi);
-  vorbis_encode_init(&vi,2,44100, -1, 128000, -1);
+  vorbis_encode_init(&vi,1,44100, -1, 999000, -1);
 
   /* add a comment */
   vorbis_comment_init(&vc);
@@ -128,7 +128,7 @@ int main(){
   
   while(!eos){
     long i;
-    long bytes=fread(readbuffer,1,READ*4,stdin); /* stereo hardwired here */
+    long bytes=fread(readbuffer,1,READ*2,stdin); /* stereo hardwired here */
 
     if(bytes==0){
       /* end of file.  this can be done implicitly in the mainline,
@@ -144,13 +144,11 @@ int main(){
       float **buffer=vorbis_analysis_buffer(&vd,READ);
       
       /* uninterleave samples */
-      for(i=0;i<bytes/4;i++){
-	buffer[0][i]=((readbuffer[i*4+1]<<8)|
-		      (0x00ff&(int)readbuffer[i*4]))/32768.f;
-	buffer[1][i]=((readbuffer[i*4+3]<<8)|
-		      (0x00ff&(int)readbuffer[i*4+2]))/32768.f;
+      for(i=0;i<bytes/2;i++){
+	buffer[0][i]=((readbuffer[i*2+1]<<8)|
+		      (0x00ff&(int)readbuffer[i*2]))/32768.f;
       }
-    
+      
       /* tell the library how much we actually submitted */
       vorbis_analysis_wrote(&vd,i);
     }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.28 2001/08/13 01:36:56 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.29 2001/08/13 11:33:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -360,7 +360,7 @@ long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
 }
 
 long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
-  int i,j=0,entry;
+  int i,j,entry;
   float *t;
 
   if(book->dim>8){
@@ -376,6 +376,7 @@ long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
       entry = vorbis_book_decode(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
+      j=0;
       switch(book->dim){
       case 8:
 	a[i++]+=t[j++];

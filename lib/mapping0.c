@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.34 2001/08/13 01:36:57 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.35 2001/08/13 11:33:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -412,11 +412,11 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		     res,
 		     local_ampmax[i]);
 
-    for(j=0;j<n/2;j++)
+    /*for(j=0;j<n/2;j++)
       if(fabs(res[j])>1200){
 	analysis_noisy=1;
-	/*fprintf(stderr,"%ld ",seq+i);*/
-      }
+	fprintf(stderr,"%ld ",seq+i);
+	}*/
 
     _analysis_output("res",seq+i,res,n/2,1,0);
     _analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
@@ -475,13 +475,25 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     zerobundle[0]=alloca(sizeof(int)*vi->channels);
 
     /* initial down-quantized coupling */
-    _vp_quantize_couple(look->psy_look[blocktype],
-			info,
-			pcm,
-			sofar,
-			quantized,
-			nonzero,
-			0);
+    
+    if(info->coupling_steps==0){
+      /* this assumes all or nothing coupling right now.  it should pass
+	 through any channels left uncoupled, but it doesn't do that now */
+      for(i=0;i<vi->channels;i++){
+	float *lpcm=pcm[i];
+	float *lqua=quantized[i];
+	for(j=0;j<n/2;j++)
+	  lqua[j]=lpcm[j];
+      }
+    }else{
+      _vp_quantize_couple(look->psy_look[blocktype],
+			  info,
+			  pcm,
+			  sofar,
+			  quantized,
+			  nonzero,
+			  0);
+    }
 
     for(i=0;i<vi->channels;i++)
       _analysis_output("quant",seq+i,quantized[i],n/2,1,0);
@@ -533,13 +545,25 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       if(!stopflag){
 	/* down-couple/down-quantize from perfect-'so-far' -> 
 	   new quantized vector */
-	_vp_quantize_couple(look->psy_look[blocktype],
-			    info,
-			    pcm,
-			    sofar,
-			    quantized,
-			    nonzero,
-			    i);
+	if(info->coupling_steps==0){
+	  /* this assumes all or nothing coupling right now.  it should pass
+	     through any channels left uncoupled, but it doesn't do that now */
+	  for(i=0;i<vi->channels;i++){
+	    float *lpcm=pcm[i];
+	    float *lsof=sofar[i];
+	    float *lqua=quantized[i];
+	    for(j=0;j<n/2;j++)
+	      lqua[j]=lpcm[j]-lsof[j];
+	  }
+	}else{
+	  _vp_quantize_couple(look->psy_look[blocktype],
+			      info,
+			      pcm,
+			      sofar,
+			      quantized,
+			      nonzero,
+			      i);
+	}
       }
       /* steady as she goes */
     }

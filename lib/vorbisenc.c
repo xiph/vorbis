@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.11 2001/08/13 08:39:30 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.12 2001/08/13 11:33:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -158,27 +158,21 @@ int vorbis_encode_init(vorbis_info *vi,
 
     break;
   default:
-#if 0
-    if(bpch<60000){
-      /* mode AA */
-      mode=&info_AA;
-    }else if(bpch<75000){
-      /* mode A */
-      mode=&info_A;
+
+    if(bpch<40000){
+      mode=&info_44_Z;
+    }else if(bpch<50000){
+      mode=&info_44_Y;
+    }else if(bpch<70000){
+      mode=&info_44_X;
     }else if(bpch<90000){
-      /* mode B */
-      mode=&info_B;
-    }else if(bpch<110000){
-      /* mode C */
-      mode=&info_C;
-    }else if(bpch<160000){
-      /* mode D */
-      mode=&info_D;
+      mode=&info_44_A;
+    }else if(bpch<120000){
+      mode=&info_44_B;
     }else{
-      /* mode E */
-      mode=&info_E;
+      mode=&info_44_C;
     }
-#endif
+    break;
   }
 
   /* now we have to deepcopy */
