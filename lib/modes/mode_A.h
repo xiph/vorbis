@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.14.4.1 2001/04/29 22:21:06 xiphmont Exp $
+ last mod: $Id: mode_A.h,v 1.14.4.2 2001/05/01 17:08:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,10 +22,8 @@
 #include "vorbis/codec.h"
 #include "backends.h"
 
-#include "books/lsp12_0.vqh"
-#include "books/lsp30_0.vqh"
-#include "books/lsp12_1.vqh"
-#include "books/lsp30_1.vqh"
+#include "books/line0.vqh"
+#include "books/line1.vqh"
 
 #include "books/res0_128_128aux.vqh"
 #include "books/res0_128_1024aux.vqh"
@@ -228,10 +226,48 @@ static vorbis_info_psy _psy_set_A={
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0A={0};
-static vorbis_info_floor0 _floor_set0A={12, 44100,  64, 10,130, 2, {0,1},
-                                        0.199f, .285f};
-static vorbis_info_floor0 _floor_set1A={30, 44100, 256, 12,150, 2, {2,3}, 
-                                        .082f, .126f};
+/*static vorbis_info_floor0 _floor_set0A={12, 44100,  64, 10,130, 2, {0,1},
+  0.199f, .285f};*/
+/*static vorbis_info_floor0 _floor_set1A={30, 44100, 256, 12,150, 2, {2,3}, 
+  .082f, .126f};*/
+
+static vorbis_info_floor1 _floor_set0A={4,
+					{0,1,2,2},
+					
+					{2,3,3},
+					{1,1,1},
+					{0,0,0},
+					{{-1,1},{-1,1},{-1,1}},
+
+					2,
+					{0,128,
+					 5,21,
+
+					 2,1,3,
+					 11,7,15,
+					 45,30,73},
+					
+					40,8,200,4};
+
+static vorbis_info_floor1 _floor_set1A={10,
+					{0,1,2,2,2,2,3,3,3,3},
+					
+					{3,4,3,3},
+					{1,1,1,1},
+					{2,2,2,2},
+					{{-1,3},{-1,3},{-1,3},{-1,3}},
+
+					2,
+					{0,1024,
+					 88,31,243,
+					 14,54,143,460,
+
+					 6,3,10, 22,18,26, 41,36,47, 
+					 69,61,78, 112,99,126, 185,162,211,  
+					 329,282,387, 672,553,825},
+					
+					40,8,200,9};
+
 static vorbis_info_residue0 _residue_set0A={0,96,16,6,4,
 					    {0,1,1,1,1,1},
 					    {6,7,8,9,10},
@@ -271,14 +307,14 @@ codec_setup_info info_A={
   /* times */
   {0,0},{&_time_set0A},
   /* floors */
-  {0,0},{&_floor_set0A,&_floor_set1A},
+  {1,1},{&_floor_set0A,&_floor_set1A},
   /* residue */
   {0,0},{&_residue_set0A,&_residue_set1A},
   /* books */
-  {&_vq_book_lsp12_0,       /* 0 */
-   &_vq_book_lsp12_1,       /* 1 */
-   &_vq_book_lsp30_0,      /* 2 */
-   &_vq_book_lsp30_1,      /* 3 */
+  {&_huff_book_line0,
+   &_huff_book_line1,
+   &_huff_book_line0,
+   &_huff_book_line1,
 
    &_huff_book_res0_128_128aux,
    &_huff_book_res0_128_1024aux,

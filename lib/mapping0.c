@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.27.4.1 2001/04/29 22:21:04 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.27.4.2 2001/05/01 17:08:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -297,7 +297,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 #endif      
   }
 
-  seq++;
   vbi->ampmax=newmax;
 
   /* perform residue encoding with residue mapping; this is
