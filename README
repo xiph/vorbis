@@ -1,13 +1,12 @@
 ********************************************************************
 *                                                                  *
-* THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
-* USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
-* THE GNU LESSER/LIBRARY PUBLIC LICENSE 2, WHICH IS INCLUDED WITH  *
-* THIS SOURCE.  PLEASE READ THESE TERMS DISTRIBUTING.              *
+* THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
+* USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
+* GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
+* IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
 *                                                                  *
-* THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
-* by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
-* http://www.xiph.org/                                             *
+* THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+* by the XIPHOPHORUS Company http://www.xiph.org/                  *
 *                                                                  *
 ********************************************************************
 
@@ -72,15 +71,15 @@ patent concerns.
 
 This package contains:
 
-.) libvorbis, an LGPLed software implementation of
+.) libvorbis, a BSD-license software implementation of
 the Vorbis specification by the Xiphophorus company
 (http://www.xiph.org/) 
 
-.) libvorbisfile, an LGPLed convenience library
+.) libvorbisfile, a BSD-license convenience library
 built on Vorbis designed to simplify common uses and a number of GPL
 example programs
 
-.) libvorbisenc, an LGPL library that provides a simple, programmatic
+.) libvorbisenc, a BSD-license library that provides a simple, programmatic
 encoding setup interface 
 
 .) example code making use of libogg, libvorbis, libvorbisfile and
@@ -141,4 +140,4 @@ VorbisLib at least) and #include "ogg/ogg.h" and "vorbis/codec.h"
 wherever you need to acces Ogg and Vorbis functionality.
 
 
-$Id: README,v 1.8 2000/11/22 06:22:18 xiphmont Exp $
+$Id: README,v 1.9 2001/03/22 00:27:26 xiphmont Exp $
