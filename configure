@@ -932,7 +932,7 @@ else
 	i?86-*-linux*)
 		DEBUG="-g -Wall -fsigned-char"
 		OPT="-O20 -ffast-math -malign-double -fsigned-char"
-		PROFILE="-pg -g -O20 -malign-double -fsigned-char";;
+		PROFILE="-pg -g -O20 -malign-double -D__NO_MATH_INLINES -fsigned-char";;
 	sparc-sun-*)
 		DEBUG="-g -Wall -fsigned-char -mv8"
 		OPT="-O20 -ffast-math -fsigned-char -mv8"
