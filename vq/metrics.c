@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.6.4.3 2000/04/26 07:10:16 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.6.4.4 2000/05/04 23:08:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -203,22 +203,30 @@ void process_postprocess(codebook **bs,char *basename){
   }
 }
 
-void process_one(codebook *b,int book,double *a,int dim,int step,int addmul){
+double process_one(codebook *b,int book,double *a,int dim,int step,int addmul,
+		   double base){
   int j,entry;
-  double base=0.;
   double amplitude=0.;
 
-  if(book==0)
+  if(book==0){
+    double last=base;
     for(j=0;j<dim;j++){
-      if(b->c->q_sequencep){
-	amplitude=a[j*step]-base;
-	base=a[j*step];
-      }else
-	amplitude=a[j*step];
+      amplitude=a[j*step]-last;
       meanamplitude_acc+=fabs(amplitude);
       meanamplitudesq_acc+=amplitude*amplitude;
       count++;
+      last=a[j*step];
     }
+  }
+
+  if(b->c->q_sequencep){
+    double temp;
+    for(j=0;j<dim;j++){
+      temp=a[j*step];
+      a[j*step]-=base;
+    }
+    base=temp;
+  }
 
   entry=vorbis_book_besterror(b,a,step,addmul);
   
@@ -239,6 +247,7 @@ void process_one(codebook *b,int book,double *a,int dim,int step,int addmul){
     if(histogram[book][entry]==0 || histogram_lo[book][entry*dim+j]>error)
       histogram_lo[book][entry*dim+j]=error;
   }
+  return base;
 }
 
 
@@ -249,13 +258,14 @@ void process_vector(codebook **bs,int *addmul,int inter,double *a,int n){
   for(bi=0;bi<books;bi++){
     codebook *b=bs[bi];
     int dim=b->dim;
-    
+    double base=0.;
+
     if(inter){
       for(i=0;i<n/dim;i++)
-	process_one(b,bi,a+i,dim,n/dim,addmul[bi]);
+	base=process_one(b,bi,a+i,dim,n/dim,addmul[bi],base);
     }else{
       for(i=0;i<=n-dim;i+=dim)
-	process_one(b,bi,a+i,dim,1,addmul[bi]);
+	base=process_one(b,bi,a+i,dim,1,addmul[bi],base);
     }
   }
   

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.11 2000/05/04 06:13:28 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.12 2000/05/04 23:08:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -438,6 +438,7 @@ static void max_seeds(vorbis_look_psy *p,double *flr){
       }else{
 	endpos=posstack[i]*17/15;
       }
+      if(endpos>n)endpos=n;
       for(j=pos;j<endpos;j++)flr[j]=ampstack[i];
       pos=endpos;
     }

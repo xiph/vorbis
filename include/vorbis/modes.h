@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.9.2.7 2000/05/04 06:14:51 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.9.2.8 2000/05/04 23:08:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,18 +25,8 @@
 
 #include "vorbis/book/lsp20_0.vqh"
 #include "vorbis/book/lsp32_0.vqh"
-
 #include "vorbis/book/resaux0_short.vqh"
 #include "vorbis/book/resaux0_long.vqh"
-
-#include "vorbis/book/res0_0a.vqh"
-#include "vorbis/book/res0_1a.vqh"
-#include "vorbis/book/res0_0b.vqh"
-#include "vorbis/book/res0_0c.vqh"
-#include "vorbis/book/res0_0d.vqh"
-#include "vorbis/book/res0_0e.vqh"
-#include "vorbis/book/res0_0f.vqh"
-#include "vorbis/book/res0_0g.vqh"
 
 /* A farily high quality setting mix */
 static vorbis_info_psy _psy_set0={
@@ -73,16 +63,16 @@ static vorbis_info_psy _psy_set0={
 static vorbis_info_time0 _time_set0={0};
 static vorbis_info_floor0 _floor_set0={20, 44100,  64, 12,150, 1, {0} };
 static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,150, 1, {1} };
-static vorbis_info_residue0 _residue_set0={0, 128, 16,8,2,
-					   {36,768,512,40240,4048,256, 6, 0},
-					   { 1, 2, 2, 4, 4, 4, 8, 8},
-					   {1,1,1,1,1,1,1,0},
-					   {4,5,6,7,8,9,10}};
+static vorbis_info_residue0 _residue_set0={0, 128, 16,1,2,
+					   {0},
+					   {0},
+					   {0},
+					   {}};
 static vorbis_info_residue0 _residue_set1={0,1024, 16,8,3,
-					   {36,768,512,40240,4048,256, 6, 0},
-					   { 1, 2, 2, 4, 4, 4, 8, 8},
-					   {1,1,1,1,1,1,1,0},
-					   {4,5,6,7,8,9,10}};
+					   {0},
+					   {0},
+					   {0},
+					   {}};
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {1}, {0}};
 static vorbis_info_mode _mode_set0={0,0,0,0};
@@ -95,7 +85,7 @@ vorbis_info info_A={
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   11,   1,
+  2,          2,    1,     2,       2,    4,   1,
   /* modes */
   {&_mode_set0,&_mode_set1},
   /* maps */
@@ -113,13 +103,13 @@ vorbis_info info_A={
    &_huff_book_resaux0_short,
    &_huff_book_resaux0_long,
 
-   &_vq_book_res0_0a,   /* 4 */
-   &_vq_book_res0_1a,   /* 5 */
-   &_vq_book_res0_1a,   /* 6 */
-   &_vq_book_res0_1a,   /* 7 */
-   &_vq_book_res0_1a,   /* 8 */
-   &_vq_book_res0_1a,   /* 9 */
-   &_vq_book_res0_1a,   /* 10 */
+   /*vq_book_res0_0a,
+   &_vq_book_res0_1a,
+   &_vq_book_res0_1a,
+   &_vq_book_res0_1a,
+   &_vq_book_res0_1a,
+   &_vq_book_res0_1a,
+   &_vq_book_res0_1a,*/
   },
   /* psy */
   {&_psy_set0},

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.11.4.3 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.11.4.4 2000/05/04 23:08:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,7 +32,7 @@ void vqext_quantize(vqgen *v,quant_meta *q){
 
 double global_maxdel=M_PI;
 double *weight=NULL;
-#if 1
+#if 0
 /* LSP training metric.  We weight error proportional to distance
    *between* LSP vector values.  The idea of this metric is not to set
    final cells, but get the midpoint spacing into a form conducive to

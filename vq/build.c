@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.12.4.5 2000/04/27 09:22:40 xiphmont Exp $
+ last mod: $Id: build.c,v 1.12.4.6 2000/05/04 23:08:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -184,8 +184,11 @@ int main(int argc,char *argv[]){
   vqgen_unquantize(&v,&q);
 
   /* build the book */
-  c.maptype=2;
   vqsp_book(&v,&b,quantlist);
+  c.q_min=q.min;
+  c.q_delta=q.delta;
+  c.q_quant=q.quant;
+  c.q_sequencep=q.sequencep;
 
   /* save the book in C header form */
   write_codebook(out,name,b.c);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.5.4.3 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.5.4.4 2000/05/04 23:08:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,24 +37,44 @@ void process_postprocess(codebook **b,char *basename){
   fprintf(stderr,"Done.                      \n");
 }
 
-void process_vector(codebook **bs,int *addmul,int inter,double *a,int n){
-  int i;
-  int booknum=0;
+double process_one(codebook *b,double *a,int dim,int step,int addmul,
+		   double base){
+  int j;
 
+  if(b->c->q_sequencep){
+    double temp;
+    for(j=0;j<dim;j++){
+      temp=a[j*step];
+      a[j*step]-=base;
+    }
+    base=temp;
+  }
+
+  vorbis_book_besterror(b,a,step,addmul);
+  
+  return base;
+}
+
+void process_vector(codebook **bs,int *addmul,int inter,double *a,int n){
+  int i,bi=0;
+  int booknum=0;
+  
   while(*bs){
+    double base=0.;
     codebook *b=*bs;
     int dim=b->dim;
-
+    
     if(inter){
       for(i=0;i<n/dim;i++)
-	vorbis_book_besterror(b,a+i,n/dim,addmul[booknum]);
+	base=process_one(b,a+i,dim,n/dim,addmul[bi],base);
     }else{
       for(i=0;i<=n-dim;i+=dim)
-	vorbis_book_besterror(b,a+i,1,addmul[booknum]);
+	base=process_one(b,a+i,dim,1,addmul[bi],base);
     }
 
     bs++;
     booknum++;
+    bi++;
   }
 
   for(i=0;i<n;i++)

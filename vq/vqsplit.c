@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.18.4.5 2000/04/27 09:22:40 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.18.4.6 2000/05/04 23:08:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -379,6 +379,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   memset(c,0,sizeof(static_codebook));
   b->c=c;
   t=c->nearest_tree=calloc(1,sizeof(encode_aux_nearestmatch));
+  c->maptype=2;
 
   /* make sure there are no duplicate entries and that every 
      entry has points */

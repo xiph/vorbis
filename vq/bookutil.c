@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.12.4.5 2000/04/27 09:22:40 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.12.4.6 2000/05/04 23:08:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -453,8 +453,9 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
   /* first, the static vectors, then the book structure to tie it together. */
   /* quantlist */
   if(c->quantlist){
+    long vals=(c->maptype==1?_book_maptype1_quantvals(c):c->entries*c->dim);
     fprintf(out,"static long _vq_quantlist_%s[] = {\n",name);
-    for(j=0;j<_book_maptype1_quantvals(c);j++){
+    for(j=0;j<vals;j++){
       fprintf(out,"\t%ld,\n",c->quantlist[j]);
     }
     fprintf(out,"};\n\n");
