@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.45.4.6 2002/06/26 00:37:39 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.45.4.7 2002/06/28 21:54:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -80,7 +80,7 @@ void res0_free_look(vorbis_look_residue *i){
     {
       int j,k,l;
       for(j=0;j<look->parts;j++){
-	fprintf(stderr,"partition %d: ",j);
+	/*fprintf(stderr,"partition %d: ",j);*/
 	for(k=0;k<8;k++)
 	  if(look->training_data[k][j]){
 	    char buffer[80];
@@ -96,19 +96,20 @@ void res0_free_look(vorbis_look_residue *i){
 	    
 	    fclose(of);
 	    
-	    fprintf(stderr,"%d(%.2f|%.2f) ",k,look->training_min[k][j],look->training_max[k][j]);
+	    /*fprintf(stderr,"%d(%.2f|%.2f) ",k,
+	      look->training_min[k][j],look->training_max[k][j]);*/
 
 	    _ogg_free(look->training_data[k][j]);
 	  }
-	fprintf(stderr,"\n");
+	/*fprintf(stderr,"\n");*/
       }
     }
     fprintf(stderr,"min/max residue: %g::%g\n",look->tmin,look->tmax);
 
-    fprintf(stderr,"residue bit usage %f:%f (%f total)\n",
+    /*fprintf(stderr,"residue bit usage %f:%f (%f total)\n",
 	    (float)look->phrasebits/look->frames,
 	    (float)look->postbits/look->frames,
-	    (float)(look->postbits+look->phrasebits)/look->frames);
+	    (float)(look->postbits+look->phrasebits)/look->frames);*/
 #endif
 
 
@@ -404,7 +405,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
     }
   }
 
-#ifdef TRAIN_RES
+#ifdef TRAIN_RESAUX
   {
     FILE *of;
     char buffer[80];
@@ -468,7 +469,7 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
 
   }  
   
-#ifdef TRAIN_RES
+#ifdef TRAIN_RESAUX
   sprintf(buffer,"resaux_%d.vqd",look->train_seq);
   of=fopen(buffer,"a");
   for(i=0;i<partvals;i++)
