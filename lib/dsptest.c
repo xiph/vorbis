@@ -72,6 +72,7 @@ int main(){
        /* analysis */
 
        vorbis_analysis(&vb);
+       vorbis_analysis_packetout(&vb,&op);
 
        /* synthesis */
 

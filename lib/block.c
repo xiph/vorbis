@@ -14,7 +14,7 @@
  function: PCM data vector blocking, windowing and dis/reassembly
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Aug 05 1999
+ last modification date: Oct 2 1999
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -69,6 +69,59 @@
 			  |beginSl
 			  |beginW
 */
+
+/* block abstraction setup *********************************************/
+
+int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
+  int i;
+  memset(vb,0,sizeof(vorbis_block));
+  vb->vd=v;
+
+  vb->pcm_storage=v->block_size[1];
+  vb->pcm_channels=v->pcm_channels;
+  vb->mult_storage=v->block_size[1]/v->samples_per_envelope_step;
+  vb->mult_channels=v->envelope_channels;
+  vb->floor_channels=v->vi.floorch;
+  vb->floor_storage=v->vi.floororder;
+  
+  vb->pcm=malloc(vb->pcm_channels*sizeof(double *));
+  for(i=0;i<vb->pcm_channels;i++)
+    vb->pcm[i]=malloc(vb->pcm_storage*sizeof(double));
+  
+  vb->mult=malloc(vb->mult_channels*sizeof(double *));
+  for(i=0;i<vb->mult_channels;i++)
+    vb->mult[i]=malloc(vb->mult_storage*sizeof(double));
+
+  vb->lsp=malloc(vb->floor_channels*sizeof(double *));
+  vb->lpc=malloc(vb->floor_channels*sizeof(double *));
+  vb->amp=malloc(vb->floor_channels*sizeof(double));
+  for(i=0;i<vb->floor_channels;i++){
+    vb->lsp[i]=malloc(vb->floor_storage*sizeof(double));
+    vb->lpc[i]=malloc(vb->floor_storage*sizeof(double));
+  }
+
+  return(0);
+}
+
+int vorbis_block_clear(vorbis_block *vb){
+  int i;
+  if(vb->pcm){
+    for(i=0;i<vb->pcm_channels;i++)
+      free(vb->pcm[i]);
+    free(vb->pcm);
+  }
+  if(vb->mult){
+    for(i=0;i<vb->mult_channels;i++)
+      free(vb->mult[i]);
+    free(vb->mult);
+  }
+  memset(vb,0,sizeof(vorbis_block));
+  return(0);
+}
+
+/* Analysis side code, but directly related to blocking.  Thus it's
+   here and not in analysis.c (which is for analysis transforms only).
+   The init is here because some of it is shared */
 
 static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   memset(v,0,sizeof(vorbis_dsp_state));
@@ -230,51 +283,6 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
 
     v->pcm_current+=vals;
   }
-  return(0);
-}
-
-int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
-  int i;
-  memset(vb,0,sizeof(vorbis_block));
-  vb->pcm_storage=v->block_size[1];
-  vb->pcm_channels=v->pcm_channels;
-  vb->mult_storage=v->block_size[1]/v->samples_per_envelope_step;
-  vb->mult_channels=v->envelope_channels;
-  vb->floor_channels=v->vi.floorch;
-  vb->floor_storage=v->vi.floororder;
-  
-  vb->pcm=malloc(vb->pcm_channels*sizeof(double *));
-  for(i=0;i<vb->pcm_channels;i++)
-    vb->pcm[i]=malloc(vb->pcm_storage*sizeof(double));
-  
-  vb->mult=malloc(vb->mult_channels*sizeof(double *));
-  for(i=0;i<vb->mult_channels;i++)
-    vb->mult[i]=malloc(vb->mult_storage*sizeof(double));
-
-  vb->lsp=malloc(vb->floor_channels*sizeof(double *));
-  vb->lpc=malloc(vb->floor_channels*sizeof(double *));
-  vb->amp=malloc(vb->floor_channels*sizeof(double));
-  for(i=0;i<vb->floor_channels;i++){
-    vb->lsp[i]=malloc(vb->floor_storage*sizeof(double));
-    vb->lpc[i]=malloc(vb->floor_storage*sizeof(double));
-  }
-
-  return(0);
-}
-
-int vorbis_block_clear(vorbis_block *vb){
-  int i;
-  if(vb->pcm){
-    for(i=0;i<vb->pcm_channels;i++)
-      free(vb->pcm[i]);
-    free(vb->pcm);
-  }
-  if(vb->mult){
-    for(i=0;i<vb->mult_channels;i++)
-      free(vb->mult[i]);
-    free(vb->mult);
-  }
-  memset(vb,0,sizeof(vorbis_block));
   return(0);
 }
 

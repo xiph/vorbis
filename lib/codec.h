@@ -14,12 +14,14 @@
  function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Aug 21 1999
+ last modification date: Oct 2 1999
 
  ********************************************************************/
 
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
+
+/* lookup structures for various simple transforms *****************/
 
 typedef struct {
   int n;
@@ -56,6 +58,7 @@ typedef struct lpclook{
 
 } lpc_lookup;
 
+/* structures for various internal data abstractions ********************/
 
 typedef struct {
   long endbyte;     
@@ -67,25 +70,28 @@ typedef struct {
   
 } oggpack_buffer;
 
+/* vobis_info contains all the setup information specific to the specific
+   compression/decompression mode in progress (eg, psychoacoustic settings,
+   channel setup, options, codebook etc) *********************************/
+
 typedef struct vorbis_info{
   int channels;
   int rate;
   int version;
-  int mode;
+
   char **user_comments;
+  int    max_comment;
   char *vendor;
 
   int smallblock;
   int largeblock;
   int envelopesa;
   int envelopech;
-  int *envelopemap; /* which envelope applies to what pcm channel */
-  int **Echannelmap; /* which encoding channels produce what pcm (decode) */
-  int **channelmap;   /* which pcm channels produce what floors   (encode) */
   int floororder;
   int flooroctaves;
   int floorch;
-  int *floormap;
+
+  /* no mapping, copuling, balance yet. */
 
   int balanceorder;
   int balanceoctaves;
@@ -94,12 +100,17 @@ typedef struct vorbis_info{
   double preecho_clamp;
 } vorbis_info;
  
+/* ogg_page is used to encapsulate the data in one Ogg bitstream page *****/
+
 typedef struct {
   unsigned char *header;
   long header_len;
   unsigned char *body;
   long body_len;
 } ogg_page;
+
+/* ogg_stream_state contains the current encode/decode state of a logical
+   Ogg bitstream **********************************************************/
 
 typedef struct {
   unsigned char   *body_data;    /* bytes from packet bodies */
@@ -130,6 +141,9 @@ typedef struct {
 
 } ogg_stream_state;
 
+/* ogg_packet is used to encapsulate the data and metadata belonging
+   to a single raw Ogg/Vorbis packet *************************************/
+
 typedef struct {
   unsigned char *packet;
   long  bytes;
@@ -150,6 +164,10 @@ typedef struct {
   int headerbytes;
   int bodybytes;
 } ogg_sync_state;
+
+/* vorbis_dsp_state buffers the current vorbis audio
+   analysis/synthesis state.  The DSP state belongs to a specific
+   logical bitstream ****************************************************/
 
 typedef struct vorbis_dsp_state{
   int samples_per_envelope_step;
@@ -187,6 +205,11 @@ typedef struct vorbis_dsp_state{
 
 } vorbis_dsp_state;
 
+/* vorbis_block is a single block of data to be processed as part of
+the analysis/synthesis stream; it belongs to a specific logical
+bitstream, but is independant from other vorbis_blocks belonging to
+that logical bitstream. *************************************************/
+
 typedef struct vorbis_block{
   double **pcm;
   double **mult;
@@ -194,8 +217,8 @@ typedef struct vorbis_block{
   double **lsp;
   double *amp;
   
-  int    pcm_channels; /* allocated, not used */
-  int    pcm_storage;  /* allocated, not used */
+  int    pcm_channels;  /* allocated, not used */
+  int    pcm_storage;   /* allocated, not used */
   int    mult_channels; /* allocated, not used */
   int    mult_storage;  /* allocated, not used */
   int    floor_channels;
@@ -258,32 +281,34 @@ extern size64 ogg_page_frameno(ogg_page *og);
 extern int    ogg_page_serialno(ogg_page *og);
 extern int    ogg_page_pageno(ogg_page *og);
 
-/* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
+/* Vorbis PRIMITIVES: general ***************************************/
 
-extern int      vorbis_analysis_init(vorbis_dsp_state *vd,vorbis_info *vi);
-extern int      vorbis_analysis_reset(vorbis_dsp_state *vd);
-extern void     vorbis_analysis_free(vorbis_dsp_state *vd);
-extern double **vorbis_analysis_buffer(vorbis_dsp_state *vd,int vals);
-extern int      vorbis_analysis_wrote(vorbis_dsp_state *vd,int vals);
-extern int      vorbis_analysis_blockout(vorbis_dsp_state *vd,
-					 vorbis_block *vb);
-extern int      vorbis_analysis(vorbis_block *vb);
-extern int      vorbis_analysis_packetout(vorbis_block *vb,
-					  ogg_packet *op);
+extern int vorbis_info_clear(vorbis_info *vi); 
+extern int vorbis_info_modeset(vorbis_info *vi, int mode); 
+extern int vorbis_info_addcomment(vorbis_info *vi, char *comment); 
+extern int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op);
+extern int vorbis_info_headerout(vorbis_info *vi,ogg_packet *op);
+
+extern int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
+extern int vorbis_block_clear(vorbis_block *vb);
+
+/* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
+extern int      vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi);
+extern void     vorbis_analysis_clear(vorbis_dsp_state *v);
+
+extern double **vorbis_analysis_buffer(vorbis_dsp_state *v,int vals);
+extern int      vorbis_analysis_wrote(vorbis_dsp_state *v,int vals);
+extern int      vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb);
+extern int      vorbis_analysis(vorbis_block *vb,ogg_packet *op);
 
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
+extern int  vorbis_synthesis_clear(vorbis_dsp_state *v);
+extern int  vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi);
 
-extern void vorbis_synthesis_free(vorbis_dsp_state *vd);
-extern int  vorbis_synthesis_init(vorbis_dsp_state *vd,vorbis_info *vi);
-
-extern int vorbis_synthesis(vorbis_block *vb);
+extern int vorbis_synthesis(vorbis_block *vb,ogg_packet *op);
 extern int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
 extern int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
 extern int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes);
-
-
-extern int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
-
 
 #define min(x,y)  ((x)>(y)?(y):(x))
 #define max(x,y)  ((x)<(y)?(y):(x))

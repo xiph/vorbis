@@ -11,41 +11,26 @@
  *                                                                  *
  ********************************************************************
 
- function: single-block PCM synthesis
+ function: predefined encoding modes
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Aug 08 1999
+ last modification date: Oct 2 1999
 
  ********************************************************************/
 
+#ifndef _V_MODES_H_
+#define _V_MODES_H_
+
+#include <stdio.h>
 #include "codec.h"
-#include "envelope.h"
-#include "mdct.h"
-#include "lpc.h"
-#include "lsp.h"
 
-int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  int i;
-  vorbis_info *vi=&vb->vd->vi;
-  double *window=vb->vd->window[vb->W][vb->lW][vb->nW];
-  lpc_lookup *vl=&vb->vd->vl[vb->W];
+vorbis_info predef_modes[]={
+  /* CD quality stereo, no channel coupling */
+  { 2, 44100, 0, NULL, 0, NULL, 512, 2048, 64, 2, 30, 5, 2, 0, 0, 10, .5 },
 
-  /* get the LSP params back to LPC params. This will be for each
-     spectral floor curve */
+};
 
-  /*for(i=0;i<vi->floorch;i++)
-    vorbis_lsp_to_lpc(vb->lsp[i],vb->lpc[i],vi->floororder);*/
+#define predef_mode_max 0
 
-  /* Map the resulting floors back to the appropriate channels */
-
-  /*for(i=0;i<vi->channels;i++)
-    vorbis_lpc_apply(vb->pcm[i],vb->pcmend,vb->lpc[vi->floormap[i]],
-    vb->amp[vi->floormap[i]],vi->floororder);*/
-  
-  for(i=0;i<vb->pcm_channels;i++)
-    mdct_backward(&vb->vd->vm[vb->W],vb->pcm[i],vb->pcm[i],window);
-  _ve_envelope_apply(vb,1);
-
-}
-
+#endif
 

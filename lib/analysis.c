@@ -14,7 +14,7 @@
  function: single-block PCM analysis
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Aug 22 1999
+ last modification date: Oct 2 1999
 
  ********************************************************************/
 
@@ -30,7 +30,7 @@
 
 extern void compute_balance(double *A, double *B, double *phi,int n);
 
-int vorbis_analysis(vorbis_block *vb){
+int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   int i;
   double *window=vb->vd->window[vb->W][vb->lW][vb->nW];
   lpc_lookup *vl=&vb->vd->vl[vb->W];
@@ -231,20 +231,3 @@ int vorbis_analysis(vorbis_block *vb){
   return(0);
 }
 
-int vorbis_analysis_packetout(vorbis_block *vb, ogg_packet *op){
-
-  /* find block's envelope vector and apply it */
-
-
-  /* the real analysis begins; forward MDCT with window */
-
-  
-  /* Noise floor, resolution floor */
-
-  /* encode the floor into LSP; get the actual floor back for quant */
-
-  /* use noise floor, res floor for culling, actual floor for quant */
-
-  /* encode residue */
-
-}

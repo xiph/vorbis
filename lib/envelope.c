@@ -14,7 +14,7 @@
  function: PCM data envelope analysis and manipulation
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Aug 07 1999
+ last modification date: Oct 02 1999
 
  Vorbis manipulates the dynamic range of the incoming PCM data
  envelope to minimise time-domain energy leakage from percussive and
@@ -139,7 +139,8 @@ void _ve_envelope_multipliers(vorbis_dsp_state *v){
       for(pch=0;pch<vi->channels;pch++){
 	
 	/* does this channel contribute to the envelope analysis */
-	if(vi->envelopemap[pch]==ech){
+	/*if(vi->envelopemap[pch]==ech){ not mapping yet */
+	if(pch==ech){
 
 	  /* we need a 1/4 envelope window overlap front and back */
 	  double *pcm=v->pcm[pch]+dcurr*step-step/2;
@@ -233,7 +234,8 @@ void _ve_envelope_apply(vorbis_block *vb,int multp){
       for(j=0;j<vi->channels;j++){
 	
 	/* check to see if the generated envelope applies to this channel */
-	if(vi->envelopemap[j]==i){
+	/*if(vi->envelopemap[j]==i){ not mapping yet */
+	if(j==i){
 	  
 	  if(multp)
 	    for(k=0;k<vb->multend*vi->envelopesa;k++)

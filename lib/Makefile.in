@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.8 1999/08/09 21:11:38 xiphmont Exp $
+# $Id: Makefile.in,v 1.9 1999/10/02 21:21:18 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -28,7 +28,7 @@ RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
 OFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
-		lsp.o lpc.o analysis.o synthesis.o psy.o
+		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o
 TARGETFILES =	libvorbis.a
 
 all:
