@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.44.2.1 2001/03/28 03:34:12 segher Exp $
+ last mod: $Id: psy.c,v 1.44.2.2 2001/03/28 04:50:55 segher Exp $
 
  ********************************************************************/
 
@@ -227,7 +227,7 @@ initdbtab();
   p->total_octave_lines=maxoc-p->firstoc+1;
 
   p->ath=_ogg_malloc(n*sizeof(float));
-  p->octave=_ogg_malloc(n*sizeof(int));
+  p->octave=_ogg_malloc(n*sizeof(long));
   p->bark=_ogg_malloc(n*sizeof(float));
   p->vi=vi;
   p->n=n;
