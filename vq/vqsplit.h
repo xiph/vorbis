@@ -11,33 +11,28 @@
  *                                                                  *
  ********************************************************************
 
- function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.h,v 1.4.4.3 2000/04/27 09:22:40 xiphmont Exp $
+ function: build a VQ codebook decision tree 
+ last mod: $Id: vqsplit.h,v 1.1.4.1 2000/04/27 09:22:40 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_BOOKUTIL_H_
-#define _V_BOOKUTIL_H_
-
-#include <stdio.h>
-#include <sys/time.h>
+#ifndef _VQSPL_H_
+#define _VQSPL_H_
 
 #include "vorbis/codebook.h"
 
-extern char     *get_line(FILE *in);
-extern char     *setup_line(FILE *in);
-extern int       get_line_value(FILE *in,double *value);
-extern int       get_next_value(FILE *in,double *value);
-extern int       get_next_ivalue(FILE *in,long *ivalue);
-extern void      reset_next_value(void);
-extern int       get_vector(codebook *b,FILE *in,int start,int num,double *a);
-extern char     *find_seek_to(FILE *in,char *s);
-
-extern codebook *codebook_load(char *filename);
-extern void write_codebook(FILE *out,char *name,const static_codebook *c);
-
-extern void spinnit(char *s,int n);
-extern void build_tree_from_lengths(int vals, long *hist, long *lengths);
+extern void vqsp_book(vqgen *v,codebook *b,long *quantlist);
+extern int vqenc_entry(codebook *b,double *val);
+extern int lp_split(double *pointlist,long totalpoints,
+		    codebook *b,
+		    long *entryindex,long entries, 
+		    long *pointindex,long points,
+		    long *membership,long *reventry,
+		    long depth, long *pointsofar);
 
 #endif
+
+
+
+
 

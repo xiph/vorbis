@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.1.2.1 2000/04/26 07:10:16 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.1.2.2 2000/04/27 09:22:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,8 @@
 #include "vorbis/codebook.h"
 #include "../lib/sharedbook.h"
 #include "bookutil.h"
+#include "vqgen.h"
+#include "vqsplit.h"
 
 /* Lattice codebooks have two strengths: important fetaures that are
    poorly modelled by global error minimization training (eg, strong
@@ -82,10 +84,10 @@ void add_vector(codebook *b,double *vec,long n){
       if(points>=allocated){
 	if(allocated){
 	  allocated*=2;
-	  pointlist=realloc(pointlist,allocated*dim*sizeof(double));
+	  pointlist=realloc(pointlist,allocated*sizeof(double));
 	}else{
 	  allocated=1024*1024;
-	  pointlist=malloc(allocated*dim*sizeof(double));
+	  pointlist=malloc(allocated*sizeof(double));
 	}
       }
 
@@ -289,6 +291,7 @@ int main(int argc,char *argv[]){
   }
   dim=b->dim;
   entries=b->entries;
+  points/=dim;
 
   if(target==-1){
     fprintf(stderr,"Target number of cells required on command line\n");
@@ -297,6 +300,12 @@ int main(int argc,char *argv[]){
 
   /* set up auxiliary vectors for error tracking */
   {
+    encode_aux_nearestmatch *nt=NULL;
+    long pointssofar=0;
+    long *pointindex;
+    long indexedpoints=0;
+    long *entryindex;
+    long *reventry;
     long *membership=malloc(points*sizeof(long));
     long *cellhead=malloc(entries*sizeof(long));
     double *cellerror1=calloc(entries,sizeof(double)); /* error for
@@ -369,21 +378,106 @@ int main(int argc,char *argv[]){
 
       cellsleft--;
     }
-    free(membership);
+
+    /* paring is over.  Build decision trees using points that now fall
+       through the thresh matcher. */
+    /* we don't free membership; we flatten it in order to use in lp_split */
+
+    for(i=0;i<entries;i++){
+      long head=cellhead[i];
+      while(head!=-1){
+	long next=membership[head];
+	membership[head]=i;
+	head=next;
+      }
+    }
+
     free(cellhead);
     free(cellerror1);
     free(cellerror2);
+
+    pointindex=malloc(points*sizeof(long));
+    /* make a point index of fall-through points */
+    for(i=0;i<points;i++){
+      int best=_best(b,pointlist+i*dim,1);
+      if(best==-1)
+	pointindex[indexedpoints++]=i;
+    }
+
+    /* make an entry index */
+    entryindex=malloc(entries*sizeof(long));
+    target=0;
+    for(i=0;i<entries;i++){
+      if(b->c->lengthlist[i]>0)
+	entryindex[target++]=i;
+    }
+
+    /* make working space for a reverse entry index */
+    reventry=malloc(entries*sizeof(long));
+
+    /* do the split */
+    nt=b->c->nearest_tree=
+      calloc(1,sizeof(encode_aux_nearestmatch));
+
+    nt->alloc=4096;
+    nt->ptr0=malloc(sizeof(long)*nt->alloc);
+    nt->ptr1=malloc(sizeof(long)*nt->alloc);
+    nt->p=malloc(sizeof(long)*nt->alloc);
+    nt->q=malloc(sizeof(long)*nt->alloc);
+    nt->aux=0;
+
+    fprintf(stderr,"Leaves added: %d              \n",
+            lp_split(pointlist,points,
+                     b,entryindex,target,
+                     pointindex,indexedpoints,
+                     membership,reventry,
+                     0,&pointssofar));
+    free(membership);
+    free(reventry);
+    free(pointindex);
+    
+    /* recount hits.  Build new lengthlist. reuse entryindex storage */
+    for(i=0;i<entries;i++)entryindex[i]=1;
+    for(i=0;i<points;i++){
+      int best=_best(b,pointlist+i*dim,1);
+      if(!(i&0xff))spinnit("counting hits...",i);
+      if(best==-1){
+	fprintf(stderr,"\nINTERNAL ERROR; a point count not be matched to a\n"
+		"codebook entry.  The new decision tree is broken.\n");
+	exit(1);
+      }
+      entryindex[best]++;
+    }
+    
+    /* the lengthlist builder doesn't actually deal with 0 hit entries.
+       So, we pack the 'sparse' hit list into a dense list, then unpack
+       the lengths after the build */
+    {
+      int upper=0;
+      long *lengthlist=calloc(entries,sizeof(long));
+      for(i=0;i<entries;i++)
+	if(b->c->lengthlist[i]>0)
+	  entryindex[upper++]=entryindex[i];
+      
+      /* sanity check */
+      if(upper != target){
+	fprintf(stderr,"\nINTERNAL ERROR; packed the wrong number of entries\n");
+	exit(1);
+      }
+    
+
+      build_tree_from_lengths(upper,entryindex,lengthlist);
+      
+      upper=0;
+      for(i=0;i<entries;i++)
+	if(b->c->lengthlist[i]>0)
+	  b->c->lengthlist[i]=lengthlist[upper++];
+    }
   }
+  /* we're done.  write it out. */
+  write_codebook(stdout,"foo",b->c);
 
-  for(i=0;i<entries;i++)
-    fprintf(stderr,"%ld, ",b->c->lengthlist[i]);
-
-  /* paring is over.  Build decision trees using points that now fall
-     through the thresh matcher */
-
-
-
-  fprintf(stderr,"\r                                        \nDone.");
+  fprintf(stderr,"\r                                        \nDone.\n");
   return(0);
 }
 

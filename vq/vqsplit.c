@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.18.4.4 2000/04/21 16:35:41 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.18.4.5 2000/04/27 09:22:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -68,23 +68,35 @@ int iascsort(const void *a,const void *b){
   return(av-bv);
 }
 
-/* grab it from vqgen.c */
-extern double _dist(vqgen *v,double *a, double *b);
+static double _Ndist(int el,double *a, double *b){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
+  return sqrt(acc);
+}
+
+#define _Npoint(i) (pointlist+dim*(i))
+#define _Nnow(i) (entrylist+dim*(i))
+
 
 /* goes through the split, but just counts it and returns a metric*/
-int vqsp_count(vqgen *v,long *membership,long *reventry,
-		long *entryindex,long entries, 
+int vqsp_count(double *entrylist,double *pointlist,int dim,
+	       long *membership,long *reventry,
+	       long *entryindex,long entries, 
 	       long *pointindex,long points,int splitp,
-		long *entryA,long *entryB,
-		long besti,long bestj,
-		long *entriesA,long *entriesB,long *entriesC){
+	       long *entryA,long *entryB,
+	       long besti,long bestj,
+	       long *entriesA,long *entriesB,long *entriesC){
   long i,j;
   long A=0,B=0,C=0;
   long pointsA=0;
   long pointsB=0;
   long *temppointsA=NULL;
   long *temppointsB=NULL;
-
+  
   if(splitp){
     temppointsA=malloc(points*sizeof(long));
     temppointsB=malloc(points*sizeof(long));
@@ -97,7 +109,7 @@ int vqsp_count(vqgen *v,long *membership,long *reventry,
      both? */
 
   for(i=0;i<points;i++){
-    double *ppt=_point(v,pointindex[i]);
+    double *ppt=_Npoint(pointindex[i]);
     long   firstentry=membership[pointindex[i]];
 
     if(firstentry==besti){
@@ -111,8 +123,8 @@ int vqsp_count(vqgen *v,long *membership,long *reventry,
       continue;
     }
     {
-      double distA=_dist(v,ppt,_now(v,besti));
-      double distB=_dist(v,ppt,_now(v,bestj));
+      double distA=_Ndist(dim,ppt,_Nnow(besti));
+      double distB=_Ndist(dim,ppt,_Nnow(bestj));
       if(distA<distB){
 	entryA[reventry[firstentry]]=1;
 	if(splitp)temppointsA[pointsA++]=pointindex[i];
@@ -144,7 +156,8 @@ int vqsp_count(vqgen *v,long *membership,long *reventry,
   return(pointsA);
 }
 
-int lp_split(vqgen *v,codebook *b,
+int lp_split(double *pointlist,long totalpoints,
+	     codebook *b,
 	     long *entryindex,long entries, 
 	     long *pointindex,long points,
 	     long *membership,long *reventry,
@@ -158,6 +171,8 @@ int lp_split(vqgen *v,codebook *b,
      codebook set spacing and distribution using special metrics and
      even a midpoint division won't disturb the basic properties) */
 
+  int dim=b->dim;
+  double *entrylist=b->valuelist;
   long ret;
   long *entryA=calloc(entries,sizeof(long));
   long *entryB=calloc(entries,sizeof(long));
@@ -169,12 +184,12 @@ int lp_split(vqgen *v,codebook *b,
 
   long   besti=-1;
   long   bestj=-1;
-
+  
   char spinbuf[80];
-  sprintf(spinbuf,"splitting [%ld left]... ",v->points-*pointsofar);
+  sprintf(spinbuf,"splitting [%ld left]... ",totalpoints-*pointsofar);
 
   /* one reverse index needed */
-  for(i=0;i<v->entries;i++)reventry[i]=-1;
+  for(i=0;i<b->entries;i++)reventry[i]=-1;
   for(i=0;i<entries;i++)reventry[entryindex[i]]=i;
 
   /* We need to find the dividing hyperplane. find the median of each
@@ -190,7 +205,8 @@ int lp_split(vqgen *v,codebook *b,
     for(i=0;i<entries-1;i++){
       for(j=i+1;j<entries;j++){
 	spinnit(spinbuf,entries-i);
-	vqsp_count(v,membership,reventry,
+	vqsp_count(b->valuelist,pointlist,dim,
+		   membership,reventry,
 		   entryindex,entries, 
 		   pointindex,points,0,
 		   entryA,entryB,
@@ -214,20 +230,20 @@ int lp_split(vqgen *v,codebook *b,
       }
     }
   }else{
-    double *p=alloca(v->elements*sizeof(double));
-    double *q=alloca(v->elements*sizeof(double));
+    double *p=alloca(dim*sizeof(double));
+    double *q=alloca(dim*sizeof(double));
     double best=0.;
     
     /* try COG/normal and furthest pairs */
     /* meanpoint */
     /* eventually, we want to select the closest entry and figure n/c
        from p/q (because storing n/c is too large */
-    for(k=0;k<v->elements;k++){
+    for(k=0;k<dim;k++){
       spinnit(spinbuf,entries);
       
       p[k]=0.;
       for(j=0;j<entries;j++)
-	p[k]+=v->entrylist[entryindex[j]*v->elements+k];
+	p[k]+=b->valuelist[entryindex[j]*dim+k];
       p[k]/=entries;
 
     }
@@ -237,18 +253,18 @@ int lp_split(vqgen *v,codebook *b,
        center */
 
     for(i=0;i<entries;i++){
-      double *ppi=_now(v,entryindex[i]);
+      double *ppi=_Nnow(entryindex[i]);
       double ref_best=0.;
       double ref_j=-1;
       double this;
       spinnit(spinbuf,entries-i);
       
-      for(k=0;k<v->elements;k++)
+      for(k=0;k<dim;k++)
 	q[k]=2*p[k]-ppi[k];
 
       for(j=0;j<entries;j++){
 	if(j!=i){
-	  double this=_dist(v,q,_now(v,entryindex[j]));
+	  double this=_Ndist(dim,q,_Nnow(entryindex[j]));
 	  if(ref_j==-1 || this<=ref_best){ /* <=, not <; very important */
 	    ref_best=this;
 	    ref_j=entryindex[j];
@@ -256,7 +272,8 @@ int lp_split(vqgen *v,codebook *b,
 	}
       }
 
-      vqsp_count(v,membership,reventry,
+      vqsp_count(b->valuelist,pointlist,dim,
+		 membership,reventry,
 		 entryindex,entries, 
 		 pointindex,points,0,
 		 entryA,entryB,
@@ -289,7 +306,8 @@ int lp_split(vqgen *v,codebook *b,
   /* find cells enclosing points */
   /* count A/B points */
 
-  pointsA=vqsp_count(v,membership,reventry,
+  pointsA=vqsp_count(b->valuelist,pointlist,dim,
+		     membership,reventry,
 		     entryindex,entries, 
 		     pointindex,points,1,
 		     entryA,entryB,
@@ -317,7 +335,7 @@ int lp_split(vqgen *v,codebook *b,
       *pointsofar+=pointsA;
     }else{
       t->ptr0[thisaux]= -t->aux;
-      ret=lp_split(v,b,entryA,entriesA,pointindex,pointsA,
+      ret=lp_split(pointlist,totalpoints,b,entryA,entriesA,pointindex,pointsA,
 		   membership,reventry,depth+1,pointsofar); 
     }
     if(entriesB==1){
@@ -326,7 +344,7 @@ int lp_split(vqgen *v,codebook *b,
       *pointsofar+=points-pointsA;
     }else{
       t->ptr1[thisaux]= -t->aux;
-      ret+=lp_split(v,b,entryB,entriesB,pointindex+pointsA,
+      ret+=lp_split(pointlist,totalpoints,b,entryB,entriesB,pointindex+pointsA,
 		    points-pointsA,membership,reventry,
 		    depth+1,pointsofar); 
     }
@@ -368,7 +386,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   for(i=0;i<v->entries;){
     /* duplicate? if so, eliminate */
     for(j=0;j<i;j++){
-      if(_dist(v,_now(v,i),_now(v,j))==0.){
+      if(_Ndist(v->elements,_now(v,i),_now(v,j))==0.){
 	fprintf(stderr,"found a duplicate entry!  removing...\n");
 	v->entries--;
 	memcpy(_now(v,i),_now(v,v->entries),sizeof(double)*v->elements);
@@ -384,13 +402,13 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     v->assigned=calloc(v->entries,sizeof(long));
     for(i=0;i<v->points;i++){
       double *ppt=_point(v,i);
-      double firstmetric=_dist(v,_now(v,0),ppt);
+      double firstmetric=_Ndist(v->elements,_now(v,0),ppt);
       long   firstentry=0;
 
       if(!(i&0xff))spinnit("checking... ",v->points-i);
 
       for(j=0;j<v->entries;j++){
-	double thismetric=_dist(v,_now(v,j),ppt);
+	double thismetric=_Ndist(v->elements,_now(v,j),ppt);
 	if(thismetric<firstmetric){
 	  firstmetric=thismetric;
 	  firstentry=j;
@@ -435,18 +453,21 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     c->dim=v->elements;
     c->entries=v->entries;
     c->lengthlist=calloc(c->entries,sizeof(long));
-    
+    b->valuelist=v->entrylist; /* temporary; replaced later */
+    b->dim=c->dim;
+    b->entries=c->entries;
+
     for(i=0;i<v->points;i++)membership[i]=-1;
     for(i=0;i<v->points;i++){
       double *ppt=_point(v,i);
       long   firstentry=0;
-      double firstmetric=_dist(v,_now(v,0),ppt);
+      double firstmetric=_Ndist(v->elements,_now(v,0),ppt);
     
       if(!(i&0xff))spinnit("assigning... ",v->points-i);
 
       for(j=1;j<v->entries;j++){
 	if(v->assigned[j]!=-1){
-	  double thismetric=_dist(v,_now(v,j),ppt);
+	  double thismetric=_Ndist(v->elements,_now(v,j),ppt);
 	  if(thismetric<=firstmetric){
 	    firstmetric=thismetric;
 	    firstentry=j;
@@ -458,7 +479,8 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     }
 
     fprintf(stderr,"Leaves added: %d              \n",
-	    lp_split(v,b,entryindex,v->entries,
+	    lp_split(v->pointlist,v->points,
+		     b,entryindex,v->entries,
 		     pointindex,v->points,
 		     membership,reventry,
 		     0,&pointssofar));
@@ -525,7 +547,6 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   {
     long *probability=malloc(c->entries*sizeof(long));
     for(i=0;i<c->entries;i++)probability[i]=1; /* trivial guard */
-    b->valuelist=v->entrylist; /* temporary for vqenc_entry; replaced later */
     b->dim=c->dim;
 
     /* sigh.  A necessary hack */
