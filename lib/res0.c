@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.32.2.4 2001/08/07 19:50:00 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.32.2.5 2001/08/08 04:19:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -491,8 +491,6 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 
   long resbits[possible_partitions];
   long resvals[possible_partitions];
-  memset(resbits,0,sizeof(resbits));
-  memset(resvals,0,sizeof(resvals));
 
   
 #ifdef TRAIN_RES
@@ -509,6 +507,9 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     fclose(of);
   }
 #endif      
+
+  memset(resbits,0,sizeof(resbits));
+  memset(resvals,0,sizeof(resvals));
   
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
@@ -566,7 +567,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     long totalbits=0;
     fprintf(stderr,"%d :: ",vb->mode);
     for(k=0;k<possible_partitions;k++){
-      fprintf(stderr,"%d/%1.2g, ",resvals[k],(float)resbits[k]/resvals[k]);
+      fprintf(stderr,"%ld/%1.2g, ",resvals[k],(float)resbits[k]/resvals[k]);
       total+=resvals[k];
       totalbits+=resbits[k];
     }

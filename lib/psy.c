@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48.2.7 2001/08/07 19:50:00 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.48.2.8 2001/08/08 04:19:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1013,15 +1013,6 @@ static void couple_lossless(float A, float B, float *mag, float *ang){
   }
 }
 
-static void couple_Nphase(float A, float B, float Aa, float Ba,
-			    float *mag, float *ang){
-  if(fabs(A)>fabs(B)){
-    *mag=A;*ang=(A>0.f?Aa-Ba:Ba-Aa);
-  }else{
-    *mag=B;*ang=(B>0.f?Aa-Ba:Ba-Aa);
-  }
-}
-
 static void couple_8phase(float A, float B, float *mag, float *ang){
   if(fabs(A)>fabs(B)){
     *mag=A; *ang=(A>0?A-B:B-A);
@@ -1101,6 +1092,8 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 
   /* perform any requested channel coupling */
   for(i=0;i<vi->coupling_steps;i++){
+    float granulem=info->couple_pass[passno].granulem;
+    float igranulem=info->couple_pass[passno].igranulem;
     
     /* make sure coupling a zero and a nonzero channel results in two
        nonzero channels. */
@@ -1124,9 +1117,6 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 	  /* partition by partition; k is our by-location partition
 	     class counter */
 
-	  float granulem=part->granulem;
-	  float igranulem=part->igranulem;
-
 	  float Am=rint(pcmM[j]*igranulem)*granulem;
 	  float Bm=rint(pcmA[j]*igranulem)*granulem;
 	  float ang,mag,fmag=max(fabs(Am),fabs(Bm));
@@ -1140,16 +1130,11 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 	      if(fmag<part->amppost_8phase){
 		couple_8phase(Am,Bm,&mag,&ang);
 	      }else{
-		if(fmag<part->amppost_Nphase){
-		  float Aa=rint(pcmM[j]*part->igranulea)*part->granulea;
-		  float Ba=rint(pcmA[j]*part->igranulea)*part->granulea;
-		  couple_Nphase(Am,Bm,Aa,Ba,&mag,&ang);
-		}else{
-		  couple_lossless(Am,Bm,&mag,&ang);
-		}
+		couple_lossless(Am,Bm,&mag,&ang);
 	      }
 	    }
 	  }
+	  fmag=rint(fmag);
 	  if(ang>fmag*1.9999f)ang=-fmag*2.f;
 	  
 	  qM[j]=mag-sofarM[j];

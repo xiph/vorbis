@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.21.2.6 2001/08/07 19:50:00 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.21.2.7 2001/08/08 04:19:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,19 +39,21 @@
 typedef struct vp_couple{
   int limit;        /* sample post */
 
-  float granulem;
-  float igranulem;
-  float granulea;
-  float igranulea;
-
-  float amppost_Nphase;
   float amppost_8phase;
+  float thresh_8phase;
+
   float amppost_6phase;
+  float thresh_6phase;
+
   float amppost_point;
+  float thresh_point;
   
 } vp_couple;
 
 typedef struct vp_couple_pass{  
+  float granulem;
+  float igranulem;
+
   vp_couple couple_pass[8];
 } vp_couple_pass;
 
