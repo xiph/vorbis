@@ -11,7 +11,7 @@
  *                                                                  *
  ********************************************************************
 
- function: simple example of opening/seeking chained bitstreams
+ function: stdio-based convenience library for opening/seeking/decoding
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
  last modification date: Nov 02 1999
@@ -19,11 +19,9 @@
  ********************************************************************/
 
 #include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include <stdio.h>
-#include <math.h>
 #include "codec.h"
+#include "vorbisfile.h"
 
 /* A 'chained bitstream' is a Vorbis bitstream that contains more than
    one logical bitstream arranged end to end (the only form of Ogg
@@ -40,38 +38,13 @@
    bitstream structure right off the bat, or find pieces on demand.
    This example determines and caches structure for the entire
    bitstream, but builds a virtual decoder on the fly when moving
-   between links in the chain */
+   between links in the chain. */
 
 /* There are also different ways to implement seeking.  Enough
    information exists in an Ogg bitstream to seek to
    sample-granularity positions in the output.  Or, one can seek by
    picking some portion of the stream roughtly in the area if we only
    want course navigation through the stream. */
-
-typedef struct {
-  FILE             *f;
-  int              seekable;
-  long             offset;
-  long             end;
-  ogg_sync_state   oy; 
-
-  /* If the FILE handle isn't seekable (eg, a pipe), only the current
-     stream appears */
-  int              links;
-  long             *offsets;
-  long             *serialnos;
-  size64           *pcmlengths;
-  vorbis_info      *vi;
-
-  /* Decoding working state local storage */
-  int ready;
-  ogg_stream_state os; /* take physical pages, weld into a logical
-                          stream of packets */
-  vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
-  vorbis_block     vb; /* local working space for packet->PCM decode */
-
-} OggVorbis_File;
-
 
 /*************************************************************************
  * Many, many internal helpers.  The intention is not to be confusing; 
@@ -455,7 +428,7 @@ double ov_lbtime(OggVorbis_File *vf,int i){
   return(0);
 }
 
-long ov_totaltime(OggVorbis_File *vf){
+double ov_totaltime(OggVorbis_File *vf){
   double acc=0;
   int i;
   for(i=0;i<vf->links;i++)
@@ -464,49 +437,35 @@ long ov_totaltime(OggVorbis_File *vf){
 }
 
 /* seek to an offset relative to the *compressed* data */
-int ov_seek_stream;
+int ov_seek_stream(OggVorbis_File *vf,long pos){
 
+
+
+
+}
+
+/* seek to the beginning of the next logical bitstream within the
+   physical bitstream */
+int ov_seek_bitstream(OggVorbis_File *vf,long pos){
+
+
+
+
+}
 
 /* seek to an offset relative to the decompressed *output* stream */
-int ov_seek_pcm;
+int ov_seek_pcm(OggVorbis_File *vf,long pos){
 
 
-int main(){
-  OggVorbis_File ov;
-  int i;
 
-  /* open the file/pipe on stdin */
-  if(ov_open(stdin,&ov,NULL,-1)==-1){
-    printf("Could not open input as an OggVorbis file.\n\n");
-    exit(1);
-  }
-  
-  /* print details about each logical bitstream in the input */
-  if(ov.seekable){
-    printf("Input bitstream contained %d logical bitstream section(s).\n",
-	   ov.links);
-    printf("Total bitstream playing time: %ld seconds\n\n",
-	   (long)ov_totaltime(&ov));
-
-  }else{
-    printf("Standard input was not seekable.\n"
-	   "First logical bitstream information:\n\n");
-  }
-
-  for(i=0;i<ov.links;i++){
-    printf("\tlogical bitstream section %d information:\n",i+1);
-    printf("\t\tsample rate: %ldHz\n",ov.vi[i].rate);
-    printf("\t\tchannels: %d\n",ov.vi[i].channels);
-    printf("\t\tserial number: %ld\n",ov.serialnos[i]);
-    printf("\t\traw length: %ldbytes\n",(ov.offsets?
-				     ov.offsets[i+1]-ov.offsets[i]:
-				     -1));
-    printf("\t\tplay time: %lds\n\n",(long)ov_lbtime(&ov,i));
-  }
-  
-  ov_clear(&ov);
-  return 0;
 }
+
+int ov_seek_time(OggVorbis_File *vf,double seconds){
+
+
+
+}
+
 
 
 
