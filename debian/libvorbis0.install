@@ -1,0 +1,3 @@
+debian/tmp/usr/lib/libvorbis.so.*
+debian/tmp/usr/lib/libvorbisenc.so.*
+debian/tmp/usr/lib/libvorbisfile.so.*

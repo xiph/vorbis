@@ -3,5 +3,5 @@
 AUTOMAKE_OPTIONS = foreign
 
 EXTRA_DIST = changelog control copyright libvorbis-dev.docs \
-	libvorbis-dev.examples libvorbis-dev.files libvorbis0.README.Debian \
-	libvorbis0.files rules
+	libvorbis-dev.examples libvorbis-dev.install libvorbis0.README.Debian \
+	libvorbis0.install rules
