@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.37.2.1 2001/10/09 04:34:45 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.37.2.2 2001/10/11 15:41:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -513,14 +513,6 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
   long partialpass;
   int stoppos=0;
 
-  if((int)passlimit<ci->passlimit[pass]){
-    wholepasses=passlimit;
-    partialpass=rint((passlimit-wholepasses)*partvals);
-  }else{
-    wholepasses=ci->passlimit[pass];
-    partialpass=0;
-  }
-
 #ifdef TRAIN_RES
   FILE *of;
   char buffer[80];
@@ -535,6 +527,14 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     fclose(of);
   }
 #endif      
+
+  if((int)passlimit<ci->passlimit[pass]){
+    wholepasses=passlimit;
+    partialpass=rint((passlimit-wholepasses)*partvals);
+  }else{
+    wholepasses=ci->passlimit[pass];
+    partialpass=0;
+  }
 
   memset(resbits,0,sizeof(resbits));
   memset(resvals,0,sizeof(resvals));

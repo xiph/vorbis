@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.1 2001/10/09 04:34:45 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.2 2001/10/11 15:41:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -286,7 +286,9 @@ static double floater_interpolate(backend_lookup_state *b,vorbis_info *vi,
   int eighth=b->bitrate_floatinglimit*8-1.;
   double lobitrate;
   double hibitrate;
-
+  
+  if(desired_rate<=0.)return(0.);
+  
   lobitrate=(double)(eighth==0?0.:
 		     b->bitrate_avgbitacc[eighth-1])/b->bitrate_avgsampleacc*vi->rate;
   while(lobitrate>desired_rate && eighth>0){
@@ -388,6 +390,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       temp=logfft[(j+1)>>1]=todB(&temp);
       if(temp>local_ampmax[i])local_ampmax[i]=temp;
     }
+
+    if(local_ampmax[i]>0.f)local_ampmax[i]=0.f;
     if(local_ampmax[i]>global_ampmax)global_ampmax=local_ampmax[i];
 
     _analysis_output("fft",seq+i,logfft,n/2,1,0);
@@ -409,7 +413,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     for(j=0;j<n/2;j++)
       logmdct[j]=todB(mdct+j);
     _analysis_output("mdct",seq+i,logmdct,n/2,1,0);
-    _analysis_output("lmdct",seq+i,mdct,n/2,0,0);
 
 
     /* perform psychoacoustics; do masking */
@@ -435,7 +438,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      codedflr);
 
 
-    _analysis_output("mdct2",seq+i,mdct,n/2,1,1);
     _vp_remove_floor(look->psy_look[blocktype],
 		     b->psy_g_look,
 		     logmdct,
@@ -608,6 +610,73 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		    i,classifications[j],b->bitrate_floatinglimit,queueptr);
 	}
 	i++;
+
+      }
+
+      {
+	char buf[80];
+	int k;
+	float *pcmM=sofar[info->coupling_mag[0]];
+	float *pcmA=sofar[info->coupling_ang[0]];
+	float *a=alloca(sizeof(*a)*n/2);
+	float *b=alloca(sizeof(*b)*n/2);
+	sprintf(buf,"sofar%d",i);
+
+	/* channel coupling */
+
+	for(j=0;j<n/2;j++){
+	  float mag=pcmM[j];
+	  float ang=pcmA[j];
+	  
+	  if(mag>0)
+	    if(ang>0){
+	      a[j]=mag;
+	      b[j]=mag-ang;
+	    }else{
+	      b[j]=mag;
+	      a[j]=mag+ang;
+	    }
+	  else
+	    if(ang>0){
+	      a[j]=mag;
+	      b[j]=mag+ang;
+	    }else{
+	      b[j]=mag;
+	      a[j]=mag-ang;
+	    }
+	}
+
+	_analysis_output(buf,seq,a,n/2,1,0);
+	_analysis_output(buf,seq+1,b,n/2,1,0);
+
+	pcmM=quantized[info->coupling_mag[0]];
+	pcmA=quantized[info->coupling_ang[0]];
+	sprintf(buf,"uquant%d",i);
+
+	for(j=0;j<n/2;j++){
+	  float mag=pcmM[j];
+	  float ang=pcmA[j];
+	  
+	  if(mag>0)
+	    if(ang>0){
+	      a[j]=mag;
+	      b[j]=mag-ang;
+	    }else{
+	      b[j]=mag;
+	      a[j]=mag+ang;
+	    }
+	  else
+	    if(ang>0){
+	      a[j]=mag;
+	      b[j]=mag+ang;
+	    }else{
+	      b[j]=mag;
+	      a[j]=mag-ang;
+	    }
+	}
+
+	_analysis_output(buf,seq,a,n/2,1,0);
+	_analysis_output(buf,seq+1,b,n/2,1,0);
       }
       
       /* bitrate management.... deciding when it's time to stop. */
@@ -642,14 +711,17 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	if(info->coupling_steps==0){
 	  /* this assumes all or nothing coupling right now.  it should pass
 	     through any channels left uncoupled, but it doesn't do that now */
-	  for(i=0;i<vi->channels;i++){
-	    float *lpcm=pcm[i];
-	    float *lsof=sofar[i];
-	    float *lqua=quantized[i];
+	  int k;
+	  for(k=0;k<vi->channels;k++){
+	    float *lpcm=pcm[k];
+	    float *lsof=sofar[k];
+	    float *lqua=quantized[k];
 	    for(j=0;j<n/2;j++)
 	      lqua[j]=lpcm[j]-lsof[j];
 	  }
 	}else{
+	  char buf[80];
+
 	  _vp_quantize_couple(look->psy_look[blocktype],
 			      info,
 			      pcm,
@@ -657,19 +729,25 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			      quantized,
 			      nonzero,
 			      i);
+
+	  sprintf(buf,"quant%d",i);
+	  for(j=0;j<vi->channels;j++)
+	    _analysis_output(buf,seq+j,quantized[j],n/2,1,0);
+
 	}
       }
-
-      /* truncate the packet according to stoppos */
-      if(!stoppos)stoppos=oggpack_bytes(&vb->opb);
-      if(minbits && stoppos*8<minbits)stoppos=(minbits+7)/8;
-      if(maxbits && stoppos*8>maxbits)stoppos=maxbits/8;
-      if(stoppos>oggpack_bytes(&vb->opb))stoppos=oggpack_bytes(&vb->opb);
-      vb->opb.endbyte=stoppos;
-      vb->opb.endbit=0;
   
       /* steady as she goes */
     }
+     
+    /* truncate the packet according to stoppos */
+    if(!stoppos)stoppos=oggpack_bytes(&vb->opb);
+    if(minbits && stoppos*8<minbits)stoppos=(minbits+7)/8;
+    if(maxbits && stoppos*8>maxbits)stoppos=maxbits/8;
+    if(stoppos>oggpack_bytes(&vb->opb))stoppos=oggpack_bytes(&vb->opb);
+    vb->opb.endbyte=stoppos;
+    vb->opb.endbit=0;
+
     seq+=vi->channels;
 
     fprintf(stderr,"Bitrate: cav %d, cmin %ld, cmax %ld, float %.1f,"
@@ -711,40 +789,39 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     {
       int bits=oggpack_bytes(&vb->opb)*8;
 
-      if(bits>32){ /* (avoid pushing the floater too far in digital silence) */
-
-	/* boundaries */
-	b->bitrate_queue[b->bitrate_queue_head]=bits;
-	if(vb->W)b->bitrate_queue[b->bitrate_queue_head]|=0x80000000UL;
-	b->bitrate_boundbitacc+=bits;
-	b->bitrate_boundsampleacc+=ci->blocksizes[vb->W]>>1;
-
-	/* eighths */
-	if(b->bitrate_eighths){
-	  for(i=0;i<b->bitrate_eighths;i++)
-	    b->bitrate_avgbitacc[i]+=
-	      b->bitrate_queue_eighths[b->bitrate_queue_head*b->bitrate_eighths+i];
-	  b->bitrate_avgsampleacc+=ci->blocksizes[vb->W]>>1;
-	}
-
-	b->bitrate_queue_head++;
-	if(b->bitrate_queue_head>=b->bitrate_queue_size)b->bitrate_queue_head=0;
-		
-	/* adjust the floater to offset bitrate above/below desired average */
-	/* look for the eighth settings in recent history that bracket
-           the desired bitrate, and interpolate twixt them for the
-           flaoter setting we want */
-
-	if(b->bitrate_eighths>0){
-	  double upper=floater_interpolate(b,vi,ci->bitrate_queue_upperavg);
-	  double lower=floater_interpolate(b,vi,ci->bitrate_queue_loweravg);
-	  b->bitrate_floatinglimit=ci->bitrate_floatinglimit_initial;
-	  if(upper>0 && upper<b->bitrate_floatinglimit)
-	    b->bitrate_floatinglimit=upper;
-	  if(lower>b->bitrate_floatinglimit)
-	    b->bitrate_floatinglimit=lower;
-	} 
+      /* boundaries */
+      b->bitrate_queue[b->bitrate_queue_head]=bits;
+      if(vb->W)b->bitrate_queue[b->bitrate_queue_head]|=0x80000000UL;
+      b->bitrate_boundbitacc+=bits;
+      b->bitrate_boundsampleacc+=ci->blocksizes[vb->W]>>1;
+      
+      /* eighths */
+      if(b->bitrate_eighths){
+	for(i=0;i<b->bitrate_eighths;i++)
+	  b->bitrate_avgbitacc[i]+=
+	    b->bitrate_queue_eighths[b->bitrate_queue_head*b->bitrate_eighths+i];
+	b->bitrate_avgsampleacc+=ci->blocksizes[vb->W]>>1;
       }
+      
+      b->bitrate_queue_head++;
+      if(b->bitrate_queue_head>=b->bitrate_queue_size)b->bitrate_queue_head=0;
+      
+      /* adjust the floater to offset bitrate above/below desired average */
+      /* look for the eighth settings in recent history that bracket
+	 the desired bitrate, and interpolate twixt them for the
+	 flaoter setting we want */
+      
+      if(b->bitrate_eighths>0){
+	double upper=floater_interpolate(b,vi,ci->bitrate_queue_upperavg);
+	double lower=floater_interpolate(b,vi,ci->bitrate_queue_loweravg);
+
+	fprintf(stderr,"\tupper:%g :: lower:%g\n",upper,lower);
+	b->bitrate_floatinglimit=ci->bitrate_floatinglimit_initial;
+	if(upper>0. && upper<b->bitrate_floatinglimit)
+	  b->bitrate_floatinglimit=upper;
+	if(lower>b->bitrate_floatinglimit)
+	  b->bitrate_floatinglimit=lower;
+      } 
     }
   }
     

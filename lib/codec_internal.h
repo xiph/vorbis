@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.9.4.1 2001/10/09 04:34:45 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.9.4.2 2001/10/11 15:41:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -134,8 +134,8 @@ typedef struct codec_setup_info {
   double bitrate_absolute_min;
   double bitrate_queue_max;
   double bitrate_queue_min;
-  double bitrate_queue_upperavg;
   double bitrate_queue_loweravg;
+  double bitrate_queue_upperavg;
 
   int    passlimit[32];     /* iteration limit per couple/quant pass */
   int    coupling_passes;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.50.2.1 2001/10/09 04:34:45 xiphmont Exp $
+ last mod: $Id: block.c,v 1.50.2.2 2001/10/11 15:41:44 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -276,7 +276,8 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
 		     ci->bitrate_avg_queuetime)*
       vi->rate+(ci->blocksizes[0]-1))/ci->blocksizes[0]+1;
     long eighths=8*ci->passlimit[ci->coupling_passes-1];
-    if(ci->bitrate_queue_loweravg<=0. && ci->bitrate_queue_upperavg<=0.)eighths=0;
+    if(ci->bitrate_queue_loweravg<=0. && 
+       ci->bitrate_queue_upperavg<=0.)eighths=0;
 
     b->bitrate_queue_size=maxpackets;
     b->bitrate_eighths=eighths;
@@ -395,6 +396,7 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   return(v->pcmret);
 }
 
+static int seq=0;
 static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
   int order=32;
@@ -405,21 +407,30 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
 
   if(v->pcm_current-v->centerW>order*2){ /* safety */
     for(i=0;i<v->vi->channels;i++){
-      
       /* need to run the extrapolation in reverse! */
       for(j=0;j<v->pcm_current;j++)
 	work[j]=v->pcm[i][v->pcm_current-j-1];
       
+      _analysis_output("preextrap",seq,v->pcm[i],v->pcm_current,0,0);
+      _analysis_output("workextrap",seq,work,v->pcm_current,0,0);
+
       /* prime as above */
       vorbis_lpc_from_data(work,lpc,v->pcm_current-v->centerW,order);
+      _analysis_output("lpc",seq,lpc,order,0,0);
       
       /* run the predictor filter */
       vorbis_lpc_predict(lpc,work+v->pcm_current-v->centerW-order,
 			 order,
 			 work+v->pcm_current-v->centerW,
 			 v->centerW);
+
+      _analysis_output("extrap",seq,work,v->pcm_current,0,0);
+
+
       for(j=0;j<v->pcm_current;j++)
 	v->pcm[i][v->pcm_current-j-1]=work[j];
+
+      _analysis_output("postextrap",seq++,v->pcm[i],v->pcm_current,0,0);
     }
   }
 }
