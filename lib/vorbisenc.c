@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.44 2002/07/01 11:20:11 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.45 2002/07/01 21:56:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -760,7 +760,7 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 				     setup->psy_noise_dBsuppress,
 				     setup->psy_noise_bias_impulse,
 				     setup->psy_noiseguards,
-				     hi->impulse_noisetune);
+				     (i0==0?hi->impulse_noisetune:0.));
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[1].noise_bias_setting,1,
 				     setup->psy_noise_dBsuppress,
 				     setup->psy_noise_bias_padding,
