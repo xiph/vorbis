@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.17.2.2 2000/06/09 03:59:24 xiphmont Exp $
+ last mod: $Id: train.c,v 1.17.2.3 2000/06/12 00:31:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -165,7 +165,7 @@ int main(int argc,char *argv[]){
 	v.bias[i++]=a;
       }
       
-      v.seed=1;
+      v.seeded=1;
       {
 	double *b=alloca((dim+vqext_aux)*sizeof(double));
 	i=0;

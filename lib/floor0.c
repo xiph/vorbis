@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.14.2.2 2000/06/09 00:28:33 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.14.2.3 2000/06/12 00:31:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,6 +39,13 @@ typedef struct {
   vorbis_info_floor0 *vi;
   lpc_lookup lpclook;
 } vorbis_look_floor0;
+
+typedef struct {
+  long *codewords;
+  double *curve;
+  long frameno;
+  long codes;
+} vorbis_echstate_floor0;
 
 static void free_info(vorbis_info_floor *i){
   if(i){
@@ -137,13 +144,44 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
   return look;
 }
 
+static vorbis_echstate_floor *state (vorbis_info_floor *i){
+  vorbis_echstate_floor0 *state=calloc(1,sizeof(vorbis_echstate_floor0));
+  vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
+
+  /* a safe size if usually too big (dim==1) */
+  state->codewords=malloc(info->order*sizeof(long)); 
+  state->curve=malloc(info->barkmap*sizeof(double));
+  state->frameno=-1;
+  return(state);
+}
+
+static void free_state (vorbis_echstate_floor *vs){
+  vorbis_echstate_floor0 *state=(vorbis_echstate_floor0 *)vs;
+  if(state){
+    free(state->codewords);
+    free(state->curve);
+    memset(state,0,sizeof(vorbis_echstate_floor0));
+    free(state);
+  }
+}
+
 #include <stdio.h>
 
+double _curve_error(double *curve1,double *curve2,long n){
+  double acc=0.;
+  long i;
+  for(i=0;i<n;i++){
+    double val=curve1[i]-curve2[i];
+    acc+=val*val;
+  }
+  return(acc);
+}
 
 /* less efficient than the decode side (written for clarity).  We're
    not bottlenecked here anyway */
-double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
-			    long frameno){
+
+double _curve_to_lpc(double *curve,double *lpc,
+		     vorbis_look_floor0 *l,long frameno){
   /* map the input curve to a bark-scale curve for encoding */
   
   int mapped=l->ln;
@@ -186,7 +224,7 @@ double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
   for(i=bark+1;i<mapped;i++)
     work[i]=work[i-1];
   
-#if 1
+#if 0
     { /******************/
       FILE *of;
       char buffer[80];
@@ -217,7 +255,7 @@ void _lpc_to_curve(double *curve,double *lpc,double amp,
   }
   vorbis_lpc_to_curve(lcurve,lpc,amp,&(l->lpclook));
 
-#if 1
+#if 0
     { /******************/
       FILE *of;
       char buffer[80];
@@ -237,10 +275,11 @@ void _lpc_to_curve(double *curve,double *lpc,double amp,
 
 static long seq=0;
 static int forward(vorbis_block *vb,vorbis_look_floor *i,
-		    double *in,double *out){
-  long j,k;
+		    double *in,double *out,vorbis_echstate_floor *vs){
+  long j,k,l;
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
+  vorbis_echstate_floor0 *state=(vorbis_echstate_floor0 *)vs;
   double *work=alloca(look->n*sizeof(double));
   double amp;
   long bits=0;
@@ -274,14 +313,19 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   }
 
   if(amp>0){
+    double *refcurve=alloca(sizeof(double)*max(look->ln*2,look->m*2+2));
+    double *newcurve=alloca(sizeof(double)*max(look->ln*2,look->m*2+2));
+    long *codelist=alloca(sizeof(long)*look->m);
+    int codes=0;
+
+
+    if(state->frameno == vb->sequence){
+      /* generate a reference curve for testing */
+      vorbis_lpc_to_curve(refcurve,out,1,&(look->lpclook));
+    }
 
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
-#ifdef ANALYSIS
-    _analysis_output("lsp",seq,out,look->m,0,0);
-    vorbis_lsp_to_lpc(out,work,look->m); 
-    _lpc_to_curve(work,work,amp,look,"Fprefloor",seq);
-#endif
 
 #ifdef TRAIN
     {
@@ -291,7 +335,7 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
       sprintf(buffer,"lsp0coeff_%d.vqd",vb->mode);
       of=fopen(buffer,"a");
       for(j=0;j<look->m;j++)
-	fprintf(of,"%g, ",out[j]);
+	fprintf(of,"%.12g, ",out[j]);
       fprintf(of,"\n");
       fclose(of);
     }
@@ -301,6 +345,47 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
        quantized values; we don't want creeping error as each block is
        nailed to the last quantized value of the previous block. */
 
+    /* A new development: the code selection is based on error against
+       the LSP coefficients and not the curve it produces.  Because
+       the coefficient error is not linearly related to the curve
+       error, the fit we select is usually nonoptimal (but
+       sufficient).  This is fine, but flailing about causes a problem
+       in generally consistent spectra... so we add hysterisis. */
+
+    /* select a new fit, but don't code it.  Just grab it for testing */
+    {
+      /* the spec supports using one of a number of codebooks.  Right
+	 now, encode using this lib supports only one */
+      codebook *b=vb->vd->fullbooks+info->books[0];
+      double last=0.;
+      
+      for(j=0;j<look->m;){
+	for(k=0;k<b->dim;k++)out[j+k]-=last;
+	codelist[codes++]=vorbis_book_errorv(b,out+j);
+	for(k=0;k<b->dim;k++,j++)out[j]+=last;
+	last=out[j-1];
+      }
+    }
+    vorbis_lsp_to_lpc(out,out,look->m); 
+    vorbis_lpc_to_curve(newcurve,out,1,&(look->lpclook));
+    
+    /* if we're out of sequence, no hysterisis this frame, else check it */
+    if(state->frameno != vb->sequence ||
+       _curve_error(refcurve,newcurve,look->ln)<
+       _curve_error(refcurve,state->curve,look->ln)){
+      /* new curve is the fit to use.  replace the state */
+      memcpy(state->curve,newcurve,sizeof(double)*look->ln);
+      memcpy(state->codewords,codelist,sizeof(long)*codes);
+      state->codes=codes;
+    }else{
+      /* use state */
+      fprintf(stderr,"X");
+      codelist=state->codewords;
+      codes=state->codes;
+    }
+
+    state->frameno=vb->sequence+1;
+
     /* the spec supports using one of a number of codebooks.  Right
        now, encode using this lib supports only one */
     _oggpack_write(&vb->opb,0,_ilog(info->numbooks));
@@ -308,9 +393,8 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     {
       codebook *b=vb->vd->fullbooks+info->books[0];
       double last=0.;
-      for(j=0;j<look->m;){
-	for(k=0;k<b->dim;k++)out[j+k]-=last;
-	bits+=vorbis_book_encodev(b,out+j,&vb->opb);
+      for(l=0,j=0;l<codes;l++){
+	bits+=vorbis_book_encodev(b,codelist[l],out+j,&vb->opb);
 	for(k=0;k<b->dim;k++,j++)out[j]+=last;
 	last=out[j-1];
       }
@@ -365,7 +449,7 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
 
 /* export hooks */
 vorbis_func_floor floor0_exportbundle={
-  &pack,&unpack,&look,&free_info,&free_look,&forward,&inverse
+  &pack,&unpack,&look,&state,&free_info,&free_look,&free_state,&forward,&inverse
 };
 
 

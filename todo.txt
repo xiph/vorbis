@@ -5,9 +5,6 @@ libvorbis:
 libvorbis isn't doing the 'how much data in the last frame' trick from
 the PCM counter/last page flag.
 
-Re-add multistage floor0 LSP code.  Right now, it's gutted to single
-stage only.
-
 Implement correct truncated packet handling; this is mostly a case of
 'intiialize vectors and check return values' in res0.c:inverse (but
 not entirely)

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.10.2.6 2000/06/09 00:28:33 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.10.2.7 2000/06/12 00:31:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,8 +23,8 @@
 #include "vorbis/codec.h"
 #include "vorbis/backends.h"
 
-#include "vorbis/book/lsp16_1.vqh"
-#include "vorbis/book/lsp32_2.vqh"
+#include "vorbis/book/lsp12_0.vqh"
+#include "vorbis/book/lsp30_0.vqh"
 #include "vorbis/book/resaux0_short.vqh"
 #include "vorbis/book/resaux0_long.vqh"
 #include "vorbis/book/resaux0b_short.vqh"
@@ -101,8 +101,8 @@ static vorbis_info_psy _psy_set0={
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0={0};
-static vorbis_info_floor0 _floor_set0={16, 44100,  64, 12,150, 1, {0} };
-static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,150, 1, {1} };
+static vorbis_info_floor0 _floor_set0={12, 44100,  64, 12,150, 1, {0} };
+static vorbis_info_floor0 _floor_set1={30, 44100, 256, 12,150, 1, {1} };
 static vorbis_info_residue0 _residue_set0={0,128, 64,14,2,
 					   {0,1,1,1,1,1,1,1,1,1,1,1,1,1,
 					    0,1,1,1,1,1,1,1,1,1,1,1,1,1},
@@ -114,7 +114,7 @@ static vorbis_info_residue0 _residue_set0={0,128, 64,14,2,
 					   {6,6,6,6,6,6,6,6,6,6,6,6,6},
 					   -1,-1};
 
-static vorbis_info_residue0 _residue_set1={0,1024, 64,14,3,
+static vorbis_info_residue0 _residue_set1={0,768, 64,28,3,
 					   {0,1,1,1,1,1,1,1,1,1,1,1,1,1,
 					    0,1,1,1,1,1,1,1,1,1,1,1,1,1},
 					   {4,5,6,7,8,9,10,11,12,13,14,15,16,
@@ -123,7 +123,7 @@ static vorbis_info_residue0 _residue_set1={0,1024, 64,14,3,
 					   {0,16,9999,30,9999,41,9999,47,9999,60,9999,128,9999},
 					   {1.5,1.5,1.5,2.5,2.5,3.5,3.5,5,5,9,9,18,18},
 					   {6,6,6,6,6,6,6,6,6,6,6,6,6},/*6==64*/
-					   -1,-1};
+					   4,-1};
 
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {1}, {0}};
@@ -149,11 +149,11 @@ vorbis_info info_A={
   /* residue */
   {0,0},{&_residue_set0,&_residue_set1},
   /* books */
-  {&_vq_book_lsp16_1,      /* 0 */
-   &_vq_book_lsp32_2,      /* 1 */
+  {&_vq_book_lsp12_0,      /* 0 */
+   &_vq_book_lsp30_0,      /* 1 */
 
    &_huff_book_resaux0_short,
-   &_huff_book_resaux0_long,
+   &_huff_book_resaux0b_long,
 
    &_vq_book_res0a_1,
    &_vq_book_res0a_2,
@@ -185,7 +185,7 @@ vorbis_info info_A={
   /* psy */
   {&_psy_set0},
   /* thresh sample period, preecho clamp trigger threshhold, range */
-  64, 4, 2 
+  128, 4, 2 
 };
 
 #define PREDEF_INFO_MAX 0

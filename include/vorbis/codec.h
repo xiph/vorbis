@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.15.2.1 2000/05/24 21:16:57 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.15.2.2 2000/06/12 00:31:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,6 +30,7 @@ typedef void vorbis_info_time;
 typedef void vorbis_look_time;
 typedef void vorbis_info_floor;
 typedef void vorbis_look_floor;
+typedef void vorbis_echstate_floor;
 typedef void vorbis_info_residue;
 typedef void vorbis_look_residue;
 typedef void vorbis_info_mapping;

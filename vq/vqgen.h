@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.13.2.1 2000/06/09 03:59:25 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.13.2.2 2000/06/12 00:31:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,9 @@
 #define _VQGEN_H_
 
 typedef struct vqgen{
-  int seed;
+  int seeded;
+  int sorted;
+
   int it;
   int elements;
 
