@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.32 2000/12/12 04:18:54 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.33 2000/12/12 08:54:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -373,9 +373,9 @@ static float floor0_forward2(vorbis_block *vb,vorbis_look_floor *i,
 			  long amp,float error,
 			  vorbis_bitbuffer *vbb){
 
+  vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
+  vorbis_info_floor0 *info=look->vi;
   if(amp){
-    vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
-    vorbis_info_floor0 *info=look->vi;
     long maxval=(1L<<info->ampbits)-1;
     long adj=rint(todB(error)/info->ampdB*maxval/2);
     
@@ -385,7 +385,10 @@ static float floor0_forward2(vorbis_block *vb,vorbis_look_floor *i,
     oggpack_write(&vb->opb,amp,info->ampbits);
     bitbuf_pack(&vb->opb,vbb);
     return(fromdB((float)adj/maxval*info->ampdB));
-  }
+  }else{
+    oggpack_write(&vb->opb,0,info->ampbits);
+    bitbuf_pack(&vb->opb,vbb);
+  }    
   return(0.);
 }
 

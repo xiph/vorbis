@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.20 2000/11/17 11:47:18 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.21 2000/12/12 08:54:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -332,7 +332,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
        massaging things before we write out the final version. */
 
     {
-      static int seq=0;
       for(i=0;i<vi->channels;i++){
 	float *pcm=vb->pcm[i];
 	float *pcmori=vb->pcm[i]+n/2;
@@ -342,7 +341,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	int submap=info->chmuxlist[i];
 	
 	if(nonzero[i]){
-	  
+
 	  for(j=0;j<n/2;j++)
 	    pcm[j]=pcmori[j]-pcm[j]*quant[j];
 	  
