@@ -11,24 +11,15 @@
  *                                                                  *
  ********************************************************************
 
- function: residue backend 0 implementation
- last mod: $Id: res0.h,v 1.1 2000/01/20 04:43:04 xiphmont Exp $
+ function: miscellaneous prototypes
+ last mod: $Id: misc.h,v 1.1 2000/01/22 13:28:27 xiphmont Exp $
 
  ********************************************************************/
 
-typedef struct vorbis_info_res0{
-/* block-partitioned VQ coded straight residue */
-  long  begin;
-  long  end;
+#ifndef _V_RANDOM_H_
+#define _V_RANDOM_H_
 
-  /* way unfinished, just so you know while poking around CVS ;-) */
-  int   stages;
-  int  *books;
-} vorbis_info_res0;
+extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
+extern void _vorbis_block_ripcord(vorbis_block *vb);
 
-extern _vi_info_res *_vorbis_res0_dup   (_vi_info_res *source);
-extern void          _vorbis_res0_free  (_vi_info_res *i);
-extern void          _vorbis_res0_pack  (oggpack_buffer *opb, 
-					 _vi_info_res *vi);
-extern _vi_info_res *_vorbis_res0_unpack(vorbis_info *vi,
-					 oggpack_buffer *opb);
+#endif

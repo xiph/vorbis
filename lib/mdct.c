@@ -13,7 +13,7 @@
 
  function: modified discrete cosine transform
            power of two length transform only [16 <= n ]
- last mod: $Id: mdct.c,v 1.13 1999/12/30 07:26:44 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.14 2000/01/22 13:28:25 xiphmont Exp $
 
  Algorithm adapted from _The use of multirate filter banks for coding
  of high quality digital audio_, by T. Sporer, K. Brandenburg and
@@ -196,7 +196,7 @@ static double *_mdct_kernel(double *x, double *w,
   return(x);
 }
 
-void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
+void mdct_forward(mdct_lookup *init, double *in, double *out){
   int n=init->n;
   double *x=alloca(sizeof(double)*(n/2));
   double *w=alloca(sizeof(double)*(n/2));
@@ -217,8 +217,8 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
     
     for(i=0;i<n8;i+=2){
       A-=2;
-      tempA= in[in1+2]*window[in1+2] + in[in2]*window[in2];
-      tempB= in[in1]*window[in1] + in[in2+2]*window[in2+2];       
+      tempA= in[in1+2] + in[in2];
+      tempB= in[in1] + in[in2+2];       
       in1 -=4;in2 +=4;
       x[i]=   tempB*A[1] + tempA*A[0];
       x[i+1]= tempB*A[0] - tempA*A[1];
@@ -228,8 +228,8 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
 
     for(;i<n2-n8;i+=2){
       A-=2;
-      tempA= in[in1+2]*window[in1+2] - in[in2]*window[in2];
-      tempB= in[in1]*window[in1] - in[in2+2]*window[in2+2];       
+      tempA= in[in1+2] - in[in2];
+      tempB= in[in1] - in[in2+2];       
       in1 -=4;in2 +=4;
       x[i]=   tempB*A[1] + tempA*A[0];
       x[i+1]= tempB*A[0] - tempA*A[1];
@@ -239,8 +239,8 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
 
     for(;i<n2;i+=2){
       A-=2;
-      tempA= -in[in1+2]*window[in1+2] - in[in2]*window[in2];
-      tempB= -in[in1]*window[in1] - in[in2+2]*window[in2+2];       
+      tempA= -in[in1+2] - in[in2];
+      tempB= -in[in1] - in[in2+2];       
       in1 -=4;in2 +=4;
       x[i]=   tempB*A[1] + tempA*A[0];
       x[i+1]= tempB*A[0] - tempA*A[1];
@@ -265,7 +265,7 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
   }
 }
 
-void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
+void mdct_backward(mdct_lookup *init, double *in, double *out){
   int n=init->n;
   double *x=alloca(sizeof(double)*(n/2));
   double *w=alloca(sizeof(double)*(n/2));
@@ -275,7 +275,7 @@ void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
   int n8=n>>3;
   int i;
 
-  /* window + rotate + step 1 */
+  /* rotate + step 1 */
   {
     double *inO=in+1;
     double  *xO= x;
@@ -312,10 +312,10 @@ void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
       double temp1= (*xx * B[1] - *(xx+1) * B[0]);
       double temp2=-(*xx * B[0] + *(xx+1) * B[1]);
     
-      out[o1]=-temp1*window[o1];
-      out[o2]= temp1*window[o2];
-      out[o3]= temp2*window[o3];
-      out[o4]= temp2*window[o4];
+      out[o1]=-temp1;
+      out[o2]= temp1;
+      out[o3]= temp2;
+      out[o4]= temp2;
 
       o1++;
       o2--;
@@ -326,7 +326,6 @@ void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
     }
   }
 }
-
 
 
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.7 2000/01/05 03:10:59 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.8 2000/01/22 13:28:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,19 @@
 #define _V_LPC_H_
 
 #include "vorbis/codec.h"
+#include "smallft.h"
+
+typedef struct lpclook{
+  /* en/decode lookups */
+  int *linearmap;
+  double *barknorm;
+  drft_lookup fft;
+
+  int n;
+  int ln;
+  int m;
+
+} lpc_lookup;
 
 extern void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m);
 extern void lpc_clear(lpc_lookup *l);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.13 2000/01/20 04:43:04 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.14 2000/01/22 13:28:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,13 +20,13 @@
 #include "vorbis/codec.h"
 #include "registry.h"
 #include "bitwise.h"
+#include "misc.h"
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vorbis_dsp_state *vd=vb->vd;
   vorbis_info      *vi=vd->vi;
   oggpack_buffer   *opb=&vb->opb;
-  int              type;
-  int              mode;
+  int              type,mode,i;
 
   /* first things first.  Make sure decode is ready */
   _vorbis_block_ripcord(vb);
@@ -38,11 +38,32 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
     return(-1);
   }
 
-  /* read our mode */
-  mode=_oggpack_read(&vb->opb,vd->modebits);
-  type=vi->mappingtypes[mode]; /* unpack_header enforces range checking */
+  /* read our mode and pre/post windowsize */
+  mode=_oggpack_read(opb,vd->modebits);
+  vb->W=vi->mode_param[mode]->blockflag;
+  if(vb->W){
+    vb->lW=_oggpack_read(opb,1);
+    vb->nW=_oggpack_read(opb,1);
+  }else{
+    vb->lW=0;
+    vb->nW=0;
+  }
+  
+  /* more setup */
+  vb->frameno=op->frameno;
+  vb->sequence=op->packetno-3; /* first block is third packet */
+  vb->eofflag=op->e_o_s;
 
-  return(vorbis_map_synthesis_P[type](vb,vi->modelist[mode],op));
+  /* alloc pcm passback storage */
+  vb->pcmend=vi->blocksizes[vb->W];
+  vb->pcm=_vorbis_block_alloc(vb,sizeof(double *)*vi->channels);
+  for(i=0;i<vi->channels;i++)
+    vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(double));
+
+  /* unpack_header enforces range checking */
+  type=vi->map_type[vi->mode_param[mode]->mapping];
+
+  return(_mapping_P[type]->inverse(vb,vd->mode[mode]));
 }
 
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.3 2000/01/05 03:10:25 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.4 2000/01/22 13:28:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -259,8 +259,8 @@ int main(){
     /* ogg_page and ogg_packet structs always point to storage in
        libvorbis.  They're never freed or manipulated directly */
     
-    vorbis_dsp_clear(&vd);
     vorbis_block_clear(&vb);
+    vorbis_dsp_clear(&vd);
     vorbis_info_clear(&vi);  /* must be called last */
   }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: time backend 0 (dummy)
- last mod: $Id: time0.c,v 1.1 2000/01/20 04:43:05 xiphmont Exp $
+ last mod: $Id: time0.c,v 1.2 2000/01/22 13:28:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,20 +20,30 @@
 #include <string.h>
 #include "vorbis/codec.h"
 #include "registry.h"
-#include "time0.h"
 
-extern _vi_info_time *_vorbis_time0_dup(_vi_info_time *source){
-  return(calloc(1,sizeof(vorbis_info_time0)));
+static void pack (vorbis_info_time *i,oggpack_buffer *opb){
+}
+static vorbis_info_time *unpack (vorbis_info *vi,oggpack_buffer *opb){
+  return NULL;
+}
+static vorbis_look_time *look (vorbis_info *vi,vorbis_info_mode *mi,
+                              vorbis_info_time *i){
+  return NULL;
+}
+static void free_info(vorbis_info_time *i){
+}
+static void free_look(vorbis_look_time *i){
+}
+static int forward(vorbis_block *vb,vorbis_look_time *i,
+		    double *in,double *out){
+  return(0);
+}
+static int inverse(vorbis_block *vb,vorbis_look_time *i,
+		    double *in,double *out){
+  return(0);
 }
 
-extern void _vorbis_time0_free(_vi_info_time *i){
-  if(i)free(i);
-}
-
-extern void _vorbis_time0_pack(oggpack_buffer *opb,_vi_info_time *i){
-}  
-
-extern _vi_info_time *_vorbis_time0_unpack(vorbis_info *vi,
-					   oggpack_buffer *opb){
-  return(_vorbis_time0_dup(NULL));
-}
+/* export hooks */
+vorbis_func_time time0_exportbundle={
+  &pack,&unpack,&look,&free_info,&free_look,&forward,&inverse
+};

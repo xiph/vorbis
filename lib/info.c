@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.16 2000/01/20 04:42:55 xiphmont Exp $
+ last mod: $Id: info.c,v 1.17 2000/01/22 13:28:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,6 +25,7 @@
 #include "bitwise.h"
 #include "bookinternal.h"
 #include "registry.h"
+#include "window.h"
 #include "psy.h"
 
 /* helpers */
@@ -51,7 +52,8 @@ static void _v_readstring(oggpack_buffer *o,char *buf,int bytes){
 }
 
 /* convenience functions for the interface */
-int vorbis_info_addcomment(vorbis_info *vi,char *comment){
+int vorbis_dsp_addcomment(vorbis_dsp_state *v,char *comment){
+  vorbis_info *vi=v->vi;
   vi->user_comments=realloc(vi->user_comments,
 			    (vi->comments+2)*sizeof(char *));
   vi->user_comments[vi->comments]=strdup(comment);
@@ -60,12 +62,9 @@ int vorbis_info_addcomment(vorbis_info *vi,char *comment){
   return(0);
 }
 
-int vorbis_info_addvendor(vorbis_info *vi,char *vendor){
-  if(vi->vendor)free(vi->vendor);
-  vi->vendor=strdup(vendor);
-  return(0);
-}
-  
+/* used by analysis, which has a minimally replicated vi */
+void _vorbis_info_anrep(vorbis_info *dest, vorbis_info *source){
+
 /* libVorbis expects modes to be submitted in an already valid
    vorbis_info structure, but also expects some of the elements to be
    allocated storage.  To make this easier, the Vorbis distribution
@@ -87,65 +86,10 @@ int vorbis_info_dup(vorbis_info *dest,vorbis_info *source){
     for(i=0;i<source->comments;i++)
       dest->user_comments[i]=strdup(source->user_comments[i]);
   }
-  /* dup vendor */
-  if(source->vendor)
-    dest->vendor=strdup(source->vendor);
+  dest->vendor=NULL;
 
-  /* dup mode maps, blockflags and map types */
-  if(source->modes){
-    dest->blockflags=malloc(source->modes*sizeof(int));
-    dest->windowtypes=malloc(source->modes*sizeof(int));
-    dest->transformtypes=malloc(source->modes*sizeof(int));
-    dest->mappingtypes=malloc(source->modes*sizeof(int));
-    dest->modelist=calloc(source->modes,sizeof(void *));
-
-    memcpy(dest->blockflags,source->blockflags,sizeof(int)*dest->modes);
-    memcpy(dest->windowtypes,source->windowtypes,sizeof(int)*dest->modes);
-    memcpy(dest->transformtypes,source->transformtypes,sizeof(int)*dest->modes);
-    memcpy(dest->mappingtypes,source->mappingtypes,sizeof(int)*dest->modes);
-    for(i=0;i<source->modes;i++){
-      if(dest->mappingtypes[i]<0|| dest->mappingtypes[i]>=VI_MAPB)goto err_out;
-      dest->modelist[i]=
-	vorbis_map_dup_P[dest->mappingtypes[i]](source,source->modelist[i]);
-    }
-  }
-
-  /* dup times */
-  if(source->times){
-    dest->timetypes=malloc(source->times*sizeof(int));
-    dest->timelist=calloc(source->times,sizeof(void *));
-    memcpy(dest->timetypes,source->timetypes,sizeof(int)*dest->times);
-    for(i=0;i<source->times;i++){
-      if(dest->timetypes[i]<0|| dest->timetypes[i]>=VI_TIMEB)goto err_out;
-      dest->timelist[i]=
-	vorbis_time_dup_P[dest->timetypes[i]](source->timelist[i]);
-    }
-  }
-
-  /* dup floors */
-  if(source->floors){
-    dest->floortypes=malloc(source->floors*sizeof(int));
-    dest->floorlist=calloc(source->floors,sizeof(void *));
-    memcpy(dest->floortypes,source->floortypes,sizeof(int)*dest->floors);
-    for(i=0;i<source->floors;i++){
-      if(dest->floortypes[i]<0|| dest->floortypes[i]>=VI_FLOORB)goto err_out;
-      dest->floorlist[i]=
-	vorbis_floor_dup_P[dest->floortypes[i]](source->floorlist[i]);
-    }
-  }
-
-  /* dup residues */
-  if(source->residues){
-    dest->residuetypes=malloc(source->residues*sizeof(int));
-    dest->residuelist=calloc(source->residues,sizeof(void *));
-    memcpy(dest->residuetypes,source->residuetypes,sizeof(int)*dest->residues);
-    for(i=0;i<source->residues;i++){
-      if(dest->residuetypes[i]<0|| dest->residuetypes[i]>=VI_RESB)
-	goto err_out;
-      dest->residuelist[i]=
-	vorbis_res_dup_P[dest->residuetypes[i]](source->residuelist[i]);
-    }
-  }
+  /* modes, maps, times, floors, residues, psychoacoustics are not
+     dupped; the pointer is just replicated by the above copy */
 
   /* dup (partially) books */
   if(source->books){
@@ -156,23 +100,25 @@ int vorbis_info_dup(vorbis_info *dest,vorbis_info *source){
     }
   }
 
-  /* dup psychoacoustics (if any) */
-  if(source->psys){
-    dest->psylist=calloc(source->psys,sizeof(void *));
-    for(i=0;i<source->psys;i++){
-      dest->psylist[i]=_vi_psy_dup(source->psylist[i]);
-    }
-  }
-
-  /* we do *not* dup local storage */
-  dest->header=NULL;
-  dest->header1=NULL;
-  dest->header2=NULL;
-  
   return(0);
 err_out:
   vorbis_info_clear(dest);
   return(-1);
+}
+
+
+  memset(vi,0,sizeof(vorbis_info));
+}
+
+void vorbis_info_anclear(vorbis_info *vi){
+  memset(vi,0,sizeof(vorbis_info));
+}
+
+
+
+/* used by synthesis, which has a full, alloced vi */
+void vorbis_info_init(vorbis_info *vi){
+  memset(vi,0,sizeof(vorbis_info));
 }
 
 void vorbis_info_clear(vorbis_info *vi){
@@ -348,8 +294,8 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
     vi->windowtypes[i]=_oggpack_read(opb,16);
     vi->transformtypes[i]=_oggpack_read(opb,16);
     vi->mappingtypes[i]=_oggpack_read(opb,16);
-    if(vi->windowtypes[i]!=0)goto err_out;
-    if(vi->transformtypes[i]!=0)goto err_out;
+    if(vi->windowtypes[i]<0 || vi->windowtypes[i]>VI_WINDOWB)goto err_out;
+    if(vi->transformtypes[i]<0 || vi->transformtypes[i]>VI_TRANSFORMB)goto err_out;
     if(vi->mappingtypes[i]<0 || vi->mappingtypes[i]>VI_MAPB)goto err_out;
     vi->modelist[i]=vorbis_map_unpack_P[vi->mappingtypes[i]](vi,opb);
     if(!vi->modelist[i])goto err_out;
@@ -367,11 +313,6 @@ err_out:
    the first page that identifies basic parameters, a second packet
    with bitstream comments and a third packet that holds the
    codebook. */
-
-/* call before header in, or just to zero out uninitialized mem */
-void vorbis_info_init(vorbis_info *vi){
-  memset(vi,0,sizeof(vorbis_info));
-}
 
 int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op){
 
@@ -531,11 +472,11 @@ err_out:
   return(-1);
 } 
 
-int vorbis_info_headerout(vorbis_info *vi,
-			  ogg_packet *op,
-			  ogg_packet *op_comm,
-			  ogg_packet *op_code){
-
+int vorbis_analysis_headerout(vorbis_dsp_state *v,
+			      ogg_packet *op,
+			      ogg_packet *op_comm,
+			      ogg_packet *op_code){
+  vorbis_info *vi=v->vi;
   oggpack_buffer opb;
 
   /* first header packet **********************************************/
@@ -544,10 +485,10 @@ int vorbis_info_headerout(vorbis_info *vi,
   if(_vorbis_pack_info(&opb,vi))goto err_out;
 
   /* build the packet */
-  if(vi->header)free(vi->header);
-  vi->header=malloc(_oggpack_bytes(&opb));
-  memcpy(vi->header,opb.buffer,_oggpack_bytes(&opb));
-  op->packet=vi->header;
+  if(v->header)free(v->header);
+  v->header=malloc(_oggpack_bytes(&opb));
+  memcpy(v->header,opb.buffer,_oggpack_bytes(&opb));
+  op->packet=v->header;
   op->bytes=_oggpack_bytes(&opb);
   op->b_o_s=1;
   op->e_o_s=0;
@@ -560,10 +501,10 @@ int vorbis_info_headerout(vorbis_info *vi,
   _oggpack_write(&opb,0x81,8);
   if(_vorbis_pack_comments(&opb,vi))goto err_out;
 
-  if(vi->header1)free(vi->header1);
-  vi->header1=malloc(_oggpack_bytes(&opb));
-  memcpy(vi->header1,opb.buffer,_oggpack_bytes(&opb));
-  op_comm->packet=vi->header1;
+  if(v->header1)free(v->header1);
+  v->header1=malloc(_oggpack_bytes(&opb));
+  memcpy(v->header1,opb.buffer,_oggpack_bytes(&opb));
+  op_comm->packet=v->header1;
   op_comm->bytes=_oggpack_bytes(&opb);
   op_comm->b_o_s=0;
   op_comm->e_o_s=0;
@@ -576,10 +517,10 @@ int vorbis_info_headerout(vorbis_info *vi,
   _oggpack_write(&opb,0x82,8);
   if(_vorbis_pack_books(&opb,vi))goto err_out;
 
-  if(vi->header2)free(vi->header2);
-  vi->header2=malloc(_oggpack_bytes(&opb));
-  memcpy(vi->header2,opb.buffer,_oggpack_bytes(&opb));
-  op_code->packet=vi->header2;
+  if(v->header2)free(v->header2);
+  v->header2=malloc(_oggpack_bytes(&opb));
+  memcpy(v->header2,opb.buffer,_oggpack_bytes(&opb));
+  op_code->packet=v->header2;
   op_code->bytes=_oggpack_bytes(&opb);
   op_code->b_o_s=0;
   op_code->e_o_s=0;

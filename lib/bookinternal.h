@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: bookinternal.h,v 1.3 2000/01/20 04:42:54 xiphmont Exp $
+ last mod: $Id: bookinternal.h,v 1.4 2000/01/22 13:28:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,17 +22,7 @@
 #include "vorbis/codebook.h"
 #include "bitwise.h"
 
-/* some elements in the codebook structure are assumed to be pointers
-   to static/shared storage (the pointers are duped, and free below
-   does not touch them.  The fields are unused by decode):
-
-   quantlist,
-   lengthlist,
-   encode_tree
-
-*/ 
-
-extern void vorbis_book_dup(codebook *dest,const codebook *source);
+extern void vorbis_book_finish(codebook *dest,const static_codebook *source);
 extern void vorbis_book_clear(codebook *b);
 extern int vorbis_book_pack(codebook *c,oggpack_buffer *b);
 extern int vorbis_book_unpack(oggpack_buffer *b,codebook *c);

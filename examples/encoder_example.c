@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.3 2000/01/05 03:10:26 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.4 2000/01/22 13:28:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -148,8 +148,8 @@ int main(){
   /* clean up and exit.  vorbis_info_clear() must be called last */
   
   ogg_stream_clear(&os);
-  vorbis_dsp_clear(&vd);
   vorbis_block_clear(&vb);
+  vorbis_dsp_clear(&vd);
   vorbis_info_clear(&vi);
   
   /* ogg_page and ogg_packet structs always point to storage in

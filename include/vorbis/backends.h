@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.1 2000/01/22 10:40:36 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.2 2000/01/22 13:28:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,36 +25,23 @@
 #define _vorbis_time_backend_h_
 
 /* this would all be simpler/shorter with templates, but.... */
-/* mode setup ******************************************************/
-typedef struct {
-  int blockflag;
-  int windowtype;
-  int transformtype;
-  int mapping;
-} vorbis_info_mode;
-
 /* Transform backend generic *************************************/
-typedef void vorbis_look_transform;
 
-typedef struct{
-  void (*forward)(vorbis_look_transform *,double *in,double *out);
-  void (*inverse)(vorbis_look_transform *,double *in,double *out);
-} vorbis_func_transform;
+/* only mdct right now.  Flesh it out more if we ever transcend mdct
+   in the transform domain */
 
 /* Time backend generic ******************************************/
-
-typedef void vorbis_info_time;
-typedef void vorbis_look_time;
-
 typedef struct{
   void              (*pack)  (vorbis_info_time *,oggpack_buffer *);
-  vorbis_info_time *(*unpack)(oggpack_buffer *);
+  vorbis_info_time *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_time *(*look)  (vorbis_info *,vorbis_info_mode *,
 			      vorbis_info_time *);
   void (*free_info) (vorbis_info_time *);
   void (*free_look) (vorbis_look_time *);
-  void (*forward)   (vorbis_info *,vorbis_look_time *,double *,double *);
-  void (*inverse)   (vorbis_info *,vorbis_look_time *,double *,double *);
+  int  (*forward)   (struct vorbis_block *,vorbis_look_time *,
+		     double *,double *);
+  int  (*inverse)   (struct vorbis_block *,vorbis_look_time *,
+		     double *,double *);
 } vorbis_func_time;
 
 typedef struct{
@@ -62,19 +49,17 @@ typedef struct{
 } vorbis_info_time0;
 
 /* Floor backend generic *****************************************/
-
-typedef void vorbis_info_floor;
-typedef void vorbis_look_floor;
-
 typedef struct{
   void               (*pack)  (vorbis_info_floor *,oggpack_buffer *);
-  vorbis_info_floor *(*unpack)(oggpack_buffer *);
+  vorbis_info_floor *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_floor *(*look)  (vorbis_info *,vorbis_info_mode *,
 			       vorbis_info_floor *);
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
-  void (*forward)   (vorbis_info *,vorbis_look_floor *,double *,double *);
-  void (*inverse)   (vorbis_info *,vorbis_look_floor *,double *,double *);
+  int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
+		     double *,double *);
+  int  (*inverse)   (struct vorbis_block *,vorbis_look_floor *,
+		     double *,double *);
 } vorbis_func_floor;
 
 typedef struct{
@@ -86,21 +71,20 @@ typedef struct{
 } vorbis_info_floor0;
 
 /* Residue backend generic *****************************************/
-typedef void vorbis_info_residue;
-typedef void vorbis_look_residue;
-
 typedef struct{
   void                 (*pack)  (vorbis_info_residue *,oggpack_buffer *);
-  vorbis_info_residue *(*unpack)(oggpack_buffer *);
+  vorbis_info_residue *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_residue *(*look)  (vorbis_info *,vorbis_info_mode *,
 				 vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
-  void (*forward)      (vorbis_info *,vorbis_look_residue *,double *,double *);
-  void (*inverse)      (vorbis_info *,vorbis_look_residue *,double *,double *);
+  int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
+			double *,double *);
+  int  (*inverse)      (struct vorbis_block *,vorbis_look_residue *,
+			double *,double *);
 } vorbis_func_residue;
 
-typedef struct vorbis_info_res0{
+typedef struct vorbis_info_residue0{
 /* block-partitioned VQ coded straight residue */
   long  begin;
   long  end;
@@ -108,29 +92,19 @@ typedef struct vorbis_info_res0{
   /* way unfinished, just so you know while poking around CVS ;-) */
   int   stages;
   int  *books;
-} vorbis_info_res0;
-
-/* psychoacoustic setup ********************************************/
-typedef struct vorbis_info_psy{
-  double maskthresh[MAX_BARK];
-  double lrolldB;
-  double hrolldB;
-} vorbis_info_psy;
+} vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/
-typedef void vorbis_info_mapping;
-typedef void vorbis_look_mapping;
-
 typedef struct{
   void                 (*pack)  (vorbis_info_mapping *,oggpack_buffer *);
-  vorbis_info_mapping *(*unpack)(oggpack_buffer *);
+  vorbis_info_mapping *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_mapping *(*look)  (vorbis_info *,vorbis_info_mode *,
 				 vorbis_info_mapping *);
   void (*free_info)    (vorbis_info_mapping *);
   void (*free_look)    (vorbis_look_mapping *);
-  void (*forward)      (int mode,struct vorbis_block *vb);
-  void (*inverse)      (int mode,struct vorbis_block *vb);
-} vorbis_func_residue;
+  int  (*forward)      (struct vorbis_block *vb,vorbis_look_mapping *);
+  int  (*inverse)      (struct vorbis_block *vb,vorbis_look_mapping *);
+} vorbis_func_mapping;
 
 typedef struct vorbis_info_mapping0{
   int    submaps;

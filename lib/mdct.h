@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: modified discrete cosine transform prototypes
- last mod: $Id: mdct.h,v 1.9 2000/01/05 03:11:00 xiphmont Exp $
+ last mod: $Id: mdct.h,v 1.10 2000/01/22 13:28:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,10 +23,8 @@
 
 extern void mdct_init(mdct_lookup *lookup,int n);
 extern void mdct_clear(mdct_lookup *l);
-extern void mdct_forward(mdct_lookup *init, double *in, 
-			 double *out, double *window);
-extern void mdct_backward(mdct_lookup *init, double *in, 
-			  double *out, double *window);
+extern void mdct_forward(mdct_lookup *init, double *in, double *out);
+extern void mdct_backward(mdct_lookup *init, double *in, double *out);
 
 #endif
 

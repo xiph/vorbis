@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.13 2000/01/05 03:10:56 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.14 2000/01/22 13:28:18 xiphmont Exp $
 
  Preecho calculation.
 
@@ -54,12 +54,16 @@ void _ve_envelope_clear(envelope_lookup *e){
 static void _ve_deltas(double *deltas,double *pcm,int n,double *window,
 		       int winsize,mdct_lookup *m){
   int i,j;
-  double *out=alloca(sizeof(double)*winsize/2);
+  double *out=alloca(sizeof(double)*winsize);
   
   for(j=0;j<n;j++){
     double acc=0.;
-    
-    mdct_forward(m,pcm+j*winsize,out,window);
+ 
+    memcpy(out,pcm+j*winsize,winsize);
+    for(i=0;i<winsize;i++)
+      out[i]*=window[i];
+   
+    mdct_forward(m,out,out);
     for(i=winsize/10;i<winsize/2;i++)
       acc+=fabs(out[i]);
     if(deltas[j]<acc)deltas[j]=acc;

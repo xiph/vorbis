@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.4 2000/01/22 10:40:37 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.5 2000/01/22 13:28:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,12 +24,36 @@
 #include <sys/types.h>
 #include "vorbis/codebook.h"
 #include "vorbis/internal.h"
-#include "vorbis/backends.h"
 
-/* vobis_info contains all the setup information specific to the
+typedef void vorbis_look_transform;
+typedef void vorbis_info_time;
+typedef void vorbis_look_time;
+typedef void vorbis_info_floor;
+typedef void vorbis_look_floor;
+typedef void vorbis_info_residue;
+typedef void vorbis_look_residue;
+typedef void vorbis_info_mapping;
+typedef void vorbis_look_mapping;
+
+/* mode ************************************************************/
+typedef struct {
+  int blockflag;
+  int windowtype;
+  int transformtype;
+  int mapping;
+} vorbis_info_mode;
+
+/* psychoacoustic setup ********************************************/
+typedef struct vorbis_info_psy{
+  double maskthresh[MAX_BARK];
+  double lrolldB;
+  double hrolldB;
+} vorbis_info_psy;
+
+/* vorbis_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,
    psychoacoustic settings, channel setup, options, codebook
-   etc). Substructures are in backends.h.
+   etc).  
 *********************************************************************/
 
 typedef struct vorbis_info{
@@ -82,7 +106,7 @@ typedef struct vorbis_info{
   int                  *floor_type;
   vorbis_info_floor   **floor_param;
   int                  *residue_type;
-  vorbis_info_res     **residue_param;
+  vorbis_info_residue **residue_param;
   static_codebook     **book_param;
   vorbis_info_psy     **psy_param; /* encode only */
   
@@ -92,17 +116,6 @@ typedef struct vorbis_info{
   double     preecho_clamp;
 
 } vorbis_info;
-
-/* the comments are not part of vorbis_info so that vorbis_info can be
-   static storage */
-typedef struct vorbis_comments{
-  /* unlimited user comment fields.  libvorbis writes 'libvorbis'
-     whatever vendor is set to in encode */
-  char **user_comments;
-  int    comments;
-  char  *vendor;
-
-} vorbis_comments;
  
 /* ogg_page is used to encapsulate the data in one Ogg bitstream page *****/
 
@@ -270,6 +283,26 @@ typedef struct vorbis_block{
   long res_bits;
 
 } vorbis_block;
+
+#include "vorbis/backends.h"
+
+/* vorbis_info contains all the setup information specific to the
+   specific compression/decompression mode in progress (eg,
+   psychoacoustic settings, channel setup, options, codebook
+   etc). vorbis_info and substructures are in backends.h.
+*********************************************************************/
+
+/* the comments are not part of vorbis_info so that vorbis_info can be
+   static storage */
+typedef struct vorbis_comments{
+  /* unlimited user comment fields.  libvorbis writes 'libvorbis'
+     whatever vendor is set to in encode */
+  char **user_comments;
+  int    comments;
+  char  *vendor;
+
+} vorbis_comments;
+
 
 /* libvorbis encodes in two abstraction layers; first we perform DSP
    and produce a packet (see docs/analysis.txt).  The packet is then

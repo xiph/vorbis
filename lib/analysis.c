@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.21 2000/01/20 04:42:51 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.22 2000/01/22 13:28:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -43,11 +43,16 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   /* currently lazy.  Short block dispatches to 0, long to 1. */
 
   if(vb->W &&vi->modes>1)mode=1;
-  type=vi->mappingtypes[mode];
+  type=vi->map_type[vi->mode_param[mode]->mapping];
 
-  /* Encode frame mode and dispatch */
+  /* Encode frame mode, pre,post windowsize, then dispatch */
   _oggpack_write(&vb->opb,mode,vd->modebits);
-  if(vorbis_map_analysis_P[type](vb,vi->modelist[mode],op))
+  if(vb->W){
+    _oggpack_write(&vb->opb,vb->lW,1);
+    _oggpack_write(&vb->opb,vb->nW,1);
+  }
+
+  if(_mapping_P[type]->forward(vb,vd->mode[mode]))
     return(-1);
 
   /* set up the packet wrapper */

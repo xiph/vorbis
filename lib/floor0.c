@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.1 2000/01/20 04:42:55 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.2 2000/01/22 13:28:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,56 +21,86 @@
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "registry.h"
-#include "floor0.h"
 
-extern _vi_info_floor *_vorbis_floor0_dup(_vi_info_floor *source){
-  vorbis_info_floor0 *d=malloc(sizeof(vorbis_info_floor0));
-  memcpy(d,source,sizeof(vorbis_info_floor0));
-  if(d->stages){
-    d->books=malloc(sizeof(int)*d->stages);
-    memcpy(d->books,((vorbis_info_floor0 *)source)->books,
-	   sizeof(int)*d->stages);
-  }
-  return(d);
+static void pack (vorbis_info_floor *i,oggpack_buffer *opb){
+  vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
+  int j;
+  _oggpack_write(opb,d->order,8);
+  _oggpack_write(opb,d->rate,16);
+  _oggpack_write(opb,d->barkmap,16);
+  _oggpack_write(opb,d->stages,8);
+  for(j=0;j<d->stages;j++)
+    _oggpack_write(opb,d->books[j],8);
 }
 
-extern void _vorbis_floor0_free(_vi_info_floor *i){
+static vorbis_info_floor *unpack (vorbis_info *vi,oggpack_buffer *opb){
+  int j;
+  vorbis_info_floor0 *d=malloc(sizeof(vorbis_info_floor0));
+  d->order=_oggpack_read(opb,8);
+  d->rate=_oggpack_read(opb,16);
+  d->barkmap=_oggpack_read(opb,16);
+  d->stages=_oggpack_read(opb,8);
+  
+  if(d->order<1)goto err_out;
+  if(d->rate<1)goto err_out;
+  if(d->barkmap<1)goto err_out;
+  if(d->stages<1)goto err_out;
+
+  d->books=alloca(sizeof(int)*d->stages);
+  for(j=0;j<d->stages;j++){
+    d->books[j]=_oggpack_read(opb,8);
+    if(d->books[j]<0 || d->books[j]>=vi->books)goto err_out;
+  }
+  return(d);  
+ err_out:
+  free_info(d);
+  return(NULL);
+}
+
+static vorbis_look_floor *look (vorbis_info *vi,vorbis_info_mode *mi,
+                              vorbis_info_floor *i){
+
+}
+static void free_info(vorbis_info_floor *i){
   vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
   if(d){
     if(d->books)free(d->books);
     memset(i,0,sizeof(vorbis_info_floor0));
   }
 }
-
-extern void _vorbis_floor0_pack(oggpack_buffer *opb,_vi_info_floor *vi){
-  vorbis_info_floor0 *d=(vorbis_info_floor0 *)vi;
-  int i;
-  _oggpack_write(opb,d->order,8);
-  _oggpack_write(opb,d->rate,16);
-  _oggpack_write(opb,d->barkmap,16);
-  _oggpack_write(opb,d->stages,8);
-  for(i=0;i<d->stages;i++)
-    _oggpack_write(opb,d->books[i],8);
+static void free_look(vorbis_look_floor *i){
 }
 
-extern _vi_info_floor *_vorbis_floor0_unpack(vorbis_info *vi,
-					     oggpack_buffer *opb){
-  vorbis_info_floor0 d;
-  int i;
-  d.order=_oggpack_read(opb,8);
-  d.rate=_oggpack_read(opb,16);
-  d.barkmap=_oggpack_read(opb,16);
-  d.stages=_oggpack_read(opb,8);
-  
-  if(d.order<1)return(NULL);
-  if(d.rate<1)return(NULL);
-  if(d.barkmap<1)return(NULL);
-  if(d.stages<1)return(NULL);
+static void forward(vorbis_block *vb,vorbis_look_floor *i,
+		    double *in,double *out){
 
-  d.books=alloca(sizeof(int)*d.stages);
-  for(i=0;i<d.stages;i++){
-    d.books[i]=_oggpack_read(opb,8);
-    if(d.books[i]<0 || d.books[i]>=vi->books)return(NULL);
-  }
-  return(_vorbis_floor0_dup(&d));
+
+      /* Convert our floor to a set of lpc coefficients 
+      vb->amp[i]=sqrt(vorbis_curve_to_lpc(floor,lpc,vl));
+
+      LSP <-> LPC is orthogonal and LSP quantizes more stably 
+      vorbis_lpc_to_lsp(lpc,lsp,vl->m);
+
+      code the spectral envelope; mutates the lsp coeffs to reflect
+      what was actually encoded 
+      _vs_spectrum_encode(vb,vb->amp[i],lsp);
+
+      Generate residue from the decoded envelope, which will be
+         slightly different to the pre-encoding floor due to
+         quantization.  Slow, yes, but perhaps more accurate 
+
+      vorbis_lsp_to_lpc(lsp,lpc,vl->m); 
+      vorbis_lpc_to_curve(curve,lpc,vb->amp[i],vl);*/
+  return(0);
 }
+static void inverse(vorbis_block *vb,vorbis_look_floor *i,
+		    double *in,double *out){
+  return(0);
+}
+
+/* export hooks */
+vorbis_func_floor floor0_exportbundle={
+  &pack,&unpack,&look,&free_info,&free_look,&forward,&inverse
+};
+
+

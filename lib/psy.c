@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.11 2000/01/20 04:43:02 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.12 2000/01/22 13:28:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -84,8 +84,8 @@ void _vp_psy_clear(psy_lookup *p){
 
 /* Masking curve: linear rolloff on a Bark/dB scale, attenuated by
    maskthresh */
-
-void _vp_mask_floor(psy_lookup *p,double *f, double *m){
+/* right now, floor==mask */
+void _vp_mask_floor(psy_lookup *p,double *f, double *mask,double *floor){
   int n=p->n;
   double hroll=p->vi->hrolldB;
   double lroll=p->vi->lrolldB;
@@ -104,7 +104,8 @@ void _vp_mask_floor(psy_lookup *p,double *f, double *m){
       curoc=newoc;
     }
     troll=fromdB(roll);
-    if(m[i]<troll)m[i]=troll;
+    if(mask[i]<troll)mask[i]=troll;
+    if(floor[i]<troll)floor[i]=troll;
   }
 
   curmask=todB(f[n-1])+p->maskthresh[n-1];
@@ -119,7 +120,8 @@ void _vp_mask_floor(psy_lookup *p,double *f, double *m){
       curoc=newoc;
     }
     troll=fromdB(roll);
-    if(m[i]<troll)m[i]=troll;
+    if(mask[i]<troll)mask[i]=troll;
+    if(floor[i]<troll)floor[i]=troll;
   }
 }
 
