@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.8.4.1 2000/04/01 12:51:32 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.8.4.2 2000/04/02 01:21:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -136,7 +136,7 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
       look->partbooks[j]=malloc(stages*sizeof(codebook *));
       for(k=0;k<stages;k++)
 	look->partbooks[j][k]=vd->fullbooks+info->booklist[acc++];
-      look->partlevels[j]=look->partbooks[j][0]->c->q_entlevel;
+      look->partlevels[j]=look->partbooks[j][0]->c->q_entropy;
     }
     look->partstages[j]=stages;
   }
@@ -158,7 +158,7 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   return(look);
 }
 
-static int _testhack(double *vec,int n,vorbis_psy0_look *look){
+static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
   int i;
   double acc=1.;
 
@@ -169,14 +169,14 @@ static int _testhack(double *vec,int n,vorbis_psy0_look *look){
     if(vec[i])
       acc*=(todB(vec[i])+3.);
   acc=pow(acc,1./n);
-
+  
   for(i=0;i<look->parts;i++)
     if(acc<look->partlevels[i] && (look->partlevels[i]<best || besti==-1)){
       besti=i;
       best=look->partlevels[i];
     }
-
-  return(besti);
+  
+  return(besti==-1?0:besti);
 }
 
 static int _encodepart(oggpack_buffer *opb,double *vec, int n,
@@ -192,7 +192,7 @@ static int _encodepart(oggpack_buffer *opb,double *vec, int n,
     int dim=books[j]->dim;
     int step=n/dim;
     for(i=0,o=0;i<n;i+=dim,o++)
-      bits+=vorbis_book_encodevE(books[j],work+o,opb,step);
+      bits+=vorbis_book_encodevEs(books[j],work+o,opb,step);
   }
 
   return(bits);
@@ -206,8 +206,8 @@ static int _decodepart(oggpack_buffer *opb,double *work,double *vec, int n,
   for(j=0;j<stages;j++){
     int dim=books[j]->dim;
     int step=n/dim;
-    for(i=0;i<n;i+=dim)
-      vorbis_book_decodevs(books[j],work+i,opb,step);
+    for(i=0,o=0;i<n;i+=dim,o++)
+      vorbis_book_decodevs(books[j],work+o,opb,step);
   }
 
   for(i=0;i<n;i++)
@@ -252,7 +252,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
     for(j=0;j<ch;j++)
       /* do the partition decision based on the number of 'bits'
          needed to encode the block */
-      partword[j][l]=_testhack(in[j]+i,samples_per_partition,info);
+      partword[j][l]=_testhack(in[j]+i,samples_per_partition,look);
   
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the

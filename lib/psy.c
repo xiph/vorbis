@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.5 2000/04/01 12:51:32 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.6 2000/04/02 01:21:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -494,9 +494,6 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
   memcpy(f,work,p->n*sizeof(double));
 }
 
-extern int frameno;
-extern void analysis(char *base,int i,double *v,int n,int bark,int dB);
-
 void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr, 
 			     double *decay){
   double *iter=alloca(sizeof(double)*p->n);
@@ -519,8 +516,5 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr,
 	else
 	  iter[j]=fabs(f[j]);
     }
-
-    analysis("Pmask",frameno*10+i,flr,p->n,1,1);
-  
   }
 }

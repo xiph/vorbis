@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.24.2.1 2000/03/29 03:49:28 xiphmont Exp $
+# $Id: Makefile.in,v 1.24.2.1.2.1 2000/04/02 01:21:21 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -32,11 +32,11 @@ HFILES =	../include/vorbis/codec.h ../include/vorbis/vorbisfile.h \
 		../include/vorbis/codebook.h \
 		bitwise.h envelope.h lpc.h lsp.h bookinternal.h misc.h\
 		psy.h smallft.h window.h scales.h os.h mdct.h registry.h\
-		masking.h
+		masking.h sharedbook.h
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
 		time0.o floor0.o res0.o mapping0.o registry.o\
-		codebook.o vorbisfile.o
+		codebook.o sharedbook.o vorbisfile.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
