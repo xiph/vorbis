@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.23.4.2 2000/07/25 00:18:10 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23.4.3 2000/07/25 03:33:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -552,7 +552,6 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
   /* don't use the smoothed data for noise */
   if(p->vi->noisemaskp){
     bark_noise(n,p->bark,f,work2);
-    _analysis_output("noise",frameno,work2,n,0,1);
   }
 
   if(p->vi->smoothp){
