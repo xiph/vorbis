@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.26 2001/02/26 03:50:42 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.27 2001/02/26 13:31:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -242,7 +242,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     /* FFT yields more accurate tonal estimation (not phase sensitive) */
     drft_forward(&look->fft_look,additional);
     
-    additional[0]*=scale;
+    additional[0]=fabs(additional[0]*scale);
     for(j=1;j<n-1;j+=2)
       additional[(j+1)>>1]=scale*FAST_HYPOT(additional[j],additional[j+1]);
 
