@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.2 2000/05/08 20:49:49 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.3 2000/05/27 17:28:26 jon Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,9 @@
 #define _V_SCALES_H_
 
 #include <math.h>
+
+#undef min   // These get defined in a win32 header file... eeyuch.
+#undef max
 
 #define min(x,y)  ((x)>(y)?(y):(x))
 #define max(x,y)  ((x)<(y)?(y):(x))
