@@ -57,10 +57,9 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc doc/*.html
 %doc doc/*.png
 %doc doc/*.txt
-%{_docdir}/%{name}-%{version}/vorbisfile/*.html
-%{_docdir}/%{name}-%{version}/vorbisfile/*.css
-%{_docdir}/%{name}-%{version}/vorbisenc/*.html
-%{_docdir}/%{name}-%{version}/vorbisenc/*.css
+%doc doc/vorbisfile
+%doc doc/vorbisenc
+/usr/share/aclocal/vorbis.m4
 /usr/include/vorbis/codec.h
 /usr/include/vorbis/vorbisfile.h
 /usr/include/vorbis/vorbisenc.h
