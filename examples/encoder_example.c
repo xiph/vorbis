@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.25 2001/09/17 01:06:18 cwolf Exp $
+ last mod: $Id: encoder_example.c,v 1.26 2001/09/17 01:33:07 cwolf Exp $
 
  ********************************************************************/
 
@@ -77,18 +77,18 @@ int main(){
      example, after all. */
 
   readbuffer[0] = '\0';
-  for (i=0, founddata=0; i<40 && ! feof(fpin) && ! ferror(fpin); i++)
+  for (i=0, founddata=0; i<40 && ! feof(stdin) && ! ferror(stdin); i++)
   {
-    fread(readbuffer,1,2,fpin);
+    fread(readbuffer,1,2,stdin);
 
     if ( ! strncmp(readbuffer, "da", 2) )
     {
       founddata = 1;
-      fread(readbuffer,1,6,fpin);
+      fread(readbuffer,1,6,stdin);
     }
   }
 
-  if ( feof(fpin) || ferror(fpin) )
+  if ( feof(stdin) || ferror(stdin) )
   {
     (void)fprintf(stderr, "Error: Input WAV too short, or corrupt.\n");
     return(1);
