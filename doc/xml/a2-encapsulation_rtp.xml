@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<appendix id="vorbis-over-rtp">
+<appendixinfo>
+ <releaseinfo>
+  <emphasis>$Id: a2-encapsulation_rtp.xml,v 1.1 2002/10/16 22:46:44 giles Exp $</emphasis>
+ </releaseinfo>
+</appendixinfo>
+<title>Vorbis encapsulation in RTP</title>
+
+<screen>
+<!-- the draft-rtp entity must be declared in the enclosing document.
+     currently it points to the internet draft text file -->
+<![CDATA[
+&draft-rtp;
+]]>
+</screen>
+
+</appendix>
+
+<!-- end rtp appendix -->

@@ -1,7 +1,15 @@
-<section id="footer">
+<!-- articles can't have an explicit colophon -->
+<appendix id="footer">
 <title>Colophon</title>
 
 <mediaobject>
+<!-- pdf is better but some tools don't handle it -->
+<imageobject>
+ <imagedata fileref="xifish.pdf" format="PDF"/>
+</imageobject>
+<imageobject>
+ <imagedata fileref="xifish.eps" format="EPS"/>
+</imageobject>
 <imageobject>
  <imagedata fileref="white-xifish.png" format="PNG"/>
 </imageobject>
@@ -37,4 +45,8 @@ of the <ulink url="http://www.xiph.org/">Xiph.org Foundation</ulink>.  These
 pages are copyright (C) 1994-2002 Xiph.org Foundation. All rights
 reserved.</para>
 
-</section>
+<para>
+This document is set in DocBook XML.
+</para>
+
+</appendix>

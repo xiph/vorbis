@@ -15,6 +15,7 @@
 <!ENTITY oggvorbis SYSTEM "a1-encapsulation_ogg.xml">
 <!ENTITY rtpvorbis SYSTEM "a2-encapsulation_rtp.xml">
 <!ENTITY footer SYSTEM "footer.xml">
+<!ENTITY draft-rtp SYSTEM "../draft-moffitt-vorbis-rtp-00.txt" NDATA TXT>
 ]>
 
 <article>
@@ -24,6 +25,7 @@
 </articleinfo>
 
 &intro;
+<!--
 &bitpacking;
 &codebook;
 &codec;
@@ -33,10 +35,9 @@
 &residue;
 &helpers;
 &tables;
-<!--
 &oggvorbis;
-&rtpvorbis;
 -->
+&rtpvorbis;
 &footer;
 
 </article>
