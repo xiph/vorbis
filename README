@@ -13,7 +13,7 @@
 NEW AND IMPORTANT:
 
 If you're used to the source distribution from the first two beta
-relaeases, things are now rearranged a bit.  Specifically, the
+releases, things are now rearranged a bit.  Specifically, the
 'vorbis' CVS module contains only the libvorbis, libvorbisfile, and
 libvorbisenc libraries.  Because Ogg bitstreams are to be used by other 
 Ogg codecs, Ogg framing and streaming functionality is now in libogg 
@@ -38,9 +38,8 @@ the Ogg Vorbis audio coding format.
 
 Directory:
 
-./lib  		The source for the libraries, an LGPLed implementation of 
-		the public domain Ogg Vorbis audio encoding
-		format.
+./lib  		The source for the libraries, a BSD-license implementation
+		of the public domain Ogg Vorbis audio encoding format.
 
 ./include       Library API headers
 
@@ -127,7 +126,7 @@ verify that the Ogg libraries are already built following the
 instructions in the Ogg module README.  Open vorbis/mac/libvorbis.mcp,
 switch to the "Targets" pane, select everything, and make the project.
 Do the same thing to build libvorbisenc.mcp, and libvorbisfile.mcp (in
-that order).  vorbis/mac/Output you will now have both debug and final
+that order).  In vorbis/mac/Output you will now have both debug and final
 versions of Vorbis shared libraries to link your projects against.
 
 To build a project using Ogg Vorbis, add access paths to your
@@ -137,7 +136,7 @@ vorbis/include, and vorbis/mac/Output folders.  Be sure that
 be found in the "access paths" pane in your project settings.  Now
 simply add the shared libraries you need to your project (OggLib and
 VorbisLib at least) and #include "ogg/ogg.h" and "vorbis/codec.h"
-wherever you need to acces Ogg and Vorbis functionality.
+wherever you need to access Ogg and Vorbis functionality.
 
 
-$Id: README,v 1.10 2001/03/22 01:16:22 segher Exp $
+$Id: README,v 1.11 2001/03/22 01:33:20 segher Exp $
