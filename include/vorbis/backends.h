@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.9 2000/06/14 01:38:27 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.10 2000/06/14 08:19:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -102,11 +102,11 @@ typedef struct vorbis_info_residue0{
   int    secondstages[64]; /* expanded out to pointers in lookup */
   int    booklist[256];    /* list of second stage books */
 
-  double entmax[64];       /* book entropy threshholds for *encode* */
-  double ampmax[64];       /* book amp threshholds for *encode* */
-  int    subgrp[64];       /* book subgroup size for *encode* */
-  long   Bpoint;
-  long   Cpoint;
+  /* encode-only heuristic settings */
+  double entmax[64];       /* book entropy threshholds*/
+  double ampmax[64];       /* book amp threshholds*/
+  int    subgrp[64];       /* book heuristic subgroup size */
+  int    blimit[64];       /* subgroup position limits */
 
 } vorbis_info_residue0;
 
