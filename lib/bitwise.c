@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.c,v 1.6 2000/01/12 11:16:35 xiphmont Exp $
+  last mod: $Id: bitwise.c,v 1.7 2000/02/05 23:23:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -101,7 +101,7 @@ long _oggpack_look(oggpack_buffer *b,int bits){
 
   if(b->endbyte+4>=b->storage){
     /* not the main path */
-    if(b->endbyte+(bits+b->endbit-1)/8>b->storage)return(-1);
+    if(b->endbyte+(bits-1)/8>=b->storage)return(-1);
   }
   
   ret=b->ptr[0]>>b->endbit;
@@ -149,7 +149,7 @@ long _oggpack_read(oggpack_buffer *b,int bits){
   if(b->endbyte+4>=b->storage){
     /* not the main path */
     ret=-1;
-    if(b->endbyte+(bits+b->endbit-1)/8>b->storage)goto overflow;
+    if(b->endbyte+(bits-1)/8>=b->storage)goto overflow;
   }
   
   ret=b->ptr[0]>>b->endbit;
@@ -363,7 +363,7 @@ int main(void){
 
   fprintf(stderr,"\nSingle bit unclicpped packing: ");
   cliptest(testbuffer3,test3size,1,six,sixsize);
-  fprintf(stderr,"ok.\n");
+  fprintf(stderr,"ok.\n\n");
   return(0);
 }  
 #endif

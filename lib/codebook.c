@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.4 2000/01/28 09:05:08 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.5 2000/02/05 23:23:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -553,7 +553,7 @@ int main(){
     _oggpack_reset(&write);
     vorbis_book_init_encode(&c,testlist[ptr]); /* get it into memory
                                                   we can write */
-    vorbis_book_pack(testlist[ptr],&write);
+    vorbis_staticbook_pack(testlist[ptr],&write);
     fprintf(stderr,"Codebook size %ld bytes... ",_oggpack_bytes(&write));
     for(i=0;i<TESTSIZE;i+=TESTDIM)
       vorbis_book_encodev(&c,qv+i,&write);
@@ -564,7 +564,7 @@ int main(){
 
     /* transfer the write data to a read buffer and unpack/read */
     _oggpack_readinit(&read,_oggpack_buffer(&write),_oggpack_bytes(&write));
-    if(vorbis_book_unpack(&read,&s)){
+    if(vorbis_staticbook_unpack(&read,&s)){
       fprintf(stderr,"Error unpacking codebook.\n");
       exit(1);
     }
