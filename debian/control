@@ -5,6 +5,7 @@ Maintainer: Michael Beattie <mickyb@es.co.nz>
 Standards-Version: 3.0.1
 
 Package: libvorbis-dev
+Section: devel
 Architecture: any
 Description: The OGG Vorbis lossy audio compression codec.
  This Package contains the development library's and header files for
