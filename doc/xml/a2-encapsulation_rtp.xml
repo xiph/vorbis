@@ -15,7 +15,7 @@
 <literallayout class="monospaced">
 <!-- this works with extensions implemented in Saxon and Xalan
 <textobject><textdata 
-fileref="../draft-kerr-avt-vorbis-rtp-02.txt"/></textobject> -->
+fileref="../draft-kerr-avt-vorbis-rtp-03.txt"/></textobject> -->
 <!-- this works with xinclude, implemented in xsltproc -->
 <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
       href="../draft-kerr-avt-vorbis-rtp-02.txt" parse="text">
