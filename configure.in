@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.16 2000/07/07 00:48:19 xiphmont Exp $
+# $Id: configure.in,v 1.17 2000/07/07 01:52:24 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -41,13 +41,13 @@ dnl Set some target options
 if test -z "$GCC"; then
 	case $host in 
 	*-*-irix*)
-		DEBUG="-g" 
-		OPT="-O2 -w"
-		PROFILE="-p -g3 -O2" ;;
+		DEBUG="-g -signed" 
+		OPT="-O2 -w -signed"
+		PROFILE="-p -g3 -O2 -signed" ;;
 	sparc-sun-solaris*)
 		DEBUG="-v -g"
-		OPT="-xO4 -fast -w -fsingle -fsimple -native -xcg92"
-		PROFILE="-v -xpg -g -xO4 -fast -fsingle -native -fsimple -xcg92 -Dsuncc" ;;
+		OPT="-xO4 -fast -w -fsimple -native -xcg92"
+		PROFILE="-v -xpg -g -xO4 -fast -native -fsimple -xcg92 -Dsuncc" ;;
 	*)
 		DEBUG="-g"
 		OPT="-O"

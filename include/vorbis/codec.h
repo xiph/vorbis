@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.19 2000/06/18 12:33:47 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.20 2000/07/07 01:52:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -281,9 +281,9 @@ typedef struct vorbis_dsp_state{
      application does not need to worry about freeing some packets'
      memory and not others'; packet storage is always tracked.
      Cleared next call to a _dsp_ function */
-  char *header;
-  char *header1;
-  char *header2;
+  unsigned char *header;
+  unsigned char *header1;
+  unsigned char *header2;
 
 } vorbis_dsp_state;
 
