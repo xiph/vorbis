@@ -1,5 +1,5 @@
 ;
-; $Id: vorbis.def,v 1.10 2002/07/04 09:13:41 msmith Exp $
+; $Id: vorbis.def,v 1.11 2003/05/08 22:06:53 mauricio Exp $
 ; 
 LIBRARY
 EXPORTS
@@ -38,3 +38,6 @@ vorbis_synthesis_init
 vorbis_synthesis_pcmout
 vorbis_synthesis_read
 vorbis_synthesis_trackonly
+vorbis_synthesis_restart
+vorbis_synthesis_lapout
+vorbis_window
