@@ -128,7 +128,15 @@ codebook dimensions = 1  encoded as: [ 0 ], [ 1 ], [ 2 ], [ 3 ], [ 4 ], [ 5 ], [
 
 <h2> residue 2 </h2>
 
+Residue type two can be thought of as a variant of residue type 1.
+Rather than encoding multiple passed-in vectors as in residue type 1,
+the <i>ch</i> passed in vectors of length <i>n</i> are first
+interleaved and flattened into a single vector of length
+<i>ch</i>*<i>n</i>.  Encoding then proceeds as in type 1. Decoding is
+as in type 1 with decode interleave reversed. If operating on a single
+vector to begin with, residue type 1 and type 2 are equivalent.<p>
 
+<img src="residue2.png"><p>
 
 <h1>Residue decode</h1>
 
