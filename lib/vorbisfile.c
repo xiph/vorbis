@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.12 2000/01/05 03:11:05 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.13 2000/01/10 14:06:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -589,7 +589,7 @@ long ov_bitrate(OggVorbis_File *vf,int i){
   if(i>=vf->links)return(-1);
   if(!vf->seekable && i!=0)return(ov_bitrate(vf,0));
   if(i<0){
-    int64_t bits;
+    int64_t bits=0;
     int i;
     for(i=0;i<vf->links;i++)
       bits+=(vf->offsets[i+1]-vf->dataoffsets[i])*8;
