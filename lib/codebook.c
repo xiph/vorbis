@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.17.4.2 2000/09/02 05:19:24 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.17.4.3 2000/09/03 06:24:00 jack Exp $
 
  ********************************************************************/
 
@@ -387,8 +387,8 @@ long vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
 /* returns 0 on OK or -1 on eof *************************************/
 long s_vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
                          int step,int addmul){
-  long entry[step];
-  float *t[step];
+  long *entry = alloca(sizeof(long)*step);
+  float **t = alloca(sizeof(float)*step);
   int i,j,o;
 
   for (i = 0; i < step; i++) {
