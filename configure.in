@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.13 2000/06/19 10:05:57 xiphmont Exp $
+# $Id: configure.in,v 1.14 2000/06/19 14:59:06 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -142,13 +142,6 @@ case 8 in
 	$ac_cv_sizeof_long_long) SIZE64="long long";;
 esac
 
-AC_CHECK_TYPE(int16_t,$SIZE16)
-AC_CHECK_TYPE(int32_t,$SIZE32)
-AC_CHECK_TYPE(int64_t,$SIZE64)
-AC_CHECK_TYPE(u_int16_t,unsigned $SIZE16)
-AC_CHECK_TYPE(u_int32_t,unsigned $SIZE32)
-AC_CHECK_TYPE(u_int64_t,unsigned $SIZE64)
-
 if test -z "$SIZE16"; then
 	AC_MSG_ERROR(No 16 bit type found on this platform!)
 fi
@@ -171,7 +164,9 @@ AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gettimeofday select strcspn strerror strspn sigaction)
 
-AC_SUBST(TYPESIZES)
+AC_SUBST(SIZE16)
+AC_SUBST(SIZE32)
+AC_SUBST(SIZE64)
 AC_SUBST(OPT)
 AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
@@ -183,3 +178,4 @@ AC_SUBST(pthread_lib)
 
 AC_OUTPUT(Makefile lib/Makefile examples/Makefile vorbis-tools/Makefile\
 	vq/Makefile huff/Makefile cmdline/Makefile xmms/Makefile kmpg/Makefile)
+

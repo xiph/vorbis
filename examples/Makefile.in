@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.8 2000/06/19 10:05:57 xiphmont Exp $
+# $Id: Makefile.in,v 1.9 2000/06/19 14:59:06 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -16,7 +16,7 @@
 # (unless, of course, you know what you are doing :) ##########################
 
 @SET_MAKE@
-FLAGS=-I. -I../include @TYPESIZES@ @CFLAGS@ 
+FLAGS=-I. -I../include @CFLAGS@ 
 OPT=@OPT@ $(FLAGS)
 DEBUG=@DEBUG@ $(FLAGS)
 PROFILE=@PROFILE@ $(FLAGS)
