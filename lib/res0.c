@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0 and 1 implementation
- last mod: $Id: res0.c,v 1.29 2001/06/04 05:56:42 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.30 2001/06/05 01:14:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -65,8 +65,6 @@ void res0_free_look(vorbis_look_residue *i){
   int j;
   if(i){
     vorbis_look_residue0 *look=(vorbis_look_residue0 *)i;
-    long resbitsT=0;
-    long resvalsT=0;
 
     for(j=0;j<look->parts;j++)
       if(look->partbooks[j])_ogg_free(look->partbooks[j]);
@@ -140,9 +138,11 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   info->groupbook=oggpack_read(opb,8);
 
   for(j=0;j<info->partitions;j++){
-    int cascade=info->secondstages[j]=oggpack_read(opb,3);
+    int cascade=oggpack_read(opb,3);
     if(oggpack_read(opb,1))
       cascade|=(oggpack_read(opb,5)<<3);
+    info->secondstages[j]=cascade;
+
     acc+=icount(cascade);
   }
   for(j=0;j<acc;j++)
@@ -393,17 +393,17 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 
   for(s=0;s<look->stages;s++){
     for(i=info->begin,l=0;i<info->end;){
-
+      
       /* first we encode a partition codeword for each channel */
       if(s==0){
 	for(j=0;j<ch;j++){
 	  long val=partword[j][l];
 	  for(k=1;k<partitions_per_word;k++)
 	    val= val*possible_partitions+partword[j][l+k];
-	  look->phrase+=vorbis_book_encode(look->phrasebook,val,&vb->opb);
+	  vorbis_book_encode(look->phrasebook,val,&vb->opb);
 	}
       }
-
+      
       /* now we encode interleaved residual values for the partitions */
       for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition){
 	
@@ -412,16 +412,14 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	    codebook *statebook=look->partbooks[partword[j][l]][s];
 	    if(statebook){
 	      int ret=encode(&vb->opb,in[j]+i,samples_per_partition,
-			       statebook,look);
-	      look->bits[partword[j][l]]+=ret;
-	      if(s==0)look->vals[partword[j][l]]+=samples_per_partition;
+			     statebook,look);
 	    }
 	  }
 	}
       }
     }
   }
-
+  
   return(0);
 }
 
