@@ -93,14 +93,12 @@ Vorbis's homepage is located at 'http://www.xiph.org/ogg/vorbis/'.
 Up to date technical documents, contact information, source code and
 pre-built utilities may be found there.
 
-BUILD:
-
-A standard build should consist of nothing more than:
+BUILDING FROM CVS:
 
 ./autogen.sh
 make 
 
-and as root if desired :
+and as root if desired:
 
 make install
 
@@ -108,4 +106,19 @@ This will install the vorbis libraries (static and shared) into
 /usr/local/lib, includes into /usr/local/include and API manpages
 (once we write some) into /usr/local/man.
 
-$Id: README,v 1.6 2000/11/08 08:36:35 jack Exp $
+BUILDING FROM TARBALL DISTRIBUTIONS:
+
+./configure
+make
+
+and optionally (as root):
+make install
+
+BUILDING RPMS:
+
+after normal configuring:
+
+make dist
+rpm -ta libvorbis-<version>.tar.gz
+
+$Id: README,v 1.7 2000/11/08 08:45:30 jack Exp $
