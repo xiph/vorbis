@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.27 2000/07/30 13:10:10 msmith Exp $
+ last mod: $Id: info.c,v 1.28 2000/08/01 13:45:13 msmith Exp $
 
  ********************************************************************/
 
@@ -117,6 +117,7 @@ void vorbis_comment_clear(vorbis_comment *vc){
     for(i=0;i<vc->comments;i++)
       if(vc->user_comments[i])free(vc->user_comments[i]);
     if(vc->user_comments)free(vc->user_comments);
+	if(vc->comment_lengths)free(vc->comment_lengths);
     if(vc->vendor)free(vc->vendor);
   }
   memset(vc,0,sizeof(vorbis_comment));
