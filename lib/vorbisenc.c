@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17.2.5 2001/12/06 09:58:56 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.17.2.6 2001/12/06 12:47:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -408,14 +408,34 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
 
   /* for uncoupled, we use type 1, else type 2 */
   if(coupled_p){
+    ci->residue_type[block]=2;
+  }else{
+    ci->residue_type[block]=1;
+  }
+
+  switch(ci->residue_type[block]){
+  case 1:
+    n=r->end=ci->blocksizes[block?1:0]>>1; /* to be adjusted by lowpass later */
+    partition_position=rint((double)c[iq]*1000/(vi->rate/2)*n/r->grouping);
+    res_position=partition_position*r->grouping;
+    break;
+  case 2:
+    n=r->end=ci->blocksizes[block?1:0]>>1*vi->channels; /* to be adjusted by lowpass later */
+    partition_position=rint((double)c[iq]*1000/(vi->rate/2)*n/r->grouping);
+    res_position=partition_position*r->grouping/vi->channels;
+    break;
+  }
+
+  for(i=0;i<r->partitions;i++)
+    if(r->blimit[i]<0)r->blimit[i]=partition_position;
+  
+  if(coupled_p){
     int k;
     vorbis_info_mapping0 *map=ci->map_param[block];
 
     map->coupling_steps=1;
     map->coupling_mag[0]=0;
     map->coupling_ang[0]=1;
-
-    ci->residue_type[block]=2;
 
     psy->couple_pass[0].granulem=1.;
     psy->couple_pass[0].igranulem=1.;
@@ -424,7 +444,7 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     psy->couple_pass[0].couple_pass[0].outofphase_redundant_flip_p=1;
     psy->couple_pass[0].couple_pass[0].outofphase_requant_limit=9e10;
     psy->couple_pass[0].couple_pass[0].amppost_point=0;
-    psy->couple_pass[0].couple_pass[0].limit=9999;
+    psy->couple_pass[0].couple_pass[1].limit=9999;
     psy->couple_pass[0].couple_pass[1].outofphase_redundant_flip_p=1;
     psy->couple_pass[0].couple_pass[1].outofphase_requant_limit=9e10;
     psy->couple_pass[0].couple_pass[1].amppost_point=stereo_threshholds[a[iq]];
@@ -476,8 +496,6 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
       memcpy(ci->psy_param[block+1],psy,sizeof(*psy));
 
   }else{
-    ci->residue_type[block]=1;
-
     ci->passlimit[0]=3;
 
     if(residue_backfill_p){
@@ -521,19 +539,6 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     }
   }
 
-  switch(ci->residue_type[block]){
-  case 1:
-    n=r->end=ci->blocksizes[block?1:0]>>1; /* to be adjusted by lowpass later */
-    break;
-  case 2:
-    n=r->end=ci->blocksizes[block?1:0]; /* to be adjusted by lowpass later */
-    break;
-  }
-
-  partition_position=rint((double)c[iq]*1000/(vi->rate/2)*n/r->grouping);
-  for(i=0;i<r->partitions;i++)
-    if(r->blimit[i]<0)r->blimit[i]=partition_position;
-  
   return(0);
 }      
 
