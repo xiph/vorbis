@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.7 2000/01/28 09:05:19 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.8 2000/02/07 19:39:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -305,8 +305,8 @@ int codebook_entry(codebook *b,double *val){
 
   while(1){
     double C=0.;
-    double *p=b->valuelist+t->p[ptr]*c->dim;
-    double *q=b->valuelist+t->q[ptr]*c->dim;
+    double *p=b->valuelist+t->p[ptr];
+    double *q=b->valuelist+t->q[ptr];
     
     for(k=0;k<c->dim;k++){
       n[k]=p[k]-q[k];
@@ -316,6 +316,7 @@ int codebook_entry(codebook *b,double *val){
 
     for(k=0;k<c->dim;k++)
       C+=n[k]*val[k];
+
     if(C>0.) /* in A */
       ptr= -t->ptr0[ptr];
     else     /* in B */

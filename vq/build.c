@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.9 2000/01/21 13:42:36 xiphmont Exp $
+ last mod: $Id: build.c,v 1.10 2000/02/07 19:39:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -253,7 +253,7 @@ int main(int argc,char *argv[]){
   for(j=0;j<c.encode_tree->aux;){
     fprintf(out,"\t");
     for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",c.encode_tree->p[j]);
+      fprintf(out,"%6ld,",c.encode_tree->p[j]*c.elements);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
@@ -263,7 +263,7 @@ int main(int argc,char *argv[]){
   for(j=0;j<c.encode_tree->aux;){
     fprintf(out,"\t");
     for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",c.encode_tree->q[j]);
+      fprintf(out,"%6ld,",c.encode_tree->q[j]*c.elements);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
