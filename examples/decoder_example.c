@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.10 2000/08/14 22:33:50 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.11 2000/08/15 01:05:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -63,8 +63,6 @@ int main(int argc, char **argv){
 #endif
 
 #if defined(macintosh) && defined(__MWERKS__)
-  int argc = 0;
-  char **argv = NULL;
 
   argc = ccommand(&argv); /* get a "command line" from the Mac user */
                           /* this also lets the user set stdin and stdout */
