@@ -1,4 +1,4 @@
-libvorbis 1.1.0 (unreleased)
+libvorbis 1.1.0 (2004-09-22) -- "Xiph.Org libVorbis I 20040629"
 
  * merges tuning improvements from Aoyumi's aoTuV with fixups
  * new managed bitrate (CBR) mode support
