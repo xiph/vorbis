@@ -6,7 +6,7 @@ EXTRA_PROGRAMS = latticebuild latticepare latticehint\
 	latticetune huffbuild distribution
 CLEANFILES = $(EXTRA_PROGRAMS)
 
-LDFLAGS = -static
+AM_LDFLAGS = -static
 LDADD = ../lib/libvorbis.la
 
 latticebuild_SOURCES = latticebuild.c vqgen.c bookutil.c\
