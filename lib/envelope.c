@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.26 2000/11/14 00:05:30 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.27 2000/12/13 07:37:20 msmith Exp $
 
  Preecho calculation.
 
@@ -105,6 +105,7 @@ void _ve_envelope_clear(envelope_lookup *e){
   drft_clear(&e->drft);
   _ogg_free(e->window);
   _ogg_free(e->filtered);
+  _ogg_free(e->iir);
   memset(e,0,sizeof(envelope_lookup));
 }
 

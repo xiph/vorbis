@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.32 2000/11/14 00:05:31 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.33 2000/12/13 07:37:20 msmith Exp $
 
  ********************************************************************/
 
@@ -292,6 +292,7 @@ void _vp_psy_clear(vorbis_look_psy *p){
   if(p){
     if(p->ath)_ogg_free(p->ath);
     if(p->octave)_ogg_free(p->octave);
+    if(p->bark)_ogg_free(p->bark);
     if(p->tonecurves){
       for(i=0;i<P_BANDS;i++){
 	for(j=0;j<P_LEVELS;j++){
