@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.74 2003/08/27 05:29:24 xiphmont Exp $
+ last mod: $Id: block.c,v 1.75 2003/09/02 04:39:26 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -168,7 +168,10 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   int i;
   codec_setup_info *ci=vi->codec_setup;
   private_state *b=NULL;
-  int hs=ci->halfrate_flag; 
+  int hs;
+
+  if(ci==NULL) return 1;
+  hs=ci->halfrate_flag; 
 
   memset(v,0,sizeof(*v));
   b=v->backend_state=_ogg_calloc(1,sizeof(*b));
@@ -259,14 +262,14 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
     b->residue[i]=_residue_P[ci->residue_type[i]]->
       look(v,ci->residue_param[i]);    
 
-  return(0);
+  return 0;
 }
 
 /* arbitrary settings and spec-mandated numbers get filled in here */
 int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   private_state *b=NULL;
 
-  _vds_shared_init(v,vi,1);
+  if(_vds_shared_init(v,vi,1))return 1;
   b=v->backend_state;
   b->psy_g_look=_vp_global_look(vi);
 
@@ -658,10 +661,10 @@ int vorbis_synthesis_restart(vorbis_dsp_state *v){
 }
 
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
-  _vds_shared_init(v,vi,0);
+  if(_vds_shared_init(v,vi,0)) return 1;
   vorbis_synthesis_restart(v);
 
-  return(0);
+  return 0;
 }
 
 /* Unlike in analysis, the window is only partially applied for each

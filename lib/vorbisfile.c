@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.72 2003/09/02 01:06:08 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.73 2003/09/02 04:39:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -387,18 +387,20 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
   }
 }
 
-static void _make_decode_ready(OggVorbis_File *vf){
-  if(vf->ready_state!=STREAMSET)return;
+static int _make_decode_ready(OggVorbis_File *vf){
+  if(vf->ready_state!=STREAMSET)return OV_EFAULT;
   if(vf->seekable){
-    vorbis_synthesis_init(&vf->vd,vf->vi+vf->current_link);
+    if(vorbis_synthesis_init(&vf->vd,vf->vi+vf->current_link))
+      return OV_EBADLINK;
   }else{
-    vorbis_synthesis_init(&vf->vd,vf->vi);
+    if(vorbis_synthesis_init(&vf->vd,vf->vi))
+      return OV_EBADLINK;
   }    
   vorbis_block_init(&vf->vd,&vf->vb);
   vf->ready_state=INITSET;
   vf->bittrack=0.f;
   vf->samptrack=0.f;
-  return;
+  return 0;
 }
 
 static int _open_seekable2(OggVorbis_File *vf){
@@ -611,7 +613,10 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 	}
       }
       
-      _make_decode_ready(vf);
+      {
+	int ret=_make_decode_ready(vf);
+	if(ret<0)return ret;
+      }
     }
     ogg_stream_pagein(&vf->os,&og);
   }
@@ -1258,7 +1263,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   int thisblock,lastblock=0;
   int ret=ov_pcm_seek_page(vf,pos);
   if(ret<0)return(ret);
-  _make_decode_ready(vf);
+  if((ret=_make_decode_ready(vf)))return ret;
 
   /* discard leading packets we don't need for the lapping of the
      position we want; don't decode them */
@@ -1318,7 +1323,8 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
 	
 	ogg_stream_reset_serialno(&vf->os,vf->current_serialno); 
 	vf->ready_state=STREAMSET;      
-	_make_decode_ready(vf);
+	ret=_make_decode_ready(vf);
+	if(ret)return ret;
 	lastblock=0;
       }
 
