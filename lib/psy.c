@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.23.4.8 2000/08/08 02:25:07 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23.4.9 2000/08/09 20:22:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -261,7 +261,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
 		   p->tonecurves[i-1][j],
 		   p->tonecurves[i+1][j],.5);*/
       min_curve(p->tonecurves[i][j],p->tonecurves[i+1][j]);
-      min_curve(p->tonecurves[i][j],p->tonecurves[i-1][j]);
+      /*min_curve(p->tonecurves[i][j],p->tonecurves[i-1][j]);*/
     }
 
   /*for(i=0;i<P_BANDS-1;i++)
