@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.33 2001/12/23 10:12:02 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.34 2001/12/23 11:59:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -74,17 +74,6 @@ int main(){
 #endif
 
 
-#  include <fpu_control.h>
-    unsigned int mask;
-    _FPU_GETCW(mask);
-    /* Set the Linux mask to abort on most FPE's */
-    /* if bit is set, we _mask_ SIGFPE on that error! */
-    /*  mask &= ~( _FPU_MASK_IM | _FPU_MASK_ZM | _FPU_MASK_OM | _FPU_MASK_UM
-+);*/
-    mask &= ~( _FPU_MASK_IM | _FPU_MASK_ZM | _FPU_MASK_OM );
-    _FPU_SETCW(mask);
-
-
   /* we cheat on the WAV header; we just bypass the header and never
      verify that it matches 16bit/stereo/44.1kHz.  This is just an
      example, after all. */
@@ -109,7 +98,7 @@ int main(){
   vorbis_info_init(&vi);
 
   vorbis_encode_init_vbr(&vi,1,44100,.4);
-  /*vorbis_encode_init(&vi,2,44100,64000,-1,-1);*/
+  /*vorbis_encode_init(&vi,2,44100,-1,128000,-1);*/
 
   /* add a comment */
   vorbis_comment_init(&vc);
