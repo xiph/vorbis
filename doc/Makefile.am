@@ -43,15 +43,16 @@ static_docs = components.png \
 	window1.png \
 	window2.png
 
+built_docs = Vorbis_I_spec.html Vorbis_I_spec.pdf
+
 # conditionally make the generated documentation
 if BUILD_DOCS
-doc_DATA = $(static_docs) Vorbis_I_spec.html Vorbis_I_spec.pdf
+doc_DATA = $(static_docs) $(built_docs)
 else
 doc_DATA = $(static_docs)
 endif
 
-## this requires automake 1.6
-EXTRA_DIST = $(doc_DATA)
+EXTRA_DIST = $(static_docs) $(built_docs)
 
 doc_sources = xml/Vorbis_I_spec.xml \
 	xml/01-introduction.xml \
@@ -72,6 +73,10 @@ doc_sources = xml/Vorbis_I_spec.xml \
 	xml/spec-html.xsl
 
 nobase_EXTRA_DIST = $(doc_sources)
+
+# these are expensive; only remove if we have to
+MAINTAINERCLEANFILES = $(built_docs)
+CLEANFILES = Vorbis_I_spec.fo spec.aux spec.log spec.out
 
 # explicit rules for generating docs
 Vorbis_I_spec.html:
