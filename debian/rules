@@ -16,7 +16,9 @@ build: build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
+	./configure --disable-alsa --prefix=/usr \
+		--mandir=\$${prefix}/share/man \
+		--infodir=\$${prefix}/share/info
 	# Add here commands to compile the package.
 	$(MAKE)
 	cd vorbis-tools && $(MAKE) && $(MAKE) ogg123
@@ -24,7 +26,6 @@ build-stamp:
 
 	touch build-stamp
 
-EXTRA_CLEAN= vorbis-tools cmdline xmms vq huff kmpg
 clean:
 	dh_testdir
 	dh_testroot
@@ -32,15 +33,12 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	-$(MAKE) distclean
-	-@for dir in $(EXTRA_CLEAN); do (cd $$dir && $(MAKE) $(MFLAGS) distclean) || exit 1; done
 
 	dh_clean
 
 
 # Build architecture-independent files here.
-binary-arch: libvorbis-dev ogg123 vorbize xmms-vorbis # mp3tovorbis
-               # mp3tovorbis is small, and depends on mpg123 in non-free
-               # moved it as an "example" for vorbize
+binary-arch: libvorbis-dev ogg123 vorbis-tools xmms-vorbis
 
 libvorbis-dev: DH_OPTIONS=-plibvorbis-dev
 libvorbis-dev: build
@@ -87,11 +85,11 @@ ogg123: build
 
 	install -m 755 vorbis-tools/ogg123 `pwd`/debian/ogg123/usr/bin/
 
-	dh_installdocs
+	dh_installdocs vorbis-tools/README
 #	dh_installmenu
-	dh_installmanpages
+	dh_installmanpages vorbize.1 oggenc.1
 #	dh_installinfo
-	dh_undocumented ogg123.1
+#	dh_undocumented
 	dh_installchangelogs vorbis-tools/Changelog
 	dh_strip
 	dh_link
@@ -106,8 +104,8 @@ ogg123: build
 
 
 
-vorbize: DH_OPTIONS=-pvorbize
-vorbize: build
+vorbis-tools: DH_OPTIONS=-pvorbis-tools
+vorbis-tools: build
 	# Need this version of debhelper for DH_OPTIONS to work.
 	dh_testversion 1.1.17
 	dh_testdir
@@ -115,14 +113,16 @@ vorbize: build
 	dh_clean -k
 	dh_installdirs
 
-	install -m 755 vorbis-tools/vorbize `pwd`/debian/vorbize/usr/bin/
+	install -m 755 vorbis-tools/vorbize `pwd`/debian/vorbis-tools/usr/bin/
+	install -m 755 vorbis-tools/oggenc `pwd`/debian/vorbis-tools/usr/bin/
+	install -m 755 vorbis-tools/vorbiscomment `pwd`/debian/vorbis-tools/usr/bin/
 
-	dh_installdocs
+	dh_installdocs vorbis-tools/README
 	dh_installexamples vorbis-tools/mp3tovorbis
 #	dh_installmenu
-	dh_installmanpages
+	dh_installmanpages ogg123.1
 #	dh_installinfo
-	dh_undocumented vorbize.1
+#	dh_undocumented
 	dh_installchangelogs vorbis-tools/Changelog
 	dh_strip
 	dh_link
@@ -131,36 +131,6 @@ vorbize: build
 	dh_installdeb
 #	dh_makeshlibs
 	dh_shlibdeps
-	dh_gencontrol -u -isp
-	dh_md5sums
-	dh_builddeb
-
-
-
-mp3tovorbis: DH_OPTIONS=-pmp3tovorbis
-mp3tovorbis: build
-	# Need this version of debhelper for DH_OPTIONS to work.
-	dh_testversion 1.1.17
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-
-	install -m 755 vorbis-tools/mp3tovorbis `pwd`/debian/mp3tovorbis/usr/bin/
-
-	dh_installdocs
-#	dh_installmenu
-	dh_installmanpages
-#	dh_installinfo
-	dh_undocumented mp3tovorbis.1
-	dh_installchangelogs vorbis-tools/Changelog
-	dh_strip
-	dh_link
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-#	dh_makeshlibs
-#	dh_shlibdeps
 	dh_gencontrol -u -isp
 	dh_md5sums
 	dh_builddeb

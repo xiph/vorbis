@@ -1,8 +1,9 @@
-vorbis (1.0beta1-2) unstable; urgency=low
+vorbis (1.0beta2-1) unstable; urgency=low
 
+  * New upstream version. Closes: #67326, #68416
   * Changed xmms-vorbis to Architechture: any.  Closes: #67395
   * Added Build-deps. Closes: #66628
-  * 
+  * Moved vorbize to vorbis-tools along with oggenc and vorbiscomment
 
  -- Michael Beattie <mjb@debian.org>  Wed,  9 Aug 2000 00:30:15 +1200
 

@@ -8,4 +8,4 @@ tree, so it will *not* work without being edited first.
 The misc.h included in chaining_example and seeking_test just allows the
 use of a debugging malloc. (defined in misc.c) It is safe to comment out.
 
- -- Michael Beattie <mickyb@es.co.nz>, Mon, 26 Jun 2000 18:59:56 +1200
+ -- Michael Beattie <mjb@debian.org>, Mon, 26 Jun 2000 18:59:56 +1200

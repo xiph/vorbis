@@ -2,6 +2,7 @@ Source: vorbis
 Section: sound
 Priority: optional
 Maintainer: Michael Beattie <mjb@debian.org>
+Build-Depends: debhelper (>= 2.1.5), xmms-dev
 Standards-Version: 3.0.1
 
 Package: libvorbis-dev
@@ -47,13 +48,14 @@ Description: A player for Ogg Vorbis files.
  audio representations including MPEG-1 audio layer 3, MPEG-4
  audio (AAC and TwinVQ), and PAC.
 
-Package: vorbize
+Package: vorbis-tools
 Architecture: any
 Depends: ${shlibs:Depends}
 Suggests: ogg123 | xmms-vorbis
 Description: An encoder for the Ogg Vorbis lossy audio compression codec.
- This Package contains an Ogg Vorbis encoder, and an example script for
- converting .mp3 to .ogg. (/usr/share/doc/vorbize/examples/)
+ This Package contains two Ogg Vorbis encoders, oggenc and vorbize.
+ An example script for converting .mp3's to .ogg's is included.
+ (/usr/share/doc/vorbize/examples/mp3tovorbis)
  NOTE: Currently vorbis only works with 44kHz, 16bit stereo raw PCM or
  wav files. Use sox to coax any other formats into line.
  .
