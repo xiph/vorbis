@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.51 2002/03/29 07:10:38 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.52 2002/06/28 22:19:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,12 +30,7 @@ int analysis_noisy=1;
 
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
-  vorbis_dsp_state     *vd=vb->vd;
-  backend_lookup_state *b=vd->backend_state;
-  vorbis_info          *vi=vd->vi;
-  codec_setup_info     *ci=vi->codec_setup;
-  int                   type,ret;
-  int                   mode=0;
+  int                   ret;
 
   vb->glue_bits=0;
   vb->time_bits=0;
@@ -44,26 +39,20 @@ int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
 
   /* first things first.  Make sure encode is ready */
   oggpack_reset(&vb->opb);
-  /* Encode the packet type */
-  oggpack_write(&vb->opb,0,1);
   
-  /* currently lazy.  Short block dispatches to 0, long to 1. */
-  
-  if(vb->W &&ci->modes>1)mode=1;
-  type=ci->map_type[ci->mode_param[mode]->mapping];
-  vb->mode=mode;
+  /* we only have one mapping type (0), and we let the mapping code
+     itself figure out what soft mode to use.  This allows easier
+     bitrate management */
 
-  /* Encode frame mode, pre,post windowsize, then dispatch */
-  oggpack_write(&vb->opb,mode,b->modebits);
-  if(vb->W){
-    oggpack_write(&vb->opb,vb->lW,1);
-    oggpack_write(&vb->opb,vb->nW,1);
-  }
-
-  if((ret=_mapping_P[type]->forward(vb,b->mode[mode])))
+  if((ret=_mapping_P[0]->forward(vb)))
     return(ret);
 
   if(op){
+    if(vorbis_bitrate_managed(vb))
+      /* The app is using a bitmanaged mode... but not using the
+         bitrate management interface. */
+      return(OV_EINVAL);
+    
     op->packet=oggpack_get_buffer(&vb->opb);
     op->bytes=oggpack_bytes(&vb->opb);
     op->b_o_s=0;
@@ -90,18 +79,20 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg
       if(dB && v[j]==0)
 	fprintf(of,"\n\n");
       else{
-	if(bark)
-	  fprintf(of,"%g ",toBARK(22050.f*j/n));
-	else
-	  if(off!=0)
-	    fprintf(of,"%g ",(double)(j+off)/44100.);
+	if(v[j]>-900.){
+	  if(bark)
+	    fprintf(of,"%f ",toBARK(22050.f*j/n));
 	  else
-	    fprintf(of,"%g ",(double)j);
-
-	if(dB){
-	  fprintf(of,"%g\n",todB(v+j));
-	}else{
-	  fprintf(of,"%g\n",v[j]);
+	    if(off!=0)
+	      fprintf(of,"%f ",(double)(j+off)/44100.);
+	    else
+	    fprintf(of,"%f ",(double)j);
+	  
+	  if(dB){
+	    fprintf(of,"%f\n",todB(v+j));
+	  }else{
+	    fprintf(of,"%f\n",v[j]);
+	  }
 	}
       }
     }
@@ -109,11 +100,18 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg
     /*  } */
 }
 
-void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
-#ifdef ANALYSIS
-  if(analysis_noisy)_analysis_output_always(base,i,v,n,bark,dB);
-#endif
+void _analysis_output(char *base,int i,float *v,int n,int bark,int dB,
+		      ogg_int64_t off){
+  if(analysis_noisy)_analysis_output_always(base,i,v,n,bark,dB,off);
 }
+
+
+
+
+
+
+
+
 
 
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.h,v 1.11 2001/12/20 01:00:29 segher Exp $
+ last mod: $Id: registry.h,v 1.12 2002/06/28 22:19:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,15 +25,8 @@
 #define VI_RESB 3
 #define VI_MAPB 1
 
-#if defined(_WIN32) && defined(VORBISDLL_IMPORT)
-# define EXTERN __declspec(dllimport) extern
-#else
-# define EXTERN extern
-#endif
-
-EXTERN vorbis_func_time      *_time_P[];
-EXTERN vorbis_func_floor     *_floor_P[];
-EXTERN vorbis_func_residue   *_residue_P[];
-EXTERN vorbis_func_mapping   *_mapping_P[];
+extern vorbis_func_floor     *_floor_P[];
+extern vorbis_func_residue   *_residue_P[];
+extern vorbis_func_mapping   *_mapping_P[];
 
 #endif

@@ -2,4 +2,4 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = floor_44.h psych_44.h residue_44.h
+EXTRA_DIST = floor_44.h psych_44.h residue_44.h setup_44.h

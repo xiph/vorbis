@@ -11,174 +11,172 @@
  ********************************************************************
 
  function: key floor settings for 44.1/48kHz
- last mod: $Id: floor_44.h,v 1.2 2001/12/12 09:45:55 xiphmont Exp $
+ last mod: $Id: floor_44.h,v 1.3 2002/06/28 22:19:54 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "backends.h"
+#include "books/floor/floor_books.h"
 
-#include "books/floor/line_128x7_class1.vqh"
-#include "books/floor/line_128x7_class2.vqh"
-
-#include "books/floor/line_128x7_0sub0.vqh"
-#include "books/floor/line_128x7_1sub1.vqh"
-#include "books/floor/line_128x7_1sub2.vqh"
-#include "books/floor/line_128x7_1sub3.vqh"
-#include "books/floor/line_128x7_2sub1.vqh"
-#include "books/floor/line_128x7_2sub2.vqh"
-#include "books/floor/line_128x7_2sub3.vqh"
-
-#include "books/floor/line_128x9_class1.vqh"
-#include "books/floor/line_128x9_class2.vqh"
-
-#include "books/floor/line_128x9_0sub0.vqh"
-#include "books/floor/line_128x9_1sub1.vqh"
-#include "books/floor/line_128x9_1sub2.vqh"
-#include "books/floor/line_128x9_1sub3.vqh"
-#include "books/floor/line_128x9_2sub1.vqh"
-#include "books/floor/line_128x9_2sub2.vqh"
-#include "books/floor/line_128x9_2sub3.vqh"
-
-#include "books/floor/line_128x19_class1.vqh"
-#include "books/floor/line_128x19_class2.vqh"
-
-#include "books/floor/line_128x19_0sub0.vqh"
-#include "books/floor/line_128x19_1sub1.vqh"
-#include "books/floor/line_128x19_1sub2.vqh"
-#include "books/floor/line_128x19_1sub3.vqh"
-#include "books/floor/line_128x19_2sub1.vqh"
-#include "books/floor/line_128x19_2sub2.vqh"
-#include "books/floor/line_128x19_2sub3.vqh"
-
-#include "books/floor/line_1024x31_class0.vqh"
-#include "books/floor/line_1024x31_class1.vqh"
-#include "books/floor/line_1024x31_class2.vqh"
-#include "books/floor/line_1024x31_class3.vqh"
-
-#include "books/floor/line_1024x31_0sub0.vqh"
-#include "books/floor/line_1024x31_0sub1.vqh"
-#include "books/floor/line_1024x31_1sub0.vqh"
-#include "books/floor/line_1024x31_1sub1.vqh"
-#include "books/floor/line_1024x31_2sub1.vqh"
-#include "books/floor/line_1024x31_2sub2.vqh"
-#include "books/floor/line_1024x31_2sub3.vqh"
-#include "books/floor/line_1024x31_3sub1.vqh"
-#include "books/floor/line_1024x31_3sub2.vqh"
-#include "books/floor/line_1024x31_3sub3.vqh"
-
+static static_codebook *_floor_44_128x4_books[]={
+  &_huff_book_line_128x4_class0,
+  &_huff_book_line_128x4_0sub0,
+  &_huff_book_line_128x4_0sub1,
+  &_huff_book_line_128x4_0sub2,
+  &_huff_book_line_128x4_0sub3,
+};
 static static_codebook *_floor_44_128x7_books[]={
+  &_huff_book_line_128x7_class0,
   &_huff_book_line_128x7_class1,
-  &_huff_book_line_128x7_class2,
   
-  &_huff_book_line_128x7_0sub0,
+  &_huff_book_line_128x7_0sub1,
+  &_huff_book_line_128x7_0sub2,
+  &_huff_book_line_128x7_0sub3,
   &_huff_book_line_128x7_1sub1,
   &_huff_book_line_128x7_1sub2,
-  &_huff_book_line_128x7_1sub3,
-  &_huff_book_line_128x7_2sub1,
-  &_huff_book_line_128x7_2sub2,
-  &_huff_book_line_128x7_2sub3, 
+  &_huff_book_line_128x7_1sub3, 
 };
-static static_codebook *_floor_44_128x9_books[]={
-  &_huff_book_line_128x9_class1,
-  &_huff_book_line_128x9_class2,
+static static_codebook *_floor_44_128x11_books[]={
+  &_huff_book_line_128x11_class1,
+  &_huff_book_line_128x11_class2,
+  &_huff_book_line_128x11_class3,
   
-  &_huff_book_line_128x9_0sub0,
-  &_huff_book_line_128x9_1sub1,
-  &_huff_book_line_128x9_1sub2,
-  &_huff_book_line_128x9_1sub3,
-  &_huff_book_line_128x9_2sub1,
-  &_huff_book_line_128x9_2sub2,
-  &_huff_book_line_128x9_2sub3, 
+  &_huff_book_line_128x11_0sub0,
+  &_huff_book_line_128x11_1sub0,
+  &_huff_book_line_128x11_1sub1,
+  &_huff_book_line_128x11_2sub1,
+  &_huff_book_line_128x11_2sub2,
+  &_huff_book_line_128x11_2sub3, 
+  &_huff_book_line_128x11_3sub1,
+  &_huff_book_line_128x11_3sub2,
+  &_huff_book_line_128x11_3sub3, 
 };
-static static_codebook *_floor_44_128x19_books[]={
-  &_huff_book_line_128x19_class1,
-  &_huff_book_line_128x19_class2,
+static static_codebook *_floor_44_128x17_books[]={
+  &_huff_book_line_128x17_class1,
+  &_huff_book_line_128x17_class2,
+  &_huff_book_line_128x17_class3,
   
-  &_huff_book_line_128x19_0sub0,
-  &_huff_book_line_128x19_1sub1,
-  &_huff_book_line_128x19_1sub2,
-  &_huff_book_line_128x19_1sub3,
-  &_huff_book_line_128x19_2sub1,
-  &_huff_book_line_128x19_2sub2,
-  &_huff_book_line_128x19_2sub3, 
+  &_huff_book_line_128x17_0sub0,
+  &_huff_book_line_128x17_1sub0,
+  &_huff_book_line_128x17_1sub1,
+  &_huff_book_line_128x17_2sub1,
+  &_huff_book_line_128x17_2sub2,
+  &_huff_book_line_128x17_2sub3, 
+  &_huff_book_line_128x17_3sub1,
+  &_huff_book_line_128x17_3sub2,
+  &_huff_book_line_128x17_3sub3, 
+};
+static static_codebook *_floor_44_1024x27_books[]={
+  &_huff_book_line_1024x27_class1,
+  &_huff_book_line_1024x27_class2,
+  &_huff_book_line_1024x27_class3,
+  &_huff_book_line_1024x27_class4,
+  
+  &_huff_book_line_1024x27_0sub0,
+  &_huff_book_line_1024x27_1sub0,
+  &_huff_book_line_1024x27_1sub1,
+  &_huff_book_line_1024x27_2sub0,
+  &_huff_book_line_1024x27_2sub1,
+  &_huff_book_line_1024x27_3sub1,
+  &_huff_book_line_1024x27_3sub2,
+  &_huff_book_line_1024x27_3sub3,
+  &_huff_book_line_1024x27_4sub1,
+  &_huff_book_line_1024x27_4sub2,
+  &_huff_book_line_1024x27_4sub3,
 };
 
-static static_codebook **_floor_44_128_books[3]={
+static static_codebook **_floor_44_books[9]={
+  _floor_44_128x4_books,
+  _floor_44_128x4_books,
   _floor_44_128x7_books,
-  _floor_44_128x9_books,
-  _floor_44_128x19_books,
+  _floor_44_128x7_books,
+  _floor_44_128x11_books,
+  _floor_44_128x17_books,
+  _floor_44_128x17_books,
+  _floor_44_1024x27_books,
+  _floor_44_1024x27_books
 };
 
-static static_codebook *_floor_44_1024x31_books[]={
-    &_huff_book_line_1024x31_class0,
-    &_huff_book_line_1024x31_class1,
-    &_huff_book_line_1024x31_class2,
-    &_huff_book_line_1024x31_class3,
-    
-    &_huff_book_line_1024x31_0sub0,
-    &_huff_book_line_1024x31_0sub1,
-    &_huff_book_line_1024x31_1sub0, 
-    &_huff_book_line_1024x31_1sub1,
-    &_huff_book_line_1024x31_2sub1,  
-    &_huff_book_line_1024x31_2sub2,
-    &_huff_book_line_1024x31_2sub3, 
-    &_huff_book_line_1024x31_3sub1,
-    &_huff_book_line_1024x31_3sub2,
-    &_huff_book_line_1024x31_3sub3,
-};
-
-static static_codebook **_floor_44_1024_books[1]={
-  _floor_44_1024x31_books
-};
-
-static vorbis_info_floor1 _floor_44_128[3]={
+static vorbis_info_floor1 _floor_44[9]={
+  /* 128 x 4 */
   {
-    3,{0,1,2},{1,3,3},{0,2,2},{-1,0,1},
-    {{2},{-1,3,4,5},{-1,6,7,8}},
-    4,{0,128, 7, 2,1,4, 23,13,45},
+    1,{0},{4},{2},{0},
+    {{1,2,3,4}},
+    4,{0,128, 33,8,16,70},
+
+    60,30,500,   0.,18.,  -1
+  },
+  /* 256 x 4 */
+  {
+    1,{0},{4},{2},{0},
+    {{1,2,3,4}},
+    4,{0,256, 66,16,32,140},
+
+    60,30,500,   0.,18.,  -1
+  },
+  /* 128 x 7 */
+  {
+    2,{0,1},{3,4},{2,2},{0,1},
+    {{-1,2,3,4},{-1,5,6,7}},
+    4,{0,128, 14,4,58, 2,8,28,90},
     
-    60,30,500,
-    999,999,0,18.,
-    8,70,
-    -1 /* lowpass! */
+    60,30,500,   0.,18.,  -1
+  },
+  /* 256 x 7 */
+  {
+    2,{0,1},{3,4},{2,2},{0,1},
+    {{-1,2,3,4},{-1,5,6,7}},
+    4,{0,256, 28,8,116, 4,16,56,180},
+    
+    60,30,500,   0.,18.,  -1
   },
 
+  /* 128 x 11 */
   {
-    3,{0,1,2},{1,4,4},{0,2,2},{-1,0,1},
-    {{2},{-1,3,4,5},{-1,6,7,8}},
-    4,{0,128, 13, 4,2,7,1,  44,30,62,20},
+    4,{0,1,2,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
+    {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
     
-    60,30,500,
-    999,999,0,18.,
-    8,70,
-    -1 /* lowpass! */
+    2,{0,128,  8,33,  4,16,70,  2,6,12,  23,46,90},
+    
+     60,30,500,   0,18.,  -1
   },
-
-
-  {
-    6,{0,1,1,1,2,2},{4,3,3},{0,2,2},{-1,0,1},
-    {{2},{-1,3,4,5},{-1,6,7,8}},
-    2,{0,128, 6,17,30,58, 2,1,4, 11,8,14, 23,20,26, 41,35,48, 84,69,103},
     
-    60,30,500,
-    999,999,1,18.,
-    8,70,
-    -1 /* lowpass */
-  }
-};
-
-static vorbis_info_floor1 _floor_44_1024[1]={
+  /* 128 x 17 */
   {
-    10,{0,1,2,2,2,2,2, 3,3,3},{3,4,3,3},{1,1,2,2},{0,1,2,3},
-    {{4,5},{6,7},{-1,8,9,10},{-1,11,12,13}},
-    2,{0,1024, 88,31,243, 14,54,143,460, 6,3,10, 22,18,26, 41,36,47, 
-       69,61,78, 112,99,126, 185,162,211, 329,282,387, 672,553,825},
+    6,{0,1,1,2,3,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
+    {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
+    2,{0,128,  12,46,  4,8,16,  23,33,70,  2,6,10,  14,19,28,  39,58,90},
+
+    60,30,500,    0,18.,  -1 
+  },
   
-    60,30,400,
-    20,8,1,18.,
-    20,600,
-    -1 /* lowpass */
+  /* 1024 x 17 */
+  {
+    6,{0,1,1,2,3,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
+    {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
+    2,{0,1024,  93,372,  33,65,130,  186,260,556,  
+       14,46,79,  111,158,220,  312,464,720},
+    
+    60,30,500,    0,18.,  -1 /* lowpass! */
+  },
+  /* 1024 x 27 */
+  {
+    8,{0,1,2,2,3,3,4,4},{3,4,3,4,3},{0,1,1,2,2},{-1,0,1,2,3},
+    {{4},{5,6},{7,8},{-1,9,10,11},{-1,12,13,14}},
+    2,{0,1024,   93,23,372, 6,46,186,750,  14,33,65, 130,260,556,
+       3,10,18,28,  39,55,79,111,  158,220,312,  464,650,850},
+    
+    60,30,500,    3,18.,  -1 /* lowpass */
+  },
+  /* 2048 x 27 */
+  {
+    8,{0,1,2,2,3,3,4,4},{3,4,3,4,3},{0,1,1,2,2},{-1,0,1,2,3},
+    {{4},{5,6},{7,8},{-1,9,10,11},{-1,12,13,14}},
+    2,{0,2048,   186,46,744, 12,92,372,1500,  28,66,130, 260,520,1112,
+       6,20,36,56,  78,110,158,222,  316,440,624,  928,1300,1700},
+    
+    60,30,500,    3,18.,  -1 /* lowpass */
   }
 };
 

@@ -11,31 +11,23 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.c,v 1.13 2001/12/20 01:00:29 segher Exp $
+ last mod: $Id: registry.c,v 1.14 2002/06/28 22:19:37 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "registry.h"
-#include "registry-api.h"
 #include "misc.h"
-
-
 /* seems like major overkill now; the backend numbers will grow into
    the infrastructure soon enough */
 
-extern vorbis_func_time      time0_exportbundle;
 extern vorbis_func_floor     floor0_exportbundle;
 extern vorbis_func_floor     floor1_exportbundle;
 extern vorbis_func_residue   residue0_exportbundle;
 extern vorbis_func_residue   residue1_exportbundle;
 extern vorbis_func_residue   residue2_exportbundle;
 extern vorbis_func_mapping   mapping0_exportbundle;
-
-vorbis_func_time      *_time_P[]={
-  &time0_exportbundle,
-};
 
 vorbis_func_floor     *_floor_P[]={
   &floor0_exportbundle,
@@ -51,10 +43,4 @@ vorbis_func_residue   *_residue_P[]={
 vorbis_func_mapping   *_mapping_P[]={
   &mapping0_exportbundle,
 };
-
-/* make Windows happy; can't access the registry directly outside of
-   libvorbis, and vorbisenc needs a few functions */
-void residue_free_info(vorbis_info_residue *r,int type){
-  _residue_P[type]->free_info(r);
-}
 

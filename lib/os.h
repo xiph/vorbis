@@ -13,7 +13,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.29 2002/03/18 03:30:23 segher Exp $
+ last mod: $Id: os.h,v 1.30 2002/06/28 22:19:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -40,31 +40,6 @@
 #  define rint(x)   (floor((x)+0.5f)) 
 #  define NO_FLOAT_MATH_LIB
 #  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
-#endif
-
-#ifdef HAVE_SQRTF
-#  define sqrt sqrtf
-#endif
-#ifdef HAVE_LOGF
-#  define log logf
-#endif
-#ifdef HAVE_EXPF
-#  define exp expf
-#endif
-#ifdef HAVE_ACOSF
-#  define acos acosf
-#endif
-#ifdef HAVE_ATANF
-#  define atan atanf
-#endif
-#ifdef HAVE_FREXPF
-#  define frexp frexpf
-#endif
-#ifdef HAVE_RINTF
-#  define rint rintf
-#endif
-#ifdef HAVE_FLOORF
-#  define floor floorf
 #endif
 
 #ifndef FAST_HYPOT

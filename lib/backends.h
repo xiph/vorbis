@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.12 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: backends.h,v 1.13 2002/06/28 22:19:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,44 +26,13 @@
 #include "codec_internal.h"
 
 /* this would all be simpler/shorter with templates, but.... */
-/* Transform backend generic *************************************/
-
-/* only mdct right now.  Flesh it out more if we ever transcend mdct
-   in the transform domain */
-
-/* Time backend generic ******************************************/
-typedef struct{
-  void              (*pack)  (vorbis_info_time *,oggpack_buffer *);
-  vorbis_info_time *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_time *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
-			      vorbis_info_time *);
-  vorbis_info_time *(*copy_info)(vorbis_info_time *);
-
-  void (*free_info) (vorbis_info_time *);
-  void (*free_look) (vorbis_look_time *);
-  int  (*forward)   (struct vorbis_block *,vorbis_look_time *,
-		     float *,float *);
-  int  (*inverse)   (struct vorbis_block *,vorbis_look_time *,
-		     float *,float *);
-} vorbis_func_time;
-
-typedef struct{
-  int dummy;
-} vorbis_info_time0;
-
 /* Floor backend generic *****************************************/
 typedef struct{
   void                   (*pack)  (vorbis_info_floor *,oggpack_buffer *);
   vorbis_info_floor     *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_floor     *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
-				   vorbis_info_floor *);
-  vorbis_info_floor     *(*copy_info)(vorbis_info_floor *);
+  vorbis_look_floor     *(*look)  (vorbis_dsp_state *,vorbis_info_floor *);
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
-  int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
-		     float *, const float *, /* in */
-		     const float *, const float *, /* in */
-		     float *);                     /* out */
   void *(*inverse1)  (struct vorbis_block *,vorbis_look_floor *);
   int   (*inverse2)  (struct vorbis_block *,vorbis_look_floor *,
 		     void *buffer,float *);
@@ -84,6 +53,7 @@ typedef struct{
   float greaterthan;  /* encode-only config setting hacks for libvorbis */
 
 } vorbis_info_floor0;
+
 
 #define VIF_POSIT 63
 #define VIF_CLASS 16
@@ -107,12 +77,8 @@ typedef struct{
   float maxunder;  
   float maxerr;    
 
-  int   twofitminsize;
-  int   twofitminused;
-  int   twofitweight;  
+  float twofitweight;  
   float twofitatten;
-  int   unusedminsize;
-  int   unusedmin_n;
 
   int   n;
 
@@ -122,15 +88,14 @@ typedef struct{
 typedef struct{
   void                 (*pack)  (vorbis_info_residue *,oggpack_buffer *);
   vorbis_info_residue *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_residue *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
+  vorbis_look_residue *(*look)  (vorbis_dsp_state *,
 				 vorbis_info_residue *);
-  vorbis_info_residue *(*copy_info)(vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
   long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);
   int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
-			float **,float **,int *,int,int,long **,ogg_uint32_t *);
+			float **,float **,int *,int,long **);
   int  (*inverse)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);
 } vorbis_func_residue;
@@ -147,11 +112,9 @@ typedef struct vorbis_info_residue0{
   int    secondstages[64]; /* expanded out to pointers in lookup */
   int    booklist[256];    /* list of second stage books */
 
-  /* encode-only heuristic settings */
-  float  entmax[64];       /* book entropy threshholds*/
-  float  ampmax[64];       /* book amp threshholds*/
-  int    subgrp[64];       /* book heuristic subgroup size */
-  int    blimit[64];       /* subgroup position limits */
+  float  classmetric1[64];  
+  float  classmetric2[64];  
+
 } vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/
@@ -159,34 +122,24 @@ typedef struct{
   void                 (*pack)  (vorbis_info *,vorbis_info_mapping *,
 				 oggpack_buffer *);
   vorbis_info_mapping *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_mapping *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
-				 vorbis_info_mapping *);
-  vorbis_info_mapping *(*copy_info)(vorbis_info_mapping *);
   void (*free_info)    (vorbis_info_mapping *);
-  void (*free_look)    (vorbis_look_mapping *);
-  int  (*forward)      (struct vorbis_block *vb,vorbis_look_mapping *);
-  int  (*inverse)      (struct vorbis_block *vb,vorbis_look_mapping *);
+  int  (*forward)      (struct vorbis_block *vb);
+  int  (*inverse)      (struct vorbis_block *vb,vorbis_info_mapping *);
 } vorbis_func_mapping;
 
 typedef struct vorbis_info_mapping0{
   int   submaps;  /* <= 16 */
   int   chmuxlist[256];   /* up to 256 channels in a Vorbis stream */
   
-  int   timesubmap[16];    /* [mux] */
   int   floorsubmap[16];   /* [mux] submap to floors */
   int   residuesubmap[16]; /* [mux] submap to residue */
-
-  int   psy[2]; /* by blocktype; impulse/padding for short,
-                   transition/normal for long */
 
   int   coupling_steps;
   int   coupling_mag[256];
   int   coupling_ang[256];
+
 } vorbis_info_mapping0;
 
 #endif
-
-
-
 
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.38 2002/01/22 02:16:40 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.39 2002/06/28 22:19:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -287,15 +287,6 @@ int vorbis_book_encodev(codebook *book,int best,float *a,oggpack_buffer *b){
   int k,dim=book->dim;
   for(k=0;k<dim;k++)
     a[k]=(book->valuelist+best*dim)[k];
-  return(vorbis_book_encode(book,best,b));
-}
-
-/* res0 (multistage, interleave, lattice) */
-/* returns the number of bits and *modifies a* to the remainder value ********/
-int vorbis_book_encodevs(codebook *book,float *a,oggpack_buffer *b,
-			 int step,int addmul){
-
-  int best=vorbis_book_besterror(book,a,step,addmul);
   return(vorbis_book_encode(book,best,b));
 }
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.h,v 1.5 2001/12/23 11:53:52 xiphmont Exp $
+ last mod: $Id: bitrate.h,v 1.6 2002/06/28 22:19:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,8 +23,6 @@
 #include "os.h"
 
 /* encode side bitrate tracking */
-#define BITTRACK_DIVISOR 16
-#define BITTRACK_BPT     6
 typedef struct bitrate_manager_state {
   ogg_uint32_t  *queue_binned;
   ogg_uint32_t  *queue_actual;
@@ -55,13 +53,10 @@ typedef struct bitrate_manager_state {
   int            last_to_flush;
   
   double         avgfloat;
-  double         avgnoise;
-  long           noisetrigger_postpone;
-  double         noisetrigger_request;
 
   /* unfortunately, we need to hold queued packet data somewhere */
-  oggpack_buffer *queue_packet_buffers;
-  ogg_packet     *queue_packets;
+  oggpack_buffer *packetbuffers;
+  ogg_packet     *packets;
 
 } bitrate_manager_state;
 
@@ -75,20 +70,14 @@ typedef struct bitrate_manager_info{
   double queue_avgmin;
   double queue_avgmax;
 
-  double avgfloat_initial; /* set by mode */
-  double avgfloat_minimum; /* set by mode */
   double avgfloat_downslew_max;
   double avgfloat_upslew_max;
-  double avgfloat_noise_lowtrigger;
-  double avgfloat_noise_hightrigger;
-  double avgfloat_noise_minval;
-  double avgfloat_noise_maxval;
+
 } bitrate_manager_info;
 
 extern void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bs);
 extern void vorbis_bitrate_clear(bitrate_manager_state *bs);
 extern int vorbis_bitrate_managed(vorbis_block *vb);
-extern int vorbis_bitrate_maxmarkers(void);
 extern int vorbis_bitrate_addblock(vorbis_block *vb);
 extern int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd, ogg_packet *op);
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bark scale utility
- last mod: $Id: barkmel.c,v 1.9 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: barkmel.c,v 1.10 2002/06/28 22:19:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,14 +51,7 @@ int main(){
 
 
   }
-  {
-    float i;
-    int j;
-    for(i=0.,j=0;i<28;i+=1,j++){
-      fprintf(stderr,"(%d) bark=%f %gHz (%d of 128)\n",
-	      j,i,fromBARK(i),(int)(fromBARK(i)/22050.*128.));
-    }
-  }
+
   return(0);
 }
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.64 2002/03/29 07:34:09 xiphmont Exp $
+ last mod: $Id: block.c,v 1.65 2002/06/28 22:19:35 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -33,7 +33,8 @@
 
 static int ilog2(unsigned int v){
   int ret=0;
-  while(v>1){
+  if(v)--v;
+  while(v){
     ret++;
     v>>=1;
   }
@@ -94,8 +95,6 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
       vb->internal=_ogg_calloc(1,sizeof(vorbis_block_internal));
     oggpack_writeinit(&vb->opb);
     vbi->ampmax=-9999;
-    vbi->packet_markers=_ogg_malloc(vorbis_bitrate_maxmarkers()*
-			       sizeof(*vbi->packet_markers));
   }
   
   return(0);
@@ -154,12 +153,8 @@ int vorbis_block_clear(vorbis_block *vb){
   _vorbis_block_ripcord(vb);
   if(vb->localstore)_ogg_free(vb->localstore);
 
-  if(vb->internal){
-    vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
-    if(vbi->packet_markers)_ogg_free(vbi->packet_markers);
-
+  if(vb->internal)
     _ogg_free(vb->internal);
-  }
 
   memset(vb,0,sizeof(*vb));
   return(0);
@@ -195,12 +190,27 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   b->window[1]=_vorbis_window(0,ci->blocksizes[1]/2);
 
   if(encp){ /* encode/decode differ here */
+
+    /* analysis always needs an fft */
+    drft_init(&b->fft_look[0],ci->blocksizes[0]);
+    drft_init(&b->fft_look[1],ci->blocksizes[1]);
+
     /* finish the codebooks */
     if(!ci->fullbooks){
       ci->fullbooks=_ogg_calloc(ci->books,sizeof(*ci->fullbooks));
       for(i=0;i<ci->books;i++)
 	vorbis_book_init_encode(ci->fullbooks+i,ci->book_param[i]);
     }
+
+    b->psy=_ogg_calloc(ci->psys,sizeof(*b->psy));
+    for(i=0;i<ci->psys;i++){
+      _vp_psy_init(b->psy+i,
+		   ci->psy_param[i],
+		   &ci->psy_g_param,
+		   ci->blocksizes[ci->psy_param[i]->blockflag]/2,
+		   vi->rate);
+    }
+
     v->analysisp=1;
   }else{
     /* finish the codebooks */
@@ -236,14 +246,17 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
   v->pcm_current=v->centerW;
 
-  /* initialize all the mapping/backend lookups */
-  b->mode=_ogg_calloc(ci->modes,sizeof(*b->mode));
-  for(i=0;i<ci->modes;i++){
-    int mapnum=ci->mode_param[i]->mapping;
-    int maptype=ci->map_type[mapnum];
-    b->mode[i]=_mapping_P[maptype]->look(v,ci->mode_param[i],
-					 ci->map_param[mapnum]);
-  }
+  /* initialize all the backend lookups */
+  b->flr=_ogg_calloc(ci->floors,sizeof(*b->flr));
+  b->residue=_ogg_calloc(ci->residues,sizeof(*b->residue));
+
+  for(i=0;i<ci->floors;i++)
+    b->flr[i]=_floor_P[ci->floor_type[i]]->
+      look(v,ci->floor_param[i]);
+
+  for(i=0;i<ci->residues;i++)
+    b->residue[i]=_residue_P[ci->residue_type[i]]->
+      look(v,ci->residue_param[i]);    
 
   return(0);
 }
@@ -293,8 +306,31 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	_ogg_free(b->transform[1][0]);
 	_ogg_free(b->transform[1]);
       }
+
+      if(b->flr){
+	for(i=0;i<ci->floors;i++)
+	  _floor_P[ci->floor_type[i]]->
+	    free_look(b->flr[i]);
+	_ogg_free(b->flr);
+      }
+      if(b->residue){
+	for(i=0;i<ci->residues;i++)
+	  _residue_P[ci->residue_type[i]]->
+	    free_look(b->residue[i]);
+	_ogg_free(b->residue);
+      }
+      if(b->psy){
+	for(i=0;i<ci->psys;i++)
+	  _vp_psy_clear(b->psy+i);
+	_ogg_free(b->psy);
+      }
+
       if(b->psy_g_look)_vp_global_free(b->psy_g_look);
       vorbis_bitrate_clear(&b->bms);
+
+      drft_clear(&b->fft_look[0]);
+      drft_clear(&b->fft_look[1]);
+
     }
     
     if(v->pcm){
@@ -304,18 +340,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       if(v->pcmret)_ogg_free(v->pcmret);
     }
 
-    /* free mode lookups; these are actually vorbis_look_mapping structs */
-    if(ci){
-      for(i=0;i<ci->modes;i++){
-	int mapnum=ci->mode_param[i]->mapping;
-	int maptype=ci->map_type[mapnum];
-	if(b && b->mode)_mapping_P[maptype]->free_look(b->mode[i]);
-      }
-    }
-
     if(b){
-      if(b->mode)_ogg_free(b->mode);    
-      
       /* free header, header1, header2 */
       if(b->header)_ogg_free(b->header);
       if(b->header1)_ogg_free(b->header1);
@@ -471,16 +496,18 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   /* By our invariant, we have lW, W and centerW set.  Search for
      the next boundary so we can determine nW (the next window size)
      which lets us compute the shape of the current block's window */
-  
-  if(ci->blocksizes[0]<ci->blocksizes[1]){
+
+  /* we do an envelope search even on a single blocksize; we may still
+     be throwing more bits at impulses, and envelope search handles
+     marking impulses too. */
+  {  
     long bp=_ve_envelope_search(v);
     if(bp==-1)return(0); /* not enough data currently to search for a
                             full long block */
-    v->nW=bp;
 
-  }else
-    v->nW=0;
-  
+    v->nW=bp;
+  }
+
   centerNext=v->centerW+ci->blocksizes[v->W]/4+ci->blocksizes[v->nW]/4;
 
   {
@@ -568,7 +595,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* advance storage vectors and clean up */
   {
-    int new_centerNext=ci->blocksizes[1]/2+gi->delaycache;
+    int new_centerNext=ci->blocksizes[1]/2;
     int movementW=centerNext-new_centerNext;
 
     if(movementW>0){

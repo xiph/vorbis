@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.24 2002/03/29 08:18:23 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.25 2002/06/28 22:19:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,6 +22,7 @@
 #include "os.h"
 
 /* 20log10(x) */
+#define VORBIS_IEEE_FLOAT32 1
 #ifdef VORBIS_IEEE_FLOAT32
 
 static float unitnorm(float x){

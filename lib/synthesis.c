@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.26 2002/02/28 04:12:48 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.27 2002/06/28 22:19:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,6 +48,9 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vb->mode=mode;
   vb->W=ci->mode_param[mode]->blockflag;
   if(vb->W){
+
+    /* this doesn;t get mapped through mode selection as it's used
+       only for window selection */
     vb->lW=oggpack_read(opb,1);
     vb->nW=oggpack_read(opb,1);
     if(vb->nW==-1)   return(OV_EBADPACKET);
@@ -70,7 +73,8 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   /* unpack_header enforces range checking */
   type=ci->map_type[ci->mode_param[mode]->mapping];
 
-  return(_mapping_P[type]->inverse(vb,b->mode[mode]));
+  return(_mapping_P[type]->inverse(vb,ci->map_param[ci->mode_param[mode]->
+						   mapping]));
 }
 
 /* used to track pcm position without actually performing decode.
