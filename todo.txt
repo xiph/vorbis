@@ -2,6 +2,9 @@ Development hit list for 1.0:
 
 libvorbis:
 
+libvorbis isn't doing the 'how much data in the last frame' trick from
+the PCM counter/last page flag.
+
 Re-add multistage floor0 LSP code.  Right now, it's gutted to single
 stage only.
 

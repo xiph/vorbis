@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.14.2.1 2000/05/24 21:17:01 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.14.2.2 2000/06/09 00:28:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -186,7 +186,7 @@ double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
   for(i=bark+1;i<mapped;i++)
     work[i]=work[i-1];
   
-#if 0
+#if 1
     { /******************/
       FILE *of;
       char buffer[80];
@@ -217,7 +217,7 @@ void _lpc_to_curve(double *curve,double *lpc,double amp,
   }
   vorbis_lpc_to_curve(lcurve,lpc,amp,&(l->lpclook));
 
-#if 0
+#if 1
     { /******************/
       FILE *of;
       char buffer[80];
@@ -247,11 +247,13 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 
   /* our floor comes in on a linear scale; go to a [-Inf...0] dB
      scale.  The curve has to be positive, so we offset it. */
+
+  _analysis_output("Fpre",seq,in,look->n,0,1);
   for(j=0;j<look->n;j++)work[j]=todB(in[j])+info->ampdB;
 
   /* use 'out' as temp storage */
   /* Convert our floor to a set of lpc coefficients */ 
-  amp=sqrt(_curve_to_lpc(work,out,look,vb->sequence));
+  amp=sqrt(_curve_to_lpc(work,out,look,seq));
   
   /* amp is in the range (0. to ampdB].  Encode that range using
      ampbits bits */
@@ -276,8 +278,11 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
 #ifdef ANALYSIS
-    if(vb->mode==0)_analysis_output("lsp",seq++,out,look->m,0,0);
+    _analysis_output("lsp",seq,out,look->m,0,0);
+    vorbis_lsp_to_lpc(out,work,look->m); 
+    _lpc_to_curve(work,work,amp,look,"Fprefloor",seq);
 #endif
+
 #ifdef TRAIN
     {
       int j;
@@ -289,13 +294,6 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 	fprintf(of,"%g, ",out[j]);
       fprintf(of,"\n");
       fclose(of);
-    }
-#endif
-
-#if 0
-    { /******************/
-      vorbis_lsp_to_lpc(out,work,look->m); 
-      _lpc_to_curve(work,work,amp,look,"Fprefloor",vb->sequence);
     }
 #endif
 
@@ -320,12 +318,14 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_lpc(out,out,look->m); 
-    _lpc_to_curve(out,out,amp,look,"Ffloor",vb->sequence);
+    _lpc_to_curve(out,out,amp,look,"Ffloor",seq);
     for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
+    _analysis_output("Fpost",seq++,out,look->n,0,1);
     return(1);
   }
 
   memset(out,0,sizeof(double)*look->n);
+  seq++;
   return(0);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.12.2.3 2000/06/03 03:15:27 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.12.2.4 2000/06/09 00:28:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -297,12 +297,12 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   }
 
   for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];
-  fprintf(stderr,
+  /*fprintf(stderr,
 	  "Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
 	  ch*(info->end-info->begin),phrasebits,resbitsT);
   for(i=0;i<possible_partitions;i++)
     fprintf(stderr,"%ld(%ld):%ld ",i,resvals[i],resbits[i]);
-  fprintf(stderr,"\n");
+    fprintf(stderr,"\n");*/
  
   return(0);
 }

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.31.2.1 2000/06/01 12:03:04 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.31.2.2 2000/06/09 00:28:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,8 +25,8 @@
    considering the undertaking is almost withering.  For now, we brute
    force it all */
 
-#undef   CENTROID 
-#define  MEDIAN 1
+#define  CENTROID 1
+#undef   MEDIAN  
 
 #include <stdlib.h>
 #include <stdio.h>

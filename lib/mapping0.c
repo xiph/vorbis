@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.12.2.1 2000/05/24 21:17:01 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.12.2.2 2000/06/09 00:28:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -211,7 +211,9 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   double **pcmbundle=alloca(sizeof(double *)*vi->channels);
   int *nonzero=alloca(sizeof(int)*vi->channels);
-  
+ 
+  if(!vb->W)fprintf(stderr,"%ld",seq);
+ 
   /* time domain pre-window: NONE IMPLEMENTED */
 
   /* window the PCM data: takes PCM vector, vb; modifies PCM vector */
