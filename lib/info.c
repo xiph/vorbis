@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.59 2002/07/18 01:43:09 xiphmont Exp $
+ last mod: $Id: info.c,v 1.60 2002/09/23 21:46:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -596,3 +596,8 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   return(ret);
 }
 
+double vorbis_granule_time(vorbis_dsp_state *v,ogg_int64_t granulepos){
+  if(granulepos>=0)
+    return((double)granulepos/v->vi->rate);
+  return(-1);
+}
