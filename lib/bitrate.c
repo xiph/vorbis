@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.23 2003/12/30 13:17:20 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -227,7 +227,6 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
   return(0);
 }
 
-#include <stdio.h>
 int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
   private_state         *b=vd->backend_state;
   bitrate_manager_state *bm=&b->bms;
@@ -240,8 +239,6 @@ int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
     
     if(vorbis_bitrate_managed(vb))
       choice=bm->choice;
-
-    fprintf(stderr,"%d ",choice);
 
     op->packet=oggpack_get_buffer(vbi->packetblob[choice]);
     op->bytes=oggpack_bytes(vbi->packetblob[choice]);
