@@ -99,3 +99,5 @@ int ov_time_seek()
 int ov_time_seek_page()
     OV_ENOSEEK, OV_EINVAL, OV_EREAD, OV_BADLINK, OV_FAULT
 
+long ov_read()
+    OV_HOLE, OV_EBADLINK

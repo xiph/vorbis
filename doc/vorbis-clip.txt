@@ -113,10 +113,11 @@ of the queue.
 
 Note that short granule values (indicating less than the actually
 returned about of data) are not legal in the Vorbis spec outside of
-indicating beginning and ending sample positions.  However, decoders
-should, at minimum, tolerate inadvertant short values elsewhere in the
-stream (just as they should tolerate out-of-order/non-increasing
-granulepos values, although this too is illegal).
+indicating beginning and ending sample positions applying to the
+first/last audio packet.  However, decoders should, at minimum,
+tolerate inadvertant short values elsewhere in the stream (just as
+they should tolerate out-of-order/non-increasing granulepos values,
+although this too is illegal).
 
 Beginning point at arbitrary positive timestamp (no 'zero' sample):
 
