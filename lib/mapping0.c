@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.38 2001/12/12 09:45:25 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.39 2001/12/16 04:15:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -314,19 +314,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	  accounted for in masking) 
      long block (run of the mill long block)
   */
-
-  if(seq%10==0)fprintf(stderr,"%d",seq);
-  if(!vb->W){
-    if(blocktype==BLOCKTYPE_IMPULSE)
-      fprintf(stderr,"|");
-    else
-      fprintf(stderr,".");
-  }else{
-    if(blocktype==BLOCKTYPE_TRANSITION)
-      fprintf(stderr,"-");
-    else
-      fprintf(stderr,"_");
-  }
 
   for(i=0;i<vi->channels;i++){
     float scale=4.f/n;

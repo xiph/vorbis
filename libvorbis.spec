@@ -1,5 +1,5 @@
 %define name	libvorbis
-%define version	1.0rc2
+%define version	1.0rc3
 %define release 1
 
 Summary:	The Vorbis General Audio Compression Codec

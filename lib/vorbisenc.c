@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.22 2001/12/14 09:37:58 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.23 2001/12/16 04:15:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -356,6 +356,15 @@ static int vorbis_encode_ath_init(vorbis_info *vi,double q,int block,
   return(0);
 }
 
+
+static int book_dup_or_new(codec_setup_info *ci,static_codebook *book){
+  int i;
+  for(i=0;i<ci->books;i++)
+    if(ci->book_param[i]==book)return(i);
+  
+  return(ci->books++);
+}
+
 static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
 				      int coupled_p,
 				      int stereo_backfill_p,
@@ -365,11 +374,11 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
   int i,iq=q*10;
   int a[11];
   double c[11];
-  int n;
+  int n,k;
   int partition_position;
   int res_position;
   int iterations=1;
-  int amplitude_select;
+  int amplitude_select=0;
 
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_residue0 *r;
@@ -420,9 +429,16 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
 
   for(i=0;i<r->partitions;i++)
     if(r->blimit[i]<0)r->blimit[i]=partition_position;
+
+  for(i=0;i<r->partitions;i++)
+    for(k=0;k<3;k++)
+      if(in[iq].books_base[a[iq]][i][k])
+	r->secondstages[i]|=(1<<k);
+  
+  ci->passlimit[0]=3;
+    
   
   if(coupled_p){
-    int k;
     vorbis_info_mapping0 *map=ci->map_param[block];
 
     map->coupling_steps=1;
@@ -442,13 +458,6 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     psy->couple_pass[0].couple_pass[1].amppost_point=stereo_threshholds[a[iq]];
     amplitude_select=a[iq];
 
-    for(i=0;i<r->partitions;i++)
-      for(k=0;k<3;k++)
-	if(in[iq].books_base[a[iq]][i][k])
-	  r->secondstages[i]|=(1<<k);
-      
-    ci->passlimit[0]=3;
-    
     if(stereo_backfill_p && a[iq]){
       memcpy(psy->couple_pass+iterations,psy->couple_pass+iterations-1,
 	     sizeof(*psy->couple_pass));
@@ -485,13 +494,12 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     ci->coupling_passes=iterations;
 
   }else{
-    ci->passlimit[0]=3;
 
     if(residue_backfill_p){
       for(i=0;i<r->partitions;i++){
-	if(in[iq].books_residue_backfill[amplitude_select][i][0])
+	if(in[iq].books_residue_backfill[0][i][0])
 	  r->secondstages[i]|=8;
-	if(in[iq].books_residue_backfill[amplitude_select][i][1])
+	if(in[iq].books_residue_backfill[0][i][1])
 	  r->secondstages[i]|=16;
       }
       ci->passlimit[1]=4;
@@ -513,19 +521,23 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     for(i=0;i<r->partitions;i++){
       for(k=0;k<3;k++){
 	if(in[iq].books_base[a[iq]][i][k]){
-	  r->booklist[booklist++]=ci->books;
-	  ci->book_param[ci->books++]=in[iq].books_base[a[iq]][i][k];
+	  int bookid=book_dup_or_new(ci,in[iq].books_base[a[iq]][i][k]);
+	  r->booklist[booklist++]=bookid;
+	  ci->book_param[bookid]=in[iq].books_base[a[iq]][i][k];
+	}
       }
       if(coupled_p && stereo_backfill_p && a[iq] &&
 	 in[iq].books_stereo_backfill[a[iq]][i]){
-	  r->booklist[booklist++]=ci->books;
-	  ci->book_param[ci->books++]=in[iq].books_stereo_backfill[a[iq]][i];
+	int bookid=book_dup_or_new(ci,in[iq].books_stereo_backfill[a[iq]][i]);
+	r->booklist[booklist++]=bookid;
+	ci->book_param[bookid]=in[iq].books_stereo_backfill[a[iq]][i];
       }
-      if(residue_backfill_p)
+      if(residue_backfill_p){
 	for(k=0;k<2;k++){
 	  if(in[iq].books_residue_backfill[amplitude_select][i][k]){
-	    r->booklist[booklist++]=ci->books;
-	    ci->book_param[ci->books++]=in[iq].books_residue_backfill[amplitude_select][i][k];
+	    int bookid=book_dup_or_new(ci,in[iq].books_residue_backfill[amplitude_select][i][k]);
+	    r->booklist[booklist++]=bookid;
+	    ci->book_param[bookid]=in[iq].books_residue_backfill[amplitude_select][i][k];
 	  }
 	}
       }
@@ -686,10 +698,32 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
     default:
       /* setup specific to non-stereo (mono or uncoupled polyphonic)
          coupling */
-
-
-      return(OV_EIMPL);
       
+      /* unmanaged, one iteration residue setup */
+      ret|=vorbis_encode_residue_init(vi,base_quality,0,
+				      0, /* uncoupled */
+				      0, /* no mid stereo backfill */
+				      0, /* residue backfill */
+				      _residue_template_44_uncoupled,
+				      0,0,0,0,0,0,0,0,0,0,0,
+				      4.,4.,4.,6.,6.,6.,6.,4.,4.,4.,4.);
+      
+      ret|=vorbis_encode_residue_init(vi,base_quality,1,
+				      0, /* uncoupled */
+				      0, /* no mid stereo backfill */
+				      0, /* residue backfill */
+				      _residue_template_44_uncoupled,
+				      0,0,0,0,0,0,0,0,0,0,0,
+				      4.,4.,4.,6.,6.,6.,6.,4.,4.,4.,4.);      
+
+      ret|=vorbis_encode_lowpass_init(vi,base_quality,0,
+				      15.1,15.8,16.5,17.9,20.5,
+				      999.,999.,999.,999.,999.,999.);
+      ret|=vorbis_encode_lowpass_init(vi,base_quality,1,
+				      15.1,15.8,16.5,17.9,20.5,
+				      999.,999.,999.,999.,999.,999.);
+      
+      return(ret);
       break;
     }
     return(0);

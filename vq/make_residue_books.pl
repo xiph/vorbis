@@ -9,7 +9,6 @@
 # >res0_128_128 interleaved
 # haux res0_96_128aux.vqd 0,4,2
 # :1 res0_128_128_1.vqd, 4, nonseq cull, 0 +- 1
-# +1a, 4, nonseq, 0 +- .25 .5
 # :2 res0_128_128_2.vqd, 4, nonseq, 0 +- 1(.7) 2
 # :3 res0_128_128_3.vqd, 4, nonseq, 0 +- 1(.7) 3 5
 # :4 res0_128_128_4.vqd, 2, nonseq, 0 +- 1(.7) 3 5 8 11
@@ -115,170 +114,51 @@ while($line=<F>){
 	print ">>> $command\n";
 	die "Couldn't pre-hint latticebook.\n\tcommand:$command\n" 
 	    if syst($command);
+
+	if(-e $datafile){
 	
-	if($interleave=~/non/){
-	    $restune="res1tune";
-	}else{
-	    $restune="res0tune";
-	}
-
-	if($seqp=~/cull/){
-	    my $command="$restune temp$$.vqh $datafile 1 > $globalname$name.vqh";
-	    print ">>> $command\n";
-	    die "Couldn't tune latticebook.\n\tcommand:$command\n" 
-		if syst($command);
-	}else{
-	    my $command="$restune temp$$.vqh $datafile > $globalname$name.vqh";
-	    print ">>> $command\n";
-	    die "Couldn't tune latticebook.\n\tcommand:$command\n" 
-		if syst($command);
-	}
-
-	my $command="latticehint $globalname$name.vqh $thlist > temp$$.vqh";
-	print ">>> $command\n";
-	die "Couldn't post-hint latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
-
-	my $command="mv temp$$.vqh $globalname$name.vqh";
-	print ">>> $command\n";
-	die "Couldn't rename latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
-
-	# run the training data through book to cascade
-	if($interleave=~/non/){
-	    $vqcascade="vqcascade";
-	}else{
-	    $vqcascade="vqcascade -i";
-	}
-
-	my $command="$vqcascade +$globalname$name.vqh $datafile > temp$$.vqd";
-	print ">>> $command\n";
-	die "Couldn't cascade latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
-
-
-	my $command="rm temp$$.vql";
-	print ">>> $command\n";
-	die "Couldn't remove temp files.\n\tcommand:$command\n" 
-	    if syst($command);
-
-	next;
-    }
-    # +a 4, nonseq, 0 +- 1
-    if($line=~m/^\+(.*)/){
-	my($name,$dim,$seqp,$vals)=split(',',$1);
-
-	# build value list
-	my$plusminus="+";
-	my$list;
-	my$thlist;
-	my$count=0;
-	foreach my$val (split(' ',$vals)){
-	    if($val=~/\-?\+?\d+/){
-		my$th;
-
-		# got an explicit threshhint?
-		if($val=~/([0-9\.]+)\(([^\)]+)/){
-		    $val=$1;
-		    $th=$2;
-		}
-
-		if($plusminus=~/-/){
-		    $list.="-$val ";
-		    if(defined($th)){
-			$thlist.="," if(defined($thlist));
-			$thlist.="-$th";
-		    }
-		    $count++;
-		}
-		if($plusminus=~/\+/){
-		    $list.="$val ";
-		    if(defined($th)){
-			$thlist.="," if(defined($thlist));
-			$thlist.="$th";
-		    }
-		    $count++;
-		}
+	    if($interleave=~/non/){
+		$restune="res1tune";
 	    }else{
-		$plusminus=$val;
+		$restune="res0tune";
 	    }
-	}
-	die "Couldn't open temp file temp$$.vql: $!" unless
-	    open(G,">temp$$.vql");
-	print G "$count $dim 0 ";
-	if($seqp=~/non/){
-	    print G "0\n$list\n";
-	}else{	
-	    print G "1\n$list\n";
-	}
-	close(G);
+	    
+	    if($seqp=~/cull/){
+		my $command="$restune temp$$.vqh $datafile 1 > $globalname$name.vqh";
+		print ">>> $command\n";
+		die "Couldn't tune latticebook.\n\tcommand:$command\n" 
+		    if syst($command);
+	    }else{
+		my $command="$restune temp$$.vqh $datafile > $globalname$name.vqh";
+		print ">>> $command\n";
+		die "Couldn't tune latticebook.\n\tcommand:$command\n" 
+		    if syst($command);
+	    }
 
-	my $command="latticebuild temp$$.vql > $globalname$name.vqh";
-	print ">>> $command\n";
-	die "Couldn't build latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
-
-	my $command="latticehint $globalname$name.vqh $thlist > temp$$.vqh";
-	print ">>> $command\n";
-	die "Couldn't pre-hint latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
-	
-	if($interleave=~/non/){
-	    $restune="res1tune";
-	}else{
-	    $restune="res0tune";
-	}
-
-	if($seqp=~/cull/){
-	    my $command="$restune temp$$.vqh temp$$.vqd 1 > $globalname$name.vqh";
+	    my $command="latticehint $globalname$name.vqh $thlist > temp$$.vqh";
 	    print ">>> $command\n";
-	    die "Couldn't tune latticebook.\n\tcommand:$command\n" 
+	    die "Couldn't post-hint latticebook.\n\tcommand:$command\n" 
 		if syst($command);
-	}else{
-	    my $command="$restune temp$$.vqh temp$$.vqd > $globalname$name.vqh";
-	    print ">>> $command\n";
-	    die "Couldn't tune latticebook.\n\tcommand:$command\n" 
-		if syst($command);
-	}
 
-	my $command="latticehint $globalname$name.vqh $thlist > temp$$.vqh";
-	print ">>> $command\n";
-	die "Couldn't post-hint latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
+	}else{
+	    print "No matching training file; leaving this codebook untrained.\n";
+	}
 
 	my $command="mv temp$$.vqh $globalname$name.vqh";
 	print ">>> $command\n";
 	die "Couldn't rename latticebook.\n\tcommand:$command\n" 
 	    if syst($command);
 
-	# run the training data through book to cascade
-	if($interleave=~/non/){
-	    $vqcascade="vqcascade";
-	}else{
-	    $vqcascade="vqcascade -i";
-	}
-
-	my $command="$vqcascade +$globalname$name.vqh temp$$.vqd > tempa$$.vqd";
-	print ">>> $command\n";
-	die "Couldn't cascade latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
-
-
 	my $command="rm temp$$.vql";
 	print ">>> $command\n";
 	die "Couldn't remove temp files.\n\tcommand:$command\n" 
-	    if syst($command);
-
-	my $command="mv tempa$$.vqd temp$$.vqd";
-	print ">>> $command\n";
-	die "Couldn't rename temp file.\n\tcommand:$command\n" 
 	    if syst($command);
 
 	next;
     }
 }
 
-$command="rm temp$$.vqd";
+$command="rm -f temp$$.vqd";
 print ">>> $command\n";
 die "Couldn't remove temp files.\n\tcommand:$command\n" 
     if syst($command);

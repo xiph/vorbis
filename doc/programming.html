@@ -98,7 +98,7 @@ typedef struct {
   long  b_o_s;
   long  e_o_s;
 
-  size64 frameno;
+  size64 granulepos;
 
 } ogg_packet;
 </pre>
@@ -110,7 +110,7 @@ typedef struct {
               the logical bitstream
 <dt>e_o_s: <dd>end of stream; nonzero if this is the last packet of the 
               logical bitstream
-<dt>frameno: <dd>the absolute position of this packet in the original 
+<dt>granulepos: <dd>the absolute position of this packet in the original 
              uncompressed data stream.
 </dl>
 
@@ -123,10 +123,10 @@ page.  <tt>e_o_s</tt>, however, must be set; this is the means by
 which the stream encoding primitives handle end of stream and cleanup.
 
 <h4>decoding notes</h4><tt>ogg_stream_packetout()</tt> sets the fields
-to appropriate values.  Note that frameno will be >= 0 only in the
+to appropriate values.  Note that granulepos will be >= 0 only in the
 case that the given packet actually represents that position (ie, only
 the last packet completed on any page will have a meaningful
-<tt>frameno</tt>).  Intervening frames will see <tt>frameno</tt> set
+<tt>granulepos</tt>).  Intervening frames will see <tt>granulepos</tt> set
 to -1.
 
 <h3>ogg_page</h3>
@@ -189,7 +189,7 @@ logical bitstream and that no addiitonal pages belonging to this
 bitstream may follow.<p>
 
 <h3>
-size64 ogg_page_frameno(ogg_page *og);
+size64 ogg_page_granulepos(ogg_page *og);
 </h3>
 
 Returns the position of this page as an absolute position within the

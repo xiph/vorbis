@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.3 2001/12/14 07:21:29 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.4 2001/12/16 04:15:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -56,6 +56,16 @@ static vorbis_info_residue0 _residue_44_low={
   {0},
   {  99,   -1,   -1,   -1,   -1,   99,   99}
 };
+/* 26 doesn't cascade well; use 28 instead */
+static vorbis_info_residue0 _residue_44_low_un={
+  0,-1, -1, 8,-1,
+  {0},
+  {-1},
+  {9999, 9999, 9999, 9999, 9999, 9999, 9999},
+  {  .5,  1.5,  2.5,  4.5, 28.5,  1.5,  4.5},
+  {0},
+  {  99,   -1,   -1,   -1,   -1,   99,   99}
+};
 
 /*     0   1   2   4   1   2   4  16  42   +      
            0   0   0            
@@ -94,6 +104,17 @@ static vorbis_info_residue0 _residue_44_high={
   {-1},
   {9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999},
   {  .5,  8.5, 42.5,  1.5,  2.5,  4.5,  8.5, 16.5, 56.5},
+  {0},
+  {  99,   -1,   -1,   99,   99,   99,   99,   99,   99}
+};
+/* 56 doesn't cascade well; use 59 */
+static vorbis_info_residue0 _residue_44_high_un={
+  0,-1, -1, 10,-1,
+  /*  0     1     2     3     4     5     6     7     8     9 */
+  {0},
+  {-1},
+  {9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999},
+  {  .5,  8.5, 42.5,  1.5,  2.5,  4.5,  8.5, 16.5, 59.5},
   {0},
   {  99,   -1,   -1,   99,   99,   99,   99,   99,   99}
 };
@@ -494,7 +515,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
    {&_huff_book__44c7_short,&_huff_book__44c7_long},
    { {{0},{&_44c7_s0_p1_0,&_44c7_s0_p1_1},
       {&_44c7_s0_p2_0,&_44c7_s0_p2_1},
-      {0,0,&_44c6_s0_p3_0},{0,0,&_44c6_s0_p4_0},{0,0,&_44c6_s0_p5_0},
+      {0,0,&_44c7_s0_p3_0},{0,0,&_44c7_s0_p4_0},{0,0,&_44c7_s0_p5_0},
       {&_44c7_s0_p6_0,&_44c7_s0_p6_1},
       {&_44c7_s0_p7_0,&_44c7_s0_p7_1},
       {&_44c7_s0_p8_0,&_44c7_s0_p8_1},
@@ -529,7 +550,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
    {&_huff_book__44c8_short,&_huff_book__44c8_long},
    { {{0},{&_44c8_s0_p1_0,&_44c8_s0_p1_1},
       {&_44c8_s0_p2_0,&_44c8_s0_p2_1},
-      {0,0,&_44c6_s0_p3_0},{0,0,&_44c6_s0_p4_0},{0,0,&_44c6_s0_p5_0},
+      {0,0,&_44c8_s0_p3_0},{0,0,&_44c8_s0_p4_0},{0,0,&_44c8_s0_p5_0},
       {&_44c8_s0_p6_0,&_44c8_s0_p6_1},
       {&_44c8_s0_p7_0,&_44c8_s0_p7_1},
       {&_44c8_s0_p8_0,&_44c8_s0_p8_1},
@@ -563,7 +584,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
    {&_huff_book__44c9_short,&_huff_book__44c9_long},
    { {{0},{&_44c9_s0_p1_0,&_44c9_s0_p1_1},
       {&_44c9_s0_p2_0,&_44c9_s0_p2_1},
-      {0,0,&_44c6_s0_p3_0},{0,0,&_44c6_s0_p4_0},{0,0,&_44c6_s0_p5_0},
+      {0,0,&_44c9_s0_p3_0},{0,0,&_44c9_s0_p4_0},{0,0,&_44c9_s0_p5_0},
       {&_44c9_s0_p6_0,&_44c9_s0_p6_1},
       {&_44c9_s0_p7_0,&_44c9_s0_p7_1},
       {&_44c9_s0_p8_0,&_44c9_s0_p8_1},
@@ -595,12 +616,321 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
 
 };
 
+#include "books/uncoupled/_44u0_p1_0.vqh"
+#include "books/uncoupled/_44u0_p2_0.vqh"
+#include "books/uncoupled/_44u0_p3_0.vqh"
+#include "books/uncoupled/_44u0_p4_0.vqh"
+#include "books/uncoupled/_44u0_p4_1.vqh"
+#include "books/uncoupled/_44u0_p5_0.vqh"
+#include "books/uncoupled/_44u0_p6_0.vqh"
+#include "books/uncoupled/_44u0_p7_0.vqh"
+#include "books/uncoupled/_44u0_p7_1.vqh"
+#include "books/uncoupled/_44u0_p7_2.vqh"
+
+#include "books/uncoupled/_44u0_p0_r0.vqh"
+#include "books/uncoupled/_44u0_p1_r0.vqh"
+
+#include "books/uncoupled/_44u0_p0_r1.vqh"
+#include "books/uncoupled/_44u0_p1_r1.vqh"
+
+#include "books/uncoupled/_44u4_p1_0.vqh"
+#include "books/uncoupled/_44u4_p2_0.vqh"
+#include "books/uncoupled/_44u4_p3_0.vqh"
+#include "books/uncoupled/_44u4_p4_0.vqh"
+#include "books/uncoupled/_44u4_p5_0.vqh"
+#include "books/uncoupled/_44u4_p6_0.vqh"
+#include "books/uncoupled/_44u4_p7_0.vqh"
+#include "books/uncoupled/_44u4_p7_1.vqh"
+#include "books/uncoupled/_44u4_p8_0.vqh"
+#include "books/uncoupled/_44u4_p8_1.vqh"
+#include "books/uncoupled/_44u4_p9_0.vqh"
+#include "books/uncoupled/_44u4_p9_1.vqh"
+#include "books/uncoupled/_44u4_p9_2.vqh"
+
+#include "books/uncoupled/_44u4_p0_r0.vqh"
+#include "books/uncoupled/_44u4_p1_r0.vqh"
+
+#include "books/uncoupled/_44u4_p0_r1.vqh"
+#include "books/uncoupled/_44u4_p1_r1.vqh"
+
+#include "books/uncoupled/_44u7_p1_0.vqh"
+#include "books/uncoupled/_44u7_p2_0.vqh"
+#include "books/uncoupled/_44u7_p2_1.vqh"
+#include "books/uncoupled/_44u7_p3_0.vqh"
+#include "books/uncoupled/_44u7_p4_0.vqh"
+#include "books/uncoupled/_44u7_p5_0.vqh"
+#include "books/uncoupled/_44u7_p6_0.vqh"
+#include "books/uncoupled/_44u7_p7_0.vqh"
+#include "books/uncoupled/_44u7_p7_1.vqh"
+#include "books/uncoupled/_44u7_p8_0.vqh"
+#include "books/uncoupled/_44u7_p8_1.vqh"
+#include "books/uncoupled/_44u7_p9_0.vqh"
+#include "books/uncoupled/_44u7_p9_1.vqh"
+#include "books/uncoupled/_44u7_p9_2.vqh"
+
+#include "books/uncoupled/_44u7_p0_r0.vqh"
+#include "books/uncoupled/_44u7_p1_r0.vqh"
+
+#include "books/uncoupled/_44u7_p0_r1.vqh"
+#include "books/uncoupled/_44u7_p1_r1.vqh"
 
 
-
-
-
-
+static vorbis_residue_template _residue_template_44_uncoupled[11]={
+  /* mode 0; 40/c-ish */
+  {{&_residue_44_low_un, &_residue_44_low_un},  
+   {&_huff_book__44c0_short,&_huff_book__44c0_long},
+   { {{0},
+      {0,0,&_44u0_p1_0},
+      {0,0,&_44u0_p2_0},
+      {0,0,&_44u0_p3_0},
+      {&_44u0_p4_0,&_44u0_p4_1},
+      {0,0,&_44u0_p5_0},
+      {0,0,&_44u0_p6_0},
+      {&_44u0_p7_0,&_44u0_p7_1,&_44u0_p7_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u0_p0_r0,&_44u0_p0_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1}},
+   }
+  },
+  /* mode 1; 50-ish */
+  {{&_residue_44_low_un, &_residue_44_low_un},  
+   {&_huff_book__44c1_short,&_huff_book__44c1_long},
+   { {{0},
+      {0,0,&_44u0_p1_0},
+      {0,0,&_44u0_p2_0},
+      {0,0,&_44u0_p3_0},
+      {&_44u0_p4_0,&_44u0_p4_1},
+      {0,0,&_44u0_p5_0},
+      {0,0,&_44u0_p6_0},
+      {&_44u0_p7_0,&_44u0_p7_1,&_44u0_p7_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u0_p0_r0,&_44u0_p0_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1}},
+   }
+  },
+  /* mode 2; 60-ish */
+  {{&_residue_44_low_un, &_residue_44_low_un},  
+   {&_huff_book__44c2_short,&_huff_book__44c2_long},
+   { {{0},
+      {0,0,&_44u0_p1_0},
+      {0,0,&_44u0_p2_0},
+      {0,0,&_44u0_p3_0},
+      {&_44u0_p4_0,&_44u0_p4_1},
+      {0,0,&_44u0_p5_0},
+      {0,0,&_44u0_p6_0},
+      {&_44u0_p7_0,&_44u0_p7_1,&_44u0_p7_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u0_p0_r0,&_44u0_p0_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1}},
+   }
+  },
+  /* mode 3; 70-ish */
+  {{&_residue_44_low_un, &_residue_44_low_un},  
+   {&_huff_book__44c3_short,&_huff_book__44c3_long},
+   { {{0},
+      {0,0,&_44u0_p1_0},
+      {0,0,&_44u0_p2_0},
+      {0,0,&_44u0_p3_0},
+      {&_44u0_p4_0,&_44u0_p4_1},
+      {0,0,&_44u0_p5_0},
+      {0,0,&_44u0_p6_0},
+      {&_44u0_p7_0,&_44u0_p7_1,&_44u0_p7_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u0_p0_r0,&_44u0_p0_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1},
+      {&_44u0_p1_r0,&_44u0_p1_r1}},
+   }
+  },
+  /* mode 4; 80-ish */
+  {{&_residue_44_mid, &_residue_44_mid},  
+   {&_huff_book__44c4_short,&_huff_book__44c4_long},
+   { {{0},
+      {0,0,&_44u4_p1_0},
+      {0,0,&_44u4_p2_0},
+      {0,0,&_44u4_p3_0},
+      {0,0,&_44u4_p4_0},
+      {0,0,&_44u4_p5_0},
+      {0,0,&_44u4_p6_0},
+      {&_44u4_p7_0,&_44u4_p7_1},
+      {&_44u4_p8_0,&_44u4_p8_1},
+      {&_44u4_p9_0,&_44u4_p9_1,&_44u4_p9_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u4_p0_r0,&_44u4_p0_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1}},
+   }
+  },
+  /* mode 5; 90-ish */
+  {{&_residue_44_mid, &_residue_44_mid},  
+   {&_huff_book__44c5_short,&_huff_book__44c5_long},
+   { {{0},
+      {0,0,&_44u4_p1_0},
+      {0,0,&_44u4_p2_0},
+      {0,0,&_44u4_p3_0},
+      {0,0,&_44u4_p4_0},
+      {0,0,&_44u4_p5_0},
+      {0,0,&_44u4_p6_0},
+      {&_44u4_p7_0,&_44u4_p7_1},
+      {&_44u4_p8_0,&_44u4_p8_1},
+      {&_44u4_p9_0,&_44u4_p9_1,&_44u4_p9_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u4_p0_r0,&_44u4_p0_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1}},
+   }
+  },
+  /* mode 6; 100-ish */
+  {{&_residue_44_mid, &_residue_44_mid},  
+   {&_huff_book__44c6_short,&_huff_book__44c6_long},
+   { {{0},
+      {0,0,&_44u4_p1_0},
+      {0,0,&_44u4_p2_0},
+      {0,0,&_44u4_p3_0},
+      {0,0,&_44u4_p4_0},
+      {0,0,&_44u4_p5_0},
+      {0,0,&_44u4_p6_0},
+      {&_44u4_p7_0,&_44u4_p7_1},
+      {&_44u4_p8_0,&_44u4_p8_1},
+      {&_44u4_p9_0,&_44u4_p9_1,&_44u4_p9_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u4_p0_r0,&_44u4_p0_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1},
+      {&_44u4_p1_r0,&_44u4_p1_r1}},
+   }
+  },
+  /* mode 7 */
+  {{&_residue_44_high_un, &_residue_44_high_un},  
+   {&_huff_book__44c7_short,&_huff_book__44c7_long},
+   { {{0},
+      {0,0,&_44u7_p1_0},
+      {&_44u7_p2_0,&_44u7_p2_1},
+      {0,0,&_44u7_p3_0},
+      {0,0,&_44u7_p4_0},
+      {0,0,&_44u7_p5_0},
+      {0,0,&_44u7_p6_0},
+      {&_44u7_p7_0,&_44u7_p7_1},
+      {&_44u7_p8_0,&_44u7_p8_1},
+      {&_44u7_p9_0,&_44u7_p9_1,&_44u7_p9_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u7_p0_r0,&_44u7_p0_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1}},
+   }
+  },
+  /* mode 8 */
+  {{&_residue_44_high_un, &_residue_44_high_un},  
+   {&_huff_book__44c8_short,&_huff_book__44c8_long},
+   { {{0},
+      {0,0,&_44u7_p1_0},
+      {&_44u7_p2_0,&_44u7_p2_1},
+      {0,0,&_44u7_p3_0},
+      {0,0,&_44u7_p4_0},
+      {0,0,&_44u7_p5_0},
+      {0,0,&_44u7_p6_0},
+      {&_44u7_p7_0,&_44u7_p7_1},
+      {&_44u7_p8_0,&_44u7_p8_1},
+      {&_44u7_p9_0,&_44u7_p9_1,&_44u7_p9_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u7_p0_r0,&_44u7_p0_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1}},
+   }
+  },
+  /* mode 9 */
+  {{&_residue_44_high_un, &_residue_44_high_un},  
+   {&_huff_book__44c9_short,&_huff_book__44c9_long},
+   { {{0},
+      {0,0,&_44u7_p1_0},
+      {&_44u7_p2_0,&_44u7_p2_1},
+      {0,0,&_44u7_p3_0},
+      {0,0,&_44u7_p4_0},
+      {0,0,&_44u7_p5_0},
+      {0,0,&_44u7_p6_0},
+      {&_44u7_p7_0,&_44u7_p7_1},
+      {&_44u7_p8_0,&_44u7_p8_1},
+      {&_44u7_p9_0,&_44u7_p9_1,&_44u7_p9_2}},
+   },
+   { {0} }, /* no stereo backfill in uncoupled modes */
+   { {{&_44u7_p0_r0,&_44u7_p0_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1},
+      {&_44u7_p1_r0,&_44u7_p1_r1}},
+   }
+  },
+};
 
 
 

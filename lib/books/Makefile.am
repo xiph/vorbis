@@ -2,4 +2,4 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = floor/*.vqh coupled/*.vqh
+EXTRA_DIST = floor/*.vqh coupled/*.vqh uncoupled/*.vqh
