@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.6.4.1 2001/04/05 00:22:48 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.6.4.2 2001/04/29 22:21:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,7 +61,7 @@ typedef struct{
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
-		     float *, float *);
+		     float *);
   int  (*inverse)   (struct vorbis_block *,vorbis_look_floor *,
 		     float *);
 } vorbis_func_floor;
@@ -82,21 +82,27 @@ typedef struct{
 
 } vorbis_info_floor0;
 
+#define VIF_POSIT 63
+#define VIF_CLASS 16
+#define VIF_PARTS 31
 typedef struct{
-  long  maxrange;
-  int   rangeres;       /* 6, 7 or 8 */
+  int   partitions;                /* 0 to 31 */
+  int   partitionclass[VIF_PARTS]; /* 0 to 15 */
 
-  int   ranges;         /* up to 8 */
-  int   rangesizes[8];  /* 1 to 8 */
-  int   rangelist[64]; 
-  
-  int   positionbook[8];
-  int   ampbook[8];
+  int   class_dim[VIF_CLASS];        /* 1 to 8 */
+  int   class_subs[VIF_CLASS];       /* 0,1,2,3 (bits: 1<<n poss) */
+  int   class_book[VIF_CLASS];       /* subs ^ dim entries */
+  int   class_subbook[VIF_CLASS][8]; /* [VIF_CLASS][subs] */
 
-  float maxover;  /* encode side analysis parameter */
-  float maxunder; /* encode side analysis parameter */
-  float maxerr;   /* encode side analysis parameter */
 
+  int   mult;                      /* 1 2 3 or 4 */ 
+  int   postlist[VIF_POSIT+2];    /* first two implicit */ 
+
+
+  float maxover;     /* encode side analysis parameter */
+  float maxunder;    /* encode side analysis parameter */
+  float maxerr;      /* encode side analysis parameter */
+  int   searchstart; /* encode side analysis parameter */
 } vorbis_info_floor1;
 
 /* Residue backend generic *****************************************/
