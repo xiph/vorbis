@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.20 2000/04/21 09:35:03 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.21 2000/04/23 15:34:12 msmith Exp $
 
  ********************************************************************/
 
@@ -546,10 +546,11 @@ int ov_clear(OggVorbis_File *vf){
 
 int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
   ov_callbacks callbacks = {
-    fread,
-    fseek,
-    fclose,
-    ftell};
+    (size_t (*)(void *, size_t, size_t, void *))  fread,
+    (int (*)(void *, long, int))                  fseek,
+    (int (*)(void *))                             fclose,
+    (long (*)(void *))                            ftell
+  };
 
   return ov_open_callbacks((void *)f, vf, initial, ibytes, callbacks);
 }
