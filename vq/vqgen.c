@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.29 2000/02/16 16:18:40 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.30 2000/02/21 01:13:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -135,7 +135,7 @@ void vqgen_cellmetric(vqgen *v){
 #endif
   }
 
-  fprintf(stderr,"cell diameter: %.03g::%.03g::%.03g (%d unused/%d dup)\n",
+  fprintf(stderr,"cell diameter: %.03g::%.03g::%.03g (%ld unused/%ld dup)\n",
 	  min,mean/acc,max,unused,dup);
 
 #ifdef NOISY

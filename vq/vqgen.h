@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.11 2000/02/16 16:18:41 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.12 2000/02/21 01:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -71,6 +71,7 @@ extern void vqgen_addpoint(vqgen *v, double *p,double *aux);
 extern double vqgen_iterate(vqgen *v);
 extern void vqgen_unquantize(vqgen *v,quant_meta *q);
 extern void vqgen_quantize(vqgen *v,quant_meta *q);
+extern void vqgen_cellmetric(vqgen *v);
 
 #endif
 

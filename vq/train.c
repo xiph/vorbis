@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.15 2000/02/16 16:18:38 xiphmont Exp $
+ last mod: $Id: train.c,v 1.16 2000/02/21 01:12:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -52,7 +52,8 @@ static void usage(void){
 	  "options: -p[arams]     <entries,dim,quant>\n"
 	  "         -s[ubvector]  <start[,num]>\n"
 	  "         -e[rror]      <desired_error>\n"
-	  "         -i[terations] <maxiterations>\n\n"
+	  "         -i[terations] <maxiterations>\n"
+	  "         -d[istance]   desired minimum cell radius from midpoint\n\n"
 	  "examples:\n"
 	  "   train a new codebook to 1%% tolerance on datafile 'foo':\n"
 	  "      xxxvqtrain book -p 256,6,8 -e .01 foo\n"
@@ -75,7 +76,7 @@ int main(int argc,char *argv[]){
 
   int entries=-1,dim=-1;
   int start=0,num=-1;
-  double desired=.05;
+  double desired=.05,mindist=0.;
   int iter=1000;
 
   FILE *out=NULL;
@@ -128,7 +129,7 @@ int main(int argc,char *argv[]){
 	exit(1);
       }
       
-      vqgen_init(&v,dim,vqext_aux,entries,vqext_mindist,
+      vqgen_init(&v,dim,vqext_aux,entries,mindist,
 		 vqext_metric,vqext_weight);
       init=1;
       
@@ -204,6 +205,10 @@ int main(int argc,char *argv[]){
 	if(sscanf(argv[1],"%lf",&desired)!=1)
 	  goto syner;
 	break;
+      case 'd':
+	if(sscanf(argv[1],"%lf",&mindist)!=1)
+	  goto syner;
+	break;
       case 'i':
 	if(sscanf(argv[1],"%d",&iter)!=1)
 	  goto syner;
@@ -224,7 +229,7 @@ int main(int argc,char *argv[]){
 	  fprintf(stderr,"-p required when training a new set\n");
 	  exit(1);
 	}
-	vqgen_init(&v,dim,vqext_aux,entries,vqext_mindist,
+	vqgen_init(&v,dim,vqext_aux,entries,mindist,
 		   vqext_metric,vqext_weight);
 	init=1;
       }

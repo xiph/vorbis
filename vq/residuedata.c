@@ -12,13 +12,14 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.1 2000/02/16 16:18:38 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.2 2000/02/21 01:12:57 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 #include "vqgen.h"
 #include "bookutil.h"
 #include "vqext.h"
@@ -27,7 +28,7 @@ char *vqext_booktype="RESdata";
 quant_meta q={0,0,0,0};          /* set sequence data */
 int vqext_aux=0;
 
-double vqext_mindist=.7; /* minimum desired cell radius */
+static double *quant_save=NULL;
 
 /* LSP training metric.  We weight error proportional to distance
    *between* LSP vector values.  The idea of this metric is not to set
@@ -40,19 +41,10 @@ double *vqext_weight(vqgen *v,double *p){
 }
 
 /* quantize aligned on unit boundaries */
-void vqext_quantize(vqgen *v,quant_meta *q){
-  int i,j,k;
-  double min,max,delta=1.;
-  int vals=(1<<q->quant);
 
-  min=max=_now(v,0)[0];
-  for(i=0;i<v->entries;i++)
-    for(j=0;j<v->elements;j++){
-      if(max<_now(v,i)[j])max=_now(v,i)[j];
-      if(min>_now(v,i)[j])min=_now(v,i)[j];
-    }
-
-  /* roll the delta */
+static double _delta(double min,double max,int bits){
+  double delta=1.;
+  int vals=(1<<bits);
   while(1){
     double qmax=rint(max/delta);
     double qmin=rint(min/delta);
@@ -64,18 +56,52 @@ void vqext_quantize(vqgen *v,quant_meta *q){
       delta*=.5;
     }else{
       min=qmin*delta;
-      q->min=float24_pack(qmin*delta);
-      q->delta=float24_pack(delta);
       break;
     }
   }
+  return(delta);
+}
 
-  for(j=0;j<v->entries;j++){
-    for(k=0;k<v->elements;k++){
+void vqext_quantize(vqgen *v,quant_meta *q){
+  int i,j,k;
+  long dim=v->elements;
+  long n=v->entries;
+  double min,vals,delta=1.;
+  double *test=alloca(sizeof(double)*dim);
+  int moved=0;
+
+  min=-((1<<q->quant)/2-1);
+  vals=1<<q->quant;
+  q->min=float24_pack(rint(min/delta)*delta);
+  q->delta=float24_pack(delta);
+  
+  /* allow movement only to unoccupied coordinates on the coarse grid */
+  for(j=0;j<n;j++){
+    for(k=0;k<dim;k++){
       double val=_now(v,j)[k];
-      double now=rint((val-min)/delta);
-      _now(v,j)[k]=now;
+      val=rint((val-min)/delta);
+      if(val<0)val=0;
+      if(val>=vals)val=vals-1;
+      test[k]=val;
     }
+    /* allow move only if unoccupied */
+    if(quant_save){
+      for(k=0;k<n;k++)
+	if(j!=k && memcmp(test,quant_save+dim*k,dim*sizeof(double))==0)
+	  break;
+      if(k==n){
+	if(memcmp(test,quant_save+dim*j,dim*sizeof(double)))	
+	  moved++;
+	memcpy(quant_save+dim*j,test,sizeof(double)*dim);
+      }
+    }else{
+      memcpy(_now(v,j),test,sizeof(double)*dim);
+    }
+  }
+
+  if(quant_save){
+    memcpy(_now(v,0),quant_save,sizeof(double)*dim*n);
+    fprintf(stderr,"cells shifted this iteration: %d\n",moved);
   }
 }
 
@@ -96,5 +122,59 @@ void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
   vqgen_addpoint(v,b+start,NULL);
 }
 
+/* need to reseed because of the coarse quantization we tend to use on
+   residuals (which causes lots & lots of dupes) */
 void vqext_preprocess(vqgen *v){
+  long i,j,k,l,min,max;
+  double *test=alloca(sizeof(double)*v->elements);
+
+  vqext_quantize(v,&q);
+  vqgen_unquantize(v,&q);
+
+  /* if there are any dupes, reseed */
+  for(k=0;k<v->entries;k++){
+    for(l=0;l<k;l++){
+      if(memcmp(_now(v,k),_now(v,l),sizeof(double)*v->elements)==0)
+	break;
+    }
+    if(l<k)break;
+  }
+
+  if(k<v->entries){
+    fprintf(stderr,"reseeding with quantization....\n");
+    min=-((1<<q.quant)/2-1);
+    max=min+(1<<q.quant)-1;
+
+    /* seed the inputs to input points, but points on unit boundaries,
+     ignoring quantbits for now, making sure each seed is unique */
+    
+    for(i=0,j=0;i<v->points && j<v->entries;i++){
+      for(k=0;k<v->elements;k++){
+	test[k]=rint(_point(v,i)[k]);
+	if(test[k]<min)test[k]=min;
+	if(test[k]>max)test[k]=max;
+      }
+      
+      for(l=0;l<j;l++){
+	for(k=0;k<v->elements;k++)
+	  if(test[k]!=_now(v,l)[k])
+	    break;
+	if(k==v->elements)break;
+      }
+      if(l==j){
+	memcpy(_now(v,j),test,v->elements*sizeof(double));
+	j++;
+      }
+    }
+    
+    if(j<v->elements){
+      fprintf(stderr,"Not enough unique entries after prequantization\n");
+      exit(1);
+    }
+  }  
+  vqext_quantize(v,&q);
+  quant_save=malloc(sizeof(double)*v->elements*v->entries);
+  memcpy(quant_save,_now(v,0),sizeof(double)*v->elements*v->entries);
+  vqgen_unquantize(v,&q);
+
 }

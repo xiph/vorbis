@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: prototypes for extermal metrics specific to data type
- last mod: $Id: vqext.h,v 1.7 2000/02/16 16:18:39 xiphmont Exp $
+ last mod: $Id: vqext.h,v 1.8 2000/02/21 01:12:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,7 +24,6 @@
 extern char *vqext_booktype;
 extern quant_meta q;
 extern int vqext_aux;
-extern double vqext_mindist;
 
 extern double vqext_metric(vqgen *v,double *e, double *p);
 extern double *vqext_weight(vqgen *v,double *p);

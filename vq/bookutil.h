@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.h,v 1.3 2000/01/10 10:42:02 xiphmont Exp $
+ last mod: $Id: bookutil.h,v 1.4 2000/02/21 01:12:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,6 +39,7 @@ extern int       codebook_entry(codebook *b,double *val);
 extern void spinnit(char *s,int n);
 extern long float24_pack(double val);
 extern double float24_unpack(long val);
+extern void build_tree_from_lengths(int vals, long *hist, long *lengths);
 
 #endif
 

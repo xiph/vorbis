@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.10 2000/02/16 16:18:33 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.11 2000/02/21 01:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -298,11 +298,16 @@ codebook *codebook_load(char *filename){
   return(b);
 }
 
+
+/* the new version!  we have ptr0[0] distinct trees in the auxiliary
+   encoding structure.  Find the best match in each one, choosing the
+   best global match */
+
 int codebook_entry(codebook *b,double *val){
   const static_codebook *c=b->c;
   encode_aux *t=c->encode_tree;
-  int ptr=0,k;
- 
+  int trees=t->ptr0[0];
+
   /*{
     brute force 
     double this,best=_dist(c->dim,val,b->valuelist);
@@ -317,28 +322,46 @@ int codebook_entry(codebook *b,double *val){
   }*/
   
   double *n=alloca(c->dim*sizeof(double));
-  
-  while(1){
-    double C=0.;
-    double *p=b->valuelist+t->p[ptr];
-    double *q=b->valuelist+t->q[ptr];
-    
-    for(k=0;k<c->dim;k++){
-      n[k]=p[k]-q[k];
-      C-=(p[k]+q[k])*n[k];
+  double bestmetric;
+  double best=-1;
+  while(trees>0){
+    int ptr=t->ptr0[--trees],k;
+
+    while(1){
+      double C=0.;
+      double *p=b->valuelist+t->p[ptr];
+      double *q=b->valuelist+t->q[ptr];
+      
+      for(k=0;k<c->dim;k++){
+	n[k]=p[k]-q[k];
+	C-=(p[k]+q[k])*n[k];
+      }
+      C/=2.;
+      
+      for(k=0;k<c->dim;k++)
+	C+=n[k]*val[k];
+      
+      if(C>0.) /* in A */
+	ptr= -t->ptr0[ptr];
+      else     /* in B */
+	ptr= -t->ptr1[ptr];
+      if(ptr<=0)break;
     }
-    C/=2.;
-    
-    for(k=0;k<c->dim;k++)
-      C+=n[k]*val[k];
-    
-    if(C>0.) /* in A */
-      ptr= -t->ptr0[ptr];
-    else     /* in B */
-      ptr= -t->ptr1[ptr];
-    if(ptr<=0)break;
+
+    {
+      double dist=0.;
+      for(k=0;k<c->dim;k++){
+	double one=val[k]-(b->valuelist-ptr*c->dim)[k];
+	dist+=one*one;
+      }
+      if(best==-1 || dist<bestmetric){
+	best=-ptr;
+	bestmetric=dist;
+      }
+    }
   }
-  return(-ptr);
+
+  return(best);
 }
 
 /* 24 bit float (not IEEE; nonnormalized mantissa +
@@ -399,3 +422,51 @@ void spinnit(char *s,int n){
   }
 }
 
+void build_tree_from_lengths(int vals, long *hist, long *lengths){
+  int i,j;
+  long *membership=malloc(vals*sizeof(long));
+      
+  for(i=0;i<vals;i++)membership[i]=i;
+
+  /* find codeword lengths */
+  /* much more elegant means exist.  Brute force n^2, minimum thought */
+  for(i=vals;i>1;i--){
+    int first=-1,second=-1;
+    long least=-1;
+	
+    spinnit("building... ",i);
+    
+    /* find the two nodes to join */
+    for(j=0;j<vals;j++)
+      if(least==-1 || hist[j]<least){
+	least=hist[j];
+	first=membership[j];
+      }
+    least=-1;
+    for(j=0;j<vals;j++)
+      if((least==-1 || hist[j]<least) && membership[j]!=first){
+	least=hist[j];
+	second=membership[j];
+      }
+    if(first==-1 || second==-1){
+      fprintf(stderr,"huffman fault; no free branch\n");
+      exit(1);
+    }
+    
+    /* join them */
+    least=hist[first]+hist[second];
+    for(j=0;j<vals;j++)
+      if(membership[j]==first || membership[j]==second){
+	membership[j]=first;
+	hist[j]=least;
+	lengths[j]++;
+      }
+  }
+  for(i=0;i<vals-1;i++)
+    if(membership[i]!=membership[i+1]){
+      fprintf(stderr,"huffman fault; failed to build single tree\n");
+      exit(1);
+    }
+  
+  free(membership);
+}
