@@ -62,8 +62,6 @@ echo "Generating configuration files for $package, please wait...."
 
 echo "  aclocal $ACLOCAL_FLAGS"
 aclocal $ACLOCAL_FLAGS || exit 1
-echo "  autoheader"
-autoheader || exit 1
 echo "  $LIBTOOLIZE --automake"
 $LIBTOOLIZE --automake || exit 1
 echo "  automake --add-missing $AUTOMAKE_FLAGS"
