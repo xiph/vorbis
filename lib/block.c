@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.54 2001/12/21 14:52:35 segher Exp $
+ last mod: $Id: block.c,v 1.55 2001/12/23 11:53:52 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -502,7 +502,6 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     if(bp==-1)return(0); /* not enough data currently to search for a
                             full long block */
     v->nW=bp;
-    /*v->nW=0;*/
 
   }else
     v->nW=0;
@@ -551,35 +550,31 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   }
  
   vb->vd=v;
-  vb->sequence=v->sequence;
+  vb->sequence=v->sequence++;
   vb->granulepos=v->granulepos;
   vb->pcmend=ci->blocksizes[v->W];
-
   
   /* copy the vectors; this uses the local storage in vb */
-  {
-    vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
 
-    /* this tracks 'strongest peak' for later psychoacoustics */
-    /* moved to the global psy state; clean this mess up */
-    if(vbi->ampmax>g->ampmax)g->ampmax=vbi->ampmax;
-    g->ampmax=_vp_ampmax_decay(g->ampmax,v);
-    vbi->ampmax=g->ampmax;
-
-    vb->pcm=_vorbis_block_alloc(vb,sizeof(*vb->pcm)*vi->channels);
-    vbi->pcmdelay=_vorbis_block_alloc(vb,sizeof(*vbi->pcmdelay)*vi->channels);
-    for(i=0;i<vi->channels;i++){
-      vbi->pcmdelay[i]=
-	_vorbis_block_alloc(vb,(vb->pcmend+beginW)*sizeof(*vbi->pcmdelay[i]));
-      memcpy(vbi->pcmdelay[i],v->pcm[i],(vb->pcmend+beginW)*sizeof(*vbi->pcmdelay[i]));
-      vb->pcm[i]=vbi->pcmdelay[i]+beginW;
-      
-      /* before we added the delay 
-      vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(*vb->pcm[i]));
-      memcpy(vb->pcm[i],v->pcm[i]+beginW,ci->blocksizes[v->W]*sizeof(*vb->pcm[i]));
-      */
-
-    }
+  /* this tracks 'strongest peak' for later psychoacoustics */
+  /* moved to the global psy state; clean this mess up */
+  if(vbi->ampmax>g->ampmax)g->ampmax=vbi->ampmax;
+  g->ampmax=_vp_ampmax_decay(g->ampmax,v);
+  vbi->ampmax=g->ampmax;
+  
+  vb->pcm=_vorbis_block_alloc(vb,sizeof(*vb->pcm)*vi->channels);
+  vbi->pcmdelay=_vorbis_block_alloc(vb,sizeof(*vbi->pcmdelay)*vi->channels);
+  for(i=0;i<vi->channels;i++){
+    vbi->pcmdelay[i]=
+      _vorbis_block_alloc(vb,(vb->pcmend+beginW)*sizeof(*vbi->pcmdelay[i]));
+    memcpy(vbi->pcmdelay[i],v->pcm[i],(vb->pcmend+beginW)*sizeof(*vbi->pcmdelay[i]));
+    vb->pcm[i]=vbi->pcmdelay[i]+beginW;
+    
+    /* before we added the delay 
+       vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(*vb->pcm[i]));
+       memcpy(vb->pcm[i],v->pcm[i]+beginW,ci->blocksizes[v->W]*sizeof(*vb->pcm[i]));
+    */
+    
   }
   
   /* handle eof detection: eof==0 means that we've not yet received EOF
@@ -612,8 +607,6 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       v->lW=v->W;
       v->W=v->nW;
       v->centerW=new_centerNext;
-      
-      v->sequence++;
       
       if(v->eofflag){
 	v->eofflag-=movementW;

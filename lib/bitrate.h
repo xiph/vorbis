@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.h,v 1.4 2001/12/23 10:12:03 xiphmont Exp $
+ last mod: $Id: bitrate.h,v 1.5 2001/12/23 11:53:52 xiphmont Exp $
 
  ********************************************************************/
 
@@ -79,8 +79,6 @@ typedef struct bitrate_manager_info{
   double avgfloat_minimum; /* set by mode */
   double avgfloat_downslew_max;
   double avgfloat_upslew_max;
-  double avgfloat_downhyst;
-  double avgfloat_uphyst;
   double avgfloat_noise_lowtrigger;
   double avgfloat_noise_hightrigger;
   double avgfloat_noise_minval;
