@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.73 2003/08/18 05:34:01 xiphmont Exp $
+ last mod: $Id: block.c,v 1.74 2003/08/27 05:29:24 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -957,7 +957,12 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
 }
 
 float *vorbis_window(vorbis_dsp_state *v,int W){
+  vorbis_info *vi=v->vi;
+  codec_setup_info *ci=vi->codec_setup;
+  int hs=ci->halfrate_flag; 
   private_state *b=v->backend_state;
-  return _vorbis_window_get(b->window[W]);
+
+  if(b->window[W]-1<0)return NULL;
+  return _vorbis_window_get(b->window[W]-hs);
 }
 	

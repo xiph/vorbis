@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.70 2003/08/18 05:34:01 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.71 2003/08/27 05:29:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1691,6 +1691,8 @@ long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int length,
 }
 
 extern float *vorbis_window(vorbis_dsp_state *v,int W);
+extern void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,
+			     ogg_int64_t off);
 
 static void _ov_splice(float **pcm,float **lappcm,
 		       int n1, int n2,
@@ -1709,6 +1711,7 @@ static void _ov_splice(float **pcm,float **lappcm,
   for(j=0;j<ch1 && j<ch2;j++){
     float *s=lappcm[j];
     float *d=pcm[j];
+
     for(i=0;i<n;i++){
       float wd=w[i]*w[i];
       float ws=1.-wd;
@@ -1723,6 +1726,7 @@ static void _ov_splice(float **pcm,float **lappcm,
       d[i]=d[i]*wd;
     }
   }
+
 }
 		
 /* make sure vf is INITSET */
@@ -1784,11 +1788,16 @@ static void _ov_getlap(OggVorbis_File *vf,vorbis_info *vi,vorbis_dsp_state *vd,
        postextrapolation buffering, or the second half of the MDCT
        from the last packet */
     int samples=vorbis_synthesis_lapout(&vf->vd,&pcm);
-    if(samples>lapsize-lapcount)samples=lapsize-lapcount;
-    for(i=0;i<vi->channels;i++)
-      memcpy(lappcm[i]+lapcount,pcm[i],sizeof(**pcm)*samples);
-    lapcount+=samples;
-
+    if(samples==0){
+      for(i=0;i<vi->channels;i++)
+	memset(lappcm[i]+lapcount,0,sizeof(**pcm)*lapsize-lapcount);
+      lapcount=lapsize;
+    }else{
+      if(samples>lapsize-lapcount)samples=lapsize-lapcount;
+      for(i=0;i<vi->channels;i++)
+	memcpy(lappcm[i]+lapcount,pcm[i],sizeof(**pcm)*samples);
+      lapcount+=samples;
+    }
   }
 }
 
@@ -1799,7 +1808,7 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
   float **lappcm;
   float **pcm;
   float *w1,*w2;
-  int n1,n2,i,ret;
+  int n1,n2,i,ret,hs1,hs2;
 
   if(vf1==vf2)return(0); /* degenerate case */
   if(vf1->ready_state<OPENED)return(OV_EINVAL);
@@ -1816,10 +1825,12 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
 
   vi1=ov_info(vf1,-1);
   vi2=ov_info(vf2,-1);
-  
+  hs1=ov_halfrate_p(vf1);
+  hs2=ov_halfrate_p(vf2);
+
   lappcm=alloca(sizeof(*lappcm)*vi1->channels);
-  n1=vorbis_info_blocksize(vi1,0)/2;
-  n2=vorbis_info_blocksize(vi2,0)/2;
+  n1=vorbis_info_blocksize(vi1,0)>>(1+hs1);
+  n2=vorbis_info_blocksize(vi2,0)>>(1+hs2);
   w1=vorbis_window(&vf1->vd,0);
   w2=vorbis_window(&vf2->vd,0);
 
@@ -1832,6 +1843,8 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
      buffer of vf2 */
   /* consolidate and expose the buffer. */
   vorbis_synthesis_lapout(&vf2->vd,&pcm);
+  _analysis_output_always("pcmL",0,pcm[0],n1*2,0,0,0);
+  _analysis_output_always("pcmR",0,pcm[1],n1*2,0,0,0);
 
   /* splice */
   _ov_splice(pcm,lappcm,n1,n2,vi1->channels,vi2->channels,w1,w2);
@@ -1846,16 +1859,17 @@ static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
   float **lappcm;
   float **pcm;
   float *w1,*w2;
-  int n1,n2,ch1,ch2;
+  int n1,n2,ch1,ch2,hs;
   int i,ret;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
   ret=_ov_initset(vf);
   if(ret)return(ret);
   vi=ov_info(vf,-1);
+  hs=ov_halfrate_p(vf);
   
   ch1=vi->channels;
-  n1=vorbis_info_blocksize(vi,0)/2;
+  n1=vorbis_info_blocksize(vi,0)>>(1+hs);
   w1=vorbis_window(&vf->vd,0);  /* window arrays from libvorbis are
 				   persistent; even if the decode state
 				   from this link gets dumped, this
@@ -1875,7 +1889,7 @@ static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
  /* Guard against cross-link changes; they're perfectly legal */
   vi=ov_info(vf,-1);
   ch2=vi->channels;
-  n2=vorbis_info_blocksize(vi,0)/2;
+  n2=vorbis_info_blocksize(vi,0)>>(1+hs);
   w2=vorbis_window(&vf->vd,0);
 
   /* consolidate and expose the buffer. */
@@ -1906,16 +1920,17 @@ static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
   float **lappcm;
   float **pcm;
   float *w1,*w2;
-  int n1,n2,ch1,ch2;
+  int n1,n2,ch1,ch2,hs;
   int i,ret;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
   ret=_ov_initset(vf);
   if(ret)return(ret);
   vi=ov_info(vf,-1);
-  
+  hs=ov_halfrate_p(vf);
+
   ch1=vi->channels;
-  n1=vorbis_info_blocksize(vi,0)/2;
+  n1=vorbis_info_blocksize(vi,0)>>(1+hs);
   w1=vorbis_window(&vf->vd,0);  /* window arrays from libvorbis are
 				   persistent; even if the decode state
 				   from this link gets dumped, this
@@ -1935,7 +1950,7 @@ static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
  /* Guard against cross-link changes; they're perfectly legal */
   vi=ov_info(vf,-1);
   ch2=vi->channels;
-  n2=vorbis_info_blocksize(vi,0)/2;
+  n2=vorbis_info_blocksize(vi,0)>>(1+hs);
   w2=vorbis_window(&vf->vd,0);
 
   /* consolidate and expose the buffer. */
