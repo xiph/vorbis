@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.16 2000/07/07 01:20:46 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.17 2000/07/07 01:37:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,6 +26,7 @@
 #include "sharedbook.h"
 #include "bookinternal.h"
 #include "misc.h"
+#include "os.h"
 
 /* packs the given codebook into the bitstream **************************/
 
