@@ -291,13 +291,11 @@ sub graphhelper{
 	       "#9f0000","#007f00","#00009f","#8f8f00","#8f008f","#008f8f","#000000");
     
     my$w=$graph->{"canvas"};
+    my$rescale=0;
 
     Status("Plotting $fileno");
     $w->delete('foo');
-    $w->delete('ylabel');
-    $w->delete('xlabel');
     $w->delete('legend');
-    $w->delete('axes');
     $w->delete('lines');
 
     # count range 
@@ -310,10 +308,15 @@ sub graphhelper{
 		    $graph->{"minx"}=$1;
 		    $graph->{"maxy"}=$2;
 		    $graph->{"miny"}=$2;
+		    $rescale=1;
 		}
 		
 		for(my$j=0;$j<=$#{$data[$i]};$j++){
 		    $data[$i]->[$j]=~m/(-?\d*)[ ,]+(-?\d*)/;
+		    $rescale=1 if($1>$graph->{"maxx"});
+		    $rescale=1 if($1<$graph->{"minx"});
+		    $rescale=1 if($2>$graph->{"maxy"});
+		    $rescale=1 if($2<$graph->{"miny"});
 		    $graph->{"maxx"}=$1 if($1>$graph->{"maxx"});
 		    $graph->{"minx"}=$1 if($1<$graph->{"minx"});
 		    $graph->{"maxy"}=$2 if($2>$graph->{"maxy"});
@@ -330,104 +333,116 @@ sub graphhelper{
     if(defined($graph->{"maxx"})){
 	# draw axes, labels
 	# look for appropriate axis scales
-	my$yscale=1.;
-	my$xscale=1.;
-	while(($graph->{"maxx"}-$graph->{"minx"})*$xscale>15){$xscale*=.1;}
-	while(($graph->{"maxy"}-$graph->{"miny"})*$yscale>15){$yscale*=.1;}
-    
-	while(($graph->{"maxx"}-$graph->{"minx"})*$xscale<3){$xscale*=10.;}
-	while(($graph->{"maxy"}-$graph->{"miny"})*$yscale<3){$yscale*=10.;}
 
-	# how tall are the x axis labels?
-	$w->createText(-1,-1,-anchor=>'se',-tags=>['foo'],-text=>"0123456789.");
-	my($x1,$y1,$x2,$y2)=$w->bbox('foo');
-	$w->delete('foo');
-	my$maxlabelheight=$y2-$y1;
-	my$useabley=$height-$maxlabelheight-3;
-	my$pixelpery=$useabley/($graph->{"maxy"}-$graph->{"miny"});
-	
-	# place y axis labels at proper spacing/height
-	my$lasty=-$maxlabelheight/2;
-	my$topyval=int($graph->{"maxy"}*$yscale+1.)/$yscale;
+	if($rescale){
 
-	for(my$i=0;;$i++){
-	    my$yval= $topyval-$i/$yscale;
-	    my$y= ($graph->{"maxy"}-$yval)*$pixelpery;
-	    last if($y>$useabley);
-	    if($y-$maxlabelheight>=$lasty){
-		$w->createText(0,$y,-anchor=>'e',-tags=>['ylabel'],-text=>"$yval");
-		$lasty=$y;
-	    }
-	}
-
-	# get the max ylabel width and place them at proper x
-	($x1,$y1,$x2,$y2)=$w->bbox('ylabel');
-	my$maxylabelwidth=$x2-$x1;
-	$w->move('ylabel',$maxylabelwidth,0);
-	
-	my$beginx=$maxylabelwidth+3;
-	my$useablex=$width-$beginx;
-
-	# draw basic axes
-	$w->createLine($beginx,0,$beginx,$useabley,$width,$useabley,
-		       -tags=>['axes'],-width=>2);
-	# draw y tix
-	$lasty=-$maxlabelheight/2;
-	for(my$i=0;;$i++){
-	    my$yval= $topyval-$i/$yscale;
-	    my$y= ($graph->{"maxy"}-$yval)*$pixelpery;
-	    last if($y>$useabley);
-	    if($yval==0){
-		$w->createLine($beginx,$y,$width,$y,
-			       -tags=>['axes'],-width=>1);
-	    }else{
+	    $w->delete('ylabel');
+	    $w->delete('xlabel');
+	    $w->delete('axes');
+	    
+	    my$yscale=1.;
+	    my$xscale=1.;
+	    while(($graph->{"maxx"}-$graph->{"minx"})*$xscale>15){$xscale*=.1;}
+	    while(($graph->{"maxy"}-$graph->{"miny"})*$yscale>15){$yscale*=.1;}
+	    
+	    while(($graph->{"maxx"}-$graph->{"minx"})*$xscale<3){$xscale*=10.;}
+	    while(($graph->{"maxy"}-$graph->{"miny"})*$yscale<3){$yscale*=10.;}
+	    
+	    # how tall are the x axis labels?
+	    $w->createText(-1,-1,-anchor=>'se',-tags=>['foo'],-text=>"0123456789.");
+	    my($x1,$y1,$x2,$y2)=$w->bbox('foo');
+	    $w->delete('foo');
+	    my$maxlabelheight=$y2-$y1;
+	    my$useabley=$height-$maxlabelheight-3;
+	    my$pixelpery=$useabley/($graph->{"maxy"}-$graph->{"miny"});
+	    
+	    # place y axis labels at proper spacing/height
+	    my$lasty=-$maxlabelheight/2;
+	    my$topyval=int($graph->{"maxy"}*$yscale+1.)/$yscale;
+	    
+	    for(my$i=0;;$i++){
+		my$yval= $topyval-$i/$yscale;
+		my$y= ($graph->{"maxy"}-$yval)*$pixelpery;
+		last if($y>$useabley);
 		if($y-$maxlabelheight>=$lasty){
-		    $w->createLine($beginx,$y,$width,$y,
-				   -tags=>['axes'],-width=>1,
-				   -stipple=>'gray50');
-		    
+		    $w->createText(0,$y,-anchor=>'e',-tags=>['ylabel'],-text=>"$yval");
 		    $lasty=$y;
 		}
 	    }
-	}
-	
-	# place x axis labels at proper spacing
-	my$topxval=int($graph->{"maxx"}*$xscale+1.)/$xscale;
-	my$pixelperx=$useablex/($graph->{"maxx"}-$graph->{"minx"});
-
-	for(my$i=0;;$i++){
-	    my$xval= $topxval-$i/$xscale;
-	    my$x= $width-($graph->{"maxx"}-$xval)*$pixelperx;
-
-	    last if($x<$beginx);
-	    # bounding boxen are hard.  place temp labels.
-	    $w->createText(-1,-1,-anchor=>'e',-tags=>['foo'],-text=>"$xval");
-	}
-
-        ($x1,$y1,$x2,$y2)=$w->bbox('foo');
-	my$maxxlabelwidth=$x2-$x1;
-	$w->delete('foo');
-	my$lastx=$width;
-	
-	for(my$i=0;;$i++){
-	    my$xval= $topxval-$i/$xscale;
-	    my$x= $width-($graph->{"maxx"}-$xval)*$pixelperx;
 	    
-	    last if($x-$maxxlabelwidth/2<0);
-	    if($xval==0 && $x<$width){
-		$w->createLine($x,0,$x,$useabley,-tags=>['axes'],-width=>1);
+	    # get the max ylabel width and place them at proper x
+	    ($x1,$y1,$x2,$y2)=$w->bbox('ylabel');
+	    my$maxylabelwidth=$x2-$x1;
+	    $w->move('ylabel',$maxylabelwidth,0);
+	    
+	    my$beginx=$maxylabelwidth+3;
+	    my$useablex=$width-$beginx;
+	    
+	    # draw basic axes
+	    $w->createLine($beginx,0,$beginx,$useabley,$width,$useabley,
+			   -tags=>['axes'],-width=>2);
+	    # draw y tix
+	    $lasty=-$maxlabelheight/2;
+	    for(my$i=0;;$i++){
+		my$yval= $topyval-$i/$yscale;
+		my$y= ($graph->{"maxy"}-$yval)*$pixelpery;
+		last if($y>$useabley);
+		if($yval==0){
+		    $w->createLine($beginx,$y,$width,$y,
+				   -tags=>['axes'],-width=>1);
+		}else{
+		    if($y-$maxlabelheight>=$lasty){
+			$w->createLine($beginx,$y,$width,$y,
+				       -tags=>['axes'],-width=>1,
+				       -stipple=>'gray50');
+			
+			$lasty=$y;
+		    }
+		}
 	    }
 	    
-	    if($x+$maxxlabelwidth<=$lastx){
-		$w->createText($x,$height-1,-anchor=>'s',-tags=>['xlabel'],-text=>"$xval");
-		$w->createLine($x,0,$x,$useabley,-tags=>['axes'],-width=>1,-stipple=>"gray50");
-		$lastx=$x;
+	    # place x axis labels at proper spacing
+	    my$topxval=int($graph->{"maxx"}*$xscale+1.)/$xscale;
+	    my$pixelperx=$useablex/($graph->{"maxx"}-$graph->{"minx"});
+	    
+	    for(my$i=0;;$i++){
+		my$xval= $topxval-$i/$xscale;
+		my$x= $width-($graph->{"maxx"}-$xval)*$pixelperx;
+		
+		last if($x<$beginx);
+		# bounding boxen are hard.  place temp labels.
+		$w->createText(-1,-1,-anchor=>'e',-tags=>['foo'],-text=>"$xval");
 	    }
+	    
+	    ($x1,$y1,$x2,$y2)=$w->bbox('foo');
+	    my$maxxlabelwidth=$x2-$x1;
+	    $w->delete('foo');
+	    my$lastx=$width;
+	    
+	    for(my$i=0;;$i++){
+		my$xval= $topxval-$i/$xscale;
+		my$x= $width-($graph->{"maxx"}-$xval)*$pixelperx;
+		
+		last if($x-$maxxlabelwidth/2<0);
+		if($xval==0 && $x<$width){
+		    $w->createLine($x,0,$x,$useabley,-tags=>['axes'],-width=>1);
+		}
+	    
+		if($x+$maxxlabelwidth<=$lastx){
+		    $w->createText($x,$height-1,-anchor=>'s',-tags=>['xlabel'],-text=>"$xval");
+		    $w->createLine($x,0,$x,$useabley,-tags=>['axes'],-width=>1,-stipple=>"gray50");
+		    $lastx=$x;
+		}
+	    }
+	    $graph->{"labelheight"}=$maxlabelheight;
+	    $graph->{"xo"}=$beginx;
+	    $graph->{"ppx"}=$pixelperx;
+	    $graph->{"ppy"}=$pixelpery;
 	}
 
 	# plot the files
 	$count=0;
-	my$legendy=$maxlabelheight/2;
+	my$legendy=$graph->{"labelheight"}/2;
 	for(my$i=0;$i<$panel_count;$i++){
 	    if($graph->{"vars"}->[$i]){
 		$count++; # count here for legend color selection stability
@@ -436,7 +451,7 @@ sub graphhelper{
 		    my$color=$colors[($count-1)%($#colors+1)];
 		    $w->createText($width,$legendy,-anchor=>'e',-tags=>['legend'],
 				   -fill=>$color,-text=>$panel_keys[$i]);
-		    $legendy+=$maxlabelheight;
+		    $legendy+=$graph->{"labelheight"};
 
 		    # plot the lines
 		    my$d=$data[$i];
@@ -445,8 +460,8 @@ sub graphhelper{
 		    my$lasty=undef;
 		    foreach $pair (@{$data[$i]}){
 			if($pair=~m/(-?\d*)[ ,]+(-?\d*)/){
-			    my$x=($1-$graph->{"minx"})*$pixelperx+$beginx;
-			    my$y=(-$2+$graph->{"maxy"})*$pixelpery;
+			    my$x=($1-$graph->{"minx"})*$graph->{"ppx"}+$graph->{"xo"};
+			    my$y=(-$2+$graph->{"maxy"})*$graph->{"ppy"};
 			    
 			    if(defined($lastx)){				
 				$w->createLine($x,$y,$lastx,$lasty,-fill=>$color,
