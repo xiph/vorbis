@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.76 2002/07/30 10:43:07 msmith Exp $
+ last mod: $Id: psy.c,v 1.77 2002/10/11 07:44:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -952,9 +952,7 @@ float **_vp_quantize_couple_memo(vorbis_block *vb,
 static int apsort(const void *a, const void *b){
   float f1=fabs(**(float**)a);
   float f2=fabs(**(float**)b);
-  if(f1>f2)return -1;
-  else if(f1==f2)return 0;
-  else return 1;
+  return (f1<f2)-(f1>f2);
 }
 
 int **_vp_quantize_couple_sort(vorbis_block *vb,

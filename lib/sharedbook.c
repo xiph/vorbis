@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.28 2002/06/28 22:19:37 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.29 2002/10/11 07:44:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -310,7 +310,8 @@ static ogg_uint32_t bitreverse(ogg_uint32_t x){
 }
 
 static int sort32a(const void *a,const void *b){
-  return ( (**(ogg_uint32_t **)a>**(ogg_uint32_t **)b)<<1)-1;
+  return ( **(ogg_uint32_t **)a>**(ogg_uint32_t **)b)- 
+    ( **(ogg_uint32_t **)a<**(ogg_uint32_t **)b);
 }
 
 /* decode codebook arrangement is more heavily optimized than encode */
