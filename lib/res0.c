@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.15 2000/06/15 09:18:34 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.16 2000/08/14 21:53:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -96,7 +96,11 @@ vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
   info->partitions=_oggpack_read(opb,6)+1;
   info->groupbook=_oggpack_read(opb,8);
   for(j=0;j<info->partitions;j++){
-    acc+=info->secondstages[j]=_oggpack_read(opb,4);
+    int cascade=info->secondstages[j]=_oggpack_read(opb,4);
+    if(cascade>1)goto errout; /* temporary!  when cascading gets
+                                 reworked and actually used, we don't
+                                 want old code to DTWT */
+    acc+=cascade;
   }
   for(j=0;j<acc;j++)
     info->booklist[j]=_oggpack_read(opb,8);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.16 2000/07/12 09:36:17 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.17 2000/08/14 21:53:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -60,7 +60,7 @@
 /* A farily high quality setting mix */
 static vorbis_info_psy _psy_set0={
   1,/*athp*/
-  0,/*decayp*/
+  1,/*decayp*/
   1,/*smoothp*/
   0,8,0.,
 
@@ -113,7 +113,7 @@ static vorbis_info_residue0 _residue_set0={0,128, 64,14,2,
 					   {99,99,99,99,99,99,99,
 					    99,99,99,99,99,99,99}};
 
-static vorbis_info_residue0 _residue_set1={0,1024, 64,14,3,
+static vorbis_info_residue0 _residue_set1={0,1024, 64,28,3,
 					   {0,1,1,1,1,1,1,1,1,1,1,1,1,1,
 					    0,1,1,1,1,1,1,1,1,1,1,1,1,1},
 					   {4,5,6,7,8,9,10,11,12,13,14,15,16,
@@ -132,7 +132,8 @@ static vorbis_info_residue0 _residue_set1={0,1024, 64,14,3,
 					   {6,6,6,6,6,6,6,6,6,6,6,6,6,6,
 					   6,6,6,6,6,6,6,6,6,6,6,6,6},/*6==64*/
 
-					   {99,99,99,99,99,99,99,
+					   {2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+					    99,99,99,99,99,99,99,
 					    99,99,99,99,99,99}};
 
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
