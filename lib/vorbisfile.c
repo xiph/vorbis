@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.43 2001/03/20 08:04:05 giles Exp $
+ last mod: $Id: vorbisfile.c,v 1.44 2001/03/27 07:04:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -915,7 +915,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
   }
   
   /* verify result */
-  if(vf->pcm_offset>=pos || pos>ov_pcm_total(vf,-1)){
+  if(vf->pcm_offset>pos || pos>ov_pcm_total(vf,-1)){
     ret=OV_EFAULT;
     goto seek_error;
   }
