@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.12 1999/12/31 12:35:13 xiphmont Exp $
+ last mod: $Id: info.c,v 1.13 2000/01/04 09:05:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -44,7 +44,6 @@ int vorbis_info_modeset(vorbis_info *vi, int mode){
 
   /* handle the flat settings first */
   memcpy(vi,&(predef_modes[mode]),sizeof(vorbis_info));
-  vi->threshhold_points=threshhold_points;
   vi->user_comments=calloc(1,sizeof(char *));
   vi->vendor=strdup("Xiphophorus libVorbis I 19991230");
 

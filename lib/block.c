@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.19 1999/12/31 12:35:12 xiphmont Exp $
+ last mod: $Id: block.c,v 1.20 2000/01/04 09:04:59 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -33,6 +33,7 @@
 #include "lpc.h"
 #include "bitwise.h"
 #include "psy.h"
+#include "scales.h"
 
 /* pcm accumulator examples (not exhaustive):
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: spectrum envelope and residue code/decode
- last mod: $Id: spectrum.c,v 1.8 1999/12/31 12:35:17 xiphmont Exp $
+ last mod: $Id: spectrum.c,v 1.9 2000/01/04 09:05:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,19 +45,29 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
   int bits=rint(log(n)/log(2));
   int i;
 
-#if 0
+#ifdef TRAIN
   if(amp>0){
-    {
-      FILE *out=fopen("lspdiff.vqd","a");
-      for(i=0;i<m;i++)
-	fprintf(out,"%lf ",lsp[i]);
-      fprintf(out,"\n");
-      fclose(out);
-    }
+    FILE *out;
+    if(vb->W)
+      out=fopen("lspcoeff-long.vqd","a");
+    else
+      out=fopen("lspcoeff-short.vqd","a");
+
+    for(i=0;i<m;i++)
+      fprintf(out,"%lf ",lsp[i]);
+    fprintf(out,"\n");
+    fclose(out);
+
+    if(vb->W)
+      out=fopen("lspamp-long.vqd","a");
+    else
+      out=fopen("lspamp-short.vqd","a");
+    fprintf(out,"%lf\n",amp);
+    fclose(out);
   }
 #endif
  
-  _oggpack_write(&vb->opb,amp*327680,18);
+  _oggpack_write(&vb->opb,amp*32768,18);
   
   for(i=0;i<m;i++){
     int val=rint(lsp[i]/M_PI*n-last);
@@ -83,7 +93,7 @@ int _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp){
   int i;
   double min=M_PI/n/2.;
 
-  *amp=_oggpack_read(&vb->opb,18)/327680.;
+  *amp=_oggpack_read(&vb->opb,18)/32768.;
 
   for(i=0;i<m;i++){
     int val=_oggpack_read(&vb->opb,bits);
@@ -96,6 +106,22 @@ int _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp){
   return(0);
 }
 
+void _vs_residue_train(vorbis_block *vb,double *data,double *curve,int n){
+  int i;
+  FILE *out;
+  if(vb->W)
+    out=fopen("residue-long.vqd","a");
+  else
+    out=fopen("residue-short.vqd","a");
+      
+  for(i=0;i<n;i++){
+    double val=0;
+    if(curve[i]!=0.)val=data[i]/curve[i];
+    fprintf(out,"%lf ",val);
+  }
+  fprintf(out,"\n");
+  fclose(out);
+} 
 
 void _vs_residue_quantize(double *data,double *curve,
 				 vorbis_info *vi,int n){
@@ -105,11 +131,13 @@ void _vs_residue_quantize(double *data,double *curve,
 
   for(i=0;i<n;i++){
     int val=0;
-    if(curve[i]!=0.)val=rint(data[i]/curve[i]);
-    if(val>16)val=16;
-    if(val<-16)val=-16;
 
-    /*if(val==0 || val==2 || val==-2){
+    if(curve[i]!=0.)val=rint(data[i]/curve[i]);
+    if(val>31)val=31;
+    if(val<-31)val=-31;
+
+
+    /*if(val==0){
       if(data[i]<0){
 	val=-1;
       }else{
@@ -118,10 +146,7 @@ void _vs_residue_quantize(double *data,double *curve,
       }*/
     
     data[i]=val;
-    /*if(val<0){
-    }else{
-      data[i]=val+15;
-      }*/
+
   }
 }
 
@@ -133,7 +158,7 @@ int _vs_residue_encode(vorbis_block *vb,double *data){
   int i;
 
   for(i=0;i<n;i++){
-    _oggpack_write(&vb->opb,(int)(data[i]+16),6);
+    _oggpack_write(&vb->opb,(int)(data[i]+31),6);
   }
 
   return(0);
@@ -147,7 +172,7 @@ int _vs_residue_decode(vorbis_block *vb,double *data){
   int i;
 
   for(i=0;i<n;i++){
-    data[i]=_oggpack_read(&vb->opb,6)-16;
+    data[i]=_oggpack_read(&vb->opb,6)-31;
     /*if(data[i]>=0)data[i]+=1;*/
   }
   return(0);

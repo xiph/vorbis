@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM analysis
- last mod: $Id: analysis.c,v 1.18 1999/12/30 07:26:32 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.19 2000/01/04 09:04:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -87,8 +87,6 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 
       memset(floor,0,sizeof(double)*n/2);
       
-      _vp_noise_floor(vp,vb->pcm[i],floor);
-
 #ifdef ANALYSIS
       {
 	FILE *out;
@@ -100,11 +98,6 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 	  fprintf(out,"%g\n",vb->pcm[i][j]);
 	fclose(out);
 
-	sprintf(buffer,"Anoise%d.m",vb->sequence);
-	out=fopen(buffer,"w+");
-	for(j=0;j<n/2;j++)
-	  fprintf(out,"%g\n",floor[j]);
-	fclose(out);
       }
 #endif
 
@@ -139,8 +132,9 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 
       vorbis_lsp_to_lpc(lsp,lpc,vl->m); 
       vorbis_lpc_to_curve(curve,lpc,vb->amp[i],vl);
-      
+
       /* this may do various interesting massaging too...*/
+      if(vb->amp[i])_vs_residue_train(vb,vb->pcm[i],curve,n/2);
       _vs_residue_quantize(vb->pcm[i],curve,vi,n/2);
 
 #ifdef ANALYSIS

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.12 2000/01/01 02:52:59 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.13 2000/01/04 09:05:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,7 @@ Carsten Bormann
 #include "os.h"
 #include "smallft.h"
 #include "lpc.h"
-#include "barkmel.h"
+#include "scales.h"
 
 /* Autocorrelation LPC coeff generation algorithm invented by
    N. Levinson in 1947, modified by J. Durbin in 1959. */
@@ -167,7 +167,7 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
      floor(bark(rate-1)*C)=mapped-1
      floor(bark(rate)*C)=mapped */
 
-  scale=mapped/fBARK(rate);
+  scale=mapped/toBARK(rate);
 
   /* the mapping from a linear scale to a smaller bark scale is
      straightforward.  We do *not* make sure that the linear mapping
@@ -178,9 +178,9 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
   {
     int last=-1;
     for(i=0;i<n;i++){
-      int val=floor( fBARK(((double)rate)/n*i) *scale); /* bark numbers
-                                                          represent
-                                                          band edges */
+      int val=floor( toBARK(((double)rate)/n*i) *scale); /* bark numbers
+							    represent
+							    band edges */
       if(val>=mapped)val=mapped; /* guard against the approximation */
       l->linearmap[i]=val;
       last=val;
@@ -195,7 +195,7 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
      smoothness in the scale; they should agree closely */
 
   for(i=0;i<mapped;i++)
-    l->barknorm[i]=iBARK((i+1)/scale)-iBARK(i/scale);
+    l->barknorm[i]=fromBARK((i+1)/scale)-fromBARK(i/scale);
 
   /* we cheat decoding the LPC spectrum via FFTs */
   

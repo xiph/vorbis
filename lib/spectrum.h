@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: spectrum envelope and residue code/decode
- last mod: $Id: spectrum.h,v 1.3 1999/12/30 07:26:52 xiphmont Exp $
+ last mod: $Id: spectrum.h,v 1.4 2000/01/04 09:05:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,5 +25,8 @@ extern void _vs_residue_quantize(double *data,double *curve,
 				 vorbis_info *vi,int n);
 extern int  _vs_residue_encode(vorbis_block *vb,double *data);
 extern int  _vs_residue_decode(vorbis_block *vb,double *data);
+
+extern void _vs_residue_train(vorbis_block *vb,double *data,double *curve,
+			      int n);
 
 #endif

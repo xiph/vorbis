@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.3 1999/12/31 12:35:10 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.4 2000/01/04 09:04:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -38,8 +38,8 @@ typedef struct {
   int n;
   struct vorbis_info *vi;
 
-  double *noisethresh;
   double *maskthresh;
+  double *barknum;
 
 } psy_lookup;
 
@@ -92,7 +92,7 @@ typedef struct {
    compression/decompression mode in progress (eg, psychoacoustic settings,
    channel setup, options, codebook etc) *********************************/
 
-#define THRESH_POINTS 20
+#define MAX_BARK 27
 
 typedef struct vorbis_info{
   int channels;
@@ -146,15 +146,9 @@ typedef struct vorbis_info{
   double preecho_thresh;
   double preecho_clamp;
 
-  double *threshhold_points;
-  double noisethresh[THRESH_POINTS];
-  double lnoise;
-  double hnoise;
-  double noisebias;
-  double maskthresh[THRESH_POINTS];
-  double lroll;
-  double hroll;
-  double maskbias;
+  double maskthresh[MAX_BARK];
+  double lrolldB;
+  double hrolldB;
 
   /* local storage, only used on the encoding size.  This way the
      application does not need to worry about freeing some packets'
@@ -395,13 +389,6 @@ extern int vorbis_synthesis(vorbis_block *vb,ogg_packet *op);
 extern int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
 extern int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
 extern int vorbis_synthesis_read(vorbis_dsp_state *v,int samples);
-
-#define min(x,y)  ((x)>(y)?(y):(x))
-#define max(x,y)  ((x)<(y)?(y):(x))
-
-  /* 20log10(x) */
-#define todB(x)   ((x)==0?-9.e40:log(fabs(x))*8.6858896)
-#define fromdB(x) (exp((x)*.11512925))
 
 #endif
 
