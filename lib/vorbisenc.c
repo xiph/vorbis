@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17.2.6 2001/12/06 12:47:33 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.17.2.7 2001/12/07 08:38:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,10 +36,12 @@
 typedef struct {
   vorbis_info_residue0 *res;
   static_codebook *book_aux[2];
-  static_codebook *books_base[6][10][3];
-  static_codebook *books_stereo_backfill[6][10];
-  static_codebook *books_residue_backfill[6][10][2];
+  static_codebook *books_base[5][10][3];
+  static_codebook *books_stereo_backfill[5][10];
+  static_codebook *books_residue_backfill[5][10][2];
 } vorbis_residue_template;
+
+static double stereo_threshholds[]={0.0, 2.5, 4.5, 8.5, 16.5};
 
 typedef struct vp_adjblock{
   int block[P_BANDS][P_LEVELS];
@@ -128,12 +130,12 @@ static int vorbis_encode_floor_init(vorbis_info *vi,double q,int block,
     int maxbook=-1;
     for(i=0;i<partitions;i++)
       if(f->partitionclass[i]>maxclass)maxclass=f->partitionclass[i];
-    for(i=0;i<maxclass;i++){
+    for(i=0;i<=maxclass;i++){
       if(f->class_book[i]>maxbook)maxbook=f->class_book[i];
       f->class_book[i]+=ci->books;
       for(k=0;k<(1<<f->class_subs[i]);k++){
 	if(f->class_subbook[i][k]>maxbook)maxbook=f->class_subbook[i][k];
-	f->class_subbook[i][k]+=ci->books;
+	if(f->class_subbook[i][k]>=0)f->class_subbook[i][k]+=ci->books;
       }
     }
 
@@ -364,7 +366,6 @@ static int vorbis_encode_ath_init(vorbis_info *vi,double q,int block,
   return(0);
 }
 
-static double stereo_threshholds[]={0.0, 2.5, 4.5, 7.5, 12.5, 22.5};
 static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
 				      int coupled_p,
 				      int stereo_backfill_p,
@@ -399,6 +400,7 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
 
   r=ci->residue_param[block]=malloc(sizeof(*r));
   memcpy(r,in[iq].res,sizeof(*r));
+  if(ci->residues<=block)ci->residues=block+1;
 
   if(block){
     r->grouping=32;
@@ -420,7 +422,7 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     res_position=partition_position*r->grouping;
     break;
   case 2:
-    n=r->end=ci->blocksizes[block?1:0]>>1*vi->channels; /* to be adjusted by lowpass later */
+    n=r->end=(ci->blocksizes[block?1:0]>>1)*vi->channels; /* to be adjusted by lowpass later */
     partition_position=rint((double)c[iq]*1000/(vi->rate/2)*n/r->grouping);
     res_position=partition_position*r->grouping/vi->channels;
     break;
@@ -461,7 +463,7 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
       memcpy(psy->couple_pass+iterations,psy->couple_pass+iterations-1,
 	     sizeof(*psy->couple_pass));
       amplitude_select=a[iq]-1;
-      psy->couple_pass[1].couple_pass[1].limit=stereo_threshholds[a[iq]-1];
+      psy->couple_pass[1].couple_pass[1].amppost_point=stereo_threshholds[a[iq]-1];
       ci->passlimit[1]=4;
       for(i=0;i<r->partitions;i++)
 	if(in[iq].books_stereo_backfill[a[iq]-1][i])
@@ -597,13 +599,6 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   float base_quality /* 0. to 1. */
 			   ){
   int ret=0;
-  int stereo_backfill_p=0;
-  int residue_backfill_p=0;
-
-#ifdef TRAIN_RES
-  stereo_backfill_p=1;
-  residue_backfill_p=1;
-#endif
 
   base_quality=0.;
 
@@ -659,17 +654,17 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
       /* unmanaged, one iteration residue setup */
       ret|=vorbis_encode_residue_init(vi,base_quality,0,
 				      1, /* coupled */
-				      stereo_backfill_p, /* no mid stereo backfill */
-				      residue_backfill_p, /* no residue backfill */
-				      _residue_template_44_stereo_temp,
+				      0, /* no mid stereo backfill */
+				      0, /* no residue backfill */
+				      _residue_template_44_stereo,
 				      4,  3,  3,  2,   1,  0,  0,  0,  0,  0,  0,
 				      4., 4., 6., 6., 10., 4., 4., 4., 4., 4., 4.);
       
       ret|=vorbis_encode_residue_init(vi,base_quality,1,
 				      1, /* coupled */
-				      stereo_backfill_p, /* no mid stereo backfill */
-				      residue_backfill_p, /* no residue backfill */
-				      _residue_template_44_stereo_temp,
+				      0, /* no mid stereo backfill */
+				      0, /* no residue backfill */
+				      _residue_template_44_stereo,
 				      4,  3,  3,   2,   1,  0,  0,  0,  0,  0,  0,
 				      4., 6., 6., 10., 10., 4., 4., 4., 4., 4., 4.);      
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.11 2001/12/05 08:03:17 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.12 2001/12/07 08:38:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -547,34 +547,36 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       }
       i++;
 	
-      /* down-couple/down-quantize from perfect-'so-far' -> 
+      if(i<quant_passes){
+	/* down-couple/down-quantize from perfect-'so-far' -> 
 	 new quantized vector */
-      if(info->coupling_steps==0){
-	/* this assumes all or nothing coupling right now.  it should pass
-	   through any channels left uncoupled, but it doesn't do that now */
-	int k;
-	for(k=0;k<vi->channels;k++){
-	  float *lpcm=pcm[k];
-	  float *lsof=sofar[k];
-	  float *lqua=quantized[k];
-	  for(j=0;j<n/2;j++)
-	    lqua[j]=lpcm[j]-lsof[j];
+	if(info->coupling_steps==0){
+	  /* this assumes all or nothing coupling right now.  it should pass
+	     through any channels left uncoupled, but it doesn't do that now */
+	  int k;
+	  for(k=0;k<vi->channels;k++){
+	    float *lpcm=pcm[k];
+	    float *lsof=sofar[k];
+	    float *lqua=quantized[k];
+	    for(j=0;j<n/2;j++)
+	      lqua[j]=lpcm[j]-lsof[j];
+	  }
+	}else{
+	  char buf[80];
+	  
+	  _vp_quantize_couple(look->psy_look[blocktype],
+			      info,
+			      pcm,
+			      sofar,
+			      quantized,
+			      nonzero,
+			      i);
+	  
+	  sprintf(buf,"quant%d",i);
+	  for(j=0;j<vi->channels;j++)
+	    _analysis_output(buf,seq+j,quantized[j],n/2,1,0);
+	  
 	}
-      }else{
-	char buf[80];
-	
-	_vp_quantize_couple(look->psy_look[blocktype],
-			    info,
-			    pcm,
-			    sofar,
-			    quantized,
-			    nonzero,
-			    i);
-	
-	sprintf(buf,"quant%d",i);
-	for(j=0;j<vi->channels;j++)
-	  _analysis_output(buf,seq+j,quantized[j],n/2,1,0);
-	
       }
     }
     seq+=vi->channels;
