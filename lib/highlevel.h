@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: highlevel encoder setup struct seperated out for vorbisenc clarity
- last mod: $Id: highlevel.h,v 1.2 2002/06/28 22:19:35 xiphmont Exp $
+ last mod: $Id: highlevel.h,v 1.3 2002/06/30 08:31:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,7 @@ typedef struct highlevel_byblocktype {
   
 typedef struct highlevel_encode_setup {
   void *setup;
+  int   set_in_stone;
 
   double base_setting;
   double long_setting;

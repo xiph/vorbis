@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.29 2002/06/28 22:19:37 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.30 2002/06/30 08:31:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -156,7 +156,8 @@ extern void _vp_couple(int blobno,
 		       float **mag_memo,
 		       int   **mag_sort,
 		       int   **ifloor,
-		       int   *nonzero);
+		       int   *nonzero,
+		       int   sliding_lowpass);
 
 extern void _vp_noise_normalize(vorbis_look_psy *p,
 				float *in,float *out,int *sortedindex);

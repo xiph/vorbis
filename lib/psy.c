@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.69 2002/06/29 13:13:54 msmith Exp $
+ last mod: $Id: psy.c,v 1.70 2002/06/30 08:31:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -208,6 +208,32 @@ static float ***setup_tone_curves(float curveatt_dB[P_BANDS],float binHz,int n,
 
       }
 
+      /* be equally paranoid about being valid up to next half ocatve */
+      if(i+1<P_BANDS){
+	int l=0;
+	k=i+1;
+	for(j=0;j<EHMER_MAX;j++){
+	  int lo_bin= fromOC(j*.125+i*.5-2.0625)/binHz;
+	  int hi_bin= fromOC(j*.125+i*.5-1.9375)/binHz+1;
+	  
+	  if(lo_bin<0)lo_bin=0;
+	  if(lo_bin>n)lo_bin=n;
+	  if(lo_bin<l)l=lo_bin;
+	  if(hi_bin<0)hi_bin=0;
+	  if(hi_bin>n)hi_bin=n;
+
+	  for(;l<hi_bin && l<n;l++)
+	    if(brute_buffer[l]>workc[k][m][j])
+	      brute_buffer[l]=workc[k][m][j];
+	}
+
+	for(;l<n;l++)
+	  if(brute_buffer[l]>workc[k][m][EHMER_MAX-1])
+	    brute_buffer[l]=workc[k][m][EHMER_MAX-1];
+
+      }
+
+
       for(j=0;j<EHMER_MAX;j++){
 	int bin=fromOC(j*.125+i*.5-2.)/binHz;
 	if(bin<0){
@@ -285,7 +311,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   }
 
   for(i=0;i<n;i++)
-    p->octave[i]=toOC((i*.5f+.25f)*rate/n)*(1<<(p->shiftoc+1))+.5f;
+    p->octave[i]=toOC(((i+.25f)*.5)*rate/n)*(1<<(p->shiftoc+1))+.5f;
 
   p->tonecurves=setup_tone_curves(vi->toneatt,rate*.5/n,n,
 				  vi->tone_centerboost,vi->tone_decay);
@@ -396,6 +422,7 @@ static void seed_loop(vorbis_look_psy *p,
     
     if(max+6.f>flr[i]){
       oc=oc>>p->shiftoc;
+
       if(oc>=P_BANDS)oc=P_BANDS-1;
       if(oc<0)oc=0;
 
@@ -846,7 +873,6 @@ static void precomputed_couple_point(float premag,
   floormag*=FLOOR1_fromdB_INV_LOOKUP[(floorB&test)|(floorA&(~test))];
 
   *mag=premag*floormag;
-
   *ang=0.f;
 }
 
@@ -936,12 +962,15 @@ void _vp_noise_normalize_sort(vorbis_look_psy *p,
   }
 }
 
+#include <stdio.h>
 void _vp_noise_normalize(vorbis_look_psy *p,
 			 float *in,float *out,int *sortedindex){
   int flag=0,i,j=0,n=p->n;
   vorbis_info_psy *vi=p->vi;
   int partition=vi->normal_partition;
   int start=vi->normal_start;
+
+  if(start>n)start=n;
 
   if(vi->normal_channel_p){
     for(;j<start;j++)
@@ -989,7 +1018,8 @@ void _vp_couple(int blobno,
 		float **mag_memo,
 		int   **mag_sort,
 		int   **ifloor,
-		int   *nonzero){
+		int   *nonzero,
+		int  sliding_lowpass){
 
   int i,j,k,n=p->n;
 
@@ -1017,10 +1047,11 @@ void _vp_couple(int blobno,
       float *qA=rA+n;
       int *floorM=ifloor[vi->coupling_mag[i]];
       int *floorA=ifloor[vi->coupling_ang[i]];
-      int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
       float prepoint=stereo_threshholds[g->coupling_prepointamp[blobno]];
       float postpoint=stereo_threshholds[g->coupling_postpointamp[blobno]];
       int partition=(p->vi->normal_point_p?p->vi->normal_partition:p->n);
+      int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
+      int pointlimit=limit;
 
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
@@ -1030,25 +1061,32 @@ void _vp_couple(int blobno,
 
 	for(k=0;k<partition;k++){
 	  int l=k+j;
-	  if((l>=limit && fabs(rM[l])<postpoint && fabs(rA[l])<postpoint) ||
-	     (fabs(rM[l])<prepoint && fabs(rA[l])<prepoint)){
-	    precomputed_couple_point(mag_memo[i][l],
-				     floorM[l],floorA[l],
-				     qM+l,qA+l);
-	    if(rint(qM[l])==0.f)acc+=qM[l]*qM[l];
+
+	  if(l<sliding_lowpass){
+	    if((l>=limit && fabs(rM[l])<postpoint && fabs(rA[l])<postpoint) ||
+	       (fabs(rM[l])<prepoint && fabs(rA[l])<prepoint)){
+	      precomputed_couple_point(mag_memo[i][l],
+				       floorM[l],floorA[l],
+				       qM+l,qA+l);
+	      if(rint(qM[l])==0.f)acc+=qM[l]*qM[l];
+	    }else{
+	      couple_lossless(rM[l],rA[l],qM+l,qA+l);
+	    }
 	  }else{
-	    couple_lossless(rM[l],rA[l],qM+l,qA+l);
+	    qM[l]=0.;
+	    qA[l]=0.;
 	  }
 	}
 	
-	if(p->vi->normal_point_p)
+	if(p->vi->normal_point_p){
 	  for(k=0;k<partition && acc>=p->vi->normal_thresh;k++){
 	    int l=mag_sort[i][j+k];
-	    if(l>=limit && rint(qM[l])==0.f){
+	    if(l<sliding_lowpass && l>=pointlimit && rint(qM[l])==0.f){
 	      qM[l]=unitnorm(qM[l]);
 	      acc-=1.f;
 	    }
 	  } 
+	}
       }
     }
   }

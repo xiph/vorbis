@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.42 2002/06/29 13:24:37 msmith Exp $
+ last mod: $Id: vorbisenc.c,v 1.43 2002/06/30 08:31:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -93,8 +93,8 @@ typedef struct {
   double  *rate_mapping;
   double  *quality_mapping;
   int      coupling_restriction;
-  long     bitrate_min_restriction;
-  long     bitrate_max_restriction;
+  long     samplerate_min_restriction;
+  long     samplerate_max_restriction;
 
 
   int     *blocksize_short;
@@ -583,8 +583,8 @@ static void get_setup_template(vorbis_info *vi,
   while(setup_list[i]){
     if(setup_list[i]->coupling_restriction==-1 ||
        setup_list[i]->coupling_restriction==ch){
-      if(srate>=setup_list[i]->bitrate_min_restriction &&
-	 srate<=setup_list[i]->bitrate_max_restriction){
+      if(srate>=setup_list[i]->samplerate_min_restriction &&
+	 srate<=setup_list[i]->samplerate_max_restriction){
 	int mappings=setup_list[i]->mappings;
 	double *map=(q_or_bitrate?
 		     setup_list[i]->rate_mapping:
@@ -645,6 +645,7 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   setup=(ve_setup_data_template *)hi->setup;
   if(setup==NULL)return(OV_EINVAL);
 
+  hi->set_in_stone=1;
   /* choose block sizes from configured sizes as well as paying
      attention to long_block_p and short_block_p.  If the configured
      short and long blocks are the same length, we set long_block_p
@@ -838,6 +839,8 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
 
+  quality+=.00001;
+
   get_setup_template(vi,channels,rate,quality,0);
   if(!hi->setup)return OV_EIMPL;
   
@@ -899,17 +902,18 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
   }
 
   /* initialize management with sane defaults */
-  ci->hi.managed=1;
-
-  ci->hi.bitrate_av_window=4.;
-  ci->hi.bitrate_av_window_center=.5;
-  ci->hi.bitrate_limit_window=2.;
-  ci->hi.bitrate_min=min_bitrate;
-  ci->hi.bitrate_max=max_bitrate;
-  ci->hi.bitrate_av_lo=tnominal;
-  ci->hi.bitrate_av_hi=tnominal;
+      /* initialize management with sane defaults */
+  hi->managed=1;
+  hi->bitrate_av_window=4.;
+  hi->bitrate_av_window_center=.5;
+  hi->bitrate_limit_window=2.;
+  hi->bitrate_min=min_bitrate;
+  hi->bitrate_max=max_bitrate;
+  hi->bitrate_av_lo=tnominal;
+  hi->bitrate_av_hi=tnominal;
 
   return(ret);
+
 }
 
 int vorbis_encode_init(vorbis_info *vi,
@@ -936,5 +940,99 @@ int vorbis_encode_init(vorbis_info *vi,
 }
 
 int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
-  return(OV_EIMPL);
+  if(vi){
+    codec_setup_info *ci=vi->codec_setup;
+    highlevel_encode_setup *hi=&ci->hi;
+    int setp=(number&0xf); /* a read request has a low nibble of 0 */
+
+    if(setp && hi->set_in_stone)return(OV_EINVAL);
+
+    switch(number){
+    case OV_ECTL_RATEMANAGE_GET:
+      {
+	
+	struct ovectl_ratemanage_arg *ai=
+	  (struct ovectl_ratemanage_arg *)arg;
+	
+	ai->management_active=hi->managed;
+	ai->bitrate_av_window=hi->bitrate_av_window;
+	ai->bitrate_av_window_center=hi->bitrate_av_window_center;
+	ai->bitrate_hard_window=hi->bitrate_limit_window;
+	ai->bitrate_hard_min=hi->bitrate_min;
+	ai->bitrate_hard_max=hi->bitrate_max;
+	ai->bitrate_av_lo=hi->bitrate_av_lo;
+	ai->bitrate_av_hi=hi->bitrate_av_hi;
+	
+      }
+      return(0);
+    
+    case OV_ECTL_RATEMANAGE_SET:
+      {
+	struct ovectl_ratemanage_arg *ai=
+	  (struct ovectl_ratemanage_arg *)arg;
+	if(ai==NULL){
+	  hi->managed=0;
+	}else{
+	  hi->managed=ai->management_active;
+	  vorbis_encode_ctl(vi,OV_ECTL_RATEMANAGE_AVG,arg);
+	  vorbis_encode_ctl(vi,OV_ECTL_RATEMANAGE_HARD,arg);
+	}
+      }
+      return 0;
+
+    case OV_ECTL_RATEMANAGE_AVG:
+      {
+	struct ovectl_ratemanage_arg *ai=
+	  (struct ovectl_ratemanage_arg *)arg;
+	if(ai==NULL){
+	  hi->bitrate_av_lo=0;
+	  hi->bitrate_av_hi=0;
+	  hi->bitrate_av_window=0;
+	}else{
+	  hi->bitrate_av_window=ai->bitrate_av_window;
+	  hi->bitrate_av_window_center=ai->bitrate_av_window_center;
+	  hi->bitrate_av_lo=ai->bitrate_av_lo;
+	  hi->bitrate_av_hi=ai->bitrate_av_hi;
+	}
+
+	if(hi->bitrate_av_window<.25)hi->bitrate_av_window=.25;
+	if(hi->bitrate_av_window>10.)hi->bitrate_av_window=10.;
+	if(hi->bitrate_av_window_center<0.)hi->bitrate_av_window=0.;
+	if(hi->bitrate_av_window_center>1.)hi->bitrate_av_window=1.;
+	
+	if( ( (hi->bitrate_av_lo<=0 && hi->bitrate_av_hi<=0)||
+	      (hi->bitrate_av_window<=0) ) &&
+	    ( (hi->bitrate_min<=0 && hi->bitrate_max<=0)||
+	      (hi->bitrate_limit_window<=0) ))
+	  hi->managed=0;
+      }
+      return(0);
+    case OV_ECTL_RATEMANAGE_HARD:
+      {
+	struct ovectl_ratemanage_arg *ai=
+	  (struct ovectl_ratemanage_arg *)arg;
+	if(ai==NULL){
+	  hi->bitrate_min=0;
+	  hi->bitrate_max=0;
+	  hi->bitrate_limit_window=0;
+	}else{
+	  hi->bitrate_limit_window=ai->bitrate_hard_window;
+	  hi->bitrate_min=ai->bitrate_hard_min;
+	  hi->bitrate_max=ai->bitrate_hard_max;
+	}
+	if(hi->bitrate_limit_window<0.)hi->bitrate_limit_window=0.;
+	if(hi->bitrate_limit_window>10.)hi->bitrate_limit_window=10.;
+	
+	if( ( (hi->bitrate_av_lo<=0 && hi->bitrate_av_hi<=0)||
+	      (hi->bitrate_av_window<=0) ) &&
+	    ( (hi->bitrate_min<=0 && hi->bitrate_max<=0)||
+	      (hi->bitrate_limit_window<=0) ))
+	  hi->managed=0;
+      }
+      return(0);
+    }
+
+    return(OV_EIMPL);
+  }
+  return(OV_EINVAL);
 }

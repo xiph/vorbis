@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel settings for 44.1/48kHz
- last mod: $Id: setup_44.h,v 1.4 2002/06/29 11:18:31 xiphmont Exp $
+ last mod: $Id: setup_44.h,v 1.5 2002/06/30 08:31:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -150,7 +150,7 @@ ve_setup_data_template ve_setup_44_stereo_low={
   _psy_compand_short_mapping,
   _psy_compand_long_mapping,
 
-  {_noise_start_short_44,_noise_start_long_44},
+  {_noise_start_short_44_low,_noise_start_long_44_low},
   {_noise_part_short_44,_noise_part_long_44},
   _noise_thresh_44,
 
