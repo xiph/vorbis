@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.39 2001/02/14 13:24:29 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.40 2001/02/15 17:16:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -847,28 +847,6 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
   return OV_EBADLINK;
 }
 
-int ov_raw_seek_fast(OggVorbis_File *vf, long pos, int offset, int link) {
-  int ret;
-  ogg_page og;
-  if(!vf->seekable)return(OV_ENOSEEK); /* Don't dump machine, this is ok. */
-
-  if(pos<0 || pos>vf->offsets[vf->links])return(OV_EINVAL);
-
-  /* Clear decode state */
-  vf->pcm_offset=-1;
-  _decode_clear(vf);
-
-  /* Do the seek */
-  _seek_helper(vf,pos);
-  ret = _get_next_page(vf,&og,vf->offsets[link+1]-vf->offset);
-  if(ret<0)
-    return ret;
-  vf->pcm_offset = offset;
-
-  return 0;
-}
-
-
 /* Page granularity seek (faster than sample granularity because we
    don't do the last bit of decode to find a specific sample).
 
@@ -894,88 +872,6 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
      missing pages or incorrect frame number information in the
      bitstream could make our task impossible.  Account for that (it
      would be an error condition) */
-  /* Faster/more intelligent version from Nicholas Vinen */
-
-  {
-    ogg_int64_t target=pos-total;
-    long end=vf->offsets[link+1];
-    long begin=vf->offsets[link];
-    ogg_int64_t endtime = vf->pcmlengths[link];
-    ogg_int64_t begintime=0;
-    long best=begin;
-    ogg_page og;
-
-    while(begin<end) {
-      long bisect;
-
-      if(end-begin < CHUNKSIZE)
-	bisect=begin;
-      else {
-	/* Make an intelligent guess */
-	bisect=begin+(target-begintime)*(end-begin)/
-	  (endtime-begintime) - CHUNKSIZE;
-	if(bisect<=begin)
-	  bisect=begin+1;
-      }
-
-      again:
-      _seek_helper(vf,bisect);
-      ret=_get_next_page(vf,&og, end-bisect);
-      if(ret == OV_FALSE || ret==OV_EOF)
-      {
-        if(bisect==begin+1)
-	  goto found;
-  	if(bisect==0)
-	  goto seek_error;
-	bisect -= CHUNKSIZE;
-	if(bisect<=begin)
-	  bisect=begin+1;
-	goto again;
-      }
-      else if(ret==OV_EREAD) goto seek_error;
-      else
-      {
-        ogg_int64_t granulepos=ogg_page_granulepos(&og);
-	if(granulepos<target){
-	  best=ret; /* Raw offset of current page */
-	  begin=vf->offset; /* Raw offset of next packet */
-	  begintime=granulepos;
-
-	  /* Assume that if we're within half a second of
-	   * our target, it'll be faster to scan directly 
-	   * forward. */
-	  if(target-begintime<vf->vi->rate/2) {
-	    bisect=begin+1;
-	    goto again;
-	  } 
-	}
-	else {
-	  if(bisect<=begin+1)
-	    goto found;
-	  if(end==vf->offset){
-	    /* near the end, try just back from here */
-	    bisect-=CHUNKSIZE;
-	    goto again;
-	  }
-	  end=vf->offset;
-	  endtime=granulepos;
-	}
-      }
-    }
-
-    /* Found the relevent page. Seek to it */
-found:
-    if(link != vf->current_link){
-      if((ret=ov_raw_seek(vf,best)))goto seek_error;
-    } else {
-      if((ret=ov_raw_seek_fast(vf,best,begintime,link)))goto seek_error;
-    }
-  }
-
-
-
-
-#if 0
   {
     ogg_int64_t target=pos-total;
     long end=vf->offsets[link+1];
@@ -1017,7 +913,6 @@ found:
     
     if((ret=ov_raw_seek(vf,best)))goto seek_error;
   }
-#endif
   
   /* verify result */
   if(vf->pcm_offset>=pos || pos>ov_pcm_total(vf,-1)){
