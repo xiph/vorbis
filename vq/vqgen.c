@@ -265,7 +265,7 @@ double vqgen_iterate(vqgen *v){
   memset(nearcount,0,sizeof(long)*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
   for(i=0;i<v->points;i++){
-    double *ppt=_point(v,i);
+    double *ppt=v->weight_func(v,_point(v,i));
     double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
     double secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
     long   firstentry=0;
@@ -279,7 +279,7 @@ double vqgen_iterate(vqgen *v){
     }
     
     for(j=2;j<v->entries;j++){
-      double thismetric=v->metric_func(v,_now(v,j),_point(v,i))+v->bias[j];
+      double thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
       if(thismetric<secondmetric){
 	if(thismetric<firstmetric){
 	  secondmetric=firstmetric;
@@ -294,20 +294,20 @@ double vqgen_iterate(vqgen *v){
     }
       
     j=firstentry;
-    meterror+=sqrt(_dist_sq(v,_now(v,j),_point(v,i)));
+    meterror+=sqrt(_dist_sq(v,_now(v,j),ppt));
     /* set up midpoints for next iter */
     if(v->assigned[j]++)
       for(k=0;k<v->elements;k++)
-	vN(new,j)[k]+=_point(v,i)[k];
+	vN(new,j)[k]+=ppt[k];
     else
       for(k=0;k<v->elements;k++)
-	vN(new,j)[k]=_point(v,i)[k];
+	vN(new,j)[k]=ppt[k];
 
    
 #ifdef NOISY
     fprintf(cells,"%g %g\n%g %g\n\n",
 	    _now(v,j)[0],_now(v,j)[1],
-	    _point(v,i)[0],_point(v,i)[1]);
+	    ppt[0],ppt[1]);
 #endif
 
     for(j=0;j<v->entries;j++){
@@ -320,10 +320,10 @@ double vqgen_iterate(vqgen *v){
 	 arrangement for entry j to capture point i */
       if(firstentry==j){
 	/* use the secondary entry as the threshhold */
-	thismetric=secondmetric-v->metric_func(v,_now(v,j),_point(v,i));
+	thismetric=secondmetric-v->metric_func(v,_now(v,j),ppt);
       }else{
 	/* use the primary entry as the threshhold */
-	thismetric=firstmetric-v->metric_func(v,_now(v,j),_point(v,i));
+	thismetric=firstmetric-v->metric_func(v,_now(v,j),ppt);
       }
       
       if(k>=0 && thismetric>nearbiasptr[k]){
