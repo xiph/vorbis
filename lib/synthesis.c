@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.18.2.1 2000/10/14 03:14:07 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.18.2.2 2000/11/03 10:05:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,10 +24,12 @@
 #include "os.h"
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  vorbis_dsp_state *vd=vb->vd;
-  vorbis_info      *vi=vd->vi;
-  oggpack_buffer   *opb=&vb->opb;
-  int              type,mode,i;
+  vorbis_dsp_state     *vd=vb->vd;
+  backend_lookup_state *b=vd->backend_state;
+  vorbis_info          *vi=vd->vi;
+  codec_setup_info     *ci=vi->codec_setup;
+  oggpack_buffer       *opb=&vb->opb;
+  int                   type,mode,i;
  
   /* first things first.  Make sure decode is ready */
   _vorbis_block_ripcord(vb);
@@ -40,11 +42,11 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   }
 
   /* read our mode and pre/post windowsize */
-  mode=oggpack_read(opb,vd->modebits);
+  mode=oggpack_read(opb,b->modebits);
   if(mode==-1)return(OV_EBADPACKET);
   
   vb->mode=mode;
-  vb->W=vi->mode_param[mode]->blockflag;
+  vb->W=ci->mode_param[mode]->blockflag;
   if(vb->W){
     vb->lW=oggpack_read(opb,1);
     vb->nW=oggpack_read(opb,1);
@@ -60,15 +62,15 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vb->eofflag=op->e_o_s;
 
   /* alloc pcm passback storage */
-  vb->pcmend=vi->blocksizes[vb->W];
+  vb->pcmend=ci->blocksizes[vb->W];
   vb->pcm=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
   for(i=0;i<vi->channels;i++)
     vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(float));
 
   /* unpack_header enforces range checking */
-  type=vi->map_type[vi->mode_param[mode]->mapping];
+  type=ci->map_type[ci->mode_param[mode]->mapping];
 
-  return(_mapping_P[type]->inverse(vb,vd->mode[mode]));
+  return(_mapping_P[type]->inverse(vb,b->mode[mode]));
 }
 
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.30.2.2 2000/10/19 10:21:02 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.30.2.3 2000/11/03 10:05:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <assert.h>
 
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"

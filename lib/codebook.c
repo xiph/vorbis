@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.18.2.1 2000/10/20 06:19:40 jack Exp $
+ last mod: $Id: codebook.c,v 1.18.2.2 2000/11/03 10:05:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,10 +21,8 @@
 #include <math.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
-#include "vorbis/codebook.h"
+#include "codebook.h"
 #include "scales.h"
-#include "sharedbook.h"
-#include "bookinternal.h"
 #include "misc.h"
 #include "os.h"
 
@@ -150,6 +148,7 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
 int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   long i,j;
   memset(s,0,sizeof(static_codebook));
+  s->allocedp=1;
 
   /* make sure alignment is correct */
   if(oggpack_read(opb,24)!=0x564342)goto _eofout;

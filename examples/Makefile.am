@@ -11,6 +11,7 @@ LDADD = $(top_srcdir)/lib/.libs/libvorbis.a $(OGG_LIBS)
 
 decoder_example_SOURCES = decoder_example.c
 encoder_example_SOURCES = encoder_example.c
+encoder_example_LDADD = $(top_srcdir)/lib/.libs/libvorbisenc.a $(top_srcdir)/lib/.libs/libvorbis.a $(OGG_LIBS)
 chaining_example_SOURCES = chaining_example.c
 chaining_example_LDADD = $(top_srcdir)/lib/.libs/libvorbisfile.a $(top_srcdir)/lib/.libs/libvorbis.a $(OGG_LIBS)
 vorbisfile_example_SOURCES = vorbisfile_example.c

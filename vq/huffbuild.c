@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.5.2.1 2000/10/31 08:25:17 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.5.2.2 2000/11/03 10:06:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]){
     fprintf(file,"\tNULL,\n");
     fprintf(file,"\tNULL,\n");
     fprintf(file,"\tNULL,\n");
-    fprintf(file,"};\n\n");
+    fprintf(file,"\t0\n};\n\n");
     
     fprintf(file,"\n#endif\n");
     fclose(file);

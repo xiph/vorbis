@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.32.2.2 2000/10/31 00:10:36 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.32.2.3 2000/11/03 10:05:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,69 +24,7 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-#define MAX_BARK 27
-
 #include <ogg/ogg.h>
-#include "vorbis/codebook.h"
-
-typedef void vorbis_look_transform;
-typedef void vorbis_info_time;
-typedef void vorbis_look_time;
-typedef void vorbis_info_floor;
-typedef void vorbis_look_floor;
-typedef void vorbis_echstate_floor;
-typedef void vorbis_info_residue;
-typedef void vorbis_look_residue;
-typedef void vorbis_info_mapping;
-typedef void vorbis_look_mapping;
-
-/* mode ************************************************************/
-typedef struct {
-  int blockflag;
-  int windowtype;
-  int transformtype;
-  int mapping;
-} vorbis_info_mode;
-
-/* psychoacoustic setup ********************************************/
-#define P_BANDS 17
-#define P_LEVELS 11
-typedef struct vorbis_info_psy{
-  int    athp;
-  int    decayp;
-  int    smoothp;
-
-  int    noisecullp;
-  float noisecull_barkwidth;
-
-  float ath_adjatt;
-  float ath_maxatt;
-
-  /*     0  1  2   3   4   5   6   7   8   9  10  11  12  13  14  15   16   */
-  /* x: 63 88 125 175 250 350 500 700 1k 1.4k 2k 2.8k 4k 5.6k 8k 11.5k 16k Hz */
-  /* y: 0 10 20 30 40 50 60 70 80 90 100 dB */
-
-  int tonemaskp;
-  float toneatt[P_BANDS][P_LEVELS];
-
-  int peakattp;
-  float peakatt[P_BANDS][P_LEVELS];
-
-  int noisemaskp;
-  float noiseatt[P_BANDS][P_LEVELS];
-
-  float max_curve_dB;
-
-  /* decay setup */
-  float attack_coeff;
-  float decay_coeff;
-} vorbis_info_psy;
-
-/* vorbis_info contains all the setup information specific to the
-   specific compression/decompression mode in progress (eg,
-   psychoacoustic settings, channel setup, options, codebook
-   etc).  
-*********************************************************************/
 
 typedef struct vorbis_info{
   int version;
@@ -111,51 +49,17 @@ typedef struct vorbis_info{
   long bitrate_upper;
   long bitrate_nominal;
   long bitrate_lower;
+  long bitrate_window;
 
-  /* Vorbis supports only short and long blocks, but allows the
-     encoder to choose the sizes */
-
-  long blocksizes[2];
-
-  /* modes are the primary means of supporting on-the-fly different
-     blocksizes, different channel mappings (LR or mid-side),
-     different residue backends, etc.  Each mode consists of a
-     blocksize flag and a mapping (along with the mapping setup */
-
-  int        modes;
-  int        maps;
-  int        times;
-  int        floors;
-  int        residues;
-  int        books;
-  int        psys;     /* encode only */
-
-  vorbis_info_mode    *mode_param[64];
-  int                  map_type[64];
-  vorbis_info_mapping *map_param[64];
-  int                  time_type[64];
-  vorbis_info_time    *time_param[64];
-  int                  floor_type[64];
-  vorbis_info_floor   *floor_param[64];
-  int                  residue_type[64];
-  vorbis_info_residue *residue_param[64];
-  static_codebook     *book_param[256];
-  vorbis_info_psy     *psy_param[64]; /* encode only */
-  
-  /* for block long/sort tuning; encode only */
-  int        envelopesa;
-  float     preecho_thresh;
-  float     preecho_clamp;
-  float     preecho_minenergy;
+  void *codec_setup;
 } vorbis_info;
- 
+
 /* vorbis_dsp_state buffers the current vorbis audio
    analysis/synthesis state.  The DSP state belongs to a specific
    logical bitstream ****************************************************/
 typedef struct vorbis_dsp_state{
   int analysisp;
   vorbis_info *vi;
-  int    modebits;
 
   float **pcm;
   float **pcmret;
@@ -179,33 +83,8 @@ typedef struct vorbis_dsp_state{
   ogg_int64_t floor_bits;
   ogg_int64_t res_bits;
 
-  /* local lookup storage */
-  void                   *ve; /* envelope lookup */    
-  float                **window[2][2][2]; /* block, leadin, leadout, type */
-  vorbis_look_transform **transform[2];    /* block, type */
-  codebook               *fullbooks;
-  /* backend lookups are tied to the mode, not the backend or naked mapping */
-  vorbis_look_mapping   **mode;
-
-  /* local storage, only used on the encoding side.  This way the
-     application does not need to worry about freeing some packets'
-     memory and not others'; packet storage is always tracked.
-     Cleared next call to a _dsp_ function */
-  unsigned char *header;
-  unsigned char *header1;
-  unsigned char *header2;
-
+  void       *backend_state;
 } vorbis_dsp_state;
-
-/* vorbis_block is a single block of data to be processed as part of
-the analysis/synthesis stream; it belongs to a specific logical
-bitstream, but is independant from other vorbis_blocks belonging to
-that logical bitstream. *************************************************/
-
-struct alloc_chain{
-  void *ptr;
-  struct alloc_chain *next;
-};
 
 typedef struct vorbis_block{
   /* necessary stream state for linking to the framing abstraction */
@@ -239,7 +118,15 @@ typedef struct vorbis_block{
 
 } vorbis_block;
 
-#include "vorbis/backends.h"
+/* vorbis_block is a single block of data to be processed as part of
+the analysis/synthesis stream; it belongs to a specific logical
+bitstream, but is independant from other vorbis_blocks belonging to
+that logical bitstream. *************************************************/
+
+struct alloc_chain{
+  void *ptr;
+  struct alloc_chain *next;
+};
 
 /* vorbis_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.39.2.2 2000/10/31 00:10:37 xiphmont Exp $
+ last mod: $Id: block.c,v 1.39.2.3 2000/11/03 10:05:47 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -34,8 +34,7 @@
 #include "mdct.h"
 #include "lpc.h"
 #include "registry.h"
-#include "sharedbook.h"
-#include "bookinternal.h"
+#include "codebook.h"
 #include "misc.h"
 #include "os.h"
 
@@ -166,54 +165,58 @@ int vorbis_block_clear(vorbis_block *vb){
 
 static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   int i;
+  codec_setup_info *ci=vi->codec_setup;
+  backend_lookup_state *b=NULL;
+
   memset(v,0,sizeof(vorbis_dsp_state));
+  b=v->backend_state=calloc(1,sizeof(backend_lookup_state));
 
   v->vi=vi;
-  v->modebits=ilog2(vi->modes);
+  b->modebits=ilog2(ci->modes);
 
-  v->transform[0]=calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
-  v->transform[1]=calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
+  b->transform[0]=calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
+  b->transform[1]=calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
 
   /* MDCT is tranform 0 */
 
-  v->transform[0][0]=calloc(1,sizeof(mdct_lookup));
-  v->transform[1][0]=calloc(1,sizeof(mdct_lookup));
-  mdct_init(v->transform[0][0],vi->blocksizes[0]);
-  mdct_init(v->transform[1][0],vi->blocksizes[1]);
+  b->transform[0][0]=calloc(1,sizeof(mdct_lookup));
+  b->transform[1][0]=calloc(1,sizeof(mdct_lookup));
+  mdct_init(b->transform[0][0],ci->blocksizes[0]);
+  mdct_init(b->transform[1][0],ci->blocksizes[1]);
 
-  v->window[0][0][0]=calloc(VI_WINDOWB,sizeof(float *));
-  v->window[0][0][1]=v->window[0][0][0];
-  v->window[0][1][0]=v->window[0][0][0];
-  v->window[0][1][1]=v->window[0][0][0];
-  v->window[1][0][0]=calloc(VI_WINDOWB,sizeof(float *));
-  v->window[1][0][1]=calloc(VI_WINDOWB,sizeof(float *));
-  v->window[1][1][0]=calloc(VI_WINDOWB,sizeof(float *));
-  v->window[1][1][1]=calloc(VI_WINDOWB,sizeof(float *));
+  b->window[0][0][0]=calloc(VI_WINDOWB,sizeof(float *));
+  b->window[0][0][1]=b->window[0][0][0];
+  b->window[0][1][0]=b->window[0][0][0];
+  b->window[0][1][1]=b->window[0][0][0];
+  b->window[1][0][0]=calloc(VI_WINDOWB,sizeof(float *));
+  b->window[1][0][1]=calloc(VI_WINDOWB,sizeof(float *));
+  b->window[1][1][0]=calloc(VI_WINDOWB,sizeof(float *));
+  b->window[1][1][1]=calloc(VI_WINDOWB,sizeof(float *));
 
   for(i=0;i<VI_WINDOWB;i++){
-    v->window[0][0][0][i]=
-      _vorbis_window(i,vi->blocksizes[0],vi->blocksizes[0]/2,vi->blocksizes[0]/2);
-    v->window[1][0][0][i]=
-      _vorbis_window(i,vi->blocksizes[1],vi->blocksizes[0]/2,vi->blocksizes[0]/2);
-    v->window[1][0][1][i]=
-      _vorbis_window(i,vi->blocksizes[1],vi->blocksizes[0]/2,vi->blocksizes[1]/2);
-    v->window[1][1][0][i]=
-      _vorbis_window(i,vi->blocksizes[1],vi->blocksizes[1]/2,vi->blocksizes[0]/2);
-    v->window[1][1][1][i]=
-      _vorbis_window(i,vi->blocksizes[1],vi->blocksizes[1]/2,vi->blocksizes[1]/2);
+    b->window[0][0][0][i]=
+      _vorbis_window(i,ci->blocksizes[0],ci->blocksizes[0]/2,ci->blocksizes[0]/2);
+    b->window[1][0][0][i]=
+      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[0]/2,ci->blocksizes[0]/2);
+    b->window[1][0][1][i]=
+      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[0]/2,ci->blocksizes[1]/2);
+    b->window[1][1][0][i]=
+      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[1]/2,ci->blocksizes[0]/2);
+    b->window[1][1][1][i]=
+      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[1]/2,ci->blocksizes[1]/2);
   }
 
   if(encp){ /* encode/decode differ here */
     /* finish the codebooks */
-    v->fullbooks=calloc(vi->books,sizeof(codebook));
-    for(i=0;i<vi->books;i++)
-      vorbis_book_init_encode(v->fullbooks+i,vi->book_param[i]);
+    b->fullbooks=calloc(ci->books,sizeof(codebook));
+    for(i=0;i<ci->books;i++)
+      vorbis_book_init_encode(b->fullbooks+i,ci->book_param[i]);
     v->analysisp=1;
   }else{
     /* finish the codebooks */
-    v->fullbooks=calloc(vi->books,sizeof(codebook));
-    for(i=0;i<vi->books;i++)
-      vorbis_book_init_decode(v->fullbooks+i,vi->book_param[i]);
+    b->fullbooks=calloc(ci->books,sizeof(codebook));
+    for(i=0;i<ci->books;i++)
+      vorbis_book_init_decode(b->fullbooks+i,ci->book_param[i]);
   }
 
   /* initialize the storage vectors to a decent size greater than the
@@ -236,17 +239,17 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   v->W=0;  /* current window size */
 
   /* all vector indexes */
-  v->centerW=vi->blocksizes[1]/2;
+  v->centerW=ci->blocksizes[1]/2;
 
   v->pcm_current=v->centerW;
 
   /* initialize all the mapping/backend lookups */
-  v->mode=calloc(vi->modes,sizeof(vorbis_look_mapping *));
-  for(i=0;i<vi->modes;i++){
-    int mapnum=vi->mode_param[i]->mapping;
-    int maptype=vi->map_type[mapnum];
-    v->mode[i]=_mapping_P[maptype]->look(v,vi->mode_param[i],
-					 vi->map_param[mapnum]);
+  b->mode=calloc(ci->modes,sizeof(vorbis_look_mapping *));
+  for(i=0;i<ci->modes;i++){
+    int mapnum=ci->mode_param[i]->mapping;
+    int maptype=ci->map_type[mapnum];
+    b->mode[i]=_mapping_P[maptype]->look(v,ci->mode_param[i],
+					 ci->map_param[mapnum]);
   }
 
   return(0);
@@ -254,11 +257,14 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
 /* arbitrary settings and spec-mandated numbers get filled in here */
 int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
+  backend_lookup_state *b=NULL;
+
   _vds_shared_init(v,vi,1);
+  b=v->backend_state;
 
   /* Initialize the envelope state storage */
-  v->ve=calloc(1,sizeof(envelope_lookup));
-  _ve_envelope_init(v->ve,vi);
+  b->ve=calloc(1,sizeof(envelope_lookup));
+  _ve_envelope_init(b->ve,vi);
 
   return(0);
 }
@@ -267,18 +273,39 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
   int i,j,k;
   if(v){
     vorbis_info *vi=v->vi;
+    codec_setup_info *ci=(vi?vi->codec_setup:NULL);
+    backend_lookup_state *b=v->backend_state;
 
-    if(v->window[0][0][0]){
-      for(i=0;i<VI_WINDOWB;i++)
-	if(v->window[0][0][0][i])free(v->window[0][0][0][i]);
-      free(v->window[0][0][0]);
+    if(b){
+      if(b->window[0][0][0]){
+	for(i=0;i<VI_WINDOWB;i++)
+	  if(b->window[0][0][0][i])free(b->window[0][0][0][i]);
+	free(b->window[0][0][0]);
+	
+	for(j=0;j<2;j++)
+	  for(k=0;k<2;k++){
+	    for(i=0;i<VI_WINDOWB;i++)
+	      if(b->window[1][j][k][i])free(b->window[1][j][k][i]);
+	    free(b->window[1][j][k]);
+	  }
+      }
 
-      for(j=0;j<2;j++)
-	for(k=0;k<2;k++){
-	  for(i=0;i<VI_WINDOWB;i++)
-	    if(v->window[1][j][k][i])free(v->window[1][j][k][i]);
-	  free(v->window[1][j][k]);
-	}
+      if(b->ve){
+	_ve_envelope_clear(b->ve);
+	free(b->ve);
+      }
+
+      if(b->transform[0]){
+	mdct_clear(b->transform[0][0]);
+	free(b->transform[0][0]);
+	free(b->transform[0]);
+      }
+      if(b->transform[1]){
+	mdct_clear(b->transform[1][0]);
+	free(b->transform[1][0]);
+	free(b->transform[1]);
+      }
+      
     }
     
     if(v->pcm){
@@ -288,42 +315,29 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       if(v->pcmret)free(v->pcmret);
     }
 
-    if(v->ve){
-      _ve_envelope_clear(v->ve);
-      free(v->ve);
-    }
-
-    if(v->transform[0]){
-      mdct_clear(v->transform[0][0]);
-      free(v->transform[0][0]);
-      free(v->transform[0]);
-    }
-    if(v->transform[1]){
-      mdct_clear(v->transform[1][0]);
-      free(v->transform[1][0]);
-      free(v->transform[1]);
-    }
-
     /* free mode lookups; these are actually vorbis_look_mapping structs */
-    if(vi){
-      for(i=0;i<vi->modes;i++){
-	int mapnum=vi->mode_param[i]->mapping;
-	int maptype=vi->map_type[mapnum];
-	_mapping_P[maptype]->free_look(v->mode[i]);
+    if(ci){
+      for(i=0;i<ci->modes;i++){
+	int mapnum=ci->mode_param[i]->mapping;
+	int maptype=ci->map_type[mapnum];
+	if(b && b->mode)_mapping_P[maptype]->free_look(b->mode[i]);
       }
       /* free codebooks */
-      for(i=0;i<vi->books;i++)
-	vorbis_book_clear(v->fullbooks+i);
+      for(i=0;i<ci->books;i++)
+	if(b && b->fullbooks)vorbis_book_clear(b->fullbooks+i);
     }
 
-    if(v->mode)free(v->mode);    
-    if(v->fullbooks)free(v->fullbooks);
-
-    /* free header, header1, header2 */
-    if(v->header)free(v->header);
-    if(v->header1)free(v->header1);
-    if(v->header2)free(v->header2);
-
+    if(b){
+      if(b->mode)free(b->mode);    
+      if(b->fullbooks)free(b->fullbooks);
+      
+      /* free header, header1, header2 */
+      if(b->header)free(b->header);
+      if(b->header1)free(b->header1);
+      if(b->header2)free(b->header2);
+      free(b);
+    }
+    
     memset(v,0,sizeof(vorbis_dsp_state));
   }
 }
@@ -331,11 +345,12 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   int i;
   vorbis_info *vi=v->vi;
+  backend_lookup_state *b=v->backend_state;
 
   /* free header, header1, header2 */
-  if(v->header)free(v->header);v->header=NULL;
-  if(v->header1)free(v->header1);v->header1=NULL;
-  if(v->header2)free(v->header2);v->header2=NULL;
+  if(b->header)free(b->header);b->header=NULL;
+  if(b->header1)free(b->header1);b->header1=NULL;
+  if(b->header2)free(b->header2);b->header2=NULL;
 
   /* Do we have enough storage space for the requested buffer? If not,
      expand the PCM (and envelope) storage */
@@ -388,6 +403,8 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
 
 int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
   vorbis_info *vi=v->vi;
+  codec_setup_info *ci=vi->codec_setup;
+
   if(vals<=0){
     int order=32;
     int i;
@@ -403,9 +420,9 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
        amplitude off a cliff, creating spread spectrum noise that will
        suck to encode.  Extrapolate for the sake of cleanliness. */
 
-    vorbis_analysis_buffer(v,v->vi->blocksizes[1]*2);
+    vorbis_analysis_buffer(v,ci->blocksizes[1]*2);
     v->eofflag=v->pcm_current;
-    v->pcm_current+=v->vi->blocksizes[1]*2;
+    v->pcm_current+=ci->blocksizes[1]*2;
 
     for(i=0;i<vi->channels;i++){
       if(v->eofflag>order*2){
@@ -414,7 +431,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
 
 	/* make a predictor filter */
 	n=v->eofflag;
-	if(n>v->vi->blocksizes[1])n=v->vi->blocksizes[1];
+	if(n>ci->blocksizes[1])n=ci->blocksizes[1];
 	vorbis_lpc_from_data(v->pcm[i]+v->eofflag-n,lpc,n,order);
 
 	/* run the predictor filter */
@@ -439,7 +456,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
     /* we may want to reverse extrapolate the beginning of a stream
        too... in case we're beginning on a cliff! */
     /* clumsy, but simple.  It only runs once, so simple is good. */
-    if(!v->preextrapolate && v->pcm_current-v->centerW>v->vi->blocksizes[1])
+    if(!v->preextrapolate && v->pcm_current-v->centerW>ci->blocksizes[1])
       _preextrapolate_helper(v);
 
   }
@@ -451,7 +468,9 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
 int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   int i;
   vorbis_info *vi=v->vi;
-  long beginW=v->centerW-vi->blocksizes[v->W]/2,centerNext;
+  codec_setup_info *ci=vi->codec_setup;
+  backend_lookup_state *b=v->backend_state;
+  long beginW=v->centerW-ci->blocksizes[v->W]/2,centerNext;
 
   /* check to see if we're started... */
   if(!v->preextrapolate)return(0);
@@ -463,16 +482,16 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      the next boundary so we can determine nW (the next window size)
      which lets us compute the shape of the current block's window */
   
-  if(vi->blocksizes[0]<vi->blocksizes[1]){
+  if(ci->blocksizes[0]<ci->blocksizes[1]){
     long largebound;
     long bp;
 
     if(v->W)
       /* min boundary; nW large, next small */
-      largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]/4;
+      largebound=v->centerW+ci->blocksizes[1]*3/4+ci->blocksizes[0]/4;
     else
       /* min boundary; nW large, next small */
-      largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]*3/4;
+      largebound=v->centerW+ci->blocksizes[1]*3/4+ci->blocksizes[0]*3/4;
 
     bp=_ve_envelope_search(v,largebound);
     if(bp==-1)return(0); /* not enough data currently to search for a
@@ -482,12 +501,12 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   }else
     v->nW=0;
   
-  centerNext=v->centerW+vi->blocksizes[v->W]/4+vi->blocksizes[v->nW]/4;
+  centerNext=v->centerW+ci->blocksizes[v->W]/4+ci->blocksizes[v->nW]/4;
 
   {
     /* center of next block + next block maximum right side. */
 
-    long blockbound=centerNext+vi->blocksizes[v->nW]/2;
+    long blockbound=centerNext+ci->blocksizes[v->nW]/2;
     if(v->pcm_current<blockbound)return(0); /* not enough data yet;
                                                although this check is
                                                less strict that the
@@ -513,14 +532,14 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   vb->vd=v;
   vb->sequence=v->sequence;
   vb->granulepos=v->granulepos;
-  vb->pcmend=vi->blocksizes[v->W];
+  vb->pcmend=ci->blocksizes[v->W];
   
   /* copy the vectors; this uses the local storage in vb */
   {
     vb->pcm=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
     for(i=0;i<vi->channels;i++){
       vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(float));
-      memcpy(vb->pcm[i],v->pcm[i]+beginW,vi->blocksizes[v->W]*sizeof(float));
+      memcpy(vb->pcm[i],v->pcm[i]+beginW,ci->blocksizes[v->W]*sizeof(float));
     }
   }
   
@@ -538,10 +557,10 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* advance storage vectors and clean up */
   {
-    int new_centerNext=vi->blocksizes[1]/2;
+    int new_centerNext=ci->blocksizes[1]/2;
     int movementW=centerNext-new_centerNext;
 
-    _ve_envelope_shift(v->ve,movementW);
+    _ve_envelope_shift(b->ve,movementW);
     v->pcm_current-=movementW;
 
     for(i=0;i<vi->channels;i++)
@@ -573,11 +592,12 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 }
 
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
+  codec_setup_info *ci=vi->codec_setup;
   _vds_shared_init(v,vi,0);
 
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;
-  v->centerW-= vi->blocksizes[v->W]/4+vi->blocksizes[v->lW]/4;
+  v->centerW-= ci->blocksizes[v->W]/4+ci->blocksizes[v->lW]/4;
   v->granulepos=-1;
   v->sequence=-1;
 
@@ -590,15 +610,16 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
 
 int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   vorbis_info *vi=v->vi;
+  codec_setup_info *ci=vi->codec_setup;
 
   /* Shift out any PCM that we returned previously */
   /* centerW is currently the center of the last block added */
-  if(v->pcm_returned  && v->centerW>vi->blocksizes[1]/2){
+  if(v->pcm_returned  && v->centerW>ci->blocksizes[1]/2){
 
     /* don't shift too much; we need to have a minimum PCM buffer of
        1/2 long block */
 
-    int shiftPCM=v->centerW-vi->blocksizes[1]/2;
+    int shiftPCM=v->centerW-ci->blocksizes[1]/2;
     shiftPCM=(v->pcm_returned<shiftPCM?v->pcm_returned:shiftPCM);
 
     v->pcm_current-=shiftPCM;
@@ -628,8 +649,8 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   v->sequence=vb->sequence;
 
   {
-    int sizeW=vi->blocksizes[v->W];
-    int centerW=v->centerW+vi->blocksizes[v->lW]/4+sizeW/4;
+    int sizeW=ci->blocksizes[v->W];
+    int centerW=v->centerW+ci->blocksizes[v->lW]/4+sizeW/4;
     int beginW=centerW-sizeW/2;
     int endW=beginW+sizeW;
     int beginSl;
@@ -639,7 +660,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     /* Do we have enough PCM/mult storage for the block? */
     if(endW>v->pcm_storage){
       /* expand the storage */
-      v->pcm_storage=endW+vi->blocksizes[1];
+      v->pcm_storage=endW+ci->blocksizes[1];
    
       for(i=0;i<vi->channels;i++)
 	v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(float)); 
@@ -650,11 +671,11 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     switch(v->W){
     case 0:
       beginSl=0;
-      endSl=vi->blocksizes[0]/2;
+      endSl=ci->blocksizes[0]/2;
       break;
     case 1:
-      beginSl=vi->blocksizes[1]/4-vi->blocksizes[v->lW]/4;
-      endSl=beginSl+vi->blocksizes[v->lW]/2;
+      beginSl=ci->blocksizes[1]/4-ci->blocksizes[v->lW]/4;
+      endSl=beginSl+ci->blocksizes[v->lW]/2;
       break;
     }
 
