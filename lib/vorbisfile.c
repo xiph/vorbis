@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.69 2003/03/11 23:52:02 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.70 2003/08/18 05:34:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -735,7 +735,35 @@ int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
 
   return ov_open_callbacks((void *)f, vf, initial, ibytes, callbacks);
 }
+ 
+/* cheap hack for game usage where downsampling is desirable; there's
+   no need for SRC as we can just do it cheaply in libvorbis. */
+ 
+int ov_halfrate(OggVorbis_File *vf,int flag){
+  int i;
+  if(vf->vi==NULL)return OV_EINVAL;
+  if(!vf->seekable)return OV_EINVAL;
+  if(vf->ready_state>=STREAMSET)
+    _decode_clear(vf); /* clear out stream state; later on libvorbis
+                          will be able to swap this on the fly, but
+                          for now dumping the decode machine is needed
+                          to reinit the MDCT lookups.  1.1 libvorbis
+                          is planned to be able to switch on the fly */
   
+  for(i=0;i<vf->links;i++){
+    if(vorbis_synthesis_halfrate(vf->vi+i,flag)){
+      ov_halfrate(vf,0);
+      return OV_EINVAL;
+    }
+  }
+  return 0;
+}
+
+int ov_halfrate_p(OggVorbis_File *vf){
+  if(vf->vi==NULL)return OV_EINVAL;
+  return vorbis_synthesis_halfrate_p(vf->vi);
+}
+
 /* Only partially open the vorbis file; test for Vorbisness, and load
    the headers for the first chain.  Do not seek (although test for
    seekability).  Use ov_test_open to finish opening the file, else

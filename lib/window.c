@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.21 2003/03/06 22:05:26 xiphmont Exp $
+ last mod: $Id: window.c,v 1.22 2003/08/18 05:34:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -2084,35 +2084,26 @@ static float vwin8192[4096] = {
   1.0000000000F, 1.0000000000F, 1.0000000000F, 1.0000000000F, 
 };
 
-float *_vorbis_window_get(int type, int left){
-  switch(type){
-  case 0:
-    /* The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*pi*.5) */
-    switch(left){
-    case 32:
-      return(vwin64);
-    case 64:
-      return(vwin128);
-    case 128:
-      return(vwin256);
-    case 256:
-      return(vwin512);
-    case 512:
-      return(vwin1024);
-    case 1024:
-      return(vwin2048);
-    case 2048:
-      return(vwin4096);
-    case 4096:
-      return(vwin8192);
-    }
-  default:
-    return(NULL);
-  }
+static float *vwin[8] = {
+  vwin64,
+  vwin128,
+  vwin256,
+  vwin512,
+  vwin1024,
+  vwin2048,
+  vwin4096,
+  vwin8192,
+};
+
+float *_vorbis_window_get(int n){
+  return vwin[n];
 }
 
-void _vorbis_apply_window(float *d,float *window[2],long *blocksizes,
+void _vorbis_apply_window(float *d,int *winno,long *blocksizes,
 			  int lW,int W,int nW){
+  float *windowLW=vwin[winno[lW]];
+  float *windowNW=vwin[winno[nW]];
+
   lW=(W?lW:0);
   nW=(W?nW:0);
 
@@ -2133,10 +2124,10 @@ void _vorbis_apply_window(float *d,float *window[2],long *blocksizes,
       d[i]=0.f;
     
     for(p=0;i<leftend;i++,p++)
-      d[i]*=window[lW][p];
+      d[i]*=windowLW[p];
     
     for(i=rightbegin,p=rn/2-1;i<rightend;i++,p--)
-      d[i]*=window[nW][p];
+      d[i]*=windowNW[p];
     
     for(;i<n;i++)
       d[i]=0.f;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.43 2003/03/04 21:23:37 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.44 2003/08/18 05:34:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -211,6 +211,9 @@ extern int      vorbis_synthesis_pcmout(vorbis_dsp_state *v,float ***pcm);
 extern int      vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm);
 extern int      vorbis_synthesis_read(vorbis_dsp_state *v,int samples);
 extern long     vorbis_packet_blocksize(vorbis_info *vi,ogg_packet *op);
+
+extern int      vorbis_synthesis_halfrate(vorbis_info *v,int flag);
+extern int      vorbis_synthesis_halfrate_p(vorbis_info *v);
 
 /* Vorbis ERRORS and return codes ***********************************/
 
