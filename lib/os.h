@@ -13,9 +13,13 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.33 2003/09/02 05:11:53 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <math.h>
 #include <ogg/os_types.h>

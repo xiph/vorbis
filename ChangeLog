@@ -1,0 +1,8 @@
+2004-08-05  Thomas Vander Stichele  <thomas at apestaart dot org>
+
+	* autogen.sh:
+	  activate autoheader
+	* configure.in:
+	  generate config.h
+	* lib/os.h:
+	  include config.h because we use a define from it
