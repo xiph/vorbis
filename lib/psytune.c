@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.1 2000/03/29 03:49:28 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2 2000/03/29 20:08:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -29,44 +29,31 @@
 #include "scales.h"
 #include "lpc.h"
 
-/*
-   0      1      2      3      4     5      6     7     8     9 
-   0,   100,  200,   300,   400,   510,   630,  770,  920, 1080,
-
-   10    11    12     13     14     15     16    17    18    19
- 1270, 1480, 1720,  2000,  2320,  2700,  3150, 3700, 4400, 5300,
-
-   20    21    22     23     24     25     26 Bark
- 6400, 7700, 9500, 12000, 15500, 20500, 27000 Hz    */
-
 static vorbis_info_psy _psy_set0={
-  /* ATH */
-  { 70,  25,  15,  11,   9,   8, 7.5,   7,   7,   7,
-     6,   4,   2,   0,  -3,  -5,  -6,  -6,-4.5, 2.5,
-    11,  18, 21, 17, 25, 80,120}, 
-  /* master attenuation */
-  120.,
+  -130.,
 
-  /* mask1 attenuation proportion */
-  { .7, .75, .80, .83, .84, .85, .85, .85, .85, .85,
-    .00, .00, .00, .00, .00, .00, .00, .00, .00, .00,
-    /*  .85, .85, .85, .85, .00, .00, .00, .00, .00, .00,*/
-    .00, .00, .00, .00, .00, .00, .00},
-  /* mask1 slope */
-  {-40, -24, -12, -8., -4., -4, -4, -4, -4, -4,
-   -99, -99, -99, -99, -99,-99,-99,-99,-99,-99,
-   -99,-99,-99,-99,-99,-99,-99},
+  {-35.,-40.,-60.,-80.,-85.},
+  {-35.,-40.,-60.,-80.,-100.},
+  {-35.,-40.,-60.,-80.,-100.},
+  {-35.,-40.,-60.,-80.,-100.},
+  {-35.,-40.,-60.,-80.,-100.},
+  {-35.,-40.,-60.,-80.,-100.},
 
-  /* mask2 attenuation proportion */
-  { .60, .60, .60, .60, .55, .55, .50, .50, .50, .50,
-    .50, .50, .50, .50, .50, .50, .50, .50, .50, .55,
-    .60, .65, .66, .67, .68, .7, .7},      
-  /* mask2 slope */
-  {-40.,-24.,-11., -8., -6., -5.,-3.,-1.8, -1.8,-1.8,
-   -1.8,-1.8,-1.9,-1.9,-2, -2, -2, -2,-2,-1.8,
-   -1.7,-1.7,-1.6,-1.6,-1.6,-1.6,-1.6},
+  /*{-99,-99,-99,-99,-99},
+  {-99,-99,-99,-99,-99},
+  {-99,-99,-99,-99,-99},
+  {-99,-99,-99,-99,-99},
+  {-99,-99,-99,-99,-99},
+  {-99,-99,-99,-99,-99},*/
+  {-8.,-12.,-18.,-20.,-24.},
+  {-8.,-12.,-18.,-20.,-24.},
+  {-8.,-12.,-18.,-20.,-24.},
+  {-8.,-12.,-18.,-20.,-24.},
+  {-8.,-12.,-18.,-20.,-24.},
+  {-8.,-12.,-18.,-20.,-24.},
+  -25.,-12.,
 
-  -33., /* backward masking rolloff */
+  110.,
 
   .9998, .9997  /* attack/decay control */
 };
@@ -117,14 +104,9 @@ int main(int argc,char *argv[]){
   vorbis_look_psy p_look;
   long i,j,k;
 
-  drft_lookup fft_look;
   lpc_lookup lpc_look;
 
   int ath=0;
-  int mask1p=0;
-  int mask2p=0;
-  int mask3p=0;
-  int backp=0;
   int decayp=0;
 
   argv++;
@@ -137,28 +119,12 @@ int main(int argc,char *argv[]){
       if(argv[0][1]=='A'){
 	ath=0;
       }
-      if(argv[0][1]=='1'){
-	mask1p=0;
-      }
-      if(argv[0][1]=='2'){
-	mask2p=0;
-      }
-      if(argv[0][1]=='3'){
-	mask3p=0;
-      }
-      if(argv[0][1]=='B'){
-	backp=0;
-      }
       if(argv[0][1]=='D'){
 	decayp=0;
       }
       if(argv[0][1]=='X'){
 	ath=0;
-	mask1p=0;
-	mask2p=0;
-	mask3p=0;
 	decayp=0;
-	backp=0;
       }
     }else
       if(*argv[0]=='+'){
@@ -169,28 +135,12 @@ int main(int argc,char *argv[]){
 	if(argv[0][1]=='A'){
 	  ath=1;
 	}
-	if(argv[0][1]=='1'){
-	  mask1p=1;
-	}
-	if(argv[0][1]=='2'){
-	  mask2p=1;
-	}
-	if(argv[0][1]=='3'){
-	  mask3p=1;
-	}
-	if(argv[0][1]=='B'){
-	  backp=1;
-	}
 	if(argv[0][1]=='D'){
 	  decayp=1;
 	}
 	if(argv[0][1]=='X'){
 	  ath=1;
-	  mask1p=1;
-	  mask2p=1;
-	  mask3p=1;
 	  decayp=1;
-	  backp=1;
 	}
       }else
 	framesize=atoi(argv[0]);
@@ -214,6 +164,10 @@ int main(int argc,char *argv[]){
   _vp_psy_init(&p_look,&_psy_set0,framesize/2,44100);
   lpc_init(&lpc_look,framesize/2,256,44100,order);
 
+  for(i=0;i<11;i++)
+    for(j=0;j<9;j++)
+      analysis("Pcurve",i*10+j,p_look.curves[i][j],EHMER_MAX,0,1);
+
   for(j=0;j<framesize;j++)
     maskwindow[j]*=maskwindow[j];
 
@@ -229,7 +183,6 @@ int main(int argc,char *argv[]){
   fprintf(stderr,"Processing for frame size %d...\n",framesize);
 
   while(!eos){
-    long s;
     long bytes=fread(buffer2,1,framesize*2,stdin); 
     if(bytes<framesize*2)
       memset(buffer2+bytes,0,framesize*2-bytes);
@@ -256,8 +209,37 @@ int main(int argc,char *argv[]){
 	mdct_forward(&m_look,mask,mask);
 
 	analysis("maskmdct",frameno,mask,framesize/2,1,1);
-	_vp_tone_tone_mask(&p_look,mask,mask,
-			   1,1,decayp,decay[i]);
+
+	{
+	  double *iter=malloc(sizeof(double)*framesize/2);
+
+	  _vp_tone_tone_mask(&p_look,mask,floor,
+			     ath,0,decay[i]);
+	
+	  memcpy(iter,mask,sizeof(double)*framesize/2);
+	  for(j=0;j<framesize/2;j++)
+	    if(fabs(iter[j])<fromdB(floor[j]))iter[j]=0.;
+	  _vp_tone_tone_mask(&p_look,iter,iter,
+			     ath,0,decay[i]);
+	  for(j=0;j<framesize/2;j++)
+	    floor[j]=(floor[j]+iter[j])/2.;
+
+	  memcpy(iter,mask,sizeof(double)*framesize/2);
+	  for(j=0;j<framesize/2;j++)
+	    if(fabs(iter[j])<fromdB(floor[j]))iter[j]=0.;
+	  _vp_tone_tone_mask(&p_look,iter,iter,
+			     ath,0,decay[i]);
+	  for(j=0;j<framesize/2;j++)
+	    floor[j]=(floor[j]+iter[j])/2.;
+	  
+	  memcpy(iter,mask,sizeof(double)*framesize/2);
+	  for(j=0;j<framesize/2;j++)
+	    if(fabs(iter[j])<fromdB(floor[j]))iter[j]=0.;
+	  _vp_tone_tone_mask(&p_look,iter,mask,
+			     ath,0,decay[i]);
+	}	  
+
+
 	analysis("mask",frameno,mask,framesize/2,1,0);
 	analysis("lmask",frameno,mask,framesize/2,0,0);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
@@ -291,29 +273,25 @@ int main(int argc,char *argv[]){
 	  if(mask[j]==0)
 	    val=0;
 	  else{
-	    val=todB(pcm[i][j])-floor[j]-3.;
-	    if(val<-6.){
-	      val=0;
+	    val=rint((todB(pcm[i][j])-floor[j]));
+	    if(val<0.){
+	      val=0.;
 	    }else{
 	      nonz+=1;
-	      if(val<1.5){
-		val=1;
-	      }else{
-		val=rint(val/3.)+1;
-	      }
+	      val+=1;
+	      if(pcm[i][j]<0)val= -val;
 	    }
-	    if(pcm[i][j]<0)val= -val;
 	  }
-  
+	  
 	  acc+=log(fabs(val)*2.+1.)/log(2);
 	  tot++;
 	  if(val==0)
 	    pcm[i][j]=0.;
 	  else{
 	    if(val>0)
-	      pcm[i][j]=fromdB(val*3.+floor[j]-3.);
+	      pcm[i][j]=fromdB((val-1.)+floor[j]);
 	    else
-	      pcm[i][j]=-fromdB(floor[j]-val*3.-3.);
+	      pcm[i][j]=-fromdB(floor[j]-(val+1.));
 	  }
 	}
 
