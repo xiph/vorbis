@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.18 2002/10/16 02:43:48 xiphmont Exp $
+ last mod: $Id: window.c,v 1.19 2003/03/02 11:45:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -77,3 +77,4 @@ void _vorbis_apply_window(float *d,float *window[2],long *blocksizes,
       d[i]=0.f;
   }
 }
+

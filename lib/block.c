@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.68 2002/10/11 11:14:41 xiphmont Exp $
+ last mod: $Id: block.c,v 1.69 2003/03/02 11:45:17 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -673,7 +673,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
   v->sequence=vb->sequence;
   
-  if(vb->pcm){  /* not pcm to process if vorbis_synthesis_trackonly 
+  if(vb->pcm){  /* no pcm to process if vorbis_synthesis_trackonly 
 		   was called on block */
     int n=ci->blocksizes[v->W]/2;
     int n0=ci->blocksizes[0]/2;
@@ -691,8 +691,8 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       thisCenter=n1;
       prevCenter=0;
     }else{
-	thisCenter=0;
-	prevCenter=n1;
+      thisCenter=0;
+      prevCenter=n1;
     }
     
     /* v->pcm is now used like a two-stage double buffer.  We don't want
@@ -706,32 +706,36 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       if(v->lW){
 	if(v->W){
 	  /* large/large */
+	  float *w=b->window[1];
 	  float *pcm=v->pcm[j]+prevCenter;
 	  float *p=vb->pcm[j];
 	  for(i=0;i<n1;i++)
-	    pcm[i]+=p[i];
+	    pcm[i]=pcm[i]*w[n1-i-1] + p[i]*w[i];
 	}else{
 	  /* large/small */
+	  float *w=b->window[0];
 	  float *pcm=v->pcm[j]+prevCenter+n1/2-n0/2;
 	  float *p=vb->pcm[j];
 	  for(i=0;i<n0;i++)
-	    pcm[i]+=p[i];
+	    pcm[i]=pcm[i]*w[n0-i-1] +p[i]*w[i];
 	}
       }else{
 	if(v->W){
 	  /* small/large */
+	  float *w=b->window[0];
 	  float *pcm=v->pcm[j]+prevCenter;
 	  float *p=vb->pcm[j]+n1/2-n0/2;
 	  for(i=0;i<n0;i++)
-	    pcm[i]+=p[i];
+	    pcm[i]=pcm[i]*w[n0-i-1] +p[i]*w[i];
 	  for(;i<n1/2+n0/2;i++)
 	    pcm[i]=p[i];
 	}else{
 	  /* small/small */
+	  float *w=b->window[0];
 	  float *pcm=v->pcm[j]+prevCenter;
 	  float *p=vb->pcm[j];
 	  for(i=0;i<n0;i++)
-	    pcm[i]+=p[i];
+	    pcm[i]=pcm[i]*w[n0-i-1] +p[i]*w[i];
 	}
       }
       
@@ -796,7 +800,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 	  /* no preceeding granulepos; assume we started at zero (we'd
 	     have to in a short single-page stream) */
 	  /* granulepos could be -1 due to a seek, but that would result
-	     in a long coun`t, not short count */
+	     in a long count, not short count */
 	  
 	  v->pcm_current-=(b->sample_count-v->granulepos);
 	}else{
@@ -856,3 +860,97 @@ int vorbis_synthesis_read(vorbis_dsp_state *v,int n){
   return(0);
 }
 
+/* intended for use with a specific vorbisfile feature; we want access
+   to the [usually synthetic/postextrapolated] buffer and lapping at
+   the end of a decode cycle, specifically, a half-short-block worth.
+   This funtion works like pcmout above, except it will also expose
+   this implicit buffer data not normally decoded. */
+int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
+  vorbis_info *vi=v->vi;
+  codec_setup_info *ci=vi->codec_setup;
+  
+  int n=ci->blocksizes[v->W]/2;
+  int n0=ci->blocksizes[0]/2;
+  int n1=ci->blocksizes[1]/2;
+  int i,j;
+
+  if(v->pcm_returned<0)return 0;
+
+  /* our returned data ends at pcm_returned; because the synthesis pcm
+     buffer is a two-fragment ring, that means our data block may be
+     fragmented by buffering, wrapping or a short block not filling
+     out a buffer.  To simplify things, we unfragment if it's at all
+     possibly needed. Otherwise, we'd need to call lapout more than
+     once as well as hold additional dsp state.  Opt for
+     simplicity. */
+
+  /* centerW was advanced by blockin; it would be the center of the
+     *next* block */
+  if(v->centerW==n1){
+    /* the data buffer wraps; swap the halves */
+    /* slow, sure, small */
+    for(j=0;j<vi->channels;j++){
+      float *p=v->pcm[j];
+      for(i=0;i<n1;i++){
+	float temp=p[i];
+	p[i]=p[i+n1];
+	p[i+n1]=temp;
+      }
+    }
+
+    v->pcm_current-=n1;
+    v->pcm_returned-=n1;
+    v->centerW=0;
+  }
+  
+  if((v->lW^v->W)==1){
+    /* long/short or short/long */
+    for(j=0;j<vi->channels;j++){
+      float *s=v->pcm[j];
+      float *d=v->pcm[j]+(n1-n0)/2;
+      for(i=(n1+n0)/2-1;i>=0;--i)
+	d[i]=s[i];
+    }
+    v->pcm_returned+=(n1-n0)/2;
+    v->pcm_current+=(n1-n0)/2;
+  }else{
+    if(v->lW==0){
+      /* short/short */
+      for(j=0;j<vi->channels;j++){
+	float *s=v->pcm[j];
+	float *d=v->pcm[j]+n1-n0;
+	for(i=n0-1;i>=0;--i)
+	  d[i]=s[i];
+      }
+      v->pcm_returned+=n1-n0;
+      v->pcm_current+=n1-n0;
+    }
+  }
+    
+  if(pcm){
+    int i;
+    for(i=0;i<vi->channels;i++)
+      v->pcmret[i]=v->pcm[i]+v->pcm_returned;
+    *pcm=v->pcmret;
+  }
+
+  return(n1+n-v->pcm_returned);
+
+}
+
+void vorbis_splice(float *d,float *s,
+		   vorbis_dsp_state *v,int W){
+  
+  vorbis_info *vi=v->vi;
+  codec_setup_info *ci=vi->codec_setup;
+  private_state *b=v->backend_state;
+  int n=ci->blocksizes[W]/2;
+
+  float *wd=b->window[W];
+  float *ws=b->window[W]+n;
+  int i;
+
+  for(i=0;i<n;i++)
+    d[i]=d[i]*(*wd++) + s[i]*(*--ws);
+}
+	

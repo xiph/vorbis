@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.56 2002/10/17 06:06:59 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.57 2003/03/02 11:45:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -745,17 +745,6 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_info_mapping *l){
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
     mdct_backward(b->transform[vb->W][0],pcm,pcm);
-  }
-
-  /* window the data */
-  for(i=0;i<vi->channels;i++){
-    float *pcm=vb->pcm[i];
-    if(nonzero[i])
-      _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
-    else
-      for(j=0;j<n;j++)
-	pcm[j]=0.f;
-
   }
 
   /* all done! */
