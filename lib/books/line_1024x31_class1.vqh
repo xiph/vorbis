@@ -20,7 +20,7 @@
 #include "codebook.h"
 
 static long _huff_lengthlist_line_1024x31_class1[] = {
-	 1, 2, 4, 4, 7, 7,10,12, 4, 5, 7, 8,10,10,12,11,
+	 1, 2, 3, 6, 8, 9,11,11, 4, 5, 8,10,10, 9,11,11,
 };
 
 static static_codebook _huff_book_line_1024x31_class1 = {
