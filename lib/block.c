@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.46 2001/02/26 03:50:41 xiphmont Exp $
+ last mod: $Id: block.c,v 1.47 2001/03/26 23:27:42 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -617,9 +617,7 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
   _vds_shared_init(v,vi,0);
 
-  /* Adjust centerW to allow an easier mechanism for determining output */
-  v->pcm_returned=v->centerW;
-  v->centerW-= ci->blocksizes[v->W]/4+ci->blocksizes[v->lW]/4;
+  v->pcm_returned=-1;
   v->granulepos=-1;
   v->sequence=-1;
 
@@ -725,6 +723,12 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     
     }
 
+    /* deal with initial packet state; we do this using the explicit
+       pcm_returned==-1 flag otherwise we're sensitive to first block
+       being short or long */
+
+    if(v->pcm_returned==-1)
+      v->pcm_returned=centerW;
 
     /* track the frame number... This is for convenience, but also
        making sure our last packet doesn't end with added padding.  If
@@ -754,6 +758,9 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 	    /* partial last frame.  Strip the extra samples off */
 	    centerW-=extra;
 	  }else if(vb->sequence == 1){
+	    /* ^^^ argh, this can be 1 from seeking! */
+
+
 	    /* partial first frame.  Discard extra leading samples */
 	    v->pcm_returned+=extra;
 	    if(v->pcm_returned>centerW)v->pcm_returned=centerW;
