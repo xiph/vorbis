@@ -168,15 +168,18 @@ uses a single mapping type (0), with implicit PCM channel mappings.<p>
              <ol><li>if set, <tt>[vorbis_mapping_submaps]</tt> = read 4 bits as unsigned integer and add one<p>
                  <li>if unset, <tt>[vorbis_mapping_submaps]</tt> = 1<p>
              </ol>
-          <li>read 1 bit as a boolean flag; if set, square polar channel mapping is in use:<p>
-              <ol><li><tt>[vorbis_mapping_coupling_steps]</tt>= read 8 bits as unsigned integer and add one<p>
-                  <li>for <tt>[j]</tt> each of <tt>[vorbis_mapping_coupling_steps]</tt> steps:<p>
-                      <ol>
-                      <li>vector <tt>[vorbis_mapping_magnitude]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels] - 1) bits as unsigned integer<p>
-                      <li>vector <tt>[vorbis_mapping_angle]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels] - 1) bits as unsigned integer<p>
-                      <li>the numbers read in the above two steps are channel numbers representing the channel to treat as magnitude and the channel to treat as angle, respectively.  If for any coupling step the angle channel number equals the magnitude channel number, the magnitude channel number is greater than <tt>[audio_channels]</tt>-1, or the angle channel is greater than <tt>[audio_channels]</tt>-1, the stream is undecodable.<p>
-                      </ol>
-               </ol>
+          <li>read 1 bit as a boolean flag<p>
+	     <ol><li>if set, square polar channel mapping is in use:<p>
+                  <ol><li><tt>[vorbis_mapping_coupling_steps]</tt> = read 8 bits as unsigned integer and add one<p>
+                      <li>for <tt>[j]</tt> each of <tt>[vorbis_mapping_coupling_steps]</tt> steps:<p>
+                          <ol>
+                          <li>vector <tt>[vorbis_mapping_magnitude]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels] - 1) bits as unsigned integer<p>
+                          <li>vector <tt>[vorbis_mapping_angle]</tt> element <tt>[j]</tt>= read <a href="helper.html#ilog">ilog</a>([audio_channels] - 1) bits as unsigned integer<p>
+                          <li>the numbers read in the above two steps are channel numbers representing the channel to treat as magnitude and the channel to treat as angle, respectively.  If for any coupling step the angle channel number equals the magnitude channel number, the magnitude channel number is greater than <tt>[audio_channels]</tt>-1, or the angle channel is greater than <tt>[audio_channels]</tt>-1, the stream is undecodable.<p>
+                          </ol>
+                   </ol>
+               <li>if unset, <tt>[vorbis_mapping_coupling_steps]</tt> = 0
+	       </ol>
            <li>read 2 bits (reserved field); if the value is nonzero, the stream is undecodable<p>
            <li>if <tt>[vorbis_mapping_submaps]</tt> is greater than one, we read channel multiplex settings.  For each <tt>[j]</tt> of <tt>[audio_channels]</tt> channels:<p>
                <ol><li>vector <tt>[vorbis_mapping_mux]</tt> element <tt>[j]</tt> = read 4 bits as unsigned integer<p>
@@ -259,9 +262,10 @@ must ignore the packet and not attempt decoding it to audio</em>.
   </ol>
 </ol>
 
-Vorbis windows all use the slope function y=sin(2*PI*sin^2(x/n)),
-but dissimilar lapping requirements can affect overall shape.  Window
-generation proceeds as follows:<p>
+Vorbis windows all use the slope function y=sin( .5 * PI * sin^2( (x+.5) /
+n * PI) ) where n is window size and x ranges 0...n-1, but dissimilar
+lapping requirements can affect overall shape.  Window generation
+proceeds as follows:<p>
 
 <ol>
 <li> <tt>[window_center]</tt> = <tt>[n]</tt> / 2
@@ -289,12 +293,12 @@ generation proceeds as follows:<p>
     </ol>
 <li> window from range 0 ... <tt>[left_window_start]</tt>-1 inclusive is zero
 
-<li> for <tt>[i]</tt> in range <tt>[left_window_start]</tt> ... <tt>[left_window_end]</tt>-1, window(<tt>[i]</tt>) = sin(2*PI*sin^2((<tt>[i]</tt>-<tt>[left_window_start]</tt>+.5)/<tt>[left_n]</tt>*PI/2))
+<li> for <tt>[i]</tt> in range <tt>[left_window_start]</tt> ... <tt>[left_window_end]</tt>-1, window(<tt>[i]</tt>) = sin(.5 * PI * sin^2( (<tt>[i]</tt>-<tt>[left_window_start]</tt>+.5) / <tt>[left_n]</tt> * .5 * PI) )
 
 
 <li> window from range <tt>[left_window_end]</tt> ... <tt>[right_window_start]</tt>-1 inclusive is one
 
-<li> for <tt>[i]</tt> in range <tt>[right_window_start]</tt> ... <tt>[right_window_end]</tt>-1, window(<tt>[i]</tt>) = sin(2*PI*sin^2((<tt>[i]</tt>-<tt>[right_window_start]</tt>+.5)/<tt>[right_n]</tt>*PI/2.+PI/2.))
+<li> for <tt>[i]</tt> in range <tt>[right_window_start]</tt> ... <tt>[right_window_end]</tt>-1, window(<tt>[i]</tt>) = sin(.5 * PI * sin^2( (<tt>[i]</tt>-<tt>[right_window_start]</tt>+.5) / <tt>[right_n]</tt> * .5 * PI/2. + .5 * PI) )
 
 <li> window from range <tt>[rigth_window_start]</tt> ... <tt>[n]</tt>-1 is zero
 

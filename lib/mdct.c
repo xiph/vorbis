@@ -12,7 +12,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [64 <= n ]
- last mod: $Id: mdct.c,v 1.31 2002/06/28 22:19:36 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.32 2002/10/16 02:43:48 xiphmont Exp $
 
  Original algorithm adapted long ago from _The use of multirate filter
  banks for coding of high quality digital audio_, by T. Sporer,
@@ -26,7 +26,7 @@
 
  This module DOES NOT INCLUDE code to generate/apply the window
  function.  Everybody has their own weird favorite including me... I
- happen to like the properties of y=sin(2PI*sin^2(x)), but others may
+ happen to like the properties of y=sin(.5PI*sin^2(x)), but others may
  vehemently disagree.
 
  ********************************************************************/

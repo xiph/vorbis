@@ -6,7 +6,7 @@
 Ogg Vorbis I format specification: floor type 1 setup and decode
 </font></h1>
 
-<em>Last update to this document: September 19, 2002</em><br>
+<em>Last update to this document: October 15, 2002</em><br>
 
 <h1>Overview</h1>
 
@@ -247,8 +247,8 @@ Unwrap the always-positive-or-zero values read from the packet into
        8) [high_neighbor_offset] = <a href="helper.html#high_neighbor">high_neighbor</a>([floor1_X_list],[i])
 
        9) [predicted] = <a href="helper.html#render_point">render_point</a>( vector [floor1_X_list] element [low_neighbor_offset],
-                                      vector [floor1_X_list] element [high_neighbor_offset],
 				      vector [floor1_final_Y] element [low_neighbor_offset],
+                                      vector [floor1_X_list] element [high_neighbor_offset],
 				      vector [floor1_final_Y] element [high_neighbor_offset],
                                       vector [floor1_X_list] element [i] )
 
@@ -278,7 +278,7 @@ Unwrap the always-positive-or-zero values read from the packet into
 		     
 		      } else [hiroom] is not greater than [lowroom] {
               
-                        23) vector [floor1_final_Y] element [i] = [predicted] - ([val] - [lowroom]) - 1
+                        23) vector [floor1_final_Y] element [i] = [predicted] - [val] + [hiroom] - 1
                    
                       }
                
@@ -287,7 +287,7 @@ Unwrap the always-positive-or-zero values read from the packet into
 		  24) if ([val] is odd) {
                  
                         25) vector [floor1_final_Y] element [i] = 
-                            [predicted] - (([val] - 1) divided by  2 using integer division)
+                            [predicted] - (([val] + 1) divided by  2 using integer division)
 
                       } else [val] is even {
 
@@ -342,22 +342,22 @@ Then compute the final curve in one pass:<p>
 
              6) [hy] = [floor1_final_Y]' element [i] * [floor1_multiplier]
  	     7) [hx] = [floor1_X_list]' element [i]
-             8) <a href="helper.html#render_line">render_line</a>( [lx], [hx], [ly], [hy], [floor] )
+             8) <a href="helper.html#render_line">render_line</a>( [lx], [ly], [hx], [hy], [floor] )
              9) [lx] = [hx]
 	    10) [ly] = [hy]
           }
+     }
  
-      11) if ( [hx] is less than [n] ) {
+ 11) if ( [hx] is less than [n] ) {
 
-            12) <a href="helper.html#render_line">render_line</a>( [hx], [hy], [n], [hy], [floor] )
+       12) <a href="helper.html#render_line">render_line</a>( [hx], [hy], [n], [hy], [floor] )
 
-          }
+     }
 
-      13) if ( [hx] is greater than [n] ) {
+ 13) if ( [hx] is greater than [n] ) {
 
-            14) truncate vector [floor] to [n] elements
+       14) truncate vector [floor] to [n] elements
 
-          }
      }
  
  15) for each scalar in vector [floor], perform a lookup substitution using 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.17 2002/03/23 03:17:34 xiphmont Exp $
+ last mod: $Id: window.c,v 1.18 2002/10/16 02:43:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,7 +26,7 @@ float *_vorbis_window(int type, int left){
 
   switch(type){
   case 0:
-    /* The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*2pi) */
+    /* The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*pi*.5) */
     {
     
       for(i=0;i<left;i++){
