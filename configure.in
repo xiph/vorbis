@@ -143,7 +143,7 @@ dnl --------------------------------------------------
 AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
-AM_PATH_OGG(1.0.0, have_ogg=yes, have_ogg=no)
+AM_PATH_OGG(have_ogg=yes, have_ogg=no)
 
 dnl --------------------------------------------------
 dnl Check for library functions
@@ -162,4 +162,4 @@ AC_SUBST(PROFILE)
 AC_SUBST(CC)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile vorbis-config lib/Makefile doc/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)
+AC_OUTPUT(Makefile lib/Makefile doc/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)

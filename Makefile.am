@@ -4,7 +4,6 @@ AUTOMAKE_OPTIONS = foreign dist-zip
 
 SUBDIRS = lib include doc examples
 
-bin_SCRIPTS = vorbis-config
 m4datadir = $(datadir)/aclocal
 m4data_DATA = vorbis.m4
 
