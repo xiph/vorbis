@@ -1,7 +1,7 @@
 <section id="vorbis-spec-codebook">
 <sectioninfo>
 <releaseinfo>
- $Id: 03-codebook.xml,v 1.1 2002/10/12 20:37:11 giles Exp $
+ $Id: 03-codebook.xml,v 1.2 2002/10/14 23:47:54 giles Exp $
  <emphasis>Last update to this document: August 8, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -23,12 +23,10 @@ decoded output corresponding to a given compressed codeword.</para>
 
 <section><title>bitwise operation</title>
 <para>
-The codebook mechanism is built on top of the
-<ulink url="vorbis-spec-bitpack.html">Vorbis bitpacker</ulink>; both the
-codebooks themselves and the codewords they decode are unrolled from a
-packet as a series of arbitrary-width values read from the stream
-according to the <ulink url="vorbis-spec-bitpack.html">Vorbis bitpacking
-convention</ulink>.</para>
+The codebook mechanism is built on top of the vorbis bitpacker. Both
+the codebooks themselves and the codewords they decode are unrolled 
+from a packet as a series of arbitrary-width values read from the 
+stream according to <xref linkend="vorbis-spec-bitpacking"/>.</para>
 </section>
 
 </section>
@@ -39,9 +37,8 @@ convention</ulink>.</para>
 <para>
 For purposes of the below examples, we assume that the storage
 system's native byte width is eight bits.  This is not universally
-true; see <ulink url="vorbis-spec-bitpack.html">the Vorbis bitpacking
-convention</ulink> document for discussion relating to non-eight-bit
-bytes.</para>
+true; see <xref linkend="vorbis-spec-bitpacking"/> for discussion 
+relating to non-eight-bit bytes.</para>
 
 <section><title>codebook decode</title>
 
@@ -137,8 +134,7 @@ byte 8: [             X 1 ] [sparse] flag (1 bit)
 <screen>
   1) [current_entry] = 0;
   2) [current_length] = read a five bit unsigned integer and add 1;
-  3) [number] = read <ulink
-url="helper.html#ilog">ilog</ulink>([codebook_entries] -
+  3) [number] = read <link linkend="vorbis-spec-ilog">ilog</link>([codebook_entries] -
 [current_entry])
 bits as an unsigned integer
   4) set the entries [current_entry] through [current_entry]+[number]-1, inclusive, 
@@ -189,19 +185,14 @@ vector explicitly, rather than building vectors from a smaller list of
 possible scalar values.  Lookup decode proceeds as follows:
 
 <screen>
-  1) [codebook_minimum_value] =
-<ulink url="helper.html#float32_unpack">float32_unpack</ulink>( read 32
-bits as an unsigned integer) 
-  2) [codebook_delta_value] = <ulink url="helper.html#float32_unpack">float32_unpack</ulink>( read 32 bits as
-an unsigned integer) 
+  1) [codebook_minimum_value] = <link linkend="vorbis-spec-float32_unpack">float32_unpack</link>( read 32 bits as an unsigned integer) 
+  2) [codebook_delta_value] = <link linkend="vorbis-spec-float32_unpack">float32_unpack</link>( read 32 bits as an unsigned integer) 
   3) [codebook_value_bits] = read 4 bits as an unsigned integer and add 1
   4) [codebook_sequence_p] = read 1 bit as a boolean flag
 
   if ( [codebook_lookup_type] is 1 ) {
    
-     5) [codebook_lookup_values] =
-<ulink url="helper.html#lookup1_values">lookup1_values</ulink>(
-<varname>[codebook_entries]</varname>, <varname>[codebook_dimensions]</varname> )
+     5) [codebook_lookup_values] = <link linkend="vorbis-spec-lookup1_values">lookup1_values</link>(<varname>[codebook_entries]</varname>, <varname>[codebook_dimensions]</varname> )
 
   } else {
 
@@ -340,7 +331,7 @@ the [codebook_multiplicands] array
 </para>
 
 <para>
-Decoding [unpacking] a specific vector in the vector lookup table
+Decoding (unpacking) a specific vector in the vector lookup table
 proceeds according to <varname>[codebook_lookup_type]</varname>.  The unpacked
 vector values are what a codebook would return during audio packet
 decode in a VQ context.</para>

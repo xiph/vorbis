@@ -1,7 +1,7 @@
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.1 2002/10/12 20:37:11 giles Exp $
+ $Id: 04-codec.xml,v 1.2 2002/10/14 23:47:54 giles Exp $
  <emphasis>Last update to this document: September 20, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -619,10 +619,10 @@ representation.</para>
 Convert the audio spectrum vector of each channel back into time
 domain PCM audio via an inverse Modified Discrete Cosine Transform
 (MDCT).  A detailed description of the MDCT is available in the paper
-<ulink
-url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">_The
+<citetitle pubwork="article"><ulink
+url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">The
 use of multirate filter banks for coding of high quality digital
-audio_</ulink>, by T. Sporer, K. Brandenburg and B. Edler.  The window
+audio</ulink></citetitle>, by T. Sporer, K. Brandenburg and B. Edler.  The window
 function used for the MDCT is the window determined earlier.</para>
 
 </section>
@@ -704,7 +704,7 @@ center, front right, rear left, rear right, LFE</simpara>
 <para>
 Applications using Vorbis for dedicated purposes may define channel
 mapping as seen fit.  Future channel mappings (such as three and four
-channel <ulink url="http://www.ambisonic.net">Ambisonics</ulink>) will
+channel <ulink url="http://www.ambisonic.net/">Ambisonics</ulink>) will
 make use of channel mappings other than mapping 0.</para>
 
 </section>

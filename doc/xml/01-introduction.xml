@@ -1,7 +1,7 @@
 <section id="vorbis-spec-intro">
 <sectioninfo>
 <releaseinfo>
- $Id: 01-introduction.xml,v 1.2 2002/10/13 15:18:46 giles Exp $
+ $Id: 01-introduction.xml,v 1.3 2002/10/14 23:47:54 giles Exp $
 <emphasis>Last update to this document: July 18, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -12,11 +12,10 @@
 
 <para>
 This document provides a high level description of the Vorbis codec's
-construction.  A bit-by-bit specification appears beginning in the <ulink
-url="vorbis-spec-ref.html">packet specification and reference</ulink>
-document.  The other reference documents assumes a high-level
-understanding of the Vorbis decode process, which is provided in this
-document.</para>
+construction.  A bit-by-bit specification appears beginning in <xref
+linkend="vorbis-spec-codec"/>. The other reference documents assumes
+a high-level understanding of the Vorbis decode process, which is 
+provided in this document.</para>
 
 <section>
 <title>Application</title>
@@ -469,10 +468,11 @@ decode.</para>
 
 <para>
 A description of valid window functions for use with an inverse MDCT
-can be found in the paper <ulink
-url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">_The
-use of multirate filter banks for coding of high quality digital
-audio_</ulink>, by T. Sporer, K. Brandenburg and B. Edler.  Vorbis windows
+can be found in the paper 
+<citetitle pubwork="article">
+<ulink url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">
+The use of multirate filter banks for coding of high quality digital
+audio</ulink></citetitle>, by T. Sporer, K. Brandenburg and B. Edler.  Vorbis windows
 all use the slope function 
   <inlineequation>
     <alt>y=sin(2PI*sin^2(x/n))</alt>
@@ -590,10 +590,11 @@ representation.</para>
 <para>
 The audio spectrum is converted back into time domain PCM audio via an
 inverse Modified Discrete Cosine Transform (MDCT).  A detailed
-description of the MDCT is available in the paper <ulink
-url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">_The
-use of multirate filter banks for coding of high quality digital
-audio_</ulink>, by T. Sporer, K. Brandenburg and B. Edler.</para>
+description of the MDCT is available in the paper 
+<citetitle pubwork="article"><ulink
+url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">
+The use of multirate filter banks for coding of high quality digital
+audio</ulink></citetitle>, by T. Sporer, K. Brandenburg and B. Edler.</para>
 
 <para>
 Note that the PCM produced directly from the MDCT is not yet finished
