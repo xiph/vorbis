@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.19 2000/11/14 00:05:31 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.20 2000/11/17 11:47:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,7 @@
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "codebook.h"
+#include "bitbuffer.h"
 #include "registry.h"
 #include "psy.h"
 #include "misc.h"
@@ -222,8 +223,20 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
 
   float **pcmbundle=alloca(sizeof(float *)*vi->channels);
-  int *nonzero=alloca(sizeof(int)*vi->channels);
- 
+
+  int    *nonzero=alloca(sizeof(int)*vi->channels);
+  float **floor=_vorbis_block_alloc(vb,vi->channels*sizeof(float *));
+  float **nonquant=_vorbis_block_alloc(vb,vi->channels*sizeof(float *));
+
+  vorbis_bitbuffer      vbb_res;
+  vorbis_bitbuffer      *vbb_flr=_vorbis_block_alloc(vb,
+						     sizeof(vorbis_bitbuffer)*
+						     vi->channels);
+
+  for(i=0;i<vi->channels;i++)
+    bitbuf_init(vbb_flr+i,vb);
+  bitbuf_init(&vbb_res,vb);
+  
   /* time domain pre-window: NONE IMPLEMENTED */
 
   /* window the PCM data: takes PCM vector, vb; modifies PCM vector */
@@ -240,16 +253,22 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
+    float *outq=nonquant[i]=_vorbis_block_alloc(vb,n*sizeof(float));
     mdct_forward(b->transform[vb->W][0],pcm,pcm);
+
+    memcpy(pcm+n/2,pcm,n*sizeof(float)/2);
+    mdct_backward(b->transform[vb->W][0],pcm,outq);
+    for(j=0;j<n;j++)
+      outq[j]*=window[j];
+    
   }
 
   {
-    float *floor=_vorbis_block_alloc(vb,n*sizeof(float)/2);
-    
     for(i=0;i<vi->channels;i++){
       float *pcm=vb->pcm[i];
       float *decay=look->decay[i];
       int submap=info->chmuxlist[i];
+      floor[i]=_vorbis_block_alloc(vb,n*sizeof(float)/2);
 
       /* if some other mode/mapping was called last frame, our decay
          accumulator is out of date.  Clear it. */
@@ -257,21 +276,21 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	memset(decay,0,n*sizeof(float)/2);
 
       /* perform psychoacoustics; do masking */
-      _vp_compute_mask(look->psy_look+submap,pcm,floor,decay);
+      _vp_compute_mask(look->psy_look+submap,pcm,floor[i],decay);
  
       _analysis_output("decay",seq,decay,n/2,0,1);
       _analysis_output("mdct",seq,pcm,n/2,0,1);
       _analysis_output("lmdct",seq,pcm,n/2,0,0);
-      _analysis_output("prefloor",seq,floor,n/2,0,1);
+      _analysis_output("prefloor",seq,floor[i],n/2,0,1);
 
       /* perform floor encoding */
       nonzero[i]=look->floor_func[submap]->
-	forward(vb,look->floor_look[submap],floor,floor);
+	forward(vb,look->floor_look[submap],floor[i],floor[i],vbb_flr+i);
 
-      _analysis_output("floor",seq,floor,n/2,0,1);
+      _analysis_output("floor",seq,floor[i],n/2,0,1);
 
       /* apply the floor, do optional noise levelling */
-      _vp_apply_floor(look->psy_look+submap,pcm,floor);
+      _vp_apply_floor(look->psy_look+submap,pcm,floor[i]);
       
       _analysis_output("res",seq++,pcm,n/2,0,0);
       
@@ -299,14 +318,64 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     for(i=0;i<info->submaps;i++){
       int ch_in_bundle=0;
       for(j=0;j<vi->channels;j++){
-	if(info->chmuxlist[j]==i && nonzero[j]==1){
+	if(info->chmuxlist[j]==i && nonzero[j]>0){
 	  pcmbundle[ch_in_bundle++]=vb->pcm[j];
 	}
       }
       
       look->residue_func[i]->forward(vb,look->residue_look[i],
-				     pcmbundle,ch_in_bundle);
+				     pcmbundle,ch_in_bundle,&vbb_res);
     }
+
+    /* go back and compute the original MDCT inverse and our quantized
+       inverse; we'll want to give the floor mapping a shot at
+       massaging things before we write out the final version. */
+
+    {
+      static int seq=0;
+      for(i=0;i<vi->channels;i++){
+	float *pcm=vb->pcm[i];
+	float *pcmori=vb->pcm[i]+n/2;
+	float *orig=nonquant[i];
+	float *quant=floor[i];
+	float num=0.,den=0.;
+	int submap=info->chmuxlist[i];
+	
+	if(nonzero[i]){
+	  
+	  for(j=0;j<n/2;j++)
+	    pcm[j]=pcmori[j]-pcm[j]*quant[j];
+	  
+	  mdct_backward(b->transform[vb->W][0],pcm,pcm);
+	  for(j=0;j<n;j++)
+	    pcm[j]*=window[j];
+	  
+	  /* weighted compare twixt original and quantized mdct output */
+	  for(j=0;j<n;j++){
+	    den+=(pcm[j]*pcm[j]);
+	    num+=(orig[j]*orig[j]);
+	  }
+	  
+	  num=sqrt(num);
+	  den=sqrt(den);
+
+	}
+
+	num=look->floor_func[submap]->
+	  forward2(vb,look->floor_look[submap],
+		   nonzero[i],den==0.?0:num/den,vbb_flr+i);
+
+	/*for(j=0;j<n;j++)
+	  pcm[j]*=num;
+	_analysis_output("i_orig",seq,orig,n,0,0);
+	_analysis_output("i_quant",seq++,pcm,n,0,0);
+	*/
+
+      }
+    }
+
+    bitbuf_pack(&vb->opb,&vbb_res);
+
   }
 
   look->lastframe=vb->sequence;

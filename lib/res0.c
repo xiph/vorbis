@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.21 2000/11/14 00:05:31 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.22 2000/11/17 11:47:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,6 +32,7 @@
 #include "codebook.h"
 #include "misc.h"
 #include "os.h"
+#include "bitbuffer.h"
 
 typedef struct {
   vorbis_info_residue0 *info;
@@ -211,11 +212,10 @@ static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
   return(i);
 }
 
-static int _encodepart(oggpack_buffer *opb,float *vec, int n,
+static int _encodepart(vorbis_bitbuffer *vbb,float *vec, int n,
 		       int stages, codebook **books,int mode,int part){
-  int i,j,bits=0,flag=0;
-
-  for(j=0;j<stages;j++){
+  int i,j=0,bits=0;
+  if(stages){
     int dim=books[j]->dim;
     int step=n/dim;
     for(i=0;i<step;i++){
@@ -230,13 +230,10 @@ static int _encodepart(oggpack_buffer *opb,float *vec, int n,
 	fclose(f);
       }
 #endif
-      bits+=vorbis_book_encode(books[j],entry,opb);
-      if(entry!=books[j]->zeroentry)flag=1;
-
+      bits+=vorbis_book_bufencode(books[j],entry,vbb);
     }
   }
-
-  return(flag);
+  return(bits);
 }
 
 static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
@@ -258,7 +255,7 @@ static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
 }
 
 int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
-	    float **in,int ch){
+	    float **in,int ch,vorbis_bitbuffer *vbb){
   long i,j,k,l;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
@@ -275,7 +272,6 @@ int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(long *));
-  long lastbyte,lastbit;;
 
   partvals=partwords*partitions_per_word;
 
@@ -304,8 +300,6 @@ int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
      residual words for that partition word.  Then write the next
      partition channel words... */
   
-  lastbyte=vb->opb.endbyte;
-  lastbit=vb->opb.endbit;
   for(i=info->begin,l=0;i<info->end;){
     
     /* first we encode a partition codeword for each channel */
@@ -313,36 +307,25 @@ int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
       long val=partword[j][l];
       for(k=1;k<partitions_per_word;k++)
 	val= val*possible_partitions+partword[j][l+k];
-      phrasebits+=vorbis_book_encode(look->phrasebook,val,&vb->opb);
+      phrasebits+=vorbis_book_bufencode(look->phrasebook,val,vbb);
     }
     /* now we encode interleaved residual values for the partitions */
     for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition)
       for(j=0;j<ch;j++){
 	/*resbits[partword[j][l]]+=*/
-	int flag=_encodepart(&vb->opb,in[j]+i,samples_per_partition,
-			     info->secondstages[partword[j][l]],
-			     look->partbooks[partword[j][l]],look->map,partword[j][l]);
+	resbitsT+=_encodepart(vbb,in[j]+i,samples_per_partition,
+			      info->secondstages[partword[j][l]],
+			      look->partbooks[partword[j][l]],look->map,partword[j][l]);
 	resvals[partword[j][l]]+=samples_per_partition;
-	if(flag){
-	  lastbyte=vb->opb.endbyte;
-	  lastbit=vb->opb.endbit;
-	}
       }
       
   }
 
-  /* grab a free byte or two here and there */
-  if(lastbyte<vb->opb.endbyte){
-    vb->opb.endbyte=lastbyte;
-    vb->opb.endbit=lastbit;  /* yeah overengineered */
-  }
-
-
-  /*for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];*/
+  for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];
   /*fprintf(stderr,
-	  "Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
-	  ch*(info->end-info->begin),phrasebits,resbitsT);
-  for(i=0;i<possible_partitions;i++)
+    "Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
+    ch*(info->end-info->begin),phrasebits,resbitsT);
+    for(i=0;i<possible_partitions;i++)
     fprintf(stderr,"%ld(%ld):%ld ",i,resvals[i],resbits[i]);
     fprintf(stderr,"\n");*/
  

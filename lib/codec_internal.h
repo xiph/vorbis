@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.2 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.3 2000/11/17 11:47:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,6 +22,7 @@
 #include "envelope.h"
 #include "codebook.h"
 #include "psy.h"
+#include "bitbuffer.h"
 
 typedef void vorbis_look_time;
 typedef void vorbis_look_mapping;

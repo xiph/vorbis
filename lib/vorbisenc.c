@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.3 2000/11/08 06:08:12 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.4 2000/11/17 11:47:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -115,7 +115,7 @@ int vorbis_encode_init(vorbis_info *vi,
 
   /* copy a mode into our allocated storage */
   bpch=nominal_bitrate/channels;
-  if(bpch<55000){
+  if(bpch<60000){
     /* mode A */
     mode=&info_AA;
   }else if(bpch<75000){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.28 2000/11/14 00:05:31 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.29 2000/11/17 11:47:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -239,13 +239,14 @@ float _curve_to_lpc(float *curve,float *lpc,
 
 /* generate the whole freq response curve of an LSP IIR filter */
 static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
-		    float *in,float *out){
+		    float *in,float *out,vorbis_bitbuffer *vbb){
   long j;
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   float *work=alloca((look->ln+look->n)*sizeof(float));
   float amp;
   long bits=0;
+  long val=0;
   static int seq=0;
 
 #ifdef TRAIN_LSP
@@ -278,25 +279,25 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
   {
     long maxval=(1L<<info->ampbits)-1;
     
-    long val=rint(amp/info->ampdB*maxval);
+    val=rint(amp/info->ampdB*maxval);
 
     if(val<0)val=0;           /* likely */
     if(val>maxval)val=maxval; /* not bloody likely */
 
-    oggpack_write(&vb->opb,val,info->ampbits);
+    /*oggpack_write(&vb->opb,val,info->ampbits);*/
     if(val>0)
       amp=(float)val/maxval*info->ampdB;
     else
       amp=0;
   }
 
-  if(amp>0){
+  if(val){
 
     /* the spec supports using one of a number of codebooks.  Right
        now, encode using this lib supports only one */
     backend_lookup_state *be=vb->vd->backend_state;
     codebook *b=be->fullbooks+info->books[0];
-    oggpack_write(&vb->opb,0,_ilog(info->numbooks));
+    bitbuf_write(vbb,0,_ilog(info->numbooks));
 
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
@@ -334,7 +335,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 
     for(j=0;j<look->m;j+=b->dim){
       int entry=_f0_fit(b,out,work,j);
-      bits+=vorbis_book_encode(b,entry,&vb->opb);
+      bits+=vorbis_book_bufencode(b,entry,vbb);
 
 #ifdef TRAIN_LSP
       fprintf(ef,"%d,\n",entry);
@@ -360,13 +361,34 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_curve(out,look->linearmap,look->n,look->ln,
 			work,look->m,amp,info->ampdB);
-    return(1);
+    return(val);
   }
 
   memset(out,0,sizeof(float)*look->n);
   seq++;
-  return(0);
+  return(val);
 }
+
+static float floor0_forward2(vorbis_block *vb,vorbis_look_floor *i,
+			  long amp,float error,
+			  vorbis_bitbuffer *vbb){
+
+  if(amp){
+    vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
+    vorbis_info_floor0 *info=look->vi;
+    long maxval=(1L<<info->ampbits)-1;
+    long adj=rint(todB(error)/info->ampdB*maxval/2);
+    
+    amp+=adj;
+    if(amp<1)amp=1;
+   
+    oggpack_write(&vb->opb,amp,info->ampbits);
+    bitbuf_pack(&vb->opb,vbb);
+    return(fromdB((float)adj/maxval*info->ampdB));
+  }
+  return(0.);
+}
+
 
 static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
@@ -409,7 +431,7 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
 /* export hooks */
 vorbis_func_floor floor0_exportbundle={
   &floor0_pack,&floor0_unpack,&floor0_look,&floor0_copy_info,&floor0_free_info,
-  &floor0_free_look,&floor0_forward,&floor0_inverse
+  &floor0_free_look,&floor0_forward,&floor0_forward2,&floor0_inverse
 };
 
 
