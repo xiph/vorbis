@@ -44,7 +44,7 @@ static long _vq_lengthlist_res0_1024a_128_7[] = {
 	13,14,14,15,11,13,14,14,15,
 };
 
-static double _vq_quantthresh_res0_1024a_128_7[] = {
+static float _vq_quantthresh_res0_1024a_128_7[] = {
 	-5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
 	3.5, 5, 
 };

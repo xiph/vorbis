@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: miscellaneous prototypes
- last mod: $Id: misc.h,v 1.4 2000/05/08 20:49:49 xiphmont Exp $
+ last mod: $Id: misc.h,v 1.5 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,7 @@
 
 extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
 extern void _vorbis_block_ripcord(vorbis_block *vb);
-extern void _analysis_output(char *base,int i,double *v,int n,int bark,int dB);
+extern void _analysis_output(char *base,int i,float *v,int n,int bark,int dB);
 
 #ifdef DEBUG_LEAKS
 extern void *_VDBG_malloc(void *ptr,long bytes,char *file,long line); 

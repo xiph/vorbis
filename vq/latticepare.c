@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.4 2000/07/12 09:36:18 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.5 2000/10/12 03:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,20 +59,20 @@
    produces a new output book on stdout 
 */
 
-static double _dist(int el,double *a, double *b){
+static float _dist(int el,float *a, float *b){
   int i;
-  double acc=0.;
+  float acc=0.;
   for(i=0;i<el;i++){
-    double val=(a[i]-b[i]);
+    float val=(a[i]-b[i]);
     acc+=val*val;
   }
   return(acc);
 }
 
-static double *pointlist;
+static float *pointlist;
 static long points=0;
 
-void add_vector(codebook *b,double *vec,long n){
+void add_vector(codebook *b,float *vec,long n){
   int dim=b->dim,i,j;
   int step=n/dim;
   for(i=0;i<step;i++){
@@ -82,7 +82,7 @@ void add_vector(codebook *b,double *vec,long n){
   }
 }
 
-static int bestm(codebook *b,double *vec){
+static int bestm(codebook *b,float *vec){
   encode_aux_threshmatch *tt=b->c->thresh_tree;
   int dim=b->dim;
   int i,k,o;
@@ -100,12 +100,12 @@ static int bestm(codebook *b,double *vec){
   return(best);
 }
 
-static int closest(codebook *b,double *vec,int current){
+static int closest(codebook *b,float *vec,int current){
   encode_aux_threshmatch *tt=b->c->thresh_tree;
   int dim=b->dim;
   int i,k,o;
 
-  double bestmetric=0;
+  float bestmetric=0;
   int bestentry=-1;
   int best=bestm(b,vec);
 
@@ -113,7 +113,7 @@ static int closest(codebook *b,double *vec,int current){
 
   for(i=0;i<b->entries;i++){
     if(b->c->lengthlist[i]>0 && i!=best && i!=current){
-      double thismetric=_dist(dim, vec, b->valuelist+i*dim);
+      float thismetric=_dist(dim, vec, b->valuelist+i*dim);
       if(bestentry==-1 || thismetric<bestmetric){
 	bestentry=i;
 	bestmetric=thismetric;
@@ -124,15 +124,15 @@ static int closest(codebook *b,double *vec,int current){
   return(bestentry);
 }
 
-static double _heuristic(codebook *b,double *ppt,int secondbest){
-  double *secondcell=b->valuelist+secondbest*b->dim;
+static float _heuristic(codebook *b,float *ppt,int secondbest){
+  float *secondcell=b->valuelist+secondbest*b->dim;
   int best=bestm(b,ppt);
-  double *firstcell=b->valuelist+best*b->dim;
-  double error=_dist(b->dim,firstcell,secondcell);
-  double *zero=alloca(b->dim*sizeof(double));
-  double fromzero;
+  float *firstcell=b->valuelist+best*b->dim;
+  float error=_dist(b->dim,firstcell,secondcell);
+  float *zero=alloca(b->dim*sizeof(float));
+  float fromzero;
   
-  memset(zero,0,b->dim*sizeof(double));
+  memset(zero,0,b->dim*sizeof(float));
   fromzero=sqrt(_dist(b->dim,firstcell,zero));
 
   return(error/fromzero);
@@ -217,7 +217,7 @@ int main(int argc,char *argv[]){
 	    int cols;
 	    long lines=0;
 	    char *line;
-	    double *vec;
+	    float *vec;
 	    FILE *in=fopen(name,"r");
 	    if(!in){
 	      fprintf(stderr,"Could not open input file %s\n",name);
@@ -235,7 +235,7 @@ int main(int argc,char *argv[]){
 		while(*temp==' ')temp++;
 	      }
 	    }
-	    vec=alloca(cols*sizeof(double));
+	    vec=alloca(cols*sizeof(float));
 	    /* count, then load, to avoid fragmenting the hell out of
 	       memory */
 	    while(line){
@@ -248,7 +248,7 @@ int main(int argc,char *argv[]){
 	      if((lines&0xff)==0)spinnit("counting samples...",lines*cols);
 	      line=setup_line(in);
 	    }
-	    pointlist=malloc((cols*lines+entries*dim)*sizeof(double));
+	    pointlist=malloc((cols*lines+entries*dim)*sizeof(float));
 	    
 	    rewind(in);
 	    line=setup_line(in);
@@ -319,8 +319,8 @@ int main(int argc,char *argv[]){
 
     long *cellcount=calloc(entries,sizeof(long));
     long *cellcount2=calloc(entries,sizeof(long));
-    double *cellerror=calloc(entries,sizeof(double));
-    double *cellerrormax=calloc(entries,sizeof(double));
+    float *cellerror=calloc(entries,sizeof(float));
+    float *cellerrormax=calloc(entries,sizeof(float));
     long cellsleft=entries;
     for(i=0;i<points;i++)membership[i]=-1;
     for(i=0;i<entries;i++)firsthead[i]=-1;
@@ -330,11 +330,11 @@ int main(int argc,char *argv[]){
     for(i=0;i<points;i++){
       /* assign vectors to the nearest cell.  Also keep track of second
 	 nearest for error statistics */
-      double *ppt=pointlist+i*dim;
+      float *ppt=pointlist+i*dim;
       int    firstentry=closest(b,ppt,-1);
       int    secondentry=closest(b,ppt,firstentry);
-      double firstmetric=_dist(dim,b->valuelist+dim*firstentry,ppt);
-      double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
+      float firstmetric=_dist(dim,b->valuelist+dim*firstentry,ppt);
+      float secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
       
       if(!(i&0xff))spinnit("initializing... ",points-i);
     
@@ -382,8 +382,8 @@ int main(int argc,char *argv[]){
     /* do the automatic cull request */
     while(cellsleft>target){
       int bestcell=-1;
-      double besterror=0;
-      double besterror2=0;
+      float besterror=0;
+      float besterror2=0;
       long head=-1;
       char spinbuf[80];
       sprintf(spinbuf,"cells left to eliminate: %ld : ",cellsleft-target);
@@ -413,11 +413,11 @@ int main(int argc,char *argv[]){
       firsthead[bestcell]=-1;
       while(head!=-1){
 	/* head is a point number */
-	double *ppt=pointlist+head*dim;
+	float *ppt=pointlist+head*dim;
 	int firstentry=closest(b,ppt,-1);
 	int secondentry=closest(b,ppt,firstentry);
-	double firstmetric=_dist(dim,b->valuelist+dim*firstentry,ppt);
-	double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
+	float firstmetric=_dist(dim,b->valuelist+dim*firstentry,ppt);
+	float secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
 	long next=membership[head];
 
 	if(head<points-entries){
@@ -441,15 +441,15 @@ int main(int argc,char *argv[]){
       head=secondhead[bestcell];
       secondhead[bestcell]=-1;
       while(head!=-1){
-	double *ppt=pointlist+head*dim;
+	float *ppt=pointlist+head*dim;
 	/* who are we assigned to now? */
 	int firstentry=closest(b,ppt,-1);
 	/* what is the new second closest match? */
 	int secondentry=closest(b,ppt,firstentry);
 	/* old second closest is the cell being disbanded */
-	double oldsecondmetric=_dist(dim,b->valuelist+dim*bestcell,ppt);
+	float oldsecondmetric=_dist(dim,b->valuelist+dim*bestcell,ppt);
 	/* new second closest error */
-	double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
+	float secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
 	long next=secondary[head];
 
 	if(head<points-entries){
@@ -541,7 +541,7 @@ int main(int argc,char *argv[]){
     for(i=0;i<entries;i++)entryindex[i]=1;
     for(i=0;i<points-entries;i++){
       int best=_best(b,pointlist+i*dim,1);
-      double *a=pointlist+i*dim;
+      float *a=pointlist+i*dim;
       if(!(i&0xff))spinnit("counting hits...",i);
       if(best==-1){
 	fprintf(stderr,"\nINTERNAL ERROR; a point count not be matched to a\n"

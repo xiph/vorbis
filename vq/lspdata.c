@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.12 2000/05/08 20:49:50 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.13 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,12 +27,12 @@ char *vqext_booktype="LSPdata";
 quant_meta q={0,0,0,1};          /* set sequence data */
 int vqext_aux=1;
 
-double global_maxdel=M_PI;
-double global_mindel=M_PI;
+float global_maxdel=M_PI;
+float global_mindel=M_PI;
 #if 0
 void vqext_quantize(vqgen *v,quant_meta *q){
-  double delta,mindel;
-  double maxquant=((1<<q->quant)-1);
+  float delta,mindel;
+  float maxquant=((1<<q->quant)-1);
   int j,k;
 
   /* first find the basic delta amount from the maximum span to be
@@ -48,10 +48,10 @@ void vqext_quantize(vqgen *v,quant_meta *q){
   delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
-    double last=0;
+    float last=0;
     for(k=0;k<v->elements;k++){
-      double val=_now(v,j)[k];
-      double now=rint((val-last-mindel)/delta);
+      float val=_now(v,j)[k];
+      float now=rint((val-last-mindel)/delta);
       
       _now(v,j)[k]=now;
       if(now<0){
@@ -76,7 +76,7 @@ void vqext_quantize(vqgen *v,quant_meta *q){
 }
 #endif
 
-double *weight=NULL;
+float *weight=NULL;
 #if 0
 /* LSP training metric.  We weight error proportional to distance
    *between* LSP vector values.  The idea of this metric is not to set
@@ -86,13 +86,13 @@ double *weight=NULL;
 
 #define FUDGE (global_maxdel-weight[i])
 
-double *vqext_weight(vqgen *v,double *p){
+float *vqext_weight(vqgen *v,float *p){
   int i;
   int el=v->elements;
-  double lastp=0.;
+  float lastp=0.;
   for(i=0;i<el;i++){
-    double predist=(p[i]-lastp);
-    double postdist=(p[i+1]-p[i]);
+    float predist=(p[i]-lastp);
+    float postdist=(p[i+1]-p[i]);
     weight[i]=(predist<postdist?predist:postdist);
     lastp=p[i];
   }
@@ -100,18 +100,18 @@ double *vqext_weight(vqgen *v,double *p){
 }
 #else
 #define FUDGE 1.
-double *vqext_weight(vqgen *v,double *p){
+float *vqext_weight(vqgen *v,float *p){
   return p;
 }
 #endif
 
                             /* candidate,actual */
-double vqext_metric(vqgen *v,double *e, double *p){
+float vqext_metric(vqgen *v,float *e, float *p){
   int i;
   int el=v->elements;
-  double acc=0.;
+  float acc=0.;
   for(i=0;i<el;i++){
-    double val=(p[i]-e[i])*FUDGE;
+    float val=(p[i]-e[i])*FUDGE;
     acc+=val*val;
   }
   return sqrt(acc/v->elements);
@@ -124,9 +124,9 @@ double vqext_metric(vqgen *v,double *e, double *p){
    trailing space */
 
 /* assume vqext_aux==1 */
-void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num){
-  double *a=alloca(sizeof(double)*(dim+1)); /* +aux */
-  double base=0;
+void vqext_addpoint_adj(vqgen *v,float *b,int start,int dim,int cols,int num){
+  float *a=alloca(sizeof(float)*(dim+1)); /* +aux */
+  float base=0;
   int i;
 
   if(start>0)base=b[start-1];
@@ -146,15 +146,15 @@ void vqext_preprocess(vqgen *v){
   global_maxdel=0.;
   global_mindel=M_PI;
   for(j=0;j<v->points;j++){
-    double last=0.;
+    float last=0.;
     for(k=0;k<v->elements+v->aux;k++){
-      double p=_point(v,j)[k];
+      float p=_point(v,j)[k];
       if(p-last>global_maxdel)global_maxdel=p-last;
       if(p-last<global_mindel)global_mindel=p-last;
       last=p;
     }
   }
 
-  weight=malloc(sizeof(double)*v->elements);
+  weight=malloc(sizeof(float)*v->elements);
 }
 

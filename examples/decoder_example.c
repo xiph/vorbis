@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.12 2000/08/30 06:09:21 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.13 2000/10/12 03:12:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "vorbis/codec.h"
+#include <vorbis/codec.h>
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 #include <io.h>
@@ -216,14 +216,14 @@ int main(int argc, char **argv){
 	      /* no reason to complain; already complained above */
 	    }else{
 	      /* we have a packet.  Decode it */
-	      double **pcm;
+	      float **pcm;
 	      int samples;
 	      
 	      if(vorbis_synthesis(&vb,&op)==0) /* test for success! */
 		vorbis_synthesis_blockin(&vd,&vb);
 	      /* 
 		 
-	      **pcm is a multichannel double vector.  In stereo, for
+	      **pcm is a multichannel float vector.  In stereo, for
 	      example, pcm[0] is left, and pcm[1] is right.  samples is
 	      the size of each channel.  Convert the float values
 	      (-1.<=range<=1.) to whatever PCM format and write it out */
@@ -233,13 +233,17 @@ int main(int argc, char **argv){
 		int clipflag=0;
 		int bout=(samples<convsize?samples:convsize);
 		
-		/* convert doubles to 16 bit signed ints (host order) and
+		/* convert floats to 16 bit signed ints (host order) and
 		   interleave */
 		for(i=0;i<vi.channels;i++){
 		  ogg_int16_t *ptr=convbuffer+i;
-		  double  *mono=pcm[i];
+		  float  *mono=pcm[i];
 		  for(j=0;j<bout;j++){
+#if 1
 		    int val=mono[j]*32767.;
+#else /* optional dither */
+		    int val=mono[j]*32767.+drand48()-0.5;
+#endif
 		    /* might as well guard against clipping */
 		    if(val>32767){
 		      val=32767;

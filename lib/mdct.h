@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: modified discrete cosine transform prototypes
- last mod: $Id: mdct.h,v 1.11 2000/06/18 12:33:47 xiphmont Exp $
+ last mod: $Id: mdct.h,v 1.12 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,15 +25,15 @@ typedef struct {
   int n;
   int log2n;
   
-  double *trig;
+  float *trig;
   int    *bitrev;
 
 } mdct_lookup;
 
 extern void mdct_init(mdct_lookup *lookup,int n);
 extern void mdct_clear(mdct_lookup *l);
-extern void mdct_forward(mdct_lookup *init, double *in, double *out);
-extern void mdct_backward(mdct_lookup *init, double *in, double *out);
+extern void mdct_forward(mdct_lookup *init, float *in, float *out);
+extern void mdct_backward(mdct_lookup *init, float *in, float *out);
 
 #endif
 

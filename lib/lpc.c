@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.25 2000/08/23 10:16:57 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.26 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,16 +59,16 @@ Carsten Bormann
 /* Input : n elements of time doamin data
    Output: m lpc coefficients, excitation energy */
 
-double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
-  double *aut=alloca(sizeof(double)*(m+1));
-  double error;
+float vorbis_lpc_from_data(float *data,float *lpc,int n,int m){
+  float *aut=alloca(sizeof(float)*(m+1));
+  float error;
   int i,j;
 
   /* autocorrelation, p+1 lag coefficients */
 
   j=m+1;
   while(j--){
-    double d=0;
+    float d=0;
     for(i=j;i<n;i++)d+=data[i]*data[i-j];
     aut[j]=d;
   }
@@ -77,12 +77,12 @@ double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
 
   error=aut[0];
   if(error==0){
-    memset(lpc,0,m*sizeof(double));
+    memset(lpc,0,m*sizeof(float));
     return 0;
   }
   
   for(i=0;i<m;i++){
-    double r=-aut[i+1];
+    float r=-aut[i+1];
 
     /* Sum up this iteration's reflection coefficient; note that in
        Vorbis we don't save it.  If anyone wants to recycle this code
@@ -96,7 +96,7 @@ double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
     
     lpc[i]=r;
     for(j=0;j<i/2;j++){
-      double tmp=lpc[j];
+      float tmp=lpc[j];
       lpc[j]+=r*lpc[i-1-j];
       lpc[i-1-j]+=r*tmp;
     }
@@ -114,11 +114,11 @@ double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
 /* Input : n element envelope spectral curve
    Output: m lpc coefficients, excitation energy */
 
-double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l){
+float vorbis_lpc_from_curve(float *curve,float *lpc,lpc_lookup *l){
   int n=l->ln;
   int m=l->m;
-  double *work=alloca(sizeof(double)*(n+n));
-  double fscale=.5/n;
+  float *work=alloca(sizeof(float)*(n+n));
+  float fscale=.5/n;
   int i,j;
   
   /* input is a real curve. make it complex-real */
@@ -136,7 +136,7 @@ double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l){
      most of the power in the edges. */
   
   for(i=0,j=n/2;i<n/2;){
-    double temp=work[i];
+    float temp=work[i];
     work[i++]=work[j];
     work[j++]=temp;
   }
@@ -165,16 +165,16 @@ void lpc_clear(lpc_lookup *l){
   }
 }
 
-void vorbis_lpc_predict(double *coeff,double *prime,int m,
-                     double *data,long n){
+void vorbis_lpc_predict(float *coeff,float *prime,int m,
+                     float *data,long n){
 
   /* in: coeff[0...m-1] LPC coefficients 
          prime[0...m-1] initial values (allocated size of n+m-1)
     out: data[0...n-1] data samples */
 
   long i,j,o,p;
-  double y;
-  double *work=alloca(sizeof(double)*(m+n));
+  float y;
+  float *work=alloca(sizeof(float)*(m+n));
 
   if(!prime)
     for(i=0;i<m;i++)
@@ -193,3 +193,8 @@ void vorbis_lpc_predict(double *coeff,double *prime,int m,
     data[i]=work[o]=y;
   }
 }
+
+
+
+
+

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.6 2000/07/17 12:55:35 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.7 2000/10/12 03:12:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -73,15 +73,15 @@ typedef struct encode_aux_nearestmatch{
 
 /* assumes a maptype of 1; encode side only, so that's OK */
 typedef struct encode_aux_threshmatch{
-  double *quantthresh;
+  float *quantthresh;
   long   *quantmap;
   int     quantvals; 
   int     threshvals; 
 } encode_aux_threshmatch;
 
 typedef struct encode_aux_pigeonhole{
-  double min;
-  double del;
+  float min;
+  float del;
 
   int  mapentries;
   int  quantvals;
@@ -94,6 +94,10 @@ typedef struct encode_aux_pigeonhole{
 } encode_aux_pigeonhole;
 
 typedef struct decode_aux{
+  long   *tab;
+  int    *tabl;
+  int    tabn;
+
   long   *ptr0;
   long   *ptr1;
   long   aux;        /* number of tree entries */
@@ -104,7 +108,7 @@ typedef struct codebook{
   long entries;       /* codebook entries */
   const static_codebook *c;
 
-  double *valuelist;  /* list of dim*entries actual entry values */
+  float  *valuelist;  /* list of dim*entries actual entry values */
   long   *codelist;   /* list of bitstream codewords for each entry */
   struct decode_aux *decode_tree;
 

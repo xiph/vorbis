@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.16 2000/08/15 09:09:44 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.17 2000/10/12 03:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -75,7 +75,7 @@ char *get_line(FILE *in){
 /* read the next numerical value from the given file */
 static char *value_line_buff=NULL;
 
-int get_line_value(FILE *in,double *value){
+int get_line_value(FILE *in,float *value){
   char *next;
 
   if(!value_line_buff)return(-1);
@@ -92,7 +92,7 @@ int get_line_value(FILE *in,double *value){
   }
 }
 
-int get_next_value(FILE *in,double *value){
+int get_next_value(FILE *in,float *value){
   while(1){
     if(get_line_value(in,value)){
       value_line_buff=get_line(in);
@@ -104,13 +104,13 @@ int get_next_value(FILE *in,double *value){
 }
 
 int get_next_ivalue(FILE *in,long *ivalue){
-  double value;
+  float value;
   int ret=get_next_value(in,&value);
   *ivalue=value;
   return(ret);
 }
 
-static double sequence_base=0.;
+static float sequence_base=0.;
 static int v_sofar=0;
 void reset_next_value(void){
   value_line_buff=NULL;
@@ -125,7 +125,7 @@ char *setup_line(FILE *in){
 }
 
 
-int get_vector(codebook *b,FILE *in,int start, int n,double *a){
+int get_vector(codebook *b,FILE *in,int start, int n,float *a){
   int i;
   const static_codebook *c=b->c;
 
@@ -146,7 +146,7 @@ int get_vector(codebook *b,FILE *in,int start, int n,double *a){
 	break;
     
     if(i==c->dim){
-      double temp=a[c->dim-1];
+      float temp=a[c->dim-1];
       for(i=0;i<c->dim;i++)a[i]-=sequence_base;
       if(c->q_sequencep)sequence_base=temp;
       v_sofar++;
@@ -284,9 +284,9 @@ codebook *codebook_load(char *filename){
       exit(1);
     }
     /* load quantthresh */
-    find_seek_to(in,"static double _vq_quantthresh_");
+    find_seek_to(in,"static float _vq_quantthresh_");
     reset_next_value();
-    t->quantthresh=malloc(sizeof(double)*t->threshvals);
+    t->quantthresh=malloc(sizeof(float)*t->threshvals);
     for(i=0;i<t->threshvals-1;i++)
       if(get_next_value(in,t->quantthresh+i)){
 	fprintf(stderr,"out of data 1 while reading codebook %s\n",filename);
@@ -581,7 +581,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
 
   if(t){
     /* quantthresh */
-    fprintf(out,"static double _vq_quantthresh_%s[] = {\n",name);
+    fprintf(out,"static float _vq_quantthresh_%s[] = {\n",name);
     for(j=0;j<t->threshvals-1;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<t->threshvals-1;k++,j++)

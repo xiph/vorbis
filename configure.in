@@ -1,59 +1,70 @@
-# $Id: configure.in,v 1.23 2000/08/31 03:28:43 xiphmont Exp $
+dnl Process this file with autoconf to produce a configure script
+
+dnl ------------------------------------------------
+dnl Initialization and Versioning
+dnl ------------------------------------------------
 
 AC_INIT(lib/mdct.c)
-#AC_CONFIG_HEADER(config.h)
+AM_INIT_AUTOMAKE(libvorbis,1.0.0)
 
-cp configure.guess config.guess
-cp configure.sub config.sub
+dnl Library versioning
 
-AC_CANONICAL_HOST
+V_LIB_CURRENT=0
+V_LIB_REVISION=0
+V_LIB_AGE=0
+VF_LIB_CURRENT=0
+VF_LIB_REVISION=0
+VF_LIB_AGE=0
+AC_SUBST(V_LIB_CURRENT)
+AC_SUBST(V_LIB_REVISION)
+AC_SUBST(V_LIB_AGE)
+AC_SUBST(VF_LIB_CURRENT)
+AC_SUBST(VF_LIB_REVISION)
+AC_SUBST(VF_LIB_AGE)
 
-dnl If we're on IRIX, we wanna use cc even if gcc is there (unless the user
-dnl has overriden us)...
-case $host in 
-	*-*-irix*)
-		if test -z "$CC"; then
-			CC=cc
-		fi
-		AC_CHECK_LIB(audio, ALwritesamps)
-	;;
-# BeOS does not use -lm
-#	*-*-beos)
-#		LIBS=""
-#	;;
-# added better check below
+dnl --------------------------------------------------  
+dnl Check for programs
+dnl --------------------------------------------------  
 
-esac
-
+dnl save $CFLAGS since AC_PROG_CC likes to insert "-g -O2"
+dnl if $CFLAGS is blank
 cflags_save="$CFLAGS"
 AC_PROG_CC
-# because AC_PROG_CC likes to set -g 
 CFLAGS="$cflags_save"
 
-AC_PROG_CPP
-AC_PROG_RANLIB
-AC_CHECK_PROG(AR,ar,ar)
-AC_CHECK_PROG(INSTALL,install,install)
+AM_PROG_LIBTOOL
 
-#not everyone uses libm (eg, BeOS)
-#AC_CHECK_LIB(m, cos, LIBS="-lm"; AC_DEFINE(HAVE_LIBM), LIBS="")
-# We no longer use config.h
-AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
+dnl --------------------------------------------------  
+dnl Additional arguments
+dnl --------------------------------------------------  
+
+AC_ARG_WITH(ogg, [  --with-ogg=DIR          Set where the Ogg library is located]) 
+
+dnl --------------------------------------------------
+dnl Set build flags based on environment
+dnl --------------------------------------------------
+
+AC_CANONICAL_HOST
 
 dnl Set some target options
 if test -z "$GCC"; then
 	case $host in 
 	*-*-irix*)
+		dnl If we're on IRIX, we wanna use cc even if gcc 
+		dnl is there (unless the user has overriden us)...
+		if test -z "$CC"; then
+			CC=cc
+		fi
 		DEBUG="-g -signed" 
-		OPT="-O2 -w -signed"
+		CFLAGS="-O2 -w -signed"
 		PROFILE="-p -g3 -O2 -signed" ;;
 	sparc-sun-solaris*)
 		DEBUG="-v -g"
-		OPT="-xO4 -fast -w -fsimple -native -xcg92"
+		CFLAGS="-xO4 -fast -w -fsimple -native -xcg92"
 		PROFILE="-v -xpg -g -xO4 -fast -native -fsimple -xcg92 -Dsuncc" ;;
 	*)
 		DEBUG="-g"
-		OPT="-O"
+		CFLAGS="-O"
 		PROFILE="-g -p" ;;
         esac
 else
@@ -61,9 +72,10 @@ else
 	case $host in 
 	*86-*-linux*)
 		DEBUG="-g -Wall -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
-		OPT="-O20 -ffast-math -D_REENTRANT -fsigned-char"
-		PROFILE="-pg -g -O20 -ffast-math -D_REENTRANT -fsigned-char"
-		
+		CFLAGS="-O20 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char"
+#              	PROFILE="-Wall -W -pg -O20 -ffast-math -D_REENTRANT -fsigned-char -fno-inline -static"
+		PROFILE="-Wall -W -pg -O20 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char -fno-inline -static"
+
 		# glibc < 2.1.3 has a serious FP bug in the math inline header
 		# that will cripple Vorbis.  Look to see if the magic FP stack
 		# clobber is missing in the mathinline header, thus indicating
@@ -100,20 +112,20 @@ else
  AC_MSG_WARN([********************************************************])
  AC_MSG_WARN([                                                        ])
 
-  		OPT=${OPT}" -D__NO_MATH_INLINES"
+  		CFLAGS=${OPT}" -D__NO_MATH_INLINES"
   		PROFILE=${PROFILE}" -D__NO_MATH_INLINES"
   		fi;;
 	*-*-linux*)
 		DEBUG="-g -Wall -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
-		OPT="-O20 -ffast-math -D_REENTRANT -fsigned-char"
+		CFLAGS="-O20 -ffast-math -D_REENTRANT -fsigned-char"
 		PROFILE="-pg -g -O20 -ffast-math -D_REENTRANT -fsigned-char";;
 	sparc-sun-*)
 		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char -mv8"
-		OPT="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char -mv8"
+		CFLAGS="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char -mv8"
 		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char -mv8" ;;
 	*)
 		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char"
-		OPT="-O20 -D__NO_MATH_INLINES -fsigned-char"
+		CFLAGS="-O20 -D__NO_MATH_INLINES -fsigned-char"
 		PROFILE="-O20 -g -pg -D__NO_MATH_INLINES -fsigned-char" ;;
         esac
 fi
@@ -274,85 +286,46 @@ else
 	esac
 fi
 
-if test x$has_int32_t = "xyes" ; then
-	SIZE32="int32_t"
-else
-	case 4 in
-		$ac_cv_sizeof_short) SIZE32="short";;
-		$ac_cv_sizeof_int) SIZE32="int";;
-		$ac_cv_sizeof_long) SIZE32="long";;
-	esac
-fi
+dnl --------------------------------------------------
+dnl Check for headers
+dnl --------------------------------------------------
 
-if test x$has_uint32_t = "xyes" ; then
-	USIZE32="uint32_t"
-else
-	if test x$has_u_int32_t = "xyes" ; then
-		USIZE32="u_int32_t"
-	else
-		case 4 in
-			$ac_cv_sizeof_short) USIZE32="unsigned short";;
-			$ac_cv_sizeof_int) USIZE32="unsigned int";;
-			$ac_cv_sizeof_long) USIZE32="unsigned long";;
-		esac
-	fi
-fi
-
-if test x$has_int64_t = "xyes" ; then
-	SIZE64="int64_t"
-else
-case 8 in
-	$ac_cv_sizeof_int) SIZE64="int";;
-	$ac_cv_sizeof_long) SIZE64="long";;
-	$ac_cv_sizeof_long_long) SIZE64="long long";;
-esac
-fi
-
-if test -z "$SIZE16"; then
-	AC_MSG_ERROR(No 16 bit type found on this platform!)
-fi
-if test -z "$SIZE32"; then
-	AC_MSG_ERROR(No 32 bit type found on this platform!)
-fi
-if test -z "$USIZE32"; then
-	AC_MSG_ERROR(No unsigned 32 bit type found on this platform!)
-fi
-if test -z "$SIZE64"; then
-	AC_MSG_WARN(No 64 bit type found on this platform!)
-fi
-	
-#AC_CHECK_HEADER(alloca.h,AC_DEFINE(USE_ALLOCA_H),:)
-#AC_CHECK_HEADER(memory.h,AC_DEFINE(USE_MEMORY_H),:)
-# We no longer use config.h
-AC_CHECK_HEADER(alloca.h,CFLAGS="$CFLAGS -DUSE_ALLOCA_H",:)
 AC_CHECK_HEADER(memory.h,CFLAGS="$CFLAGS -DUSE_MEMORY_H",:)
 
-AC_C_CONST
-AC_HEADER_TIME
-AC_STRUCT_TM
+dnl --------------------------------------------------
+dnl Check for typedefs, structures, etc
+dnl --------------------------------------------------
 
-AC_PROG_MAKE_SET
+dnl none
+
+dnl --------------------------------------------------
+dnl Check for libraries
+dnl --------------------------------------------------
+
+AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
+AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
+
+dnl Check for libogg
+if test -n $with_ogg; then
+	CFLAGS="$CFLAGS -I$with_ogg/include -L$with_ogg/lib"
+fi 
+AC_CHECK_LIB(ogg, oggpack_read, LIBS="$LIBS -logg", AC_MSG_ERROR([You must have libogg to compile vorbis!!!]))
+
+dnl --------------------------------------------------
+dnl Check for library functions
+dnl --------------------------------------------------
+
+AC_FUNC_ALLOCA
 AC_FUNC_MEMCMP
-AC_TYPE_SIGNAL
-AC_CHECK_FUNCS(gettimeofday select strcspn strerror strspn sigaction)
 
-AC_SUBST(SIZE16)
-AC_SUBST(SIZE32)
-AC_SUBST(USIZE32)
-AC_SUBST(SIZE64)
-AC_SUBST(OPT)
+dnl --------------------------------------------------
+dnl Do substitutions
+dnl --------------------------------------------------
+
 AC_SUBST(LIBS)
 AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(CC)
-AC_SUBST(RANLIB)
-#AC_SUBST(XOGG)
-#AC_SUBST(LIBGTKDIR)
 AC_SUBST(pthread_lib)
 
-AC_CONFIG_SUBDIRS(vorbis-tools/libao)
-
-AC_OUTPUT(Makefile lib/Makefile examples/Makefile include/vorbis/os_types.h\
-	vorbis-tools/Makefile\
-	vq/Makefile huff/Makefile cmdline/Makefile xmms/Makefile kmpg/Makefile)
-
+AC_OUTPUT(Makefile lib/Makefile doc/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)

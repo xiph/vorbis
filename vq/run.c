@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.10 2000/05/08 20:49:51 xiphmont Exp $
+ last mod: $Id: run.c,v 1.11 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,7 +39,7 @@
 
 extern void process_preprocess(codebook **b,char *basename);
 extern void process_postprocess(codebook **b,char *basename);
-extern void process_vector(codebook **b,int *addmul, int inter,double *a,int n);
+extern void process_vector(codebook **b,int *addmul, int inter,float *a,int n);
 extern void process_usage(void);
 
 int main(int argc,char *argv[]){
@@ -127,7 +127,7 @@ int main(int argc,char *argv[]){
 	int cols;
 	long lines=0;
 	char *line;
-	double *vec;
+	float *vec;
 	FILE *in=fopen(name,"r");
 	if(!in){
 	  fprintf(stderr,"Could not open input file %s\n",name);
@@ -150,7 +150,7 @@ int main(int argc,char *argv[]){
 	    while(*temp==' ')temp++;
 	  }
 	}
-	vec=alloca(cols*sizeof(double));
+	vec=alloca(cols*sizeof(float));
 	while(line){
 	  lines++;
 	  for(j=0;j<cols;j++)
@@ -179,7 +179,7 @@ int main(int argc,char *argv[]){
       int cols;
       char *line;
       long lines=0;
-      double *vec;
+      float *vec;
       if(!input){
 	process_preprocess(b,basename);
 	input++;
@@ -195,7 +195,7 @@ int main(int argc,char *argv[]){
 	  while(*temp==' ')temp++;
 	}
       }
-      vec=alloca(cols*sizeof(double));
+      vec=alloca(cols*sizeof(float));
       while(line){
 	lines++;
 	for(j=0;j<cols;j++)

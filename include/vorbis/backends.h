@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.11 2000/07/12 09:36:17 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.12 2000/10/12 03:12:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,9 +39,9 @@ typedef struct{
   void (*free_info) (vorbis_info_time *);
   void (*free_look) (vorbis_look_time *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_time *,
-		     double *,double *);
+		     float *,float *);
   int  (*inverse)   (struct vorbis_block *,vorbis_look_time *,
-		     double *,double *);
+		     float *,float *);
 } vorbis_func_time;
 
 typedef struct{
@@ -57,9 +57,9 @@ typedef struct{
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
-		     double *,double *);
+		     float *,float *);
   int  (*inverse)   (struct vorbis_block *,vorbis_look_floor *,
-		     double *);
+		     float *);
 } vorbis_func_floor;
 
 typedef struct{
@@ -83,9 +83,9 @@ typedef struct{
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
   int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
-			double **,int);
+			float **,int);
   int  (*inverse)      (struct vorbis_block *,vorbis_look_residue *,
-			double **,int);
+			float **,int);
 } vorbis_func_residue;
 
 typedef struct vorbis_info_residue0{
@@ -101,8 +101,8 @@ typedef struct vorbis_info_residue0{
   int    booklist[256];    /* list of second stage books */
 
   /* encode-only heuristic settings */
-  double entmax[64];       /* book entropy threshholds*/
-  double ampmax[64];       /* book amp threshholds*/
+  float  entmax[64];       /* book entropy threshholds*/
+  float  ampmax[64];       /* book amp threshholds*/
   int    subgrp[64];       /* book heuristic subgroup size */
   int    blimit[64];       /* subgroup position limits */
 

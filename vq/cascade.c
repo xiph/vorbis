@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.6 2000/05/08 20:49:50 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.7 2000/10/12 03:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,7 +27,7 @@
 
 /* set up metrics */
 
-double count=0.;
+float count=0.;
 
 
 void process_preprocess(codebook **bs,char *basename){
@@ -37,12 +37,12 @@ void process_postprocess(codebook **b,char *basename){
   fprintf(stderr,"Done.                      \n");
 }
 
-double process_one(codebook *b,double *a,int dim,int step,int addmul,
-		   double base){
+float process_one(codebook *b,float *a,int dim,int step,int addmul,
+		   float base){
   int j;
 
   if(b->c->q_sequencep){
-    double temp;
+    float temp;
     for(j=0;j<dim;j++){
       temp=a[j*step];
       a[j*step]-=base;
@@ -55,12 +55,12 @@ double process_one(codebook *b,double *a,int dim,int step,int addmul,
   return base;
 }
 
-void process_vector(codebook **bs,int *addmul,int inter,double *a,int n){
+void process_vector(codebook **bs,int *addmul,int inter,float *a,int n){
   int i,bi=0;
   int booknum=0;
   
   while(*bs){
-    double base=0.;
+    float base=0.;
     codebook *b=*bs;
     int dim=b->dim;
     

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.h,v 1.6 2000/07/12 09:36:18 xiphmont Exp $
+ last mod: $Id: bookutil.h,v 1.7 2000/10/12 03:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,11 +26,11 @@
 
 extern char     *get_line(FILE *in);
 extern char     *setup_line(FILE *in);
-extern int       get_line_value(FILE *in,double *value);
-extern int       get_next_value(FILE *in,double *value);
+extern int       get_line_value(FILE *in,float *value);
+extern int       get_next_value(FILE *in,float *value);
 extern int       get_next_ivalue(FILE *in,long *ivalue);
 extern void      reset_next_value(void);
-extern int       get_vector(codebook *b,FILE *in,int start,int num,double *a);
+extern int       get_vector(codebook *b,FILE *in,int start,int num,float *a);
 extern char     *find_seek_to(FILE *in,char *s);
 
 extern codebook *codebook_load(char *filename);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.38 2000/08/27 07:59:19 msmith Exp $
+ last mod: $Id: block.c,v 1.39 2000/10/12 03:12:52 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -26,13 +26,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
 
 #include "window.h"
 #include "envelope.h"
 #include "mdct.h"
 #include "lpc.h"
-#include "bitwise.h"
 #include "registry.h"
 #include "sharedbook.h"
 #include "bookinternal.h"
@@ -98,7 +98,7 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   vb->localalloc=0;
   vb->localstore=NULL;
   if(v->analysisp)
-    _oggpack_writeinit(&vb->opb);
+    oggpack_writeinit(&vb->opb);
 
   return(0);
 }
@@ -152,7 +152,7 @@ void _vorbis_block_ripcord(vorbis_block *vb){
 int vorbis_block_clear(vorbis_block *vb){
   if(vb->vd)
     if(vb->vd->analysisp)
-      _oggpack_writeclear(&vb->opb);
+      oggpack_writeclear(&vb->opb);
   _vorbis_block_ripcord(vb);
   if(vb->localstore)free(vb->localstore);
 
@@ -181,14 +181,14 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   mdct_init(v->transform[0][0],vi->blocksizes[0]);
   mdct_init(v->transform[1][0],vi->blocksizes[1]);
 
-  v->window[0][0][0]=calloc(VI_WINDOWB,sizeof(double *));
+  v->window[0][0][0]=calloc(VI_WINDOWB,sizeof(float *));
   v->window[0][0][1]=v->window[0][0][0];
   v->window[0][1][0]=v->window[0][0][0];
   v->window[0][1][1]=v->window[0][0][0];
-  v->window[1][0][0]=calloc(VI_WINDOWB,sizeof(double *));
-  v->window[1][0][1]=calloc(VI_WINDOWB,sizeof(double *));
-  v->window[1][1][0]=calloc(VI_WINDOWB,sizeof(double *));
-  v->window[1][1][1]=calloc(VI_WINDOWB,sizeof(double *));
+  v->window[1][0][0]=calloc(VI_WINDOWB,sizeof(float *));
+  v->window[1][0][1]=calloc(VI_WINDOWB,sizeof(float *));
+  v->window[1][1][0]=calloc(VI_WINDOWB,sizeof(float *));
+  v->window[1][1][1]=calloc(VI_WINDOWB,sizeof(float *));
 
   for(i=0;i<VI_WINDOWB;i++){
     v->window[0][0][0][i]=
@@ -222,12 +222,12 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   v->pcm_storage=8192; /* we'll assume later that we have
 			  a minimum of twice the blocksize of
 			  accumulated samples in analysis */
-  v->pcm=malloc(vi->channels*sizeof(double *));
-  v->pcmret=malloc(vi->channels*sizeof(double *));
+  v->pcm=malloc(vi->channels*sizeof(float *));
+  v->pcmret=malloc(vi->channels*sizeof(float *));
   {
     int i;
     for(i=0;i<vi->channels;i++)
-      v->pcm[i]=calloc(v->pcm_storage,sizeof(double));
+      v->pcm[i]=calloc(v->pcm_storage,sizeof(float));
   }
 
   /* all 1 (large block) or 0 (small block) */
@@ -328,7 +328,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
   }
 }
 
-double **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
+float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   int i;
   vorbis_info *vi=v->vi;
 
@@ -344,7 +344,7 @@ double **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
     v->pcm_storage=v->pcm_current+vals*2;
    
     for(i=0;i<vi->channels;i++){
-      v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(double));
+      v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(float));
     }
   }
 
@@ -357,8 +357,8 @@ double **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
 static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
   int order=32;
-  double *lpc=alloca(order*sizeof(double));
-  double *work=alloca(v->pcm_current*sizeof(double));
+  float *lpc=alloca(order*sizeof(float));
+  float *work=alloca(v->pcm_current*sizeof(float));
   long j;
   v->preextrapolate=1;
 
@@ -391,7 +391,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
   if(vals<=0){
     int order=32;
     int i;
-    double *lpc=alloca(order*sizeof(double));
+    float *lpc=alloca(order*sizeof(float));
 
     /* if it wasn't done earlier (very short sample) */
     if(!v->preextrapolate)
@@ -425,7 +425,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
            guarding the overlap, but bulletproof in case that
            assumtion goes away). zeroes will do. */
 	memset(v->pcm[i]+v->eofflag,0,
-	       (v->pcm_current-v->eofflag)*sizeof(double));
+	       (v->pcm_current-v->eofflag)*sizeof(float));
 
       }
     }
@@ -512,15 +512,15 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   }
   vb->vd=v;
   vb->sequence=v->sequence;
-  vb->frameno=v->frameno;
+  vb->granulepos=v->granulepos;
   vb->pcmend=vi->blocksizes[v->W];
   
   /* copy the vectors; this uses the local storage in vb */
   {
-    vb->pcm=_vorbis_block_alloc(vb,sizeof(double *)*vi->channels);
+    vb->pcm=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
     for(i=0;i<vi->channels;i++){
-      vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(double));
-      memcpy(vb->pcm[i],v->pcm[i]+beginW,vi->blocksizes[v->W]*sizeof(double));
+      vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(float));
+      memcpy(vb->pcm[i],v->pcm[i]+beginW,vi->blocksizes[v->W]*sizeof(float));
     }
   }
   
@@ -546,7 +546,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 
     for(i=0;i<vi->channels;i++)
       memmove(v->pcm[i],v->pcm[i]+movementW,
-	      v->pcm_current*sizeof(double));
+	      v->pcm_current*sizeof(float));
 
 
     v->lW=v->W;
@@ -559,12 +559,12 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       v->eofflag-=movementW;
       /* do not add padding to end of stream! */
       if(v->centerW>=v->eofflag){
-	v->frameno+=movementW-(v->centerW-v->eofflag);
+	v->granulepos+=movementW-(v->centerW-v->eofflag);
       }else{
-	v->frameno+=movementW;
+	v->granulepos+=movementW;
       }
     }else{
-      v->frameno+=movementW;
+      v->granulepos+=movementW;
     }
   }
 
@@ -578,13 +578,13 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;
   v->centerW-= vi->blocksizes[v->W]/4+vi->blocksizes[v->lW]/4;
-  v->frameno=-1;
+  v->granulepos=-1;
   v->sequence=-1;
 
   return(0);
 }
 
-/* Unike in analysis, the window is only partially applied for each
+/* Unlike in analysis, the window is only partially applied for each
    block.  The time domain envelope is not yet handled at the point of
    calling (as it relies on the previous block). */
 
@@ -609,7 +609,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       int i;
       for(i=0;i<vi->channels;i++)
 	memmove(v->pcm[i],v->pcm[i]+shiftPCM,
-		v->pcm_current*sizeof(double));
+		v->pcm_current*sizeof(float));
     }
   }
 
@@ -622,7 +622,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   v->floor_bits+=vb->floor_bits;
   v->res_bits+=vb->res_bits;
 
-  if(v->sequence+1 != vb->sequence)v->frameno=-1; /* out of sequence;
+  if(v->sequence+1 != vb->sequence)v->granulepos=-1; /* out of sequence;
                                                      lose count */
 
   v->sequence=vb->sequence;
@@ -642,7 +642,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       v->pcm_storage=endW+vi->blocksizes[1];
    
       for(i=0;i<vi->channels;i++)
-	v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(double)); 
+	v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(float)); 
     }
 
     /* overlap/add PCM */
@@ -659,20 +659,21 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     }
 
     for(j=0;j<vi->channels;j++){
-      double *pcm=v->pcm[j]+beginW;
-      
+      float *pcm=v->pcm[j]+beginW;
+      float *p=vb->pcm[j];
+
       /* the overlap/add section */
       for(i=beginSl;i<endSl;i++)
-	pcm[i]+=vb->pcm[j][i];
+	pcm[i]+=p[i];
       /* the remaining section */
       for(;i<sizeW;i++)
-	pcm[i]=vb->pcm[j][i];
+	pcm[i]=p[i];
     }
 
     /* track the frame number... This is for convenience, but also
        making sure our last packet doesn't end with added padding.  If
        the last packet is partial, the number of samples we'll have to
-       return will be past the vb->frameno.
+       return will be past the vb->granulepos.
        
        This is not foolproof!  It will be confused if we begin
        decoding at the last page after a seek or hole.  In that case,
@@ -680,17 +681,17 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
        is.  For this reason, vorbisfile will always try to make sure
        it reads the last two marked pages in proper sequence */
 
-    if(v->frameno==-1)
-      v->frameno=vb->frameno;
+    if(v->granulepos==-1)
+      v->granulepos=vb->granulepos;
     else{
-      v->frameno+=(centerW-v->centerW);
-      if(vb->frameno!=-1 && v->frameno!=vb->frameno){
-	if(v->frameno>vb->frameno && vb->eofflag){
+      v->granulepos+=(centerW-v->centerW);
+      if(vb->granulepos!=-1 && v->granulepos!=vb->granulepos){
+	if(v->granulepos>vb->granulepos && vb->eofflag){
 	  /* partial last frame.  Strip the padding off */
-	  centerW-=(v->frameno-vb->frameno);
+	  centerW-=(v->granulepos-vb->granulepos);
 	}/* else{ Shouldn't happen *unless* the bitstream is out of
             spec.  Either way, believe the bitstream } */
-	v->frameno=vb->frameno;
+	v->granulepos=vb->granulepos;
       }
     }
 
@@ -706,7 +707,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 }
 
 /* pcm==NULL indicates we just want the pending samples, no more */
-int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm){
+int vorbis_synthesis_pcmout(vorbis_dsp_state *v,float ***pcm){
   vorbis_info *vi=v->vi;
   if(v->pcm_returned<v->centerW){
     if(pcm){

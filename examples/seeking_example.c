@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.3 2000/07/07 06:16:24 xiphmont Exp $
+ last mod: $Id: seeking_example.c,v 1.4 2000/10/12 03:12:39 xiphmont Exp $
 
  ********************************************************************/
 

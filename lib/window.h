@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.h,v 1.3 2000/01/22 13:28:37 xiphmont Exp $
+ last mod: $Id: window.h,v 1.4 2000/10/12 03:12:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,6 @@
 #define _V_WINDOW_
 
 #define VI_WINDOWB 1
-extern double *_vorbis_window(int type,int window,int left,int right);
+extern float *_vorbis_window(int type,int window,int left,int right);
 
 #endif

@@ -12,17 +12,17 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.8 2000/08/31 08:01:34 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.9 2000/10/12 03:12:54 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <ogg/ogg.h>
 #include "os.h"
 #include "vorbis/codec.h"
 #include "vorbis/codebook.h"
-#include "bitwise.h"
 #include "scales.h"
 #include "sharedbook.h"
 
@@ -45,7 +45,7 @@ int _ilog(unsigned int v){
 #define VQ_FEXP_BIAS 768 /* bias toward values smaller than 1. */
 
 /* doesn't currently guard under/overflow */
-long _float32_pack(double val){
+long _float32_pack(float val){
   int sign=0;
   long exp;
   long mant;
@@ -60,10 +60,10 @@ long _float32_pack(double val){
   return(sign|exp|mant);
 }
 
-double _float32_unpack(long val){
-  double mant=val&0x1fffff;
-  double sign=val&0x80000000;
-  double exp =(val&0x7fe00000)>>VQ_FMAN;
+float _float32_unpack(long val){
+  float mant=val&0x1fffff;
+  float sign=val&0x80000000;
+  float exp =(val&0x7fe00000)>>VQ_FMAN;
   if(sign)mant= -mant;
   return(ldexp(mant,exp-(VQ_FMAN-1)-VQ_FEXP_BIAS));
 }
@@ -142,7 +142,7 @@ long *_make_words(long *l,long n){
 /* build the decode helper tree from the codewords */
 decode_aux *_make_decode_tree(codebook *c){
   const static_codebook *s=c->c;
-  long top=0,i,j;
+  long top=0,i,j,n;
   decode_aux *t=malloc(sizeof(decode_aux));
   long *ptr0=t->ptr0=calloc(c->entries*2,sizeof(long));
   long *ptr1=t->ptr1=calloc(c->entries*2,sizeof(long));
@@ -173,6 +173,25 @@ decode_aux *_make_decode_tree(codebook *c){
     }
   }
   free(codelist);
+
+  t->tabn = _ilog(c->entries)-4; /* this is magic */
+  if(t->tabn<5)t->tabn=5;
+  n = 1<<t->tabn;
+  t->tab = malloc(n*sizeof(long));
+  t->tabl = malloc(n*sizeof(int));
+  for (i = 0; i < n; i++) {
+    long p = 0;
+    for (j = 0; j < t->tabn && (p > 0 || j == 0); j++) {
+      if (i & (1 << j))
+	p = ptr1[p];
+      else
+	p = ptr0[p];
+    }
+    /* now j == length, and p == -code */
+    t->tab[i] = p;
+    t->tabl[i] = j;
+  }
+
   return(t);
 }
 
@@ -212,13 +231,13 @@ long _book_maptype1_quantvals(const static_codebook *b){
    generated algorithmically (each column of the vector counts through
    the values in the quant vector). in map type 2, all the values came
    in in an explicit list.  Both value lists must be unpacked */
-double *_book_unquantize(const static_codebook *b){
+float *_book_unquantize(const static_codebook *b){
   long j,k;
   if(b->maptype==1 || b->maptype==2){
     int quantvals;
-    double mindel=_float32_unpack(b->q_min);
-    double delta=_float32_unpack(b->q_delta);
-    double *r=calloc(b->entries*b->dim,sizeof(double));
+    float mindel=_float32_unpack(b->q_min);
+    float delta=_float32_unpack(b->q_delta);
+    float *r=calloc(b->entries*b->dim,sizeof(float));
 
     /* maptype 1 and 2 both use a quantized value vector, but
        different sizes */
@@ -233,11 +252,11 @@ double *_book_unquantize(const static_codebook *b){
 	 that */
       quantvals=_book_maptype1_quantvals(b);
       for(j=0;j<b->entries;j++){
-	double last=0.;
+	float last=0.;
 	int indexdiv=1;
 	for(k=0;k<b->dim;k++){
 	  int index= (j/indexdiv)%quantvals;
-	  double val=b->quantlist[index];
+	  float val=b->quantlist[index];
 	  val=fabs(val)*delta+mindel+last;
 	  if(b->q_sequencep)last=val;	  
 	  r[j*b->dim+k]=val;
@@ -247,9 +266,9 @@ double *_book_unquantize(const static_codebook *b){
       break;
     case 2:
       for(j=0;j<b->entries;j++){
-	double last=0.;
+	float last=0.;
 	for(k=0;k<b->dim;k++){
-	  double val=b->quantlist[j*b->dim+k];
+	  float val=b->quantlist[j*b->dim+k];
 	  val=fabs(val)*delta+mindel+last;
 	  if(b->q_sequencep)last=val;	  
 	  r[j*b->dim+k]=val;
@@ -319,25 +338,25 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   return(-1);
 }
 
-static double _dist(int el,double *ref, double *b,int step){
+static float _dist(int el,float *ref, float *b,int step){
   int i;
-  double acc=0.;
+  float acc=0.;
   for(i=0;i<el;i++){
-    double val=(ref[i]-b[i*step]);
+    float val=(ref[i]-b[i*step]);
     acc+=val*val;
   }
   return(acc);
 }
 
 #include <stdio.h>
-int _best(codebook *book, double *a, int step){
+int _best(codebook *book, float *a, int step){
   encode_aux_nearestmatch *nt=book->c->nearest_tree;
   encode_aux_threshmatch *tt=book->c->thresh_tree;
   encode_aux_pigeonhole *pt=book->c->pigeon_tree;
   int dim=book->dim;
   int ptr=0,k,o;
   /*int savebest=-1;
-    double saverr;*/
+    float saverr;*/
 
   /* do we have a threshhold encode hint? */
   if(tt){
@@ -364,14 +383,14 @@ int _best(codebook *book, double *a, int step){
   if(pt){
     const static_codebook *c=book->c;
     int i,besti=-1;
-    double best;
+    float best;
     int entry=0;
 
     /* dealing with sequentialness is a pain in the ass */
     if(c->q_sequencep){
       int pv;
       long mul=1;
-      double qlast=0;
+      float qlast=0;
       for(k=0,o=0;k<dim;k++,o+=step){
 	pv=(int)((a[o]-qlast-pt->min)/pt->del);
 	if(pv<0 || pv>=pt->mapentries)break;
@@ -393,7 +412,7 @@ int _best(codebook *book, double *a, int step){
       /* search the abbreviated list */
       long *list=pt->fitlist+pt->fitmap[entry];
       for(i=0;i<pt->fitlength[entry];i++){
-	double this=_dist(dim,book->valuelist+list[i]*dim,a,step);
+	float this=_dist(dim,book->valuelist+list[i]*dim,a,step);
 	if(besti==-1 || this<best){
 	  best=this;
 	  besti=list[i];
@@ -407,9 +426,9 @@ int _best(codebook *book, double *a, int step){
   if(nt){
     /* optimized using the decision tree */
     while(1){
-      double c=0.;
-      double *p=book->valuelist+nt->p[ptr];
-      double *q=book->valuelist+nt->q[ptr];
+      float c=0.;
+      float *p=book->valuelist+nt->p[ptr];
+      float *q=book->valuelist+nt->q[ptr];
       
       for(k=0,o=0;k<dim;k++,o+=step)
 	c+=(p[k]-q[k])*(a[o]-(p[k]+q[k])*.5);
@@ -427,11 +446,11 @@ int _best(codebook *book, double *a, int step){
   {
     const static_codebook *c=book->c;
     int i,besti=-1;
-    double best;
-    double *e=book->valuelist;
+    float best;
+    float *e=book->valuelist;
     for(i=0;i<book->entries;i++){
       if(c->lengthlist[i]>0){
-	double this=_dist(dim,e,a,step);
+	float this=_dist(dim,e,a,step);
 	if(besti==-1 || this<best){
 	  best=this;
 	  besti=i;
@@ -459,7 +478,7 @@ int _best(codebook *book, double *a, int step){
 }
 
 /* returns the entry number and *modifies a* to the remainder value ********/
-int vorbis_book_besterror(codebook *book,double *a,int step,int addmul){
+int vorbis_book_besterror(codebook *book,float *a,int step,int addmul){
   int dim=book->dim,i,o;
   int best=_best(book,a,step);
   switch(addmul){
@@ -469,7 +488,7 @@ int vorbis_book_besterror(codebook *book,double *a,int step,int addmul){
     break;
   case 1:
     for(i=0,o=0;i<dim;i++,o+=step){
-      double val=(book->valuelist+best*dim)[i];
+      float val=(book->valuelist+best*dim)[i];
       if(val==0){
 	a[o]=0;
       }else{
@@ -519,7 +538,7 @@ static_codebook test1={
   NULL,
   NULL,NULL
 };
-static double *test1_result=NULL;
+static float *test1_result=NULL;
   
 /* linear, full mapping, nonsequential */
 static_codebook test2={
@@ -530,7 +549,7 @@ static_codebook test2={
   full_quantlist1,
   NULL,NULL
 };
-static double test2_result[]={-3,-2,-1,0, 1,2,3,4, 5,0,3,-2};
+static float test2_result[]={-3,-2,-1,0, 1,2,3,4, 5,0,3,-2};
 
 /* linear, full mapping, sequential */
 static_codebook test3={
@@ -541,7 +560,7 @@ static_codebook test3={
   full_quantlist1,
   NULL,NULL
 };
-static double test3_result[]={-3,-5,-6,-6, 1,3,6,10, 5,5,8,6};
+static float test3_result[]={-3,-5,-6,-6, 1,3,6,10, 5,5,8,6};
 
 /* linear, algorithmic mapping, nonsequential */
 static_codebook test4={
@@ -552,7 +571,7 @@ static_codebook test4={
   partial_quantlist1,
   NULL,NULL
 };
-static double test4_result[]={-3,-3,-3, 4,-3,-3, -1,-3,-3,
+static float test4_result[]={-3,-3,-3, 4,-3,-3, -1,-3,-3,
 			      -3, 4,-3, 4, 4,-3, -1, 4,-3,
 			      -3,-1,-3, 4,-1,-3, -1,-1,-3, 
 			      -3,-3, 4, 4,-3, 4, -1,-3, 4,
@@ -571,7 +590,7 @@ static_codebook test5={
   partial_quantlist1,
   NULL,NULL
 };
-static double test5_result[]={-3,-6,-9, 4, 1,-2, -1,-4,-7,
+static float test5_result[]={-3,-6,-9, 4, 1,-2, -1,-4,-7,
 			      -3, 1,-2, 4, 8, 5, -1, 3, 0,
 			      -3,-4,-7, 4, 3, 0, -1,-2,-5, 
 			      -3,-6,-2, 4, 1, 5, -1,-4, 0,
@@ -581,8 +600,8 @@ static double test5_result[]={-3,-6,-9, 4, 1,-2, -1,-4,-7,
 			      -3, 1, 0, 4, 8, 7, -1, 3, 2,
 			      -3,-4,-5, 4, 3, 2, -1,-2,-3};
 
-void run_test(static_codebook *b,double *comp){
-  double *out=_book_unquantize(b);
+void run_test(static_codebook *b,float *comp){
+  float *out=_book_unquantize(b);
   int i;
 
   if(comp){

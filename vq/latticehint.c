@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.2 2000/08/15 09:09:44 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.3 2000/10/12 03:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -69,10 +69,10 @@ static int addtosearch(int entry,long **tempstack,long *tempcount,int add){
 }
 
 static void setvals(int dim,encode_aux_pigeonhole *p,
-		    long *temptrack,double *tempmin,double *tempmax,
+		    long *temptrack,float *tempmin,float *tempmax,
 		    int seqp){
   int i;
-  double last=0.;
+  float last=0.;
   for(i=0;i<dim;i++){
     tempmin[i]=(temptrack[i])*p->del+p->min+last;
     tempmax[i]=tempmin[i]+p->del;
@@ -84,12 +84,12 @@ static void setvals(int dim,encode_aux_pigeonhole *p,
    quantize outside the pigeonmap are dropped and brute-forced.  So we
    can ignore the <0 and >=n boundary cases in min/max error */
 
-static double minerror(int dim,double *a,encode_aux_pigeonhole *p,
-		       long *temptrack,double *tempmin,double *tempmax){
+static float minerror(int dim,float *a,encode_aux_pigeonhole *p,
+		       long *temptrack,float *tempmin,float *tempmax){
   int i;
-  double err=0.;
+  float err=0.;
   for(i=0;i<dim;i++){
-    double eval=0.;
+    float eval=0.;
     if(a[i]<tempmin[i]){
       eval=tempmin[i]-a[i];
     }else if(a[i]>tempmax[i]){
@@ -100,17 +100,17 @@ static double minerror(int dim,double *a,encode_aux_pigeonhole *p,
   return(err);
 }
 
-static double maxerror(int dim,double *a,encode_aux_pigeonhole *p,
-		       long *temptrack,double *tempmin,double *tempmax){
+static float maxerror(int dim,float *a,encode_aux_pigeonhole *p,
+		       long *temptrack,float *tempmin,float *tempmax){
   int i;
-  double err=0.,eval;
+  float err=0.,eval;
   for(i=0;i<dim;i++){
     if(a[i]<tempmin[i]){
       eval=tempmax[i]-a[i];
     }else if(a[i]>tempmax[i]){
       eval=a[i]-tempmin[i];
     }else{
-      double t1=a[i]-tempmin[i];
+      float t1=a[i]-tempmin[i];
       eval=tempmax[i]-a[i];
       if(t1>eval)eval=t1;
     }
@@ -123,7 +123,7 @@ int main(int argc,char *argv[]){
   codebook *b;
   static_codebook *c;
   int entries=-1,dim=-1;
-  double min,del;
+  float min,del;
   char *name;
   long i,j;
   long dB=0;
@@ -172,7 +172,7 @@ int main(int argc,char *argv[]){
     fprintf(stderr,"Adding threshold hint to %s...\n",name);
 
     /* simplest possible threshold hint only */
-    t->quantthresh=calloc(quantvals-1,sizeof(double));
+    t->quantthresh=calloc(quantvals-1,sizeof(float));
     t->quantmap=calloc(quantvals,sizeof(int));
     t->threshvals=quantvals;
     t->quantvals=quantvals;
@@ -184,8 +184,8 @@ int main(int argc,char *argv[]){
     /* ok, gen the map and thresholds */
     for(i=0;i<quantvals;i++)t->quantmap[i]=quantsort[i]-c->quantlist;
     for(i=0;i<quantvals-1;i++){
-      double v1=*(quantsort[i])*del+min;
-      double v2=*(quantsort[i+1])*del+min;
+      float v1=*(quantsort[i])*del+min;
+      float v2=*(quantsort[i+1])*del+min;
       if(dB){
 	if(fabs(v1)<.01)v1=(v1+v2)*.5;
 	if(fabs(v2)<.01)v2=(v1+v2)*.5;
@@ -204,8 +204,8 @@ int main(int argc,char *argv[]){
     long **tempstack;
     long *tempcount;
     long *temptrack;
-    double *tempmin;
-    double *tempmax;
+    float *tempmin;
+    float *tempmax;
     long totalstack=0;
     long pigeons;
     long subpigeons;
@@ -244,11 +244,11 @@ int main(int argc,char *argv[]){
        exact pigeonhole grouping is an optimization issue, not a
        correctness issue */
     for(i=0;i<p->mapentries;i++){
-      double thisval=del*i+min; /* middle of the quant zone */
+      float thisval=del*i+min; /* middle of the quant zone */
       int quant=0;
-      double err=fabs(c->quantlist[0]*del+min-thisval);
+      float err=fabs(c->quantlist[0]*del+min-thisval);
       for(j=1;j<quantvals;j++){
-	double thiserr=fabs(c->quantlist[j]*del+min-thisval);
+	float thiserr=fabs(c->quantlist[j]*del+min-thisval);
 	if(thiserr<err){
 	  quant=j/factor;
 	  err=thiserr;
@@ -275,13 +275,13 @@ int main(int argc,char *argv[]){
     for(i=0;i<dim;i++)subpigeons*=p->mapentries;
     for(i=0;i<dim;i++)pigeons*=p->quantvals;
     temptrack=calloc(dim,sizeof(long));
-    tempmin=calloc(dim,sizeof(double));
-    tempmax=calloc(dim,sizeof(double));
+    tempmin=calloc(dim,sizeof(float));
+    tempmax=calloc(dim,sizeof(float));
     tempstack=calloc(pigeons,sizeof(long *));
     tempcount=calloc(pigeons,sizeof(long));
 
     while(1){
-      double errorpost=-1;
+      float errorpost=-1;
       char buffer[80];
 
       /* map our current pigeonhole to a 'big pigeonhole' so we know
@@ -296,7 +296,7 @@ int main(int argc,char *argv[]){
          maximum error.  Record that error */
       for(i=0;i<entries;i++){
 	if(c->lengthlist[i]>0){
-	  double this=maxerror(dim,b->valuelist+i*dim,p,
+	  float this=maxerror(dim,b->valuelist+i*dim,p,
 			       temptrack,tempmin,tempmax);
 	  if(errorpost==-1 || this<errorpost)errorpost=this;
 	  spinnit(buffer,subpigeons);
@@ -329,7 +329,7 @@ int main(int argc,char *argv[]){
        improbable is determined by c->lengthlist; we assume that
        pigeonholing is in sync with the codeword cells, which it is */
     /*for(i=0;i<entries;i++){
-      double probability= 1./(1<<c->lengthlist[i]);
+      float probability= 1./(1<<c->lengthlist[i]);
       if(c->lengthlist[i]==0 || probability*entries<cutoff){
 	totalstack-=tempcount[i];
 	tempcount[i]=0;

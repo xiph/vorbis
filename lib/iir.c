@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.1 2000/07/12 09:36:18 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.2 2000/10/12 03:12:52 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,17 +24,17 @@
 #include <math.h>
 #include "iir.h"
 
-void IIR_init(IIR_state *s,int stages,double gain, double *A, double *B){
+void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
   memset(s,0,sizeof(IIR_state));
   s->stages=stages;
   s->gain=gain;
-  s->coeff_A=malloc(stages*sizeof(double));
-  s->coeff_B=malloc((stages+1)*sizeof(double));
-  s->z_A=calloc(stages*2,sizeof(double));
-  s->z_B=calloc(stages*2,sizeof(double));
+  s->coeff_A=malloc(stages*sizeof(float));
+  s->coeff_B=malloc((stages+1)*sizeof(float));
+  s->z_A=calloc(stages*2,sizeof(float));
+  s->z_B=calloc(stages*2,sizeof(float));
 
-  memcpy(s->coeff_A,A,stages*sizeof(double));
-  memcpy(s->coeff_B,B,(stages+1)*sizeof(double));
+  memcpy(s->coeff_A,A,stages*sizeof(float));
+  memcpy(s->coeff_B,B,(stages+1)*sizeof(float));
 }
 
 void IIR_clear(IIR_state *s){
@@ -47,11 +47,11 @@ void IIR_clear(IIR_state *s){
   }
 }
 
-double IIR_filter(IIR_state *s,double in){
+float IIR_filter(IIR_state *s,float in){
   int stages=s->stages,i;
-  double newA;
-  double newB=0;
-  double *zA=s->z_A+s->ring;
+  float newA;
+  float newB=0;
+  float *zA=s->z_A+s->ring;
 
   newA=in/=s->gain;
   for(i=0;i<stages;i++){
@@ -68,11 +68,11 @@ double IIR_filter(IIR_state *s,double in){
 
 /* this assumes the symmetrical structure of the feed-forward stage of
    a Chebyshev bandpass to save multiplies */
-double IIR_filter_ChebBand(IIR_state *s,double in){
+float IIR_filter_ChebBand(IIR_state *s,float in){
   int stages=s->stages,i;
-  double newA;
-  double newB=0;
-  double *zA=s->z_A+s->ring;
+  float newA;
+  float newB=0;
+  float *zA=s->z_A+s->ring;
 
   newA=in/=s->gain;
 
@@ -96,8 +96,8 @@ double IIR_filter_ChebBand(IIR_state *s,double in){
 #ifdef _V_SELFTEST
 
 /* z^-stage, z^-stage+1... */
-static double cheb_bandpass_B[]={-1.,0.,5.,0.,-10.,0.,10.,0.,-5.,0.,1};
-static double cheb_bandpass_A[]={-0.6665900311,
+static float cheb_bandpass_B[]={-1.,0.,5.,0.,-10.,0.,10.,0.,-5.,0.,1};
+static float cheb_bandpass_A[]={-0.6665900311,
 				  1.0070146601,
 				 -3.1262875409,
 			 	  3.5017171569,
@@ -108,7 +108,7 @@ static double cheb_bandpass_A[]={-0.6665900311,
 				 -3.9134284363,
 				  1.3997338886};
 
-static double data[128]={  
+static float data[128]={  
   0.0426331,
   0.0384521,
   0.0345764,
@@ -247,7 +247,7 @@ static double data[128]={
 
 static float xv[NZEROS+1], yv[NPOLES+1];
 
-static double filterloop(double next){ 
+static float filterloop(float next){ 
   xv[0] = xv[1]; xv[1] = xv[2]; xv[2] = xv[3]; xv[3] = xv[4]; xv[4] = xv[5]; 
   xv[5] = xv[6]; xv[6] = xv[7]; xv[7] = xv[8]; xv[8] = xv[9]; xv[9] = xv[10]; 
   xv[10] = next / GAIN;
@@ -267,7 +267,7 @@ int main(){
 
   /* run the pregenerated Chebyshev filter, then our own distillation
      through the generic and specialized code */
-  double *work=malloc(128*sizeof(double));
+  float *work=malloc(128*sizeof(float));
   IIR_state iir;
   int i;
 

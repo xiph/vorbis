@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: time backend 0 (dummy)
- last mod: $Id: time0.c,v 1.5 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: time0.c,v 1.6 2000/10/12 03:12:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,30 +22,31 @@
 #include "registry.h"
 #include "misc.h"
 
-static void pack (vorbis_info_time *i,oggpack_buffer *opb){
+static void time0_pack (vorbis_info_time *i,oggpack_buffer *opb){
 }
-static vorbis_info_time *unpack (vorbis_info *vi,oggpack_buffer *opb){
+static vorbis_info_time *time0_unpack (vorbis_info *vi,oggpack_buffer *opb){
   return "";
 
 }
-static vorbis_look_time *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
+static vorbis_look_time *time0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
                               vorbis_info_time *i){
   return "";
 }
-static void free_info(vorbis_info_time *i){
+static void time0_free_info(vorbis_info_time *i){
 }
-static void free_look(vorbis_look_time *i){
+static void time0_free_look(vorbis_look_time *i){
 }
-static int forward(vorbis_block *vb,vorbis_look_time *i,
-		    double *in,double *out){
+static int time0_forward(vorbis_block *vb,vorbis_look_time *i,
+		    float *in,float *out){
   return(0);
 }
-static int inverse(vorbis_block *vb,vorbis_look_time *i,
-		    double *in,double *out){
+static int time0_inverse(vorbis_block *vb,vorbis_look_time *i,
+		    float *in,float *out){
   return(0);
 }
 
 /* export hooks */
 vorbis_func_time time0_exportbundle={
-  &pack,&unpack,&look,&free_info,&free_look,&forward,&inverse
+  &time0_pack,&time0_unpack,&time0_look,&time0_free_info,
+  &time0_free_look,&time0_forward,&time0_inverse
 };

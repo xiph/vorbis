@@ -34,7 +34,7 @@ static long _vq_lengthlist_res0_128a_192_1[] = {
 	 8,
 };
 
-static double _vq_quantthresh_res0_128a_192_1[] = {
+static float _vq_quantthresh_res0_128a_192_1[] = {
 	-0.5, 0.5, 
 };
 

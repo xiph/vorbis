@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.33 2000/07/17 12:55:37 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.34 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,18 +59,18 @@
 #define vN(data,i) (data+v->elements*i)
 
 /* default metric; squared 'distance' from desired value. */
-double _dist(vqgen *v,double *a, double *b){
+float _dist(vqgen *v,float *a, float *b){
   int i;
   int el=v->elements;
-  double acc=0.;
+  float acc=0.;
   for(i=0;i<el;i++){
-    double val=(a[i]-b[i]);
+    float val=(a[i]-b[i]);
     acc+=val*val;
   }
   return sqrt(acc);
 }
 
-double *_weight_null(vqgen *v,double *a){
+float *_weight_null(vqgen *v,float *a){
   return a;
 }
 
@@ -78,25 +78,25 @@ double *_weight_null(vqgen *v,double *a){
 void _vqgen_seed(vqgen *v){
   long i;
   for(i=0;i<v->entries;i++)
-    memcpy(_now(v,i),_point(v,i),sizeof(double)*v->elements);
+    memcpy(_now(v,i),_point(v,i),sizeof(float)*v->elements);
   v->seeded=1;
 }
 
 int directdsort(const void *a, const void *b){
-  double av=*((double *)a);
-  double bv=*((double *)b);
+  float av=*((float *)a);
+  float bv=*((float *)b);
   if(av>bv)return(-1);
   return(1);
 }
 
 void vqgen_cellmetric(vqgen *v){
   int j,k;
-  double min=-1.,max=-1.,mean=0.,acc=0.;
+  float min=-1.,max=-1.,mean=0.,acc=0.;
   long dup=0,unused=0;
  #ifdef NOISY
   int i;
    char buff[80];
-   double spacings[v->entries];
+   float spacings[v->entries];
    int count=0;
    FILE *cells;
    sprintf(buff,"cellspace%d.m",v->it);
@@ -105,11 +105,11 @@ void vqgen_cellmetric(vqgen *v){
 
   /* minimum, maximum, cell spacing */
   for(j=0;j<v->entries;j++){
-    double localmin=-1.;
+    float localmin=-1.;
 
     for(k=0;k<v->entries;k++){
       if(j!=k){
-	double this=_dist(v,_now(v,j),_now(v,k));
+	float this=_dist(v,_now(v,j),_now(v,k));
 	if(this>0){
 	  if(v->assigned[k] && (localmin==-1 || this<localmin))
 	    localmin=this;
@@ -142,7 +142,7 @@ void vqgen_cellmetric(vqgen *v){
 	  min,mean/acc,max,unused,dup);
 
 #ifdef NOISY
-  qsort(spacings,count,sizeof(double),directdsort);
+  qsort(spacings,count,sizeof(float),directdsort);
   for(i=0;i<count;i++)
     fprintf(cells,"%g\n",spacings[i]);
   fclose(cells);
@@ -167,18 +167,18 @@ void vqgen_cellmetric(vqgen *v){
 
 void vqgen_quantize(vqgen *v,quant_meta *q){
 
-  double maxdel;
-  double mindel;
+  float maxdel;
+  float mindel;
 
-  double delta;
-  double maxquant=((1<<q->quant)-1);
+  float delta;
+  float maxquant=((1<<q->quant)-1);
 
   int j,k;
 
   mindel=maxdel=_now(v,0)[0];
   
   for(j=0;j<v->entries;j++){
-    double last=0.;
+    float last=0.;
     for(k=0;k<v->elements;k++){
       if(mindel>_now(v,j)[k]-last)mindel=_now(v,j)[k]-last;
       if(maxdel<_now(v,j)[k]-last)maxdel=_now(v,j)[k]-last;
@@ -200,10 +200,10 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
   delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
-    double last=0;
+    float last=0;
     for(k=0;k<v->elements;k++){
-      double val=_now(v,j)[k];
-      double now=rint((val-last-mindel)/delta);
+      float val=_now(v,j)[k];
+      float now=rint((val-last-mindel)/delta);
       
       _now(v,j)[k]=now;
       if(now<0){
@@ -226,13 +226,13 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
    scales; we just make sure they're properly offset. */
 void vqgen_unquantize(vqgen *v,quant_meta *q){
   long j,k;
-  double mindel=_float32_unpack(q->min);
-  double delta=_float32_unpack(q->delta);
+  float mindel=_float32_unpack(q->min);
+  float delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
-    double last=0.;
+    float last=0.;
     for(k=0;k<v->elements;k++){
-      double now=_now(v,j)[k];
+      float now=_now(v,j)[k];
       now=fabs(now)*delta+last+mindel;
       if(q->sequencep)last=now;
       _now(v,j)[k]=now;
@@ -240,9 +240,9 @@ void vqgen_unquantize(vqgen *v,quant_meta *q){
   }
 }
 
-void vqgen_init(vqgen *v,int elements,int aux,int entries,double mindist,
-		double  (*metric)(vqgen *,double *, double *),
-		double *(*weight)(vqgen *,double *),int centroid){
+void vqgen_init(vqgen *v,int elements,int aux,int entries,float mindist,
+		float  (*metric)(vqgen *,float *, float *),
+		float *(*weight)(vqgen *,float *),int centroid){
   memset(v,0,sizeof(vqgen));
 
   v->centroid=centroid;
@@ -250,13 +250,13 @@ void vqgen_init(vqgen *v,int elements,int aux,int entries,double mindist,
   v->aux=aux;
   v->mindist=mindist;
   v->allocated=32768;
-  v->pointlist=malloc(v->allocated*(v->elements+v->aux)*sizeof(double));
+  v->pointlist=malloc(v->allocated*(v->elements+v->aux)*sizeof(float));
 
   v->entries=entries;
-  v->entrylist=malloc(v->entries*v->elements*sizeof(double));
+  v->entrylist=malloc(v->entries*v->elements*sizeof(float));
   v->assigned=malloc(v->entries*sizeof(long));
-  v->bias=calloc(v->entries,sizeof(double));
-  v->max=calloc(v->entries,sizeof(double));
+  v->bias=calloc(v->entries,sizeof(float));
+  v->max=calloc(v->entries,sizeof(float));
   if(metric)
     v->metric_func=metric;
   else
@@ -270,7 +270,7 @@ void vqgen_init(vqgen *v,int elements,int aux,int entries,double mindist,
 
 }
 
-void vqgen_addpoint(vqgen *v, double *p,double *a){
+void vqgen_addpoint(vqgen *v, float *p,float *a){
   int k;
   for(k=0;k<v->elements;k++)
     fprintf(v->asciipoints,"%.12g\n",p[k]);
@@ -280,11 +280,11 @@ void vqgen_addpoint(vqgen *v, double *p,double *a){
   if(v->points>=v->allocated){
     v->allocated*=2;
     v->pointlist=realloc(v->pointlist,v->allocated*(v->elements+v->aux)*
-			 sizeof(double));
+			 sizeof(float));
   }
 
-  memcpy(_point(v,v->points),p,sizeof(double)*v->elements);
-  if(v->aux)memcpy(_point(v,v->points)+v->elements,a,sizeof(double)*v->aux);
+  memcpy(_point(v,v->points),p,sizeof(float)*v->elements);
+  if(v->aux)memcpy(_point(v,v->points)+v->elements,a,sizeof(float)*v->aux);
  
   /* quantize to the density mesh if it's selected */
   if(v->mindist>0.){
@@ -311,7 +311,7 @@ void vqgen_sortmesh(vqgen *v){
     long i,march=1;
 
     /* sort to make uniqueness detection trivial */
-    sortsize=(v->elements+v->aux)*sizeof(double);
+    sortsize=(v->elements+v->aux)*sizeof(float);
     qsort(v->pointlist,v->points,sortsize,meshcomp);
 
     /* now march through and eliminate dupes */
@@ -333,19 +333,19 @@ void vqgen_sortmesh(vqgen *v){
   v->sorted=1;
 }
 
-double vqgen_iterate(vqgen *v,int biasp){
+float vqgen_iterate(vqgen *v,int biasp){
   long   i,j,k;
 
-  double fdesired;
+  float fdesired;
   long  desired;
   long  desired2;
 
-  double asserror=0.;
-  double meterror=0.;
-  double *new;
-  double *new2;
+  float asserror=0.;
+  float meterror=0.;
+  float *new;
+  float *new2;
   long   *nearcount;
-  double *nearbias;
+  float *nearbias;
  #ifdef NOISY
    char buff[80];
    FILE *assig;
@@ -368,30 +368,30 @@ double vqgen_iterate(vqgen *v,int biasp){
   if(!v->sorted)vqgen_sortmesh(v);
   if(!v->seeded)_vqgen_seed(v);
 
-  fdesired=(double)v->points/v->entries;
+  fdesired=(float)v->points/v->entries;
   desired=fdesired;
   desired2=desired*2;
-  new=malloc(sizeof(double)*v->entries*v->elements);
-  new2=malloc(sizeof(double)*v->entries*v->elements);
+  new=malloc(sizeof(float)*v->entries*v->elements);
+  new2=malloc(sizeof(float)*v->entries*v->elements);
   nearcount=malloc(v->entries*sizeof(long));
-  nearbias=malloc(v->entries*desired2*sizeof(double));
+  nearbias=malloc(v->entries*desired2*sizeof(float));
 
   /* fill in nearest points for entry biasing */
-  /*memset(v->bias,0,sizeof(double)*v->entries);*/
+  /*memset(v->bias,0,sizeof(float)*v->entries);*/
   memset(nearcount,0,sizeof(long)*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
   if(biasp){
     for(i=0;i<v->points;i++){
-      double *ppt=v->weight_func(v,_point(v,i));
-      double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
-      double secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
+      float *ppt=v->weight_func(v,_point(v,i));
+      float firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
+      float secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
       long   firstentry=0;
       long   secondentry=1;
       
       if(!(i&0xff))spinnit("biasing... ",v->points+v->points+v->entries-i);
       
       if(firstmetric>secondmetric){
-	double temp=firstmetric;
+	float temp=firstmetric;
 	firstmetric=secondmetric;
 	secondmetric=temp;
 	firstentry=1;
@@ -399,7 +399,7 @@ double vqgen_iterate(vqgen *v,int biasp){
       }
       
       for(j=2;j<v->entries;j++){
-	double thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
+	float thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
 	if(thismetric<secondmetric){
 	  if(thismetric<firstmetric){
 	    secondmetric=firstmetric;
@@ -416,8 +416,8 @@ double vqgen_iterate(vqgen *v,int biasp){
       j=firstentry;
       for(j=0;j<v->entries;j++){
 	
-	double thismetric,localmetric;
-	double *nearbiasptr=nearbias+desired2*j;
+	float thismetric,localmetric;
+	float *nearbiasptr=nearbias+desired2*j;
 	long k=nearcount[j];
 	
 	localmetric=v->metric_func(v,_now(v,j),ppt);
@@ -441,7 +441,7 @@ double vqgen_iterate(vqgen *v,int biasp){
 	  k++;
 	  if(k==desired){
 	    spinnit("biasing... ",v->points+v->points+v->entries-i);
-	    qsort(nearbiasptr,desired,sizeof(double),directdsort);
+	    qsort(nearbiasptr,desired,sizeof(float),directdsort);
 	  }
 	  
 	}else if(thismetric>nearbiasptr[desired-1]){
@@ -449,7 +449,7 @@ double vqgen_iterate(vqgen *v,int biasp){
 	  k++;
 	  if(k==desired2){
 	    spinnit("biasing... ",v->points+v->points+v->entries-i);
-	    qsort(nearbiasptr,desired2,sizeof(double),directdsort);
+	    qsort(nearbiasptr,desired2,sizeof(float),directdsort);
 	    k=desired;
 	  }
 	}
@@ -460,31 +460,31 @@ double vqgen_iterate(vqgen *v,int biasp){
     /* inflate/deflate */
     
     for(i=0;i<v->entries;i++){
-      double *nearbiasptr=nearbias+desired2*i;
+      float *nearbiasptr=nearbias+desired2*i;
       
       spinnit("biasing... ",v->points+v->entries-i);
       
       /* due to the delayed sorting, we likely need to finish it off....*/
       if(nearcount[i]>desired)
-	qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
+	qsort(nearbiasptr,nearcount[i],sizeof(float),directdsort);
 
       v->bias[i]=nearbiasptr[desired-1];
 
     }
   }else{ 
-    memset(v->bias,0,v->entries*sizeof(double));
+    memset(v->bias,0,v->entries*sizeof(float));
   }
 
   /* Now assign with new bias and find new midpoints */
   for(i=0;i<v->points;i++){
-    double *ppt=v->weight_func(v,_point(v,i));
-    double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
+    float *ppt=v->weight_func(v,_point(v,i));
+    float firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
     long   firstentry=0;
 
     if(!(i&0xff))spinnit("centering... ",v->points-i);
 
     for(j=0;j<v->entries;j++){
-      double thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
+      float thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
       if(thismetric<firstmetric){
 	firstmetric=thismetric;
 	firstentry=j;

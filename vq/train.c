@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.18 2000/06/14 01:38:32 xiphmont Exp $
+ last mod: $Id: train.c,v 1.19 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -79,7 +79,7 @@ int main(int argc,char *argv[]){
 
   int entries=-1,dim=-1;
   int start=0,num=-1;
-  double desired=.05,mindist=0.;
+  float desired=.05,mindist=0.;
   int iter=1000;
   int biasp=1;
   int centroid=0;
@@ -120,7 +120,7 @@ int main(int argc,char *argv[]){
     
     if(in){
       /* we wish to suck in a preexisting book and continue to train it */
-      double a;
+      float a;
       
       line=rline(in,out,1);
       if(strcmp(line,vqext_booktype)){
@@ -167,7 +167,7 @@ int main(int argc,char *argv[]){
       
       v.seeded=1;
       {
-	double *b=alloca((dim+vqext_aux)*sizeof(double));
+	float *b=alloca((dim+vqext_aux)*sizeof(float));
 	i=0;
 	while(1){
 	  for(k=0;k<dim+vqext_aux;k++){
@@ -263,7 +263,7 @@ int main(int argc,char *argv[]){
 	}
 	{
 	  int i;
-	  double b[cols];
+	  float b[cols];
 	  if(start+num*dim>cols){
 	    fprintf(stderr,"ran out of columns reading %s\n",file);
 	    exit(1);
@@ -306,7 +306,7 @@ int main(int argc,char *argv[]){
   signal(SIGINT,setexit);
 
   for(i=0;i<iter && !exiting;i++){
-    double result;
+    float result;
     if(i!=0){
       vqgen_unquantize(&v,&q);
       vqgen_cellmetric(&v);

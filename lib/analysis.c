@@ -12,15 +12,15 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.33 2000/08/15 09:09:42 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.34 2000/10/12 03:12:52 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
-#include "bitwise.h"
 #include "registry.h"
 #include "scales.h"
 #include "os.h"
@@ -38,9 +38,9 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   vb->res_bits=0;
 
   /* first things first.  Make sure encode is ready */
-  _oggpack_reset(&vb->opb);
+  oggpack_reset(&vb->opb);
   /* Encode the packet type */
-  _oggpack_write(&vb->opb,0,1);
+  oggpack_write(&vb->opb,0,1);
 
   /* currently lazy.  Short block dispatches to 0, long to 1. */
 
@@ -49,32 +49,32 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   vb->mode=mode;
 
   /* Encode frame mode, pre,post windowsize, then dispatch */
-  _oggpack_write(&vb->opb,mode,vd->modebits);
+  oggpack_write(&vb->opb,mode,vd->modebits);
   if(vb->W){
-    _oggpack_write(&vb->opb,vb->lW,1);
-    _oggpack_write(&vb->opb,vb->nW,1);
-    /*fprintf(stderr,"*");
-  }else{
-    fprintf(stderr,".");*/
-  }
+    oggpack_write(&vb->opb,vb->lW,1);
+    oggpack_write(&vb->opb,vb->nW,1);
+    /*fprintf(stderr,"*");*/
+  }/*else{
+    fprintf(stderr,".");
+    }*/
 
   if(_mapping_P[type]->forward(vb,vd->mode[mode]))
     return(-1);
 
   /* set up the packet wrapper */
 
-  op->packet=_oggpack_buffer(&vb->opb);
-  op->bytes=_oggpack_bytes(&vb->opb);
+  op->packet=oggpack_get_buffer(&vb->opb);
+  op->bytes=oggpack_bytes(&vb->opb);
   op->b_o_s=0;
   op->e_o_s=vb->eofflag;
-  op->frameno=vb->frameno;
+  op->granulepos=vb->granulepos;
   op->packetno=vb->sequence; /* for sake of completeness */
 
   return(0);
 }
 
 /* there was no great place to put this.... */
-void _analysis_output(char *base,int i,double *v,int n,int bark,int dB){
+void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
 #ifdef ANALYSIS
   int j;
   FILE *of;

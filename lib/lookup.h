@@ -11,30 +11,23 @@
  *                                                                  *
  ********************************************************************
 
- function: libvorbis codec internal types.  These structures are 
-           'visible', but generally uninteresting to the developer
- last mod: $Id: internal.h,v 1.7 2000/07/12 09:36:17 xiphmont Exp $
+  function: lookup based functions
+  last mod: $Id: lookup.h,v 1.2 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _vorbis_internal_h_
-#define _vorbis_internal_h_
+#ifndef _V_LOOKUP_H_
 
-/* structures for various internal data abstractions ********************/
-
-typedef struct {
-  long endbyte;     
-  int  endbit;      
-
-  unsigned char *buffer;
-  unsigned char *ptr;
-  long storage;
-  
-} oggpack_buffer;
+#ifdef FLOAT_LOOKUP
+extern float vorbis_coslook(float a);
+extern float vorbis_invsqlook(float a);
+extern float vorbis_invsq2explook(int a);
+extern float vorbis_fromdBlook(float a);
+#endif
+#ifdef INT_LOOKUP
+extern long vorbis_invsqlook_i(long a,long e);
+extern long vorbis_coslook_i(long a);
+extern float vorbis_fromdBlook_i(long a);
+#endif 
 
 #endif
-
-
-
-
-

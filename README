@@ -2,8 +2,8 @@
 *                                                                  *
 * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
 * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
-* THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
-* PLEASE READ THESE TERMS DISTRIBUTING.                            *
+* THE GNU LESSER/LIBRARY PUBLIC LICENSE 2, WHICH IS INCLUDED WITH  *
+* THIS SOURCE.  PLEASE READ THESE TERMS DISTRIBUTING.              *
 *                                                                  *
 * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
 * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
@@ -11,9 +11,24 @@
 *                                                                  *
 ********************************************************************
 
+NEW AND IMPORTANT:
+
+If you're used to the source distribution from the first two beta
+relaeases, things are now rearranged a bit.  Specifically, the
+'vorbis' CVS module contains only the libvorbis and libvorbisfile
+libraries.  Because Ogg bitstreams are to be used by other Ogg codecs,
+Ogg framing and streaming functionality is now in libogg (the 'ogg'
+CVS module).  Vorbis utilities are in 'vorbis-tools' and various
+player plugins are in 'vorbis-plugins'.  For now, you'll need to check
+out these other modules seperately.
+
+Secondly, the Ogg/Vorbis build systems now use automake.  Instead of
+'./configure;make', the proper build sequence (in each module) is
+'./autogen.sh;make'.
+
 WHAT'S HERE:
 
-This source distribution includes libvorbis, a full-featured example
+This source distribution includes libvorbis and an example
 encoder/player to demonstrate use of libvorbis and documentation on
 the Ogg Vorbis audio coding format.
 
@@ -23,11 +38,20 @@ Directory:
 		the public domain OggSquish Vorbis audio encoding
 		format.
 
-./cmdline	A full-featured command line encoder/decoder/player
-		utility ('vorbis') that demonstrates programmatic use
-		of libvorbis.
+./include       Library API headers and codebooks
 
-./docs          Vorbis specification documents
+./debian        Rules/spec files for building Debian .deb packages
+
+./doc           Vorbis specification documents
+
+./examples	Example code illustrating programmatic use of libogg, 
+		libvorbis, libvorbisfile and libvorbisenc
+
+./mac 		Codewarrior project files and build tweaks for MacOS.
+
+
+./vq 		Internal utilities for training/building new LSP/residue 
+		and auxiliary codebooks.
 
 WHAT IS VORBIS:
 
@@ -40,11 +64,21 @@ All the technical details are published and documented, and any
 software entity may make full use of the format without royalty or
 patent concerns.
 
-This package contains libvorbis, an LGPLed software implementation of
+This package contains:
+
+.) libvorbis, an LGPLed software implementation of
 the Vorbis specification by the Xiphophorus company
-(http://www.xiph.org/), vorbisfile, an LGPLed convenience library
+(http://www.xiph.org/) 
+
+.) libvorbisfile, an LGPLed convenience library
 built on Vorbis designed to simplify common uses and a number of GPL
-example programs, utilities and player plugins.
+example programs
+
+.) libvorbisenc, an LGPL library that provides a simple, programmatic
+encoding setup interface 
+
+.) example code making use of libogg, libvorbis, libvorbisfile and
+libvorbisenc
 
 CONTACT:
 
@@ -57,17 +91,17 @@ BUILD:
 
 A standard build should consist of nothing more than:
 
-./configure
+./autogen.sh
 make 
 
 and as root if desired :
 
 make install
 
-This will install the ogg vorbis commandline encoder/player ('ogg')
-into /usr/local/bin, the ogg player and libvorbis manpages into
-/usr/local/man/ and libvorbis.a into /usr/local/lib.
+This will install the vorbis libraries (static and shared) into
+/usr/local/lib, includes into /usr/local/include and API manpages
+(once we write some) into /usr/local/man.
 
-Monty <monty@xiph.org>, <xiphmont@mit.edu>
+Monty <monty@xiph.org>
 
-$Id: README,v 1.4 2000/05/12 21:42:04 xiphmont Exp $
+$Id: README,v 1.5 2000/10/12 03:12:36 xiphmont Exp $

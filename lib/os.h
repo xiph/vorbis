@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.9 2000/08/23 06:38:49 xiphmont Exp $
+ last mod: $Id: os.h,v 1.10 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,7 +41,7 @@
 
 #endif
 
-#ifdef USE_ALLOCA_H
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
 
@@ -57,9 +57,4 @@
 #  define max(x,y)  ((x)<(y)?(y):(x))
 #endif
 
-#include "../include/vorbis/os_types.h"
-
 #endif /* _OS_H */
-
-
-

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.3 2000/05/08 20:49:51 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.4 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,9 +31,9 @@ char *vqext_booktype="RESdata";
 quant_meta q={0,0,0,0};          /* set sequence data */
 int vqext_aux=0;
 
-static double *quant_save=NULL;
+static float *quant_save=NULL;
 
-double *vqext_weight(vqgen *v,double *p){
+float *vqext_weight(vqgen *v,float *p){
   return p;
 }
 
@@ -45,16 +45,16 @@ void vqext_quantize(vqgen *v,quant_meta *q){
   int j,k;
   long dim=v->elements;
   long n=v->entries;
-  double max=-1;
-  double *test=alloca(sizeof(double)*dim);
+  float max=-1;
+  float *test=alloca(sizeof(float)*dim);
   int moved=0;
 
   
   /* allow movement only to unoccupied coordinates on the coarse grid */
   for(j=0;j<n;j++){
     for(k=0;k<dim;k++){
-      double val=_now(v,j)[k];
-      double norm=rint(fabs(val)/scalequant);
+      float val=_now(v,j)[k];
+      float norm=rint(fabs(val)/scalequant);
       if(norm>max)max=norm;
       test[k]=norm;
     }
@@ -62,15 +62,15 @@ void vqext_quantize(vqgen *v,quant_meta *q){
     /* allow move only if unoccupied */
     if(quant_save){
       for(k=0;k<n;k++)
-	if(j!=k && memcmp(test,quant_save+dim*k,dim*sizeof(double))==0)
+	if(j!=k && memcmp(test,quant_save+dim*k,dim*sizeof(float))==0)
 	  break;
       if(k==n){
-	if(memcmp(test,quant_save+dim*j,dim*sizeof(double)))	
+	if(memcmp(test,quant_save+dim*j,dim*sizeof(float)))	
 	  moved++;
-	memcpy(quant_save+dim*j,test,sizeof(double)*dim);
+	memcpy(quant_save+dim*j,test,sizeof(float)*dim);
       }
     }else{
-      memcpy(_now(v,j),test,sizeof(double)*dim);
+      memcpy(_now(v,j),test,sizeof(float)*dim);
     }
   }
 
@@ -83,17 +83,17 @@ void vqext_quantize(vqgen *v,quant_meta *q){
   q->quant=_ilog(max);
 
   if(quant_save){
-    memcpy(_now(v,0),quant_save,sizeof(double)*dim*n);
+    memcpy(_now(v,0),quant_save,sizeof(float)*dim*n);
     fprintf(stderr,"cells shifted this iteration: %d\n",moved);
   }
 }
 
                             /* candidate,actual */
-double vqext_metric(vqgen *v,double *e, double *p){
+float vqext_metric(vqgen *v,float *e, float *p){
   int i;
-  double acc=0.;
+  float acc=0.;
   for(i=0;i<v->elements;i++){
-    double val=p[i]-e[i];
+    float val=p[i]-e[i];
     acc+=val*val;
   }
   return sqrt(acc);
@@ -101,7 +101,7 @@ double vqext_metric(vqgen *v,double *e, double *p){
 
 /* We don't interleave here; we assume that the interleave is provided
    for us by residuesplit in vorbis/huff/ */
-void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num){
+void vqext_addpoint_adj(vqgen *v,float *b,int start,int dim,int cols,int num){
   vqgen_addpoint(v,b+start,NULL);
 }
 
@@ -109,7 +109,7 @@ void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num){
    residuals (which causes lots & lots of dupes) */
 void vqext_preprocess(vqgen *v){
   long i,j,k,l;
-  double *test=alloca(sizeof(double)*v->elements);
+  float *test=alloca(sizeof(float)*v->elements);
   scalequant=q.quant;
 
   vqext_quantize(v,&q);
@@ -118,7 +118,7 @@ void vqext_preprocess(vqgen *v){
   /* if there are any dupes, reseed */
   for(k=0;k<v->entries;k++){
     for(l=0;l<k;l++){
-      if(memcmp(_now(v,k),_now(v,l),sizeof(double)*v->elements)==0)
+      if(memcmp(_now(v,k),_now(v,l),sizeof(float)*v->elements)==0)
 	break;
     }
     if(l<k)break;
@@ -132,7 +132,7 @@ void vqext_preprocess(vqgen *v){
     
     for(i=0,j=0;i<v->points && j<v->entries;i++){
       for(k=0;k<v->elements;k++){
-	double val=_point(v,i)[k];
+	float val=_point(v,i)[k];
 	test[k]=rint(val/scalequant)*scalequant;
       }
       
@@ -143,7 +143,7 @@ void vqext_preprocess(vqgen *v){
 	if(k==v->elements)break;
       }
       if(l==j){
-	memcpy(_now(v,j),test,v->elements*sizeof(double));
+	memcpy(_now(v,j),test,v->elements*sizeof(float));
 	j++;
       }
     }
@@ -154,8 +154,8 @@ void vqext_preprocess(vqgen *v){
     }
   }  
   vqext_quantize(v,&q);
-  quant_save=malloc(sizeof(double)*v->elements*v->entries);
-  memcpy(quant_save,_now(v,0),sizeof(double)*v->elements*v->entries);
+  quant_save=malloc(sizeof(float)*v->elements*v->entries);
+  memcpy(quant_save,_now(v,0),sizeof(float)*v->elements*v->entries);
   vqgen_unquantize(v,&q);
 
 }

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.5 2000/08/15 09:09:44 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.6 2000/10/12 03:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,7 +59,7 @@ static int ilog(unsigned int v){
 int main(int argc,char *argv[]){
   codebook b;
   static_codebook c;
-  double *quantlist;
+  float *quantlist;
   long *hits;
 
   int entries=-1,dim=-1,quantvals=-1,addmul=-1,sequencep=0;
@@ -128,8 +128,8 @@ int main(int argc,char *argv[]){
 
   /* gen a real quant list from the more easily human-grokked input */
   {
-    double min=quantlist[0];
-    double mindel=-1;
+    float min=quantlist[0];
+    float mindel=-1;
     int fac=1;
     for(j=1;j<quantvals;j++)if(quantlist[j]<min)min=quantlist[j];
     for(j=0;j<quantvals;j++)
@@ -140,7 +140,7 @@ int main(int argc,char *argv[]){
     j=0;
     while(j<quantvals){
       for(j=0;j<quantvals;j++){
-	double test=(quantlist[j]-min)/(mindel/fac);
+	float test=(quantlist[j]-min)/(mindel/fac);
 	if( fabs(rint(test)-test)>.000001) break;
       }
       if(j<quantvals)fac++;

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.14 2000/06/14 01:38:32 xiphmont Exp $
+ last mod: $Id: build.c,v 1.15 2000/10/12 03:13:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -149,7 +149,7 @@ int main(int argc,char *argv[]){
   i=0;
   quantlist=malloc(sizeof(long)*v.elements*v.entries);
   for(j=0;j<entries;j++){
-    double a;
+    float a;
     for(k=0;k<dim;k++){
       line=rline(in,out);
       sscanf(line,"%lf",&a);
@@ -165,7 +165,7 @@ int main(int argc,char *argv[]){
   
   /* training points */
   {
-    double *b=alloca(sizeof(double)*(dim+aux));
+    float *b=alloca(sizeof(float)*(dim+aux));
     i=0;
     v.entries=0; /* hack to avoid reseeding */
     while(1){

@@ -183,7 +183,7 @@ static long _vq_lengthlist_res0_1024a_160_6[] = {
 	18,
 };
 
-static double _vq_quantthresh_res0_1024a_160_6[] = {
+static float _vq_quantthresh_res0_1024a_160_6[] = {
 	-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
 };
 

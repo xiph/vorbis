@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.14 2000/06/14 01:38:32 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.15 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,23 +27,23 @@ typedef struct vqgen{
   int elements;
 
   int aux;
-  double mindist;
+  float mindist;
   int centroid;
 
   /* point cache */
-  double *pointlist; 
+  float *pointlist; 
   long   points;
   long   allocated;
 
   /* entries */
-  double *entrylist;
+  float *entrylist;
   long   *assigned;
-  double *bias;
+  float *bias;
   long   entries;
-  double *max;
+  float *max;
   
-  double  (*metric_func) (struct vqgen *v,double *entry,double *point);
-  double *(*weight_func) (struct vqgen *v,double *point);
+  float  (*metric_func) (struct vqgen *v,float *entry,float *point);
+  float *(*weight_func) (struct vqgen *v,float *point);
 
   FILE *asciipoints;
 } vqgen;
@@ -55,25 +55,25 @@ typedef struct {
   int    sequencep; /* bitflag */
 } quant_meta;
 
-static inline double *_point(vqgen *v,long ptr){
+static inline float *_point(vqgen *v,long ptr){
   return v->pointlist+((v->elements+v->aux)*ptr);
 }
 
-static inline double *_aux(vqgen *v,long ptr){
+static inline float *_aux(vqgen *v,long ptr){
   return _point(v,ptr)+v->aux;
 }
 
-static inline double *_now(vqgen *v,long ptr){
+static inline float *_now(vqgen *v,long ptr){
   return v->entrylist+(v->elements*ptr);
 }
 
 extern void vqgen_init(vqgen *v,
-		       int elements,int aux,int entries,double mindist,
-		       double  (*metric)(vqgen *,double *, double *),
-		       double *(*weight)(vqgen *,double *),int centroid);
-extern void vqgen_addpoint(vqgen *v, double *p,double *aux);
+		       int elements,int aux,int entries,float mindist,
+		       float  (*metric)(vqgen *,float *, float *),
+		       float *(*weight)(vqgen *,float *),int centroid);
+extern void vqgen_addpoint(vqgen *v, float *p,float *aux);
 
-extern double vqgen_iterate(vqgen *v,int biasp);
+extern float vqgen_iterate(vqgen *v,int biasp);
 extern void vqgen_unquantize(vqgen *v,quant_meta *q);
 extern void vqgen_quantize(vqgen *v,quant_meta *q);
 extern void vqgen_cellmetric(vqgen *v);

@@ -12,13 +12,12 @@
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id: chaining_example.c,v 1.5 2000/06/14 10:13:35 xiphmont Exp $
+ last mod: $Id: chaining_example.c,v 1.6 2000/10/12 03:12:39 xiphmont Exp $
 
  ********************************************************************/
 
-#include "vorbis/codec.h"
-#include "vorbis/vorbisfile.h"
-#include "../lib/misc.h"
+#include <vorbis/codec.h>
+#include <vorbis/vorbisfile.h>
 
 int main(){
   OggVorbis_File ov;

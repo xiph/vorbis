@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.13 2000/08/15 14:01:02 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.14 2000/10/12 03:12:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "vorbis/mode_C.h"
+#include <vorbis/mode_C.h>
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 #include <io.h>
@@ -113,7 +113,17 @@ int main(){
     ogg_stream_packetin(&os,&header_comm);
     ogg_stream_packetin(&os,&header_code);
 
-    /* no need to write out here.  We'll get to that in the main loop */
+	/* We don't have to write out here, but doing so makes streaming 
+	 * much easier, so we do, flushing ALL pages. This ensures the actual
+	 * audio data will start on a new page
+	 */
+	while(!eos){
+		int result=ogg_stream_flush(&os,&og);
+		if(result==0)break;
+		fwrite(og.header,1,og.header_len,stdout);
+		fwrite(og.body,1,og.body_len,stdout);
+	}
+
   }
   
   while(!eos){
@@ -131,7 +141,7 @@ int main(){
       /* data to encode */
 
       /* expose the buffer to submit data */
-      double **buffer=vorbis_analysis_buffer(&vd,READ);
+      float **buffer=vorbis_analysis_buffer(&vd,READ);
       
       /* uninterleave samples */
       for(i=0;i<bytes/4;i++){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook decision tree 
- last mod: $Id: vqsplit.h,v 1.2 2000/05/08 20:49:51 xiphmont Exp $
+ last mod: $Id: vqsplit.h,v 1.3 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,8 +22,8 @@
 #include "vorbis/codebook.h"
 
 extern void vqsp_book(vqgen *v,codebook *b,long *quantlist);
-extern int vqenc_entry(codebook *b,double *val);
-extern int lp_split(double *pointlist,long totalpoints,
+extern int vqenc_entry(codebook *b,float *val);
+extern int lp_split(float *pointlist,long totalpoints,
 		    codebook *b,
 		    long *entryindex,long entries, 
 		    long *pointindex,long points,

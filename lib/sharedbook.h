@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.h,v 1.2 2000/05/08 20:49:50 xiphmont Exp $
+ last mod: $Id: sharedbook.h,v 1.3 2000/10/12 03:12:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,15 +26,15 @@ extern int vorbis_book_init_encode(codebook *dest,const static_codebook *source)
 extern int vorbis_book_init_decode(codebook *dest,const static_codebook *source);
 extern void vorbis_book_clear(codebook *b);
 
-extern double *_book_unquantize(const static_codebook *b);
-extern double *_book_logdist(const static_codebook *b,double *vals);
-extern double _float32_unpack(long val);
-extern long   _float32_pack(double val);
-extern int  _best(codebook *book, double *a, int step);
+extern float *_book_unquantize(const static_codebook *b);
+extern float *_book_logdist(const static_codebook *b,float *vals);
+extern float _float32_unpack(long val);
+extern long   _float32_pack(float val);
+extern int  _best(codebook *book, float *a, int step);
 extern int _ilog(unsigned int v);
 extern long _book_maptype1_quantvals(const static_codebook *b);
 
-extern int vorbis_book_besterror(codebook *book,double *a,int step,int addmul);
+extern int vorbis_book_besterror(codebook *book,float *a,int step,int addmul);
 extern long vorbis_book_codeword(codebook *book,int entry);
 extern long vorbis_book_codelen(codebook *book,int entry);
 

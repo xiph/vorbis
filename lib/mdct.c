@@ -13,7 +13,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [16 <= n ]
- last mod: $Id: mdct.c,v 1.16 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.17 2000/10/12 03:12:53 xiphmont Exp $
 
  Algorithm adapted from _The use of multirate filter banks for coding
  of high quality digital audio_, by T. Sporer, K. Brandenburg and
@@ -46,13 +46,13 @@
 
 void mdct_init(mdct_lookup *lookup,int n){
   int    *bitrev=malloc(sizeof(int)*(n/4));
-  double *trig=malloc(sizeof(double)*(n+n/4));
-  double *AE=trig;
-  double *AO=trig+1;
-  double *BE=AE+n/2;
-  double *BO=BE+1;
-  double *CE=BE+n/2;
-  double *CO=CE+1;
+  float *trig=malloc(sizeof(float)*(n+n/4));
+  float *AE=trig;
+  float *AO=trig+1;
+  float *BE=AE+n/2;
+  float *BO=BE+1;
+  float *CE=BE+n/2;
+  float *CO=CE+1;
   
   int i;
   int log2n=lookup->log2n=rint(log(n)/log(2));
@@ -96,21 +96,21 @@ void mdct_clear(mdct_lookup *l){
   }
 }
 
-static double *_mdct_kernel(double *x, double *w,
+static float *_mdct_kernel(float *x, float *w,
 			    int n, int n2, int n4, int n8,
 			    mdct_lookup *init){
   int i;
   /* step 2 */
 
   {
-    double *xA=x+n4;
-    double *xB=x;
-    double *w2=w+n4;
-    double *A=init->trig+n2;
+    float *xA=x+n4;
+    float *xB=x;
+    float *w2=w+n4;
+    float *A=init->trig+n2;
 
     for(i=0;i<n4;){
-      double x0=*xA - *xB;
-      double x1;
+      float x0=*xA - *xB;
+      float x1;
       w2[i]=    *xA++ + *xB++;
 
 
@@ -133,14 +133,14 @@ static double *_mdct_kernel(double *x, double *w,
       int k0=n>>(i+2);
       int k1=1<<(i+3);
       int wbase=n2-2;
-      double *A=init->trig;
-      double *temp;
+      float *A=init->trig;
+      float *temp;
 
       for(r=0;r<(k0>>2);r++){
         int w1=wbase;
 	int w2=w1-(k0>>1);
-	double AEv= A[0],wA;
-	double AOv= A[1],wB;
+	float AEv= A[0],wA;
+	float AOv= A[1],wB;
 	wbase-=2;
 
 	k0++;
@@ -170,23 +170,23 @@ static double *_mdct_kernel(double *x, double *w,
 
   /* step 4, 5, 6, 7 */
   {
-    double *C=init->trig+n;
+    float *C=init->trig+n;
     int *bit=init->bitrev;
-    double *x1=x;
-    double *x2=x+n2-1;
+    float *x1=x;
+    float *x2=x+n2-1;
     for(i=0;i<n8;i++){
       int t1=*bit++;
       int t2=*bit++;
 
-      double wA=w[t1]-w[t2+1];
-      double wB=w[t1-1]+w[t2];
-      double wC=w[t1]+w[t2+1];
-      double wD=w[t1-1]-w[t2];
+      float wA=w[t1]-w[t2+1];
+      float wB=w[t1-1]+w[t2];
+      float wC=w[t1]+w[t2+1];
+      float wD=w[t1-1]-w[t2];
 
-      double wACE=wA* *C;
-      double wBCE=wB* *C++;
-      double wACO=wA* *C;
-      double wBCO=wB* *C++;
+      float wACE=wA* *C;
+      float wBCE=wB* *C++;
+      float wACO=wA* *C;
+      float wBCO=wB* *C++;
       
       *x1++=( wC+wACO+wBCE)*.5;
       *x2--=(-wD+wBCO-wACE)*.5;
@@ -197,11 +197,11 @@ static double *_mdct_kernel(double *x, double *w,
   return(x);
 }
 
-void mdct_forward(mdct_lookup *init, double *in, double *out){
+void mdct_forward(mdct_lookup *init, float *in, float *out){
   int n=init->n;
-  double *x=alloca(sizeof(double)*(n/2));
-  double *w=alloca(sizeof(double)*(n/2));
-  double *xx;
+  float *x=alloca(sizeof(float)*(n/2));
+  float *w=alloca(sizeof(float)*(n/2));
+  float *xx;
   int n2=n>>1;
   int n4=n>>2;
   int n8=n>>3;
@@ -209,10 +209,10 @@ void mdct_forward(mdct_lookup *init, double *in, double *out){
 
   /* window + rotate + step 1 */
   {
-    double tempA,tempB;
+    float tempA,tempB;
     int in1=n2+n4-4;
     int in2=in1+5;
-    double *A=init->trig+n2;
+    float *A=init->trig+n2;
 
     i=0;
     
@@ -253,9 +253,9 @@ void mdct_forward(mdct_lookup *init, double *in, double *out){
   /* step 8 */
 
   {
-    double *B=init->trig+n2;
-    double *out2=out+n2;
-    double scale=4./n;
+    float *B=init->trig+n2;
+    float *out2=out+n2;
+    float scale=4./n;
     for(i=0;i<n4;i++){
       out[i]   =(xx[0]*B[0]+xx[1]*B[1])*scale;
       *(--out2)=(xx[0]*B[1]-xx[1]*B[0])*scale;
@@ -266,11 +266,11 @@ void mdct_forward(mdct_lookup *init, double *in, double *out){
   }
 }
 
-void mdct_backward(mdct_lookup *init, double *in, double *out){
+void mdct_backward(mdct_lookup *init, float *in, float *out){
   int n=init->n;
-  double *x=alloca(sizeof(double)*(n/2));
-  double *w=alloca(sizeof(double)*(n/2));
-  double *xx;
+  float *x=alloca(sizeof(float)*(n/2));
+  float *w=alloca(sizeof(float)*(n/2));
+  float *xx;
   int n2=n>>1;
   int n4=n>>2;
   int n8=n>>3;
@@ -278,9 +278,9 @@ void mdct_backward(mdct_lookup *init, double *in, double *out){
 
   /* rotate + step 1 */
   {
-    double *inO=in+1;
-    double  *xO= x;
-    double  *A=init->trig+n2;
+    float *inO=in+1;
+    float  *xO= x;
+    float  *A=init->trig+n2;
 
     for(i=0;i<n8;i++){
       A-=2;
@@ -305,13 +305,13 @@ void mdct_backward(mdct_lookup *init, double *in, double *out){
   /* step 8 */
 
   {
-    double *B=init->trig+n2;
+    float *B=init->trig+n2;
     int o1=n4,o2=o1-1;
     int o3=n4+n2,o4=o3-1;
     
     for(i=0;i<n4;i++){
-      double temp1= (*xx * B[1] - *(xx+1) * B[0]);
-      double temp2=-(*xx * B[0] + *(xx+1) * B[1]);
+      float temp1= (*xx * B[1] - *(xx+1) * B[0]);
+      float temp2=-(*xx * B[0] + *(xx+1) * B[1]);
     
       out[o1]=-temp1;
       out[o2]= temp1;

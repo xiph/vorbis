@@ -82,7 +82,7 @@ static long _vq_lengthlist_res0_128a_192_5[] = {
 	 0,
 };
 
-static double _vq_quantthresh_res0_128a_192_5[] = {
+static float _vq_quantthresh_res0_128a_192_5[] = {
 	-38.5, -27.5, -19.5, -13.5, -9.5, -7, -5, -3.5, 
 	-2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 5, 
 	7, 9.5, 13.5, 19.5, 27.5, 38.5, 

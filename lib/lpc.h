@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.13 2000/08/23 10:16:57 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.14 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -35,11 +35,10 @@ extern void lpc_init(lpc_lookup *l,long mapped, int m);
 extern void lpc_clear(lpc_lookup *l);
 
 /* simple linear scale LPC code */
-extern double vorbis_lpc_from_data(double *data,double *lpc,int n,int m);
-extern double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l);
+extern float vorbis_lpc_from_data(float *data,float *lpc,int n,int m);
+extern float vorbis_lpc_from_curve(float *curve,float *lpc,lpc_lookup *l);
 
-extern void vorbis_lpc_predict(double *coeff,double *prime,int m,
-			       double *data,long n);
-
+extern void vorbis_lpc_predict(float *coeff,float *prime,int m,
+			       float *data,long n);
 
 #endif

@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.6 2000/08/19 11:46:28 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.7 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -29,6 +29,7 @@
 #include "window.h"
 #include "scales.h"
 #include "lpc.h"
+#include "lsp.h"
 
 static vorbis_info_psy _psy_set0={
   1,/*athp*/
@@ -111,7 +112,7 @@ static vorbis_info_psy _psy_set0={
 };
 
 static int noisy=0;
-void analysis(char *base,int i,double *v,int n,int bark,int dB){
+void analysis(char *base,int i,float *v,int n,int bark,int dB){
   if(noisy){
     int j;
     FILE *of;
@@ -126,7 +127,7 @@ void analysis(char *base,int i,double *v,int n,int bark,int dB){
 	if(bark)
 	  fprintf(of,"%g ",toBARK(22050.*j/n));
 	else
-	  fprintf(of,"%g ",(double)j);
+	  fprintf(of,"%g ",(float)j);
       
 	if(dB){
 	  fprintf(of,"%g\n",todB(fabs(v[j])));
@@ -149,17 +150,12 @@ typedef struct {
   lpc_lookup lpclook;
 } vorbis_look_floor0;
 
-extern double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
-			    long frameno);
-extern void _lsp_to_curve(double *curve,double *lpc,double amp,
-			  vorbis_look_floor0 *l,char *name,long frameno);
-
-long frameno=0;
+long granulepos=0;
 
 /* hacked from floor0.c */
 static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
   int j;
-  double scale;
+  float scale;
   look->m=m;
   look->n=n;
   look->ln=ln;
@@ -177,15 +173,15 @@ static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
 
 int main(int argc,char *argv[]){
   int eos=0;
-  double nonz=0.;
-  double acc=0.;
-  double tot=0.;
+  float nonz=0.;
+  float acc=0.;
+  float tot=0.;
 
   int framesize=2048;
   int order=32;
   int map=256;
 
-  double *pcm[2],*out[2],*window,*decay[2],*lpc,*floor;
+  float *pcm[2],*out[2],*window,*decay[2],*lpc,*floor;
   signed char *buffer,*buffer2;
   mdct_lookup m_look;
   vorbis_look_psy p_look;
@@ -234,14 +230,14 @@ int main(int argc,char *argv[]){
     argv++;
   }
   
-  pcm[0]=malloc(framesize*sizeof(double));
-  pcm[1]=malloc(framesize*sizeof(double));
-  out[0]=calloc(framesize/2,sizeof(double));
-  out[1]=calloc(framesize/2,sizeof(double));
-  decay[0]=calloc(framesize/2,sizeof(double));
-  decay[1]=calloc(framesize/2,sizeof(double));
-  floor=malloc(framesize*sizeof(double));
-  lpc=malloc(order*sizeof(double));
+  pcm[0]=malloc(framesize*sizeof(float));
+  pcm[1]=malloc(framesize*sizeof(float));
+  out[0]=calloc(framesize/2,sizeof(float));
+  out[1]=calloc(framesize/2,sizeof(float));
+  decay[0]=calloc(framesize/2,sizeof(float));
+  decay[1]=calloc(framesize/2,sizeof(float));
+  floor=malloc(framesize*sizeof(float));
+  lpc=malloc(order*sizeof(float));
   buffer=malloc(framesize*4);
   buffer2=buffer+framesize*2;
   window=_vorbis_window(0,framesize,framesize/2,framesize/2);
@@ -280,9 +276,9 @@ int main(int argc,char *argv[]){
       }
       
       for(i=0;i<2;i++){
-	double amp;
+	float amp;
 
-	analysis("pre",frameno,pcm[i],framesize,0,0);
+	analysis("pre",granulepos,pcm[i],framesize,0,0);
 	
 	/* do the psychacoustics */
 	for(j=0;j<framesize;j++)
@@ -290,29 +286,22 @@ int main(int argc,char *argv[]){
 
 	mdct_forward(&m_look,pcm[i],pcm[i]);
 
-	analysis("mdct",frameno,pcm[i],framesize/2,1,1);
+	analysis("mdct",granulepos,pcm[i],framesize/2,1,1);
 
 	_vp_compute_mask(&p_look,pcm[i],floor,decay[i]);
 	
-	analysis("prefloor",frameno,floor,framesize/2,1,1);
+	analysis("floor",frameno,floor,framesize/2,1,1);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
 	
-	for(j=0;j<framesize/2;j++)floor[j]=todB(floor[j])+150;
-	amp=_curve_to_lpc(floor,lpc,&floorlook,frameno);
-	vorbis_lpc_to_lsp(lpc,lpc,order);
-	_lsp_to_curve(floor,lpc,sqrt(amp),&floorlook,"Ffloor",frameno);
-	for(j=0;j<framesize/2;j++)floor[j]=fromdB(floor[j]-150);
-	analysis("floor",frameno,floor,framesize/2,1,1);
-
 	_vp_apply_floor(&p_look,pcm[i],floor);
 	/*r(j=0;j<framesize/2;j++)
 	  if(fabs(pcm[i][j])<1.)pcm[i][j]=0;*/
 
-	analysis("quant",frameno,pcm[i],framesize/2,1,1);
+	analysis("quant",granulepos,pcm[i],framesize/2,1,1);
 
 	/* re-add floor */
 	for(j=0;j<framesize/2;j++){
-	  double val=rint(pcm[i][j]);
+	  float val=rint(pcm[i][j]);
 	  tot++;
 	  if(val){
 	    nonz++;
@@ -323,20 +312,20 @@ int main(int argc,char *argv[]){
 	  }
 	}
 	
-	analysis("final",frameno,pcm[i],framesize/2,1,1);
+	analysis("final",granulepos,pcm[i],framesize/2,1,1);
 
 	/* take it back to time */
 	mdct_backward(&m_look,pcm[i],pcm[i]);
 	for(j=0;j<framesize/2;j++)
 	  out[i][j]+=pcm[i][j]*window[j];
 
-	frameno++;
+	granulepos++;
       }
            
       /* write data.  Use the part of buffer we're about to shift out */
       for(i=0;i<2;i++){
-	char *ptr=buffer+i*2;
-	double  *mono=out[i];
+	char  *ptr=buffer+i*2;
+	float *mono=out[i];
 	for(j=0;j<framesize/2;j++){
 	  int val=mono[j]*32767.;
 	  /* might as well guard against clipping */

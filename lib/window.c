@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.7 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: window.c,v 1.8 2000/10/12 03:12:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,8 +21,8 @@
 #include "os.h"
 #include "misc.h"
 
-double *_vorbis_window(int type, int window,int left,int right){
-  double *ret=calloc(window,sizeof(double));
+float *_vorbis_window(int type, int window,int left,int right){
+  float *ret=calloc(window,sizeof(float));
 
   switch(type){
   case 0:
@@ -33,7 +33,7 @@ double *_vorbis_window(int type, int window,int left,int right){
       int i;
     
       for(i=0;i<left;i++){
-	double x=(i+.5)/left*M_PI/2.;
+	float x=(i+.5)/left*M_PI/2.;
 	x=sin(x);
 	x*=x;
 	x*=M_PI/2.;
@@ -45,7 +45,7 @@ double *_vorbis_window(int type, int window,int left,int right){
 	ret[i]=1.;
       
       for(i=0;i<right;i++){
-	double x=(right-i-.5)/right*M_PI/2.;
+	float x=(right-i-.5)/right*M_PI/2.;
 	x=sin(x);
 	x*=x;
 	x*=M_PI/2.;

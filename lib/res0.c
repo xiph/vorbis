@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.17 2000/08/15 09:09:43 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.18 2000/10/12 03:12:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,8 +25,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
-#include "bitwise.h"
 #include "registry.h"
 #include "bookinternal.h"
 #include "sharedbook.h"
@@ -45,14 +45,14 @@ typedef struct {
   int       **decodemap;
 } vorbis_look_residue0;
 
-void free_info(vorbis_info_residue *i){
+void res0_free_info(vorbis_info_residue *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_residue0));
     free(i);
   }
 }
 
-void free_look(vorbis_look_residue *i){
+void res0_free_look(vorbis_look_residue *i){
   int j;
   if(i){
     vorbis_look_residue0 *look=(vorbis_look_residue0 *)i;
@@ -67,44 +67,44 @@ void free_look(vorbis_look_residue *i){
   }
 }
 
-void pack(vorbis_info_residue *vr,oggpack_buffer *opb){
+void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   int j,acc=0;
-  _oggpack_write(opb,info->begin,24);
-  _oggpack_write(opb,info->end,24);
+  oggpack_write(opb,info->begin,24);
+  oggpack_write(opb,info->end,24);
 
-  _oggpack_write(opb,info->grouping-1,24);  /* residue vectors to group and 
+  oggpack_write(opb,info->grouping-1,24);  /* residue vectors to group and 
 					     code with a partitioned book */
-  _oggpack_write(opb,info->partitions-1,6); /* possible partition choices */
-  _oggpack_write(opb,info->groupbook,8);  /* group huffman book */
+  oggpack_write(opb,info->partitions-1,6); /* possible partition choices */
+  oggpack_write(opb,info->groupbook,8);  /* group huffman book */
   for(j=0;j<info->partitions;j++){
-    _oggpack_write(opb,info->secondstages[j],4); /* zero *is* a valid choice */
+    oggpack_write(opb,info->secondstages[j],4); /* zero *is* a valid choice */
     acc+=info->secondstages[j];
   }
   for(j=0;j<acc;j++)
-    _oggpack_write(opb,info->booklist[j],8);
+    oggpack_write(opb,info->booklist[j],8);
 
 }
 
 /* vorbis_info is for range checking */
-vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
+vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
   vorbis_info_residue0 *info=calloc(1,sizeof(vorbis_info_residue0));
 
-  info->begin=_oggpack_read(opb,24);
-  info->end=_oggpack_read(opb,24);
-  info->grouping=_oggpack_read(opb,24)+1;
-  info->partitions=_oggpack_read(opb,6)+1;
-  info->groupbook=_oggpack_read(opb,8);
+  info->begin=oggpack_read(opb,24);
+  info->end=oggpack_read(opb,24);
+  info->grouping=oggpack_read(opb,24)+1;
+  info->partitions=oggpack_read(opb,6)+1;
+  info->groupbook=oggpack_read(opb,8);
   for(j=0;j<info->partitions;j++){
-    int cascade=info->secondstages[j]=_oggpack_read(opb,4);
+    int cascade=info->secondstages[j]=oggpack_read(opb,4);
     if(cascade>1)goto errout; /* temporary!  when cascading gets
                                  reworked and actually used, we don't
                                  want old code to DTWT */
     acc+=cascade;
   }
   for(j=0;j<acc;j++)
-    info->booklist[j]=_oggpack_read(opb,8);
+    info->booklist[j]=oggpack_read(opb,8);
 
   if(info->groupbook>=vi->books)goto errout;
   for(j=0;j<acc;j++)
@@ -112,11 +112,11 @@ vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
 
   return(info);
  errout:
-  free_info(info);
+  res0_free_info(info);
   return(NULL);
 }
 
-vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
+vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   vorbis_look_residue0 *look=calloc(1,sizeof(vorbis_look_residue0));
@@ -160,13 +160,13 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 
 /* does not guard against invalid settings; eg, a subn of 16 and a
    subgroup request of 32.  Max subn of 128 */
-static int _testhack(double *vec,int n,vorbis_look_residue0 *look,
+static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
 		     int auxparts,int auxpartnum){
   vorbis_info_residue0 *info=look->info;
   int i,j=0;
-  double max,localmax=0.;
-  double temp[128];
-  double entropy[8];
+  float max,localmax=0.;
+  float temp[128];
+  float entropy[8];
 
   /* setup */
   for(i=0;i<n;i++)temp[i]=fabs(vec[i]);
@@ -201,7 +201,7 @@ static int _testhack(double *vec,int n,vorbis_look_residue0 *look,
   return(i);
 }
 
-static int _encodepart(oggpack_buffer *opb,double *vec, int n,
+static int _encodepart(oggpack_buffer *opb,float *vec, int n,
 		       int stages, codebook **books,int mode,int part){
   int i,j,bits=0;
 
@@ -227,17 +227,16 @@ static int _encodepart(oggpack_buffer *opb,double *vec, int n,
   return(bits);
 }
 
-static int _decodepart(oggpack_buffer *opb,double *work,double *vec, int n,
+static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
 		       int stages, codebook **books){
-  int i,j;
+  int i;
   
-  memset(work,0,sizeof(double)*n);
-  for(j=0;j<stages;j++){
-    int dim=books[j]->dim;
+  memset(work,0,sizeof(float)*n);
+  for(i=0;i<stages;i++){
+    int dim=books[i]->dim;
     int step=n/dim;
-    for(i=0;i<step;i++)
-      if(vorbis_book_decodevs(books[j],work+i,opb,step,0)==-1)
-	return(-1);
+    if(s_vorbis_book_decodevs(books[i],work,opb,step,0)==-1)
+      return(-1);
   }
   
   for(i=0;i<n;i++)
@@ -246,8 +245,8 @@ static int _decodepart(oggpack_buffer *opb,double *work,double *vec, int n,
   return(0);
 }
 
-int forward(vorbis_block *vb,vorbis_look_residue *vl,
-	    double **in,int ch){
+int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
+	    float **in,int ch){
   long i,j,k,l;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
@@ -290,7 +289,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
      residual words for that partition word.  Then write the next
-     parition channel words... */
+     partition channel words... */
   
   for(i=info->begin,l=0;i<info->end;){
     /* first we encode a partition codeword for each channel */
@@ -324,7 +323,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 /* a truncated packet here just means 'stop working'; it's not an error */
-int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
+int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
   long i,j,k,l,transend=vb->pcmend/2;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
@@ -337,12 +336,12 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   int **partword=alloca(ch*sizeof(long *));
-  double *work=alloca(sizeof(double)*samples_per_partition);
+  float *work=alloca(sizeof(float)*samples_per_partition);
   partvals=partwords*partitions_per_word;
 
   /* make sure we're zeroed up to the start */
   for(j=0;j<ch;j++)
-    memset(in[j],0,sizeof(double)*info->begin);
+    memset(in[j],0,sizeof(float)*info->begin);
 
   for(i=info->begin,l=0;i<info->end;){
     /* fetch the partition word for each channel */
@@ -366,23 +365,23 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
  eopbreak:
   if(i<transend){
     for(j=0;j<ch;j++)
-      memset(in[j]+i,0,sizeof(double)*(transend-i));
+      memset(in[j]+i,0,sizeof(float)*(transend-i));
   }
 
   return(0);
 
  errout:
   for(j=0;j<ch;j++)
-    memset(in[j],0,sizeof(double)*transend);
+    memset(in[j],0,sizeof(float)*transend);
   return(0);
 }
 
 vorbis_func_residue residue0_exportbundle={
-  &pack,
-  &unpack,
-  &look,
-  &free_info,
-  &free_look,
-  &forward,
-  &inverse
+  &res0_pack,
+  &res0_unpack,
+  &res0_look,
+  &res0_free_info,
+  &res0_free_look,
+  &res0_forward,
+  &res0_inverse
 };

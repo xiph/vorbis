@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.4 2000/08/15 09:09:32 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.5 2000/10/12 03:13:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,10 +25,10 @@
 
 /* does not guard against invalid settings; eg, a subn of 16 and a
    subgroup request of 32.  Max subn of 128 */
-static void _testhack(double *vec,int n,double *entropy){
+static void _testhack(float *vec,int n,float *entropy){
   int i,j=0;
-  double max=0.;
-  double temp[128];
+  float max=0.;
+  float temp[128];
 
   /* setup */
   for(i=0;i<n;i++)temp[i]=fabs(vec[i]);
@@ -61,13 +61,13 @@ static FILE **or;
 /* This is currently a bit specific to/hardwired for mapping 0; things
    will need to change in the future when we get real multichannel
    mappings */
-int quantaux(double *res,int n,double *ebound,double *mbound,int *subgrp,int parts, int subn){
+int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts, int subn){
   long i,j;
-  double entropy[8];
+  float entropy[8];
   int aux;
 
   for(i=0;i<=n-subn;i+=subn){
-    double max=0.;
+    float max=0.;
 
     _testhack(res+i,subn,entropy);
     for(j=0;j<subn;j++)
@@ -92,7 +92,7 @@ int quantaux(double *res,int n,double *ebound,double *mbound,int *subgrp,int par
   return(0);
 }
 
-static int getline(FILE *in,double *vec,int begin,int n){
+static int getline(FILE *in,float *vec,int begin,int n){
   int i,next=0;
 
   reset_next_value();
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]){
   char *base;
   int i,parts,begin,n,subn,*subgrp;
   FILE *res;
-  double *ebound,*mbound,*vec;
+  float *ebound,*mbound,*vec;
   long c=0;
   if(argc<5)usage();
 
@@ -162,8 +162,8 @@ int main(int argc, char *argv[]){
   /* how many parts?... */
   parts=argc-3;
   
-  ebound=malloc(sizeof(double)*parts);
-  mbound=malloc(sizeof(double)*parts);
+  ebound=malloc(sizeof(float)*parts);
+  mbound=malloc(sizeof(float)*parts);
   subgrp=malloc(sizeof(int)*parts);
   
   for(i=0;i<parts-1;i++){
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]){
     }
   }
   
-  vec=malloc(sizeof(double)*n);
+  vec=malloc(sizeof(float)*n);
   /* get the input line by line and process it */
   while(!feof(res)){
     if(getline(res,vec,begin,n))
