@@ -121,4 +121,24 @@ after normal configuring:
 make dist
 rpm -ta libvorbis-<version>.tar.gz
 
-$Id: README,v 1.7 2000/11/08 08:45:30 jack Exp $
+BUILDING ON MACOS 9:
+
+Vorbis on MacOS 9 is built using CodeWarrior 5.3.  To build it, first
+verify that the Ogg libraries are already built following the
+instructions in the Ogg module README.  Open vorbis/mac/libvorbis.mcp,
+switch to the "Targets" pane, select everything, and make the project.
+Do the same thing to build libvorbisenc.mcp, and libvorbisfile.mcp (in
+that order).  vorbis/mac/Output you will now have both debug and final
+versions of Vorbis shared libraries to link your projects against.
+
+To build a project using Ogg Vorbis, add access paths to your
+CodeWarrior project for the ogg/include, ogg/mac/Output,
+vorbis/include, and vorbis/mac/Output folders.  Be sure that
+"interpret DOS and Unix paths" is turned on in your project; it can
+be found in the "access paths" pane in your project settings.  Now
+simply add the shared libraries you need to your project (OggLib and
+VorbisLib at least) and #include "ogg/ogg.h" and "vorbis/codec.h"
+wherever you need to acces Ogg and Vorbis functionality.
+
+
+$Id: README,v 1.8 2000/11/22 06:22:18 xiphmont Exp $
