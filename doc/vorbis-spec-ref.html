@@ -1,0 +1,106 @@
+<HTML><HEAD><TITLE>xiph.org: Ogg Vorbis documentation</TITLE>
+<BODY bgcolor="#ffffff" text="#202020" link="#006666" vlink="#000000">
+<nobr><img src="white-ogg.png"><img src="vorbisword2.png"></nobr><p>
+
+<h1><font color=#000070>
+Ogg Vorbis I format specification: codec setup and packet decode
+</font></h1>
+
+<em>Last update to this document: July 18, 2002</em><br>
+
+<h1>Overview</h1>
+
+This document serves as the top-level reference document for the
+bit-by-bit decode specification of Vorbis I.  This document assumes a
+high-level understanding of the Vorbis decode process, which is
+provided in the document <a href="vorbis-spec-intro.html">Ogg Vorbis I
+format specification: introduction and description</a>.
+
+<h1>Header decode and decode setup</h1>
+
+A Vorbis bitstream begins with three header packets. The header
+packets are, in order, the identification header, the comments header,
+and the setup header. All are required for decode compliance.  An
+end-of-packet condition during decoding the first or third header
+packet renders the stream undecodable.  End-of-packet decoding the
+comment header is a non-fatal error condition.<p>
+
+<h2>Identification Header</h2>
+
+The identification header is a short header of only a few fields used
+to declare the stream definitively as Vorbis, and provide a externally
+relevant pieces of information about the audio stream. The
+identification header is coded as follows:<p>
+
+<ol>
+<li>
+
+
+
+<h2>Comment Header</h2>
+
+Comment header decode and data specification is covered in <a
+href="v-comment.html">Ogg Vorbis I format specification: comment field
+and header specification</a>.
+
+<h2>Setup Header</h2>
+
+
+<h3>mapping 0</h3>
+
+<h4>channel order</h4>
+
+In mapping type 0, channel mapping is implicitly defined as follows for standard audio applications:<p>
+
+<dl>
+<dt>one channel:<dd> the stream is monophonic
+<dt>two channels:<dd> the stream is stereo.  channel order: left, right
+<dt>three channels:<dd> the stream is a 1d-surround encoding.  channel order: left, center, right
+<dt>four channels:<dd> the stream is quadraphonic surround.  channel order: front left, front right, rear left, rear right
+<dt>five channels:<dd> the stream is five-channel surround.  channel order: front left, front center, front right, rear left, rear right
+<dt>six channels:<dd> the stream is 5,1 surround.  channel order: front left, front center, front right, rear left, rear right, LFE
+<dt>greter than six channels:<dd> channel use and order is defined by the application
+</dl>
+
+Applications using vorbis for dedicated purposes may define channel
+mapping as seen fit.  Future channel mappings (such as three and four
+channel <a href="http://www.ambisonic.net">Ambisonics</a>) will make
+use of channel mappings other than mapping 0.
+
+<h1>Packet decode</h1>
+
+
+
+
+
+<hr>
+<a href="http://www.xiph.org/">
+<img src="white-xifish.png" align=left border=0>
+</a>
+<font size=-2 color=#505050>
+
+Ogg is a <a href="http://www.xiph.org">Xiph.org Foundation</a> effort
+to protect essential tenets of Internet multimedia from corporate
+hostage-taking; Open Source is the net's greatest tool to keep
+everyone honest. See <a href="http://www.xiph.org/about.html">About
+the Xiph.org Foundation</a> for details.
+<p>
+
+Ogg Vorbis is the first Ogg audio CODEC.  Anyone may freely use and
+distribute the Ogg and Vorbis specification, whether in a private,
+public or corporate capacity.  However, the Xiph.org Foundation and
+the Ogg project (xiph.org) reserve the right to set the Ogg Vorbis
+specification and certify specification compliance.<p>
+
+Xiph.org's Vorbis software CODEC implementation is distributed under a
+BSD-like license.  This does not restrict third parties from
+distributing independent implementations of Vorbis software under
+other licenses.<p>
+
+Ogg, Vorbis, Xiph.org Foundation and their logos are trademarks (tm)
+of the <a href="http://www.xiph.org/">Xiph.org Foundation</a>.  These
+pages are copyright (C) 1994-2002 Xiph.org Foundation. All rights
+reserved.<p>
+
+</body>
+
