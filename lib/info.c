@@ -46,7 +46,7 @@ int vorbis_info_modeset(vorbis_info *vi, int mode){
 /* convenience function */
 int vorbis_info_addcomment(vorbis_info *vi,char *comment){
   vi->user_comments=realloc(vi->user_comments,
-			    (vi->comments+1)*sizeof(char *));
+			    (vi->comments+2)*sizeof(char *));
   vi->user_comments[vi->comments]=strdup(comment);
   vi->comments++;
   vi->user_comments[vi->comments]=NULL;
