@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.4 2001/06/05 23:59:33 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.5 2001/06/11 23:10:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -382,6 +382,31 @@ static void render_line(int x0,int x1,int y0,int y1,float *d){
 
   ady-=abs(base*adx);
 
+  d[x]*=FLOOR_fromdB_LOOKUP[y];
+  while(++x<x1){
+    err=err+ady;
+    if(err>=adx){
+      err-=adx;
+      y+=sy;
+    }else{
+      y+=base;
+    }
+    d[x]*=FLOOR_fromdB_LOOKUP[y];
+  }
+}
+
+static void render_line0(int x0,int x1,int y0,int y1,float *d){
+  int dy=y1-y0;
+  int adx=x1-x0;
+  int ady=abs(dy);
+  int base=dy/adx;
+  int sy=(dy<0?base-1:base+1);
+  int x=x0;
+  int y=y0;
+  int err=0;
+
+  ady-=abs(base*adx);
+
   d[x]=FLOOR_fromdB_LOOKUP[y];
   while(++x<x1){
     err=err+ady;
@@ -510,7 +535,6 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     double fx=x;
     double fy=y;
     double fx2=x2;
-    double fy2=y2;
     double fxy=xy;
     double denom=1./(an*fx2-fx*fx);
     double a=(fy*fx2-fxy*fx)*denom;
@@ -528,7 +552,7 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
   }
 }
 
-static void fit_line_point(lsfit_acc *a,int fits,int *y0,int *y1){
+/*static void fit_line_point(lsfit_acc *a,int fits,int *y0,int *y1){
   long y=0;
   int i;
 
@@ -536,7 +560,7 @@ static void fit_line_point(lsfit_acc *a,int fits,int *y0,int *y1){
     y+=a[i].ya;
   
   *y0=*y1=y;
-}
+  }*/
 
 static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
 			 const float *mdct,
@@ -730,7 +754,8 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	      case -1:
 		ly0=fits[lsortpos].edgey0;
 		break;
-	      default:
+		/*default:
+		  break;*/
 	      }
 
 	      switch(hmse){ 
@@ -958,13 +983,14 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       int hx;
       int lx=0;
       int ly=fit_valueA[0]*info->mult;
+
       for(j=1;j<posts;j++){
 	int current=look->forward_index[j];
 	if(!(fit_valueA[current]&0x8000)){
 	  int hy=(fit_valueA[current]&0x7fff)*info->mult;
 	  hx=info->postlist[current];
 	  
-	  render_line(lx,hx,ly,hy,codedflr);
+	  render_line0(lx,hx,ly,hy,codedflr);
 	  
 	  lx=hx;
 	  ly=hy;
@@ -995,19 +1021,18 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
   return(nonzero);
 }
 
-static int floor1_inverse(vorbis_block *vb,vorbis_look_floor *in,float *out){
+static void *floor1_inverse1(vorbis_block *vb,vorbis_look_floor *in){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
   vorbis_info_floor1 *info=look->vi;
-
+  
   codec_setup_info   *ci=vb->vd->vi->codec_setup;
-  int                  n=ci->blocksizes[vb->mode]/2;
   int i,j,k;
   codebook *books=((backend_lookup_state *)(vb->vd->backend_state))->
     fullbooks;   
 
   /* unpack wrapped/predicted values from stream */
   if(oggpack_read(&vb->opb,1)==1){
-    int fit_value[VIF_POSIT+2];
+    int *fit_value=_vorbis_block_alloc(vb,(look->posts)*sizeof(int));
 
     fit_value[0]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
     fit_value[1]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
@@ -1078,32 +1103,44 @@ static int floor1_inverse(vorbis_block *vb,vorbis_look_floor *in,float *out){
 	
     }
 
-    /* render the lines */
-    {
-      int hx;
-      int lx=0;
-      int ly=fit_value[0]*info->mult;
-      for(j=1;j<look->posts;j++){
-	int current=look->forward_index[j];
-	int hy=fit_value[current]&0x7fff;
-	if(hy==fit_value[current]){
+    return(fit_value);
+  }
+ eop:
+  return(NULL);
+}
 
-	  hy*=info->mult;
-	  hx=info->postlist[current];
-	  
-	  render_line(lx,hx,ly,hy,out);
-	  
-	  lx=hx;
-	  ly=hy;
-	}
+static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
+			  float *out){
+  vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
+  vorbis_info_floor1 *info=look->vi;
+
+  codec_setup_info   *ci=vb->vd->vi->codec_setup;
+  int                  n=ci->blocksizes[vb->mode]/2;
+  int j;
+
+  if(memo){
+    /* render the lines */
+    int *fit_value=(int *)memo;
+    int hx;
+    int lx=0;
+    int ly=fit_value[0]*info->mult;
+    for(j=1;j<look->posts;j++){
+      int current=look->forward_index[j];
+      int hy=fit_value[current]&0x7fff;
+      if(hy==fit_value[current]){
+	
+	hy*=info->mult;
+	hx=info->postlist[current];
+	
+	render_line(lx,hx,ly,hy,out);
+	
+	lx=hx;
+	ly=hy;
       }
-      for(j=hx;j<n;j++)out[j]=out[j-1]; /* be certain */
-    }    
+    }
+    for(j=hx;j<n;j++)out[j]*=out[j-1]; /* be certain */    
     return(1);
   }
-
-  /* fall through */
- eop:
   memset(out,0,sizeof(float)*n);
   return(0);
 }
@@ -1111,6 +1148,6 @@ static int floor1_inverse(vorbis_block *vb,vorbis_look_floor *in,float *out){
 /* export hooks */
 vorbis_func_floor floor1_exportbundle={
   &floor1_pack,&floor1_unpack,&floor1_look,&floor1_copy_info,&floor1_free_info,
-  &floor1_free_look,&floor1_forward,&floor1_inverse
+  &floor1_free_look,&floor1_forward,&floor1_inverse1,&floor1_inverse2
 };
 
