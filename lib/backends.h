@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.12.6.1 2002/05/07 23:47:12 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.12.6.2 2002/05/14 07:06:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,9 +30,7 @@
 typedef struct{
   void                   (*pack)  (vorbis_info_floor *,oggpack_buffer *);
   vorbis_info_floor     *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_floor     *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
-				   vorbis_info_floor *);
-  vorbis_info_floor     *(*copy_info)(vorbis_info_floor *);
+  vorbis_look_floor     *(*look)  (vorbis_dsp_state *,vorbis_info_floor *);
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   void *(*inverse1)  (struct vorbis_block *,vorbis_look_floor *);
@@ -94,9 +92,8 @@ typedef struct{
 typedef struct{
   void                 (*pack)  (vorbis_info_residue *,oggpack_buffer *);
   vorbis_info_residue *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_residue *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
+  vorbis_look_residue *(*look)  (vorbis_dsp_state *,
 				 vorbis_info_residue *);
-  vorbis_info_residue *(*copy_info)(vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
   long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
@@ -120,10 +117,9 @@ typedef struct vorbis_info_residue0{
   int    booklist[256];    /* list of second stage books */
 
   /* encode-only heuristic settings */
-  float  entmax[64];       /* book entropy threshholds*/
   float  ampmax[64];       /* book amp threshholds*/
-  int    subgrp[64];       /* book heuristic subgroup size */
-  int    blimit[64];       /* subgroup position limits */
+  int    blimit[64];       /* subgroup position limits *
+
 } vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/
@@ -131,34 +127,26 @@ typedef struct{
   void                 (*pack)  (vorbis_info *,vorbis_info_mapping *,
 				 oggpack_buffer *);
   vorbis_info_mapping *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_mapping *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
-				 vorbis_info_mapping *);
-  vorbis_info_mapping *(*copy_info)(vorbis_info_mapping *);
   void (*free_info)    (vorbis_info_mapping *);
-  void (*free_look)    (vorbis_look_mapping *);
-  int  (*forward)      (struct vorbis_block *vb,vorbis_look_mapping *);
-  int  (*inverse)      (struct vorbis_block *vb,vorbis_look_mapping *);
+  int  (*forward)      (struct vorbis_block *vb);
+  int  (*inverse)      (struct vorbis_block *vb,vorbis_info_mapping *);
 } vorbis_func_mapping;
 
 typedef struct vorbis_info_mapping0{
   int   submaps;  /* <= 16 */
   int   chmuxlist[256];   /* up to 256 channels in a Vorbis stream */
   
-  int   timesubmap[16];    /* [mux] */
   int   floorsubmap[16];   /* [mux] submap to floors */
   int   residuesubmap[16]; /* [mux] submap to residue */
-
-  int   psy[2]; /* by blocktype; impulse/padding for short,
-                   transition/normal for long */
 
   int   coupling_steps;
   int   coupling_mag[256];
   int   coupling_ang[256];
+  int   coupling_pointlimit;
+  int   coupling_pointamp;
+
 } vorbis_info_mapping0;
 
 #endif
-
-
-
 
 

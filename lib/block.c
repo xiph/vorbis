@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.64.2.1 2002/05/07 23:47:12 xiphmont Exp $
+ last mod: $Id: block.c,v 1.64.2.2 2002/05/14 07:06:40 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -189,12 +189,27 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   b->window[1]=_vorbis_window(0,ci->blocksizes[1]/2);
 
   if(encp){ /* encode/decode differ here */
+
+    /* analysis always needs an fft */
+    drft_init(&b->fft_look[0],ci->blocksizes[0]);
+    drft_init(&b->fft_look[1],ci->blocksizes[0]);
+
     /* finish the codebooks */
     if(!ci->fullbooks){
       ci->fullbooks=_ogg_calloc(ci->books,sizeof(*ci->fullbooks));
       for(i=0;i<ci->books;i++)
 	vorbis_book_init_encode(ci->fullbooks+i,ci->book_param[i]);
     }
+
+    b->psy=_ogg_calloc(ci->psys,sizeof(*b->psy));
+    for(i=0;i<ci->psys;i++){
+      _vp_psy_init(b->psy+i,
+		   ci->psy_param[i],
+		   &ci->psy_g_param,
+		   ci->blocksizes[ci->psy_param[i]->blockflag]/2,
+		   vi->rate);
+    }
+
     v->analysisp=1;
   }else{
     /* finish the codebooks */
@@ -230,14 +245,17 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
   v->pcm_current=v->centerW;
 
-  /* initialize all the mapping/backend lookups */
-  b->mode=_ogg_calloc(ci->modes,sizeof(*b->mode));
-  for(i=0;i<ci->modes;i++){
-    int mapnum=ci->mode_param[i]->mapping;
-    int maptype=ci->map_type[mapnum];
-    b->mode[i]=_mapping_P[maptype]->look(v,ci->mode_param[i],
-					 ci->map_param[mapnum]);
-  }
+  /* initialize all the backend lookups */
+  b->floor=_ogg_calloc(ci->floors,sizeof(*b->floor));
+  b->residue=_ogg_calloc(ci->residues,sizeof(*b->residue));
+
+  for(i=0;i<ci->floors;i++)
+    b->floor[i]=_floor_P[ci->floor_type[i]]->
+      look(vd,ci->floor_param[i]);
+
+  for(i=0;i<ci->residues;i++)
+    b->residue[i]=_residue_P[ci->residue_type[i]]->
+      look(vd,ci->residue_param[i]);    
 
   return(0);
 }
@@ -287,8 +305,31 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	_ogg_free(b->transform[1][0]);
 	_ogg_free(b->transform[1]);
       }
+
+      if(b->floor){
+	for(i=0;i<ci->floors;i++)
+	  _floor_P[ci->floor_type[i]]->
+	    free_look(b->floor[i]);
+	_ogg_free(b->floor);
+      }
+      if(b->residue){
+	for(i=0;i<ci->residues;i++)
+	  _residue_P[ci->residue_type[i]]->
+	    free_look(b->residue[i]);
+	_ogg_free(b->residue);
+      }
+      if(b->psy){
+	for(i=0;i<ci->psys;i++)
+	  _vp_psy_clear(b->psy+i);
+	_ogg_free(b->psy);
+      }
+
       if(b->psy_g_look)_vp_global_free(b->psy_g_look);
       vorbis_bitrate_clear(&b->bms);
+
+      drft_clear(&b->fft_look[0]);
+      drft_clear(&b->fft_look[1]);
+
     }
     
     if(v->pcm){
@@ -298,18 +339,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       if(v->pcmret)_ogg_free(v->pcmret);
     }
 
-    /* free mode lookups; these are actually vorbis_look_mapping structs */
-    if(ci){
-      for(i=0;i<ci->modes;i++){
-	int mapnum=ci->mode_param[i]->mapping;
-	int maptype=ci->map_type[mapnum];
-	if(b && b->mode)_mapping_P[maptype]->free_look(b->mode[i]);
-      }
-    }
-
     if(b){
-      if(b->mode)_ogg_free(b->mode);    
-      
       /* free header, header1, header2 */
       if(b->header)_ogg_free(b->header);
       if(b->header1)_ogg_free(b->header1);

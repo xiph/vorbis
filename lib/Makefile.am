@@ -22,7 +22,7 @@ libvorbis_la_LDFLAGS = -version-info @V_LIB_CURRENT@:@V_LIB_REVISION@:@V_LIB_AGE
 libvorbisfile_la_SOURCES = vorbisfile.c
 libvorbisfile_la_LDFLAGS = -version-info @VF_LIB_CURRENT@:@VF_LIB_REVISION@:@VF_LIB_AGE@
 
-libvorbisenc_la_SOURCES = vorbisenc.c registry-api.h
+libvorbisenc_la_SOURCES = vorbisenc.c 
 libvorbisenc_la_LDFLAGS = -version-info @VE_LIB_CURRENT@:@VE_LIB_REVISION@:@VE_LIB_AGE@
 
 EXTRA_PROGRAMS = barkmel tone psytune

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.51.2.1 2002/05/07 23:47:12 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.51.2.2 2002/05/14 07:06:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -44,23 +44,12 @@ int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
 
   /* first things first.  Make sure encode is ready */
   oggpack_reset(&vb->opb);
-  /* Encode the packet type */
-  oggpack_write(&vb->opb,0,1);
   
-  /* currently lazy.  Short block dispatches to 0, long to 1. */
-  
-  if(vb->W &&ci->modes>1)mode=1;
-  type=ci->map_type[ci->mode_param[mode]->mapping];
-  vb->mode=mode;
+  /* we only have one mapping type (0), and we let the mapping code
+     itself figure out what soft mode to use.  This allows easier
+     bitrate management */
 
-  /* Encode frame mode, pre,post windowsize, then dispatch */
-  oggpack_write(&vb->opb,mode,b->modebits);
-  if(vb->W){
-    oggpack_write(&vb->opb,vb->lW,1);
-    oggpack_write(&vb->opb,vb->nW,1);
-  }
-
-  if((ret=_mapping_P[type]->forward(vb,b->mode[mode])))
+  if((ret=_mapping_P[0]->forward(vb)))
     return(ret);
 
   if(op){

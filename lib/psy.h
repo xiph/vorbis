@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.28.2.1 2002/05/07 23:47:14 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.28.2.2 2002/05/14 07:06:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,27 +32,20 @@
 #define P_LEVELS 11
 #define P_NOISECURVES 3
 
-typedef struct vp_couple{
-  float granulem;
-  float igranulem;
-
-  int limit;        /* sample post */
-  float amppost_point;
-  
-} vp_couple;
-
 typedef struct vp_attenblock{
   float block[P_BANDS][P_LEVELS];
 } vp_attenblock;
 
 #define NOISE_COMPAND_LEVELS 40
 typedef struct vorbis_info_psy{
-  float  ath[27];
+  int   blockflag;
 
-  float  ath_adjatt;
-  float  ath_maxatt;
+  float ath[27];
 
-  float tone_masteratt;
+  float ath_adjatt;
+  float ath_maxatt;
+
+  float tone_masteratt[P_NOISECURVES];
   float tone_guard;
   float tone_abs_limit;
   vp_attenblock toneatt;
@@ -73,29 +66,31 @@ typedef struct vorbis_info_psy{
 
   float max_curve_dB;
 
-  vp_couple couple_pass;
-
 } vorbis_info_psy;
 
 typedef struct{
-  int       eighth_octave_lines;
+  int   eighth_octave_lines;
 
   /* for block long/short tuning; encode only */
-  float     preecho_thresh[VE_BANDS];
-  float     postecho_thresh[VE_BANDS];
-  float     stretch_penalty;
-  float     preecho_minenergy;
+  float preecho_thresh[VE_BANDS];
+  float postecho_thresh[VE_BANDS];
+  float stretch_penalty;
+  float preecho_minenergy;
 
-  float     ampmax_att_per_sec;
+  float ampmax_att_per_sec;
 
   /* delay caching... how many samples to keep around prior to our
      current block to aid in analysis? */
-  int       delaycache;
+  int   delaycache;
+
+  /* channel monofilter config */
+  float monofilter_kHz[P_NOISECURVES];  
+
 } vorbis_info_psy_global;
 
 typedef struct {
-  float   ampmax;
-  int     channels;
+  float ampmax;
+  int   channels;
 
   vorbis_info_psy_global *gi;
 } vorbis_look_psy_global;

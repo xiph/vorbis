@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.45.4.1 2002/05/07 23:47:15 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.45.4.2 2002/05/14 07:06:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,7 +37,6 @@
 
 typedef struct {
   vorbis_info_residue0 *info;
-  int         map;
   
   int         parts;
   int         stages;
@@ -62,13 +61,6 @@ typedef struct {
 #endif
 
 } vorbis_look_residue0;
-
-vorbis_info_residue *res0_copy_info(vorbis_info_residue *vr){
-  vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
-  vorbis_info_residue0 *ret=_ogg_malloc(sizeof(*ret));
-  memcpy(ret,info,sizeof(*ret));
-  return(ret);
-}
 
 void res0_free_info(vorbis_info_residue *i){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)i;
@@ -235,8 +227,8 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   return(NULL);
 }
 
-vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
-			  vorbis_info_residue *vr){
+vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
+			       vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   vorbis_look_residue0 *look=_ogg_calloc(1,sizeof(*look));
   codec_setup_info     *ci=vd->vi->codec_setup;
@@ -245,7 +237,6 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
   int dim;
   int maxstage=0;
   look->info=info;
-  look->map=vm->mapping;
 
   look->parts=info->partitions;
   look->fullbooks=ci->fullbooks;
@@ -888,7 +879,6 @@ vorbis_func_residue residue0_exportbundle={
   NULL,
   &res0_unpack,
   &res0_look,
-  &res0_copy_info,
   &res0_free_info,
   &res0_free_look,
   NULL,
@@ -900,7 +890,6 @@ vorbis_func_residue residue1_exportbundle={
   &res0_pack,
   &res0_unpack,
   &res0_look,
-  &res0_copy_info,
   &res0_free_info,
   &res0_free_look,
   &res1_class,
@@ -912,10 +901,10 @@ vorbis_func_residue residue2_exportbundle={
   &res0_pack,
   &res0_unpack,
   &res0_look,
-  &res0_copy_info,
   &res0_free_info,
   &res0_free_look,
   &res2_class,
   &res2_forward,
   &res2_inverse
 };
+

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.2 2002/05/08 01:06:33 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.3 2002/05/14 07:06:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1042,30 +1042,6 @@ static void precomputed_couple_point(float premag,
   *mag=premag*floormag;
   *ang=0.f;
 }
-
-#if 0
-static void couple_point(float A, float B, float fA, float fB, 
-			 float granule,float igranule,
-			 float fmag, float *mag, float *ang){
-
-  if(fmag!=0.f){
-    float corr=FAST_HYPOT(A*fA,B*fB)/FAST_HYPOT(fA,fB);
-    
-    if(fabs(A)>fabs(B)){
-      *mag=A;
-    }else{
-      *mag=B;
-    }
-
-    *mag=unitnorm(*mag)*floor(corr*igranule+.5f)*granule; 
-    *ang=0.f;
-
-  }else{
-    *mag=0.f;
-    *ang=0.f;
-  }    
-}
-#endif
 
 /* just like below, this is currently set up to only do
    single-step-depth coupling.  Otherwise, we'd have to do more

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.20.4.1 2002/05/07 23:47:13 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.20.4.2 2002/05/14 07:06:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -66,13 +66,6 @@ typedef struct lsfit_acc{
 
 /***********************************************/
  
-static vorbis_info_floor *floor1_copy_info (vorbis_info_floor *i){
-  vorbis_info_floor1 *info=(vorbis_info_floor1 *)i;
-  vorbis_info_floor1 *ret=_ogg_malloc(sizeof(*ret));
-  memcpy(ret,info,sizeof(*ret));
-  return(ret);
-}
-
 static void floor1_free_info(vorbis_info_floor *i){
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)i;
   if(info){
@@ -203,8 +196,8 @@ static int icomp(const void *a,const void *b){
   return(**(int **)a-**(int **)b);
 }
 
-static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,vorbis_info_mode *mi,
-                              vorbis_info_floor *in){
+static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,
+				      vorbis_info_floor *in){
 
   int *sortpointer[VIF_POSIT+2];
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)in;
@@ -1182,7 +1175,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
 
 /* export hooks */
 vorbis_func_floor floor1_exportbundle={
-  &floor1_pack,&floor1_unpack,&floor1_look,&floor1_copy_info,&floor1_free_info,
+  &floor1_pack,&floor1_unpack,&floor1_look,&floor1_free_info,
   &floor1_free_look,&floor1_inverse1,&floor1_inverse2
 };
 

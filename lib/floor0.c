@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.51.4.1 2002/05/07 23:47:13 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.51.4.2 2002/05/14 07:06:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,10 +33,10 @@
 #include <stdio.h>
 
 typedef struct {
-  long n;
   int ln;
   int  m;
-  int *linearmap;
+  int **linearmap;
+  int  n[2];
 
   vorbis_info_floor0 *vi;
   lpc_lookup lpclook;
@@ -48,13 +48,6 @@ typedef struct {
 
 
 /***********************************************/
-
-static vorbis_info_floor *floor0_copy_info (vorbis_info_floor *i){
-  vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
-  vorbis_info_floor0 *ret=_ogg_malloc(sizeof(*ret));
-  memcpy(ret,info,sizeof(*ret));
-  return(ret);
-}
 
 static void floor0_free_info(vorbis_info_floor *i){
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
@@ -68,10 +61,13 @@ static void floor0_free_look(vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   if(look){
 
-    /*fprintf(stderr,"floor 0 bit usage %f\n",
-      (float)look->bits/look->frames);*/
+    if(look->linearmap){
 
-    if(look->linearmap)_ogg_free(look->linearmap);
+      if(look->linearmap[0])_ogg_free(look->linearmap[0]);
+      if(look->linearmap[1])_ogg_free(look->linearmap[1]);
+
+      _ogg_free(look->linearmap);
+    }
     if(look->lsp_look)_ogg_free(look->lsp_look);
     lpc_clear(&look->lpclook);
     memset(look,0,sizeof(*look));
@@ -115,8 +111,41 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
    Note that the scale depends on the sampling rate as well as the
    linear block and mapping sizes */
 
-static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
-                              vorbis_info_floor *i){
+static void floor0_map_lazy_init(vorbis_block      *vb,
+				 vorbis_info_floor *info,
+				 vorbis_look_floor0 *look){
+  if(!look->linearmap[W]){
+    vorbis_dsp_state   *vd=vb->vd;
+    vorbis_info        *vi=vd->vi;
+    codec_setup_info   *ci=vi->codec_setup;
+    int W=vb->W;
+    int n=ci->blocksizes[W]/2,j;
+
+    /* we choose a scaling constant so that:
+       floor(bark(rate/2-1)*C)=mapped-1
+     floor(bark(rate/2)*C)=mapped */
+    float scale=look->ln/toBARK(info->rate/2.f);
+    
+    /* the mapping from a linear scale to a smaller bark scale is
+       straightforward.  We do *not* make sure that the linear mapping
+       does not skip bark-scale bins; the decoder simply skips them and
+       the encoder may do what it wishes in filling them.  They're
+       necessary in some mapping combinations to keep the scale spacing
+       accurate */
+    look->linearmap[W]=_ogg_malloc((n+1)*sizeof(**look->linearmap));
+    for(j=0;j<n;j++){
+      int val=floor( toBARK((info->rate/2.f)/n*j) 
+		     *scale); /* bark numbers represent band edges */
+      if(val>=look->ln)val=look->ln-1; /* guard against the approximation */
+      look->linearmap[W][j]=val;
+    }
+    look->linearmap[W][j]=-1;
+    look->n[W]=n;
+  }
+}
+
+static vorbis_look_floor *floor0_look(vorbis_dsp_state *vd,
+				      vorbis_info_floor *i){
   int j;
   float scale;
   vorbis_info        *vi=vd->vi;
@@ -131,25 +160,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
   if(vd->analysisp)
     lpc_init(&look->lpclook,look->ln,look->m);
 
-  /* we choose a scaling constant so that:
-     floor(bark(rate/2-1)*C)=mapped-1
-     floor(bark(rate/2)*C)=mapped */
-  scale=look->ln/toBARK(info->rate/2.f);
-
-  /* the mapping from a linear scale to a smaller bark scale is
-     straightforward.  We do *not* make sure that the linear mapping
-     does not skip bark-scale bins; the decoder simply skips them and
-     the encoder may do what it wishes in filling them.  They're
-     necessary in some mapping combinations to keep the scale spacing
-     accurate */
-  look->linearmap=_ogg_malloc((look->n+1)*sizeof(*look->linearmap));
-  for(j=0;j<look->n;j++){
-    int val=floor( toBARK((info->rate/2.f)/look->n*j) 
-		   *scale); /* bark numbers represent band edges */
-    if(val>=look->ln)val=look->ln-1; /* guard against the approximation */
-    look->linearmap[j]=val;
-  }
-  look->linearmap[j]=-1;
+  look->linearmap=_ogg_calloc(2,sizeof(*look->linearmap));
 
   look->lsp_look=_ogg_malloc(look->ln*sizeof(*look->lsp_look));
   for(j=0;j<look->ln;j++)
@@ -162,7 +173,7 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   int j,k;
-  
+
   int ampraw=oggpack_read(&vb->opb,info->ampbits);
   if(ampraw>0){ /* also handles the -1 out of data case */
     long maxval=(1<<info->ampbits)-1;
@@ -195,23 +206,29 @@ static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   
+  floor0_map_lazy_init(vb,info,look);
+
   if(memo){
     float *lsp=(float *)memo;
     float amp=lsp[look->m];
 
     /* take the coefficients back to a spectral envelope curve */
-    vorbis_lsp_to_curve(out,look->linearmap,look->n,look->ln,
+    vorbis_lsp_to_curve(out,
+			look->linearmap[vb->W],
+			look->n[vb->W],
+			look->ln,
 			lsp,look->m,amp,(float)info->ampdB);
     return(1);
   }
-  memset(out,0,sizeof(*out)*look->n);
+  memset(out,0,sizeof(*out)*look->n[vb->W]);
   return(0);
 }
 
 /* export hooks */
 vorbis_func_floor floor0_exportbundle={
-  NULL,&floor0_unpack,&floor0_look,&floor0_copy_info,&floor0_free_info,
+  NULL,&floor0_unpack,&floor0_look,&floor0_free_info,
   &floor0_free_look,&floor0_inverse1,&floor0_inverse2
 };
+
 
 

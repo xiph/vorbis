@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.c,v 1.13.6.1 2002/05/07 23:47:14 xiphmont Exp $
+ last mod: $Id: registry.c,v 1.13.6.2 2002/05/14 07:06:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,10 +46,4 @@ vorbis_func_residue   *_residue_P[]={
 vorbis_func_mapping   *_mapping_P[]={
   &mapping0_exportbundle,
 };
-
-/* make Windows happy; can't access the registry directly outside of
-   libvorbis, and vorbisenc needs a few functions */
-void residue_free_info(vorbis_info_residue *r,int type){
-  _residue_P[type]->free_info(r);
-}
 

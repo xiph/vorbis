@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.14.4.1 2002/05/07 23:47:13 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.14.4.2 2002/05/14 07:06:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,7 +36,6 @@ typedef struct vorbis_block_internal{
   ogg_uint32_t   packetblob_markers[PACKETBLOBS];
 } vorbis_block_internal;
 
-typedef void vorbis_look_mapping;
 typedef void vorbis_look_floor;
 typedef void vorbis_look_residue;
 typedef void vorbis_look_transform;
@@ -61,11 +60,13 @@ typedef struct backend_lookup_state {
   envelope_lookup        *ve; /* envelope lookup */    
   float                  *window[2];
   vorbis_look_transform **transform[2];    /* block, type */
-  vorbis_look_psy_global *psy_g_look;
+  drft_lookup             fft_look[2];
 
-  /* backend lookups are tied to the mode, not the backend or naked mapping */
   int                     modebits;
-  vorbis_look_mapping   **mode;
+  vorbis_look_floor     **floor;
+  vorbis_look_residue   **residue;
+  vorbis_look_psy        *psy;
+  vorbis_look_psy_global *psy_g_look;
 
   /* local storage, only used on the encoding side.  This way the
      application does not need to worry about freeing some packets'
@@ -152,11 +153,14 @@ typedef struct codec_setup_info {
   static_codebook        *book_param[256];
   codebook               *fullbooks;
 
-  vorbis_info_psy        *psy_param[64]; /* encode only */
+  int                    block_to_psy_map[4];
+  vorbis_info_psy        *psy_param[4]; /* encode only */
   vorbis_info_psy_global psy_g_param;
 
   bitrate_manager_info   bi;
+  int                    modeselect[2][PACKETBLOBS];
   highlevel_encode_setup hi;
+  
 } codec_setup_info;
 
 extern vorbis_look_psy_global *_vp_global_look(vorbis_info *vi);
