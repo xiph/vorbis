@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.21 2000/07/12 09:36:17 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.22 2000/07/29 08:45:33 msmith Exp $
 
  ********************************************************************/
 
@@ -339,6 +339,7 @@ typedef struct vorbis_comment{
   /* unlimited user comment fields.  libvorbis writes 'libvorbis'
      whatever vendor is set to in encode */
   char **user_comments;
+  int   *comment_lengths;
   int    comments;
   char  *vendor;
 
@@ -398,6 +399,9 @@ extern void     vorbis_info_init(vorbis_info *vi);
 extern void     vorbis_info_clear(vorbis_info *vi);
 extern void     vorbis_comment_init(vorbis_comment *vc);
 extern void     vorbis_comment_add(vorbis_comment *vc, char *comment); 
+extern void     vorbis_comment_add_tag(vorbis_comment *vc, 
+				       char *tag, char *contents);
+extern char    *vorbis_comment_query(vorbis_comment *vc, char *tag, int count);
 extern void     vorbis_comment_clear(vorbis_comment *vc);
 
 extern int      vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.25 2000/07/07 00:53:10 xiphmont Exp $
+ last mod: $Id: info.c,v 1.26 2000/07/29 08:45:33 msmith Exp $
 
  ********************************************************************/
 
@@ -21,6 +21,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "vorbis/codec.h"
 #include "vorbis/backends.h"
 #include "bitwise.h"
@@ -61,9 +62,49 @@ void vorbis_comment_init(vorbis_comment *vc){
 void vorbis_comment_add(vorbis_comment *vc,char *comment){
   vc->user_comments=realloc(vc->user_comments,
 			    (vc->comments+2)*sizeof(char *));
+  vc->comment_lengths=realloc(vc->comment_lengths,
+      			    (vc->comments+2)*sizeof(int));
   vc->user_comments[vc->comments]=strdup(comment);
+  vc->comment_lengths[vc->comments]=strlen(comment);
   vc->comments++;
   vc->user_comments[vc->comments]=NULL;
+}
+
+void vorbis_comment_add_tag(vorbis_comment *vc, char *tag, char *contents){
+  char *comment=alloca(strlen(tag)+strlen(contents)+2); /* +2 for = and \0 */
+  strcpy(comment, tag);
+  comment[strlen(tag)] = '=';
+  strcat(comment, contents);
+  vorbis_comment_add(vc, comment);
+}
+
+/* This is more or less the same as strncasecmp - but that doesn't exist
+ * everywhere, and this is a fairly trivial function, so we include it */
+static int tagcompare(const char *s1, const char *s2, int n){
+  int c=0;
+  while(c < n){
+    if(toupper(s1[c]) != toupper(s2[c]))
+      return !0;
+    c++;
+  }
+  return 0;
+}
+
+char *vorbis_comment_query(vorbis_comment *vc, char *tag, int count){
+  long i;
+  int found = 0;
+  int taglen = strlen(tag);
+  
+  for(i=0;i<vc->comments;i++){
+    if(!tagcompare(vc->user_comments[i], tag, taglen)){
+      if(count == found)
+	/* We return a pointer to the data, not a copy */
+      	return vc->user_comments[i] + taglen + 1;
+      else
+	found++;
+    }
+  }
+  return NULL; /* didn't find anything */
 }
 
 void vorbis_comment_clear(vorbis_comment *vc){
@@ -163,10 +204,12 @@ static int _vorbis_unpack_comment(vorbis_comment *vc,oggpack_buffer *opb){
   vc->comments=_oggpack_read(opb,32);
   if(vc->comments<0)goto err_out;
   vc->user_comments=calloc(vc->comments+1,sizeof(char **));
+  vc->comment_lengths=calloc(vc->comments+1, sizeof(int));
 	    
   for(i=0;i<vc->comments;i++){
     int len=_oggpack_read(opb,32);
     if(len<0)goto err_out;
+	vc->comment_lengths[i]=len;
     vc->user_comments[i]=calloc(len+1,1);
     _v_readstring(opb,vc->user_comments[i],len);
   }	  
@@ -360,7 +403,7 @@ static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
     int i;
     for(i=0;i<vc->comments;i++){
       if(vc->user_comments[i]){
-	_oggpack_write(opb,strlen(vc->user_comments[i]),32);
+	_oggpack_write(opb,vc->comment_lengths[i],32);
 	_v_writestring(opb,vc->user_comments[i]);
       }else{
 	_oggpack_write(opb,0,32);
