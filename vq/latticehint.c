@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.1.2.3 2000/08/07 20:44:18 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.1.2.4 2000/08/15 08:33:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include <errno.h>
 #include "vorbis/codebook.h"
 #include "../lib/sharedbook.h"
+#include "../lib/scales.h"
 #include "bookutil.h"
 #include "vqgen.h"
 #include "vqsplit.h"
@@ -122,16 +123,17 @@ int main(int argc,char *argv[]){
   codebook *b;
   static_codebook *c;
   int entries=-1,dim=-1;
-  double min,del,cutoff=1.;
+  double min,del;
   char *name;
   long i,j;
+  long dB=0;
 
   if(argv[1]==NULL){
     fprintf(stderr,"Need a lattice book on the command line.\n");
     exit(1);
   }
 
-  if(argv[2])cutoff=atof(argv[2]);
+  if(argv[2])dB=1;
 
   {
     char *ptr;
@@ -181,8 +183,19 @@ int main(int argc,char *argv[]){
 
     /* ok, gen the map and thresholds */
     for(i=0;i<quantvals;i++)t->quantmap[i]=quantsort[i]-c->quantlist;
-    for(i=0;i<quantvals-1;i++)
-      t->quantthresh[i]=(*(quantsort[i])+*(quantsort[i+1]))*.5*del+min;
+    for(i=0;i<quantvals-1;i++){
+      double v1=*(quantsort[i])*del+min;
+      double v2=*(quantsort[i+1])*del+min;
+      if(dB){
+	if(fabs(v1)<.01)v1=(v1+v2)*.5;
+	if(fabs(v2)<.01)v2=(v1+v2)*.5;
+	t->quantthresh[i]=fromdB((todB(v1)+todB(v2))*.5);
+	if(v1<0 || v2<0)t->quantthresh[i]*=-1;
+
+      }else{
+	t->quantthresh[i]=(v1+v2)*.5;
+      }
+    }
   }
 
   /* Do we want to gen a pigeonhole hint? */
@@ -215,7 +228,7 @@ int main(int argc,char *argv[]){
 
     /* find our pigeonhole-specific quantization values, fill in the
        quant value->pigeonhole map */
-    factor=2;
+    factor=3;
     p->del=del;
     p->min=min;
     p->quantvals=quantvals;

@@ -1,0 +1,16 @@
+vorbis (1.0beta1-1) unstable; urgency=low
+
+  * First Beta, Ready for debian release.
+
+ -- Michael Beattie <mickyb@es.co.nz>  Fri, 30 Jun 2000 19:26:59 +1200
+
+vorbis (0.0-1) unstable; urgency=low
+
+  * Initial Release.
+  * Initial package, not placed in archive.
+
+ -- Michael Beattie <mickyb@es.co.nz>  Mon, 26 Jun 2000 18:59:56 +1200
+
+Local variables:
+mode: debian-changelog
+End:

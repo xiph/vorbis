@@ -1,0 +1,197 @@
+#!/usr/bin/make -f
+# Sample debian/rules that uses debhelper. 
+# GNU copyright 1997 by Joey Hess.
+# Modified for Ogg Vorbis, 2000 by Michael Beattie
+
+# Uncomment this to turn on verbose mode. 
+#export DH_VERBOSE=1
+
+# This is the debhelper compatability version to use.
+export DH_COMPAT=1
+
+# This has to be exported to make some magic below work.
+export DH_OPTIONS
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	./configure --prefix=/usr --mandir=\$${prefix}/share/man --infodir=\$${prefix}/share/info
+	# Add here commands to compile the package.
+	$(MAKE)
+	cd vorbis-tools && $(MAKE) && $(MAKE) ogg123
+	cd xmms && $(MAKE)
+
+	touch build-stamp
+
+EXTRA_CLEAN= vorbis-tools cmdline xmms vq huff kmpg
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp 
+
+	# Add here commands to clean up after the build process.
+	-$(MAKE) distclean
+	-@for dir in $(EXTRA_CLEAN); do (cd $$dir && $(MAKE) $(MFLAGS) distclean) || exit 1; done
+
+	dh_clean
+
+
+# Build architecture-independent files here.
+binary-arch: libvorbis-dev ogg123 vorbize xmms-vorbis mp3tovorbis
+
+libvorbis-dev: DH_OPTIONS=-plibvorbis-dev
+libvorbis-dev: build
+	# Need this version of debhelper for DH_OPTIONS to work.
+	dh_testversion 1.1.17
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	-cp -a include/vorbis/*.h `pwd`/debian/tmp/usr/include/vorbis/
+	-cp -a include/vorbis/book/*.vqh `pwd`/debian/tmp/usr/include/vorbis/book/
+	-cp lib/*.a `pwd`/debian/tmp/usr/lib/
+
+	-cp docs/*.html docs/*.png `pwd`/debian/tmp/usr/share/doc/libvorbis-dev/html/
+
+	dh_installdocs
+	dh_installexamples
+	dh_installmanpages
+#	dh_installinfo
+#	dh_undocumented
+	dh_installchangelogs 
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+#	dh_makeshlibs
+#	dh_shlibdeps
+	dh_gencontrol -u -isp
+	dh_md5sums
+	dh_builddeb
+
+
+
+ogg123: DH_OPTIONS=-pogg123
+ogg123: build
+	# Need this version of debhelper for DH_OPTIONS to work.
+	dh_testversion 1.1.17
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	install -m 755 vorbis-tools/ogg123 `pwd`/debian/ogg123/usr/bin/
+
+	dh_installdocs
+#	dh_installmenu
+	dh_installmanpages
+#	dh_installinfo
+	dh_undocumented ogg123.1
+	dh_installchangelogs vorbis-tools/Changelog
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+#	dh_makeshlibs
+	dh_shlibdeps
+	dh_gencontrol -u -isp
+	dh_md5sums
+	dh_builddeb
+
+
+
+vorbize: DH_OPTIONS=-pvorbize
+vorbize: build
+	# Need this version of debhelper for DH_OPTIONS to work.
+	dh_testversion 1.1.17
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	install -m 755 vorbis-tools/vorbize `pwd`/debian/vorbize/usr/bin/
+
+	dh_installdocs
+#	dh_installmenu
+	dh_installmanpages
+#	dh_installinfo
+	dh_undocumented vorbize.1
+	dh_installchangelogs vorbis-tools/Changelog
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+#	dh_makeshlibs
+	dh_shlibdeps
+	dh_gencontrol -u -isp
+	dh_md5sums
+	dh_builddeb
+
+
+
+mp3tovorbis: DH_OPTIONS=-pmp3tovorbis
+mp3tovorbis: build
+	# Need this version of debhelper for DH_OPTIONS to work.
+	dh_testversion 1.1.17
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	install -m 755 vorbis-tools/mp3tovorbis `pwd`/debian/mp3tovorbis/usr/bin/
+
+	dh_installdocs
+#	dh_installmenu
+	dh_installmanpages
+#	dh_installinfo
+	dh_undocumented mp3tovorbis.1
+	dh_installchangelogs vorbis-tools/Changelog
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+#	dh_makeshlibs
+#	dh_shlibdeps
+	dh_gencontrol -u -isp
+	dh_md5sums
+	dh_builddeb
+
+
+
+xmms-vorbis: DH_OPTIONS=-pxmms-vorbis
+xmms-vorbis: build install
+	# Need this version of debhelper for DH_OPTIONS to work.
+	dh_testversion 1.1.17
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	install -m 644 xmms/libvorbis.so `pwd`/debian/xmms-vorbis/usr/lib/xmms/Input/
+
+	dh_installdocs
+	dh_installchangelogs 
+	dh_strip
+	dh_link
+	dh_compress
+	dh_fixperms
+	dh_installdeb
+#
+	dh_shlibdeps
+	dh_gencontrol -u -isp
+	dh_md5sums
+	dh_builddeb
+
+
+# Build architecture-dependent files here.
+binary-indep:
+
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install

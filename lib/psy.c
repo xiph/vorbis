@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.23.4.9 2000/08/09 20:22:04 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23.4.10 2000/08/15 08:33:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -303,28 +303,6 @@ void _vp_psy_clear(vorbis_look_psy *p){
   }
 }
 
-static void compute_decay_adaptive(vorbis_look_psy *p,double *f, double *decay, int n){
-  /* handle decay */
-  int i;
-  double decscale=1.-pow(p->vi->decay_coeff,n); 
-  double attscale=1.-pow(p->vi->attack_coeff,n); 
-  static int frameno=0;
-
-  _analysis_output("drive",frameno,f,n,0,1);
-  _analysis_output("decay",frameno++,decay,n,0,1);
-
-  for(i=0;i<n;i++){
-    double del=f[i]-decay[i];
-    if(del>0)
-      /* add energy */
-      decay[i]+=del*attscale;
-    else
-      /* remove energy */
-      decay[i]+=del*decscale;
-    if(decay[i]>f[i])f[i]=decay[i];
-  }
-}
-
 static void compute_decay_fixed(vorbis_look_psy *p,double *f, double *decay, int n){
   /* handle decay */
   int i;
@@ -332,9 +310,6 @@ static void compute_decay_fixed(vorbis_look_psy *p,double *f, double *decay, int
   double attscale=1./fromdB(p->vi->attack_coeff); 
 
   static int frameno=0;
-
-  _analysis_output("drive",frameno,f,n,0,1);
-  _analysis_output("decay",frameno++,decay,n,0,1);
 
   for(i=0;i<n;i++){
     double pre=decay[i];
@@ -543,7 +518,7 @@ static void bark_noise(long n,double *b,double *f,double *noise){
   memset(norm,0,n*sizeof(double));
 
   while(hi<n){
-    val=todB(f[i]*f[i])+200.;
+    val=todB(f[i]*f[i])+400.;
     del=1./(i-lo);
     noise[lo]+=val*del;
     noise[i]-=val*del;
@@ -558,8 +533,8 @@ static void bark_noise(long n,double *b,double *f,double *noise){
     
 
     i++;
-    for(;b[hi]-.5<b[i] && hi<n;hi++);
-    for(;b[lo]+.5<b[i] && lo<i;lo++);
+    for(;hi<n && b[hi]-.3<b[i];hi++);
+    for(;lo<i-1 && b[lo]+.3<b[i];lo++);
     if(i==hi)hi++;
   }
 
@@ -569,8 +544,7 @@ static void bark_noise(long n,double *b,double *f,double *noise){
     long hilo=hi-lo;
 
     for(;i<n;i++){
-      val=todB(f[i]*f[i])+200.;
-
+      val=todB(f[i]*f[i])+400.;
       del=1./(hii);
       noise[i]-=val*del;
       norm[i]-=del;
@@ -582,7 +556,7 @@ static void bark_noise(long n,double *b,double *f,double *noise){
       norm[i]-=del;      
     }
     for(i=1,lo=n-ilo;lo<n;lo++,i++){
-      val=todB(f[n-i]*f[n-i])+200.;
+      val=todB(f[n-i]*f[n-i])+400.;
       del=1./ilo;
       noise[lo]+=val*del;
       norm[lo]+=del;
@@ -605,10 +579,13 @@ static void bark_noise(long n,double *b,double *f,double *noise){
   for(i=0;i<n;i++){
     val+=norm[i];
     acc+=noise[i];
-    if(val==0)
+    if(val==0){
       noise[i]=0.;
-    else
-      noise[i]=sqrt(fromdB(acc/val-200.));
+      norm[i]=0;
+    }else{
+      double v=acc/val-400;
+      noise[i]=sqrt(fromdB(v));
+    }
   }
 }
 
@@ -625,23 +602,24 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
 		      double *flr, 
 		      double *decay){
   double *smooth=alloca(sizeof(double)*p->n);
-  double *seed=alloca(sizeof(double)*p->n);
   int i,n=p->n;
   double specmax=0.;
 
+  double *seed=alloca(sizeof(double)*p->n);
+  double *seed2=alloca(sizeof(double)*p->n);
+
   memset(flr,0,n*sizeof(double));
-  memset(seed,0,n*sizeof(double));
 
   /* noise masking */
   if(p->vi->noisemaskp){
-    /* don't use the smoothed data for noise */
-    bark_noise(n,p->bark,f,smooth);
-    /*_analysis_output("noise",frameno,work2,n,0,1);*/
-    seed_point(p,p->noiseatt,smooth,flr,specmax);
+    memset(seed,0,n*sizeof(double));
+    bark_noise(n,p->bark,f,seed);
+    seed_point(p,p->noiseatt,seed,flr,specmax);
+
   }
 
+  /* smooth the data is that's called for ********************************/
   for(i=0;i<n;i++)smooth[i]=fabs(f[i]);
-
   if(p->vi->smoothp){
     /* compute power^.5 of three neighboring bins to smooth for peaks
        that get split twixt bins/peaks that nail the bin.  This evens
@@ -660,7 +638,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
     smooth[n-1]=sqrt(acc);
   }
 
-  /* find the highest peak so we know the limits */
+  /* find the highest peak so we know the limits *************************/
   for(i=0;i<n;i++){
     if(smooth[i]>specmax)specmax=smooth[i];
   }
@@ -678,52 +656,32 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
     }
   }
 
-  /* peak attenuation */
+  /* peak attenuation ******/
   if(p->vi->peakattp){
     memset(seed,0,n*sizeof(double));
     seed_att(p,p->peakatt,smooth,seed,specmax);
     max_seeds(p,seed,flr);
   }
 
-  /* seed the tone masking */
+  /* tone masking */
   if(p->vi->tonemaskp){
     memset(seed,0,n*sizeof(double));
+    memset(seed2,0,n*sizeof(double));
 
-    seed_generic(p,p->tonecurves,smooth,flr,seed,specmax);
-    
-    /* chase the seeds */
+    seed_generic(p,p->tonecurves,smooth,flr,seed2,specmax);
+    max_seeds(p,seed2,seed2);
+
+    for(i=0;i<n;i++)if(seed2[i]<flr[i])seed2[i]=flr[i];
+    for(i=0;i<n;i++)if(seed2[i]<decay[i])seed2[i]=decay[i];
+
+    seed_generic(p,p->tonecurves,smooth,seed2,seed,specmax);
     max_seeds(p,seed,seed);
-
+    
     if(p->vi->decayp)
       compute_decay_fixed(p,seed,decay,n);
-
+    
     for(i=0;i<n;i++)if(flr[i]<seed[i])flr[i]=seed[i];
-
-  }
-
-  /* noise culling */
-  if(p->vi->noisecullp){
-    int j;
-
-    /* march down from Nyquist to the first peak that exceeds the
-       masking threshhold */
-    for(i=n-1;i>0;i--){
-      if(flr[i]<fabs(f[i])){
-	break;
-      }else{
-	f[i]=0;
-      }
-    }
-
-    /* take the edge off the steep ATH rise in treble */
-    /*for(j=i+1;j<n;j++)
-      flr[j]=flr[j-1];*/
-
-    /* Smooth the falloff a bit */
-
-    /* cull out addiitonal bands */
-
-
+    
   }
 
   frameno++;

@@ -1,0 +1,11 @@
+Example tools using vorbis.
+
+The examples/ directory contains some example source files to build tools
+using the vorbis codec. The Makefile is only included to show how they are
+compiled. It contains relative references to the libraries in the source
+tree, so it will *not* work without being edited first.
+
+The misc.h included in chaining_example and seeking_test just allows the
+use of a debugging malloc. (defined in misc.c) It is safe to comment out.
+
+ -- Michael Beattie <mickyb@es.co.nz>, Mon, 26 Jun 2000 18:59:56 +1200

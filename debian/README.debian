@@ -1,0 +1,14 @@
+Ogg Vorbis for Debian
+---------------------
+
+Ogg Vorbis currently does not have a shared library. it is a goal for the
+future, but presently, any compiling using the codec should be done as
+follows:
+
+	gcc [flags] -c X.c
+	gcc [flags] /usr/lib/vorbisfile.a /usr/lib/libvorbis.a \
+		X.o -o X
+
+Of course, only include the .a's that are required for your program.
+
+ -- Michael Beattie <mickyb@es.co.nz>, Mon, 26 Jun 2000 18:59:56 +1200
