@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.6 2000/01/28 15:25:07 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.7 2000/05/12 08:38:20 msmith Exp $
 
  ********************************************************************/
 
@@ -26,6 +26,12 @@
 #include <time.h>
 #include <math.h>
 #include "vorbis/modes.h"
+
+#ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 
 #define READ 1024
 signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
@@ -49,6 +55,14 @@ int main(){
      verify that it matches 16bit/stereo/44.1kHz.  This is just an
      example, after all. */
 
+#ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
+  /* Beware the evil ifdef. We avoid these where we can, but this one we 
+     cannot. Don't add any more, you'll probably go to hell if you do. */
+  _setmode( _fileno( stdin ), _O_BINARY );
+  _setmode( _fileno( stdout ), _O_BINARY );
+#endif
+
+
   fread(readbuffer,1,44,stdin);
 
   /********** Encode setup ************/
@@ -68,8 +82,8 @@ int main(){
   /* set up our packet->stream encoder */
   /* pick a random serial number; that way we can more likely build
      chained streams just by concatenation */
-  srandom(time(NULL));
-  ogg_stream_init(&os,random());
+  srand(time(NULL));
+  ogg_stream_init(&os,rand());
 
   /* Vorbis streams begin with three headers; the initial header (with
      most of the codec setup parameters) which is mandated by the Ogg

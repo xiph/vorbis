@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.6 2000/05/12 05:50:11 msmith Exp $
+ last mod: $Id: decoder_example.c,v 1.7 2000/05/12 08:38:20 msmith Exp $
 
  ********************************************************************/
 
@@ -23,13 +23,19 @@
 /* Note that this is POSIX, not ANSI code */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include "vorbis/codec.h"
+
+#ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
+#include <io.h>
+#include <fcntl.h>
+#endif
 
 int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
 int convsize=4096;
 
-int main(){
+int main(int argc, char **argv){
   ogg_sync_state   oy; /* sync and verify incoming physical bitstream */
   ogg_stream_state os; /* take physical pages, weld into a logical
 			  stream of packets */
@@ -44,6 +50,14 @@ int main(){
   
   char *buffer;
   int  bytes;
+
+#ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
+  /* Beware the evil ifdef. We avoid these where we can, but this one we 
+     cannot. Don't add any more, you'll probably go to hell if you do. */
+  _setmode( _fileno( stdin ), _O_BINARY );
+  _setmode( _fileno( stdout ), _O_BINARY );
+#endif
+
 
   /********** Decode setup ************/
 
@@ -144,7 +158,7 @@ int main(){
       /* no harm in not checking before adding more */
       buffer=ogg_sync_buffer(&oy,4096);
       bytes=fread(buffer,1,4096,stdin);
-      if(bytes==0 && i < 2){
+      if(bytes==0 && i<2){
 	fprintf(stderr,"End of file before finding all Vorbis headers!\n");
 	exit(1);
       }
@@ -207,14 +221,14 @@ int main(){
 	      while((samples=vorbis_synthesis_pcmout(&vd,&pcm))>0){
 		int j;
 		int clipflag=0;
-		int out=(samples<convsize?samples:convsize);
+		int bout=(samples<convsize?samples:convsize);
 		
 		/* convert doubles to 16 bit signed ints (host order) and
 		   interleave */
 		for(i=0;i<vi.channels;i++){
 		  int16_t *ptr=convbuffer+i;
 		  double  *mono=pcm[i];
-		  for(j=0;j<out;j++){
+		  for(j=0;j<bout;j++){
 		    int val=mono[j]*32767.;
 		    /* might as well guard against clipping */
 		    if(val>32767){
@@ -234,9 +248,9 @@ int main(){
 		  fprintf(stderr,"Clipping in frame %ld\n",vd.sequence);
 		
 		
-		fwrite(convbuffer,2*vi.channels,out,stdout);
+		fwrite(convbuffer,2*vi.channels,bout,stdout);
 		
-		vorbis_synthesis_read(&vd,out); /* tell libvorbis how
+		vorbis_synthesis_read(&vd,bout); /* tell libvorbis how
 						   many samples we
 						   actually consumed */
 	      }	    
