@@ -1,7 +1,7 @@
 ;
 ; vorbisfile.def
 ;
-; last modified: $Id: vorbisfile.def,v 1.4 2002/07/21 23:18:29 msmith Exp $
+; last modified: $Id: vorbisfile.def,v 1.5 2003/10/01 21:53:25 giles Exp $
 ;
 LIBRARY
 EXPORTS
@@ -31,3 +31,6 @@ ov_read_float
 ov_test
 ov_test_callbacks
 ov_test_open
+ov_crosslap
+ov_halfrate
+ov_halfrate_p
