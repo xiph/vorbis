@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.21 2000/08/15 09:09:42 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.22 2000/08/31 08:01:34 xiphmont Exp $
 
  Preecho calculation.
 
@@ -38,9 +38,9 @@
    Command line: /www/usr/fisher/helpers/mkfilter -Ch \
    -6.0000000000e+00 -Bp -o 5 -a 1.3605442177e-01 3.1746031746e-01 -l */
 
+#if 0
 static int    cheb_bandpass_stages=10;
 static double cheb_bandpass_gain=5.589612458e+01;
-/* z^-stage, z^-stage+1... */
 static double cheb_bandpass_B[]={-1.,0.,5.,0.,-10.,0.,10.,0.,-5.,0.,1};
 static double cheb_bandpass_A[]={
   -0.1917409386,
@@ -53,6 +53,7 @@ static double cheb_bandpass_A[]={
   0.0451493360,
   -1.4471447397,
   0.0303413711};
+#endif 
 
 static int    cheb_highpass_stages=10;
 static double cheb_highpass_gain= 5.291963434e+01;
@@ -71,7 +72,6 @@ static double cheb_highpass_A[]={
   2.3920318913};
 
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
-  long rate=vi->rate;
   int ch=vi->channels;
   int window=vi->envelopesa;
   int i;
@@ -106,29 +106,8 @@ void _ve_envelope_clear(envelope_lookup *e){
   memset(e,0,sizeof(envelope_lookup));
 }
 
-/*static int frameno=0;*/
-
-static void smooth_noise(long n,double *f,double *noise){
-  long i;
-  long lo=0,hi=0;
-  double acc=0.;
-
-  for(i=0;i<n;i++){
-    long newhi=i*1.0442718740+5;
-    long newlo=i*.8781245150-5;
-    if(newhi>n)newhi=n;
-    
-    for(;lo<newlo;lo++)
-      acc-=f[lo]*f[lo];
-    for(;hi<newhi;hi++)
-      acc+=f[hi]*f[hi];
-    noise[i]=todB(sqrt(acc/(hi-lo)));
-  }
-}
-
 static double _ve_deltai(envelope_lookup *ve,IIR_state *iir,
 		      double *pre,double *post){
-  long no=ve->winlength/3; /* past the highpass rollon! */
   long n2=ve->winlength*2;
   long n=ve->winlength;
 

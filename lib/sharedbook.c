@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.7 2000/07/19 18:10:46 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.8 2000/08/31 08:01:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -336,8 +336,8 @@ int _best(codebook *book, double *a, int step){
   encode_aux_pigeonhole *pt=book->c->pigeon_tree;
   int dim=book->dim;
   int ptr=0,k,o;
-  int savebest=-1;
-  double saverr;
+  /*int savebest=-1;
+    double saverr;*/
 
   /* do we have a threshhold encode hint? */
   if(tt){

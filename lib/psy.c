@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.26 2000/08/23 06:38:49 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.27 2000/08/31 08:01:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -309,8 +309,6 @@ static void compute_decay_fixed(vorbis_look_psy *p,double *f, double *decay, int
   double decscale=fromdB(p->vi->decay_coeff*n); 
   double attscale=1./fromdB(p->vi->attack_coeff); 
 
-  static int frameno=0;
-
   for(i=10;i<n;i++){
     double pre=decay[i];
     if(decay[i]){
@@ -512,7 +510,6 @@ static void bark_noise(long n,double *b,double *f,double *noise){
   double acc=0.,val,del=0.;
 
   double *norm=alloca(n*sizeof(double));
-  double normacc=0;
 
   memset(noise,0,n*sizeof(double));
   memset(norm,0,n*sizeof(double));
@@ -541,7 +538,6 @@ static void bark_noise(long n,double *b,double *f,double *noise){
   {
     long ilo=i-lo;
     long hii=hi-i;
-    long hilo=hi-lo;
 
     for(;i<n;i++){
       val=todB(f[i]*f[i])+400.;
@@ -589,15 +585,6 @@ static void bark_noise(long n,double *b,double *f,double *noise){
   }
 }
 
-/* stability doesn't matter */
-static int comp(const void *a,const void *b){
-  if(fabs(**(double **)a)<fabs(**(double **)b))
-    return(1);
-  else
-    return(-1);
-}
-
-static int frameno=0;
 void _vp_compute_mask(vorbis_look_psy *p,double *f, 
 		      double *flr, 
 		      double *decay){
@@ -685,7 +672,12 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
     
   }
 
-  frameno++;
+  /* doing this here is clean, but we need to find a faster way to do
+     it than to just tack it on */
+
+  for(i=0;i<n;i++)if(2.*f[i]>flr[i] || -2.*f[i]>flr[i])break;
+  if(i==n)memset(flr,0,sizeof(double)*n);
+
 }
 
 
@@ -694,7 +686,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
 /* f and flr are *linear* scale, not dB */
 void _vp_apply_floor(vorbis_look_psy *p,double *f, double *flr){
   double *work=alloca(p->n*sizeof(double));
-  int i,j,addcount=0;
+  int j;
 
   /* subtract the floor */
   for(j=0;j<p->n;j++){

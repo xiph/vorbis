@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.23 2000/08/23 10:16:56 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.24 2000/08/31 08:01:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,7 @@ static long _f0_fit(codebook *book,
 		    double *workfit,
 		    int cursor){
   int dim=book->dim;
-  double norm,base=0.,err=0.;
+  double norm,base=0.;
   int i,best=0;
   double *lsp=workfit+cursor;
 
@@ -239,7 +239,7 @@ double _curve_to_lpc(double *curve,double *lpc,
   return vorbis_lpc_from_curve(work,lpc,&(l->lpclook));
 }
 
-/* generate the whole freq response curve of an LPC IIR filter */
+/* generate the whole freq response curve of an LSP IIR filter */
 
 void _lsp_to_curve(double *curve,double *lsp,double amp,
 			  vorbis_look_floor0 *l,char *name,long frameno){
@@ -284,18 +284,13 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   /* our floor comes in on a linear scale; go to a [-Inf...0] dB
      scale.  The curve has to be positive, so we offset it. */
 
-  for(j=0;j<look->n;j++){
-    double val=todB(in[j])+info->ampdB;
-    if(val<1.)
-      work[j]=1.;
-    else
-      work[j]=val;
-  }
+  for(j=0;j<look->n;j++)
+    work[j]=todB(in[j])+info->ampdB;
 
   /* use 'out' as temp storage */
   /* Convert our floor to a set of lpc coefficients */ 
   amp=sqrt(_curve_to_lpc(work,out,look,seq));
-  
+
   /* amp is in the range (0. to ampdB].  Encode that range using
      ampbits bits */
  
