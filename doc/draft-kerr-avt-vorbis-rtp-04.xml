@@ -1,7 +1,8 @@
 <?xml version='1.0'?>
 <!DOCTYPE rfc SYSTEM 'rfc2629.dtd'>
+<?rfc toc="yes" ?>
 
-<rfc ipr="full2026" docName="RTP Payload Format for Vorbis Encoded Audio">
+<rfc ipr="full3667" docName="RTP Payload Format for Vorbis Encoded Audio">
 
 <front>
 <title>draft-kerr-avt-vorbis-rtp-04</title>
@@ -14,7 +15,7 @@
 </address>
 </author>
 
-<date day="01" month="December" year="2004" />
+<date day="11" month="December" year="2004" />
 
 <area>General</area>
 <workgroup>AVT Working Group</workgroup>
@@ -34,7 +35,7 @@
 <note title="Xiph.Org Note">
 <t>
    This is a working copy of the Vorbis I-D, used for discussion on the xiph-rtp discussion list.  It will be subject 
-   to frequent revisions before it is submitted to the IETF.
+   to frequent revisions before it is submitted to the IETF at the end of December.
 </t>
 </note>
 
@@ -79,8 +80,9 @@
 <section anchor="Payload Format" title="Payload Format">
 <t>
    For RTP based transportation of Vorbis encoded audio the standard 
-   RTP header is followed by an 8 bit payload header, then the payload 
-   data.  The payload header is used to signify if the following packet
+   RTP header is followed by a 5 octet payload header, then the payload 
+   data.  The payload headers are used to associate the Vorbis data with 
+   its associated decoding codebooks as well as indicating if the following packet
    contains fragmented Vorbis data and/or the the number of whole Vorbis
    data frames.  The payload data contains the raw Vorbis bitstream 
    information.
@@ -88,8 +90,8 @@
 <section anchor="RTP Header" title="RTP Header">
 
 <artwork><![CDATA[
-     0                   1                   2                   3
-   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |V=2|P|X|  CC   |M|     PT      |       sequence number         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -103,8 +105,7 @@
 ]]></artwork>
 <t>
    The RTP header begins with an octet of fields (V, P, X, and CC) to   
-   support specialized RTP uses (see <xref target="avt-rtp-new-11"></xref> and <xref target="avt-profile-new-12"></xref> for details). For 
-   Vorbis RTP, the following values are used.
+   support specialized RTP uses (see <xref target="avt-rtp-new-11"></xref> and <xref target="avt-profile-new-12"></xref> for details). For Vorbis RTP, the following values are used.
 <t>
 </t>
    Version (V): 2 bits</t><t>
@@ -160,16 +161,26 @@
 
 <section anchor="Payload Header" title="Payload Header">
 <t>
-   After the RTP Header section the next octet is the Payload Header.  
-   This octet is split into a number of bitfields detailing the format
+   After the RTP Header section the following five octets are the Payload Header.  
+   This header is split into a number of bitfields detailing the format
    of the following Payload Data packets.
 </t>
 <artwork><![CDATA[
-     0   1   2   3   4   5   6   7
-   +---+---+---+---+---+---+---+---+
-   | C | F | R |  # of packets     |
-   +---+---+---+---+---+---+---+---+
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          Codebook Ident                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |C|F| T |# pkts.|
+   +-+-+-+-+-+-+-+-+
 ]]></artwork>
+
+<t>
+   Codebook Ident: 32 bits</t><t>
+      This 32 bit field is used to associate the Vorbis data to a decoding Codebook.
+      It is created by making a CRC32 checksum of the codebook required to decode the 
+      particular Vorbis audio stream.
+</t>
 <t>
    Continuation (C): 1 bit</t><t>
       Set to one if this is a continuation of a fragmented packet.
@@ -180,47 +191,48 @@
       contains the last fragment of a fragmented packet. 
 </t>
 <t>
-   Reserved (R): 1 bit</t><t>
-      Reserved, MUST be set to zero by senders, and ignored by 
-      receivers.
+   Payload Type (T): 2 bits</t><t>
+      This field sets the packet payload type.  There are currently four type of packet payloads. 
 </t>
+<t></t>
+<list style="empty">
+<t>      0 = Raw Vorbis payload</t>
+<t>      1 = Configuration payload</t>
+<t>      2 = Codebook payload</t>
+<t>      3 = Metadata payload</t>
+</list>
+
 <t>
-   The last 5 bits are the number of complete packets in this payload.  
-   This provides for a maximum number of 32 Vorbis packets in the 
-   payload.  If C is set to one, this number MUST be 0.
+   The last 4 bits are the number of complete packets in this payload.  
+   This provides for a maximum number of 16 Vorbis packets in the 
+   payload.  If the packet contains fragmented data the number of packets MUST be set to 0.
 </t>
 </section>
 
 <section anchor="Payload Data" title="Payload Data">
 <t>
-   Vorbis packets are unbounded in length currently.  At some future
-   point there will likely be a practical limit placed on packet
-   length.  
-</t>
-<t>
+   Vorbis packets are unbounded in length currently, although at some future
+   point there will likely be a practical limit placed on them.  
    Typical Vorbis packet sizes are from very small (2-3 bytes) to 
    quite large (8-12 kilobytes).  The reference implementation <xref target="libvorbis"></xref>
    typically produces packets less than ~800 bytes, except for the
-   header packets which are ~4-12 kilobytes.
+   codebook header packets which are ~4-12 kilobytes.
+   Within an RTP context the maximum Vorbis packet size, including the RTP and payload 
+   headers, MUST be kept below the path MTU to avoid packet fragmentation.  
 </t>
 <t>
-   Within a RTP context the maximum Vorbis packet SHOULD be kept below
-   the MTU size, typically 1500 octets, including the RTP and payload 
-   headers, to avoid fragmentation.  For the delivery of Vorbis audio 
-   using RTP the maximum size of the header block is limited to 64K.
+   Each Vorbis payload packet starts with a one octet length header, 
+   which is used to represent the size of the following data payload, followed 
+   by the raw Vorbis data.
 </t>
 <t>
-   If the payload contains a single Vorbis packet or a Vorbis packet
-   fragment, the Vorbis packet data follows the payload header.
+   For payloads which consist of multiple Vorbis packets the payload data 
+   consists of the packet length followed by the packet data for each of 
+   the Vorbis packets in the payload.
 </t>
 <t>
-   For payloads which consist of multiple Vorbis packets, payload data 
-   consists of one octet representing the packet length followed by 
-   the packet data for each of the Vorbis packets in the payload.
-</t>
-<t>
-   The Vorbis packet length field is the length of the Vorbis data 
-   block minus one octet.   
+   The Vorbis packet length header is the length of the Vorbis data 
+   block only and does not count the length octet.
 </t>
 <t>
    The payload packing of the Vorbis data packets SHOULD follow the
@@ -228,7 +240,7 @@
    occurs immediately after the RTP packet header.
 </t>
 <t>
-   Channel mapping of the audio is in accordance with BS. 775-1 
+   Channel mapping of the audio is in accordance with BS. 775-1
    ITU-R.
 </t>
 </section>
@@ -237,9 +249,12 @@
 <section anchor="Example RTP Packet" title="Example RTP Packet">
 <t>
    Here is an example RTP packet containing two Vorbis packets.
-
+</t>
+<t>
    RTP Packet Header:
+</t>
 
+<t>
 <artwork><![CDATA[
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -254,19 +269,22 @@
    |                              ...                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork>
-
+</t>
+<t>
    Payload Data:
-   
+</t>
+<t>   
 <artwork><![CDATA[
-
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |0|1|0| # pks: 2|      len      |         vorbis data ...       |
+   |                          Codebook Ident                       |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                      ...vorbis data...                        |
+   |0|1| 0 | 2 pks |      len      |         vorbis data ...       |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |      ...      |      len      |   next vorbis packet data...  |
+   ..                     ...vorbis data...                       ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..    data      |      len      |   next vorbis packet data...  |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork>
 
@@ -280,21 +298,17 @@
 <t>
    Each RTP packet contains either one complete Vorbis packet, one 
    Vorbis packet fragment, or an integer number of complete Vorbis 
-   packets (up to a max of 32 packets, since the number of packets 
-   is defined by a 5 bit value).
+   packets (up to a max of 16 packets, since the number of packets 
+   is defined by a 4 bit value).
 </t>
 <t>
-   Any Vorbis packet that is larger than 256 octets and less than the
-   path-MTU MUST be placed in a RTP packet by itself.
-</t>
-<t>
-   Any Vorbis packet that is 256 bytes or less SHOULD be bundled in the
+   Any Vorbis data packet that is 256 octets or less SHOULD be bundled in the
    RTP packet with as many Vorbis packets as will fit, up to a maximum
-   of 32.
+   of 16.
 </t>
 <t>
-   If a Vorbis packet will not fit within the network MTU, it SHOULD be
-   fragmented.  A fragmented packet has a zero in the last five bits 
+   If a Vorbis packet is larger than 256 octets it MUST be
+   fragmented.  A fragmented packet has a zero in the last four bits 
    of the payload header.  Each fragment after the first will also set 
    the Continued (C) bit to one in the payload header.  The RTP packet 
    containing the last fragment of the Vorbis packet will have the 
@@ -326,7 +340,9 @@
    |                              ...                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |0|0|0|        0|      len      |         vorbis data ..        |
+   |                          Codebook Ident                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |0|0| 0 |      0|      len      |         vorbis data ..        |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                       ..vorbis data..                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -354,7 +370,9 @@
    |                              ...                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |1|0|0|        0|      len      |         vorbis data ...       |
+   |                          Codebook Ident                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |1|0| 0 |      0|      len      |         vorbis data ...       |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                       ..vorbis data..                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -386,7 +404,9 @@
    |                              ...                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |1|1|0|        0|      len      |         vorbis data ..        |
+   |                          Codebook Ident                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |1|1| 0 |      0|      len      |         vorbis data ..        |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                       ..vorbis data..                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -424,14 +444,14 @@
    needed.  The first header indicates the sample and bitrates, the 
    number of channels and the version of the Vorbis encoder used.  
    The second header contains the decoders probability model, or 
-   codebooks and the third header details stream metadata.
+   codebook and the third header details stream metadata.
 </t>
 <t>
    As the RTP stream may change certain configuration data mid-session
    there are two different methods for delivering this configuration
-   data to a client, RTCP which is detailed below and SDP which is 
-   detailed in section 5.  SDP delivery is used to set-up an initial
-   state for the client application and RTCP is used to change state
+   data to a client, in-band which is detailed below and SDP which is 
+   detailed in section 4.3.  SDP delivery is used to set-up an initial
+   state for the client application and in-band is used to change state
    during the session.  The changes may be due to different metadata
    or codebooks as well as different bitrates of the stream.
 </t>
@@ -443,37 +463,60 @@
    information detailing the number of audio channels, bit rates and
    other information used to initialise the Vorbis stream.
 </t>
-
-
-<section anchor="RTCP Based Header Transmission" title="RTCP Based Header Transmission">
 <t>
-   The three header data blocks are sent out-of-band as an APP defined 
-   RTCP message with the 4 octet name field set to VORB. 
-</t>
-<t>
-   Synchronizing the configuration headers to the RTP stream is 
-   critical.  A 32 bit timestamp field is used to indicate the
-   timepoint when a VORB header MUST be applied to the RTP stream. 
-   VORB RTCP packets SHOULD be sent just ahead of the change in the
-   RTP stream.  As the reception loss of the RTCP header will mean 
-   the RTP stream will fail to decode properly the freqency of their 
-   periodic retransmission SHOULD be high enough to minimize the    
-   stream disturbance whilst remaining under the RTCP bandwidth
-   allocation.
+   Out of the two delivery vectors the use of an SDP attribute to indicate an URI 
+   where the configuration and codebook data can be obtained is preferred  
+   as they can be fetched reliably using TCP.  The in-band codebook delivery SHOULD 
+   only be used in situations where the link between the client is unidirectional or if 
+   the SDP-based information is not available. 
 </t>
 
+<t>
+   Synchronizing the configuration and codebook headers to the RTP stream is 
+   critical.  The 32 bit Codebook Ident field is used to indicate when a change in the stream has
+   taken place.  The client application MUST have in advance the correct configuration and codebook 
+   headers and if the client detects a change in the Ident value and does not have this information 
+   it MUST NOT decode the raw Vorbis data.
+</t>
+
+
+<section anchor="In-band Header Transmission" title="In-band Header Transmission">
+<t>
+   The three header data blocks are sent in-band with the packet type bits set to 
+   match the payload type.  The transmission sequence for the headers MUST be in 
+   this order:  configuration, codebook, metadata. The codebook and configuration 
+   headers are sent once per session if the stream is an encoding of live audio, but 
+   can change at the boundary of chained Vorbis audio files.  Metadata can be sent at the 
+   start as well as any time during the life of the session.  
+</t>
+
+<t>
+   The Vorbis configuration header is indicated with the payload type set to 1.
+   The Vorbis version MUST be set to zero to comply with
+   this document.  The fields Sample Rate, Bitrate Maximum/Nominal/
+   Minimum and Num Audio Channels are set in accordance with <xref target="vorbis-spec-ref"></xref> with 
+   the bsz fields above referring to the blocksize parameters.  The 
+   framing bit is not used for RTP transportation and so applications 
+   constructing Vorbis files MUST take care to set this if required.
+</t>
 
 <artwork><![CDATA[
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |V=2|P| subtype |   PT=APP=204  |             Length            |
+   |V=2|P|X|  CC   |M|     PT      |             xxxx              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                           SSRC/CSRC                           |
+   |                             xxxxx                             |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                             VORB                              |
+   |           synchronization source (SSRC) identifier            |
+   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+   |            contributing source (CSRC) identifiers             |
+   |                              ...                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                 Timestamp (in sample rate units)              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          Codebook Ident                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |0|1| 2 |      1| bsz 0 | bsz 1 |       Num Audio Channels      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                        Vorbis Version                         |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -485,71 +528,64 @@
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                        Bitrate Minimum                        |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   | bsz 0 | bsz 1 |       Num Audio Channels      |c|m|o|x|x|x|x|x|
-   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
-   |     Codebook length           |      Codebook checksum        |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   ..                          Codebook                            |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   ..                          URI string                          |
-   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
-   |                      Vendor string length                     |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                         Vendor string                        ..
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    User comments list length                  |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   ..               User comment length / User comment             |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork>
 
 <t>
-   The first Vorbis config header defines the Vorbis stream 
-   attributes.  The Vorbis version MUST be set to zero to comply with
-   this document.  The fields Sample Rate, Bitrate Maximum/Nominal/
-   Minimum and Num Audio Channels are set in accordance with <xref target="vorbis-spec-ref"></xref> with 
-   the bsz fields above referring to the blocksize parameters.  The 
-   framing bit is not used for RTP transportation and so applications 
-   constructing Vorbis files MUST take care to set this if required.
+   If the payload type field is set to 2 this indicates the packet contains codebook data.
 </t>
 <t>
-   The next 8 bits are used to indicate the presence of the two 
-   other Vorbis stream config headers and the size overflow header.
-</t>
-<t>
-   The c flag indicates the presence of a codebook header block, the
-   m flag indicates the presence of a comment metadata block.  The o
-   flag indicates if the size of either of the c and m headers would
-   make the VORB packet greater than that allowed for a RTCP message.
-</t>
-<t>
-   The remaining five bits, indicated with an x, are reserved/unused
-   and MUST be set to 0 for this version of the document.
-</t>
-<t>
-   If the c flag is set then the next header block will contain the 
-   codebook configuration data.  
-</t>
-<t>
-   The configuration information detailed above MUST be completely 
+   The configuration information detailed below MUST be completely 
    intact, as a client can not decode a stream with an incomplete 
    or corrupted codebook set.
 </t>
 <t>
-   A 16 bit codebook length field and a 16 bit 1's complement checksum
-   of the codebook precedes the codebook datablock.  The length field 
-   allows for codebooks to be up to 64K in size. The checksum is used 
-   to detect a corrupted codebook.  
+   A 16 bit codebook length field precedes the codebook datablock.  The length field 
+   allows for codebooks to be up to 64K in size.  Packet fragmentation, 
+   as per the Vorbis data, MUST be performed if the codebooks size exceeds
+   path MTU.  The Codebook Ident field MUST be set to match the associated codebook 
+   needed to decode the Vorbis stream.
+
 </t>
 <t>
-   If a checksum failure is detected then a new config header file
-   SHOULD be obtained from SDP, if the codebook has not changed since
-   the session has started.  If no SDP value is set and no other method
-   for obtaining the config headers exists then this is considered to 
-   be a failure and SHOULD be reported to the client application.
+   The Codebook Ident is the CRC32 checksum of the codebook and 
+   is used to detect a corrupted codebook as well as 
+   associating it with its Vorbis data stream.  This Ident value 
+   MUST NOT be set to the value of the current stream if this header is
+   being sent before the boundary of the chained file has been reached.
+   If a checksum failure is detected then this is considered to 
+   be a failure and MUST be reported to the client application.
+
 </t>
+
+
+<artwork><![CDATA[
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |V=2|P|X|  CC   |M|     PT      |             xxxx              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             xxxxx                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |           synchronization source (SSRC) identifier            |
+   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+   |            contributing source (CSRC) identifiers             |
+   |                              ...                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                           Codebook Ident                      |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |0|1| 2 |      1|           Codebook Length                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    length     |           Codebook                           ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..                          Codebook                            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+]]></artwork>
+
+
 <t>
-   If the m flag is set then the next header block will contain the 
+   With the payload type flag set to 3, this indicates that the packet contain the 
    comment metadata, such as artist name, track title and so on.  These
    metadata messages are not intended to be fully descriptive but to 
    offer basic track/song information.  This message MUST be sent at 
@@ -557,7 +593,7 @@
    headers, even if it contains no information.  During a session the
    metadata associated with the stream may change from that specified 
    at the start, e.g. a live concert broadcast changing acts/scenes, so
-   clients MUST have the ability to receive m header blocks.  Details
+   clients MUST have the ability to receive header blocks.  Details
    on the format of the comments can be found in the Vorbis 
    documentation <xref target="v-comment"></xref>.
 </t>
@@ -568,92 +604,76 @@
    length and text field pairs, up to the number indicated by the user 
    comment list length.   
 </t>
-<t>
-   If the o, overflow, bit is set then the URI of a whole header block
-   is specified in an overflow URI field, which is a null terminated 
-   UTF-8 string.  The header file specified at the URI MUST NOT have 
-   the overflow flag set, otherwise a loop condition will occur. 
-</t>
+
+<artwork><![CDATA[
+    0                   1                   2                   3
+    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |V=2|P|X|  CC   |M|     PT      |             xxxx              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                             xxxxx                             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |           synchronization source (SSRC) identifier            |
+   +=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
+   |            contributing source (CSRC) identifiers             |
+   |                              ...                              |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                          Codebook Ident                       |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |0|1| 3 |      1|          Vendor string length                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    length     |          Vendor string                       ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                    User comments list length                  |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..               User comment length / User comment             |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+]]></artwork>
+
 </section>
 
 <section anchor="Codebook Caching" title="Codebook Caching"> 
 <t>
    Codebook caching allows clients that have previously connected to a 
-   stream to re-use the codebooks and thus begin the playback of the 
-   session faster.  When a client receives a codebook it may store
-   it, together with the MD5 key, locally and can compare the MD5 key
-   of locally cached codebooks with the key it receives via SDP, which
-   is detailed in the next section.   
+   stream to re-use the associated codebooks.  When a client receives a codebook it may store
+   it locally and can compare the CRC32 key with that of the new stream.
 </t>   
-</section>
 </section>
 
 <section anchor="Session Description for Vorbis RTP Streams" title="Session Description for Vorbis RTP Streams"> 
 <t>
    Session description information concerning the Vorbis stream 
    SHOULD be provided if possible and MUST be in accordance with <xref target="rfc2327"></xref>.  
-   The SDP information is split into two sections, a mandatory 
-   section detailing the RTP stream and an optional section used to 
-   convey information needed for codebook caching.
 </t>
+
+<t>
+   If the stream comprises chained Vorbis files the configuration and codebook headers for each
+   file SHOULD be packaged together and passed to the client using the headers attribute.
+</t>
+
 <t>
    Below is an outline of the mandatory SDP attributes.
 </t>
+<list style="empty">
+<t></t>
+<t>   c=IN IP4/6 </t>
+<t>   m=audio  RTP/AVP 98</t>
+<t>   a=rtpmap:98 VORBIS/44100/2</t>
+<t>   a=fmtp:98 header=&lt;URI of configuration header&gt; </t>
+</list>
 <t>
-   c=IN IP4/6 
-   m=audio  RTP/AVP 98
-   a=rtpmap:98 vorbis/
-   a=fmtp:98 header=
-   a=fmtp:98 md5key=
+   The Vorbis configuraton specified in the header attribute MUST contain
+   all of the configuration data and codebooks needed for the life of the session.  
 </t>
 <t>
    The port value is specified by the server application bound to 
    the address specified in the c attribute.  The bitrate value 
-   specified in the a attribute MUST match the Vorbis sample rate 
-   value.
-</t>
-<t>
-   The Vorbis codebook specified in the header attribute MUST contain
-   all of the configuration data.  If the codebook MD5 attribute, 
-   md5key, is set the key is compared to a locally held cache and 
-   if found the associated local codebook is used, if not the 
-   client MUST use the configuration headers specified with the 
-   header attribute.  
-</t>
-
-<section anchor="SDP Based Config Header Transmission" title="SDP Based Config Header Transmission"> 
-<t>
-   The optional SDP attributes are used to convey details of the 
-   Vorbis stream which are required for codebook caching.  If the 
-   following attributes are set they take precedent over values 
-   specified in the u attribute detailed above.  The maximum size
-   of the mandatory and optional SDP attributes MUST be less than
-   1K in size to conform to section 4.1 of <xref target="rfc2327"></xref>.
-</t>
-<t>
-   a=fmtp:98 bitrate_min=
-   a=fmtp:98 bitrate_norm=
-   a=fmtp:98 bitrate_max=
-   a=fmtp:98 bsz0=
-   a=fmtp:98 bsz1=
-   a=fmtp:98 channels=
-   a=fmtp:98 meta_vendor=
-</t>
-<t>
-   The metadata attribute, meta_vendor, provides the bare minimum 
-   information required for decoding but does not convey any 
-   meaningful stream metadata information.  As outlined in the Vorbis 
-   comment field and header specification documentation, <xref target="v-comment"></xref>, a number 
-   of predefined field names are available which SHOULD be used.  An 
-   example would be:
-</t>
-<t>
-   a=fmtp:98 meta_vendor=Xiph.Org libVorbis I 20020717
-   a=fmtp:98 meta_artist=Honest Bob and the Factory-to-Dealer-Incentives
-   a=fmtp:98 meta_title=I'm Still Around
-   a=fmtp:98 meta_tracknumber=5
+   and channels specified in the m attribute MUST match the Vorbis 
+   sample rate value.
 </t>
 </section>
+
 </section>
 
 <section anchor="IANA Considerations" title="IANA Considerations"> 
@@ -666,15 +686,10 @@
 <t>
    Required Parameters:</t><t>
          header indicates the URI of the decoding codebook.
-         md5key indicates the MD5 key of the codebooks.
 </t>
 <t>
    Optional Parameters: </t><t>
-         bitrate_min, bitrate_norm and bitrate_max indicate the 
-         minimum, nominal and maximum bitrates.  bsz0 and bsz1
-         indicate the blocksize values.  channels indicates the 
-         number of audio channels in the stream.  meta_vendor 
-         indicates the encoding codec vendor.
+         None.
 </t>
 <t>
    Encoding considerations:</t><t>
@@ -746,8 +761,8 @@
 </t>
 <t>
    Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including 
-   Steve Casner, Ramon Garcia, Pascal Hennequin, Ralph Jiles, 
-   Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, 
+   Steve Casner, Aaron Colwell, Ross Finlayson, Ramon Garcia, Pascal Hennequin, Ralph Giles, 
+   Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher Montgomery,
    Colin Perkins, Barry Short, Mike Smith, Magnus Westerlund.
 </t>
 </section> 
@@ -755,7 +770,7 @@
 </middle>
 
 <back>
-<references>
+<references title="Normative References">
 
 <reference anchor="rfc3533">
 <front>
@@ -829,7 +844,9 @@
 </front>
 <seriesInfo name="RFC" value="1981" />
 </reference>   
+</references>
 
+<references title="Informative References">
 <reference anchor="libvorbis">
 <front>
 <title>libvorbis: Available from the Xiph website, http://www.xiph.org</title>
