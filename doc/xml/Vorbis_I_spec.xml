@@ -25,7 +25,6 @@
 </articleinfo>
 
 &intro;
-<!--
 &bitpacking;
 &codebook;
 &codec;
@@ -36,7 +35,6 @@
 &helpers;
 &tables;
 &oggvorbis;
--->
 &rtpvorbis;
 &footer;
 
