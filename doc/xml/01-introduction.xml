@@ -7,7 +7,7 @@
 <section id="vorbis-spec-intro">
 <sectioninfo>
 <releaseinfo>
- $Id: 01-introduction.xml,v 1.5 2002/10/27 14:55:31 giles Exp $
+ $Id: 01-introduction.xml,v 1.6 2002/10/27 15:05:51 giles Exp $
 <emphasis>Last update to this document: July 18, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -92,7 +92,7 @@ requirement or fundamental assumption in the Vorbis design.</para>
 
 <para>
 The specification for embedding Vorbis into
-an Ogg transport stream is in a <xref linkend="vorbis-over-ogg"/>.
+an Ogg transport stream is in <xref linkend="vorbis-over-ogg"/>.
 </para>
 
 </section>
