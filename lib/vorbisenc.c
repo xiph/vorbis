@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.21 2001/12/14 09:27:36 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.22 2001/12/14 09:37:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -591,8 +591,6 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   ){
   int ret=0;
 
-  base_quality=0.;
-
   base_quality+=.001;
   if(base_quality<0.)base_quality=0.;
   if(base_quality>.999)base_quality=.999;
@@ -688,35 +686,6 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
     default:
       /* setup specific to non-stereo (mono or uncoupled polyphonic)
          coupling */
-
-      /* unmanaged, one iteration residue setup */
-      ret|=vorbis_encode_residue_init(vi,base_quality,0,
-				      0, /* uncoupled */
-				      0, /* no mid stereo backfill */
-				      1, /* residue backfill */
-				      _residue_template_44_uncoupled,
-				      0,0,0,0,0,0,0,0,0,0,0,
-				      4.,4.,4.,6.,6.,6.,6.,4.,4.,4.,4.);
-      
-      ret|=vorbis_encode_residue_init(vi,base_quality,1,
-				      0, /* uncoupled */
-				      0, /* no mid stereo backfill */
-				      1, /* residue backfill */
-				      _residue_template_44_uncoupled,
-				      0,0,0,0,0,0,0,0,0,0,0,
-				      4.,4.,4.,6.,6.,6.,6.,4.,4.,4.,4.);      
-
-      ret|=vorbis_encode_lowpass_init(vi,base_quality,0,
-				      15.1,15.8,16.5,17.9,20.5,
-				      999.,999.,999.,999.,999.,999.);
-      ret|=vorbis_encode_lowpass_init(vi,base_quality,1,
-				      15.1,15.8,16.5,17.9,20.5,
-				      999.,999.,999.,999.,999.,999.);
-      
-      return(ret);
-
-
-
 
 
       return(OV_EIMPL);
