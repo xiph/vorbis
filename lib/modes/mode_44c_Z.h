@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_Z.h,v 1.5 2001/08/13 06:04:24 xiphmont Exp $
+ last mod: $Id: mode_44c_Z.h,v 1.6 2001/08/13 07:43:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -49,8 +49,8 @@
 #include "books/line_1024x31_3sub2.vqh"
 #include "books/line_1024x31_3sub3.vqh"
 
-#include "books/res_Zc_128aux.vqh"
-#include "books/res_Zc_1024aux.vqh"
+#include "books/res_44c_Z_128aux.vqh"
+#include "books/res_44c_Z_1024aux.vqh"
 
 #include "books/res_Zc_1.vqh"
 #include "books/res_Zc_2.vqh"
@@ -290,8 +290,8 @@ codec_setup_info info_44c_Z={
    &_huff_book_line_1024x31_3sub2,
    &_huff_book_line_1024x31_3sub3, /* 22 */
 
-   &_huff_book_res_Zc_128aux, 
-   &_huff_book_res_Zc_1024aux,
+   &_huff_book_res_44c_Z_128aux, 
+   &_huff_book_res_44c_Z_1024aux,
 
    &_vq_book_res_Zc_1,
    &_vq_book_res_Zc_2,

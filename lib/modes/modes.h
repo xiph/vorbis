@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.10 2001/08/13 06:04:24 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.11 2001/08/13 07:43:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,5 +22,7 @@
 #include "modes/mode_44c_Z.h"
 #include "modes/mode_44c_Y.h"
 #include "modes/mode_44c_X.h"
+#include "modes/mode_44c_A.h"
+#include "modes/mode_44c_B.h"
 
 #endif
