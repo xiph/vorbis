@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.41 2002/06/29 11:17:36 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.42 2002/06/29 13:24:37 msmith Exp $
 
  ********************************************************************/
 
@@ -609,6 +609,7 @@ static void get_setup_template(vorbis_info *vi,
 	return;
       }
     }
+    i++;
   }
   
   hi->setup=NULL;
