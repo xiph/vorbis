@@ -21,13 +21,13 @@ Whatever the exact qualities, the Vorbis residue abstraction codes the
 residue vectors into the bitstream packet, and then reconstructs the
 vectors during decode.  Vorbis makes use of three different encoding
 variants (numbered 0, 1 and 2) of the same basic vector encoding
-abstration.<p>
+abstraction.<p>
 
 <h1>Residue format</h1>
 
-Reside format takes the bundles of vectors, partitions the vectors
-into chunks, classifies each chunk, encodes the chunk classifications
-and finally encodes the chunks using the the specific VQ arrangement
+Reside format partitions each vector in the vector bundle into chunks,
+classifies each chunk, encodes the chunk classifications and finally
+encodes the chunks themselves using the the specific VQ arrangement
 defined for each selected selected classification.  The exact
 interleaving and partitioning vary by residue encoding number, however
 the high-level process used to classify and encode the residue vector
@@ -41,7 +41,7 @@ encoded and simply trusting that it is, is as follows:<p>
 <li>Each vector is partitioned into multiple equal sized chunks
 according to configuration specified.  If we have a vector size of
 <i>n</i>, a partition size <i>residue_partition_size</i>, and a total
-of <i>ch</i> residue vectors, the total number of paritioned chunks
+of <i>ch</i> residue vectors, the total number of partitioned chunks
 coded is <i>n</i>/<i>residue_partition_size</i>*<i>ch</i>.  It is
 important to note that the integer division truncates.  In the below
 example, we assume an example <i>residue_partition_size</i> of 8.<p>
@@ -49,13 +49,14 @@ example, we assume an example <i>residue_partition_size</i> of 8.<p>
 <li>Each partition in each vector has a classification number that
 specifies which of multiple configured VQ codebook setups are used to
 decode that partition.  The classification numbers of each partition
-can be thought of as forming a vector, as in the illustration below.
-Just as the residue vectors are coded in grouped partitions to
-increase encoding efficiency, the classification vector is also
-partitioned into chunks.  The integer elements of each scalar in a
-classification chunk are built into a single scalar that represents
-the classification numbers in that chunk.  In the below example, the
-classification codeword encodes two classification numbers.<p>
+can be thought of as forming a vector in their own right, as in the
+illustration below.  Just as the residue vectors are coded in grouped
+partitions to increase encoding efficiency, the classification vector
+is also partitioned into chunks.  The integer elements of each scalar
+in a classification chunk are built into a single scalar that
+represents the classification numbers in that chunk.  In the below
+example, the classification codeword encodes two classification
+numbers.<p>
 
 <li>The values in a residue vector may be encoded monolithically in a
 single pass through the residue vector, but more often efficient
@@ -151,20 +152,20 @@ Header decode for all three residue types is identical.<p>
   5) [residue_classbook] = read 8 bits as unsigned integer
 </pre>
 
-<tt>residue_begin</tt> and <tt>residue_end</tt> select the specific
-subportion of each vector that is actually coded; it implements akin
+<tt>[residue_begin]</tt> and <tt>[residue_end]</tt> select the specific
+sub-portion of each vector that is actually coded; it implements akin
 to a bandpass where, for coding purposes, the vector effectively
-begins at element <tt>residue_begin</tt> and ends at
-<tt>residue_end</tt>.  Preceeding and following values in the unpacked
+begins at element <tt>[residue_begin]</tt> and ends at
+<tt>[residue_end]</tt>.  Preceding and following values in the unpacked
 vectors are zeroed.  Note that for residue type 2, these values as
-well as <tt>[residue_partition_size</tt>apply to the interleaved
+well as <tt>[residue_partition_size]</tt>apply to the interleaved
 vector, not the individual vectors before interleave.
-<tt>residue_partition_size</tt> is as explained above,
-<tt>residue_classifications</tt> is the number of possible
+<tt>[residue_partition_size]</tt> is as explained above,
+<tt>[residue_classifications]</tt> is the number of possible
 classification to which a partition can belong and
-<tt>residue_classbook</tt> is the codebook number used to code
+<tt>[residue_classbook]</tt> is the codebook number used to code
 classification codewords.  The number of dimensions in book
-<tt>residue_classbook</tt> determines how many classification values
+<tt>[residue_classbook]</tt> determines how many classification values
 are grouped into a single classification codeword.<p>
 
 Next we read a bitmap pattern that specifies which partition classes
@@ -276,22 +277,96 @@ Packet decode proceeds as follows, matching the description offered earlier in t
 
 </pre>
 
-An end-of-packet codition during packet decode is to be considered a
-nominal occurence.  End-of-packet during a classification codeword
-read halts decode immediately and returns the partially-decoded
-packet.  If decode hits end-of-packet while reading a partition, the
-partially decoded partition is discarded and decode returns the result
-of vector decode up to that point.<p>
+An end-of-packet condition during packet decode is to be considered a
+nominal occurrence.  Decode returns the result of vector decode up to
+that point.<p>
 
 <h2>format 0 specifics</h2>
 
-Format zero decodes 
+Format zero decodes partitions exactly as described earlier in the
+'Residue Format: residue 0' section.  The following pseudocode
+presents the same algorithm. Assume:<p>
+
+<ul>
+<li> <tt>[n]</tt> is the value in
+<tt>[residue_partition_size]</tt>
+<li><tt>[v]</tt> is the residue vector
+<li><tt>[offset]</tt> is the beginning read offset in [v]
+</ul>
+
+<pre>
+ 1) [step] = [n] / [codebook_dimensions]
+ 2) iterate [i] over the range 0 ... [step]-1 {
+
+      3) vector [entry_temp] = read vector from packet using current codebook in VQ context
+      4) iterate [j] over the range 0 ... [codebook_dimensions]-1 {
+
+           5) vector [v] element ([offset]+[i]+[j]*[step]) =
+	        vector [v] element ([offset]+[i]+[j]*[step]) +
+                vector [entry_temp] element [j]
+
+         }
+
+    }
+
+  6) done
+
+</pre>
+<p>
+
 
 <h2>format 1 specifics</h2>
 
+Format 1 decodes partitions exactly as described earlier in the
+'Residue Format: residue 1' section.  The following pseudocode
+presents the same algorithm. Assume:<p>
+
+<ul>
+<li> <tt>[n]</tt> is the value in
+<tt>[residue_partition_size]</tt>
+<li><tt>[v]</tt> is the residue vector
+<li><tt>[offset]</tt> is the beginning read offset in [v]
+</ul>
+
+<pre>
+ 1) [i] = 0
+ 2) vector [entry_temp] = read vector from packet using current codebook in VQ context
+ 3) iterate [j] over the range 0 ... [codebook_dimensions]-1 {
+
+      5) vector [v] element ([offset]+[i]) =
+	  vector [v] element ([offset]+[i]) +
+          vector [entry_temp] element [j]
+      6) increment [i]
+
+    }
+ 
+  4) if ( [i] is less than [n] ) continue at step 2
+  5) done
+</pre>
+<p>
+
 <h2>format 2 specifics</h2>
  
+Format 2 is reducible to format 1 through the following steps, performed in order: <p>
 
+<ol>
+<li>Assume format 2 is to decode <i>ch</i> vectors of length <i>n</i>.
+<li>Decode, using format 1, a single vector <tt>[v]</tt>of length <i>ch</i>*<i>n</i>.
+<li>Deinterleave this single vector <tt>[v]</tt> into <i>ch</i> independent vectors according to:<p>
+<pre>
+  1) iterate [i] over the range 0 ... [n]-1 {
+
+       2) iterate [j] over the range 0 ... [ch]-1 {
+
+            3) output vector number [j] element [i] = vector [t] element ([i] * [ch] +[j])
+
+          }
+     }
+
+  4) done
+</pre>
+</ol>
+<p>
 
 <hr>
 <a href="http://www.xiph.org/">
