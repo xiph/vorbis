@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: 16kHz settings 
- last mod: $Id: setup_16.h,v 1.2 2002/07/11 06:41:04 xiphmont Exp $
+ last mod: $Id: setup_16.h,v 1.3 2002/07/11 08:57:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,7 +37,7 @@ static double rate_mapping_16[4]={
 };
 
 static double rate_mapping_16_uncoupled[4]={
-  16000.,28000.,50000.,90000.
+  16000.,28000.,64000.,100000.
 };
 
 static double _global_mapping_16[4]={ 1., 2., 3., 4. };

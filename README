@@ -73,8 +73,7 @@ patent concerns.
 This package contains:
 
 .) libvorbis, a BSD-style license software implementation of
-the Vorbis specification by the Xiphophorus company
-(http://www.xiph.org/) 
+the Vorbis specification by the Xiph.Org Foundation (http://www.xiph.org/) 
 
 .) libvorbisfile, a BSD-style license convenience library
 built on Vorbis designed to simplify common uses and a number of GPL

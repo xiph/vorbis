@@ -7,7 +7,7 @@
 Ogg Vorbis comment field specification
 </font></h1>
 
-<em>Last update to this document: July 2, 2002</em><p>
+<em>Last update to this document: July 11, 2002</em><p>
 
 <p>The text comment header is the second (of three) header packets that
 begin a Vorbis bitstream. It is meant for short, text comments,
@@ -36,8 +36,8 @@ number of vectors is bounded to 2^32-1 and the length of each vector
 is limited to 2^32-1 bytes. The vector length is encoded; the vector
 is not null terminated. In addition to the vector list, there is a
 single vector for vendor name (also 8 bit clean, length encoded in 32
-bits). Libvorbis currently sets the vendor string to "Xiphophorus
-libVorbis I 20010910".<p>
+bits). Libvorbis currently sets the vendor string to "Xiph.Org
+libVorbis I 20020711".<p>
 
 The comment vectors are structured similarly to a UNIX environment variable.
 That is, comment fields consist of a field name and a field value and

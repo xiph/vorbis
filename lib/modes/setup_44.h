@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel settings for 44.1/48kHz
- last mod: $Id: setup_44.h,v 1.8 2002/07/11 06:41:05 xiphmont Exp $
+ last mod: $Id: setup_44.h,v 1.9 2002/07/11 08:57:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -56,8 +56,8 @@ static double _psy_compand_long_mapping[11]={
 static double _global_mapping_44[11]={
   1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4.
 };
-static double _global_mapping_44_low[11]={
-  1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4.
+static double _global_mapping_44_low[2]={
+  0., 1.,
 };
 static int _floor_short_mapping_44_low[1]={
   1,
