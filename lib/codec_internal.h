@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.9.4.2 2001/10/11 15:41:44 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.9.4.3 2001/10/16 20:10:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,6 +46,7 @@ typedef void vorbis_info_mapping;
 
 #include "psy.h"
 
+#define BITTRACK_DIVISOR 16
 typedef struct backend_lookup_state {
   /* local lookup storage */
   envelope_lookup        *ve; /* envelope lookup */    
@@ -68,14 +69,15 @@ typedef struct backend_lookup_state {
 
   /* encode side bitrate tracking */
   ogg_uint32_t  *bitrate_queue;
-  ogg_uint32_t  *bitrate_queue_eighths;
+  ogg_uint32_t  *bitrate_queue_bin;
   int            bitrate_queue_size;
   int            bitrate_queue_head;
-  int            bitrate_eighths;
+  int            bitrate_bins;
 
-  long   bitrate_boundbitacc;
-  long   bitrate_boundsampleacc;
-  long   bitrate_boundtail;
+  /* 0, -1, -4, -16, -n/16, -n/8, -n/4, -n/2 */
+  long   bitrate_boundbitacc[8];
+  long   bitrate_boundsampleacc[8];
+  long   bitrate_boundtail[8]; 
   
   long   *bitrate_avgbitacc;
   long   bitrate_avgsampleacc;
@@ -127,13 +129,20 @@ typedef struct codec_setup_info {
 
   /* detailed bitrate management setup */
   double bitrate_floatinglimit_initial; /* set by mode */
+  double bitrate_floatinglimit_minimum; /* set by mode */
+  double bitrate_floatinglimit_upslew_max;
+  double bitrate_floatinglimit_downslew_max;
+
   double bitrate_bound_queuetime;
   double bitrate_avg_queuetime;
 
-  double bitrate_absolute_max;
-  double bitrate_absolute_min;
-  double bitrate_queue_max;
+  double bitrate_absolute_min_short;
+  double bitrate_absolute_min_long;
+  double bitrate_absolute_max_short;
+  double bitrate_absolute_max_long;
+
   double bitrate_queue_min;
+  double bitrate_queue_max;
   double bitrate_queue_loweravg;
   double bitrate_queue_upperavg;
 

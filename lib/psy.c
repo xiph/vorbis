@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.56.2.1 2001/10/11 15:41:44 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.56.2.2 2001/10/16 20:10:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -904,17 +904,22 @@ static void couple_lossless(float A, float B,
 			    float granule,float igranule,
 			    float *mag, float *ang){
 
-  A=rint(A*igranule)*granule;
-  B=rint(B*igranule)*granule;
-  
   if(fabs(A)>fabs(B)){
+    A=rint(A*igranule)*granule; /* must be done *after* the comparison */
+    B=rint(B*igranule)*granule;
+  
     *mag=A; *ang=(A>0.f?A-B:B-A);
   }else{
+    A=rint(A*igranule)*granule;
+    B=rint(B*igranule)*granule;
+  
     *mag=B; *ang=(B>0.f?A-B:B-A);
   }
 
-  if(*ang>fabs(*mag)*1.9999f)*ang=-fabs(*mag)*2.f;
- 
+  if(*ang>fabs(*mag)*1.9999f){
+    *ang= -fabs(*mag)*2.f;
+    *mag= -*mag;
+  }
 }
 
 static void couple_8phase(float A, float B, float fA, float fB, 
@@ -1086,6 +1091,7 @@ void _vp_quantize_couple(vorbis_look_psy *p,
   for(i=0;i<vi->coupling_steps;i++){
     float granulem=info->couple_pass[passno].granulem;
     float igranulem=info->couple_pass[passno].igranulem;
+    float rqlimit=info->couple_pass[passno].requant_limit;
     
     /* make sure coupling a zero and a nonzero channel results in two
        nonzero channels. */
@@ -1129,9 +1135,23 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 	      }
 	    }
 	  }
-	  
-	  qM[j]=mag-sofarM[j];
-	  qA[j]=ang-sofarA[j];
+
+	  /* executive decision time: when requantizing and recoupling
+	     residue in order to progressively encode at finer
+	     resolution, an out of phase component that originally
+	     quntized to 2*mag can flip flop magnitude/angle if it
+	     requantizes to not-quite out of phase.  If that happens,
+	     we opt not to fill in additional resolution (in order to
+	     simplify the iterative codebook design and
+	     efficiency). */
+	 
+	  if(ang<-rqlimit || ang>rqlimit){
+	    qM[j]=0.f;
+	    qA[j]=0.f;
+	  }else{ 
+	    qM[j]=mag-sofarM[j];
+	    qA[j]=ang-sofarA[j];
+	  }
 	}
       }
     }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.2 2001/10/11 15:41:44 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.3 2001/10/16 20:10:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -179,7 +179,8 @@ static int ilog2(unsigned int v){
   return(ret);
 }
 
-static void mapping0_pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer *opb){
+static void mapping0_pack(vorbis_info *vi,vorbis_info_mapping *vm,
+			  oggpack_buffer *opb){
   int i;
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)vm;
 
@@ -283,34 +284,34 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 
 static double floater_interpolate(backend_lookup_state *b,vorbis_info *vi,
 				  double desired_rate){
-  int eighth=b->bitrate_floatinglimit*8-1.;
+  int bin=b->bitrate_floatinglimit*BITTRACK_DIVISOR-1.;
   double lobitrate;
   double hibitrate;
   
   if(desired_rate<=0.)return(0.);
   
-  lobitrate=(double)(eighth==0?0.:
-		     b->bitrate_avgbitacc[eighth-1])/b->bitrate_avgsampleacc*vi->rate;
-  while(lobitrate>desired_rate && eighth>0){
-    eighth--;
-    lobitrate=(double)(eighth==0?0.:
-		       b->bitrate_avgbitacc[eighth-1])/b->bitrate_avgsampleacc*vi->rate;
+  lobitrate=(double)(bin==0?0.:
+		     b->bitrate_avgbitacc[bin-1])/b->bitrate_avgsampleacc*vi->rate;
+  while(lobitrate>desired_rate && bin>0){
+    bin--;
+    lobitrate=(double)(bin==0?0.:
+		       b->bitrate_avgbitacc[bin-1])/b->bitrate_avgsampleacc*vi->rate;
   }
 
-  hibitrate=(eighth>=b->bitrate_eighths?b->bitrate_avgbitacc[b->bitrate_eighths-1]:
-	     (double)b->bitrate_avgbitacc[eighth])/b->bitrate_avgsampleacc*vi->rate;
-  while(hibitrate<desired_rate && eighth<b->bitrate_eighths){
-    eighth++;
-    if(eighth<b->bitrate_eighths)
-      hibitrate=(double)b->bitrate_avgbitacc[eighth]/b->bitrate_avgsampleacc*vi->rate;
+  hibitrate=(bin>=b->bitrate_bins?b->bitrate_avgbitacc[b->bitrate_bins-1]:
+	     (double)b->bitrate_avgbitacc[bin])/b->bitrate_avgsampleacc*vi->rate;
+  while(hibitrate<desired_rate && bin<b->bitrate_bins){
+    bin++;
+    if(bin<b->bitrate_bins)
+      hibitrate=(double)b->bitrate_avgbitacc[bin]/b->bitrate_avgsampleacc*vi->rate;
   }
 
   /* interpolate */
-  if(eighth==b->bitrate_eighths){
-    return eighth/8.;
+  if(bin==b->bitrate_bins){
+    return bin/(double)BITTRACK_DIVISOR;
   }else{
     double delta=(desired_rate-lobitrate)/(hibitrate-lobitrate);
-    return (eighth+delta)/8.;
+    return (bin+delta)/(double)BITTRACK_DIVISOR;
   }
 }
 
@@ -501,8 +502,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     int   stopflag=0,stoppos=0;
 
     for(i=0;i<vi->channels;i++){
-      quantized[i]=pcm[i]+n/2;
-      sofar[i]=_vorbis_block_alloc(vb,n/2*sizeof(*sofar[i]));
+      quantized[i]=_vorbis_block_alloc(vb,n*sizeof(*sofar[i]));
+      sofar[i]=quantized[i]+n/2;
       memset(sofar[i],0,sizeof(*sofar[i])*n/2);
     }
 
@@ -570,16 +571,49 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	 else, use the bits sunk by a single iteration (bounded by min/max)
     */
     {
-      long period_samples=b->bitrate_boundsampleacc+ci->blocksizes[vb->W]/2;
-      long maxbits_period=ci->bitrate_queue_max/vi->rate*period_samples;
-      long minbits_period=ci->bitrate_queue_min/vi->rate*period_samples;
-      long maxbits_absolute=ci->bitrate_absolute_max/vi->rate*
-	ci->blocksizes[vb->W]/2;
-      long minbits_absolute=ci->bitrate_absolute_min/vi->rate*
-	ci->blocksizes[vb->W]/2;
+      long maxbits_absolute=
+	(vb->W?
+	 ci->bitrate_absolute_max_long/vi->rate*ci->blocksizes[1]/2:
+	 ci->bitrate_absolute_max_short/vi->rate*ci->blocksizes[0]/2);
+      long minbits_absolute=
+	(vb->W?
+	 ci->bitrate_absolute_min_long/vi->rate*ci->blocksizes[1]/2:
+	 ci->bitrate_absolute_min_short/vi->rate*ci->blocksizes[0]/2);
 
-      maxbits=min(maxbits_period-b->bitrate_boundbitacc,maxbits_absolute);
-      minbits=max(minbits_period-b->bitrate_boundbitacc,minbits_absolute);
+      long minbits_period=ci->bitrate_queue_min/vi->rate*
+	(b->bitrate_boundsampleacc[0]+ci->blocksizes[vb->W]/2)-
+	b->bitrate_boundbitacc[0];
+
+      long period_samples=max(ci->bitrate_bound_queuetime*vi->rate,
+			      b->bitrate_boundsampleacc[0]);
+      long maxbits_period=-1;
+
+      /* pessimistic checkahead */
+      for(i=0;i<8;i++){
+	long ahead_samples=period_samples-b->bitrate_boundsampleacc[i];
+	if(ahead_samples>=0){
+	  long maxbits_local=ci->bitrate_queue_max/vi->rate*
+	    (period_samples+ci->blocksizes[vb->W]/2)-
+	    b->bitrate_boundbitacc[i]-
+	    ci->bitrate_queue_min/vi->rate*ahead_samples;
+
+	  if(maxbits_period==-1 || maxbits_local<maxbits_period)
+	    maxbits_period=maxbits_local;
+
+	}
+      }
+
+
+      if(maxbits_absolute){
+	if(ci->bitrate_queue_max>0.){
+	  maxbits=min(maxbits_period,maxbits_absolute);
+	}else{
+	  maxbits=maxbits_absolute;
+	}
+      }else
+	maxbits=maxbits_period;
+      minbits=max(minbits_period,minbits_absolute);
+
       if(maxbits<0)maxbits=0;
       if(maxbits)minbits=min(minbits,maxbits);
     }
@@ -594,8 +628,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
          vector, according residue mapping */
     
       for(j=0;j<info->submaps;j++){
-	ogg_uint32_t *queueptr=b->bitrate_queue_eighths;
-	if(queueptr)queueptr+=b->bitrate_queue_head*b->bitrate_eighths;
+	ogg_uint32_t *queueptr=b->bitrate_queue_bin;
+	if(queueptr)queueptr+=b->bitrate_queue_head*b->bitrate_bins;
 
 	if(stoppos){
 	  look->residue_func[j]->
@@ -681,7 +715,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       
       /* bitrate management.... deciding when it's time to stop. */
       if(i<quant_passes){
-	if(b->bitrate_eighths==0){ /* average bitrate always runs
+	if(b->bitrate_bins==0){ /* average bitrate always runs
                                       encode to the bitter end in
                                       order to collect statistics */
 	  
@@ -706,35 +740,32 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       
       /* down-couple/down-quantize from perfect-'so-far' -> 
 	 new quantized vector */
-      if(!stoppos){ /* only do this if we're doing a real iteration
-                       and not padding */
-	if(info->coupling_steps==0){
-	  /* this assumes all or nothing coupling right now.  it should pass
-	     through any channels left uncoupled, but it doesn't do that now */
-	  int k;
-	  for(k=0;k<vi->channels;k++){
-	    float *lpcm=pcm[k];
-	    float *lsof=sofar[k];
-	    float *lqua=quantized[k];
-	    for(j=0;j<n/2;j++)
-	      lqua[j]=lpcm[j]-lsof[j];
-	  }
-	}else{
-	  char buf[80];
-
-	  _vp_quantize_couple(look->psy_look[blocktype],
-			      info,
-			      pcm,
-			      sofar,
-			      quantized,
-			      nonzero,
-			      i);
-
-	  sprintf(buf,"quant%d",i);
-	  for(j=0;j<vi->channels;j++)
-	    _analysis_output(buf,seq+j,quantized[j],n/2,1,0);
-
+      if(info->coupling_steps==0){
+	/* this assumes all or nothing coupling right now.  it should pass
+	   through any channels left uncoupled, but it doesn't do that now */
+	int k;
+	for(k=0;k<vi->channels;k++){
+	  float *lpcm=pcm[k];
+	  float *lsof=sofar[k];
+	  float *lqua=quantized[k];
+	  for(j=0;j<n/2;j++)
+	    lqua[j]=lpcm[j]-lsof[j];
 	}
+      }else{
+	char buf[80];
+	
+	_vp_quantize_couple(look->psy_look[blocktype],
+			    info,
+			    pcm,
+			    sofar,
+			    quantized,
+			    nonzero,
+			    i);
+	
+	sprintf(buf,"quant%d",i);
+	for(j=0;j<vi->channels;j++)
+	  _analysis_output(buf,seq+j,quantized[j],n/2,1,0);
+	
       }
   
       /* steady as she goes */
@@ -752,24 +783,51 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     fprintf(stderr,"Bitrate: cav %d, cmin %ld, cmax %ld, float %.1f,"
 	    " this %ld\n",
-	    (int)((double)b->bitrate_boundbitacc*vi->rate/b->bitrate_boundsampleacc),
+	    (int)((double)b->bitrate_boundbitacc[0]*vi->rate/b->bitrate_boundsampleacc[0]),
 	    minbits,maxbits,b->bitrate_floatinglimit,
 	    oggpack_bytes(&vb->opb)*8);
-    fprintf(stderr,"\thead:%d, boundtail:%ld(%ld), avtail:%ld(%ld)\n",
-	    b->bitrate_queue_head,b->bitrate_boundtail,b->bitrate_boundsampleacc,
-	    b->bitrate_avgtail,b->bitrate_avgsampleacc);
     
     /* track bitrate*/
     /* update boundary accumulators */
-    while(b->bitrate_boundsampleacc>ci->bitrate_bound_queuetime*vi->rate){
-      int samples=ci->blocksizes[0]>>1;
-      if(b->bitrate_queue[b->bitrate_boundtail]&0x80000000UL)
-	samples=ci->blocksizes[1]>>1;
-      b->bitrate_boundsampleacc-=samples;
-      b->bitrate_boundbitacc-=
-	b->bitrate_queue[b->bitrate_boundtail]&0x7fffffffUL;
-      b->bitrate_boundtail++;
-      if(b->bitrate_boundtail>=b->bitrate_queue_size)b->bitrate_boundtail=0;
+    for(i=0;i<8;i++){
+      long desired=ci->bitrate_bound_queuetime*vi->rate;
+      switch(i){
+      case 0:
+	break;
+      case 1:
+	desired-=ci->blocksizes[0]/2;
+	break;
+      case 2: 
+	desired-=ci->blocksizes[0]*2;
+	break;
+      case 3:
+	desired-=ci->blocksizes[0]*8;
+	break;
+      case 4:
+	desired-=ci->bitrate_bound_queuetime*vi->rate*(1./16.);
+	break;
+      case 5:
+	desired-=ci->bitrate_bound_queuetime*vi->rate*(1./8.);
+	break;
+      case 6:
+	desired-=ci->bitrate_bound_queuetime*vi->rate*(1./4.);
+	break;
+      case 7:
+	desired-=ci->bitrate_bound_queuetime*vi->rate*(1./2.);
+	break;
+      }
+      
+      while(b->bitrate_boundsampleacc[i]>desired){
+	int samples=ci->blocksizes[0]>>1;
+	if(b->bitrate_queue[b->bitrate_boundtail[i]]&0x80000000UL)
+	  samples=ci->blocksizes[1]>>1;
+	b->bitrate_boundsampleacc[i]-=samples;
+	b->bitrate_boundbitacc[i]-=
+	  b->bitrate_queue[b->bitrate_boundtail[i]]&0x7fffffffUL;
+	b->bitrate_boundtail[i]++;
+	if(b->bitrate_boundtail[i]>=b->bitrate_queue_size)
+	  b->bitrate_boundtail[i]=0;
+      }
     }
     
     /* update moving average accumulators */
@@ -778,51 +836,68 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       if(b->bitrate_queue[b->bitrate_avgtail]&0x80000000UL)
 	samples=ci->blocksizes[1]>>1;
       b->bitrate_avgsampleacc-=samples;
-      for(i=0;i<b->bitrate_eighths;i++)
+      for(i=0;i<b->bitrate_bins;i++)
 	b->bitrate_avgbitacc[i]-=
-	  b->bitrate_queue_eighths[b->bitrate_avgtail*b->bitrate_eighths+i];
+	  b->bitrate_queue_bin[b->bitrate_avgtail*b->bitrate_bins+i];
       b->bitrate_avgtail++;
       if(b->bitrate_avgtail>=b->bitrate_queue_size)b->bitrate_avgtail=0;
     }
     
     /* update queue head */
-    {
+    if(oggpack_bytes(&vb->opb)>2){
+      
       int bits=oggpack_bytes(&vb->opb)*8;
-
+      
       /* boundaries */
       b->bitrate_queue[b->bitrate_queue_head]=bits;
       if(vb->W)b->bitrate_queue[b->bitrate_queue_head]|=0x80000000UL;
-      b->bitrate_boundbitacc+=bits;
-      b->bitrate_boundsampleacc+=ci->blocksizes[vb->W]>>1;
-      
-      /* eighths */
-      if(b->bitrate_eighths){
-	for(i=0;i<b->bitrate_eighths;i++)
-	  b->bitrate_avgbitacc[i]+=
-	    b->bitrate_queue_eighths[b->bitrate_queue_head*b->bitrate_eighths+i];
-	b->bitrate_avgsampleacc+=ci->blocksizes[vb->W]>>1;
+      for(i=0;i<8;i++){
+	b->bitrate_boundbitacc[i]+=bits;
+	b->bitrate_boundsampleacc[i]+=ci->blocksizes[vb->W]>>1;
       }
       
-      b->bitrate_queue_head++;
-      if(b->bitrate_queue_head>=b->bitrate_queue_size)b->bitrate_queue_head=0;
+	/* bins */
+	if(b->bitrate_bins){
+	  for(i=0;i<b->bitrate_bins;i++)
+	    b->bitrate_avgbitacc[i]+=
+	      b->bitrate_queue_bin[b->bitrate_queue_head*b->bitrate_bins+i];
+	  b->bitrate_avgsampleacc+=ci->blocksizes[vb->W]>>1;
+	}
+	
+	b->bitrate_queue_head++;
+	if(b->bitrate_queue_head>=b->bitrate_queue_size)b->bitrate_queue_head=0;
+      }
       
       /* adjust the floater to offset bitrate above/below desired average */
-      /* look for the eighth settings in recent history that bracket
+      /* look for the bin settings in recent history that bracket
 	 the desired bitrate, and interpolate twixt them for the
 	 flaoter setting we want */
       
-      if(b->bitrate_eighths>0){
+      if(b->bitrate_bins>0 &&
+	 (b->bitrate_avgsampleacc>ci->bitrate_avg_queuetime*vi->rate/8 ||
+	  b->bitrate_avgsampleacc>8192)){
 	double upper=floater_interpolate(b,vi,ci->bitrate_queue_upperavg);
 	double lower=floater_interpolate(b,vi,ci->bitrate_queue_loweravg);
-
+	double new=ci->bitrate_floatinglimit_initial;
+	double slew;
+	
 	fprintf(stderr,"\tupper:%g :: lower:%g\n",upper,lower);
-	b->bitrate_floatinglimit=ci->bitrate_floatinglimit_initial;
-	if(upper>0. && upper<b->bitrate_floatinglimit)
-	  b->bitrate_floatinglimit=upper;
-	if(lower>b->bitrate_floatinglimit)
-	  b->bitrate_floatinglimit=lower;
-      } 
-    }
+	  
+	if(upper>0. && upper<new)new=upper;
+	if(lower<ci->bitrate_floatinglimit_minimum)
+	  lower=ci->bitrate_floatinglimit_minimum;
+	if(lower>new)new=lower;
+	
+	slew=new-b->bitrate_floatinglimit;
+	
+	if(slew<ci->bitrate_floatinglimit_downslew_max)
+	  new=b->bitrate_floatinglimit+ci->bitrate_floatinglimit_downslew_max;
+	if(slew>ci->bitrate_floatinglimit_upslew_max)
+	  new=b->bitrate_floatinglimit+ci->bitrate_floatinglimit_upslew_max;
+	
+	b->bitrate_floatinglimit=new;
+      }
+    } 
   }
     
   look->lastframe=vb->sequence;

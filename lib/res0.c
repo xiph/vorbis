@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.37.2.3 2001/10/12 00:08:06 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.37.2.4 2001/10/16 20:10:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -49,7 +49,7 @@ typedef struct {
   long      phrasebits;
   long      frames;
 
-  int       qoffsets[8];
+  int       qoffsets[BITTRACK_DIVISOR];
 
 } vorbis_look_residue0;
 
@@ -243,8 +243,8 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
     int n=info->end-info->begin,i;
     int partvals=n/samples_per_partition;
 
-    for(i=0;i<8;i++)
-      look->qoffsets[i]=partvals*(i+1)/8;
+    for(i=0;i<BITTRACK_DIVISOR;i++)
+      look->qoffsets[i]=partvals*(i+1)/BITTRACK_DIVISOR;
   }
 
   return(look);
@@ -545,9 +545,9 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
      partition channel words... */
 
   for(s=(pass==0?0:ci->passlimit[pass-1]);s<ci->passlimit[pass];s++){
-    int eighth=0;
+    int bin=0;
     ogg_uint32_t *qptr=NULL;
-    if(stats)qptr=stats+s*8;
+    if(stats)qptr=stats+s*BITTRACK_DIVISOR;
 
     for(i=0;i<partvals;){
 
@@ -602,8 +602,8 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	  }
 	}
 
-	if(qptr)while(i>=look->qoffsets[eighth])
-	  qptr[eighth++]=oggpack_bits(&vb->opb);
+	if(qptr)while(i>=look->qoffsets[bin])
+	  qptr[bin++]=oggpack_bits(&vb->opb);
 	
 
 
@@ -824,9 +824,13 @@ int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
       float *pcm=in[i];
       float *sofar=out[i];
       for(j=0,k=i;j<n;j++,k+=ch)
+#ifdef TRAIN_RES
+	sofar[j]+=pcm[j]; /* when training, our previous stage books 
+			    might be dummies */
+#else
 	sofar[j]+=pcm[j]-work[k];
+#endif
     }
-
     return(ret);
   }else
     return(0);
