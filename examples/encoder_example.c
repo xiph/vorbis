@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.49 2002/07/13 06:12:45 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.50 2002/07/16 09:26:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -68,7 +68,7 @@ int main(){
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
   /* if we were reading/writing a file, it would also need to in
-     binary mode, eg, 'fopen("file.wav","rb"); */
+     binary mode, eg, fopen("file.wav","wb"); */
   /* Beware the evil ifdef. We avoid these where we can, but this one we 
      cannot. Don't add any more, you'll probably go to hell if you do. */
   _setmode( _fileno( stdin ), _O_BINARY );
@@ -105,7 +105,7 @@ int main(){
    (lowest quality, smallest file) to 1. (highest quality, largest file).
    Example quality mode .4: 44kHz stereo coupled, roughly 128kbps VBR 
   
-   ret = vorbis_encode_init_vbr(&vi,2,44100,-.4);
+   ret = vorbis_encode_init_vbr(&vi,2,44100,.4);
 
    ---------------------------------------------------------------------
 
@@ -166,9 +166,8 @@ int main(){
     ogg_stream_packetin(&os,&header_comm);
     ogg_stream_packetin(&os,&header_code);
 
-	/* We don't have to write out here, but doing so makes streaming 
-	 * much easier, so we do, flushing ALL pages. This ensures the actual
-	 * audio data will start on a new page
+	/* This ensures the actual
+	 * audio data will start on a new page, as per spec
 	 */
 	while(!eos){
 		int result=ogg_stream_flush(&os,&og);
