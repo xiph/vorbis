@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.9 2000/02/13 10:23:50 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.10 2000/02/16 16:18:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -296,16 +296,6 @@ codebook *codebook_load(char *filename){
 
   /* don't need n and c */
   return(b);
-}
-
-static double _dist(int el,double *a, double *b){
-  int i;
-  double acc=0.;
-  for(i=0;i<el;i++){
-    double val=(a[i]-b[i]);
-    acc+=val*val;
-  }
-  return acc;
 }
 
 int codebook_entry(codebook *b,double *val){

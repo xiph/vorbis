@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.10 2000/01/06 13:57:14 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.11 2000/02/16 16:18:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,9 @@
 typedef struct vqgen{
   int it;
   int elements;
+
   int aux;
+  double mindist;
 
   /* point cache */
   double *pointlist; 
@@ -34,6 +36,8 @@ typedef struct vqgen{
   long   *assigned;
   double *bias;
   long   entries;
+  double *max;
+  
 
   double  (*metric_func) (struct vqgen *v,double *entry,double *point);
   double *(*weight_func) (struct vqgen *v,double *point);
@@ -58,7 +62,8 @@ static inline double *_now(vqgen *v,long ptr){
   return v->entrylist+(v->elements*ptr);
 }
 
-extern void vqgen_init(vqgen *v,int elements,int aux,int entries,
+extern void vqgen_init(vqgen *v,
+		       int elements,int aux,int entries,double mindist,
 		       double  (*metric)(vqgen *,double *, double *),
 		       double *(*weight)(vqgen *,double *));
 extern void vqgen_addpoint(vqgen *v, double *p,double *aux);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.5 2000/01/28 09:05:20 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.6 2000/02/16 16:18:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,6 +42,10 @@ double count=0.;
 int books=0;
 int dim=-1;
 double *work;
+
+static double *_now(codebook *c, int i){
+  return c->valuelist+i*c->c->dim;
+}
 
 int histerrsort(const void *a, const void *b){
   double av=histogram_distance[*((long *)a)];
@@ -79,6 +83,47 @@ void process_preprocess(codebook **bs,char *basename){
   }
 }
 
+static double _dist(int el,double *a, double *b){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
+  return acc;
+}
+
+void cell_spacing(codebook **b){
+  int i,j,k;
+  for(i=0;i<books;i++){
+    double min,max,mean=0.,meansq=0.;
+    codebook *c=b[i];
+
+    fprintf(stderr,"\nCell spacing for book %d:\n",i);
+    
+    /* minimum, maximum, mean, ms cell spacing */
+    for(j=0;j<c->c->entries;j++){
+      double localmin=-1.;
+      for(k=0;k<c->c->entries;k++){
+	double this=_dist(c->c->dim,_now(c,j),_now(c,k));
+	if(j!=k &&
+	   (localmin==-1 || this<localmin))
+	  localmin=this;
+      }
+      
+      if(j==0 || localmin<min)min=localmin;
+      if(j==0 || localmin>max)max=localmin;
+      mean+=sqrt(localmin);
+      meansq+=localmin;
+    }
+
+    fprintf(stderr,"\tminimum cell spacing (closest side): %g\n",sqrt(min));
+    fprintf(stderr,"\tmaximum cell spacing (closest side): %g\n",sqrt(max));
+    fprintf(stderr,"\tmean closest side spacing: %g\n",mean/c->c->entries);
+    fprintf(stderr,"\tmean sq closest side spacing: %g\n",sqrt(meansq/c->c->entries));
+  }
+}
+
 void process_postprocess(codebook **b,char *basename){
   int i,j,k;
   char *buffer=alloca(strlen(basename)+80);
@@ -97,6 +142,9 @@ void process_postprocess(codebook **b,char *basename){
 	  sqrt(meanerrorsq_acc/(count*dim)));
   fprintf(stderr,"\tglobal mean deviation: %g\n",
 	  meandev_acc/(count*dim));
+
+  cell_spacing(b);
+
   {
     FILE *out;
 
@@ -172,7 +220,6 @@ void process_postprocess(codebook **b,char *basename){
     fclose(out);
 		
   }
-
 }
 
 void process_vector(codebook **bs,double *a){

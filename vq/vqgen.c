@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.28 2000/01/06 13:57:13 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.29 2000/02/16 16:18:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -78,6 +78,73 @@ void _vqgen_seed(vqgen *v){
   long i;
   for(i=0;i<v->entries;i++)
     memcpy(_now(v,i),_point(v,i),sizeof(double)*v->elements);
+}
+
+int directdsort(const void *a, const void *b){
+  double av=*((double *)a);
+  double bv=*((double *)b);
+  if(av>bv)return(-1);
+  return(1);
+}
+
+void vqgen_cellmetric(vqgen *v){
+  int i,j,k;
+  double min=-1.,max=-1.,mean=0.,acc=0.;
+  long dup=0,unused=0;
+ #ifdef NOISY
+   char buff[80];
+   double spacings[v->entries];
+   int count=0;
+   FILE *cells;
+   sprintf(buff,"cellspace%d.m",v->it);
+   cells=fopen(buff,"w");
+#endif
+
+  /* minimum, maximum, cell spacing */
+  for(j=0;j<v->entries;j++){
+    double localmin=-1.;
+
+    for(k=0;k<v->entries;k++){
+      if(j!=k){
+	double this=_dist(v,_now(v,j),_now(v,k));
+	if(this>0){
+	  if(v->assigned[k] && (localmin==-1 || this<localmin))
+	    localmin=this;
+	}else{	
+	  if(k<j){
+	    dup++;
+	    break;
+	  }
+	}
+      }
+    }
+    if(k<v->entries)continue;
+
+    if(v->assigned[j]==0){
+      unused++;
+      continue;
+    }
+    
+    localmin=v->max[j]+localmin/2; /* this gives us rough diameter */
+    if(min==-1 || localmin<min)min=localmin;
+    if(max==-1 || localmin>max)max=localmin;
+    mean+=localmin;
+    acc++;
+#ifdef NOISY
+    spacings[count++]=localmin;
+#endif
+  }
+
+  fprintf(stderr,"cell diameter: %.03g::%.03g::%.03g (%d unused/%d dup)\n",
+	  min,mean/acc,max,unused,dup);
+
+#ifdef NOISY
+  qsort(spacings,count,sizeof(double),directdsort);
+  for(i=0;i<count;i++)
+    fprintf(cells,"%g\n",spacings[i]);
+  fclose(cells);
+#endif	    
+
 }
 
 /* External calls *******************************************************/
@@ -166,13 +233,14 @@ void vqgen_unquantize(vqgen *v,quant_meta *q){
   }
 }
 
-void vqgen_init(vqgen *v,int elements,int aux,int entries,
+void vqgen_init(vqgen *v,int elements,int aux,int entries,double mindist,
 		double  (*metric)(vqgen *,double *, double *),
 		double *(*weight)(vqgen *,double *)){
   memset(v,0,sizeof(vqgen));
 
   v->elements=elements;
   v->aux=aux;
+  v->mindist=mindist;
   v->allocated=32768;
   v->pointlist=malloc(v->allocated*(v->elements+v->aux)*sizeof(double));
 
@@ -180,6 +248,7 @@ void vqgen_init(vqgen *v,int elements,int aux,int entries,
   v->entrylist=malloc(v->entries*v->elements*sizeof(double));
   v->assigned=malloc(v->entries*sizeof(long));
   v->bias=calloc(v->entries,sizeof(double));
+  v->max=calloc(v->entries,sizeof(double));
   if(metric)
     v->metric_func=metric;
   else
@@ -202,20 +271,17 @@ void vqgen_addpoint(vqgen *v, double *p,double *a){
   if(v->aux)memcpy(_point(v,v->points)+v->elements,a,sizeof(double)*v->aux);
   v->points++;
   if(v->points==v->entries)_vqgen_seed(v);
-}
-
-int directdsort(const void *a, const void *b){
-  double av=*((double *)a);
-  double bv=*((double *)b);
-  if(av>bv)return(-1);
-  return(1);
+  if(!(v->points&0xff))spinnit("loading... ",v->points);
 }
 
 double vqgen_iterate(vqgen *v){
   long   i,j,k;
+  long   biasable;
+
   double fdesired=(double)v->points/v->entries;
   long  desired=fdesired;
   long  desired2=desired*2;
+
   double asserror=0.;
   double meterror=0.;
   double *new=malloc(sizeof(double)*v->entries*v->elements);
@@ -244,14 +310,16 @@ double vqgen_iterate(vqgen *v){
   /*memset(v->bias,0,sizeof(double)*v->entries);*/
   memset(nearcount,0,sizeof(long)*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
+  biasable=0;
   for(i=0;i<v->points;i++){
     double *ppt=v->weight_func(v,_point(v,i));
     double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
     double secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
     long   firstentry=0;
     long   secondentry=1;
+    int    biasflag=1;
 
-    if(i%100)spinnit("biasing... ",v->points+v->points+v->entries-i);
+    if(!(i&0xff))spinnit("biasing... ",v->points+v->points+v->entries-i);
 
     if(firstmetric>secondmetric){
       double temp=firstmetric;
@@ -279,43 +347,54 @@ double vqgen_iterate(vqgen *v){
     j=firstentry;
     for(j=0;j<v->entries;j++){
       
-      double thismetric;
+      double thismetric,localmetric;
       double *nearbiasptr=nearbias+desired2*j;
       long k=nearcount[j];
       
+      localmetric=v->metric_func(v,_now(v,j),ppt);
       /* 'thismetric' is to be the bias value necessary in the current
 	 arrangement for entry j to capture point i */
       if(firstentry==j){
 	/* use the secondary entry as the threshhold */
-	thismetric=secondmetric-v->metric_func(v,_now(v,j),ppt);
+	thismetric=secondmetric-localmetric;
       }else{
 	/* use the primary entry as the threshhold */
-	thismetric=firstmetric-v->metric_func(v,_now(v,j),ppt);
+	thismetric=firstmetric-localmetric;
       }
 
-      /* a cute two-stage delayed sorting hack */
-      if(k<desired){
-	nearbiasptr[k]=thismetric;
-	k++;
-	if(k==desired){
-	  spinnit("biasing... ",v->points+v->points+v->entries-i);
-	  qsort(nearbiasptr,desired,sizeof(double),directdsort);
+      /* support the idea of 'minimum distance'... if we want the
+         cells in a codebook to be roughly some minimum size (as with
+         the low resolution residue books) */
+      
+      if(localmetric>=v->mindist){
+
+	/* a cute two-stage delayed sorting hack */
+	if(k<desired){
+	  nearbiasptr[k]=thismetric;
+	  k++;
+	  if(k==desired){
+	    spinnit("biasing... ",v->points+v->points+v->entries-i);
+	    qsort(nearbiasptr,desired,sizeof(double),directdsort);
+	  }
+	  
+	}else if(thismetric>nearbiasptr[desired-1]){
+	  nearbiasptr[k]=thismetric;
+	  k++;
+	  if(k==desired2){
+	    spinnit("biasing... ",v->points+v->points+v->entries-i);
+	    qsort(nearbiasptr,desired2,sizeof(double),directdsort);
+	    k=desired;
+	  }
 	}
-	
-      }else if(thismetric>nearbiasptr[desired-1]){
-	nearbiasptr[k]=thismetric;
-	k++;
-	if(k==desired2){
-	  spinnit("biasing... ",v->points+v->points+v->entries-i);
-	  qsort(nearbiasptr,desired2,sizeof(double),directdsort);
-	  k=desired;
-	}
-      }
-      nearcount[j]=k;
+	nearcount[j]=k;
+      }else
+	biasflag=0;
     }
+    biasable+=biasflag;
   }
   
   /* inflate/deflate */
+
   for(i=0;i<v->entries;i++){
     double *nearbiasptr=nearbias+desired2*i;
 
@@ -325,7 +404,16 @@ double vqgen_iterate(vqgen *v){
     if(nearcount[i]>desired)
       qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
 
-    v->bias[i]=nearbiasptr[desired-1];
+    /* desired is the *maximum* bias queue size.  If we're using
+       minimum distance, we're not interested in the max size... we're
+       interested in the biasable number of points */
+    {
+      long localdesired=(double)biasable/v->entries;
+      if(localdesired)
+	v->bias[i]=nearbiasptr[localdesired-1];
+      else
+	v->bias[i]=nearbiasptr[0];
+    }
   }
 
   /* Now assign with new bias and find new midpoints */
@@ -334,7 +422,7 @@ double vqgen_iterate(vqgen *v){
     double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
     long   firstentry=0;
 
-    if(i%100)spinnit("centering... ",v->points-i);
+    if(!(i&0xff))spinnit("centering... ",v->points-i);
 
     for(j=0;j<v->entries;j++){
       double thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
@@ -352,15 +440,18 @@ double vqgen_iterate(vqgen *v){
           ppt[0],ppt[1]);
 #endif
 
-    meterror+=firstmetric-v->bias[firstentry];
+    firstmetric-=v->bias[firstentry];
+    meterror+=firstmetric;
     /* set up midpoints for next iter */
-    if(v->assigned[j]++)
+    if(v->assigned[j]++){
       for(k=0;k<v->elements;k++)
 	vN(new,j)[k]+=ppt[k];
-    else
+      if(firstmetric>v->max[firstentry])v->max[firstentry]=firstmetric;
+    }else{
       for(k=0;k<v->elements;k++)
 	vN(new,j)[k]=ppt[k];
-
+      v->max[firstentry]=firstmetric;
+    }
   }
 
   /* assign midpoints */

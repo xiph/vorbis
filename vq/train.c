@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.14 2000/01/10 10:42:06 xiphmont Exp $
+ last mod: $Id: train.c,v 1.15 2000/02/16 16:18:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -128,7 +128,8 @@ int main(int argc,char *argv[]){
 	exit(1);
       }
       
-      vqgen_init(&v,dim,vqext_aux,entries,vqext_metric,vqext_weight);
+      vqgen_init(&v,dim,vqext_aux,entries,vqext_mindist,
+		 vqext_metric,vqext_weight);
       init=1;
       
       /* quant setup */
@@ -223,7 +224,8 @@ int main(int argc,char *argv[]){
 	  fprintf(stderr,"-p required when training a new set\n");
 	  exit(1);
 	}
-	vqgen_init(&v,dim,vqext_aux,entries,vqext_metric,vqext_weight);
+	vqgen_init(&v,dim,vqext_aux,entries,vqext_mindist,
+		   vqext_metric,vqext_weight);
 	init=1;
       }
 
@@ -289,9 +291,12 @@ int main(int argc,char *argv[]){
 
   for(i=0;i<iter && !exiting;i++){
     double result;
-    if(i!=0)vqgen_unquantize(&v,&q);
+    if(i!=0){
+      vqgen_unquantize(&v,&q);
+      vqgen_cellmetric(&v);
+    }
     result=vqgen_iterate(&v);
-    vqgen_quantize(&v,&q);
+    vqext_quantize(&v,&q);
     if(result<desired)break;
   }
 
@@ -321,6 +326,9 @@ int main(int argc,char *argv[]){
       fprintf(out,"%f\n",v.pointlist[i++]);
 
   fclose(out);
+
+  vqgen_unquantize(&v,&q);
+  vqgen_cellmetric(&v);
   exit(0);
 
   syner:

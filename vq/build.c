@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.11 2000/02/07 19:49:56 xiphmont Exp $
+ last mod: $Id: build.c,v 1.12 2000/02/16 16:18:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -131,7 +131,7 @@ int main(int argc,char *argv[]){
   }
   
   /* just use it to allocate mem */
-  vqgen_init(&v,dim,0,entries,NULL,NULL);
+  vqgen_init(&v,dim,0,entries,0.,NULL,NULL);
   
   /* quant */
   line=rline(in,out);
@@ -210,7 +210,7 @@ int main(int argc,char *argv[]){
   /* quantlist */
   fprintf(out,"static long _vq_quantlist_%s[] = {\n",name);
   i=0;
-  for(j=0;j<entries;j++){
+  for(j=0;j<c.entries;j++){
     fprintf(out,"\t");
     for(k=0;k<dim;k++)
       fprintf(out,"%5ld, ",c.quantlist[i++]);
@@ -220,9 +220,9 @@ int main(int argc,char *argv[]){
 
   /* lengthlist */
   fprintf(out,"static long _vq_lengthlist_%s[] = {\n",name);
-  for(j=0;j<entries;){
+  for(j=0;j<c.entries;){
     fprintf(out,"\t");
-    for(k=0;k<16 && j<entries;k++,j++)
+    for(k=0;k<16 && j<c.entries;k++,j++)
       fprintf(out,"%2ld,",c.lengthlist[j]);
     fprintf(out,"\n");
   }

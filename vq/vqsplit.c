@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.15 2000/02/13 10:23:51 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.16 2000/02/16 16:18:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -156,6 +156,12 @@ int lp_split(vqgen *v,codebook *b,
 
   char spinbuf[80];
   sprintf(spinbuf,"splitting [%ld left]... ",v->points-*pointsofar);
+
+  if(depth==22 && points==9 && entries==2 && *pointsofar==252935){
+    fprintf(stderr,"HERE\n");
+
+  }
+
   
   /* which cells do points belong to?  Do this before n^2 best pair chooser. */
 
@@ -168,7 +174,7 @@ int lp_split(vqgen *v,codebook *b,
 
     for(j=1;j<entries;j++){
       double thismetric=_dist(v,_now(v,entryindex[j]),ppt);
-      if(thismetric<firstmetric){
+      if(thismetric<=firstmetric){ /* Not <; on the line goes to higher number */
 	firstmetric=thismetric;
 	firstentry=j;
       }
@@ -250,7 +256,7 @@ int lp_split(vqgen *v,codebook *b,
       for(j=0;j<entries;j++){
 	if(j!=i){
 	  double this=_dist(v,q,_now(v,entryindex[j]));
-	  if(ref_j==-1 || this<ref_best){
+	  if(ref_j==-1 || this<=ref_best){ /* <=, not <; very important */
 	    ref_best=this;
 	    ref_j=entryindex[j];
 	  }
@@ -396,6 +402,60 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   b->c=c;
   t=c->encode_tree=calloc(1,sizeof(encode_aux));
 
+  /* make sure there are no duplicate entries and that every 
+     entry has points */
+
+  for(i=0;i<v->entries;){
+    /* duplicate? if so, eliminate */
+    for(j=0;j<i;j++){
+      if(_dist(v,_now(v,i),_now(v,j))==0.){
+	fprintf(stderr,"found a duplicate entry!  removing...\n");
+	v->entries--;
+	memcpy(_now(v,i),_now(v,v->entries),sizeof(double)*v->elements);
+	memcpy(quantlist+i*v->elements,quantlist+v->entries*v->elements,
+	       sizeof(long)*v->elements);
+	break;
+      }
+    }
+    if(j==i)i++;
+  }
+
+  {
+    v->assigned=calloc(v->entries,sizeof(long));
+    for(i=0;i<v->points;i++){
+      double *ppt=_point(v,i);
+      double firstmetric=_dist(v,_now(v,0),ppt);
+      long   firstentry=0;
+
+      if(!(i&0xff))spinnit("checking... ",v->points-i);
+
+      for(j=0;j<v->entries;j++){
+	double thismetric=_dist(v,_now(v,j),ppt);
+	if(thismetric<firstmetric){
+	  firstmetric=thismetric;
+	  firstentry=j;
+	}
+      }
+      
+      v->assigned[firstentry]++;
+    }
+
+    for(j=0;j<v->entries;){
+      if(v->assigned[j]==0){
+	fprintf(stderr,"found an unused entry!  removing...\n");
+	v->entries--;
+	memcpy(_now(v,j),_now(v,v->entries),sizeof(double)*v->elements);
+	v->assigned[j]=v->assigned[v->elements];
+	memcpy(quantlist+j*v->elements,quantlist+v->entries*v->elements,
+	       sizeof(long)*v->elements);
+	continue;
+      }
+      j++;
+    }
+  }
+
+  fprintf(stderr,"Building a book with %d unique entries...\n",v->entries);
+
   for(i=0;i<v->entries;i++)entryindex[i]=i;
   for(i=0;i<v->points;i++)pointindex[i]=i;
   
@@ -409,7 +469,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   t->p=malloc(sizeof(long)*t->alloc);
   t->q=malloc(sizeof(long)*t->alloc);
   
-  /* first, generate the encoding decision heirarchy */
+  /* generate the encoding decision heirarchy */
   {
     long pointsofar=0;
     fprintf(stderr,"Total leaves: %d            \n",

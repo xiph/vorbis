@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.9 2000/01/10 10:42:03 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.10 2000/02/16 16:18:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,6 +25,11 @@
 char *vqext_booktype="LSPdata";  
 quant_meta q={0,0,0,1};          /* set sequence data */
 int vqext_aux=1;
+double vqext_mindist=0.;
+
+void vqext_quantize(vqgen *v,quant_meta *q){
+  vqgen_quantize(v,q);
+}
 
 /* LSP training metric.  We weight error proportional to distance
    *between* LSP vector values.  The idea of this metric is not to set
