@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.49 2003/12/30 12:23:29 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.50 2003/12/30 12:44:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -975,7 +975,7 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
   hi->bitrate_max=max_bitrate;
   hi->bitrate_av=tnominal;
   hi->bitrate_av_damp=.75f; /* full range in no less than 3/4 second */
-  hi->bitrate_reservoir=tnominal;
+  hi->bitrate_reservoir=nominal_bitrate;
   hi->bitrate_reservoir_bias=.2; /* bias toward hoarding bits */
 
   return(ret);
