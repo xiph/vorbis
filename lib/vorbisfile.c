@@ -43,8 +43,8 @@
 /* There are also different ways to implement seeking.  Enough
    information exists in an Ogg bitstream to seek to
    sample-granularity positions in the output.  Or, one can seek by
-   picking some portion of the stream roughtly in the area if we only
-   want course navigation through the stream. */
+   picking some portion of the stream roughly in the desired area if
+   we only want course navigation through the stream. */
 
 /*************************************************************************
  * Many, many internal helpers.  The intention is not to be confusing; 
@@ -500,7 +500,12 @@ int ov_clear(OggVorbis_File *vf){
 
 /* inspects the OggVorbis file and finds/documents all the logical
    bitstreams contained in it.  Tries to be tolerant of logical
-   bitstream sections that are truncated/woogie. */
+   bitstream sections that are truncated/woogie. 
+
+   return: -1) error
+            0) OK
+*/
+
 int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
   long offset=lseek(fileno(f),0,SEEK_CUR);
   int ret;
@@ -539,14 +544,20 @@ int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
   return(ret);
 }
 
+/* How many logical bitstreams in this physical bitstream? */
 long ov_streams(OggVorbis_File *vf){
   return vf->links;
 }
 
+/* Is the FILE * associated with vf seekable? */
 long ov_seekable(OggVorbis_File *vf){
   return vf->seekable;
 }
 
+/* returns: total raw (compressed) length of content if i==-1
+            raw (compressed) length of that logical bitstream for i==0 to n
+	    -1 if the stream is not seekable (we can't know the length)
+*/
 long ov_raw_total(OggVorbis_File *vf,int i){
   if(!vf->seekable)return(-1);
   if(i<0 || i>=vf->links){
@@ -560,6 +571,10 @@ long ov_raw_total(OggVorbis_File *vf,int i){
   }
 }
 
+/* returns: total PCM length (samples) of content if i==-1
+            PCM length (samples) of that logical bitstream for i==0 to n
+	    -1 if the stream is not seekable (we can't know the length)
+*/
 size64 ov_pcm_total(OggVorbis_File *vf,int i){
   if(!vf->seekable)return(-1);
   if(i<0 || i>=vf->links){
@@ -573,6 +588,10 @@ size64 ov_pcm_total(OggVorbis_File *vf,int i){
   }
 }
 
+/* returns: total seconds of content if i==-1
+            seconds in that logical bitstream for i==0 to n
+	    -1 if the stream is not seekable (we can't know the length)
+*/
 double ov_time_total(OggVorbis_File *vf,int i){
   if(!vf->seekable)return(-1);
   if(i<0 || i>=vf->links){
@@ -590,7 +609,9 @@ double ov_time_total(OggVorbis_File *vf,int i){
    immediately sucks in and decodes pages to update the PCM cursor. It
    will cross a logical bitstream boundary, but only if it can't get
    any packets out of the tail of the bitstream we seek to (so no
-   surprises). */
+   surprises). 
+
+   returns zero on success, nonzero on failure */
 
 int ov_raw_seek(OggVorbis_File *vf,long pos){
   int link;
@@ -646,7 +667,10 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
   return -1;
 }
 
-/* seek to a sample offset relative to the decompressed pcm stream */
+/* seek to a sample offset relative to the decompressed pcm stream 
+
+   returns zero on success, nonzero on failure */
+
 int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
   int i,link=-1;
   size64 total=ov_pcm_total(vf,-1);
@@ -737,8 +761,8 @@ int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
   return -1;
 }
 
-/* seek to a playback time relative to the decompressed pcm stream */
-
+/* seek to a playback time relative to the decompressed pcm stream 
+   returns zero on success, nonzero on failure */
 int ov_time_seek(OggVorbis_File *vf,double seconds){
   /* translate time to PCM position and call ov_pcm_seek */
 
@@ -774,10 +798,12 @@ long ov_raw_tell(OggVorbis_File *vf){
   return(vf->offset);
 }
 
+/* return PCM offset (sample) of next PCM sample to be read */
 size64 ov_pcm_tell(OggVorbis_File *vf){
   return(vf->pcm_offset);
 }
 
+/* return time offset (seconds) of next PCM sample to be read */
 double ov_time_tell(OggVorbis_File *vf){
   /* translate time to PCM position and call ov_pcm_seek */
 
