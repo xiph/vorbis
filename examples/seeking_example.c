@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.10 2001/09/17 01:06:18 cwolf Exp $
+ last mod: $Id: seeking_example.c,v 1.11 2001/12/18 01:07:54 segher Exp $
 
  ********************************************************************/
 
@@ -59,7 +59,7 @@ void _verify(OggVorbis_File *ov,ogg_int64_t pos,
   }
 }
 
-int main(int argc, char *argv[]){
+int main(){
   OggVorbis_File ov;
   int i,ret;
   ogg_int64_t pcmlength;

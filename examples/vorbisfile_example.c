@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder using vorbisfile
- last mod: $Id: vorbisfile_example.c,v 1.7 2001/09/17 01:06:18 cwolf Exp $
+ last mod: $Id: vorbisfile_example.c,v 1.8 2001/12/18 01:07:54 segher Exp $
 
  ********************************************************************/
 
@@ -32,7 +32,7 @@
 
 char pcmout[4096]; /* take 4k out of the data segment, not the stack */
 
-int main(int argc, char **argv){
+int main(){
   OggVorbis_File vf;
   int eof=0;
   int current_section;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.22 2001/09/17 01:06:18 cwolf Exp $
+ last mod: $Id: decoder_example.c,v 1.23 2001/12/18 01:07:53 segher Exp $
 
  ********************************************************************/
 
@@ -38,7 +38,7 @@
 ogg_int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
 int convsize=4096;
 
-int main(int argc, char **argv){
+int main(){
   ogg_sync_state   oy; /* sync and verify incoming physical bitstream */
   ogg_stream_state os; /* take physical pages, weld into a logical
 			  stream of packets */
