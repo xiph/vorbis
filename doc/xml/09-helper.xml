@@ -189,16 +189,16 @@ rounding division of both positive and negative numbers toward zero.
        14) [err] = [err] + [ady];
        15) if ( [err] >= [adx] ) {
 
-             15) [err] = [err] - [adx]
-             16)   [y] = [y] + [sy]
+             16) [err] = [err] - [adx]
+             17)   [y] = [y] + [sy]
 
            } else {
 
-             17) [y] = [y] + [base]
+             18) [y] = [y] + [base]
    
            }
 
-       18) vector [v] element [x] = [y]
+       19) vector [v] element [x] = [y]
 
      }
 </programlisting>

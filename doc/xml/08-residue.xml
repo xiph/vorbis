@@ -38,13 +38,13 @@ abstraction.</para>
 <title>Residue format</title>
 
 <para>
-Reside format partitions each vector in the vector bundle into chunks,
+Residue format partitions each vector in the vector bundle into chunks,
 classifies each chunk, encodes the chunk classifications and finally
 encodes the chunks themselves using the the specific VQ arrangement
-defined for each selected selected classification.  The exact
-interleaving and partitioning vary by residue encoding number, however
-the high-level process used to classify and encode the residue vector
-is the same in all three variants.</para>
+defined for each selected classification.
+The exact interleaving and partitioning vary by residue encoding number,
+however the high-level process used to classify and encode the residue 
+vector is the same in all three variants.</para>
 
 <para>
 A set of coded residue vectors are all of the same length.  High level
@@ -406,15 +406,15 @@ presents the same algorithm. Assume:</para>
  2) vector [entry_temp] = read vector from packet using current codebook in VQ context
  3) iterate [j] over the range 0 ... [codebook_dimensions]-1 {
 
-      5) vector [v] element ([offset]+[i]) =
+      4) vector [v] element ([offset]+[i]) =
 	  vector [v] element ([offset]+[i]) +
           vector [entry_temp] element [j]
-      6) increment [i]
+      5) increment [i]
 
     }
  
-  4) if ( [i] is less than [n] ) continue at step 2
-  5) done
+  6) if ( [i] is less than [n] ) continue at step 2
+  7) done
 </programlisting>
 
 </section>
@@ -422,7 +422,7 @@ presents the same algorithm. Assume:</para>
 <section><title>format 2 specifics</title>
  
 <para>
-Format 2 is reducible to format 1.  It may be implemented as an additional stepprior to and an additional post-decode step after a normal format 1 decode.
+Format 2 is reducible to format 1.  It may be implemented as an additional step prior to and an additional post-decode step after a normal format 1 decode.
 </para>
 
 <para>

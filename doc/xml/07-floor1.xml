@@ -338,13 +338,13 @@ Unwrap the always-positive-or-zero values read from the packet into
             19) vector [floor1_step2_flag] element [i] = set
             20) if ( [val] is greater than or equal to [room] ) {
  
-                  21) if ( [hiroom] is greater than [lowroom] ) {
+                  21) if ( [highroom] is greater than [lowroom] ) {
 
                         22) vector [floor1_final_Y] element [i] = [val] - [lowroom] + [predicted]
 		     
-		      } else [hiroom] is not greater than [lowroom] {
+		      } else [highroom] is not greater than [lowroom] {
               
-                        23) vector [floor1_final_Y] element [i] = [predicted] - [val] + [hiroom] - 1
+                        23) vector [floor1_final_Y] element [i] = [predicted] - [val] + [highroom] - 1
                    
                       }
                

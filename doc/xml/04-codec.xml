@@ -393,7 +393,7 @@ set) then
 <varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5) / <varname>[left_n]</varname> * .5 * &pi;) )</simpara></listitem>
  <listitem><simpara> window from range <varname>[left_window_end]</varname> ... <varname>[right_window_start]</varname>-1
 inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * &pi; + .5 * &pi;) )</simpara></listitem>
-<listitem><simpara> window from range <varname>[rigth_window_start]</varname> ... <varname>[n]</varname>-1 is
+<listitem><simpara> window from range <varname>[right_window_start]</varname> ... <varname>[n]</varname>-1 is
 zero</simpara></listitem>
 </orderedlist>
 
@@ -461,11 +461,12 @@ for each <varname>[i]</varname> from 0 ... <varname>[vorbis_mapping_coupling_ste
 
 <orderedlist>
  <listitem><simpara>if either <varname>[no_residue]</varname> entry for channel
-(<varname>[vorbis_mapping_magnitude]</varname> element <varname>[i]</varname>) or (channel
-<varname>[vorbis_mapping_angle]</varname> element <varname>[i]</varname>) are set to false, then both
-must be set to false.  Note that an 'unused' floor has no decoded floor
-information; it is important that this is remembered at floor curve
-synthesis time.</simpara></listitem>
+(<varname>[vorbis_mapping_magnitude]</varname> element <varname>[i]</varname>)
+or channel
+(<varname>[vorbis_mapping_angle]</varname> element <varname>[i]</varname>)
+are set to false, then both must be set to false.  Note that an 'unused' 
+floor has no decoded floor information; it is important that this is 
+remembered at floor curve synthesis time.</simpara></listitem>
 </orderedlist>
 </para>
 
