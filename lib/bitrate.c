@@ -25,7 +25,7 @@
 #include "misc.h"
 #include "bitrate.h"
 
-/* compute bitrate tracking setup, allocate circular packet size queue */
+/* compute bitrate tracking setup  */
 void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
   codec_setup_info *ci=vi->codec_setup;
   bitrate_manager_info *bi=&ci->bi;
@@ -44,6 +44,14 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
     bm->max_bitsper= rint(1.*bi->max_rate*halfsamples/ratesamples);
     
     bm->avgfloat=PACKETBLOBS/2;    
+
+    /* not a necessary fix, but one that leads to a more balanced
+       typical initialization */
+    {
+      long desired_fill=bi->reservoir_bits*bi->reservoir_bias;
+      bm->minmax_reservoir=desired_fill;
+      bm->avg_reservoir=desired_fill;
+    }
 
   }    
 }
@@ -80,7 +88,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
   long desired_fill=bi->reservoir_bits*bi->reservoir_bias;
   if(!bm->managed){
     /* not a bitrate managed stream, but for API simplicity, we'll
-       buffer one packet to keep the code path clean */
+       buffer the packet to keep the code path clean */
     
     if(bm->vb)return(-1); /* one has been submitted without
 			     being claimed */
@@ -193,11 +201,19 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
     }else{
       /* inbetween; we want to take reservoir toward but not past desired_fill */
       if(bm->minmax_reservoir>desired_fill){
-	bm->minmax_reservoir+=(this_bits-max_target_bits);
-	if(bm->minmax_reservoir<desired_fill)bm->minmax_reservoir=desired_fill;
+	if(max_target_bits>0){ /* logical bulletproofing against initialization state */
+	  bm->minmax_reservoir+=(this_bits-max_target_bits);
+	  if(bm->minmax_reservoir<desired_fill)bm->minmax_reservoir=desired_fill;
+	}else{
+	  bm->minmax_reservoir=desired_fill;
+	}
       }else{
-	bm->minmax_reservoir+=(this_bits-min_target_bits);
-	if(bm->minmax_reservoir>desired_fill)bm->minmax_reservoir=desired_fill;
+	if(min_target_bits>0){ /* logical bulletproofing against initialization state */
+	  bm->minmax_reservoir+=(this_bits-min_target_bits);
+	  if(bm->minmax_reservoir>desired_fill)bm->minmax_reservoir=desired_fill;
+	}else{
+	  bm->minmax_reservoir=desired_fill;
+	}
       }
     }
   }
@@ -211,6 +227,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
   return(0);
 }
 
+#include <stdio.h>
 int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
   private_state         *b=vd->backend_state;
   bitrate_manager_state *bm=&b->bms;
@@ -223,6 +240,8 @@ int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
     
     if(vorbis_bitrate_managed(vb))
       choice=bm->choice;
+
+    fprintf(stderr,"%d ",choice);
 
     op->packet=oggpack_get_buffer(vbi->packetblob[choice]);
     op->bytes=oggpack_bytes(vbi->packetblob[choice]);
