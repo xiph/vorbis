@@ -107,7 +107,7 @@ void vqgen_init(vqgen *v,int elements,int entries){
   {
     int i;
     for(i=0;i<v->entries;i++)
-      v->bias[i]=0.;
+      v->bias[i]=10.;
   }
   
   /*v->lasterror=-1;*/
@@ -135,12 +135,15 @@ void vqgen_iterate(vqgen *v,int biasp){
   long i,j;
   double averror=0.;
   double realerror=0.;
+  double *distance=alloca(sizeof(double)*v->entries);
 
   FILE *graph;
   FILE *err;
   FILE *bias;
+  FILE *assi;
   char name[80];
   
+  memset(distance,0,sizeof(double)*v->entries);
 
   sprintf(name,"space%d.m",iteration);
   graph=fopen(name,"w");
@@ -150,6 +153,9 @@ void vqgen_iterate(vqgen *v,int biasp){
 
   sprintf(name,"bias%d.m",iteration);
   bias=fopen(name,"w");
+
+  sprintf(name,"as%d.m",iteration);
+  assi=fopen(name,"w");
 
 
   /* init */
@@ -170,8 +176,8 @@ void vqgen_iterate(vqgen *v,int biasp){
     }
     
     v->error[bestentry]+=v->error_func(v,_now(v,bestentry),_point(v,i));
+    distance[bestentry]+=_vqgen_distance(v,_now(v,bestentry),_point(v,i));
     realerror+=sqrt(v->error_func(v,_now(v,bestentry),_point(v,i))/v->elements);
-
     v->assigned[bestentry]++;
     {
       double *n=_next(v,bestentry);
@@ -205,7 +211,7 @@ void vqgen_iterate(vqgen *v,int biasp){
     averror+=v->error[i];
     if(v->error[i]==0)fprintf(stderr,"%d ",i);
   }
-  fprintf(stderr,"\n",i);
+  fprintf(stderr,"\n");
 
   averror/=v->entries;
 
@@ -213,33 +219,27 @@ void vqgen_iterate(vqgen *v,int biasp){
   
   if(biasp){
     for(i=0;i<v->entries;i++){
-      double bias=0;
-      if(v->error[i]){
-	bias=(averror-v->error[i])/v->assigned[i]*.2;
-	v->bias[i]-=bias;
-      }else{
-	fprintf(stderr,"de-biasing\n");
-	memset(v->bias,0,sizeof(double)*v->entries);
-	break;
-      }
-      
-      /*if(bias>.1)bias=.1;
-	if(bias<-.1)bias=-.1;*/
+      double ratio=(float)v->assigned[i]*v->entries/v->points;
+      double averr=v->error[i]/v->assigned[i];
+      ratio=(ratio-1.)*averr*.1+1.;
+      v->bias[i]*=ratio;
     }
-    fprintf(stderr,"\n");
   }else{
+    int i;
     fprintf(stderr,"de-biasing\n");
-    memset(v->bias,0,sizeof(double)*v->entries);
+    for(i=0;i<v->entries;i++)v->bias[i]=10.;
   }
 
   /* dump state, report error */
   for(i=0;i<v->entries;i++){
     fprintf(err,"%g\n",v->error[i]);
+    fprintf(assi,"%ld\n",v->assigned[i]);
     fprintf(bias,"%g\n",v->bias[i]);
   }
 
   fprintf(stderr,"average error: %g\n",realerror/v->points);
 
+  fclose(assi);
   fclose(err);
   fclose(bias);
   fclose(graph);
@@ -268,7 +268,7 @@ int main(int argc,char *argv[]){
     vqgen_iterate(&v,0);
 
   for(i=0;i<100;i++)
-    vqgen_iterate(&v,i%10);
+    vqgen_iterate(&v,i%20);
 
     vqgen_iterate(&v,0);
     vqgen_iterate(&v,0);
