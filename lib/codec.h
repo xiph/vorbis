@@ -80,7 +80,7 @@ typedef struct vorbis_info{
   int version;
 
   char **user_comments;
-  int    max_comment;
+  int    comments;
   char *vendor;
 
   int smallblock;
@@ -291,17 +291,18 @@ extern int    ogg_page_pageno(ogg_page *og);
 
 /* Vorbis PRIMITIVES: general ***************************************/
 
-extern int vorbis_info_clear(vorbis_info *vi); 
-extern int vorbis_info_modeset(vorbis_info *vi, int mode); 
-extern int vorbis_info_addcomment(vorbis_info *vi, char *comment); 
-extern int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op);
-extern int vorbis_info_headerout(vorbis_info *vi,
-				 ogg_packet *op,
-				 ogg_packet *op_comm,
-				 ogg_packet *op_code);
+extern void vorbis_info_init(vorbis_info *vi); 
+extern int  vorbis_info_clear(vorbis_info *vi); 
+extern int  vorbis_info_modeset(vorbis_info *vi, int mode); 
+extern int  vorbis_info_addcomment(vorbis_info *vi, char *comment); 
+extern int  vorbis_info_headerin(vorbis_info *vi,ogg_packet *op);
+extern int  vorbis_info_headerout(vorbis_info *vi,
+				  ogg_packet *op,
+				  ogg_packet *op_comm,
+				  ogg_packet *op_code);
 
-extern int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
-extern int vorbis_block_clear(vorbis_block *vb);
+extern int  vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
+extern int  vorbis_block_clear(vorbis_block *vb);
 
 /* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
 extern int      vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi);
