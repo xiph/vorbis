@@ -16,6 +16,10 @@ AC_ARG_ENABLE(vorbistest, [  --disable-vorbistest       Do not try to compile an
     vorbis_args="$vorbis_args --prefix=$vorbis_prefix"
     VORBIS_CFLAGS="-I$vorbis_prefix/include"
     VORBIS_LIBDIR="-L$vorbis_prefix/lib"
+  elif test "$prefix" != ""; then
+    vorbis_args="$vorbis_args --prefix=$prefix"
+    VORBIS_CFLAGS="-I$prefix/include"
+    VORBIS_LIBDIR="-L$prefix/lib"
   fi
 
   VORBIS_LIBS="$VORBIS_LIBDIR -lvorbis -lm"
