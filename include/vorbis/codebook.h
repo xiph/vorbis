@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.6.4.1 2000/08/31 08:59:58 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.6.4.2 2000/09/02 05:19:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -94,6 +94,10 @@ typedef struct encode_aux_pigeonhole{
 } encode_aux_pigeonhole;
 
 typedef struct decode_aux{
+  long   *tab;
+  int    *tabl;
+  int    tabn;
+
   long   *ptr0;
   long   *ptr1;
   long   aux;        /* number of tree entries */

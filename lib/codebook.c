@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.17.4.1 2000/08/31 09:00:00 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.17.4.2 2000/09/02 05:19:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -268,7 +268,7 @@ and doesn't change.
 
 Residue0 encoding interleaves, uses multiple stages, and each stage
 peels of a specific amount of resolution from a lattice (thus we want
-to match by threshhold, not nearest match).  Residue doesn't *have* to
+to match by threshold, not nearest match).  Residue doesn't *have* to
 be encoded that way, but to change it, one will need to add more
 infrastructure on the encode side (decode side is specced and simpler) */
 
@@ -309,14 +309,23 @@ int vorbis_book_encodevs(codebook *book,float *a,oggpack_buffer *b,
    Cascades may be additive or multiplicitive; this is not inherent in
    the codebook, but set in the code using the codebook.  Like
    interleaving, it's easiest to do it here.  
-   stage==0 -> declarative (set the value)
-   stage==1 -> additive
-   stage==2 -> multiplicitive */
+   addmul==0 -> declarative (set the value)
+   addmul==1 -> additive
+   addmul==2 -> multiplicitive */
 
 /* returns the entry number or -1 on eof *************************************/
 long vorbis_book_decode(codebook *book, oggpack_buffer *b){
   long ptr=0;
   decode_aux *t=book->decode_tree;
+  int lok = _oggpack_look(b, t->tabn);
+
+  if (lok >= 0) {
+    ptr = t->tab[lok];
+    _oggpack_adv(b, t->tabl[lok]);
+    if (ptr <= 0)
+      return -ptr;
+  }
+
   do{
     switch(_oggpack_read1(b)){
     case 0:
@@ -337,22 +346,74 @@ long vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
 			  int step,int addmul){
   long entry=vorbis_book_decode(book,b);
   int i,o;
+  float *t;
   if(entry==-1)return(-1);
+  t = book->valuelist+entry*book->dim;
   switch(addmul){
   case -1:
-    for(i=0,o=0;i<book->dim;i++,o+=step)
-      a[o]=(book->valuelist+entry*book->dim)[i];
+    for(i=0,o=0;i<book->dim-3;i+=4,o+=4*step) {
+      a[o]=t[i];
+      a[o+step]=t[i+1];
+      a[o+2*step]=t[i+2];
+      a[o+3*step]=t[i+3];
+    }
+    for(;i<book->dim;i++,o+=step)
+      a[o]=t[i];
     break;
   case 0:
-    for(i=0,o=0;i<book->dim;i++,o+=step)
-      a[o]+=(book->valuelist+entry*book->dim)[i];
+    for(i=0,o=0;i<book->dim-3;i+=4,o+=4*step) {
+      a[o]+=t[i];
+      a[o+step]+=t[i+1];
+      a[o+2*step]+=t[i+2];
+      a[o+3*step]+=t[i+3];
+    }
+    for(;i<book->dim;i++,o+=step)
+      a[o]+=t[i];
     break;
   case 1:
-    for(i=0,o=0;i<book->dim;i++,o+=step)
-      a[o]*=(book->valuelist+entry*book->dim)[i];
+    for(i=0,o=0;i<book->dim-3;i+=4,o+=4*step) {
+      a[o]*=t[i];
+      a[o+step]*=t[i+1];
+      a[o+2*step]*=t[i+2];
+      a[o+3*step]*=t[i+3];
+    }
+    for(;i<book->dim;i++,o+=step)
+      a[o]*=t[i];
     break;
   }
   return(entry);
+}
+
+/* returns 0 on OK or -1 on eof *************************************/
+long s_vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
+                         int step,int addmul){
+  long entry[step];
+  float *t[step];
+  int i,j,o;
+
+  for (i = 0; i < step; i++) {
+    entry[i]=vorbis_book_decode(book,b);
+    if(entry[i]==-1)return(-1);
+    t[i] = book->valuelist+entry[i]*book->dim;
+  }
+  switch(addmul){
+  case -1:
+    for(i=0,o=0;i<book->dim;i++,o+=step)
+      for (j=0;j<step;j++)
+       a[o+j]=t[j][i];
+    break;
+  case 0:
+    for(i=0,o=0;i<book->dim;i++,o+=step)
+      for (j=0;j<step;j++)
+       a[o+j]+=t[j][i];
+    break;
+  case 1:
+    for(i=0,o=0;i<book->dim;i++,o+=step)
+      for (j=0;j<step;j++)
+       a[o+j]*=t[j][i];
+    break;
+  }
+  return(0);
 }
 
 #ifdef _V_SELFTEST

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.11.2.2 2000/08/31 08:59:58 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.11.2.3 2000/09/02 05:19:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -239,7 +239,11 @@ int main(int argc, char **argv){
 		  ogg_int16_t *ptr=convbuffer+i;
 		  float  *mono=pcm[i];
 		  for(j=0;j<bout;j++){
+#if 1
 		    int val=mono[j]*32767.;
+#else /* optional dither */
+		    int val=mono[j]*32767.+drand48()-0.5;
+#endif
 		    /* might as well guard against clipping */
 		    if(val>32767){
 		      val=32767;

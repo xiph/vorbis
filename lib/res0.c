@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.17.2.1 2000/08/31 09:00:01 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.17.2.2 2000/09/02 05:19:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,14 +45,14 @@ typedef struct {
   int       **decodemap;
 } vorbis_look_residue0;
 
-void free_info(vorbis_info_residue *i){
+void res0_free_info(vorbis_info_residue *i){
   if(i){
     memset(i,0,sizeof(vorbis_info_residue0));
     free(i);
   }
 }
 
-void free_look(vorbis_look_residue *i){
+void res0_free_look(vorbis_look_residue *i){
   int j;
   if(i){
     vorbis_look_residue0 *look=(vorbis_look_residue0 *)i;
@@ -67,7 +67,7 @@ void free_look(vorbis_look_residue *i){
   }
 }
 
-void pack(vorbis_info_residue *vr,oggpack_buffer *opb){
+void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   int j,acc=0;
   _oggpack_write(opb,info->begin,24);
@@ -87,7 +87,7 @@ void pack(vorbis_info_residue *vr,oggpack_buffer *opb){
 }
 
 /* vorbis_info is for range checking */
-vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
+vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
   vorbis_info_residue0 *info=calloc(1,sizeof(vorbis_info_residue0));
 
@@ -112,11 +112,11 @@ vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
 
   return(info);
  errout:
-  free_info(info);
+  res0_free_info(info);
   return(NULL);
 }
 
-vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
+vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   vorbis_look_residue0 *look=calloc(1,sizeof(vorbis_look_residue0));
@@ -235,9 +235,8 @@ static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
   for(j=0;j<stages;j++){
     int dim=books[j]->dim;
     int step=n/dim;
-    for(i=0;i<step;i++)
-      if(vorbis_book_decodevs(books[j],work+i,opb,step,0)==-1)
-	return(-1);
+    if(s_vorbis_book_decodevs(books[j],work+i,opb,step,0)==-1)
+      return(-1);
   }
   
   for(i=0;i<n;i++)
@@ -246,7 +245,7 @@ static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
   return(0);
 }
 
-int forward(vorbis_block *vb,vorbis_look_residue *vl,
+int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
 	    float **in,int ch){
   long i,j,k,l;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
@@ -290,7 +289,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
      residual words for that partition word.  Then write the next
-     parition channel words... */
+     partition channel words... */
   
   for(i=info->begin,l=0;i<info->end;){
     /* first we encode a partition codeword for each channel */
@@ -324,7 +323,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 /* a truncated packet here just means 'stop working'; it's not an error */
-int inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
+int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
   long i,j,k,l,transend=vb->pcmend/2;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
@@ -378,11 +377,11 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
 }
 
 vorbis_func_residue residue0_exportbundle={
-  &pack,
-  &unpack,
-  &look,
-  &free_info,
-  &free_look,
-  &forward,
-  &inverse
+  &res0_pack,
+  &res0_unpack,
+  &res0_look,
+  &res0_free_info,
+  &res0_free_look,
+  &res0_forward,
+  &res0_inverse
 };

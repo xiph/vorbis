@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: bookinternal.h,v 1.8.6.1 2000/08/31 09:00:00 xiphmont Exp $
+ last mod: $Id: bookinternal.h,v 1.8.6.2 2000/09/02 05:19:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -35,5 +35,7 @@ extern int vorbis_book_encodevs(codebook *book, float *a, oggpack_buffer *b,
 extern long vorbis_book_decode(codebook *book, oggpack_buffer *b);
 extern long vorbis_book_decodevs(codebook *book, float *a, oggpack_buffer *b,
 				 int step,int stagetype);
+extern long s_vorbis_book_decodevs(codebook *book, float *a, oggpack_buffer *b,
+				   int step,int stagetype);
 
 #endif

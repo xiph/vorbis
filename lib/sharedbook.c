@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.7.4.2 2000/08/31 09:00:02 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.7.4.3 2000/09/02 05:19:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -142,7 +142,7 @@ long *_make_words(long *l,long n){
 /* build the decode helper tree from the codewords */
 decode_aux *_make_decode_tree(codebook *c){
   const static_codebook *s=c->c;
-  long top=0,i,j;
+  long top=0,i,j,n;
   decode_aux *t=malloc(sizeof(decode_aux));
   long *ptr0=t->ptr0=calloc(c->entries*2,sizeof(long));
   long *ptr1=t->ptr1=calloc(c->entries*2,sizeof(long));
@@ -173,6 +173,25 @@ decode_aux *_make_decode_tree(codebook *c){
     }
   }
   free(codelist);
+
+  t->tabn = _ilog(c->entries)-4; /* this is magic */
+  if(t->tabn<5)t->tabn=5;
+  n = 1<<t->tabn;
+  t->tab = malloc(n*sizeof(long));
+  t->tabl = malloc(n*sizeof(int));
+  for (i = 0; i < n; i++) {
+    long p = 0;
+    for (j = 0; j < t->tabn && (p > 0 || j == 0); j++) {
+      if (i & (1 << j))
+	p = ptr1[p];
+      else
+	p = ptr0[p];
+    }
+    /* now j == length, and p == -code */
+    t->tab[i] = p;
+    t->tabl[i] = j;
+  }
+
   return(t);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.26.2.2 2000/08/31 09:00:01 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.26.2.3 2000/09/02 05:19:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -515,7 +515,7 @@ static void bark_noise(long n,float *b,float *f,float *noise){
   memset(norm,0,n*sizeof(float));
 
   while(hi<n){
-    val=todB(f[i]*f[i])+400.;
+    val=todB_nn(f[i]*f[i])+400.;
     del=1./(i-lo);
     noise[lo]+=val*del;
     noise[i]-=val*del;
@@ -540,7 +540,7 @@ static void bark_noise(long n,float *b,float *f,float *noise){
     long hii=hi-i;
 
     for(;i<n;i++){
-      val=todB(f[i]*f[i])+400.;
+      val=todB_nn(f[i]*f[i])+400.;
       del=1./(hii);
       noise[i]-=val*del;
       norm[i]-=del;
@@ -552,7 +552,7 @@ static void bark_noise(long n,float *b,float *f,float *noise){
       norm[i]-=del;      
     }
     for(i=1,lo=n-ilo;lo<n;lo++,i++){
-      val=todB(f[n-i]*f[n-i])+400.;
+      val=todB_nn(f[n-i]*f[n-i])+400.;
       del=1./ilo;
       noise[lo]+=val*del;
       norm[lo]+=del;

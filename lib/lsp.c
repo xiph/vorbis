@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.9.2.1 2000/08/31 09:00:00 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.9.2.2 2000/09/02 05:19:25 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -46,14 +46,13 @@ void vorbis_lsp_to_curve(float *curve,int n,float *lsp,int m,float amp,
   for(i=0;i<m;i++)coslsp[i]=2*cos(lsp[i]);
 
   for(k=0;k<n;k++){
-    float p=.70710678118654752440;
-    float q=.70710678118654752440;
-    for(j=0;j<m;){
-      p*= *w-coslsp[j++];
-      q*= *w-coslsp[j++];
+    double p=.5;
+    double q=.5;
+    for(j=0;j<m;j+=2){
+      p*= w[k]-coslsp[j];
+      q*= w[k]-coslsp[j+1];
     }
-    curve[k]=amp/sqrt(p*p*(1.+ *w*.5)+q*q*(1.- *w*.5));
-    w++;
+    curve[k]=amp/sqrt(p*p*(2.+ w[k])+q*q*(2.- w[k]));
   }
 }
 

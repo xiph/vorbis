@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.38.2.1 2000/08/31 09:00:00 xiphmont Exp $
+ last mod: $Id: block.c,v 1.38.2.2 2000/09/02 05:19:24 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -584,7 +584,7 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
   return(0);
 }
 
-/* Unike in analysis, the window is only partially applied for each
+/* Unlike in analysis, the window is only partially applied for each
    block.  The time domain envelope is not yet handled at the point of
    calling (as it relies on the previous block). */
 
@@ -660,13 +660,14 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
     for(j=0;j<vi->channels;j++){
       float *pcm=v->pcm[j]+beginW;
-      
+      float *p=vb->pcm[j];
+
       /* the overlap/add section */
       for(i=beginSl;i<endSl;i++)
-	pcm[i]+=vb->pcm[j][i];
+	pcm[i]+=p[i];
       /* the remaining section */
       for(;i<sizeW;i++)
-	pcm[i]=vb->pcm[j][i];
+	pcm[i]=p[i];
     }
 
     /* track the frame number... This is for convenience, but also
