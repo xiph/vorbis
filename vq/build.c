@@ -14,7 +14,7 @@
  function: utility main for building codebooks from training sets
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Dec 14 1999
+ last modification date: Dec 15 1999
 
  ********************************************************************/
 
@@ -23,209 +23,177 @@
 #include <math.h>
 #include <string.h>
 #include <errno.h>
-#include <signal.h>
 #include "vqgen.h"
 
-static int rline(FILE *in,FILE *out,char *line,int max,int pass){
-  while(fgets(line,160,in)){
-    if(line[0]=='#'){
-      if(pass)fprintf(out,"%s",line);
+static char *linebuffer=NULL;
+static int  lbufsize=0;
+static char *rline(FILE *in,FILE *out,int pass){
+  long sofar=0;
+  if(feof(in))return NULL;
+
+  while(1){
+    int gotline=0;
+
+    while(!gotline){
+      if(sofar>=lbufsize){
+	if(!lbufsize){	
+	  lbufsize=1024;
+	  linebuffer=malloc(lbufsize);
+	}else{
+	  lbufsize*=2;
+	  linebuffer=realloc(linebuffer,lbufsize);
+	}
+      }
+      {
+	long c=fgetc(in);
+	switch(c){
+	case '\n':
+	case EOF:
+	  gotline=1;
+	  break;
+	default:
+	  linebuffer[sofar++]=c;
+	  linebuffer[sofar]='\0';
+	  break;
+	}
+      }
+    }
+    
+    if(linebuffer[0]=='#'){
+      if(pass)fprintf(out,"%s",linebuffer);
+      sofar=0;
     }else{
-      return(1);
+      return(linebuffer);
     }
   }
-  return(0);
 }
 
 /* command line:
-   buildvq vq=file out=file quant=n
+   buildvq file
 */
-
-int exiting=0;
-void setexit(int dummy){
-  fprintf(stderr,"\nexiting... please wait to finish this iteration\n");
-  exiting=1;
-}
 
 int main(int argc,char *argv[]){
   vqgen v;
-  int entries=-1,dim=-1;
-  char line[1024];
+  vqbook b;
+  quant_return q;
+  int *quantlist=NULL;
+
+  int entries=-1,dim=-1,quant=-1;
+  FILE *out=NULL;
+  FILE *in=NULL;
+  char *line,*name;
   long i,j,k;
 
-  int init=0;
-  while(*argv){
-
-    /* load the trained data */
-    if(!strncmp(*argv,"vq=",3)){
-      FILE *in=NULL;
-      char filename[80],*ptr;
-      if(sscanf(*argv,"vq=%70s",filename)!=1){
-	fprintf(stderr,"Syntax error in argument '%s'\n",*argv);
-	exit(1);
-      }
-
-      in=fopen(filename,"r");
-      ptr=strrchr(filename,'-');
-      if(ptr){
-	int num;
-	ptr++;
-	num=atoi(ptr);
-	sprintf(ptr,"%d.vqi",num+1);
-      }else
-	strcat(filename,"-0.vqi");
-      
-      out=fopen(filename,"w");
-      if(out==NULL){
-	fprintf(stderr,"Unable to open %s for writing\n",filename);
-	exit(1);
-      }
-      fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
-
-      if(in){
-	/* we wish to suck in a preexisting book and continue to train it */
-	double a;
-	    
-	rline(in,out,line,160,1);
-	if(sscanf(line,"%d %d %d",&entries,&dim,&met)!=3){
-	  fprintf(stderr,"Syntax error reading book file\n");
-	  exit(1);
-	}
-
-	metric=set_metric(met);
-	vqgen_init(&v,dim,entries,metric,0.);
-	init=1;
-
-	/* entries, bias, points */
-	i=0;
-	for(j=0;j<entries;j++){
-	  for(k=0;k<dim;k++){
-	    rline(in,out,line,160,0);
-	    sscanf(line,"%lf",&a);
-	    v.entrylist[i++]=a;
-	  }
-	}
-
-	i=0;
-	for(j=0;j<entries;j++){
-	  rline(in,out,line,160,0);
-	  sscanf(line,"%lf",&a);
-	  v.bias[i++]=a;
-	}
-
-	{
-	  double b[80];
-	  i=0;
-	  v.entries=0; /* hack to avoid reseeding */
-	  while(1){
-	    for(k=0;k<dim && k<80;k++){
-	      rline(in,out,line,160,0);
-	      sscanf(line,"%lf",b+k);
-	    }
-	    if(feof(in))break;
-	    vqgen_addpoint(&v,b);
-	  }
-	  v.entries=entries;
-	}
-
-	fclose(in);
-      }
-    }
-
-    /* set parameters if we're not loading a pre book */
-    if(!strncmp(*argv,"entries=",8)){
-      sscanf(*argv,"entries=%d",&entries);
-    }
-    if(!strncmp(*argv,"desired=",8)){
-      sscanf(*argv,"desired=%lf",&desired);
-    }
-    if(!strncmp(*argv,"dim=",4)){
-      sscanf(*argv,"dim=%d",&dim);
-    }
-
-    /* which error metric (0==euclidian distance default) */
-    if(!strncmp(*argv,"met=",4)){
-      sscanf(*argv,"met=%d",&met);
-      metric=set_metric(met);
-    }
-
-    if(!strncmp(*argv,"in=",3)){
-      int start;
-      char file[80];
-      FILE *in;
-
-      if(sscanf(*argv,"in=%79[^,],%d",file,&start)!=2)goto syner;
-      if(!out){
-	fprintf(stderr,"vq= must preceed in= arguments\n");
-	exit(1);
-      }
-      if(!init){
-	if(dim==-1 || entries==-1){
-	  fprintf(stderr,"Must specify dimensionality and entries before"
-		  " first input file\n");
-	  exit(1);
-	}
-	vqgen_init(&v,dim,entries,metric,0.);
-	init=1;
-      }
-
-      in=fopen(file,"r");
-      if(in==NULL){
-	fprintf(stderr,"Could not open input file %s\n",file);
-	exit(1);
-      }
-      fprintf(out,"# training file entry: %s\n",file);
-
-      while(rline(in,out,line,1024,1)){
-	double b[16];
-	int n=sscanf(line,"%lf %lf %lf %lf %lf %lf %lf %lf "
-		     "%lf %lf %lf %lf %lf %lf %lf %lf",
-		     b,b+1,b+2,b+3,b+4,b+5,b+6,b+7,b+8,b+9,b+10,b+11,b+12,b+13,
-		     b+14,b+15);
-	if(start+dim>n){
-	  fprintf(stderr,"ran out of columns reading %s\n",file);
-	  exit(1);
-	}
-	vqgen_addpoint(&v,b+start);
-      }
-
-      fclose(in);
-    }
-    argv++;
-  }
-
-  /* train the book */
-  signal(SIGTERM,setexit);
-  signal(SIGINT,setexit);
-
-  for(i=0;i<iter && !exiting;i++){
-    if(vqgen_iterate(&v)<desired)break;
-  }
-
-  /* save the book */
-
-  fprintf(out,"%d %d %d\n",entries,dim,met);
-
-  i=0;
-  for(j=0;j<entries;j++)
-    for(k=0;k<dim;k++)
-      fprintf(out,"%f\n",v.entrylist[i++]);
-  
-  fprintf(out,"# biases---\n");
-  i=0;
-  for(j=0;j<entries;j++)
-    fprintf(out,"%f\n",v.bias[i++]);
-
-  fprintf(out,"# points---\n");
-  i=0;
-  for(j=0;j<v.points;j++)
-    for(k=0;k<dim && k<80;k++)
-      fprintf(out,"%f\n",v.pointlist[i++]);
-
-  fclose(out);
-  exit(0);
-
-  syner:
-    fprintf(stderr,"Syntax error in argument '%s'\n",*argv);
+  if(argv[1]==NULL){
+    fprintf(stderr,"Need a trained data set on the command line.\n");
     exit(1);
+  }
+
+  {
+    char *ptr;
+    char *filename=strdup(argv[1]);
+
+    in=fopen(filename,"r");
+    if(!in){
+      fprintf(stderr,"Could not open input file %s\n",filename);
+      exit(1);
+    }
+    
+    ptr=strrchr(filename,'.');
+    if(ptr){
+      *ptr='\0';
+      name=strdup(ptr);
+      sprintf(ptr,".h");
+    }else{
+      name=strdup(filename);
+      strcat(filename,".h");
+    }
+
+    out=fopen(filename,"w");
+    if(out==NULL){
+      fprintf(stderr,"Unable to open %s for writing\n",filename);
+      exit(1);
+    }
+  }
+
+  /* suck in the trained book */
+
+  /* read book type, but it doesn't matter */
+  line=rline(in,out,1);
+  
+  line=rline(in,out,1);
+  if(sscanf(line,"%d %d",&entries,&dim)!=2){
+    fprintf(stderr,"Syntax error reading book file\n");
+    exit(1);
+  }
+  
+  /* just use it to allocate mem */
+  vqgen_init(&v,dim,entries,NULL);
+  
+  /* quant */
+  line=rline(in,out,1);
+  if(sscanf(line,"%lf %lf %d %d",&q.minval,&q.delt,
+	    &q.addtoquant,&quant)!=4){
+    fprintf(stderr,"Syntax error reading book file\n");
+    exit(1);
+  }
+  
+  /* quantized entries */
+  /* save quant data; we can't regen it because the quant details
+     are specific to the data type */
+  i=0;
+  quantlist=malloc(sizeof(int)*v.elements*v.entries);
+  for(j=0;j<entries;j++){
+    double a;
+    for(k=0;k<dim;k++){
+      line=rline(in,out,0);
+      sscanf(line,"%lf",&a);
+      quantlist[i++]=rint(a);
+    }
+  }    
+  
+  /* unquantized entries */
+  i=0;
+  for(j=0;j<entries;j++){
+    double a;
+    for(k=0;k<dim;k++){
+      line=rline(in,out,0);
+      sscanf(line,"%lf",&a);
+      v.entrylist[i++]=a;
+    }
+  }
+  
+  /* ignore bias */
+  for(j=0;j<entries;j++)line=rline(in,out,0);
+  free(v.bias);
+  v.bias=NULL;
+  
+  /* training points */
+  {
+    double b[80];
+    i=0;
+    v.entries=0; /* hack to avoid reseeding */
+    while(1){
+      for(k=0;k<dim && k<80;k++){
+	line=rline(in,out,0);
+	if(!line)break;
+	sscanf(line,"%lf",b+k);
+      }
+      if(feof(in))break;
+      vqgen_addpoint(&v,b);
+    }
+    v.entries=entries;
+  }
+  
+  fclose(in);
+
+  /* build the book */
+  vqsp_book(&v,&b);
+
+  /* save the book in C header form */
+
+
+
+
+  exit(0);
 }

@@ -21,11 +21,6 @@
 #include "vqgen.h"
 
 extern char *vqext_booktype;
-typedef struct {
-  double minval;
-  double delt;
-  int    addtoquant;
-} quant_return;
 
 extern double vqext_metric(vqgen *v,double *b, double *a);
 extern quant_return vqext_quantize(vqgen *v,int quantbits);

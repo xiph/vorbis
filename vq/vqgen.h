@@ -36,6 +36,7 @@ typedef struct vqgen{
 typedef struct vqbook{
   long elements;
   long entries;
+
   double *valuelist;
   long   *codelist;
   long   *lengthlist;
@@ -52,14 +53,28 @@ typedef struct vqbook{
 
 } vqbook;
 
+typedef struct {
+  double minval;
+  double delt;
+  int    addtoquant;
+} quant_return;
+
+static inline double *_point(vqgen *v,long ptr){
+  return v->pointlist+(v->elements*ptr);
+}
+
+static inline double *_now(vqgen *v,long ptr){
+  return v->entrylist+(v->elements*ptr);
+}
+
 extern void vqgen_init(vqgen *v,int elements,int entries,
 		       double (*metric)(vqgen *,double *, double *));
 extern void vqgen_addpoint(vqgen *v, double *p);
 extern double *vqgen_midpoint(vqgen *v);
 extern double vqgen_iterate(vqgen *v);
+
+extern void vqsp_book(vqgen *v,vqbook *b);
 extern int vqenc_entry(vqbook *b,double *val);
-extern void vqgen_book(vqgen *v,vqbook *b);
-extern double *_now(vqgen *v,long ptr);
 
 #endif
 

@@ -63,6 +63,7 @@ static char *rline(FILE *in,FILE *out,int pass){
     
     if(linebuffer[0]=='#'){
       if(pass)fprintf(out,"%s",linebuffer);
+      sofar=0;
     }else{
       return(linebuffer);
     }
@@ -125,7 +126,6 @@ int main(int argc,char *argv[]){
 	double a;
 
 	line=rline(in,out,1);
-	if(strlen(line)>0)line[strlen(line)-1]='\0';
 	if(strcmp(line,vqext_booktype)){
 	  fprintf(stderr,"wrong book type; %s!=%s\n",line,vqext_booktype);
 	  exit(1);
@@ -149,7 +149,12 @@ int main(int argc,char *argv[]){
 	  exit(1);
 	}
 
-	/* entries */
+	/* quantized entries */
+	for(j=0;j<entries;j++)
+	  for(k=0;k<dim;k++)
+	    line=rline(in,out,0);
+
+	/* unquantized entries */
 	i=0;
 	for(j=0;j<entries;j++){
 	  for(k=0;k<dim;k++){
@@ -159,9 +164,6 @@ int main(int argc,char *argv[]){
 	  }
 	}
 	
-	/* dequantize */
-	vqext_unquantize(&v,&q);
-
 	/* bias, points */
 	i=0;
 	for(j=0;j<entries;j++){
@@ -177,6 +179,7 @@ int main(int argc,char *argv[]){
 	  while(1){
 	    for(k=0;k<dim && k<80;k++){
 	      line=rline(in,out,0);
+	      if(!line)break;
 	      sscanf(line,"%lf",b+k);
 	    }
 	    if(feof(in))break;
@@ -265,6 +268,12 @@ int main(int argc,char *argv[]){
     argv++;
   }
 
+  if(!init){
+    fprintf(stderr,"No input files!\n");
+    exit(1);
+  }
+
+
   /* train the book */
   signal(SIGTERM,setexit);
   signal(SIGINT,setexit);
@@ -284,10 +293,23 @@ int main(int argc,char *argv[]){
   fprintf(out,"%d %d\n",entries,dim);
   fprintf(out,"%g %g %d %d\n",q.minval,q.delt,q.addtoquant,quant);
 
+  /* quantized entries */
+  fprintf(out,"# quantized entries---\n");
+  i=0;
+  for(j=0;j<entries;j++)
+    for(k=0;k<dim;k++)
+      fprintf(out,"%d\n",(int)(rint(v.entrylist[i++])));
+
+  /* dequantize */
+  vqext_unquantize(&v,&q);
+
+  fprintf(out,"# unquantized entries---\n");
   i=0;
   for(j=0;j<entries;j++)
     for(k=0;k<dim;k++)
       fprintf(out,"%f\n",v.entrylist[i++]);
+
+  /* unquantized entries */
   
   fprintf(out,"# biases---\n");
   i=0;

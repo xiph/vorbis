@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.1 1999/12/17 07:21:26 xiphmont Exp $
+# $Id: Makefile.in,v 1.2 1999/12/17 13:19:30 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -27,8 +27,8 @@ LIBS=@LIBS@ -lm
 
 HFILES =	vqgen.h vqext.h
 
-OFILES = 	vqgen.o train.o 
-ALLOFILES = 	$(OFILES) lspdata.o
+OFILES = 	vqgen.o vqsplit.o 
+ALLOFILES = 	$(OFILES) lspdata.o train.o build.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -39,9 +39,12 @@ debug:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-target:	lspvqtrain 
+target:	lspvqtrain vqbuild
 
-lspvqtrain:	$(OFILES) lspdata.o
+lspvqtrain:	$(OFILES) lspdata.o train.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+
+vqbuild:	$(OFILES) build.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 $(ALLOFILES): 	$(HFILES)
@@ -50,5 +53,5 @@ $(ALLOFILES): 	$(HFILES)
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	-rm -f *.o *.a test* *~ *.out *.m config.*\
+	-rm -f *.o *.a test* *~ *.out *.m config.* \
 		lspvqtrain
