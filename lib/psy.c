@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.52 2001/09/01 06:14:50 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.53 2001/09/02 09:07:58 msmith Exp $
 
  ********************************************************************/
 
@@ -429,8 +429,9 @@ void _vp_psy_clear(vorbis_look_psy *p){
 	_ogg_free(p->tonecurves[i]);
       }
       _ogg_free(p->tonecurves);
-      _ogg_free(p->noiseoffset);
     }
+    _ogg_free(p->noiseoffset);
+    _ogg_free(p->noisethresh);
     memset(p,0,sizeof(vorbis_look_psy));
   }
 }
