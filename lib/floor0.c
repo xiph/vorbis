@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.11.2.1.2.3 2000/04/06 16:47:45 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.11.2.1.2.4 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,6 +25,7 @@
 #include "lpc.h"
 #include "lsp.h"
 #include "bookinternal.h"
+#include "sharedbook.h"
 #include "scales.h"
 
 typedef struct {
@@ -202,13 +203,13 @@ static double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
   }
   for(i=0;i<l->ln;i++)work[i]-=l->subcurve[i];
 
-#if 1
+#if 0
     { /******************/
       FILE *of;
       char buffer[80];
       int i;
 
-      sprintf(buffer,"mask_%d.m",frameno);
+      sprintf(buffer,"Fmask_%d.m",frameno);
       of=fopen(buffer,"w");
       for(i=0;i<mapped;i++)
 	fprintf(of,"%g\n",work[i]);
@@ -232,7 +233,7 @@ static void _lpc_to_curve(double *curve,double *lpc,double amp,
   }
   vorbis_lpc_to_curve(lcurve,lpc,amp,&(l->lpclook));
 
-#if 1
+#if 0
     { /******************/
       FILE *of;
       char buffer[80];
@@ -253,7 +254,7 @@ static void _lpc_to_curve(double *curve,double *lpc,double amp,
 
 static int forward(vorbis_block *vb,vorbis_look_floor *i,
 		    double *in,double *out){
-  long j,k,stage;
+  long j,k;
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   double amp;
@@ -304,10 +305,10 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     }
 #endif
 
-#if 1
+#if 0
     { /******************/
       vorbis_lsp_to_lpc(out,in,look->m); 
-      _lpc_to_curve(in,in,amp,look,"prefloor",vb->sequence);
+      _lpc_to_curve(in,in,amp,look,"Fprefloor",vb->sequence);
     }
 #endif
 
@@ -332,7 +333,7 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_lpc(out,out,look->m); 
-    _lpc_to_curve(out,out,amp,look,"floor",vb->sequence);
+    _lpc_to_curve(out,out,amp,look,"Ffloor",vb->sequence);
     for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
     return(1);
   }
@@ -344,7 +345,7 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
-  int j,k,stage;
+  int j,k;
   
   long ampraw=_oggpack_read(&vb->opb,info->ampbits);
   if(ampraw>0){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.11.4.1 2000/04/06 15:59:38 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.11.4.2 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,15 +23,12 @@
 #include "vqext.h"
 
 char *vqext_booktype="LSPdata";  
-quant_meta q={0,0,0,1, 0,0,0};          /* set sequence data */
+quant_meta q={0,0,0,1, 0,0};          /* set sequence data */
 int vqext_aux=1;
 
 void vqext_quantize(vqgen *v,quant_meta *q){
   vqgen_quantize(v,q);
 }
-
-/* the custom weighting was of questionable value; keep it simple
-   until we know something else is better */
 
 double global_maxdel=M_PI;
 double *weight=NULL;
@@ -82,7 +79,7 @@ double vqext_metric(vqgen *v,double *e, double *p){
    trailing space */
 
 /* assume vqext_aux==1 */
-void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
+void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num){
   double *a=alloca(sizeof(double)*(dim+1)); /* +aux */
   double base=0;
   int i;

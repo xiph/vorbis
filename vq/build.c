@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.12.4.2 2000/04/06 15:59:37 xiphmont Exp $
+ last mod: $Id: build.c,v 1.12.4.3 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -135,8 +135,8 @@ int main(int argc,char *argv[]){
   
   /* quant */
   line=rline(in,out);
-  if(sscanf(line,"%d %ld %ld %d %d %lf %lf",&q.log,&q.min,&q.delta,
-	    &q.quant,&q.sequencep,&q.encodebias,&q.entropy)!=7){
+  if(sscanf(line,"%d %ld %ld %d %d %lf",&q.log,&q.min,&q.delta,
+	    &q.quant,&q.sequencep,&q.encodebias)!=6){
     fprintf(stderr,"Syntax error reading book file\n");
     exit(1);
   }
@@ -179,7 +179,10 @@ int main(int argc,char *argv[]){
   }
   
   fclose(in);
-  vqgen_unquantize(&v,&q);
+
+  /* use our own because we want log training data to be linear for
+     splitting */
+  vqsp_unquantize(&v,&q);
 
   /* build the book */
   vqsp_book(&v,&b,quantlist);
@@ -305,9 +308,9 @@ int main(int argc,char *argv[]){
     
     fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
     
-    fprintf(out,"\t%ld, %ld, %d, %ld, %ld, %d, %d, %d, %d, %g, %g,\n",
+    fprintf(out,"\t%ld, %ld, %d, %ld, %ld, %d, %d, %d, %d, %g,\n",
 	    c.dim,c.entries,q.log,q.min,q.delta,q.quant,q.sequencep,
-	    zero,neg,q.encodebias,q.entropy);
+	    zero,neg,q.encodebias);
     fprintf(out,"\t_vq_quantlist_%s,\n",name);
     fprintf(out,"\t_vq_lengthlist_%s,\n",name);
     fprintf(out,"\t&_vq_aux_%s,\n",name);

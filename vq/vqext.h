@@ -11,16 +11,25 @@
  *                                                                  *
  ********************************************************************
 
- function: miscellaneous prototypes
- last mod: $Id: misc.h,v 1.2.4.2 2000/04/13 04:53:04 xiphmont Exp $
+ function: prototypes for extermal metrics specific to data type
+ last mod: $Id: vqext.h,v 1.8.4.1 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_RANDOM_H_
-#define _V_RANDOM_H_
+#ifndef _V_VQEXT_
+#define _V_VQEXT_
 
-extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
-extern void _vorbis_block_ripcord(vorbis_block *vb);
-extern void _analysis_output(char *base,int i,double *v,int n,int bark,int dB);
+#include "vqgen.h"
+
+extern char *vqext_booktype;
+extern quant_meta q;
+extern int vqext_aux;
+
+extern double vqext_metric(vqgen *v,double *e, double *p);
+extern double *vqext_weight(vqgen *v,double *p);
+extern void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num);
+extern void vqext_preprocess(vqgen *v);
+extern void vqext_quantize(vqgen *v,quant_meta *);
+
 
 #endif

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook 
- last mod: $Id: vqgen.h,v 1.12.4.1 2000/04/04 07:08:45 xiphmont Exp $
+ last mod: $Id: vqgen.h,v 1.12.4.2 2000/04/13 04:53:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,6 @@ typedef struct {
 
   int    log;       /* 0 == linear, 1 == log (dB) mapping */
   double encodebias;
-  double entropy;
 } quant_meta;
 
 static inline double *_point(vqgen *v,long ptr){

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.8.4.3 2000/04/06 15:59:37 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.8.4.4 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,6 +30,7 @@
 #include "registry.h"
 #include "scales.h"
 #include "bookinternal.h"
+#include "sharedbook.h"
 #include "misc.h"
 
 typedef struct {
@@ -40,7 +41,9 @@ typedef struct {
 
   codebook ***partbooks;
   int        *partstages;
+
   double     *partlevels;
+  int        *partgrouping;
 
   int         partvals;
   int       **decodemap;
@@ -61,6 +64,7 @@ void free_look(vorbis_look_residue *i){
       if(look->partbooks[j])free(look->partbooks[j]);
     free(look->partbooks);
     free(look->partlevels);
+    free(look->partgrouping);
     for(j=0;j<look->partvals;j++)
       free(look->decodemap[j]);
     free(look->decodemap);
@@ -128,6 +132,7 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 
   look->partbooks=calloc(look->parts,sizeof(codebook **));
   look->partlevels=calloc(look->parts,sizeof(double));
+  look->partgrouping=calloc(look->parts,sizeof(int));
   look->partstages=calloc(look->parts,sizeof(int));
 
   for(j=0;j<look->parts;j++){
@@ -136,8 +141,9 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
       look->partbooks[j]=malloc(stages*sizeof(codebook *));
       for(k=0;k<stages;k++)
 	look->partbooks[j][k]=vd->fullbooks+info->booklist[acc++];
-      look->partlevels[j]=look->partbooks[j][0]->c->q_entropy;
     }
+    look->partgrouping[j]=_ilog(info->partinterl[j])-1;
+    look->partlevels[j]=info->partlevels[j];
     look->partstages[j]=stages;
   }
 
@@ -158,25 +164,45 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   return(look);
 }
 
+/* does not guard against invalid settings; eg, a subn of 16 and a
+   subgroup request of 32.  Max subn of 128 */
 static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
-  int i;
-  double acc=1.;
+  int i,j=0;
+  double max=0.;
+  double entropy[8];
+  double temp[128];
 
-  double best=0.;
-  double besti=-1;
-    
-  for(i=0;i<n;i++)
+  /* setup */
+  for(i=0;i<n;i++){
     if(vec[i])
-      acc*=(todB(vec[i])+3.);
-  acc=pow(acc,1./n);
-  
-  for(i=0;i<look->parts;i++)
-    if(acc<look->partlevels[i] && (look->partlevels[i]<best || besti==-1)){
-      besti=i;
-      best=look->partlevels[i];
+      temp[i]=(todB(vec[i])+6.);
+    else
+      temp[i]=0.;
+  }
+
+  /* handle case subgrp==1 outside */
+  for(i=0;i<n;i++)
+    if(temp[i]>max)max=temp[i];
+
+  while(1){
+    entropy[j]=max; /* in the encoder, we're comparing against
+                       non-normalized vals to save cycles */
+    n>>=1;
+    j++;
+
+    if(n<=0)break;
+    for(i=0;i<n;i++){
+      temp[i]+=temp[i+n];
     }
-  
-  return(besti==-1?0:besti);
+    max=0.;
+    for(i=0;i<n;i++)
+      if(temp[i]>max)max=temp[i];
+  }
+
+  for(i=0;i<look->parts-1;i++)
+    if(entropy[look->partgrouping[i]]>look->partlevels[i])
+      break;
+  return(i);
 }
 
 static int _encodepart(oggpack_buffer *opb,double *vec, int n,
@@ -323,6 +349,7 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
 		    look->partbooks[part]);
       }
   }
+
   return(0);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.1.2.3 2000/04/06 15:59:37 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.1.2.4 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -203,7 +203,7 @@ double *_book_logdist(const static_codebook *b,double *vals){
   long j;
   if(b->quantlist && b->q_log){
     double *r=malloc(sizeof(double)*b->entries*b->dim);
-    for(j=0;j<b->entries;j++){
+    for(j=0;j<b->entries*b->dim;j++){
       if(vals[j]==0){
 	r[j]=0.;
       }else{
@@ -293,6 +293,16 @@ int _best(codebook *book, double *a, int step){
   return(-ptr);
 }
 
+static double _dist(int el,double *a, double *b){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
+  return(acc);
+}
+
 int _logbest(codebook *book, double *a, int step){
   encode_aux *t=book->c->encode_tree;
   int dim=book->dim;
@@ -308,6 +318,7 @@ int _logbest(codebook *book, double *a, int step){
       if(a[o]<0)loga[k]= -loga[k];
     }
 
+#if 1
   /* optimized using the decision tree */
   while(1){
     double c=0.;
@@ -324,5 +335,19 @@ int _logbest(codebook *book, double *a, int step){
     if(ptr<=0)break;
   }
   return(-ptr);
+#else
+  {
+    int besti=0;
+    double best=_dist(dim,loga,book->logdist);
+    for(k=1;k<book->entries;k++){
+      double val=_dist(dim,loga,book->logdist+k*dim);
+      if(val<best){
+	best=val;
+	besti=k;
+      }
+    }
+    return(besti);
+  }
+#endif
 }
 

@@ -12,9 +12,16 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.2.4.2 2000/04/06 15:59:38 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.2.4.3 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
+
+/* note that the codebook abstraction is capable of representing a log
+   codebook where there's a negative to positive dB range as well as
+   information to indicate negative/positive in the linear domain.
+   This trainer isn't that smart; it assumes that incoming data is
+   zero (linear) or 0. ... Inf dB, and just offsets 0. dB for purposes
+   of quantization */
 
 #include <stdlib.h>
 #include <math.h>
@@ -23,11 +30,12 @@
 #include "vqgen.h"
 #include "bookutil.h"
 #include "../lib/sharedbook.h"
+#include "../lib/scales.h"
 #include "vqext.h"
 
 float scalequant=3.;
 char *vqext_booktype="RESdata";  
-quant_meta q={0,0,0,0, 1,8.,0};          /* set sequence data */
+quant_meta q={0,0,0,0, 1,4.};          /* set sequence data */
 int vqext_aux=0;
 
 static double *quant_save=NULL;
@@ -67,7 +75,6 @@ void vqext_quantize(vqgen *v,quant_meta *q){
 	  test[k]=-(norm+1);
       }
     }
-
 
     /* allow move only if unoccupied */
     if(quant_save){
@@ -109,15 +116,31 @@ double vqext_metric(vqgen *v,double *e, double *p){
   return sqrt(acc);
 }
 
-void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
-  vqgen_addpoint(v,b+start,NULL);
+/* We don't interleave here; we assume that the interleave is provided
+   for us by residuesplit in vorbis/huff/ */
+void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num){
+  int i;
+  double *buff=alloca(sizeof(double)*dim);
+ 
+  for(i=0;i<dim;i++){
+    double val=b[start+i];
+    if(val>0.){
+      val=todB(val)+q.encodebias;
+    }else if(val<0.){
+      val=-todB(val)-q.encodebias;
+    }
+
+    buff[i]=val;
+  }
+  vqgen_addpoint(v,buff,NULL);
 }
 
 /* need to reseed because of the coarse quantization we tend to use on
    residuals (which causes lots & lots of dupes) */
 void vqext_preprocess(vqgen *v){
-  long i,j,k,l,min,max;
+  long i,j,k,l;
   double *test=alloca(sizeof(double)*v->elements);
+  scalequant=q.quant;
 
   vqext_quantize(v,&q);
   vqgen_unquantize(v,&q);
@@ -133,17 +156,18 @@ void vqext_preprocess(vqgen *v){
 
   if(k<v->entries){
     fprintf(stderr,"reseeding with quantization....\n");
-    min=-((1<<q.quant)/2-1);
-    max=min+(1<<q.quant)-1;
 
     /* seed the inputs to input points, but points on unit boundaries,
      ignoring quantbits for now, making sure each seed is unique */
     
     for(i=0,j=0;i<v->points && j<v->entries;i++){
       for(k=0;k<v->elements;k++){
-	test[k]=rint(_point(v,i)[k]);
-	if(test[k]<min)test[k]=min;
-	if(test[k]>max)test[k]=max;
+	double val=_point(v,i)[k];
+	if(val>0.){
+	  test[k]=rint((val-q.encodebias)/scalequant)*scalequant+q.encodebias;
+	}else if(val<0.){
+	  test[k]=rint((val+q.encodebias)/scalequant)*scalequant-q.encodebias;
+	}
       }
       
       for(l=0;l<j;l++){

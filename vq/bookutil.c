@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.12.4.1 2000/04/04 07:08:44 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.12.4.2 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -190,12 +190,12 @@ codebook *codebook_load(char *filename){
 
   /* get the major important values */
   line=get_line(in);
-  if(sscanf(line,"%ld, %ld, %d, %ld, %ld, %d, %d, %d, %d, %lf, %lf",
+  if(sscanf(line,"%ld, %ld, %d, %ld, %ld, %d, %d, %d, %d, %lf,",
 	    &(c->dim),&(c->entries),&(c->q_log),
 	    &(c->q_min),&(c->q_delta),&(c->q_quant),
 	    &(c->q_sequencep),
 	    &(c->q_zeroflag),&(c->q_negflag),
-	    &(c->q_encodebias),&(c->q_entropy))!=11){
+	    &(c->q_encodebias))!=10){
     fprintf(stderr,"1: syntax in %s in line:\t %s",filename,line);
     exit(1);
   }
@@ -277,11 +277,8 @@ codebook *codebook_load(char *filename){
   /* got it all */
   fclose(in);
 
-  /* unquantize the entries while we're at it */
-  b->valuelist=_book_unquantize(b->c);
-  b->logdist=_book_logdist(b->c,b->valuelist);
+  vorbis_book_init_encode(b,c);
 
-  /* don't need n and c */
   return(b);
 }
 

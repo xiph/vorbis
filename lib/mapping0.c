@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.11.2.2.2.3 2000/04/06 15:59:37 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.11.2.2.2.4 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -247,12 +247,19 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       /* perform psychoacoustics; do masking */
       _vp_tone_tone_mask(look->psy_look+submap,pcm,mask,decay);
  
+      _analysis_output("mdct",vb->sequence,pcm,n/2,0,1);
+      _analysis_output("mask",vb->sequence,mask,n/2,0,1);
+
       /* perform floor encoding */
       nonzero[i]=look->floor_func[submap]->
 	forward(vb,look->floor_look[submap],mask,floor);
 
+      _analysis_output("floor",vb->sequence,floor,n/2,0,1);
+
       /* apply the floor, do optional noise levelling */
       _vp_apply_floor(look->psy_look+submap,pcm,floor);
+
+      _analysis_output("res",vb->sequence,pcm,n/2,0,1);
 
 #ifdef TRAIN
       if(nonzero[i]){
@@ -316,6 +323,7 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
     int submap=info->chmuxlist[i];
     nonzero[i]=look->floor_func[submap]->
       inverse(vb,look->floor_look[submap],pcm);
+    _analysis_output("ifloor",vb->sequence,pcm,n/2,0,1);
   }
 
   /* recover the residue, apply directly to the spectral envelope */
@@ -334,6 +342,7 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     double *pcm=vb->pcm[i];
+    _analysis_output("out",vb->sequence,pcm,n/2,0,1);
     mdct_backward(vd->transform[vb->W][0],pcm,pcm);
   }
 

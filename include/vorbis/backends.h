@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.7.4.2 2000/04/06 15:59:36 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.7.4.3 2000/04/13 04:53:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -95,11 +95,13 @@ typedef struct vorbis_info_residue0{
   long  end;
 
   /* first stage (lossless partitioning) */
-  int grouping;         /* group n vectors per partition */
-  int partitions;       /* possible codebooks ofr a partition */
-  int groupbook;        /* huffbook for partitioning */
-  int secondstages[64]; /* expanded out to pointers in lookup */
-  int booklist[256];    /* list of second stage books */
+  int    grouping;         /* group n vectors per partition */
+  int    partitions;       /* possible codebooks ofr a partition */
+  int    groupbook;        /* huffbook for partitioning */
+  double partlevels[64];   /* book entropy settings for *encode* */
+  int    partinterl[64];   /* book subgroup/interleave size for *encode* */
+  int    secondstages[64]; /* expanded out to pointers in lookup */
+  int    booklist[256];    /* list of second stage books */
 
 } vorbis_info_residue0;
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.16.4.2 2000/04/06 15:59:38 xiphmont Exp $
+ last mod: $Id: train.c,v 1.16.4.3 2000/04/13 04:53:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -54,7 +54,7 @@ static void usage(void){
 	  "         -e[rror]      <desired_error>\n"
 	  "         -i[terations] <maxiterations>\n"
 	  "         -d[istance]   desired minimum cell radius from midpoint\n"
-	  "         -b            eliminate cell size biasing; use normal LBG\n\n"
+	  "         -b <dummy>    eliminate cell size biasing; use normal LBG\n\n"
 	  "examples:\n"
 	  "   train a new codebook to 1%% tolerance on datafile 'foo':\n"
 	  "      xxxvqtrain book -p 256,6,8 -e .01 foo\n"
@@ -137,8 +137,8 @@ int main(int argc,char *argv[]){
       
       /* quant setup */
       line=rline(in,out,1);
-      if(sscanf(line,"%d %ld %ld %d %d %lf %lf",&q.log,&q.min,&q.delta,
-		&q.quant,&q.sequencep,&q.encodebias,&q.entropy)!=7){
+      if(sscanf(line,"%d %ld %ld %d %d %lf",&q.log,&q.min,&q.delta,
+		&q.quant,&q.sequencep,&q.encodebias)!=6){
 	fprintf(stderr,"Syntax error reading book file\n");
 	exit(1);
       }
@@ -280,7 +280,7 @@ int main(int argc,char *argv[]){
 	  }
 	  if(num<=0)num=(cols-start)/dim;
 	  for(i=0;i<num;i++)
-	    vqext_addpoint_adj(&v,b,start+i*dim,dim,cols);
+	    vqext_addpoint_adj(&v,b,start+i*dim,dim,cols,num);
 
 	}
       }
@@ -315,8 +315,8 @@ int main(int argc,char *argv[]){
   fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
   fprintf(out,"%s\n",vqext_booktype);
   fprintf(out,"%d %d %d\n",entries,dim,vqext_aux);
-  fprintf(out,"%d %ld %ld %d %d %g %g\n",
-	  q.log,q.min,q.delta,q.quant,q.sequencep,q.encodebias,q.entropy);
+  fprintf(out,"%d %ld %ld %d %d %g\n",
+	  q.log,q.min,q.delta,q.quant,q.sequencep,q.encodebias);
 
   /* quantized entries */
   fprintf(out,"# quantized entries---\n");
