@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.h,v 1.13 2003/08/18 05:34:01 xiphmont Exp $
+ last mod: $Id: window.h,v 1.14 2003/09/05 22:17:41 giles Exp $
 
  ********************************************************************/
 
@@ -19,8 +19,8 @@
 #define _V_WINDOW_
 
 extern float *_vorbis_window_get(int n);
-extern void _vorbis_apply_window(float *d,float *window[2],long *blocksizes,
-				 int lW,int W,int nW);
+extern void _vorbis_apply_window(float *d,int *winno,long *blocksizes,
+                          int lW,int W,int nW);
 
 
 #endif
