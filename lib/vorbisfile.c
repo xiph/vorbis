@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.65 2003/03/02 11:45:17 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.66 2003/03/02 21:32:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1623,8 +1623,24 @@ long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int length,
   }
 }
 
-extern void vorbis_splice(float *d,float *s,
-			  vorbis_dsp_state *v,int W);
+extern float *vorbis_window(vorbis_dsp_state *v,int W);
+
+static void _vorbis_splice(float *d,float *s,
+			  vorbis_dsp_state *v,int W){
+  
+  vorbis_info *vi=v->vi;
+  int n=vorbis_info_blocksize(vi,0)/2;
+  float *w=vorbis_window(v,W);
+  int i;
+
+  for(i=0;i<n;i++){
+    float wd=w[i]*w[i];
+    float ws=1.-wd;
+    d[i]=d[i]*wd + s[i]*ws;
+  }
+}
+	
+
 	
 /* this sets up crosslapping of a sample by using trailing data from
    sample 1 and lapping it into the windowing buffer of the second */
@@ -1720,26 +1736,20 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
       memcpy(lappcm[i]+lapcount,pcm[i],sizeof(**pcm)*samples);
     lapcount+=samples;
 
-    if(lapcount<lapsize){
-      fprintf(stderr,"GAR undersized lapping.\n");
-      exit(1);
-    }
+    if(lapcount<lapsize)return OV_EFAULT;
   }
 
   /* have a lapping buffer from vf1; now to splice it into the lapping
      buffer of vf2 */
 
   /* consolidate and expose the buffer. */
-  if(vorbis_synthesis_lapout(vd2,&pcm)<lapsize){
-    fprintf(stderr,"vf2 undersized lapping.\n");
-    exit(1);
-  }
+  if(vorbis_synthesis_lapout(vd2,&pcm)<lapsize)return OV_EFAULT;
 
   /* splice */
   for(j=0;j<vi1->channels;j++){
     float *s=lappcm[j];
     float *d=pcm[j];
-    vorbis_splice(d,s,winstate,0);
+    _vorbis_splice(d,s,winstate,0);
   }
 
   /* done */
