@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48 2001/06/18 22:19:26 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.49 2001/07/01 16:10:07 msmith Exp $
 
  ********************************************************************/
 
@@ -693,7 +693,7 @@ float _vp_compute_mask(vorbis_look_psy *p,
 		      p->vi->noisewindowhimin,
 		      p->noisemedian,
 		      p->noiseoffset,
-		      (const long *)(p->vi->noisewindowfixed));
+		      p->vi->noisewindowfixed);
     /* suppress any noise curve > specmax+p->vi->noisemaxsupp */
     for(i=0;i<n;i++)
       if(mask[i]>specmax+p->vi->noisemaxsupp)
