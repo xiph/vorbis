@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.36 2001/01/22 06:32:02 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.37 2001/01/30 23:40:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -532,35 +532,47 @@ static void max_seeds(vorbis_look_psy *p,float *minseed,float *maxseed,
   
 }
 
-#define BIN(x) ((int)((x)*-4.))
-#define BINdB(x) ((x)*-.25)
+/* quarter-dB bins */
+#define BIN(x)   ((int)((x)*negFour))
+#define BINdB(x) ((x)*negQuarter)
+#define BINCOUNT (200*4)
+#define LASTBIN  (BINCOUNT-1)
+
 static void bark_noise_median(long n,float *b,float *f,float *noise,
 			      float lowidth,float hiwidth,
 			      int lomin,int himin,
 			      float *thresh,float *off){
   long i=0,lo=0,hi=0;
-  long *radix=alloca(200*4*sizeof(long)); /* quarter-dB bins */
+  float bi,threshi;
+  long median=LASTBIN;
+  float negFour = -4.0f;
+  float negQuarter = -0.25f;
 
-  long countabove=0;
-  long median=200*4-1;
-  long countbelow=0;
+   /* these are really integral values, but we store them in floats to
+      avoid excessive float/int conversions, which GCC and MSVC are
+      farily poor at optimizing. */
 
-  memset(radix,0,200*4*sizeof(long));
+  float radix[BINCOUNT];
+  float countabove=0;
+  float countbelow=0;
+
+  memset(radix,0,sizeof(radix));
 
   for(i=0;i<n;i++){
     /* find new lo/hi */
-    for(;hi<n && (b[hi]<=b[i]+hiwidth || hi<i+himin);hi++){
+    bi=b[i];
+    for(;hi<n && (hi<i+himin || b[hi]<=bi+hiwidth);hi++){
       int bin=BIN(f[hi]);
-      if(bin>=200*4)bin=200*4-1;
+      if(bin>LASTBIN)bin=LASTBIN;
       radix[bin]++;
       if(bin<median)
 	countabove++;
       else
 	countbelow++;
     }
-    for(;lo<i && b[lo]+lowidth<=b[i] && lo+lomin<i;lo++){
+    for(;lo<i && lo+lomin<i && b[lo]+lowidth<=bi;lo++){
       int bin=BIN(f[lo]);
-      if(bin>=200*4)bin=200*4-1;
+      if(bin>LASTBIN)bin=LASTBIN;
       radix[bin]--;
       if(bin<median)
 	countabove--;
@@ -570,15 +582,16 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 
     /* move the median if needed */
     if(countabove+countbelow){
+      threshi = thresh[i];
 
-      while(thresh[i]>countbelow/(float)(countabove+countbelow) && median>0){
+      while((countabove+countbelow)*threshi>countbelow && median>0){
 	median--;
 	countabove-=radix[median];
 	countbelow+=radix[median];
       }
 
-      while(thresh[i]<(countbelow-radix[median])/
-	    (float)(countabove+countbelow) && median+1<200*4){
+      while((countabove+countbelow)*thresh[i]<(countbelow-radix[median])
+	    && median+1<BINCOUNT){
 	countabove+=radix[median];
 	countbelow-=radix[median];
 	median++;
@@ -594,9 +607,9 @@ float _vp_compute_mask(vorbis_look_psy *p,
 		      float *mdct, 
 		      float *flr, 
 		      float *decay,
-		      float prev_maxamp){
+		      float specmax){
   int i,n=p->n;
-  float specmax=NEGINF;
+  float localmax=NEGINF;
   static int seq=0;
 
   float *minseed=alloca(sizeof(float)*p->total_octave_lines);
@@ -606,9 +619,9 @@ float _vp_compute_mask(vorbis_look_psy *p,
   /* go to dB scale. Also find the highest peak so we know the limits */
   for(i=0;i<n;i++){
     fft[i]=todB(fft[i]);
-    if(fft[i]>specmax)specmax=fft[i];
+    if(fft[i]>localmax)localmax=fft[i];
   }
-  if(specmax<prev_maxamp)specmax=prev_maxamp;
+  if(specmax<localmax)specmax=localmax;
 
 
   for(i=0;i<n;i++){
@@ -636,9 +649,10 @@ float _vp_compute_mask(vorbis_look_psy *p,
     for(i=0;i<n;i++)flr[i]=NEGINF;
   }
 
-  /* set the ATH (floating below specmax by a specified att) */
+  /* set the ATH (floating below localmax, not global max by a
+     specified att) */
   if(p->vi->athp){
-    float att=specmax+p->vi->ath_adjatt;
+    float att=localmax+p->vi->ath_adjatt;
     if(att<p->vi->ath_maxatt)att=p->vi->ath_maxatt;
 
     for(i=0;i<n;i++){
