@@ -89,7 +89,7 @@ Ogg encapsulation of a Vorbis packet stream is straightforward.</para>
 <itemizedlist>
 
 <listitem><simpara>
-  The first Vorbis packet (the indentification header), which
+  The first Vorbis packet (the identification header), which
   uniquely identifies a stream as Vorbis audio, is placed alone in the
   first page of the logical Ogg stream.  This results in a first Ogg
   page of exactly 58 bytes at the very beginning of the logical stream.
