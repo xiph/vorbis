@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.9 2000/04/03 09:45:55 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.10 2000/04/06 15:47:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,6 +31,7 @@
 #include "scales.h"
 #include "bookinternal.h"
 #include "misc.h"
+#include "osc.h"
 
 typedef struct {
   vorbis_info_residue0 *info;
