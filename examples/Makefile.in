@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.6 2000/04/03 09:51:07 xiphmont Exp $
+# $Id: Makefile.in,v 1.7 2000/05/08 20:49:42 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -50,21 +50,21 @@ encoder_example.o:	../include/vorbis/modes.h
 
 encoder_example:	$(OFILES) ../lib/libvorbis.a
 	$(CC) $(CFLAGS) $(LDFLAGS) encoder_example.o ../lib/libvorbis.a -o \
-			encoder_example -lm
+			encoder_example $(LIBS)
 
 decoder_example:	$(OFILES) ../lib/libvorbis.a
 	$(CC) $(CFLAGS) $(LDFLAGS) decoder_example.o ../lib/libvorbis.a -o \
-			decoder_example -lm
+			decoder_example $(LIBS)
 
 chaining_example:	$(OFILES) ../lib/libvorbis.a ../lib/vorbisfile.a
 	$(CC) $(CFLAGS) $(LDFLAGS) chaining_example.o \
 			../lib/vorbisfile.a ../lib/libvorbis.a \
-			-o chaining_example -lm
+			-o chaining_example $(LIBS)
 
 seeking_test:	$(OFILES) ../lib/libvorbis.a ../lib/vorbisfile.a
 	$(CC) $(CFLAGS) $(LDFLAGS) seeking_test.o \
 			../lib/vorbisfile.a ../lib/libvorbis.a \
-			-o seeking_test -lm
+			-o seeking_test $(LIBS)
 
 $(OFILES): 	$(HFILES)
 

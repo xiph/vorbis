@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.2 2000/02/21 01:12:57 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.3 2000/05/08 20:49:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,68 +22,43 @@
 #include <string.h>
 #include "vqgen.h"
 #include "bookutil.h"
+#include "../lib/sharedbook.h"
+#include "../lib/scales.h"
 #include "vqext.h"
 
+float scalequant=3.;
 char *vqext_booktype="RESdata";  
 quant_meta q={0,0,0,0};          /* set sequence data */
 int vqext_aux=0;
 
 static double *quant_save=NULL;
 
-/* LSP training metric.  We weight error proportional to distance
-   *between* LSP vector values.  The idea of this metric is not to set
-   final cells, but get the midpoint spacing into a form conducive to
-   what we want, which is weighting toward preserving narrower
-   features. */
-
 double *vqext_weight(vqgen *v,double *p){
   return p;
 }
 
-/* quantize aligned on unit boundaries */
-
-static double _delta(double min,double max,int bits){
-  double delta=1.;
-  int vals=(1<<bits);
-  while(1){
-    double qmax=rint(max/delta);
-    double qmin=rint(min/delta);
-    int qvals=rint(qmax-qmin)+1;
-
-    if(qvals>vals){
-      delta*=2;
-    }else if(qvals*2<=vals){
-      delta*=.5;
-    }else{
-      min=qmin*delta;
-      break;
-    }
-  }
-  return(delta);
-}
+/* quantize aligned on unit boundaries.  Because our grid is likely
+   very coarse, play 'shuffle the blocks'; don't allow multiple
+   entries to fill the same spot as is nearly certain to happen. */
 
 void vqext_quantize(vqgen *v,quant_meta *q){
-  int i,j,k;
+  int j,k;
   long dim=v->elements;
   long n=v->entries;
-  double min,vals,delta=1.;
+  double max=-1;
   double *test=alloca(sizeof(double)*dim);
   int moved=0;
 
-  min=-((1<<q->quant)/2-1);
-  vals=1<<q->quant;
-  q->min=float24_pack(rint(min/delta)*delta);
-  q->delta=float24_pack(delta);
   
   /* allow movement only to unoccupied coordinates on the coarse grid */
   for(j=0;j<n;j++){
     for(k=0;k<dim;k++){
       double val=_now(v,j)[k];
-      val=rint((val-min)/delta);
-      if(val<0)val=0;
-      if(val>=vals)val=vals-1;
-      test[k]=val;
+      double norm=rint(fabs(val)/scalequant);
+      if(norm>max)max=norm;
+      test[k]=norm;
     }
+
     /* allow move only if unoccupied */
     if(quant_save){
       for(k=0;k<n;k++)
@@ -99,13 +74,19 @@ void vqext_quantize(vqgen *v,quant_meta *q){
     }
   }
 
+  /* unlike the other trainers, we fill in our quantization
+     information (as we know granularity beforehand and don't need to
+     maximize it) */
+
+  q->min=_float32_pack(0.);
+  q->delta=_float32_pack(scalequant);
+  q->quant=_ilog(max);
+
   if(quant_save){
     memcpy(_now(v,0),quant_save,sizeof(double)*dim*n);
     fprintf(stderr,"cells shifted this iteration: %d\n",moved);
   }
 }
-
-/* this should probably go to a x^6/4 error metric */
 
                             /* candidate,actual */
 double vqext_metric(vqgen *v,double *e, double *p){
@@ -118,15 +99,18 @@ double vqext_metric(vqgen *v,double *e, double *p){
   return sqrt(acc);
 }
 
-void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
+/* We don't interleave here; we assume that the interleave is provided
+   for us by residuesplit in vorbis/huff/ */
+void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols,int num){
   vqgen_addpoint(v,b+start,NULL);
 }
 
 /* need to reseed because of the coarse quantization we tend to use on
    residuals (which causes lots & lots of dupes) */
 void vqext_preprocess(vqgen *v){
-  long i,j,k,l,min,max;
+  long i,j,k,l;
   double *test=alloca(sizeof(double)*v->elements);
+  scalequant=q.quant;
 
   vqext_quantize(v,&q);
   vqgen_unquantize(v,&q);
@@ -142,17 +126,14 @@ void vqext_preprocess(vqgen *v){
 
   if(k<v->entries){
     fprintf(stderr,"reseeding with quantization....\n");
-    min=-((1<<q.quant)/2-1);
-    max=min+(1<<q.quant)-1;
 
     /* seed the inputs to input points, but points on unit boundaries,
      ignoring quantbits for now, making sure each seed is unique */
     
     for(i=0,j=0;i<v->points && j<v->entries;i++){
       for(k=0;k<v->elements;k++){
-	test[k]=rint(_point(v,i)[k]);
-	if(test[k]<min)test[k]=min;
-	if(test[k]>max)test[k]=max;
+	double val=_point(v,i)[k];
+	test[k]=rint(val/scalequant)*scalequant;
       }
       
       for(l=0;l<j;l++){
@@ -178,3 +159,4 @@ void vqext_preprocess(vqgen *v){
   vqgen_unquantize(v,&q);
 
 }
+

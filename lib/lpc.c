@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.19 2000/05/01 05:46:23 jon Exp $
+  last mod: $Id: lpc.c,v 1.20 2000/05/08 20:49:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -114,7 +114,7 @@ double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
 /* Input : n element envelope spectral curve
    Output: m lpc coefficients, excitation energy */
 
-double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l){
+double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l){
   int n=l->ln;
   int m=l->m;
   double *work=alloca(sizeof(double)*(n+n));
@@ -143,131 +143,22 @@ double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l){
   return(vorbis_lpc_from_data(work,lpc,n,m));
 }
 
-/* initialize Bark scale and normalization lookups.  We could do this
-   with static tables, but Vorbis allows a number of possible
-   combinations, so it's best to do it computationally.
-
-   The below is authoritative in terms of defining scale mapping.
-   Note that the scale depends on the sampling rate as well as the
-   linear block and mapping sizes */
-
-void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
-  int i;
-  double scale;
+void lpc_init(lpc_lookup *l,long mapped, int m){
   memset(l,0,sizeof(lpc_lookup));
 
-  l->n=n;
   l->ln=mapped;
   l->m=m;
 
-  l->linearmap=malloc(n*sizeof(int));
-  l->barknorm=malloc(mapped*sizeof(double));
-
-  /* we choose a scaling constant so that:
-     floor(bark(rate/2-1)*C)=mapped-1
-     floor(bark(rate/2)*C)=mapped */
-
-  scale=mapped/toBARK(rate/2.);
-
-  /* the mapping from a linear scale to a smaller bark scale is
-     straightforward.  We do *not* make sure that the linear mapping
-     does not skip bark-scale bins; the decoder simply skips them and
-     the encoder may do what it wishes in filling them.  They're
-     necessary in some mapping combinations to keep the scale spacing
-     accurate */
-  {
-    int last=-1;
-    for(i=0;i<n;i++){
-      int val=floor( toBARK((rate/2.)/n*i) *scale); /* bark numbers
-							    represent
-							    band edges */
-      if(val>=mapped)val=mapped; /* guard against the approximation */
-      l->linearmap[i]=val;
-      last=val;
-    }
-  }
-
-  /* 'Normalization' is just making sure that power isn't lost in the
-     log scale by virtue of compressing the scale in higher
-     frequencies.  We figure the weight of bands in proportion to
-     their linear/bark width ratio below, again, authoritatively.  We
-     use computed width (not the number of actual bins above) for
-     smoothness in the scale; they should agree closely */
-
-  /* keep it 0. to 1., else the dynamic range starts spreading through
-     all the squaring... */
-
-  for(i=0;i<mapped;i++)
-    l->barknorm[i]=(fromBARK((i+1)/scale)-fromBARK(i/scale));
-  for(i=0;i<mapped;i++)
-    l->barknorm[i]/=l->barknorm[mapped-1];
-
-  /* we cheat decoding the LPC spectrum via FFTs */
-  
+  /* we cheat decoding the LPC spectrum via FFTs */  
   drft_init(&l->fft,mapped*2);
 
 }
 
 void lpc_clear(lpc_lookup *l){
   if(l){
-    if(l->barknorm)free(l->barknorm);
-    if(l->linearmap)free(l->linearmap);
     drft_clear(&l->fft);
   }
 }
-
-
-/* less efficient than the decode side (written for clarity).  We're
-   not bottlenecked here anyway */
-static int frameno=-1;
-
-double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
-  /* map the input curve to a bark-scale curve for encoding */
-  
-  int mapped=l->ln;
-  double *work=alloca(sizeof(double)*mapped);
-  int i,j,last=0;
-
-  frameno++;
-  _analysis_output("lpc_pre",frameno,curve,l->n);
-
-  memset(work,0,sizeof(double)*mapped);
-
-  /* Only the decode side is behavior-specced; for now in the encoder,
-     we select the maximum value of each band as representative (this
-     helps make sure peaks don't go out of range.  In error terms,
-     selecting min would make more sense, but the codebook is trained
-     numerically, so we don't actually lose.  We'd still want to
-     use the original curve for error and noise estimation */
-
-  for(i=0;i<l->n;i++){
-    int bark=l->linearmap[i];
-    if(work[bark]<curve[i])work[bark]=curve[i];
-    if(bark>last+1){
-      /* If the bark scale is climbing rapidly, some bins may end up
-         going unused.  This isn't a waste actually; it keeps the
-         scale resolution even so that the LPC generator has an easy
-         time.  However, if we leave the bins empty we lose energy.
-         So, fill 'em in.  The decoder does not do anything with  he
-         unused bins, so we can fill them anyway we like to end up
-         with a better spectral curve */
-
-      /* we'll always have a bin zero, so we don't need to guard init */
-      long span=bark-last;
-      for(j=1;j<span;j++){
-	double del=(double)j/span;
-	work[j+last]=work[bark]*del+work[last]*(1.-del);
-      }
-    }
-    last=bark;
-  }
-  _analysis_output("lpc_prelog",frameno,work,l->ln);
-  for(i=0;i<mapped;i++)work[i]*=l->barknorm[i];
-  _analysis_output("lpc_prelognorm",frameno,work,l->ln);
-
-  return vorbis_lpc_from_spectrum(work,lpc,l);
-}
-
 
 /* One can do this the long way by generating the transfer function in
    the time domain and taking the forward FFT of the result.  The
@@ -276,8 +167,8 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
    This version does a linear curve generation and then later
    interpolates the log curve from the linear curve.  */
 
-void _vlpc_de_helper(double *curve,double *lpc,double amp,
-			    lpc_lookup *l){
+void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,
+			 lpc_lookup *l){
   int i;
   memset(curve,0,sizeof(double)*l->ln*2);
   if(amp==0)return;
@@ -302,26 +193,6 @@ void _vlpc_de_helper(double *curve,double *lpc,double amp,
     }
   }
 }  
-
-/* generate the whole freq response curve of an LPC IIR filter */
-
-void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
-  double *lcurve=alloca(sizeof(double)*(l->ln*2));
-  int i;
-
-  if(amp==0){
-    memset(curve,0,sizeof(double)*l->n);
-    return;
-  }
-  _vlpc_de_helper(lcurve,lpc,amp,l);
-  _analysis_output("lpc_lognorm",frameno,lcurve,l->ln);
-
-  for(i=0;i<l->ln;i++)lcurve[i]/=l->barknorm[i];
-  _analysis_output("lpc_log",frameno,lcurve,l->ln);
-  for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
-  _analysis_output("lpc",frameno,curve,l->n);
-
-}
 
 /* subtract or add an lpc filter to data.  Vorbis doesn't actually use this. */
 

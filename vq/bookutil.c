@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.12 2000/02/23 09:10:10 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.13 2000/05/08 20:49:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,25 +22,8 @@
 #include <string.h>
 #include <errno.h>
 #include "vorbis/codebook.h"
+#include "../lib/sharedbook.h"
 #include "bookutil.h"
-
-void codebook_unquantize(codebook *b){
-  long j,k;
-  const static_codebook *c=b->c;
-  double mindel=float24_unpack(c->q_min);
-  double delta=float24_unpack(c->q_delta);
-  if(!b->valuelist)b->valuelist=malloc(sizeof(double)*c->entries*c->dim);
-  
-  for(j=0;j<c->entries;j++){
-    double last=0.;
-    for(k=0;k<c->dim;k++){
-      double val=c->quantlist[j*c->dim+k]*delta+last+mindel;
-      b->valuelist[j*c->dim+k]=val;
-      if(c->q_sequencep)last=val;
-
-    }
-  }
-}
 
 /* A few little utils for reading files */
 /* read a line.  Use global, persistent buffering */
@@ -135,6 +118,13 @@ void reset_next_value(void){
   v_sofar=0;
 }
 
+char *setup_line(FILE *in){
+  reset_next_value();
+  value_line_buff=get_line(in);
+  return(value_line_buff);
+}
+
+
 int get_vector(codebook *b,FILE *in,int start, int n,double *a){
   int i;
   const static_codebook *c=b->c;
@@ -190,12 +180,12 @@ char *find_seek_to(FILE *in,char *s){
 codebook *codebook_load(char *filename){
   codebook *b=calloc(1,sizeof(codebook));
   static_codebook *c=(static_codebook *)(b->c=calloc(1,sizeof(static_codebook)));
-  encode_aux *a=calloc(1,sizeof(encode_aux));
+  encode_aux_nearestmatch *a=NULL;
+  encode_aux_threshmatch *t=NULL;
+  int quant_to_read=0;
   FILE *in=fopen(filename,"r");
   char *line;
   long i;
-
-  c->encode_tree=a;
 
   if(in==NULL){
     fprintf(stderr,"Couldn't open codebook %s\n",filename);
@@ -207,36 +197,133 @@ codebook *codebook_load(char *filename){
 
   /* get the major important values */
   line=get_line(in);
-  if(sscanf(line,"%ld, %ld, %ld, %ld, %d, %d",
-	    &(c->dim),&(c->entries),&(c->q_min),&(c->q_delta),&(c->q_quant),
-	    &(c->q_sequencep))!=6){
+  if(sscanf(line,"%ld, %ld,",
+	    &(c->dim),&(c->entries))!=2){
     fprintf(stderr,"1: syntax in %s in line:\t %s",filename,line);
     exit(1);
   }
-
-  /* find the auxiliary encode struct (if any) */
-  find_seek_to(in,"static encode_aux _vq_aux_");
-  /* how big? */
   line=get_line(in);
   line=get_line(in);
-  line=get_line(in);
-  line=get_line(in);
-  line=get_line(in);
-  if(sscanf(line,"%ld, %ld",&(a->aux),&(a->alloc))!=2){
-    fprintf(stderr,"2: syntax in %s in line:\t %s",filename,line);
+  if(sscanf(line,"%d, %ld, %ld, %d, %d,",
+	    &(c->maptype),&(c->q_min),&(c->q_delta),&(c->q_quant),
+	    &(c->q_sequencep))!=5){
+    fprintf(stderr,"1: syntax in %s in line:\t %s",filename,line);
     exit(1);
+  }
+  
+  /* find the auxiliary encode struct[s] (if any) */
+  if(find_seek_to(in,"static encode_aux_nearestmatch _vq_aux")){
+    /* how big? */
+    c->nearest_tree=a=calloc(1,sizeof(encode_aux_nearestmatch));
+    line=get_line(in);
+    line=get_line(in);
+    line=get_line(in);
+    line=get_line(in);
+    line=get_line(in);
+    if(sscanf(line,"%ld, %ld",&(a->aux),&(a->alloc))!=2){
+      fprintf(stderr,"2: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+
+    /* load ptr0 */
+    find_seek_to(in,"static long _vq_ptr0");
+    reset_next_value();
+    a->ptr0=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->ptr0+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }
+    
+    /* load ptr1 */
+    find_seek_to(in,"static long _vq_ptr1");
+    reset_next_value();
+    a->ptr1=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->ptr1+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+    }
+    
+    
+    /* load p */
+    find_seek_to(in,"static long _vq_p_");
+    reset_next_value();
+    a->p=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->p+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }
+    
+    /* load q */
+    find_seek_to(in,"static long _vq_q_");
+    reset_next_value();
+    a->q=malloc(sizeof(long)*a->aux);
+    for(i=0;i<a->aux;i++)
+      if(get_next_ivalue(in,a->q+i)){
+	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	exit(1);
+      }    
+  }
+  
+  if(find_seek_to(in,"static encode_aux_threshmatch _vq_aux")){
+    /* how big? */
+    c->thresh_tree=t=calloc(1,sizeof(encode_aux_threshmatch));
+    line=get_line(in);
+    line=get_line(in);
+    line=get_line(in);
+    if(sscanf(line,"%d",&(t->quantvals))!=1){
+      fprintf(stderr,"3: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+    line=get_line(in);
+    if(sscanf(line,"%d",&(t->threshvals))!=1){
+      fprintf(stderr,"4: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+    /* load quantthresh */
+    find_seek_to(in,"static double _vq_quantthresh_");
+    reset_next_value();
+    t->quantthresh=malloc(sizeof(double)*t->threshvals);
+    for(i=0;i<t->threshvals-1;i++)
+      if(get_next_value(in,t->quantthresh+i)){
+	fprintf(stderr,"out of data 1 while reading codebook %s\n",filename);
+	exit(1);
+      }    
+    /* load quantmap */
+    find_seek_to(in,"static long _vq_quantmap_");
+    reset_next_value();
+    t->quantmap=malloc(sizeof(long)*t->threshvals);
+    for(i=0;i<t->threshvals;i++)
+      if(get_next_ivalue(in,t->quantmap+i)){
+	fprintf(stderr,"out of data 2 while reading codebook %s\n",filename);
+	exit(1);
+      }    
+  }
+    
+  switch(c->maptype){
+  case 0:
+    quant_to_read=0;
+    break;
+  case 1:
+    quant_to_read=_book_maptype1_quantvals(c);
+    break;
+  case 2:
+    quant_to_read=c->entries*c->dim;
+    break;
   }
     
   /* load the quantized entries */
   find_seek_to(in,"static long _vq_quantlist_");
   reset_next_value();
-  c->quantlist=malloc(sizeof(long)*c->entries*c->dim);
-  for(i=0;i<c->entries*c->dim;i++)
+  c->quantlist=malloc(sizeof(long)*quant_to_read);
+  for(i=0;i<quant_to_read;i++)
     if(get_next_ivalue(in,c->quantlist+i)){
       fprintf(stderr,"out of data while reading codebook %s\n",filename);
       exit(1);
     }
-
+  
   /* load the lengthlist */
   find_seek_to(in,"static long _vq_lengthlist");
   reset_next_value();
@@ -247,110 +334,12 @@ codebook *codebook_load(char *filename){
       exit(1);
     }
 
-  /* load ptr0 */
-  find_seek_to(in,"static long _vq_ptr0");
-  reset_next_value();
-  a->ptr0=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->ptr0+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
-  /* load ptr1 */
-  find_seek_to(in,"static long _vq_ptr1");
-  reset_next_value();
-  a->ptr1=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->ptr1+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
-
-  /* load p */
-  find_seek_to(in,"static long _vq_p_");
-  reset_next_value();
-  a->p=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->p+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
-  /* load q */
-  find_seek_to(in,"static long _vq_q_");
-  reset_next_value();
-  a->q=malloc(sizeof(long)*a->aux);
-  for(i=0;i<a->aux;i++)
-    if(get_next_ivalue(in,a->q+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
   /* got it all */
   fclose(in);
+  
+  vorbis_book_init_encode(b,c);
 
-  /* unquantize the entries while we're at it */
-  codebook_unquantize(b);
-
-  /* don't need n and c */
   return(b);
-}
-
-int codebook_entry(codebook *b,double *val){
-  const static_codebook *c=b->c;
-  encode_aux *t=c->encode_tree;
-  double *n=alloca(c->dim*sizeof(double));
-  int ptr=0,k;
-
-  do{
-    double C=0.;
-    double *p=b->valuelist+t->p[ptr];
-    double *q=b->valuelist+t->q[ptr];
-    
-    for(k=0;k<c->dim;k++){
-      n[k]=p[k]-q[k];
-      C-=(p[k]+q[k])*n[k];
-    }
-    C/=2.;
-    
-    for(k=0;k<c->dim;k++)
-      C+=n[k]*val[k];
-    
-    if(C>0.) /* in A */
-      ptr=-t->ptr0[ptr];
-    else     /* in B */
-      ptr=-t->ptr1[ptr];
-  }while(ptr>0);
-
-  return(-ptr);
-}
-
-/* 24 bit float (not IEEE; nonnormalized mantissa +
-   biased exponent ): neeeeemm mmmmmmmm mmmmmmmm */
-
-long float24_pack(double val){
-  int sign=0;
-  long exp;
-  long mant;
-  if(val<0){
-    sign=0x800000;
-    val= -val;
-  }
-  exp= floor(log(val)/log(2));
-  mant=rint(ldexp(val,17-exp));
-  exp=(exp+VQ_FEXP_BIAS)<<18;
-
-  return(sign|exp|mant);
-}
-
-double float24_unpack(long val){
-  double mant=val&0x3ffff;
-  double sign=val&0x800000;
-  double exp =(val&0x7c0000)>>18;
-  if(sign)mant= -mant;
-  return(ldexp(mant,exp-17-VQ_FEXP_BIAS));
 }
 
 void spinnit(char *s,int n){
@@ -388,6 +377,8 @@ void spinnit(char *s,int n){
 void build_tree_from_lengths(int vals, long *hist, long *lengths){
   int i,j;
   long *membership=malloc(vals*sizeof(long));
+  long *histsave=alloca(vals*sizeof(long));
+  memcpy(histsave,hist,vals*sizeof(long));
 
   for(i=0;i<vals;i++)membership[i]=i;
 
@@ -431,5 +422,172 @@ void build_tree_from_lengths(int vals, long *hist, long *lengths){
       exit(1);
     }
 
+  /* for sanity check purposes: how many bits would it have taken to
+     encode the training set? */
+  {
+    long bitsum=0;
+    long samples=0;
+    for(i=0;i<vals;i++){
+      bitsum+=(histsave[i]-1)*lengths[i];
+      samples+=histsave[i]-1;
+    }
+    fprintf(stderr,"\rTotal samples in training set: %ld      \n",samples);
+    fprintf(stderr,"\rTotal bits used to represent training set: %ld\n",
+	    bitsum);
+  }
+
   free(membership);
+}
+
+void write_codebook(FILE *out,char *name,const static_codebook *c){
+  encode_aux_threshmatch *t=c->thresh_tree;
+  encode_aux_nearestmatch *n=c->nearest_tree;
+  int j,k;
+
+  /* save the book in C header form */
+  fprintf(out,
+ "/********************************************************************\n"
+ " *                                                                  *\n"
+ " * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *\n"
+ " * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *\n"
+ " * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *\n"
+ " * PLEASE READ THESE TERMS DISTRIBUTING.                            *\n"
+ " *                                                                  *\n"
+ " * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *\n"
+ " * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *\n"
+ " * http://www.xiph.org/                                             *\n"
+ " *                                                                  *\n"
+ " ********************************************************************\n"
+ "\n"
+ " function: static codebook autogenerated by vq/somethingorother\n"
+ "\n"
+ " ********************************************************************/\n\n");
+
+  fprintf(out,"#ifndef _V_%s_VQH_\n#define _V_%s_VQH_\n",name,name);
+  fprintf(out,"#include \"vorbis/codebook.h\"\n\n");
+
+  /* first, the static vectors, then the book structure to tie it together. */
+  /* quantlist */
+  if(c->quantlist){
+    long vals=(c->maptype==1?_book_maptype1_quantvals(c):c->entries*c->dim);
+    fprintf(out,"static long _vq_quantlist_%s[] = {\n",name);
+    for(j=0;j<vals;j++){
+      fprintf(out,"\t%ld,\n",c->quantlist[j]);
+    }
+    fprintf(out,"};\n\n");
+  }
+
+  /* lengthlist */
+  fprintf(out,"static long _vq_lengthlist_%s[] = {\n",name);
+  for(j=0;j<c->entries;){
+    fprintf(out,"\t");
+    for(k=0;k<16 && j<c->entries;k++,j++)
+      fprintf(out,"%2ld,",c->lengthlist[j]);
+    fprintf(out,"\n");
+  }
+  fprintf(out,"};\n\n");
+
+  if(t){
+    /* quantthresh */
+    fprintf(out,"static double _vq_quantthresh_%s[] = {\n",name);
+    for(j=0;j<t->threshvals-1;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<t->threshvals-1;k++,j++)
+	fprintf(out,"%.5g, ",t->quantthresh[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+
+    /* quantmap */
+    fprintf(out,"static long _vq_quantmap_%s[] = {\n",name);
+    for(j=0;j<t->threshvals;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<t->threshvals;k++,j++)
+	fprintf(out,"%5ld,",t->quantmap[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");  
+
+    fprintf(out,"static encode_aux_threshmatch _vq_auxt_%s = {\n",name);
+    fprintf(out,"\t_vq_quantthresh_%s,\n",name);
+    fprintf(out,"\t_vq_quantmap_%s,\n",name);
+    fprintf(out,"\t%d,\n",t->quantvals);
+    fprintf(out,"\t%d\n};\n\n",t->threshvals);
+  }
+
+  if(n){
+    
+    /* ptr0 */
+    fprintf(out,"static long _vq_ptr0_%s[] = {\n",name);
+    for(j=0;j<n->aux;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<n->aux;k++,j++)
+	fprintf(out,"%6ld,",n->ptr0[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+    
+    /* ptr1 */
+    fprintf(out,"static long _vq_ptr1_%s[] = {\n",name);
+    for(j=0;j<n->aux;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<n->aux;k++,j++)
+	fprintf(out,"%6ld,",n->ptr1[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+    
+    /* p */
+    fprintf(out,"static long _vq_p_%s[] = {\n",name);
+    for(j=0;j<n->aux;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<n->aux;k++,j++)
+	fprintf(out,"%6ld,",n->p[j]*c->dim);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+    
+    /* q */
+    fprintf(out,"static long _vq_q_%s[] = {\n",name);
+    for(j=0;j<n->aux;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<n->aux;k++,j++)
+	fprintf(out,"%6ld,",n->q[j]*c->dim);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+  
+    fprintf(out,"static encode_aux_nearestmatch _vq_auxn_%s = {\n",name);
+    fprintf(out,"\t_vq_ptr0_%s,\n",name);
+    fprintf(out,"\t_vq_ptr1_%s,\n",name);
+    fprintf(out,"\t_vq_p_%s,\n",name);
+    fprintf(out,"\t_vq_q_%s,\n",name);
+    fprintf(out,"\t%ld, %ld\n};\n\n",n->aux,n->aux);
+  }
+
+  /* tie it all together */
+  
+  fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
+  
+  fprintf(out,"\t%ld, %ld,\n",c->dim,c->entries);
+  fprintf(out,"\t_vq_lengthlist_%s,\n",name);
+  fprintf(out,"\t%d, %ld, %ld, %d, %d,\n",
+          c->maptype,c->q_min,c->q_delta,c->q_quant,c->q_sequencep);
+  if(c->quantlist)
+    fprintf(out,"\t_vq_quantlist_%s,\n",name);
+  else
+    fprintf(out,"\tNULL,\n");
+
+  if(n)
+    fprintf(out,"\t&_vq_auxn_%s,\n",name);
+  else
+    fprintf(out,"\tNULL,\n");
+  if(t)
+    fprintf(out,"\t&_vq_auxt_%s,\n",name);
+  else
+    fprintf(out,"\tNULL,\n");
+
+  fprintf(out,"};\n\n");
+
+  fprintf(out,"\n#endif\n");
 }

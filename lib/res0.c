@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.11 2000/04/06 15:55:41 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.12 2000/05/08 20:49:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,8 +28,8 @@
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "registry.h"
-#include "scales.h"
 #include "bookinternal.h"
+#include "sharedbook.h"
 #include "misc.h"
 #include "os.h"
 
@@ -38,9 +38,7 @@ typedef struct {
   
   int         parts;
   codebook   *phrasebook;
-
   codebook ***partbooks;
-  int        *partstages;
 
   int         partvals;
   int       **decodemap;
@@ -63,7 +61,6 @@ void free_look(vorbis_look_residue *i){
     for(j=0;j<look->partvals;j++)
       free(look->decodemap[j]);
     free(look->decodemap);
-    if(look->partstages)free(look->partstages);
     memset(i,0,sizeof(vorbis_look_residue0));
     free(i);
   }
@@ -98,8 +95,9 @@ vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
   info->grouping=_oggpack_read(opb,24)+1;
   info->partitions=_oggpack_read(opb,6)+1;
   info->groupbook=_oggpack_read(opb,8);
-  for(j=0;j<info->partitions;j++)
+  for(j=0;j<info->partitions;j++){
     acc+=info->secondstages[j]=_oggpack_read(opb,4);
+  }
   for(j=0;j<acc;j++)
     info->booklist[j]=_oggpack_read(opb,8);
 
@@ -126,7 +124,6 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   dim=look->phrasebook->dim;
 
   look->partbooks=calloc(look->parts,sizeof(codebook **));
-  look->partstages=calloc(look->parts,sizeof(int));
 
   for(j=0;j<look->parts;j++){
     int stages=info->secondstages[j];
@@ -135,10 +132,9 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
       for(k=0;k<stages;k++)
 	look->partbooks[j][k]=vd->fullbooks+info->booklist[acc++];
     }
-    look->partstages[j]=stages;
   }
 
-  look->partvals=pow(look->parts,dim);
+  look->partvals=rint(pow(look->parts,dim));
   look->decodemap=malloc(look->partvals*sizeof(int *));
   for(j=0;j<look->partvals;j++){
     long val=j;
@@ -155,76 +151,48 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   return(look);
 }
 
-/* returns the distance error from encoding with this book set */
-static double _testpart(double *vec,int n, int stages, codebook **books){
-  int i,j;
-
-  double *work=alloca(n*sizeof(double)),acc=0.;
-  memcpy(work,vec,n*sizeof(double));
-
-  if(stages==0){
-    /* a mild hack.  We want partitions with samples values under
-       fabs(.5) to be fully zeroed; if this case is met, we return an
-       error of -1 (which cannot be beaten).  If the samples values
-       don't meet this criteria, return the real error */
-    for(i=0;i<n;i++)
-      if(fabs(vec[i])>.5)break;
-    if(i==n)return(-1.);
-    
-    /* real (squared) error */
-    for(i=0;i<n;i++)
-      acc+=vec[i]*vec[i];
-
-  }else{
-    for(j=0;j<stages;j++){
-      acc=0.;
-      for(i=0;i<n;i+=books[j]->dim)
-	acc+=vorbis_book_vE(books[j],work+i);
-    }
-  }
-
-  return(acc);
-}
-
-static int _testhack(double *vec,int n){
-  int i;
-  double acc=0.;
+/* classify by max quantized amplitude only */
+static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
+  vorbis_info_residue0 *info=look->info;
   double max=0.;
+  int i;
+  
   for(i=0;i<n;i++)
-    acc+=todB(fabs(vec[i]));
-  acc=fromdB(acc/n);
-  for(i=0;i<n;i++)
-    max=(fabs(vec[i])>max?fabs(vec[i]):max);
-
-  if(max<.5)return(0);
-  if(max<2.5 && acc<1.5)return(1);
-  if(max<6.)return(2);
-  return(3);
+    if(fabs(vec[i])>max)max=fabs(vec[i]);
+  
+  for(i=0;i<look->parts-1;i++)
+    if(max>=info->ampmax[i])
+      break;
+  return(i);
 }
 
 static int _encodepart(oggpack_buffer *opb,double *vec, int n,
 		       int stages, codebook **books){
   int i,j,bits=0;
 
-  double *work=alloca(n*sizeof(double));
-  memcpy(work,vec,n*sizeof(double));
+  for(j=0;j<stages;j++){
+    int dim=books[j]->dim;
+    int step=n/dim;
+    for(i=0;i<step;i++)
+      bits+=vorbis_book_encodevs(books[j],vec+i,opb,step,0);
+ 
+  }
 
-  for(j=0;j<stages;j++)
-    for(i=0;i<n;i+=books[j]->dim)
-      bits+=vorbis_book_encodevE(books[j],work+i,opb);
-  
   return(bits);
 }
 
 static int _decodepart(oggpack_buffer *opb,double *work,double *vec, int n,
 		       int stages, codebook **books){
   int i,j;
-
-  memset(work,0,n*sizeof(double));
-  for(j=0;j<stages;j++)
-    for(i=0;i<n;i+=books[j]->dim)
-      vorbis_book_decodev(books[j],work+i,opb);
-
+  
+  memset(work,0,sizeof(double)*n);
+  for(j=0;j<stages;j++){
+    int dim=books[j]->dim;
+    int step=n/dim;
+    for(i=0;i<step;i++)
+      vorbis_book_decodevs(books[j],work+i,opb,step,0);
+  }
+  
   for(i=0;i<n;i++)
     vec[i]*=work[i];
   
@@ -251,11 +219,10 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(long *));
   partvals=partwords*partitions_per_word;
 
-  /* we find/encode the patition type for each partition of each
+  /* we find the patition type for each partition of each
      channel.  We'll go back and do the interleaved encoding in a
      bit.  For now, clarity */
   
-  if(ch)_analysis_output("a_res",vb->sequence,in[0],n);
   memset(resbits,0,sizeof(long)*possible_partitions);
   memset(resvals,0,sizeof(long)*possible_partitions);
 
@@ -264,34 +231,16 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
     memset(partword[i],0,n/samples_per_partition*sizeof(long));
   }
 
-  for(i=info->begin,l=0;i<info->end;i+=samples_per_partition,l++){
-    for(j=0;j<ch;j++){
-      
-      /* find the best encoding for the partition using each possible
-         book.  Use the book that had lowest error (we arrange the
-         books to make optimal choice very obvious and not even think
-         about bits) */
-      partword[j][l]=_testhack(in[j]+i,samples_per_partition);
-
-#if 0
-      double best=_testpart(in[j]+i,samples_per_partition,
-			    look->partstages[0],look->partbooks[0]);
-      for(k=1;k<info->partitions;k++){
-	double this=_testpart(in[j]+i,samples_per_partition,
-			      look->partstages[k],look->partbooks[k]);
-	if(this<best){
-	  best=this;
-	  partword[j][l]=k;
-	}
-      }
-#endif
-    }
-  }
+  for(i=info->begin,l=0;i<info->end;i+=samples_per_partition,l++)
+    for(j=0;j<ch;j++)
+      /* do the partition decision based on the number of 'bits'
+         needed to encode the block */
+      partword[j][l]=_testhack(in[j]+i,samples_per_partition,look);
   
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
-     partitions for that partition word.  Then write the next parition
-     channel words... */
+     residual words for that partition word.  Then write the next
+     parition channel words... */
   
   for(i=info->begin,l=0;i<info->end;){
     /* first we encode a partition codeword for each channel */
@@ -306,7 +255,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
       for(j=0;j<ch;j++){
 	resbits[partword[j][l]]+=
 	  _encodepart(&vb->opb,in[j]+i,samples_per_partition,
-		      look->partstages[partword[j][l]],
+		      info->secondstages[partword[j][l]],
 		      look->partbooks[partword[j][l]]);
 	resvals[partword[j][l]]+=samples_per_partition;
       }
@@ -314,12 +263,13 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   }
 
   for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];
-  fprintf(stderr,"Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
+  fprintf(stderr,
+	  "Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
 	  ch*(info->end-info->begin),phrasebits,resbitsT);
   for(i=0;i<possible_partitions;i++)
     fprintf(stderr,"%ld(%ld):%ld ",i,resvals[i],resbits[i]);
   fprintf(stderr,"\n");
-
+ 
   return(0);
 }
 
@@ -352,12 +302,10 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
       for(j=0;j<ch;j++){
 	int part=partword[j][k];
 	_decodepart(&vb->opb,work,in[j]+i,samples_per_partition,
-		    look->partstages[part],
+		    info->secondstages[part],
 		    look->partbooks[part]);
       }
   }
-
-  if(ch)_analysis_output("s_res",vb->sequence,in[0],n);
 
   return(0);
 }

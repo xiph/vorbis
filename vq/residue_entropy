@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+
+use POSIX;
+my($groupn,$quant,$sink)=@ARGV;
+my%hash;
+my$count=0;
+my$lines=0;
+
+if(!defined($quant)){
+    print "Usage: residue_entropy <groupsize> <quant>\n";
+    exit(1);
+}
+$|=1;
+
+while (<STDIN>) {
+    chop;
+    my@nums = ();
+    @nums = split(/,/);
+    $lines++;
+
+    my$step=$#nums/$groupn;
+    for(my$i=0;$i<$step;$i++){
+	my$key="";
+	for(my$j=$i;$j<$#nums;$j+=$step){
+	    
+	    $num=$nums[$j];
+	    if($num!=0){
+		if($num<0){
+		    $num= -POSIX::floor(log(-$num)*8.6858896/$quant+.5)-1;
+		}else{
+		    $num= POSIX::floor(log($num)*8.6858896/$quant+.5)+1;
+		}
+	    }else{
+		$num=0;
+	    }
+	    $key.=":$num";
+	}
+	
+	if(!defined($hash{$key})){
+	    $count++;
+	    $hash{$key}=1;
+	}
+    }
+	 
+    if(($lines % 1000)==0){
+	print "\rworking... $lines lines, found $count values so far";
+    }
+}
+
+print "\r$count values total                                       \n";
+print "Done.\n\n";

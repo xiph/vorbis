@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.5 2000/01/21 13:42:37 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.6 2000/05/08 20:49:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,49 +21,64 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
+#include "vorbis/codebook.h"
+#include "../lib/sharedbook.h"
 #include "bookutil.h"
 
 /* set up metrics */
 
 double count=0.;
-int dim=-1;
-double *work=NULL;
+
 
 void process_preprocess(codebook **bs,char *basename){
-  while(*bs){
-    codebook *b=*bs;
-    if(dim==-1){
-      dim=b->c->dim;
-      work=malloc(sizeof(double)*dim);
-    }else{
-      if(dim!=b->c->dim){
-	fprintf(stderr,"Each codebook in a cascade must have the same dimensional order\n");
-	exit(1);
-      }
-    }
-    bs++;
-  }
 }
 
 void process_postprocess(codebook **b,char *basename){
   fprintf(stderr,"Done.                      \n");
 }
 
-void process_vector(codebook **bs,double *a){
-  int i;
-  memcpy(work,a,dim*sizeof(double));
+double process_one(codebook *b,double *a,int dim,int step,int addmul,
+		   double base){
+  int j;
 
-  while(*bs){
-    codebook *b=*bs;
-    int entry=codebook_entry(b,work);
-    double *e=b->valuelist+b->c->dim*entry;
-
-    for(i=0;i<b->c->dim;i++)work[i]-=e[i];
-    bs++;
+  if(b->c->q_sequencep){
+    double temp;
+    for(j=0;j<dim;j++){
+      temp=a[j*step];
+      a[j*step]-=base;
+    }
+    base=temp;
   }
 
-  for(i=0;i<dim;i++)
-    fprintf(stdout,"%f, ",work[i]);
+  vorbis_book_besterror(b,a,step,addmul);
+  
+  return base;
+}
+
+void process_vector(codebook **bs,int *addmul,int inter,double *a,int n){
+  int i,bi=0;
+  int booknum=0;
+  
+  while(*bs){
+    double base=0.;
+    codebook *b=*bs;
+    int dim=b->dim;
+    
+    if(inter){
+      for(i=0;i<n/dim;i++)
+	base=process_one(b,a+i,dim,n/dim,addmul[bi],base);
+    }else{
+      for(i=0;i<=n-dim;i+=dim)
+	base=process_one(b,a+i,dim,1,addmul[bi],base);
+    }
+
+    bs++;
+    booknum++;
+    bi++;
+  }
+
+  for(i=0;i<n;i++)
+    fprintf(stdout,"%f, ",a[i]);
   fprintf(stdout,"\n");
   
   if((long)(count++)%100)spinnit("working.... lines: ",count);
@@ -71,7 +86,8 @@ void process_vector(codebook **bs,double *a){
 
 void process_usage(void){
   fprintf(stderr,
-	  "usage: vqcascade book.vqh [book.vqh]... datafile.vqd [datafile.vqd]...\n\n"
+	  "usage: vqcascade [-i] +|*<codebook>.vqh [ +|*<codebook.vqh> ]... \n"
+	  "                 datafile.vqd [datafile.vqd]...\n\n"
 	  "       data can be taken on stdin.  residual error data sent to\n"
 	  "       stdout.\n\n");
 

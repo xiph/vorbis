@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.25 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.26 2000/05/08 20:49:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,7 @@
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "registry.h"
-#include "misc.h"
+#include "scales.h"
 
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
@@ -70,17 +70,30 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 }
 
 /* there was no great place to put this.... */
-void _analysis_output(char *base,int i,double *v,int n){
+void _analysis_output(char *base,int i,double *v,int n,int bark,int dB){
 #ifdef ANALYSIS
   int j;
   FILE *of;
   char buffer[80];
   sprintf(buffer,"%s_%d.m",base,i);
   of=fopen(buffer,"w");
-  for(j=0;j<n;j++)
-    fprintf(of,"%g\n",v[j]);
+
+  for(j=0;j<n;j++){
+    if(dB && v[j]==0)
+          fprintf(of,"\n\n");
+    else{
+      if(bark)
+	fprintf(of,"%g ",toBARK(22050.*j/n));
+      else
+	fprintf(of,"%g ",(double)j);
+      
+      if(dB){
+	fprintf(of,"%g\n",todB(fabs(v[j])));
+      }else{
+	fprintf(of,"%g\n",v[j]);
+      }
+    }
+  }
   fclose(of);
 #endif
 }
-
-

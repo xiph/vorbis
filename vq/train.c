@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.16 2000/02/21 01:12:58 xiphmont Exp $
+ last mod: $Id: train.c,v 1.17 2000/05/08 20:49:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -53,7 +53,8 @@ static void usage(void){
 	  "         -s[ubvector]  <start[,num]>\n"
 	  "         -e[rror]      <desired_error>\n"
 	  "         -i[terations] <maxiterations>\n"
-	  "         -d[istance]   desired minimum cell radius from midpoint\n\n"
+	  "         -d[istance]   desired minimum cell radius from midpoint\n"
+	  "         -b <dummy>    eliminate cell size biasing; use normal LBG\n\n"
 	  "examples:\n"
 	  "   train a new codebook to 1%% tolerance on datafile 'foo':\n"
 	  "      xxxvqtrain book -p 256,6,8 -e .01 foo\n"
@@ -78,6 +79,7 @@ int main(int argc,char *argv[]){
   int start=0,num=-1;
   double desired=.05,mindist=0.;
   int iter=1000;
+  int biasp=1;
 
   FILE *out=NULL;
   char *line;
@@ -213,6 +215,9 @@ int main(int argc,char *argv[]){
 	if(sscanf(argv[1],"%d",&iter)!=1)
 	  goto syner;
 	break;
+      case 'b':
+	biasp=0;
+	break;
       default:
 	fprintf(stderr,"Unknown option %s\n",argv[0]);
 	exit(1);
@@ -275,7 +280,7 @@ int main(int argc,char *argv[]){
 	  }
 	  if(num<=0)num=(cols-start)/dim;
 	  for(i=0;i<num;i++)
-	    vqext_addpoint_adj(&v,b,start+i*dim,dim,cols);
+	    vqext_addpoint_adj(&v,b,start+i*dim,dim,cols,num);
 
 	}
       }
@@ -300,7 +305,7 @@ int main(int argc,char *argv[]){
       vqgen_unquantize(&v,&q);
       vqgen_cellmetric(&v);
     }
-    result=vqgen_iterate(&v);
+    result=vqgen_iterate(&v,biasp);
     vqext_quantize(&v,&q);
     if(result<desired)break;
   }
@@ -310,7 +315,8 @@ int main(int argc,char *argv[]){
   fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
   fprintf(out,"%s\n",vqext_booktype);
   fprintf(out,"%d %d %d\n",entries,dim,vqext_aux);
-  fprintf(out,"%ld %ld %d %d\n",q.min,q.delta,q.quant,q.sequencep);
+  fprintf(out,"%ld %ld %d %d\n",
+	  q.min,q.delta,q.quant,q.sequencep);
 
   /* quantized entries */
   fprintf(out,"# quantized entries---\n");

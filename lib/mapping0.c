@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.11 2000/02/23 09:24:29 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.12 2000/05/08 20:49:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -49,6 +49,10 @@ typedef struct {
   vorbis_func_floor **floor_func;
   vorbis_func_residue **residue_func;
 
+  int ch;
+  double **decay;
+  long lastframe; /* if a different mode is called, we need to 
+		     invalidate decay */
 } vorbis_look_mapping0;
 
 static void free_info(vorbis_info_mapping *i){
@@ -67,6 +71,12 @@ static void free_look(vorbis_look_mapping *look){
       l->floor_func[i]->free_look(l->floor_look[i]);
       l->residue_func[i]->free_look(l->residue_look[i]);
       if(l->psy_look)_vp_psy_clear(l->psy_look+i);
+    }
+    if(l->decay){
+      for(i=0;i<l->ch;i++){
+	if(l->decay[i])free(l->decay[i]);
+      }
+      free(l->decay);
     }
     free(l->time_func);
     free(l->floor_func);
@@ -117,6 +127,13 @@ static vorbis_look_mapping *look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
       _vp_psy_init(look->psy_look+i,vi->psy_param[psynum],
 		   vi->blocksizes[vm->blockflag]/2,vi->rate);
     }
+  }
+
+  look->ch=vi->channels;
+  if(vi->psys){
+    look->decay=calloc(vi->channels,sizeof(double *));
+    for(i=0;i<vi->channels;i++)
+      look->decay[i]=calloc(vi->blocksizes[vm->blockflag]/2,sizeof(double));
   }
 
   return(look);
@@ -178,8 +195,10 @@ static vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
 #include "psy.h"
 #include "bitwise.h"
 #include "spectrum.h"
+#include "scales.h"
 
 /* no time mapping implementation for now */
+static long seq=0;
 static int forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state     *vd=vb->vd;
   vorbis_info          *vi=vd->vi;
@@ -213,52 +232,52 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
   }
 
   {
-    double *decfloor=_vorbis_block_alloc(vb,n*sizeof(double)/2);
-    /*double *floor=_vorbis_block_alloc(vb,n*sizeof(double)/2);*/
+    double *floor=_vorbis_block_alloc(vb,n*sizeof(double)/2);
     double *mask=_vorbis_block_alloc(vb,n*sizeof(double)/2);
     
     for(i=0;i<vi->channels;i++){
       double *pcm=vb->pcm[i];
+      double *decay=look->decay[i];
       int submap=info->chmuxlist[i];
 
-      /* perform psychoacoustics; takes PCM vector; 
-	 returns two curves: the desired transform floor and the masking curve */
-      /*memset(floor,0,sizeof(double)*n/2);*/
-      memset(mask,0,sizeof(double)*n/2);
-      /*_vp_mask_floor(look->psy_look+submap,pcm,floor,0); we use
-        unnormalized masks as floors for now */
-      _vp_mask_floor(look->psy_look+submap,pcm,mask,1);
- 
-      /* perform floor encoding; takes transform floor, returns decoded floor */
-      /*      nonzero[i]=look->floor_func[submap]->
-	      forward(vb,look->floor_look[submap],floor,decfloor);*/
-      nonzero[i]=look->floor_func[submap]->
-	forward(vb,look->floor_look[submap],mask,decfloor);
+      /* if some other mode/mapping was called last frame, our decay
+         accumulator is out of date.  Clear it. */
+      if(look->lastframe+1 != vb->sequence)
+	memset(decay,0,n*sizeof(double)/2);
 
+      /* perform psychoacoustics; do masking */
+      _vp_compute_mask(look->psy_look+submap,pcm,floor,mask,decay);
+ 
+      _analysis_output("mdct",seq,pcm,n/2,0,1);
+      _analysis_output("lmdct",seq,pcm,n/2,0,0);
+      _analysis_output("prefloor",seq,floor,n/2,0,1);
+
+      /* perform floor encoding */
+      nonzero[i]=look->floor_func[submap]->
+	forward(vb,look->floor_look[submap],floor,floor);
+
+      _analysis_output("floor",seq,floor,n/2,0,1);
+
+      /* apply the floor, do optional noise levelling */
+      _vp_apply_floor(look->psy_look+submap,pcm,floor,mask);
+      
+      _analysis_output("res",seq++,pcm,n/2,0,0);
+      
 #ifdef TRAIN
       if(nonzero[i]){
 	FILE *of;
 	char buffer[80];
 	int i;
 	
-	sprintf(buffer,"masked_%d.vqd",vb->mode);
+	sprintf(buffer,"residue_%d.vqd",vb->mode);
 	of=fopen(buffer,"a");
 	for(i=0;i<n/2;i++)
-	  fprintf(of,"%g, ",pcm[i]/mask[i]);
-	fprintf(of,"\n");
-	fclose(of);
-	sprintf(buffer,"floored_%d.vqd",vb->mode);
-	of=fopen(buffer,"a");
-	for(i=0;i<n/2;i++)
-	  fprintf(of,"%g, ",pcm[i]/decfloor[i]);
+	  fprintf(of,"%g, ",pcm[i]);
 	fprintf(of,"\n");
 	fclose(of);
       }
 #endif      
 
-      /* no iterative residue/floor tuning at the moment */
-      if(nonzero[i])for(j=0;j<n/2;j++)pcm[j]/=decfloor[j];
-      
     }
     
     /* perform residue encoding with residue mapping; this is
@@ -278,6 +297,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
     }
   }
 
+  look->lastframe=vb->sequence;
   return(0);
 }
 
@@ -305,6 +325,7 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
     int submap=info->chmuxlist[i];
     nonzero[i]=look->floor_func[submap]->
       inverse(vb,look->floor_look[submap],pcm);
+    _analysis_output("ifloor",seq+i,pcm,n/2,0,1);
   }
 
   /* recover the residue, apply directly to the spectral envelope */
@@ -323,6 +344,7 @@ static int inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     double *pcm=vb->pcm[i];
+    _analysis_output("out",seq++,pcm,n/2,0,0);
     mdct_backward(vd->transform[vb->W][0],pcm,pcm);
   }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.7 2000/04/06 16:46:51 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.8 2000/05/08 20:49:49 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -22,9 +22,20 @@
 
  ********************************************************************/
 
+/* Note that the lpc-lsp conversion finds the roots of polynomial with
+   an iterative root polisher (CACM algorithm 283).  It *is* possible
+   to confuse this algorithm into not converging; that should only
+   happen with absurdly closely spaced roots (very sharp peaks in the
+   LPC f response) which in turn should be impossible in our use of
+   the code.  If this *does* happen anyway, it's a bug in the floor
+   finder; find the cause of the confusion (probably a single bin
+   spike or accidental near-double-limit resolution problems) and
+   correct it. */
+
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include "lsp.h"
 #include "os.h"
 #include "misc.h"
 
@@ -76,28 +87,17 @@ void vorbis_lsp_to_lpc(double *lsp,double *lpc,int m){
   }
 }
 
-static void kw(double *r,int n) {
-  double *s=alloca(sizeof(double)*(n/2+1));
-  double *c=alloca(sizeof(double)*(n+1));
-  int i, j, k;
-  
-  s[0] = 1.0;
-  s[1] = -2.0;
-  s[2] = 2.0;
-  for(i=3;i<=n/2;i++) s[i] = s[i-2];
-  
-  for(k=0;k<=n;k++) {
-    c[k] = r[k];
-    j = 1;
-    for(i=k+2;i<=n;i+=2) {
-      c[k] += s[j]*r[i];
-      s[j] -= s[j-1];
-      j++;
+static void cheby(double *g, int ord) {
+  int i, j;
+
+  g[0] *= 0.5;
+  for(i=2; i<= ord; i++) {
+    for(j=ord; j >= i; j--) {
+      g[j-2] -= g[j];
+      g[j] += g[j]; 
     }
   }
-  for(k=0;k<=n;k++) r[k] = c[k];
 }
-
 
 static int comp(const void *a,const void *b){
   if(*(double *)a<*(double *)b)
@@ -126,6 +126,7 @@ static void cacm283(double *a,int ord,double *r){
       }
       delta = val/p;
       r[i] -= delta;
+
       error += delta*delta;
     }
   }
@@ -160,8 +161,8 @@ void vorbis_lpc_to_lsp(double *lpc,double *lsp,int m){
   for(i=0; i<order2;i++) g2[order2-i-1] += g2[order2-i];
 
   /* Convert into polynomials in cos(alpha) */
-  kw(g1,order2);
-  kw(g2,order2);
+  cheby(g1,order2);
+  cheby(g2,order2);
 
   /* Find the roots of the 2 even polynomials.*/
   
@@ -169,7 +170,7 @@ void vorbis_lpc_to_lsp(double *lpc,double *lsp,int m){
   cacm283(g2,order2,g2r);
   
   for(i=0;i<m;i+=2){
-    lsp[i] = acos(g1r[i/2]*.5);
-    lsp[i+1] = acos(g2r[i/2]*.5);
+    lsp[i] = acos(g1r[i/2]);
+    lsp[i+1] = acos(g2r[i/2]);
   }
 }

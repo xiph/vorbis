@@ -13,7 +13,7 @@
 
  function: libvorbis codec internal types.  These structures are 
            'visible', but generally uninteresting to the developer
- last mod: $Id: internal.h,v 1.4 2000/01/22 13:28:12 xiphmont Exp $
+ last mod: $Id: internal.h,v 1.5 2000/05/08 20:49:43 xiphmont Exp $
 
  ********************************************************************/
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.23 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: info.c,v 1.24 2000/05/08 20:49:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,7 @@
 #include "vorbis/codec.h"
 #include "vorbis/backends.h"
 #include "bitwise.h"
+#include "sharedbook.h"
 #include "bookinternal.h"
 #include "registry.h"
 #include "window.h"
@@ -341,7 +342,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 }
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
-  char temp[]="Xiphophorus libVorbis I 20000223";
+  char temp[]="Xiphophorus libVorbis I 20000508";
 
   /* preamble */  
   _oggpack_write(opb,0x03,8);

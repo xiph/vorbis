@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.4 2000/01/28 09:05:00 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.5 2000/05/08 20:49:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,23 +33,40 @@
 */
 
 typedef struct static_codebook{
-  long dim;           /* codebook dimensions (elements per vector) */
-  long entries;       /* codebook entries */
+  long   dim;            /* codebook dimensions (elements per vector) */
+  long   entries;        /* codebook entries */
+  long  *lengthlist;     /* codeword lengths in bits */
 
-  /* mapping */
-  long   q_min;       /* packed 24 bit float; quant value 0 maps to minval */
-  long   q_delta;     /* packed 24 bit float; val 1 - val 0 == delta */
-  int    q_quant;     /* 0 < quant <= 16 */
-  int    q_sequencep; /* bitflag */
+  /* mapping ***************************************************************/
+  int    maptype;        /* 0=none
+			    1=implicitly populated values from map column 
+			    2=listed arbitrary values */
 
-  long   *quantlist;  /* list of dim*entries quantized entry values */
+  /* The below does a linear, single monotonic sequence mapping. */
+  long     q_min;       /* packed 32 bit float; quant value 0 maps to minval */
+  long     q_delta;     /* packed 32 bit float; val 1 - val 0 == delta */
+  int      q_quant;     /* bits: 0 < quant <= 16 */
+  int      q_sequencep; /* bitflag */
 
-  long   *lengthlist; /* codeword lengths in bits */
+  /* additional information for log (dB) mapping; the linear mapping
+     is assumed to actually be values in dB.  encodebias is used to
+     assign an error weight to 0 dB. We have two additional flags:
+     zeroflag indicates if entry zero is to represent -Inf dB; negflag
+     indicates if we're to represent negative linear values in a
+     mirror of the positive mapping. */
 
-  struct encode_aux *encode_tree;
+  long     *quantlist;  /* map == 1: (int)(entries/dim) element column map
+			   map == 2: list of dim*entries quantized entry vals
+			*/
+
+  /* encode helpers ********************************************************/
+  struct encode_aux_nearestmatch *nearest_tree;
+  struct encode_aux_threshmatch  *thresh_tree;
 } static_codebook;
 
-typedef struct encode_aux{
+/* this structures an arbitrary trained book to quickly find the
+   nearest cell match */
+typedef struct encode_aux_nearestmatch{
   /* pre-calculated partitioning tree */
   long   *ptr0;
   long   *ptr1;
@@ -58,7 +75,15 @@ typedef struct encode_aux{
   long   *q;         /* decision points (each is an entry) */
   long   aux;        /* number of tree entries */
   long   alloc;       
-} encode_aux;
+} encode_aux_nearestmatch;
+
+/* assumes a maptype of 1; encode side only, so that's OK */
+typedef struct encode_aux_threshmatch{
+  double *quantthresh;
+  long   *quantmap;
+  int     quantvals; 
+  int     threshvals; 
+} encode_aux_threshmatch;
 
 typedef struct decode_aux{
   long   *ptr0;
@@ -76,8 +101,6 @@ typedef struct codebook{
   struct decode_aux *decode_tree;
 
 } codebook;
-
-#define VQ_FEXP_BIAS 20 /* bias toward values smaller than 1. */
 
 #endif
 

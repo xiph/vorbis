@@ -11,8 +11,8 @@
  *                                                                  *
  ********************************************************************
 
- function: residue backend 0 partitioner
- last mod: $Id: residuesplit.c,v 1.1 2000/02/12 08:33:01 xiphmont Exp $
+ function: residue backend 0 partitioner/classifier
+ last mod: $Id: residuesplit.c,v 1.2 2000/05/08 20:49:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,64 +20,35 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
-#include "../lib/scales.h"
 #include "../vq/bookutil.h"
-
-/* take a masking curve and raw residue; eliminate the inaduble and
-   quantize to the final form handed to the VQ.  All and any tricks to
-   squeeze out bits given knowledge of the encoding mode should go
-   here too */
-
-/* modifies the pcm vector, returns book membership in aux */
-
-/* This is currently a bit specific to/hardwired for mapping 0; things
-   will need to change in the future when we het real multichannel
-   mappings */
-
-static double _maxval(double *v,int n){
-  int i;
-  double acc=0.;
-  for(i=0;i<n;i++){
-    double val=fabs(v[i]);
-    if(acc<val)acc=val;
-  }
-  return(acc);
-}
-
-/* mean dB actually */
-static double _meanval(double *v,int n){
-  int i;
-  double acc=0.;
-  for(i=0;i<n;i++)
-    acc+=todB(fabs(v[i]));
-  return(fromdB(acc/n));
-}
 
 static FILE *of;
 static FILE **or;
 
-int quantaux(double *mask, double *floor,int n,
-	     double *maskmbound,double *maskabound,double *floorbound,
-	     int parts, int subn){
-  long i,j;
+/* currently classify only by maximum amplitude */
 
-  for(i=0;i<=n-subn;){
-    double maxmask=_maxval(mask+i,subn);
-    double meanmask=_meanval(mask+i,subn);
-    double meanfloor=_meanval(floor+i,subn);
-    int aux;
+/* This is currently a bit specific to/hardwired for mapping 0; things
+   will need to change in the future when we get real multichannel
+   mappings */
 
+int quantaux(double *res,int n,double *bound,int parts, int subn){
+  long i,j,aux;
+  
+  for(i=0;i<=n-subn;i+=subn){
+    double max=0.;
+    for(j=0;j<subn;j++)
+      if(fabs(res[i+j])>max)max=fabs(res[i+j]);
+    
     for(j=0;j<parts-1;j++)
-      if(maxmask<maskmbound[j] && 
-	 meanmask<maskabound[j] &&
-	 meanfloor<floorbound[j])
+      if(max>=bound[j])
 	break;
     aux=j;
-
-    fprintf(of,"%d, ",aux);      
-
-    for(j=0;j<subn;j++,i++)
-      fprintf(or[aux],"%g, ",floor[i]);
+    
+    fprintf(of,"%ld, ",aux);
+    
+    for(j=0;j<subn;j++)
+      fprintf(or[aux],"%g, ",res[j+i]);
+    
     fprintf(or[aux],"\n");
   }
 
@@ -111,12 +82,12 @@ static int getline(FILE *in,double *vec,int begin,int n){
 static void usage(){
   fprintf(stderr,
 	  "usage:\n" 
-	  "residuesplit <mask> <floor> <begin,n,group> <baseout> <m,a,f> [<m,a,f>]...\n"
+	  "residuesplit <res> <begin,n,group> <baseout> <min> [<min>]...\n"
 	  "   where begin,n,group is first scalar, \n"
 	  "                          number of scalars of each in line,\n"
 	  "                          number of scalars in a group\n"
-	  "         m,a,f are the boundary conditions for each group\n"
-	  "eg: residuesplit mask.vqd floor.vqd 0,1024,32 res .5 2.5,1.5 ,,.25\n"
+	  "         min is the minimum peak value required for membership in a group\n"
+	  "eg: residuesplit mask.vqd floor.vqd 0,1024,16 res 25.5 13.5 7.5 1.5 0\n"
 	  "produces resaux.vqd and res_0...n.vqd\n\n");
   exit(1);
 }
@@ -125,18 +96,16 @@ int main(int argc, char *argv[]){
   char *buffer;
   char *base;
   int i,parts,begin,n,subn;
-  FILE *mask;
-  FILE *floor;
-  double *maskmbound,*maskabound,*maskvec;
-  double *floorbound,*floorvec;
+  FILE *res;
+  double *bound,*vec;
+  long c=0;
+  if(argc<5)usage();
 
-  if(argc<6)usage();
-
-  base=strdup(argv[4]);
+  base=strdup(argv[3]);
   buffer=alloca(strlen(base)+20);
   {
-    char *pos=strchr(argv[3],',');
-    begin=atoi(argv[3]);
+    char *pos=strchr(argv[2],',');
+    begin=atoi(argv[2]);
     if(!pos)
       usage();
     else
@@ -152,42 +121,18 @@ int main(int argc, char *argv[]){
     }
   }
 
-  /* how many parts?  Need to scan m,f... */
-  parts=argc-4; /* yes, one past */
-  maskmbound=malloc(sizeof(double)*parts);
-  maskabound=malloc(sizeof(double)*parts);
-  floorbound=malloc(sizeof(double)*parts);
+  /* how many parts?... */
+  parts=argc-3;
+  bound=malloc(sizeof(double)*parts);
 
   for(i=0;i<parts-1;i++){
-    char *pos=strchr(argv[5+i],',');
-    maskmbound[i]=atof(argv[5+i]);
-    if(*argv[5+i]==',')maskmbound[i]=1e50;
-    if(!pos){
-      maskabound[i]=1e50;
-      floorbound[i]=1e50;
-    }else{
-      maskabound[i]=atof(pos+1);
-      if(pos[1]==',')maskabound[i]=1e50;
-      pos=strchr(pos+1,',');
-      if(!pos)
-	floorbound[i]=1e50;
-      else{
-	floorbound[i]=atof(pos+1);
-      }
-    }
+    bound[i]=atof(argv[4+i]);
   }
-  maskmbound[i]=1e50;
-  maskabound[i]=1e50;
-  floorbound[i]=1e50;
+  bound[i]=0;
 
-  mask=fopen(argv[1],"r");
-  if(!mask){
+  res=fopen(argv[1],"r");
+  if(!res){
     fprintf(stderr,"Could not open file %s\n",argv[1]);
-    exit(1);
-  }
-  floor=fopen(argv[2],"r");
-  if(!mask){
-    fprintf(stderr,"Could not open file %s\n",argv[2]);
     exit(1);
   }
 
@@ -207,21 +152,21 @@ int main(int argc, char *argv[]){
     }
   }
   
-  maskvec=malloc(sizeof(double)*n);
-  floorvec=malloc(sizeof(double)*n);
+  vec=malloc(sizeof(double)*n);
   /* get the input line by line and process it */
-  while(!feof(mask) && !feof(floor)){
-    if(getline(mask,maskvec,begin,n) &&
-       getline(floor,floorvec,begin,n)) 
-      quantaux(maskvec,floorvec,n,
-	       maskmbound,maskabound,floorbound,parts,subn);
-    
+  while(!feof(res)){
+    if(getline(res,vec,begin,n))
+      quantaux(vec,n,bound,parts,subn);
+    c++;
+    if(!(c&0xf)){
+      spinnit("kB so far...",(int)(ftell(res)/1024));
+    }
   }
-  fclose(mask);
-  fclose(floor);
+  fclose(res);
   fclose(of);
   for(i=0;i<parts;i++)
     fclose(or[i]);
+  fprintf(stderr,"\rDone                         \n");
   return(0);
 }
 

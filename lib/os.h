@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.4 2000/05/01 06:26:52 jon Exp $
+ last mod: $Id: os.h,v 1.5 2000/05/08 20:49:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,14 +25,10 @@
 #define M_PI (3.1415926539)
 #endif
 
-#ifndef rint
-/* not strictly correct, but Vorbis doesn't care */
-#define rint(x)   (floor((x)+0.5)) 
-#endif
-
-#ifndef alloca
+#ifndef __GNUC__
 #ifdef _WIN32
 #  define alloca(x) (_alloca(x))
+#  define rint(x)   (floor((x)+0.5)) 
 #endif
 #endif
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.9 2000/01/28 09:05:12 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.10 2000/05/08 20:49:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,26 +24,20 @@
 
 typedef struct lpclook{
   /* en/decode lookups */
-  int *linearmap;
-  double *barknorm;
   drft_lookup fft;
 
-  int n;
   int ln;
   int m;
 
 } lpc_lookup;
 
-extern void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m);
+extern void lpc_init(lpc_lookup *l,long mapped, int m);
 extern void lpc_clear(lpc_lookup *l);
 
 /* simple linear scale LPC code */
 extern double vorbis_lpc_from_data(double *data,double *lpc,int n,int m);
-extern double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l);
-
-/* log scale layer */
-extern double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l);
-extern void vorbis_lpc_to_curve(double *curve,double *lpc, double amp,
+extern double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l);
+extern void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,
 				lpc_lookup *l);
 
 /* standard lpc stuff */

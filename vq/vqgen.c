@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.30 2000/02/21 01:13:00 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.31 2000/05/08 20:49:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,6 +32,7 @@
 
 #include "vqgen.h"
 #include "bookutil.h"
+#include "../lib/sharedbook.h"
 
 /* Codebook generation happens in two steps: 
 
@@ -88,10 +89,11 @@ int directdsort(const void *a, const void *b){
 }
 
 void vqgen_cellmetric(vqgen *v){
-  int i,j,k;
+  int j,k;
   double min=-1.,max=-1.,mean=0.,acc=0.;
   long dup=0,unused=0;
  #ifdef NOISY
+  int i;
    char buff[80];
    double spacings[v->entries];
    int count=0;
@@ -190,8 +192,11 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
 
   delta=(maxdel-mindel)/((1<<q->quant)-1.5);
 
-  q->min=float24_pack(mindel);
-  q->delta=float24_pack(delta);
+  q->min=_float32_pack(mindel);
+  q->delta=_float32_pack(delta);
+
+  mindel=_float32_unpack(q->min);
+  delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
     double last=0;
@@ -216,19 +221,20 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
   }
 }
 
-/* much easier :-) */
+/* much easier :-).  Unlike in the codebook, we don't un-log log
+   scales; we just make sure they're properly offset. */
 void vqgen_unquantize(vqgen *v,quant_meta *q){
   long j,k;
-  double mindel=float24_unpack(q->min);
-  double delta=float24_unpack(q->delta);
+  double mindel=_float32_unpack(q->min);
+  double delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
     double last=0.;
     for(k=0;k<v->elements;k++){
-      double now=_now(v,j)[k]*delta+last+mindel;
-      _now(v,j)[k]=now;
+      double now=_now(v,j)[k];
+      now=fabs(now)*delta+last+mindel;
       if(q->sequencep)last=now;
-
+      _now(v,j)[k]=now;
     }
   }
 }
@@ -274,7 +280,7 @@ void vqgen_addpoint(vqgen *v, double *p,double *a){
   if(!(v->points&0xff))spinnit("loading... ",v->points);
 }
 
-double vqgen_iterate(vqgen *v){
+double vqgen_iterate(vqgen *v,int biasp){
   long   i,j,k;
   long   biasable;
 
@@ -311,109 +317,113 @@ double vqgen_iterate(vqgen *v){
   memset(nearcount,0,sizeof(long)*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
   biasable=0;
-  for(i=0;i<v->points;i++){
-    double *ppt=v->weight_func(v,_point(v,i));
-    double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
-    double secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
-    long   firstentry=0;
-    long   secondentry=1;
-    int    biasflag=1;
-
-    if(!(i&0xff))spinnit("biasing... ",v->points+v->points+v->entries-i);
-
-    if(firstmetric>secondmetric){
-      double temp=firstmetric;
-      firstmetric=secondmetric;
-      secondmetric=temp;
-      firstentry=1;
-      secondentry=0;
+  if(biasp){
+    for(i=0;i<v->points;i++){
+      double *ppt=v->weight_func(v,_point(v,i));
+      double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
+      double secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
+      long   firstentry=0;
+      long   secondentry=1;
+      int    biasflag=1;
+      
+      if(!(i&0xff))spinnit("biasing... ",v->points+v->points+v->entries-i);
+      
+      if(firstmetric>secondmetric){
+	double temp=firstmetric;
+	firstmetric=secondmetric;
+	secondmetric=temp;
+	firstentry=1;
+	secondentry=0;
+      }
+      
+      for(j=2;j<v->entries;j++){
+	double thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
+	if(thismetric<secondmetric){
+	  if(thismetric<firstmetric){
+	    secondmetric=firstmetric;
+	    secondentry=firstentry;
+	    firstmetric=thismetric;
+	    firstentry=j;
+	  }else{
+	    secondmetric=thismetric;
+	    secondentry=j;
+	  }
+	}
+      }
+      
+      j=firstentry;
+      for(j=0;j<v->entries;j++){
+	
+	double thismetric,localmetric;
+	double *nearbiasptr=nearbias+desired2*j;
+	long k=nearcount[j];
+	
+	localmetric=v->metric_func(v,_now(v,j),ppt);
+	/* 'thismetric' is to be the bias value necessary in the current
+	   arrangement for entry j to capture point i */
+	if(firstentry==j){
+	  /* use the secondary entry as the threshhold */
+	  thismetric=secondmetric-localmetric;
+	}else{
+	  /* use the primary entry as the threshhold */
+	  thismetric=firstmetric-localmetric;
+	}
+	
+	/* support the idea of 'minimum distance'... if we want the
+	   cells in a codebook to be roughly some minimum size (as with
+	   the low resolution residue books) */
+	
+	if(localmetric>=v->mindist){
+	  
+	  /* a cute two-stage delayed sorting hack */
+	  if(k<desired){
+	    nearbiasptr[k]=thismetric;
+	    k++;
+	    if(k==desired){
+	      spinnit("biasing... ",v->points+v->points+v->entries-i);
+	      qsort(nearbiasptr,desired,sizeof(double),directdsort);
+	    }
+	    
+	  }else if(thismetric>nearbiasptr[desired-1]){
+	    nearbiasptr[k]=thismetric;
+	    k++;
+	    if(k==desired2){
+	      spinnit("biasing... ",v->points+v->points+v->entries-i);
+	      qsort(nearbiasptr,desired2,sizeof(double),directdsort);
+	      k=desired;
+	    }
+	  }
+	  nearcount[j]=k;
+	}else
+	  biasflag=0;
+      }
+      biasable+=biasflag;
     }
     
-    for(j=2;j<v->entries;j++){
-      double thismetric=v->metric_func(v,_now(v,j),ppt)+v->bias[j];
-      if(thismetric<secondmetric){
-	if(thismetric<firstmetric){
-	  secondmetric=firstmetric;
-	  secondentry=firstentry;
-	  firstmetric=thismetric;
-	  firstentry=j;
-	}else{
-	  secondmetric=thismetric;
-	  secondentry=j;
-	}
+    /* inflate/deflate */
+    
+    for(i=0;i<v->entries;i++){
+      double *nearbiasptr=nearbias+desired2*i;
+      
+      spinnit("biasing... ",v->points+v->entries-i);
+      
+      /* due to the delayed sorting, we likely need to finish it off....*/
+      if(nearcount[i]>desired)
+	qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
+      
+      /* desired is the *maximum* bias queue size.  If we're using
+	 minimum distance, we're not interested in the max size... we're
+	 interested in the biasable number of points */
+      {
+	long localdesired=(double)biasable/v->entries;
+	if(localdesired)
+	  v->bias[i]=nearbiasptr[localdesired-1];
+	else
+	  v->bias[i]=nearbiasptr[0];
       }
     }
-
-    j=firstentry;
-    for(j=0;j<v->entries;j++){
-      
-      double thismetric,localmetric;
-      double *nearbiasptr=nearbias+desired2*j;
-      long k=nearcount[j];
-      
-      localmetric=v->metric_func(v,_now(v,j),ppt);
-      /* 'thismetric' is to be the bias value necessary in the current
-	 arrangement for entry j to capture point i */
-      if(firstentry==j){
-	/* use the secondary entry as the threshhold */
-	thismetric=secondmetric-localmetric;
-      }else{
-	/* use the primary entry as the threshhold */
-	thismetric=firstmetric-localmetric;
-      }
-
-      /* support the idea of 'minimum distance'... if we want the
-         cells in a codebook to be roughly some minimum size (as with
-         the low resolution residue books) */
-      
-      if(localmetric>=v->mindist){
-
-	/* a cute two-stage delayed sorting hack */
-	if(k<desired){
-	  nearbiasptr[k]=thismetric;
-	  k++;
-	  if(k==desired){
-	    spinnit("biasing... ",v->points+v->points+v->entries-i);
-	    qsort(nearbiasptr,desired,sizeof(double),directdsort);
-	  }
-	  
-	}else if(thismetric>nearbiasptr[desired-1]){
-	  nearbiasptr[k]=thismetric;
-	  k++;
-	  if(k==desired2){
-	    spinnit("biasing... ",v->points+v->points+v->entries-i);
-	    qsort(nearbiasptr,desired2,sizeof(double),directdsort);
-	    k=desired;
-	  }
-	}
-	nearcount[j]=k;
-      }else
-	biasflag=0;
-    }
-    biasable+=biasflag;
-  }
-  
-  /* inflate/deflate */
-
-  for(i=0;i<v->entries;i++){
-    double *nearbiasptr=nearbias+desired2*i;
-
-    spinnit("biasing... ",v->points+v->entries-i);
-
-    /* due to the delayed sorting, we likely need to finish it off....*/
-    if(nearcount[i]>desired)
-      qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
-
-    /* desired is the *maximum* bias queue size.  If we're using
-       minimum distance, we're not interested in the max size... we're
-       interested in the biasable number of points */
-    {
-      long localdesired=(double)biasable/v->entries;
-      if(localdesired)
-	v->bias[i]=nearbiasptr[localdesired-1];
-      else
-	v->bias[i]=nearbiasptr[0];
-    }
+  }else{ 
+    memset(v->bias,0,v->entries*sizeof(double));
   }
 
   /* Now assign with new bias and find new midpoints */

@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.25 2000/04/12 07:55:06 msmith Exp $
+# $Id: Makefile.in,v 1.26 2000/05/08 20:49:47 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -31,16 +31,16 @@ HFILES =	../include/vorbis/codec.h \
 		../include/vorbis/internal.h ../include/vorbis/backends.h \
 		../include/vorbis/codebook.h \
 		bitwise.h envelope.h lpc.h lsp.h bookinternal.h misc.h\
-		psy.h smallft.h window.h scales.h os.h mdct.h registry.h
+		psy.h smallft.h window.h scales.h os.h mdct.h registry.h\
+		masking.h sharedbook.h
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
 		time0.o floor0.o res0.o mapping0.o registry.o\
-		codebook.o
+		codebook.o sharedbook.o vorbisfile.o
 VF_HFILES = ../include/vorbis/vorbisfile.h ../include/vorbis/codec.h \
 		../include/vorbis/internal.h ../include/vorbis/codebook.h \
 		os.h misc.h
 VF_LFILES = vorbisfile.o
-
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -54,7 +54,7 @@ analysis:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-target:	libvorbis.a vorbisfile.a
+target:	libvorbis.a vorbisfile.a psytune
 
 selftest:	
 	$(MAKE) clean
@@ -62,11 +62,15 @@ selftest:
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
 		-o test_bitwise -lm
 	$(CC) $(DEBUG) $(LDFLAGS) -c bitwise.c
-	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c bitwise.o\
-		-o test_codebook -lm
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST sharedbook.c\
+		-o test_sharedbook -lm
+	$(CC) $(DEBUG) $(LDFLAGS) -c sharedbook.c
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c \
+		sharedbook.o bitwise.o -o test_codebook -lm
 	@echo
 	@./test_framing
 	@./test_bitwise
+	@./test_sharedbook
 	@./test_codebook
 
 libvorbis.a: 	$(LFILES)	
@@ -76,6 +80,10 @@ libvorbis.a: 	$(LFILES)
 vorbisfile.a:	$(VF_LFILES)
 		$(AR) -r vorbisfile.a $^
 		$(RANLIB) vorbisfile.a
+
+psytune:	mdct.o psy.o lpc.o smallft.o window.o psytune.o floor0.o \
+		bitwise.o lsp.o codebook.o sharedbook.o
+	        $(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 
 $(LFILES): 	$(HFILES)

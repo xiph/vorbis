@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.h,v 1.4 2000/02/21 01:12:54 xiphmont Exp $
+ last mod: $Id: bookutil.h,v 1.5 2000/05/08 20:49:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,8 +24,8 @@
 
 #include "vorbis/codebook.h"
 
-extern void      codebook_unquantize(codebook *b);
 extern char     *get_line(FILE *in);
+extern char     *setup_line(FILE *in);
 extern int       get_line_value(FILE *in,double *value);
 extern int       get_next_value(FILE *in,double *value);
 extern int       get_next_ivalue(FILE *in,long *ivalue);
@@ -34,11 +34,9 @@ extern int       get_vector(codebook *b,FILE *in,int start,int num,double *a);
 extern char     *find_seek_to(FILE *in,char *s);
 
 extern codebook *codebook_load(char *filename);
-extern int       codebook_entry(codebook *b,double *val);
+extern void write_codebook(FILE *out,char *name,const static_codebook *c);
 
 extern void spinnit(char *s,int n);
-extern long float24_pack(double val);
-extern double float24_unpack(long val);
 extern void build_tree_from_lengths(int vals, long *hist, long *lengths);
 
 #endif
