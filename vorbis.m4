@@ -12,7 +12,7 @@ dnl
 AC_ARG_WITH(vorbis-prefix,[  --with-vorbis-prefix=PFX   Prefix where libvorbis is installed (optional)], vorbis_prefix="$withval", vorbis_prefix="")
 AC_ARG_ENABLE(vorbistest, [  --disable-vorbistest       Do not try to compile and run a test Vorbis program],, enable_vorbistest=yes)
 
-  if test x$vorbis_prefix != x ; then
+  if test "x$vorbis_prefix" != "xNONE" ; then
     vorbis_args="$vorbis_args --prefix=$vorbis_prefix"
     VORBIS_CFLAGS="-I$vorbis_prefix/include"
     VORBIS_LIBDIR="-L$vorbis_prefix/lib"
@@ -56,7 +56,7 @@ int main ()
        LIBS="$ac_save_LIBS"
   fi
 
-  if test "x$no_vorbis" = x ; then
+  if test "x$no_vorbis" = "x" ; then
      AC_MSG_RESULT(yes)
      ifelse([$1], , :, [$1])     
   else
