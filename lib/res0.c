@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.37.2.4 2001/10/16 20:10:11 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.37.2.5 2001/10/20 01:03:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -327,26 +327,13 @@ static int _interleaved_encodepart(oggpack_buffer *opb,float *vec, int n,
   int i,bits=0;
   int dim=book->dim;
   int step=n/dim;
-#ifdef TRAIN_RESENT      
-  char buf[80];
-  FILE *f;
-  sprintf(buf,"res0_b%d.vqd",book-look->fullbooks);
-  f=fopen(buf,"a");
-#endif
 
   for(i=0;i<step;i++){
     int entry=vorbis_book_besterror(book,vec+i,step,0);
 
-#ifdef TRAIN_RESENT      
-    fprintf(f,"%d\n",entry);
-#endif
-
     bits+=vorbis_book_encode(book,entry,opb);
   }
 
-#ifdef TRAIN_RESENT      
-  fclose(f);
-#endif
   return(bits);
 }
  
@@ -355,26 +342,13 @@ static int _encodepart(oggpack_buffer *opb,float *vec, int n,
   int i,bits=0;
   int dim=book->dim;
   int step=n/dim;
-#ifdef TRAIN_RESENT      
-  char buf[80];
-  FILE *f;
-  sprintf(buf,"res0_b%d.vqd",book-look->fullbooks);
-  f=fopen(buf,"a");
-#endif
 
   for(i=0;i<step;i++){
     int entry=vorbis_book_besterror(book,vec+i*dim,1,0);
 
-#ifdef TRAIN_RESENT      
-    fprintf(f,"%d\n",entry);
-#endif
-
     bits+=vorbis_book_encode(book,entry,opb);
   }
 
-#ifdef TRAIN_RESENT      
-  fclose(f);
-#endif
   return(bits);
 }
 
@@ -419,7 +393,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
     char buffer[80];
   
     for(i=0;i<ch;i++){
-      sprintf(buffer,"resaux_%d.vqd",vb->mode);
+      sprintf(buffer,"resaux_%s.vqd",(vb->mode?"long":"short"));
       of=fopen(buffer,"a");
       for(j=0;j<partvals;j++)
 	fprintf(of,"%ld, ",partword[i][j]);
@@ -449,6 +423,11 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,
   int partvals=n/samples_per_partition;
   long **partword=_vorbis_block_alloc(vb,sizeof(*partword));
   float *work=alloca(sizeof(*work)*samples_per_partition);
+
+#ifdef TRAIN_RES
+  FILE *of;
+  char buffer[80];
+#endif
   
   partword[0]=_vorbis_block_alloc(vb,n*ch/samples_per_partition*sizeof(*partword[0]));
   memset(partword[0],0,n*ch/samples_per_partition*sizeof(*partword[0]));
@@ -462,23 +441,22 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,
 	l++;
       }
     }
+
     partword[0][i]=
       classify(work,samples_per_partition,look,possible_partitions,i);
+
+
   }  
 
 #ifdef TRAIN_RES
-  {
-    FILE *of;
-    char buffer[80];
-  
-    sprintf(buffer,"resaux_%d.vqd",vb->mode);
-    of=fopen(buffer,"a");
-    for(i=0;i<partvals;i++)
-      fprintf(of,"%ld, ",partword[0][i]);
-    fprintf(of,"\n");
-    fclose(of);
-  }
+  sprintf(buffer,"resaux_%s.vqd",(vb->mode?"long":"short"));
+  of=fopen(buffer,"a");
+  for(i=0;i<partvals;i++)
+    fprintf(of,"%ld, ",partword[0][i]);
+  fprintf(of,"\n");
+  fclose(of);
 #endif
+
   look->frames++;
 
   return(partword);
@@ -514,17 +492,22 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
   int stoppos=0;
 
 #ifdef TRAIN_RES
-  FILE *of;
+  FILE *of; 
   char buffer[80];
   int m;
   
   for(i=0;i<ch;i++){
-    sprintf(buffer,"residue_%d#%d.vqd",vb->mode,pass);
-    of=fopen(buffer,"a");
-    for(m=0;m<info->end;m++)
-      fprintf(of,"%.2f, ",in[i][m]);
-    fprintf(of,"\n");
-    fclose(of);
+    for(j=0;j<partvals;j++){
+      int class=partword[i][j];
+      float *ptr=in[i]+info->begin+j*samples_per_partition;
+      sprintf(buffer,"res_%s_part%d_it%d.vqd",(vb->mode?"long":"short"),
+	      class,pass);
+      of=fopen(buffer,"a");
+      for(k=0;k<samples_per_partition;k++)
+	fprintf(of,"%.3f, ",ptr[k]);
+      fprintf(of,"\n");
+      fclose(of);
+    }
   }
 #endif      
 

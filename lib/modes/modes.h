@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.14.2.1 2001/10/16 20:10:21 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.14.2.2 2001/10/20 01:04:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,7 @@
 
 #include "masking.h"
 /* stereo (coupled) */
-#include "modes/mode_44c_Z.h"
+//#include "modes/mode_44c_Z.h"
 //#include "modes/mode_44c_Y.h"
 //#include "modes/mode_44c_X.h"
 #include "modes/mode_44c_A.h"

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.3 2001/10/16 20:10:10 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.4 2001/10/20 01:03:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -462,9 +462,10 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   /* partition based prequantization and channel coupling */
   /* Steps in prequant and coupling:
-     
+
+     classify by |mag| across all pcm vectors 
+
      down-couple/down-quantize from perfect residue ->  quantized vector 
-     classify by this first quantized vector
      
      do{ 
         encode quantized vector; add encoded values to 'so-far' vector
@@ -489,6 +490,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     float  **sofar=alloca(sizeof(*sofar)*vi->channels);
 
     long  ***classifications=alloca(sizeof(*classifications)*info->submaps);
+    float ***qbundle=alloca(sizeof(*qbundle)*info->submaps);
     float ***pcmbundle=alloca(sizeof(*pcmbundle)*info->submaps);
     float ***sobundle=alloca(sizeof(*sobundle)*info->submaps);
     int    **zerobundle=alloca(sizeof(*zerobundle)*info->submaps);
@@ -507,6 +509,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       memset(sofar[i],0,sizeof(*sofar[i])*n/2);
     }
 
+    qbundle[0]=alloca(sizeof(*qbundle[0])*vi->channels);
     pcmbundle[0]=alloca(sizeof(*pcmbundle[0])*vi->channels);
     sobundle[0]=alloca(sizeof(*sobundle[0])*vi->channels);
     zerobundle[0]=alloca(sizeof(*zerobundle[0])*vi->channels);
@@ -540,7 +543,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     for(i=0;i<info->submaps;i++){
       int ch_in_bundle=0;
-      pcmbundle[i]=pcmbundle[0]+chcounter;
+      qbundle[i]=qbundle[0]+chcounter;
       sobundle[i]=sobundle[0]+chcounter;
       zerobundle[i]=zerobundle[0]+chcounter;
 
@@ -550,7 +553,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	    zerobundle[i][ch_in_bundle]=1;
 	  else
 	    zerobundle[i][ch_in_bundle]=0;
-	  pcmbundle[i][ch_in_bundle]=quantized[j];
+	  qbundle[i][ch_in_bundle]=quantized[j];
+	  pcmbundle[i][ch_in_bundle]=pcm[j];
 	  sobundle[i][ch_in_bundle++]=sofar[j];
 	}
       }
@@ -621,7 +625,11 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     /* actual encoding loop; if we have a desired stopping point, pack
        slightly past it so that the end of the packet is not
        uninitialized data that could pollute the decoded audio on the
-       decode side.  We want to truncate at a clean byte boundary */
+       decode side.  We want to truncate at a clean byte boundary.
+
+       If we're doing an average bitrate, we need to encode to the
+       bitter end then truncate (so that we can collect bit usage
+       statistics for floater adjustment) */
     for(i=0;!stopflag;){
 
       /* perform residue encoding of this pass's quantized residue
@@ -634,13 +642,13 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	if(stoppos){
 	  look->residue_func[j]->
 	    forward(vb,look->residue_look[j],
-		    pcmbundle[j],sobundle[j],zerobundle[j],chbundle[j],
+		    qbundle[j],sobundle[j],zerobundle[j],chbundle[j],
 		    i,classifications[j],b->bitrate_floatinglimit,queueptr);
 	  
 	}else{
 	  stoppos=look->residue_func[j]->
 	    forward(vb,look->residue_look[j],
-		    pcmbundle[j],sobundle[j],zerobundle[j],chbundle[j],
+		    qbundle[j],sobundle[j],zerobundle[j],chbundle[j],
 		    i,classifications[j],b->bitrate_floatinglimit,queueptr);
 	}
 	i++;
@@ -856,49 +864,49 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	b->bitrate_boundsampleacc[i]+=ci->blocksizes[vb->W]>>1;
       }
       
-	/* bins */
-	if(b->bitrate_bins){
-	  for(i=0;i<b->bitrate_bins;i++)
-	    b->bitrate_avgbitacc[i]+=
-	      b->bitrate_queue_bin[b->bitrate_queue_head*b->bitrate_bins+i];
-	  b->bitrate_avgsampleacc+=ci->blocksizes[vb->W]>>1;
-	}
-	
-	b->bitrate_queue_head++;
-	if(b->bitrate_queue_head>=b->bitrate_queue_size)b->bitrate_queue_head=0;
+      /* bins */
+      if(b->bitrate_bins){
+	for(i=0;i<b->bitrate_bins;i++)
+	  b->bitrate_avgbitacc[i]+=
+	    b->bitrate_queue_bin[b->bitrate_queue_head*b->bitrate_bins+i];
+	b->bitrate_avgsampleacc+=ci->blocksizes[vb->W]>>1;
       }
       
-      /* adjust the floater to offset bitrate above/below desired average */
-      /* look for the bin settings in recent history that bracket
-	 the desired bitrate, and interpolate twixt them for the
-	 flaoter setting we want */
+      b->bitrate_queue_head++;
+      if(b->bitrate_queue_head>=b->bitrate_queue_size)b->bitrate_queue_head=0;
+    }
       
-      if(b->bitrate_bins>0 &&
-	 (b->bitrate_avgsampleacc>ci->bitrate_avg_queuetime*vi->rate/8 ||
-	  b->bitrate_avgsampleacc>8192)){
-	double upper=floater_interpolate(b,vi,ci->bitrate_queue_upperavg);
-	double lower=floater_interpolate(b,vi,ci->bitrate_queue_loweravg);
-	double new=ci->bitrate_floatinglimit_initial;
-	double slew;
-	
-	fprintf(stderr,"\tupper:%g :: lower:%g\n",upper,lower);
-	  
-	if(upper>0. && upper<new)new=upper;
-	if(lower<ci->bitrate_floatinglimit_minimum)
-	  lower=ci->bitrate_floatinglimit_minimum;
-	if(lower>new)new=lower;
-	
-	slew=new-b->bitrate_floatinglimit;
-	
-	if(slew<ci->bitrate_floatinglimit_downslew_max)
-	  new=b->bitrate_floatinglimit+ci->bitrate_floatinglimit_downslew_max;
-	if(slew>ci->bitrate_floatinglimit_upslew_max)
-	  new=b->bitrate_floatinglimit+ci->bitrate_floatinglimit_upslew_max;
-	
-	b->bitrate_floatinglimit=new;
-      }
-    } 
-  }
+    /* adjust the floater to offset bitrate above/below desired average */
+    /* look for the bin settings in recent history that bracket
+       the desired bitrate, and interpolate twixt them for the
+       flaoter setting we want */
+    
+    if(b->bitrate_bins>0 &&
+       (b->bitrate_avgsampleacc>ci->bitrate_avg_queuetime*vi->rate/8 ||
+	b->bitrate_avgsampleacc>8192)){
+      double upper=floater_interpolate(b,vi,ci->bitrate_queue_upperavg);
+      double lower=floater_interpolate(b,vi,ci->bitrate_queue_loweravg);
+      double new=ci->bitrate_floatinglimit_initial;
+      double slew;
+      
+      fprintf(stderr,"\tupper:%g :: lower:%g\n",upper,lower);
+      
+      if(upper>0. && upper<new)new=upper;
+      if(lower<ci->bitrate_floatinglimit_minimum)
+	lower=ci->bitrate_floatinglimit_minimum;
+      if(lower>new)new=lower;
+      
+      slew=new-b->bitrate_floatinglimit;
+      
+      if(slew<ci->bitrate_floatinglimit_downslew_max)
+	new=b->bitrate_floatinglimit+ci->bitrate_floatinglimit_downslew_max;
+      if(slew>ci->bitrate_floatinglimit_upslew_max)
+	new=b->bitrate_floatinglimit+ci->bitrate_floatinglimit_upslew_max;
+      
+      b->bitrate_floatinglimit=new;
+    }
+  } 
+
     
   look->lastframe=vb->sequence;
   return(0);

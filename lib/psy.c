@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.56.2.2 2001/10/16 20:10:11 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.56.2.3 2001/10/20 01:03:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -902,7 +902,8 @@ float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
 
 static void couple_lossless(float A, float B, 
 			    float granule,float igranule,
-			    float *mag, float *ang){
+			    float *mag, float *ang,
+			    int flip_p){
 
   if(fabs(A)>fabs(B)){
     A=rint(A*igranule)*granule; /* must be done *after* the comparison */
@@ -916,131 +917,10 @@ static void couple_lossless(float A, float B,
     *mag=B; *ang=(B>0.f?A-B:B-A);
   }
 
-  if(*ang>fabs(*mag)*1.9999f){
+  if(flip_p && *ang>fabs(*mag)*1.9999f){
     *ang= -fabs(*mag)*2.f;
     *mag= -*mag;
   }
-}
-
-static void couple_8phase(float A, float B, float fA, float fB, 
-			 float granule,float igranule,
-			 float fmag, float *mag, float *ang){
-
-  float origmag=FAST_HYPOT(A*fA,B*fB),corr;
-
-  if(fmag!=0.f){
-    float phase=rint((A-B)/fmag);
-    
-    if(fabs(A)>fabs(B)){
-      *mag=A;phase=(A>0?phase:-phase);
-    }else{
-      *mag=B;phase=(B>0?phase:-phase);
-    }
-    
-    switch((int)phase){
-    case 0:
-      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
-      *mag=rint(*mag*corr*igranule)*granule; 
-      *ang=0.f;
-      break;
-    case 1:
-      *mag=rint(*mag*igranule)*granule; 
-      *ang=fabs(*mag);
-      break;
-    case -1:
-      *mag=rint(*mag*igranule)*granule; 
-      *ang= -fabs(*mag);
-      break;
-    case -2:
-      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
-      *mag=rint(*mag*corr*igranule)*granule; 
-      *ang= -2.f*fabs(*mag);
-      break;
-    case 2:
-      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
-      *mag= -rint(*mag*corr*igranule)*granule; 
-      *ang= -2.f*fabs(*mag);
-      break;
-    }
-  }else{
-    *mag=0.f;
-    *ang=0.f;
-  }    
-}
-
-static void couple_6phase(float A, float B, float fA, float fB, 
-			 float granule,float igranule,
-			 float fmag, float *mag, float *ang){
-
-  float origmag=FAST_HYPOT(A*fA,B*fB),corr;
-
-  if(fmag!=0.f){
-    float phase=rint((A-B)/fmag);
-    
-    if(fabs(A)>fabs(B)){
-      *mag=A;phase=(A>0?phase:-phase);
-    }else{
-      *mag=B;phase=(B>0?phase:-phase);
-    }
-    
-    switch((int)phase){
-    case 0:
-      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
-      *mag=rint(*mag*corr*igranule)*granule; 
-      *ang=0.f;
-      break;
-    case 1:case 2:
-      *mag=rint(*mag*igranule)*granule; 
-      *ang= fabs(*mag);
-      break;
-    case -1:case -2:
-      *mag=rint(*mag*igranule)*granule; 
-      *ang= -fabs(*mag);
-      break;
-    default:
-      *mag=0.f;
-      *ang=0.f;
-
-    }
-  }else{
-    *mag=0.f;
-    *ang=0.f;
-  }    
-}
-
-static void couple_4phase(float A, float B, float fA, float fB, 
-			 float granule,float igranule,
-			 float fmag, float *mag, float *ang){
-
-  float origmag=FAST_HYPOT(A*fA,B*fB),corr;
-
-  if(fmag!=0.f){
-    float phase=rint((A-B)*.5/fmag);
-    
-    if(fabs(A)>fabs(B)){
-      *mag=A;phase=(A>0?phase:-phase);
-    }else{
-      *mag=B;phase=(B>0?phase:-phase);
-    }
-    
-    corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
-    *mag=rint(*mag*corr*igranule)*granule; 
-    switch((int)phase){
-    case 0:
-      *ang=0.f;
-      break;
-    case -1:
-      *ang=-2.f*fabs(*mag);
-      break;
-    default:
-      *mag=-*mag;
-      *ang=-2.f*fabs(*mag);
-      break;
-    }
-  }else{
-    *mag=0.f;
-    *ang=0.f;
-  }    
 }
 
 static void couple_point(float A, float B, float fA, float fB, 
@@ -1091,8 +971,7 @@ void _vp_quantize_couple(vorbis_look_psy *p,
   for(i=0;i<vi->coupling_steps;i++){
     float granulem=info->couple_pass[passno].granulem;
     float igranulem=info->couple_pass[passno].igranulem;
-    float rqlimit=info->couple_pass[passno].requant_limit;
-    
+
     /* make sure coupling a zero and a nonzero channel results in two
        nonzero channels. */
     if(nonzero[vi->coupling_mag[i]] ||
@@ -1112,7 +991,9 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 
       for(j=0,k=0;j<n;k++){
 	vp_couple *part=info->couple_pass[passno].couple_pass+k;
-
+	float rqlimit=part->outofphase_requant_limit;
+	float flip_p=part->outofphase_redundant_flip_p;
+    
 	for(;j<part->limit && j<p->n;j++){
 	  /* partition by partition; k is our by-location partition
 	     class counter */
@@ -1121,19 +1002,10 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 	  if(fmag<part->amppost_point){
 	    couple_point(pcmM[j],pcmA[j],floorM[j],floorA[j],
 			 granulem,igranulem,fmag,&mag,&ang);
+
 	  }else{
-	    if(fmag<part->amppost_6phase){
-	      couple_6phase(pcmM[j],pcmA[j],floorM[j],floorA[j],
-			   granulem,igranulem,fmag,&mag,&ang);
-	    }else{ 
-	      if(fmag<part->amppost_8phase){
-		couple_8phase(pcmM[j],pcmA[j],floorM[j],floorA[j],
-			      granulem,igranulem,fmag,&mag,&ang);
-	      }else{
-		couple_lossless(pcmM[j],pcmA[j],
-				granulem,igranulem,&mag,&ang);
-	      }
-	    }
+	    couple_lossless(pcmM[j],pcmA[j],
+			    granulem,igranulem,&mag,&ang,flip_p);
 	  }
 
 	  /* executive decision time: when requantizing and recoupling
