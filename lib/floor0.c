@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.29 2000/11/17 11:47:18 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.30 2000/11/22 02:54:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -306,8 +306,8 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     {
       float *lspwork=alloca(look->m*sizeof(float));
       memcpy(lspwork,out,look->m*sizeof(float));
-      vorbis_lsp_to_curve(lspwork,look->linearmap,look->n,look->ln,
-			  work,look->m,amp,info->ampdB);
+      vorbis_lsp_to_curve(work,look->linearmap,look->n,look->ln,
+			  lspwork,look->m,amp,info->ampdB);
       _analysis_output("prefit",seq,work,look->n,0,1);
 
     }
