@@ -11,43 +11,43 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.14.4.6 2001/05/27 06:21:55 xiphmont Exp $
+ last mod: $Id: mode_AA.h,v 1.10.4.1 2001/05/27 06:21:56 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_MODES_A_H_
-#define _V_MODES_A_H_
+#ifndef _V_MODES_AA_H_
+#define _V_MODES_AA_H_
 
 #include <stdio.h>
 #include "vorbis/codec.h"
 #include "backends.h"
 
-#include "books/lsp12_0.vqh"
+#include "books/lsp9_0.vqh"
 #include "books/lsp30_0.vqh"
-#include "books/lsp12_1.vqh"
+#include "books/lsp9_1.vqh"
 #include "books/lsp30_1.vqh"
 
-#include "books/res0_128_128aux.vqh"
-#include "books/res0_128_1024aux.vqh"
+#include "books/res0_96_128aux.vqh"
+#include "books/res0_96_1024aux.vqh"
 
-#include "books/res0_128_128_1.vqh"
-#include "books/res0_128_128_2.vqh"
-#include "books/res0_128_128_3.vqh"
-#include "books/res0_128_128_4.vqh"
-#include "books/res0_128_128_5.vqh"
+#include "books/res0_96_128_1.vqh"
+#include "books/res0_96_128_2.vqh"
+#include "books/res0_96_128_3.vqh"
+#include "books/res0_96_128_4.vqh"
+#include "books/res0_96_128_5.vqh"
 
-#include "books/res0_128_1024_1.vqh"
-#include "books/res0_128_1024_2.vqh"
-#include "books/res0_128_1024_3.vqh"
-#include "books/res0_128_1024_4.vqh"
-#include "books/res0_128_1024_5.vqh"
-#include "books/res0_128_1024_6.vqh"
-#include "books/res0_128_1024_7.vqh"
-#include "books/res0_128_1024_8.vqh"
-#include "books/res0_128_1024_9.vqh"
+#include "books/res0_96_1024_1.vqh"
+#include "books/res0_96_1024_2.vqh"
+#include "books/res0_96_1024_3.vqh"
+#include "books/res0_96_1024_4.vqh"
+#include "books/res0_96_1024_5.vqh"
+#include "books/res0_96_1024_6.vqh"
+#include "books/res0_96_1024_7.vqh"
+#include "books/res0_96_1024_8.vqh"
+#include "books/res0_96_1024_9.vqh"
 
 
-static vorbis_info_psy _psy_set_A0={
+static vorbis_info_psy _psy_set_AA0={
   1,/*athp*/
   1,/*decayp*/
 
@@ -104,7 +104,7 @@ static vorbis_info_psy _psy_set_A0={
   },
 
   1,/*noisemaskp */
-  -10.f,  /* suppress any noise curve over maxspec+n */
+  -0.f,  /* suppress any noise curve over maxspec+n */
   .5f,   /* low window */
   .5f,   /* high window */
   5,
@@ -125,17 +125,16 @@ static vorbis_info_psy _psy_set_A0={
    .600f, 0.f,/*4000*/
    .700f, 0.f,/*5600*/
    .850f, 0.f,/*8000*/
-   .900f, 0.f,/*11500*/
-   .900f, 0.f,/*16000*/
+   .900f, 2.f,/*11500*/
+   .900f, 3.f,/*16000*/
   },
  
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
   -22.,
-
 };
 
-static vorbis_info_psy _psy_set_A={
+static vorbis_info_psy _psy_set_AA={
   1,/*athp*/
   1,/*decayp*/
 
@@ -154,49 +153,49 @@ static vorbis_info_psy _psy_set_A={
    {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f}, /*88*/
    {-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f,-999.f}, /*125*/
 
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*175*/
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*250*/
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*350*/
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*500*/
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*700*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*175*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*250*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*350*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*500*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*700*/
 
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*1000*/
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*1400*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*1000*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*1400*/
    {-40.f,-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*2000*/
    {-40.f,-40.f,-40.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*2800*/
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*4000*/
-   {-35.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*5600*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*4000*/
+   {-30.f,-35.f,-35.f,-40.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*5600*/
 
-   {-30.f,-30.f,-33.f,-35.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*8000*/
-   {-30.f,-30.f,-33.f,-35.f,-35.f,-45.f,-50.f,-60.f,-70.f,-90.f,-100.f}, /*11500*/
-   {-24.f,-24.f,-26.f,-32.f,-32.f,-42.f,-50.f,-60.f,-70.f,-90.f,-100.f}, /*16000*/
+   {-20.f,-25.f,-30.f,-35.f,-40.f,-50.f,-60.f,-70.f,-80.f,-90.f,-100.f}, /*8000*/
+   {-20.f,-25.f,-30.f,-35.f,-35.f,-45.f,-50.f,-60.f,-70.f,-80.f,-90.f}, /*11500*/
+   {-20.f,-24.f,-26.f,-32.f,-35.f,-45.f,-50.f,-60.f,-70.f,-80.f,-90.f}, /*16000*/
 
   },
 
   1,/* peakattp */
-  {{-14.f,-16.f,-18.f,-19.f,-20.f,-21.f,-22.f,-22.f,-24.f,-24.f,-24.f},/*63*/
-   {-14.f,-16.f,-18.f,-19.f,-20.f,-21.f,-22.f,-22.f,-24.f,-24.f,-24.f},/*88*/
-   {-14.f,-16.f,-18.f,-19.f,-20.f,-21.f,-22.f,-22.f,-24.f,-24.f,-24.f},/*125*/
-   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-24.f,-24.f,-24.f},/*175*/
-   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-24.f,-24.f,-24.f},/*250*/
-   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-24.f,-24.f},/*350*/
-   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-24.f,-24.f},/*500*/
-   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*700*/
-   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*1000*/
-   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*1400*/
-   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*2000*/
-   {-10.f,-10.f,-10.f,-12.f,-16.f,-16.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*2400*/
-   {-10.f,-10.f,-10.f,-12.f,-16.f,-16.f,-16.f,-20.f,-22.f,-24.f,-24.f},/*4000*/
-   {-10.f,-10.f,-10.f,-12.f,-12.f,-14.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*5600*/
-   {-10.f,-10.f,-10.f,-10.f,-10.f,-14.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*8000*/
-   {-10.f,-10.f,-10.f,-10.f,-10.f,-14.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*11500*/
-   {-10.f,-10.f,-10.f,-10.f,-10.f,-12.f,-16.f,-18.f,-22.f,-24.f,-24.f},/*16000*/
+  {{-14.f,-16.f,-18.f,-19.f,-20.f,-21.f,-22.f,-22.f,-22.f,-22.f,-22.f},/*63*/
+   {-14.f,-16.f,-18.f,-19.f,-20.f,-21.f,-22.f,-22.f,-22.f,-22.f,-22.f},/*88*/
+   {-14.f,-16.f,-18.f,-19.f,-20.f,-21.f,-22.f,-22.f,-22.f,-22.f,-22.f},/*125*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-22.f,-22.f},/*175*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-22.f,-22.f},/*250*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-22.f,-22.f},/*350*/
+   {-10.f,-10.f,-10.f,-10.f,-16.f,-16.f,-18.f,-20.f,-22.f,-22.f,-22.f},/*500*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-22.f,-22.f},/*700*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-22.f,-22.f},/*1000*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-22.f,-22.f},/*1400*/
+   {-10.f,-10.f,-10.f,-10.f,-14.f,-14.f,-16.f,-20.f,-22.f,-22.f,-22.f},/*2000*/
+   {-10.f,-10.f,-10.f,-12.f,-16.f,-16.f,-16.f,-20.f,-22.f,-22.f,-22.f},/*2400*/
+   {-10.f,-10.f,-10.f,-12.f,-16.f,-16.f,-16.f,-20.f,-22.f,-22.f,-22.f},/*4000*/
+   {-10.f,-10.f,-10.f,-12.f,-12.f,-14.f,-16.f,-18.f,-22.f,-22.f,-22.f},/*5600*/
+   {-10.f,-10.f,-10.f,-10.f,-10.f,-14.f,-16.f,-18.f,-22.f,-22.f,-22.f},/*8000*/
+   {-10.f,-10.f,-10.f,-10.f,-10.f,-14.f,-16.f,-18.f,-22.f,-22.f,-22.f},/*11500*/
+   {-10.f,-10.f,-10.f,-10.f,-10.f,-12.f,-16.f,-18.f,-22.f,-22.f,-22.f},/*16000*/
   },
 
   1,/*noisemaskp */
-  -24.f,  /* suppress any noise curve over maxspec+n */
-  .5f,   /* low window */
-  .5f,   /* high window */
+  -0.f,  /* suppress any noise curve over maxspec+n */
+  .7f,   /* low window */
+  .7f,   /* high window */
   25,
   25,
   50,
@@ -221,89 +220,88 @@ static vorbis_info_psy _psy_set_A={
  
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
-  -28.,
+  -22.,
 
 };
 
 /* with GNUisms, this could be short and readable. Oh well */
-static vorbis_info_time0 _time_set0A={0};
-static vorbis_info_floor0 _floor_set0A={12, 44100,  64, 10,130, 2, {0,1},
-                                        0.199f, .285f};
-static vorbis_info_floor0 _floor_set1A={30, 44100, 256, 12,150, 2, {2,3}, 
+static vorbis_info_time0 _time_set0AA={0};
+static vorbis_info_floor0 _floor_set0AA={9, 44100,  64, 10,130, 2, {0,1},
+                                        0.246f, .387f};
+static vorbis_info_floor0 _floor_set1AA={30, 44100, 256, 12,150, 2, {2,3}, 
                                         .082f, .126f};
-static vorbis_info_residue0 _residue_set0A={0,96,16,6,4,
+static vorbis_info_residue0 _residue_set0AA={0,192,16,6,4,
 					    {0,1,1,1,1,1},
 					    {6,7,8,9,10},
 					    
-					    {0,99999,9999,9999,9999},
-					    {999.f,1.5f,3.5f,15.5f,26.5f},
+					    {0,7,9999,9999,9999},
+					    {999.f,2.f,2.f,9.5f,26.f},
 					    {4,4,4,4,4},
 					    {99,99,99,99,99}};
 
-static vorbis_info_residue0 _residue_set1A={0, 960, 32,10,5,
+static vorbis_info_residue0 _residue_set1AA={0, 768, 32,10,5,
 					    {0,1,1,1,1,1,1,1,1,1},
 					    {11,12,13,14,15,16,17,18,19},
 					   
-					    {0,8,9999,16,9999,
-					     24,9999,9999,9999},
-					    {999.f,1.5f,1.5f,2.5f,2.5f,
-					     6.5f,6.5f,12.5f,22.5f},
+					    {0,10,9999,16,9999,
+					     26,9999,9999,9999},
+					    {999.f,2.f,2.f,4.f,4.f,
+					     9.5f,9.5f,18.f,37.f},
 					    {5,5,5,5,5,5,5,5,5},
 					    {99,99,99,99,99,99,99,99,99}};
 
-static vorbis_info_mapping0 _mapping_set0A={1, {0,0}, {0}, {0}, {0}, {0}};
-static vorbis_info_mapping0 _mapping_set1A={1, {0,0}, {0}, {1}, {1}, {1}};
-static vorbis_info_mode _mode_set0A={0,0,0,0};
-static vorbis_info_mode _mode_set1A={1,0,0,1};
+static vorbis_info_mapping0 _mapping_set0AA={1, {0,0}, {0}, {0}, {0}, {0}};
+static vorbis_info_mapping0 _mapping_set1AA={1, {0,0}, {0}, {1}, {1}, {1}};
+static vorbis_info_mode _mode_set0AA={0,0,0,0};
+static vorbis_info_mode _mode_set1AA={1,0,0,1};
 
 /* CD quality stereo, no channel coupling */
-codec_setup_info info_A={
+codec_setup_info info_AA={
 
   /* smallblock, largeblock */
-  {256, 2048}, 
+  {512, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
   2,          2,    1,     2,       2,   20,   2,
   /* modes */
-  {&_mode_set0A,&_mode_set1A},
+  {&_mode_set0AA,&_mode_set1AA},
   /* maps */
-  {0,0},{&_mapping_set0A,&_mapping_set1A},
+  {0,0},{&_mapping_set0AA,&_mapping_set1AA},
   /* times */
-  {0,0},{&_time_set0A},
+  {0,0},{&_time_set0AA},
   /* floors */
-  {0,0},{&_floor_set0A,&_floor_set1A},
+  {0,0},{&_floor_set0AA,&_floor_set1AA},
   /* residue */
-  {0,0},{&_residue_set0A,&_residue_set1A},
+  {0,0},{&_residue_set0AA,&_residue_set1AA},
   /* books */
-  {&_vq_book_lsp12_0,       /* 0 */
-   &_vq_book_lsp12_1,       /* 1 */
+  {&_vq_book_lsp9_0,       /* 0 */
+   &_vq_book_lsp9_1,       /* 1 */
    &_vq_book_lsp30_0,      /* 2 */
    &_vq_book_lsp30_1,      /* 3 */
 
-   &_huff_book_res0_128_128aux,
-   &_huff_book_res0_128_1024aux,
+   &_huff_book_res0_96_128aux,
+   &_huff_book_res0_96_1024aux,
 
-   &_vq_book_res0_128_128_1,
-   &_vq_book_res0_128_128_2,
-   &_vq_book_res0_128_128_3,
-   &_vq_book_res0_128_128_4,
-   &_vq_book_res0_128_128_5,
+   &_vq_book_res0_96_128_1,
+   &_vq_book_res0_96_128_2,
+   &_vq_book_res0_96_128_3,
+   &_vq_book_res0_96_128_4,
+   &_vq_book_res0_96_128_5,
 
-   &_vq_book_res0_128_1024_1,
-   &_vq_book_res0_128_1024_2,
-   &_vq_book_res0_128_1024_3,
-   &_vq_book_res0_128_1024_4,
-   &_vq_book_res0_128_1024_5,
-   &_vq_book_res0_128_1024_6,
-   &_vq_book_res0_128_1024_7,
-   &_vq_book_res0_128_1024_8,
-   &_vq_book_res0_128_1024_9,
+   &_vq_book_res0_96_1024_1,
+   &_vq_book_res0_96_1024_2,
+   &_vq_book_res0_96_1024_3,
+   &_vq_book_res0_96_1024_4,
+   &_vq_book_res0_96_1024_5,
+   &_vq_book_res0_96_1024_6,
+   &_vq_book_res0_96_1024_7,
+   &_vq_book_res0_96_1024_8,
+   &_vq_book_res0_96_1024_9,
 
   },
   /* psy */
-  {&_psy_set_A0,&_psy_set_A},
-
+  {&_psy_set_AA0,&_psy_set_AA},
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
-  256, {26.f,26.f,26.f,30.f}, {-90.f,-90.f,-90.f,-90.f}, -90.f,
+  256, {30.f,30.f,30.f,34.f}, {-90.f,-90.f,-90.f,-90.f}, -90.f,
 
   -10., 
 
