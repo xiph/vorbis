@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.36 2003/03/07 09:13:30 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.37 2003/03/08 07:15:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -80,7 +80,7 @@ float vorbis_lpc_from_data(float *data,float *lpci,int n,int m){
     double r= -aut[i+1];
 
     if(error==0){
-      memset(lpc,0,m*sizeof(*lpc));
+      memset(lpci,0,m*sizeof(*lpci));
       return 0;
     }
 
