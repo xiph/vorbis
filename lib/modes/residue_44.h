@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.1.2.1 2001/12/04 11:17:25 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.1.2.2 2001/12/05 08:03:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -102,10 +102,10 @@ static vorbis_info_residue0 _residue_44_high={
 /* residue backfill is entered in the template array as if stereo
    backfill is not in use.  It's up to vorbisenc to make the
    appropriate index adjustment */
-#ifdef 0
+#if 0
 static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 0; 64-ish */
-  {&residue_44_low,  {&44c0_short,&44c0_long},
+  {&_residue_44_low,  {&44c0_short,&44c0_long},
    { {{-1}}, /* lossless stereo */
      {{-1}}, /* 6dB (2.5) stereo */
      {{-1}}, /* 12dB (4.5) stereo */
@@ -137,7 +137,7 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
 
   /* mode 1; 80-ish */
 
-}
+};
 #endif
 
 #include "books/res_44c_Z_128aux.vqh"
@@ -145,31 +145,31 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
 
 static vorbis_residue_template _residue_template_44_stereo_temp[11]={
   /* mode 0; 64-ish */
-  {&residue_44_low,  {&_huff_book_res_44c_Z_128aux, 
+  {&_residue_44_low,  {&_huff_book_res_44c_Z_128aux, 
 		      &_huff_book_res_44c_Z_1024aux},
-   { {{-1}}, /* lossless stereo */
-     {{-1}}, /* 6dB (2.5) stereo */
-     {{-1}}, /* 12dB (4.5) stereo */
-     {{-1}}, /* 17dB (7.5) stereo */
-     {{-1}},
-     {{-1}}, /* 27dB (22.5) stereo */
+   { {{0}}, /* lossless stereo */
+     {{0}}, /* 6dB (2.5) stereo */
+     {{0}}, /* 12dB (4.5) stereo */
+     {{0}}, /* 17dB (7.5) stereo */
+     {{0}},
+     {{0}}, /* 27dB (22.5) stereo */
    },
-   { {-1}, /* lossless stereo */
-     {-1}, /* 6dB (2.5) stereo */
-     {-1}, /* 12dB (4.5) stereo */
-     {-1}, /* 17dB (7.5) stereo */
-     {-1},
-     {-1}, /* 27dB (22.5) stereo */
+   { {0}, /* lossless stereo */
+     {0}, /* 6dB (2.5) stereo */
+     {0}, /* 12dB (4.5) stereo */
+     {0}, /* 17dB (7.5) stereo */
+     {0},
+     {0}, /* 27dB (22.5) stereo */
    },
-   { {{-1}}, /* lossless stereo */
-     {{-1}}, /* 6dB (2.5) stereo */
-     {{-1}}, /* 12dB (4.5) stereo */
-     {{-1}},
-     {{-1}}, /* 22dB (12.5) stereo */
-     {{-1}}, /* 27dB (22.5) stereo */
+   { {{0}}, /* lossless stereo */
+     {{0}}, /* 6dB (2.5) stereo */
+     {{0}}, /* 12dB (4.5) stereo */
+     {{0}},
+     {{0}}, /* 22dB (12.5) stereo */
+     {{0}}, /* 27dB (22.5) stereo */
    },
   }
 
   /* mode 1; 80-ish */
 
-}
+};

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.10 2001/11/24 07:16:38 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.11 2001/12/05 08:03:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -143,13 +143,13 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
       int psynum=info->psy[0];
       look->psy_look[0]=_ogg_calloc(1,sizeof(*look->psy_look[0]));      
       _vp_psy_init(look->psy_look[0],ci->psy_param[psynum],
-		   ci->psy_g_param,
+		   &ci->psy_g_param,
 		   ci->blocksizes[vm->blockflag]/2,vi->rate);
 
       psynum=info->psy[1];
       look->psy_look[1]=_ogg_calloc(1,sizeof(*look->psy_look[1]));      
       _vp_psy_init(look->psy_look[1],ci->psy_param[psynum],
-		   ci->psy_g_param,
+		   &ci->psy_g_param,
 		   ci->blocksizes[vm->blockflag]/2,vi->rate);
     }else{
 
@@ -157,7 +157,7 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
       look->psy_look[0]=_ogg_calloc(1,sizeof(*look->psy_look[0]));      
       look->psy_look[1]=look->psy_look[0];
       _vp_psy_init(look->psy_look[0],ci->psy_param[psynum],
-		   ci->psy_g_param,
+		   &ci->psy_g_param,
 		   ci->blocksizes[vm->blockflag]/2,vi->rate);
 
     }

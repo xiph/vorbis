@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.1.2.5 2001/12/04 11:16:19 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.1.2.6 2001/12/05 08:03:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -85,7 +85,7 @@ static long limit_sum(bitrate_manager_state *bm,int limit){
 void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
   int i;
   codec_setup_info *ci=vi->codec_setup;
-  bitrate_manager_info *bi=ci->bi;
+  bitrate_manager_info *bi=&ci->bi;
   long maxlatency;
 
   memset(bm,0,sizeof(*bm));
@@ -199,7 +199,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
   bitrate_manager_state *bm=&b->bms;
   vorbis_info           *vi=vd->vi;
   codec_setup_info      *ci=vi->codec_setup;
-  bitrate_manager_info  *bi=ci->bi;
+  bitrate_manager_info  *bi=&ci->bi;
   int                    eofflag=vb->eofflag;
   int                    head=bm->queue_head;
   int                    next_head=head+1;
@@ -363,7 +363,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	if(bm->avgnoise>bi->avgfloat_noise_maxval)
 	  bm->avgnoise=bi->avgfloat_noise_maxval;
       }
-      fprintf(stderr,"noise:%f req:%d trigger:%d\n",bm->avgnoise,
+      fprintf(stderr,"noise:%f req:%ld trigger:%ld\n",bm->avgnoise,
 	      bm->noisetrigger_request,bm->noisetrigger_postpone);
 
     }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.56.2.5 2001/12/04 11:16:19 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.56.2.6 2001/12/05 08:03:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -35,22 +35,10 @@
    masking has a strong harmonic dependency */
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
-  int i,j;
   codec_setup_info *ci=vi->codec_setup;
-  vorbis_info_psy_global *gi=ci->psy_g_param;
+  vorbis_info_psy_global *gi=&ci->psy_g_param;
   vorbis_look_psy_global *look=_ogg_calloc(1,sizeof(*look));
 
-  int shiftoc=rint(log(gi->eighth_octave_lines*8)/log(2))-1;
-  look->decaylines=toOC(96000.f)*(1<<(shiftoc+1))+.5f; /* max sample
-							  rate of
-							  192000kHz
-							  for now */
-  look->decay=_ogg_calloc(vi->channels,sizeof(*look->decay));
-  for(i=0;i<vi->channels;i++){
-    look->decay[i]=_ogg_calloc(look->decaylines,sizeof(*look->decay[i]));
-    for(j=0;j<look->decaylines;j++)
-      look->decay[i][j]=-9999.;
-  }
   look->channels=vi->channels;
 
   look->ampmax=-9999.;
@@ -59,14 +47,10 @@ vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
 }
 
 void _vp_global_free(vorbis_look_psy_global *look){
-  int i;
-  if(look->decay){
-    for(i=0;i<look->channels;i++)
-      _ogg_free(look->decay[i]);
-    _ogg_free(look->decay);
+  if(look){
+    memset(look,0,sizeof(*look));
+    _ogg_free(look);
   }
-  memset(look,0,sizeof(*look));
-  _ogg_free(look);
 }
 
 void _vi_gpsy_free(vorbis_info_psy_global *i){
@@ -334,7 +318,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 
   /* set up the final curves */
   for(i=0;i<P_BANDS;i++)
-    setup_curve(p->tonecurves[i],i,vi->toneatt->block[i]);
+    setup_curve(p->tonecurves[i],i,vi->toneatt.block[i]);
 
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("curve_63Hz",i,p->tonecurves[0][i]+2,EHMER_MAX,0,0);
@@ -378,8 +362,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     for(i=0;i<P_BANDS;i++)
       for(j=0;j<P_LEVELS;j++){
 	for(k=2;k<EHMER_OFFSET+2+vi->curvelimitp;k++)
-	  if(p->tonecurves[i][j][k]> vi->peakatt->block[i][j])
-	    p->tonecurves[i][j][k]=  vi->peakatt->block[i][j];
+	  if(p->tonecurves[i][j][k]> vi->peakatt.block[i][j])
+	    p->tonecurves[i][j][k]=  vi->peakatt.block[i][j];
 	  else
 	    break;
       }
@@ -423,8 +407,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   if(vi->peakattp) /* we limit maximum depth only optionally */
     for(i=0;i<P_BANDS;i++)
       for(j=0;j<P_LEVELS;j++)
-	if(p->tonecurves[i][j][EHMER_OFFSET+2]< vi->peakatt->block[i][j])
-	  p->tonecurves[i][j][EHMER_OFFSET+2]=  vi->peakatt->block[i][j];
+	if(p->tonecurves[i][j][EHMER_OFFSET+2]< vi->peakatt.block[i][j])
+	  p->tonecurves[i][j][EHMER_OFFSET+2]=  vi->peakatt.block[i][j];
 
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("pcurve_63Hz",i,p->tonecurves[0][i]+2,EHMER_MAX,0,0);
@@ -898,7 +882,7 @@ void _vp_compute_mask(vorbis_look_psy *p,
 float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
   vorbis_info *vi=vd->vi;
   codec_setup_info *ci=vi->codec_setup;
-  vorbis_info_psy_global *gi=ci->psy_g_param;
+  vorbis_info_psy_global *gi=&ci->psy_g_param;
 
   int n=ci->blocksizes[vd->W]/2;
   float secs=(float)n/vi->rate;

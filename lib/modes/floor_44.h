@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: key floor settings for 44.1/48kHz
- last mod: $Id: floor_44.h,v 1.1.2.1 2001/12/04 11:17:24 xiphmont Exp $
+ last mod: $Id: floor_44.h,v 1.1.2.2 2001/12/05 08:03:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -56,35 +56,37 @@
 #include "books/line_1024x31_3sub2.vqh"
 #include "books/line_1024x31_3sub3.vqh"
 
-static static_codebook _floor_44_128_books[2][9]={
-  {
-    &_huff_book_line_128x7_class1,
-    &_huff_book_line_128x7_class2,
-    
-    &_huff_book_line_128x7_0sub0,
-    &_huff_book_line_128x7_1sub1,
-    &_huff_book_line_128x7_1sub2,
-    &_huff_book_line_128x7_1sub3,
-    &_huff_book_line_128x7_2sub1,
-    &_huff_book_line_128x7_2sub2,
-    &_huff_book_line_128x7_2sub3, 
-  },
-  {
-    &_huff_book_line_128x19_class1,
-    &_huff_book_line_128x19_class2,
-    
-    &_huff_book_line_128x19_0sub0,
-    &_huff_book_line_128x19_1sub1,
-    &_huff_book_line_128x19_1sub2,
-    &_huff_book_line_128x19_1sub3,
-    &_huff_book_line_128x19_2sub1,
-    &_huff_book_line_128x19_2sub2,
-    &_huff_book_line_128x19_2sub3, 
-  }
+static static_codebook *_floor_44_128x7_books[]={
+  &_huff_book_line_128x7_class1,
+  &_huff_book_line_128x7_class2,
+  
+  &_huff_book_line_128x7_0sub0,
+  &_huff_book_line_128x7_1sub1,
+  &_huff_book_line_128x7_1sub2,
+  &_huff_book_line_128x7_1sub3,
+  &_huff_book_line_128x7_2sub1,
+  &_huff_book_line_128x7_2sub2,
+  &_huff_book_line_128x7_2sub3, 
+};
+static static_codebook *_floor_44_128x19_books[]={
+  &_huff_book_line_128x19_class1,
+  &_huff_book_line_128x19_class2,
+  
+  &_huff_book_line_128x19_0sub0,
+  &_huff_book_line_128x19_1sub1,
+  &_huff_book_line_128x19_1sub2,
+  &_huff_book_line_128x19_1sub3,
+  &_huff_book_line_128x19_2sub1,
+  &_huff_book_line_128x19_2sub2,
+  &_huff_book_line_128x19_2sub3, 
 };
 
-static static_codebook _floor_44_1024_books[1][14]={
-  {
+static static_codebook **_floor_44_128_books[2]={
+  _floor_44_128x7_books,
+  _floor_44_128x19_books,
+};
+
+static static_codebook *_floor_44_1024x31_books[]={
     &_huff_book_line_1024x31_class0,
     &_huff_book_line_1024x31_class1,
     &_huff_book_line_1024x31_class2,
@@ -100,8 +102,11 @@ static static_codebook _floor_44_1024_books[1][14]={
     &_huff_book_line_1024x31_3sub1,
     &_huff_book_line_1024x31_3sub2,
     &_huff_book_line_1024x31_3sub3,
-  }
-}
+};
+
+static static_codebook **_floor_44_1024_books[1]={
+  _floor_44_1024x31_books
+};
 
 static vorbis_info_floor1 _floor_44_128[2]={
   {
