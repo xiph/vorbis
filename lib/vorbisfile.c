@@ -12,12 +12,13 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.34 2000/12/21 21:04:41 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.35 2001/01/01 21:31:15 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <math.h>
 
@@ -59,17 +60,27 @@
 /* read a little more data from the file/pipe into the ogg_sync framer */
 #define CHUNKSIZE 4096
 static long _get_data(OggVorbis_File *vf){
-  char *buffer=ogg_sync_buffer(&vf->oy,CHUNKSIZE);
-  long bytes=(vf->callbacks.read_func)(buffer,1,CHUNKSIZE,vf->datasource);
-  if(bytes>0)ogg_sync_wrote(&vf->oy,bytes);
-  return(bytes);
+  errno=0;
+  if(vf->datasource){
+    char *buffer=ogg_sync_buffer(&vf->oy,CHUNKSIZE);
+    long bytes=(vf->callbacks.read_func)(buffer,1,CHUNKSIZE,vf->datasource);
+    if(bytes>0)ogg_sync_wrote(&vf->oy,bytes);
+    if(bytes==0 && errno)return(-1);
+    return(bytes);
+  }else
+    return(0);
 }
 
 /* save a tiny smidge of verbosity to make the code more readable */
 static void _seek_helper(OggVorbis_File *vf,long offset){
-  (vf->callbacks.seek_func)(vf->datasource, offset, SEEK_SET);
-  vf->offset=offset;
-  ogg_sync_reset(&vf->oy);
+  if(vf->datasource){ 
+    (vf->callbacks.seek_func)(vf->datasource, offset, SEEK_SET);
+    vf->offset=offset;
+    ogg_sync_reset(&vf->oy);
+  }else{
+    /* shouldn't happen unless someone writes a broken callback */
+    return;
+  }
 }
 
 /* The read/seek functions track absolute position within the stream */
@@ -585,6 +596,7 @@ int ov_clear(OggVorbis_File *vf){
 }
 
 static int _fseek64_wrap(FILE *f,ogg_int64_t off,int whence){
+  if(f==NULL)return(-1);
   return fseek(f,(int)off,whence);
 }
 
@@ -611,7 +623,7 @@ int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
 int ov_open_callbacks(void *f,OggVorbis_File *vf,char *initial,long ibytes,
     ov_callbacks callbacks)
 {
-  long offset=callbacks.seek_func(f,0,SEEK_CUR);
+  long offset=(f?callbacks.seek_func(f,0,SEEK_CUR):-1);
   int ret;
 
   memset(vf,0,sizeof(OggVorbis_File));
