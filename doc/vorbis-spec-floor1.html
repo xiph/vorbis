@@ -6,7 +6,7 @@
 Ogg Vorbis I format specification: floor type 1 setup and decode
 </font></h1>
 
-<em>Last update to this document: July 18, 2002</em><br>
+<em>Last update to this document: July 19, 2002</em><br>
 
 <h1>Overview</h1>
 
@@ -146,7 +146,8 @@ addition, a <tt>[floor1_class_masterbooks]</tt> or
 highest numbered codebook configured in this stream is an error
 condition that renders the stream undecodable.<p>
 
-<h2>packet decode</h2>
+<a name=decode>
+<h2>packet decode</h2></a>
 
 Packet decode begins by checking the <tt>[nonzero]</tt> flag:<p>
 
@@ -211,7 +212,8 @@ operation above, floor decode is to return 'unused' status as if the
 Vector <tt>[floor1_Y]</tt> contains the values from packet decode
 needed for floor 1 synthesis.<p>
 
-<h2>curve computation</h2>
+<a name=synth>
+<h2>curve computation</h2></a>
 
 Curve computation is split into two logical steps; the first step
 derives final Y amplitude values from the encoded, wrapped difference

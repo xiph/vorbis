@@ -329,7 +329,8 @@ as described earlier, all of which may be used in a given Vorbis
 stream. The mode is encoded as an integer used as a direct offset into
 the mode instance index. <p>
 
-<h3>Window shape decode [long windows only]</h3>
+<a name=window>
+<h3>Window shape decode [long windows only]</h3></a>
 
 Vorbis frames may be one of two PCM sample sizes specified during
 codec setup.  In Vorbis I, legal frame sizes are powers of two from 64
@@ -369,7 +370,7 @@ can be found in the paper <a
 href="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">_The
 use of multirate filter banks for coding of high quality digital
 audio_</a>, by T. Sporer, K. Brandenburg and B. Edler.  Vorbis windows
-all use the slope function y=sin(2PI*sin^2((x+.5)/n)).<p>
+all use the slope function y=sin(2PI*sin^2(x/n)).<p>
 
 <h3>floor decode</h3>
 
@@ -429,9 +430,8 @@ This step is straightforward; for each output channel, the decoder
 multiplies the floor curve and residue vectors element by element,
 producing the finished audio spectrum of each channel.<p>
 
-One point is worth mentioning about this dot product (the bit-level
-specification document goes into more detail about this); a common
-mistake in a fixed point implementation is to assume that a 32 bit
+One point is worth mentioning about this dot product; a common mistake
+in a fixed point implementation might be to assume that a 32 bit
 fixed-point representation for floor and residue and direct
 multiplication of the vectors is sufficient for acceptable spectral
 depth in all cases because it happens to mostly work with the current
@@ -494,7 +494,7 @@ transform orthogonality.  Pay attention however to returning the
 correct data range; the amount of data to be returned is:<p>
 <tt>window_blocksize(previous_window)/4+window_blocksize(current_window)/4</tt>
 from the center of the previous window to the center of the current
-window..<p>
+window.<p>
 
 Data is not returned from the first frame; it must be used to 'prime'
 the decode engine.  The encoder accounts for this priming when

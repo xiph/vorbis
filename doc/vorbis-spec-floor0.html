@@ -6,7 +6,7 @@
 Ogg Vorbis I format specification: floor type 0 setup and decode
 </font></h1>
 
-<em>Last update to this document: July 18, 2002</em><br>
+<em>Last update to this document: July 19, 2002</em><br>
 
 <h1>Overview</h1>
 
@@ -48,7 +48,8 @@ this stream undecodable.  In addition, any element of the array
 number for this bitstream is an error condition that also renders the
 stream undecodable.
 
-<h2>packet decode</h2>
+<a name=decode>
+<h2>packet decode</h2></a>
 
 Extracting a floor0 curve from an audio packet consists of first
 decoding the curve amplitude and <tt>[floor0_order]</tt> LSP
@@ -103,7 +104,8 @@ condition, and care must be taken not to allow a buffer overflow in
 decode. The extra values are not used and may be ignored or discarded.
 </ul>
  
-<h2>curve computation</h2>
+<a name=synth>
+<h2>curve computation</h2></a>
 
 Given an <tt>[amplitude]</tt> integer and <tt>[coefficients]</tt>
 vector from packet decode as well as the [floor0_order],
