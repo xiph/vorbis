@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: modified discrete cosine transform prototypes
- last mod: $Id: mdct.h,v 1.14 2000/12/16 01:49:39 xiphmont Exp $
+ last mod: $Id: mdct.h,v 1.15 2000/12/17 01:07:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,7 +21,7 @@
 
 #include "vorbis/codec.h"
 
-//#define MDCT_INTEGERIZED  <- be warned there could be some hurt left here
+/*#define MDCT_INTEGERIZED  <- be warned there could be some hurt left here*/
 #ifdef MDCT_INTEGERIZED
 
 #define DATA_TYPE int
