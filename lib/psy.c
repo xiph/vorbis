@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48.2.1 2001/07/08 08:48:01 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.48.2.2 2001/07/11 00:41:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -541,6 +541,44 @@ static void seed_chase(float *seeds, int linesper, long n){
 
 }
 
+static int seq=0;
+static void _vp_compute_mask_decay(vorbis_look_psy *p,
+				   vorbis_look_psy_global *g,
+				   float *seed,int channel){
+  if(g->gi->decaydBpms<0){
+    int i;
+
+    /* first decay the entire cached buffer */
+    float *decay=g->decay[channel];
+    float ms=p->n*1000.f/p->rate;
+    float decaydB=g->gi->decaydBpms*ms;
+
+    for(i=0;i<g->decaylines;i++){
+      decay[i]+=decaydB;
+      if(decay[i]<-9999.f)decay[i]=-9999.f;
+    }
+    _analysis_output("decay",seq,decay+200,g->decaylines-200,0,0);
+    _analysis_output("seed",seq++,seed-p->firstoc+200,p->total_octave_lines+p->firstoc-200,0,0);
+
+    /* now, apply decayed buffer to the valid range of the seeds,
+       copy back larger seeds into cache */
+    {
+      float end=p->total_octave_lines+p->firstoc-1;
+      int begin=-p->firstoc;
+
+      if(end>g->decaylines)end=g->decaylines;
+      if(begin<260)begin=260;
+      for(i=begin;i<end;i++){
+	if(decay[i]>seed[i-p->firstoc])
+	  seed[i-p->firstoc]=decay[i];
+	else
+	  decay[i]=seed[i-p->firstoc];
+      }
+    }
+  }
+}
+
+
 /* bleaugh, this is more complicated than it needs to be */
 static void max_seeds(vorbis_look_psy *p,
 		      vorbis_look_psy_global *g,
@@ -703,43 +741,6 @@ static void bark_noise_median(int n,const long *b,const float *f,
     noise[i]= (median+1)*.5f+off[i];
   }
 
-}
-
-static int seq=0;
-static void _vp_compute_mask_decay(vorbis_look_psy *p,
-				   vorbis_look_psy_global *g,
-				   float *seed,int channel){
-  if(g->gi->decaydBpms<0){
-    int i;
-
-    /* first decay the entire cached buffer */
-    float *decay=g->decay[channel];
-    float ms=p->n*1000.f/p->rate;
-    float decaydB=g->gi->decaydBpms*ms;
-
-    for(i=0;i<g->decaylines;i++){
-      decay[i]+=decaydB;
-      if(decay[i]<-9999.f)decay[i]=-9999.f;
-    }
-    _analysis_output("decay",seq,decay+200,g->decaylines-200,0,0);
-    _analysis_output("seed",seq++,seed-p->firstoc+200,p->total_octave_lines+p->firstoc-200,0,0);
-
-    /* now, apply decayed buffer to the valid range of the seeds,
-       copy back larger seeds into cache */
-    {
-      float end=p->total_octave_lines+p->firstoc-1;
-      int begin=-p->firstoc;
-
-      if(end>g->decaylines)end=g->decaylines;
-      if(begin<260)begin=260;
-      for(i=begin;i<end;i++){
-	if(decay[i]>seed[i-p->firstoc])
-	  seed[i-p->firstoc]=decay[i];
-	else
-	  decay[i]=seed[i-p->firstoc];
-      }
-    }
-  }
 }
 
 float _vp_compute_mask(vorbis_look_psy *p,
