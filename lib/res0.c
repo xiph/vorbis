@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.32.2.6 2001/08/08 05:17:17 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.32.2.7 2001/08/08 05:23:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -489,10 +489,6 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 
   int partvals=n/samples_per_partition;
 
-  long resbits[possible_partitions];
-  long resvals[possible_partitions];
-
-  
 #ifdef TRAIN_RES
   FILE *of;
   char buffer[80];
@@ -507,9 +503,6 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     fclose(of);
   }
 #endif      
-
-  memset(resbits,0,sizeof(resbits));
-  memset(resvals,0,sizeof(resvals));
   
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
@@ -546,14 +539,12 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	long offset=i*samples_per_partition+info->begin;
 	
 	for(j=0;j<ch;j++){
-	  if(s==0)resvals[partword[j][i]]+=samples_per_partition;
 	  if(info->secondstages[partword[j][i]]&(1<<s)){
 	    codebook *statebook=look->partbooks[partword[j][i]][s];
 	    if(statebook){
 	      int ret=encode(&vb->opb,in[j]+offset,samples_per_partition,
 			     statebook,look);
 	      look->postbits+=ret;
-	      resbits[partword[j][i]]+=ret;
 	      
 	    }
 	  }
@@ -573,7 +564,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     }
 
     fprintf(stderr,":: %ld:%1.2g\n",total,(double)totalbits/total);
-    }*/
+    }*/ 
   return(0);
 }
 
