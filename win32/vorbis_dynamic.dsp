@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /Ox /Ot /Og /Oi /Ob2 /I "..\..\ogg\include" /I "..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /YX /FD /c
+# ADD CPP /nologo /GB /MD /W3 /GX /O2 /Ob1 /I "..\..\ogg\include" /I "..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_IEEE_FLOAT32" /D "_USE_NON_INTEL_COMPILER" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -151,15 +151,6 @@ SOURCE=..\lib\psy.c
 # Begin Source File
 
 SOURCE=..\lib\registry.c
-
-!IF  "$(CFG)" == "vorbis_dynamic - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "vorbis_dynamic - Win32 Debug"
-
-# ADD CPP /I "..\src"
-
-!ENDIF 
-
 # End Source File
 # Begin Source File
 
@@ -188,6 +179,10 @@ SOURCE=..\lib\window.c
 # Begin Source File
 
 SOURCE=..\lib\backends.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\bitbuffer.h
 # End Source File
 # Begin Source File
 
@@ -276,15 +271,6 @@ SOURCE=..\lib\window.h
 # Begin Source File
 
 SOURCE=.\vorbis.def
-
-!IF  "$(CFG)" == "vorbis_dynamic - Win32 Release"
-
-!ELSEIF  "$(CFG)" == "vorbis_dynamic - Win32 Debug"
-
-# PROP Exclude_From_Build 1
-
-!ENDIF 
-
 # End Source File
 # End Group
 # End Target

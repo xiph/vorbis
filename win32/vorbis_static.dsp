@@ -41,7 +41,7 @@ RSC=rc.exe
 # PROP Intermediate_Dir "Vorbis_Static_Release"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
-# ADD CPP /nologo /MT /W2 /GX /Ox /Ot /Og /Oi /Ob2 /I "..\include" /I "..\..\ogg\include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /c
+# ADD CPP /nologo /GB /MT /W3 /GX /O2 /Ob1 /I "..\include" /I "..\..\ogg\include" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "_LIB" /YX /FD /O3 /QaxK /Qsox- /Qip /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -64,7 +64,7 @@ LIB32=link.exe -lib
 # PROP Intermediate_Dir "Vorbis_Static_Debug"
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\include" /I "..\..\ogg\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /I "..\..\ogg\include" /D "WIN32" /D "_DEBUG" /D "_MBCS" /D "_LIB" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -117,6 +117,10 @@ SOURCE=..\lib\info.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\lib\lookup.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\lib\lpc.c
 # End Source File
 # Begin Source File
@@ -165,7 +169,11 @@ SOURCE=..\lib\window.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\lib\backends.h
+SOURCE=..\include\vorbis\backends.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\bitbuffer.h
 # End Source File
 # Begin Source File
 
@@ -173,11 +181,7 @@ SOURCE=..\lib\bitrate.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bitrate.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\lib\codebook.h
+SOURCE=..\include\vorbis\codebook.h
 # End Source File
 # Begin Source File
 
