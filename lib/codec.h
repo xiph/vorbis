@@ -98,6 +98,14 @@ typedef struct vorbis_info{
 
   double preecho_thresh;
   double preecho_clamp;
+
+  /* local storage, only used on the encoding size.  This way the
+     application does not need to worry about freeing some packets'
+     memory and not others'.  Packet storage is always tracked */
+  char *header;
+  char *header1;
+  char *header2;
+
 } vorbis_info;
  
 /* ogg_page is used to encapsulate the data in one Ogg bitstream page *****/
@@ -287,7 +295,10 @@ extern int vorbis_info_clear(vorbis_info *vi);
 extern int vorbis_info_modeset(vorbis_info *vi, int mode); 
 extern int vorbis_info_addcomment(vorbis_info *vi, char *comment); 
 extern int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op);
-extern int vorbis_info_headerout(vorbis_info *vi,ogg_packet *op);
+extern int vorbis_info_headerout(vorbis_info *vi,
+				 ogg_packet *op,
+				 ogg_packet *op_comm,
+				 ogg_packet *op_code);
 
 extern int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
 extern int vorbis_block_clear(vorbis_block *vb);

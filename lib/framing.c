@@ -221,7 +221,7 @@ int ogg_stream_packetin(ogg_stream_state *os,ogg_packet *op){
 
 /* This constructs pages from buffered packet segments.  The pointers
 returned are to static buffers; do not free. The returned buffers are
-good only until the next call (using the same os) */
+good only until the next call (using the same ogg_stream_state) */
 
 int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
   int i;
@@ -238,9 +238,11 @@ int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
     os->body_returned=0;
   }
 
-  if((os->e_o_s&&os->lacing_fill) || 
-     os->body_fill > 4096 || 
-     os->lacing_fill>=255){
+  if((os->e_o_s&&os->lacing_fill) ||  /* 'were done, now flush' case */
+     os->body_fill > 4096 ||          /* 'page nominal size' case */
+     os->lacing_fill>=255 ||          /* 'segment table full' case */
+     (os->lacing_fill&&!os->b_o_s)){  /* 'initial header page' case */
+
     int vals=0,bytes=0;
     int maxvals=(os->lacing_fill>255?255:os->lacing_fill);
     long acc=0;
@@ -248,10 +250,23 @@ int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
 
     /* construct a page */
     /* decide how many segments to include */
-    for(vals=0;vals<maxvals;vals++){
-      if(acc>4096)break;
-      acc+=os->lacing_vals[vals]&0x0ff;
-      if((os->lacing_vals[vals]&0x0ff)<255)pcm_pos=os->pcm_vals[vals];
+
+    /* If this is the initial header case, the first page must only include
+       the initial header packet */
+    if(os->b_o_s==0){  /* 'initial header page' case */
+      pcm_pos=0;
+      for(vals=0;vals<maxvals;vals++){
+	if((os->lacing_vals[vals]&0x0ff)<255){
+	  vals++;
+	  break;
+	}
+      }
+    }else{
+      for(vals=0;vals<maxvals;vals++){
+	if(acc>4096)break;
+	acc+=os->lacing_vals[vals]&0x0ff;
+	if((os->lacing_vals[vals]&0x0ff)<255)pcm_pos=os->pcm_vals[vals];
+      }
     }
 
     /* construct the header in temp storage */
@@ -259,10 +274,9 @@ int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
 
     /* stream structure version */
     os->header[4]=0x00;
-
     
-    os->header[5]=0x00;
     /* continued packet flag? */
+    os->header[5]=0x00;
     if((os->lacing_vals[0]&0x100)==0)os->header[5]|=0x01;
     /* first page flag? */
     if(os->b_o_s==0)os->header[5]|=0x02;
@@ -935,16 +949,37 @@ int main(void){
      the checksums are working.  */
 
   {
+    /* 17 only */
+    int packets[]={17, -1};
+    int head1[] = {0x4f,0x67,0x67,0x53,0,0x06,
+		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,0,0,0,0,
+		   0x15,0xed,0xec,0x91,
+		   1,
+		   17};
+    int *headret[]={head1,NULL};
+    
+    fprintf(stderr,"testing single page encoding... ");
+    test_pack(packets,headret);
+  }
+
+  {
     /* 17, 254, 255, 256, 500, 510, 600 byte, pad */
     int packets[]={17, 254, 255, 256, 500, 510, 600, -1};
-    int head1[] = {0x4f,0x67,0x67,0x53,0,0x06,
-		   0x07,0x18,0x00,0x00,0x00,0x00,0x00,0x00,
+    int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
+		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 		   0x01,0x02,0x03,0x04,0,0,0,0,
-		   0x46,0x39,0xee,0xcb,
-		   14,
-		   17,254,255,0,255,1,255,245,255,255,0,
+		   0x59,0x10,0x6c,0x2c,
+		   1,
+                   17};
+    int head2[] = {0x4f,0x67,0x67,0x53,0,0x04,
+		   0x07,0x18,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,1,0,0,0,
+		   0x89,0x33,0x85,0xce,
+		   13,
+		   254,255,0,255,1,255,245,255,255,0,
 		   255,255,90};
-    int *headret[]={head1,NULL};
+    int *headret[]={head1,head2,NULL};
     
     fprintf(stderr,"testing basic page encoding... ");
     test_pack(packets,headret);
@@ -954,71 +989,84 @@ int main(void){
     /* nil packets; beginning,middle,end */
     int packets[]={0,17, 254, 255, 0, 256, 0, 500, 510, 600, 0, -1};
 
-    int head1[] = {0x4f,0x67,0x67,0x53,0,0x06,
-		   0x07,0x28,0x00,0x00,0x00,0x00,0x00,0x00,
+    int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
+		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 		   0x01,0x02,0x03,0x04,0,0,0,0,
-		   0xf6,0x56,0x56,0x9e,
-		   18,
-		   0,17,254,255,0,0,255,1,0,255,245,255,255,0,
+		   0xff,0x7b,0x23,0x17,
+		   1,
+		   0};
+    int head2[] = {0x4f,0x67,0x67,0x53,0,0x04,
+		   0x07,0x28,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,1,0,0,0,
+		   0x5c,0x3f,0x66,0xcb,
+		   17,
+		   17,254,255,0,0,255,1,0,255,245,255,255,0,
 		   255,255,90,0};
-    int *headret[]={head1,NULL};
+    int *headret[]={head1,head2,NULL};
     
     fprintf(stderr,"testing basic nil packets... ");
     test_pack(packets,headret);
   }
 
   {
-    /* starting new page with first segment */
+    /* large initial packet */
     int packets[]={4345,259,255,-1};
 
     int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
 		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 		   0x01,0x02,0x03,0x04,0,0,0,0,
-		   0x7e,0x3e,0xa9,0x86,
+		   0x01,0x27,0x31,0xaa,
+		   18,
+		   255,255,255,255,255,255,255,255,
+		   255,255,255,255,255,255,255,255,255,10};
+
+    int head2[] = {0x4f,0x67,0x67,0x53,0,0x04,
+		   0x07,0x08,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,1,0,0,0,
+		   0x7f,0x4e,0x8a,0xd2,
+		   4,
+		   255,4,255,0};
+    int *headret[]={head1,head2,NULL};
+    
+    fprintf(stderr,"testing initial-packet lacing > 4k... ");
+    test_pack(packets,headret);
+  }
+
+  {
+    /* continuing packet test */
+    int packets[]={0,4345,259,255,-1};
+
+    int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
+		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,0,0,0,0,
+		   0xff,0x7b,0x23,0x17,
+		   1,
+		   0};
+
+    int head2[] = {0x4f,0x67,0x67,0x53,0,0x00,
+		   0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,1,0,0,0,
+		   0x34,0x24,0xd5,0x29,
 		   17,
 		   255,255,255,255,255,255,255,255,
 		   255,255,255,255,255,255,255,255,255};
 
-    int head2[] = {0x4f,0x67,0x67,0x53,0,0x05,
-		   0x07,0x08,0x00,0x00,0x00,0x00,0x00,0x00,
-		   0x01,0x02,0x03,0x04,1,0,0,0,
-		   0x28,0x26,0x8c,0x6a,
+    int head3[] = {0x4f,0x67,0x67,0x53,0,0x05,
+		   0x07,0x0c,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,2,0,0,0,
+		   0xc8,0xc3,0xcb,0xed,
 		   5,
 		   10,255,4,255,0};
-    int *headret[]={head1,head2,NULL};
+    int *headret[]={head1,head2,head3,NULL};
     
-    fprintf(stderr,"testing single-packet page span... ");
+    fprintf(stderr,"testing single packet page span... ");
     test_pack(packets,headret);
   }
-
-  {
-    int packets[]={100,4345,259,255,-1};
-
-    int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
-		   0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-		   0x01,0x02,0x03,0x04,0,0,0,0,
-		   0x9f,0x45,0x89,0x8c,
-		   17,
-		   100,255,255,255,255,255,255,255,255,
-		   255,255,255,255,255,255,255,255};
-
-    int head2[] = {0x4f,0x67,0x67,0x53,0,0x05,
-		   0x07,0x0c,0x00,0x00,0x00,0x00,0x00,0x00,
-		   0x01,0x02,0x03,0x04,1,0,0,0,
-		   0xe6,0x35,0xfc,0xb7,
-		   6,
-		   255,10,255,4,255,0};
-    int *headret[]={head1,head2,NULL};
-    
-    fprintf(stderr,"testing multi-packet page span... ");
-    test_pack(packets,headret);
-  }
-
 
   /* page with the 255 segment limit */
   {
 
-    int packets[]={10,10,10,10,10,10,10,10,
+    int packets[]={0,10,10,10,10,10,10,10,10,
 		   10,10,10,10,10,10,10,10,
 		   10,10,10,10,10,10,10,10,
 		   10,10,10,10,10,10,10,10,
@@ -1052,9 +1100,16 @@ int main(void){
 		   10,10,10,10,10,10,10,50,-1};
 
     int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
-		   0x07,0xf8,0x03,0x00,0x00,0x00,0x00,0x00,
+		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 		   0x01,0x02,0x03,0x04,0,0,0,0,
-		   0x2f,0xe5,0xf5,0x43,
+		   0xff,0x7b,0x23,0x17,
+		   1,
+		   0};
+
+    int head2[] = {0x4f,0x67,0x67,0x53,0,0x00,
+		   0x07,0xfc,0x03,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,1,0,0,0,
+		   0xed,0x2a,0x2e,0xa7,
 		   255,
 		   10,10,10,10,10,10,10,10,
 		   10,10,10,10,10,10,10,10,
@@ -1089,13 +1144,13 @@ int main(void){
 		   10,10,10,10,10,10,10,10,
 		   10,10,10,10,10,10,10};
 
-    int head2[] = {0x4f,0x67,0x67,0x53,0,0x04,
-		   0x07,0xfc,0x03,0x00,0x00,0x00,0x00,0x00,
-		   0x01,0x02,0x03,0x04,1,0,0,0,
-		   0x46,0x8b,0x88,0x90,
+    int head3[] = {0x4f,0x67,0x67,0x53,0,0x04,
+		   0x07,0x00,0x04,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,2,0,0,0,
+		   0x6c,0x3b,0x82,0x3d,
 		   1,
 		   50};
-    int *headret[]={head1,head2,NULL};
+    int *headret[]={head1,head2,head3,NULL};
     
     fprintf(stderr,"testing max packet segments... ");
     test_pack(packets,headret);
@@ -1104,31 +1159,38 @@ int main(void){
   {
     /* packet that overspans over an entire page */
 
-    int packets[]={100,9000,259,255,-1};
+    int packets[]={0,100,9000,259,255,-1};
 
     int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
-		   0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 		   0x01,0x02,0x03,0x04,0,0,0,0,
-		   0x9f,0x45,0x89,0x8c,
+		   0xff,0x7b,0x23,0x17,
+		   1,
+		   0};
+
+    int head2[] = {0x4f,0x67,0x67,0x53,0,0x00,
+		   0x07,0x04,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,1,0,0,0,
+		   0x3c,0xd9,0x4d,0x3f,
 		   17,
 		   100,255,255,255,255,255,255,255,255,
 		   255,255,255,255,255,255,255,255};
 
-    int head2[] = {0x4f,0x67,0x67,0x53,0,0x01,
-		   0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
-		   0x01,0x02,0x03,0x04,1,0,0,0,
-		   0xaf,0x9d,0xf1,0x76,
+    int head3[] = {0x4f,0x67,0x67,0x53,0,0x01,
+		   0x07,0x04,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,2,0,0,0,
+		   0xbd,0xd5,0xb5,0x8b,
 		   17,
 		   255,255,255,255,255,255,255,255,
 		   255,255,255,255,255,255,255,255,255};
 
-    int head3[] = {0x4f,0x67,0x67,0x53,0,0x05,
-		   0x07,0x0c,0x00,0x00,0x00,0x00,0x00,0x00,
-		   0x01,0x02,0x03,0x04,2,0,0,0,
-		   0xe1,0x61,0x9f,0xbd,
+    int head4[] = {0x4f,0x67,0x67,0x53,0,0x05,
+		   0x07,0x10,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,3,0,0,0,
+		   0xef,0xdd,0x88,0xde,
 		   7,
 		   255,255,75,255,4,255,0};
-    int *headret[]={head1,head2,head3,NULL};
+    int *headret[]={head1,head2,head3,head4,NULL};
     
     fprintf(stderr,"testing very large packets... ");
     test_pack(packets,headret);
@@ -1137,23 +1199,30 @@ int main(void){
   {
     /* term only page.  why not? */
 
-    int packets[]={100,4080,-1};
+    int packets[]={0,100,4080,-1};
 
     int head1[] = {0x4f,0x67,0x67,0x53,0,0x02,
-		   0x07,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 		   0x01,0x02,0x03,0x04,0,0,0,0,
-		   0x9f,0x45,0x89,0x8c,
+		   0xff,0x7b,0x23,0x17,
+		   1,
+		   0};
+
+    int head2[] = {0x4f,0x67,0x67,0x53,0,0x00,
+		   0x07,0x04,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,1,0,0,0,
+		   0x3c,0xd9,0x4d,0x3f,
 		   17,
 		   100,255,255,255,255,255,255,255,255,
 		   255,255,255,255,255,255,255,255};
 
-    int head2[] = {0x4f,0x67,0x67,0x53,0,0x05,
-		   0x07,0x04,0x00,0x00,0x00,0x00,0x00,0x00,
-		   0x01,0x02,0x03,0x04,1,0,0,0,
-		   0xf1,0x29,0xfc,0x4c,
+    int head3[] = {0x4f,0x67,0x67,0x53,0,0x05,
+		   0x07,0x08,0x00,0x00,0x00,0x00,0x00,0x00,
+		   0x01,0x02,0x03,0x04,2,0,0,0,
+		   0xd4,0xe0,0x60,0xe5,
 		   1,0};
 
-    int *headret[]={head1,head2,NULL};
+    int *headret[]={head1,head2,head3,NULL};
     
     fprintf(stderr,"testing zero data page (1 nil packet)... ");
     test_pack(packets,headret);
@@ -1164,9 +1233,9 @@ int main(void){
   {
     /* build a bunch of pages for testing */
     unsigned char *data=malloc(1024*1024);
-    int pl[]={100,4079,2956,2057,76,34,912,0,234,1000,1000,1000,300,-1};
+    int pl[]={0,100,4079,2956,2057,76,34,912,0,234,1000,1000,1000,300,-1};
     int inptr=0,i,j;
-    ogg_page og[4];
+    ogg_page og[5];
     
     ogg_stream_reset(&os_en);
 
@@ -1186,7 +1255,7 @@ int main(void){
     free(data);
 
     /* retrieve finished pages */
-    for(i=0;i<4;i++){
+    for(i=0;i<5;i++){
       if(ogg_stream_pageout(&os_en,&og[i])==0){
 	fprintf(stderr,"Too few pages output building sync tests!\n");
 	exit(1);
@@ -1203,7 +1272,7 @@ int main(void){
 
       ogg_sync_reset(&oy);
       ogg_stream_reset(&os_de);
-      for(i=0;i<4;i++){
+      for(i=0;i<5;i++){
 	memcpy(ogg_sync_buffer(&oy,og[i].header_len),og[i].header,
 	       og[i].header_len);
 	ogg_sync_wrote(&oy,og[i].header_len);
@@ -1214,6 +1283,8 @@ int main(void){
       ogg_sync_pageout(&oy,&temp);
       ogg_stream_pagein(&os_de,&temp);
       ogg_sync_pageout(&oy,&temp);
+      ogg_stream_pagein(&os_de,&temp);
+      ogg_sync_pageout(&oy,&temp);
       /* skip */
       ogg_sync_pageout(&oy,&temp);
       ogg_stream_pagein(&os_de,&temp);
@@ -1221,17 +1292,19 @@ int main(void){
       /* do we get the expected results/packets? */
       
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,100,0,-1);
+      checkpacket(&test,0,0,0);
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,4079,1,2000);
+      checkpacket(&test,100,1,-1);
+      if(ogg_stream_packetout(&os_de,&test)!=1)error();
+      checkpacket(&test,4079,2,3000);
       if(ogg_stream_packetout(&os_de,&test)!=-1){
 	fprintf(stderr,"Error: loss of page did not return error\n");
 	exit(1);
       }
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,76,4,-1);
+      checkpacket(&test,76,5,-1);
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,34,5,-1);
+      checkpacket(&test,34,6,-1);
       fprintf(stderr,"ok.\n");
     }
 
@@ -1244,7 +1317,7 @@ int main(void){
 
       ogg_sync_reset(&oy);
       ogg_stream_reset(&os_de);
-      for(i=0;i<4;i++){
+      for(i=0;i<5;i++){
 	memcpy(ogg_sync_buffer(&oy,og[i].header_len),og[i].header,
 	       og[i].header_len);
 	ogg_sync_wrote(&oy,og[i].header_len);
@@ -1257,6 +1330,8 @@ int main(void){
       ogg_sync_pageout(&oy,&temp);
       ogg_stream_pagein(&os_de,&temp);
       ogg_sync_pageout(&oy,&temp);
+      ogg_stream_pagein(&os_de,&temp);
+      ogg_sync_pageout(&oy,&temp);
       /* skip */
       ogg_sync_pageout(&oy,&temp);
       ogg_stream_pagein(&os_de,&temp);
@@ -1264,17 +1339,19 @@ int main(void){
       /* do we get the expected results/packets? */
       
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,100,0,-1);
+      checkpacket(&test,0,0,0);
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,4079,1,2000);
+      checkpacket(&test,100,1,-1);
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,2956,2,3000);
+      checkpacket(&test,4079,2,3000);
+      if(ogg_stream_packetout(&os_de,&test)!=1)error();
+      checkpacket(&test,2956,3,4000);
       if(ogg_stream_packetout(&os_de,&test)!=-1){
 	fprintf(stderr,"Error: loss of page did not return error\n");
 	exit(1);
       }
       if(ogg_stream_packetout(&os_de,&test)!=1)error();
-      checkpacket(&test,300,12,13000);
+      checkpacket(&test,300,13,14000);
       fprintf(stderr,"ok.\n");
     }
     
@@ -1284,37 +1361,37 @@ int main(void){
       /* Test fractional page inputs: incomplete capture */
       fprintf(stderr,"Testing sync on partial inputs... ");
       ogg_sync_reset(&oy);
-      memcpy(ogg_sync_buffer(&oy,og[0].header_len),og[0].header,
+      memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header,
 	     3);
       ogg_sync_wrote(&oy,3);
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
       
       /* Test fractional page inputs: incomplete fixed header */
-      memcpy(ogg_sync_buffer(&oy,og[0].header_len),og[0].header+3,
+      memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header+3,
 	     20);
       ogg_sync_wrote(&oy,20);
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
       
       /* Test fractional page inputs: incomplete header */
-      memcpy(ogg_sync_buffer(&oy,og[0].header_len),og[0].header+23,
+      memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header+23,
 	     5);
       ogg_sync_wrote(&oy,5);
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
       
       /* Test fractional page inputs: incomplete body */
       
-      memcpy(ogg_sync_buffer(&oy,og[0].header_len),og[0].header+28,
-	     og[0].header_len-28);
-      ogg_sync_wrote(&oy,og[0].header_len-28);
+      memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header+28,
+	     og[1].header_len-28);
+      ogg_sync_wrote(&oy,og[1].header_len-28);
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
       
-      memcpy(ogg_sync_buffer(&oy,og[0].body_len),og[0].body,1000);
+      memcpy(ogg_sync_buffer(&oy,og[1].body_len),og[1].body,1000);
       ogg_sync_wrote(&oy,1000);
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
       
-      memcpy(ogg_sync_buffer(&oy,og[0].body_len),og[0].body+1000,
-	     og[0].body_len-1000);
-      ogg_sync_wrote(&oy,og[0].body_len-1000);
+      memcpy(ogg_sync_buffer(&oy,og[1].body_len),og[1].body+1000,
+	     og[1].body_len-1000);
+      ogg_sync_wrote(&oy,og[1].body_len-1000);
       if(ogg_sync_pageout(&oy,&og_de)<=0)error();
       
       fprintf(stderr,"ok.\n");
@@ -1326,13 +1403,13 @@ int main(void){
       fprintf(stderr,"Testing sync on 1+partial inputs... ");
       ogg_sync_reset(&oy); 
 
-      memcpy(ogg_sync_buffer(&oy,og[0].header_len),og[0].header,
-	     og[0].header_len);
-      ogg_sync_wrote(&oy,og[0].header_len);
+      memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header,
+	     og[1].header_len);
+      ogg_sync_wrote(&oy,og[1].header_len);
 
-      memcpy(ogg_sync_buffer(&oy,og[0].body_len),og[0].body,
-	     og[0].body_len);
-      ogg_sync_wrote(&oy,og[0].body_len);
+      memcpy(ogg_sync_buffer(&oy,og[1].body_len),og[1].body,
+	     og[1].body_len);
+      ogg_sync_wrote(&oy,og[1].body_len);
 
       memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header,
 	     20);
@@ -1358,31 +1435,31 @@ int main(void){
       ogg_sync_reset(&oy); 
       
       /* 'garbage' */
-      memcpy(ogg_sync_buffer(&oy,og[0].body_len),og[0].body,
-	     og[0].body_len);
-      ogg_sync_wrote(&oy,og[0].body_len);
-
-      memcpy(ogg_sync_buffer(&oy,og[0].header_len),og[0].header,
-	     og[0].header_len);
-      ogg_sync_wrote(&oy,og[0].header_len);
-
-      memcpy(ogg_sync_buffer(&oy,og[0].body_len),og[0].body,
-	     og[0].body_len);
-      ogg_sync_wrote(&oy,og[0].body_len);
+      memcpy(ogg_sync_buffer(&oy,og[1].body_len),og[1].body,
+	     og[1].body_len);
+      ogg_sync_wrote(&oy,og[1].body_len);
 
       memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header,
+	     og[1].header_len);
+      ogg_sync_wrote(&oy,og[1].header_len);
+
+      memcpy(ogg_sync_buffer(&oy,og[1].body_len),og[1].body,
+	     og[1].body_len);
+      ogg_sync_wrote(&oy,og[1].body_len);
+
+      memcpy(ogg_sync_buffer(&oy,og[2].header_len),og[2].header,
 	     20);
       ogg_sync_wrote(&oy,20);
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
       if(ogg_sync_pageout(&oy,&og_de)<=0)error();
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
 
-      memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header+20,
-	     og[1].header_len-20);
-      ogg_sync_wrote(&oy,og[1].header_len-20);
-      memcpy(ogg_sync_buffer(&oy,og[1].body_len),og[1].body,
-	     og[1].body_len);
-      ogg_sync_wrote(&oy,og[1].body_len);
+      memcpy(ogg_sync_buffer(&oy,og[2].header_len),og[2].header+20,
+	     og[2].header_len-20);
+      ogg_sync_wrote(&oy,og[2].header_len-20);
+      memcpy(ogg_sync_buffer(&oy,og[2].body_len),og[2].body,
+	     og[2].body_len);
+      ogg_sync_wrote(&oy,og[2].body_len);
       if(ogg_sync_pageout(&oy,&og_de)<=0)error();
 
       fprintf(stderr,"ok.\n");
@@ -1394,35 +1471,35 @@ int main(void){
       fprintf(stderr,"Testing recapture... ");
       ogg_sync_reset(&oy); 
 
-      memcpy(ogg_sync_buffer(&oy,og[0].header_len),og[0].header,
-	     og[0].header_len);
-      ogg_sync_wrote(&oy,og[0].header_len);
-
-      memcpy(ogg_sync_buffer(&oy,og[0].body_len),og[0].body,
-	     og[0].body_len);
-      ogg_sync_wrote(&oy,og[0].body_len);
-
       memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header,
 	     og[1].header_len);
       ogg_sync_wrote(&oy,og[1].header_len);
-
-      memcpy(ogg_sync_buffer(&oy,og[1].header_len),og[1].header,
-	     og[1].header_len);
-      ogg_sync_wrote(&oy,og[1].header_len);
-
-      if(ogg_sync_pageout(&oy,&og_de)<=0)error();
 
       memcpy(ogg_sync_buffer(&oy,og[1].body_len),og[1].body,
-	     og[1].body_len-5);
-      ogg_sync_wrote(&oy,og[1].body_len-5);
+	     og[1].body_len);
+      ogg_sync_wrote(&oy,og[1].body_len);
 
       memcpy(ogg_sync_buffer(&oy,og[2].header_len),og[2].header,
 	     og[2].header_len);
       ogg_sync_wrote(&oy,og[2].header_len);
 
+      memcpy(ogg_sync_buffer(&oy,og[2].header_len),og[2].header,
+	     og[2].header_len);
+      ogg_sync_wrote(&oy,og[2].header_len);
+
+      if(ogg_sync_pageout(&oy,&og_de)<=0)error();
+
       memcpy(ogg_sync_buffer(&oy,og[2].body_len),og[2].body,
-	     og[2].body_len);
-      ogg_sync_wrote(&oy,og[2].body_len);
+	     og[2].body_len-5);
+      ogg_sync_wrote(&oy,og[2].body_len-5);
+
+      memcpy(ogg_sync_buffer(&oy,og[3].header_len),og[3].header,
+	     og[3].header_len);
+      ogg_sync_wrote(&oy,og[3].header_len);
+
+      memcpy(ogg_sync_buffer(&oy,og[3].body_len),og[3].body,
+	     og[3].body_len);
+      ogg_sync_wrote(&oy,og[3].body_len);
 
       if(ogg_sync_pageout(&oy,&og_de)>0)error();
       if(ogg_sync_pageout(&oy,&og_de)<=0)error();

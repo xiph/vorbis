@@ -59,7 +59,7 @@ void _oggpack_readinit(oggpack_buffer *b,char *buf,int bytes){
   b->storage=bytes;
 }
 
-/* Takes only up to 31 bits. We won't need it all */
+/* Takes only up to 32 bits. */
 void _oggpack_write(oggpack_buffer *b,unsigned long value,int bits){
   if(b->endbyte+4>=b->storage){
     b->buffer=realloc(b->buffer,b->storage+BUFFER_INCREMENT);
@@ -79,7 +79,10 @@ void _oggpack_write(oggpack_buffer *b,unsigned long value,int bits){
       if(bits>=24){
 	b->ptr[3]=value>>(24-b->endbit);  
 	if(bits>=32){
-	  b->ptr[4]=value>>(32-b->endbit); /*can't get here if endbit==0*/
+	  if(b->endbit)
+	    b->ptr[4]=value>>(32-b->endbit);
+	  else
+	    b->ptr[4]=0;
 	}
       }
     }
@@ -90,7 +93,7 @@ void _oggpack_write(oggpack_buffer *b,unsigned long value,int bits){
   b->endbit=bits&7;
 }
 
-/* Read in bits without advancing the bitptr; bits < 32 */
+/* Read in bits without advancing the bitptr; bits <= 32 */
 long _oggpack_look(oggpack_buffer *b,int bits){
   unsigned long ret;
   unsigned long m=mask[bits];
@@ -109,9 +112,8 @@ long _oggpack_look(oggpack_buffer *b,int bits){
       ret|=b->ptr[2]<<(16-b->endbit);  
       if(bits>24){
 	ret|=b->ptr[3]<<(24-b->endbit);  
-	if(bits>32){
-	  ret|=b->ptr[4]<<(32-b->endbit); /*can't get here if endbit==0*/
-	}
+	if(bits>32 && b->endbit)
+	  ret|=b->ptr[4]<<(32-b->endbit);
       }
     }
   }
@@ -138,7 +140,7 @@ void _oggpack_adv1(oggpack_buffer *b){
   }
 }
 
-/* bits < 32 */
+/* bits <= 32 */
 long _oggpack_read(oggpack_buffer *b,int bits){
   unsigned long ret;
   unsigned long m=mask[bits];
@@ -158,8 +160,8 @@ long _oggpack_read(oggpack_buffer *b,int bits){
       ret|=b->ptr[2]<<(16-b->endbit);  
       if(bits>24){
 	ret|=b->ptr[3]<<(24-b->endbit);  
-	if(bits>32){
-	  ret|=b->ptr[4]<<(32-b->endbit); /*can't get here if endbit==0*/
+	if(bits>32 && b->endbit){
+	  ret|=b->ptr[4]<<(32-b->endbit);
 	}
       }
     }
@@ -288,27 +290,27 @@ int main(void){
 
   int onesize=33;
   static int one[]={146,25,44,151,195,15,153,176,233,131,196,65,85,172,47,40,
-		    34,242,223,136,35,222,211,86,171,50,225,135,214,75,172,
-		    223,4};
+                    34,242,223,136,35,222,211,86,171,50,225,135,214,75,172,
+                    223,4};
 
   int twosize=6;
   static int two[]={61,255,255,251,231,29};
 
   int threesize=54;
   static int three[]={169,2,232,252,91,132,156,36,89,13,123,176,144,32,254,
-		      142,224,85,59,121,144,79,124,23,67,90,90,216,79,23,83,
-		      58,135,196,61,55,129,183,54,101,100,170,37,127,126,10,
-		      100,52,4,14,18,86,77,1};
+                      142,224,85,59,121,144,79,124,23,67,90,90,216,79,23,83,
+                      58,135,196,61,55,129,183,54,101,100,170,37,127,126,10,
+                      100,52,4,14,18,86,77,1};
 
   int foursize=38;
   static int four[]={18,6,163,252,97,194,104,131,32,1,7,82,137,42,129,11,72,
-		     132,60,220,112,8,196,109,64,179,86,9,137,195,208,122,169,
-		     28,2,133,0,1};
+                     132,60,220,112,8,196,109,64,179,86,9,137,195,208,122,169,
+                     28,2,133,0,1};
 
   int fivesize=45;
   static int five[]={169,2,126,139,144,172,30,4,80,72,240,59,130,218,73,62,
-		     241,24,210,44,4,20,0,248,116,49,135,100,110,130,181,169,
-		     84,75,159,2,1,0,132,192,8,0,0,18,22};
+                     241,24,210,44,4,20,0,248,116,49,135,100,110,130,181,169,
+                     84,75,159,2,1,0,132,192,8,0,0,18,22};
 
   int sixsize=7;
   static int six[]={17,177,170,242,169,19,148};
@@ -329,21 +331,21 @@ int main(void){
   cliptest(testbuffer2,test2size,0,three,threesize);
   fprintf(stderr,"ok.");
 
-  fprintf(stderr,"\n31 bit preclipped packing: ");
+  fprintf(stderr,"\n32 bit preclipped packing: ");
   _oggpack_reset(&o);
   for(i=0;i<test2size;i++)
-    _oggpack_write(&o,large[i],31);
+    _oggpack_write(&o,large[i],32);
   buffer=o.buffer;
   bytes=_oggpack_bytes(&o);
   _oggpack_readinit(&r,buffer,bytes);
   for(i=0;i<test2size;i++){
-    if(_oggpack_look(&r,31)==-1)report("out of data. failed!");
-    if(_oggpack_look(&r,31)!=large[i]){
-      fprintf(stderr,"%ld != %ld (%lx!=%lx):",_oggpack_look(&r,31),large[i],
-	      _oggpack_look(&r,31),large[i]);
+    if(_oggpack_look(&r,32)==-1)report("out of data. failed!");
+    if(_oggpack_look(&r,32)!=large[i]){
+      fprintf(stderr,"%ld != %ld (%lx!=%lx):",_oggpack_look(&r,32),large[i],
+	      _oggpack_look(&r,32),large[i]);
       report("read incorrect value!\n");
     }
-    _oggpack_adv(&r,31);
+    _oggpack_adv(&r,32);
   }
   if(_oggpack_bytes(&r)!=bytes)report("leftover bytes after read!\n");
   fprintf(stderr,"ok.");

@@ -12,8 +12,6 @@ int main(){
    long counterout=0;
    int done=0;
    char *temp[]={ "Test" ,"the Test band", "test records",NULL };
-   int mtemp[]={0,1};
-   int mtemp2[]={0,1};
    int frame=0;
    int i;
 
@@ -29,8 +27,7 @@ int main(){
    vi.largeblock=2048;
    vi.envelopesa=64;
    vi.envelopech=2;
-   vi.envelopemap=mtemp;
-   vi.floormap=mtemp2;
+
    vi.floororder=30;
    vi.flooroctaves=5;
    vi.floorch=2;
