@@ -55,9 +55,6 @@ void mdct_init(mdct_lookup *lookup,int n){
   double *CE=BE+n/2;
   double *CO=CE+1;
   
-  int *bitA=bitrev;
-  int *bitB=bitrev+1;
-
   int i;
   int log2n=lookup->log2n=rint(log(n)/log(2));
   lookup->n=n;
@@ -86,8 +83,8 @@ void mdct_init(mdct_lookup *lookup,int n){
       int acc=0;
       for(j=0;msb>>j;j++)
 	if((msb>>j)&i)acc|=1<<j;
-      bitA[i*2]=((~acc)&mask);
-      bitB[i*2+1]=acc;
+      bitrev[i*2]=((~acc)&mask);
+      bitrev[i*2+1]=acc;
     }
   }
 }

@@ -43,7 +43,47 @@
 /* There are also different ways to implement seeking.  Enough
    information exists in an Ogg bitstream to seek to
    sample-granularity positions in the output.  Or, one can seek by
-   picking some portion of the stream roughtly in the area we only
-   want course navigation through the stream.  This example implements
-   the latter. */
+   picking some portion of the stream roughtly in the area if we only
+   want course navigation through the stream. */
+
+typedef struct {
+
+
+
+
+} Vorbis_File;
+
+typedef struct {
+  ogg_sync_state   oy; /* sync and verify incoming physical bitstream */
+  ogg_stream_state os; /* take physical pages, weld into a logical
+                          stream of packets */
+  ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
+  ogg_packet       op; /* one raw packet of data for decode */
+  
+  vorbis_info      vi; /* struct that stores all the static vorbis bitstream
+                          settings */
+  vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
+  vorbis_block     vb; /* local working space for packet->PCM decode */
+  
+  char *buffer;
+  int  bytes;
+  int i;
+  int eos=0;
+
+
+
+
+} Vorbis_Decode;
+
+
+int vorbis_open_file(FILE *f,Vorbis_File *vf){
+
+
+}
+
+int vorbis_clear_file(Vorbis_File *vf){
+
+
+
+}
 

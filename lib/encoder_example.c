@@ -14,7 +14,7 @@
  function: simple example encoder
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 04 1999
+ last modification date: Oct 29 1999
 
  ********************************************************************/
 
@@ -22,6 +22,8 @@
    a Vorbis bitstream */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include <math.h>
 #include "codec.h"
 
@@ -61,7 +63,10 @@ int main(){
   vorbis_block_init(&vd,&vb);
   
   /* set up our packet->stream encoder */
-  ogg_stream_init(&os,0); /* serial number 0 is fine */
+  /* pick a random serial number; that way we can more likely build
+     chained streams just by concatenation */
+  srandom(time(NULL));
+  ogg_stream_init(&os,random());
 
   /* Vorbis streams begin with three headers; the initial header (with
      most of the codec setup parameters) which is mandated by the Ogg
