@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.1.2.2 2001/11/22 06:21:07 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.1.2.3 2001/11/22 07:54:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -98,7 +98,7 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
 		 bi->queue_minmax_time)+bm->avg_centerdesired;
   
   if(maxlatency>0){
-    long maxpackets=maxlatency/ci->blocksizes[0]+3;
+    long maxpackets=maxlatency/(ci->blocksizes[0]>>1)+3;
     long bins=BITTRACK_DIVISOR*ci->passlimit[ci->coupling_passes-1];
     
     bm->queue_size=maxpackets;
@@ -311,7 +311,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       
       /* apply the average floater to new blocks */
       bin=bm->avgfloat*BITTRACK_DIVISOR; /* truncate on purpose */
-      //fprintf(stderr,"float:%d ",bin);
+      fprintf(stderr,"float:%d ",bin);
       while(bm->avg_centeracc>desired_center){
 	int samples=
 	  samples=ci->blocksizes[bm->queue_actual[bm->avg_center]&
@@ -428,7 +428,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       double bitrate=(double)bm->minmax_acctotal/bm->minmax_sampleacc*vi->rate;
       int limit=0;
       
-      //fprintf(stderr,"prelimit:%dkbps ",(int)bitrate);
+      fprintf(stderr,"prelimit:%dkbps ",(int)bitrate/1000);
       if(bitrate>bi->queue_hardmax || bitrate<bi->queue_hardmin){
 	int newstack;
 	int stackctr;
@@ -450,6 +450,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	    bitrate=(double)bitsum/bm->minmax_sampleacc*vi->rate;
 	    if(bitrate>=bi->queue_hardmin)break;
 	  }
+	  if(bitrate>bi->queue_hardmax)limit--;
 	}
 
 	/* trace the limit backward, stop when we see a lower limit */
@@ -477,7 +478,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	stackctr++;
 	bm->minmax_posstack[stackctr]=bm->minmax_posstack[bm->minmax_stackptr];
 	bm->minmax_limitstack[stackctr]=limit;
-	//fprintf(stderr,"limit:%d\n",limit);
+	fprintf(stderr,"limit:%d\n",limit);
 
 	/* set up new blank stack entry */
 	stackctr++;
@@ -552,22 +553,20 @@ int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
     bm->queue_head=0;
 
   }else{
+    long bins=bm->queue_bins;
     long bin;
     long bytes;
 
-    fprintf(stderr,"in ");
     if(bm->next_to_flush==bm->last_to_flush)return(0);
 
     bin=bm->queue_actual[bm->next_to_flush];
-    bytes=(bm->queue_binned[bm->queue_bins*bm->next_to_flush+bin]+7)/8;
+    bytes=(BINBITS(bm->next_to_flush,bin)+7)/8;
     
     memcpy(op,bm->queue_packets+bm->next_to_flush,sizeof(*op));
     if(bytes<op->bytes)op->bytes=bytes;
 
     bm->next_to_flush++;
     if(bm->next_to_flush>=bm->queue_size)bm->next_to_flush=0;
-
-    fprintf(stderr,"eof %d %ld\n",op->e_o_s,(long)op->granulepos);
 
   }
 
