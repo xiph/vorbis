@@ -24,6 +24,12 @@ ov_pcm_seek_page
 ov_time_seek
 ov_time_seek_page
 
+ov_raw_seek_lap
+ov_pcm_seek_lap
+ov_pcm_seek_page_lap
+ov_time_seek_lap
+ov_time_seek_page_lap
+
 ov_raw_tell
 ov_pcm_tell
 ov_time_tell
@@ -33,3 +39,7 @@ ov_comment
 
 ov_read
 ov_read_float
+
+ov_crosslap
+ov_halfrate
+ov_halfrate_p

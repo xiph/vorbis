@@ -15,6 +15,7 @@ vorbis_comment_clear
 vorbis_block_init
 vorbis_block_clear
 vorbis_dsp_clear
+vorbis_granule_time
 
 # Vorbis PRIMITIVES: analysis/DSP layer
 
@@ -32,9 +33,13 @@ vorbis_bitrate_flushpacket
 
 vorbis_synthesis_headerin
 vorbis_synthesis_init
+vorbis_synthesis_restart
 vorbis_synthesis
 vorbis_synthesis_trackonly
 vorbis_synthesis_blockin
 vorbis_synthesis_pcmout
+vorbis_synthesis_lapout
 vorbis_synthesis_read
 vorbis_packet_blocksize
+vorbis_synthesis_halfrate
+vorbis_synthesis_halfrate_p
