@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = foreign dist-zip
 
-SUBDIRS = lib include doc examples
+SUBDIRS = lib include doc examples win32 debian
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = vorbis.m4

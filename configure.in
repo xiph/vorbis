@@ -166,4 +166,4 @@ AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile lib/Makefile lib/modes/Makefile lib/books/Makefile doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile include/Makefile include/vorbis/Makefile examples/Makefile)
+AC_OUTPUT(Makefile lib/Makefile lib/modes/Makefile lib/books/Makefile doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile include/Makefile include/vorbis/Makefile examples/Makefile win32/Makefile debian/Makefile)
