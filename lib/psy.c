@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.53 2001/09/02 09:07:58 msmith Exp $
+ last mod: $Id: psy.c,v 1.54 2001/09/11 02:42:34 segher Exp $
 
  ********************************************************************/
 
@@ -32,7 +32,7 @@
 #define NEGINF -9999.f
 
 /* Why Bark scale for encoding but not masking computation? Because
-   masking has a strong harmonic dependancy */
+   masking has a strong harmonic dependency */
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   int i,j;
@@ -137,10 +137,10 @@ static void setup_curve(float **c,
   memcpy(c[2]+2,c[4]+2,sizeof(float)*EHMER_MAX);
 
   /* we add back in the ATH to avoid low level curves falling off to
-     -infinity and unneccessarily cutting off high level curves in the
+     -infinity and unnecessarily cutting off high level curves in the
      curve limiting (last step).  But again, remember... a half-band's
      settings must be valid over the whole band, and it's better to
-     mask too little than too much, so be pessimal. */
+     mask too little than too much, so be pessimistical. */
 
   for(i=0;i<EHMER_MAX;i++){
     float oc_min=band*.5+(i-EHMER_OFFSET)*.125;
@@ -167,7 +167,7 @@ static void setup_curve(float **c,
     ath[i]=min(ath_min,ath_max);
   }
 
-  /* The c array is comes in as dB curves at 20 40 60 80 100 dB.
+  /* The c array comes in as dB curves at 20 40 60 80 100 dB.
      interpolate intermediate dB curves */
   for(i=1;i<P_LEVELS;i+=2){
     interp_curve(c[i]+2,c[i-1]+2,c[i+1]+2,.5);
