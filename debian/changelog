@@ -3,7 +3,7 @@ libvorbis (1.0rc3-1) unstable; urgency=low
   * New upstream. (Closes: #121995, #123472)
   * added autotools target (config.* updater) to rules
 
- -- Christopher L Cheney <ccheney@debian.org>  Thu, 13 Dec 2001 11:00:00 -0600
+ -- Christopher L Cheney <ccheney@debian.org>  Mon, 24 Dec 2001 11:00:00 -0600
 
 libvorbis (1.0rc2-1) unstable; urgency=low
 
