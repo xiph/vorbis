@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: key psychoacoustic settings for 44.1/48kHz
- last mod: $Id: psych_44.h,v 1.26 2002/07/13 06:12:49 xiphmont Exp $
+ last mod: $Id: psych_44.h,v 1.27 2002/10/18 06:00:12 xiphmont Exp $
 
  ********************************************************************/
 
@@ -353,8 +353,8 @@ static noise3 _psy_noisebias_padding[11]={
 };
 
 static noiseguard _psy_noiseguards_44[4]={
-  {4,4,15},
-  {4,4,15},
+  {3,3,15},
+  {3,3,15},
   {10,10,100},
   {10,10,100},
 };
