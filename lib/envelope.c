@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.49 2002/04/06 03:07:25 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.50 2002/07/04 10:07:02 msmith Exp $
 
  ********************************************************************/
 
@@ -226,7 +226,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
   if(first<0)first=0;
 
   /* make sure we have enough storage to match the PCM */
-  if(last>ve->storage){
+  if(last+VE_WIN+VE_POST>ve->storage){
     ve->storage=last+VE_WIN+VE_POST; /* be sure */
     ve->mark=_ogg_realloc(ve->mark,ve->storage*sizeof(*ve->mark));
   }
