@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: time backend 0 (dummy)
- last mod: $Id: time0.c,v 1.2 2000/01/22 13:28:34 xiphmont Exp $
+ last mod: $Id: time0.c,v 1.3 2000/02/06 13:39:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,11 +24,12 @@
 static void pack (vorbis_info_time *i,oggpack_buffer *opb){
 }
 static vorbis_info_time *unpack (vorbis_info *vi,oggpack_buffer *opb){
-  return NULL;
+  return "";
+
 }
 static vorbis_look_time *look (vorbis_info *vi,vorbis_info_mode *mi,
                               vorbis_info_time *i){
-  return NULL;
+  return "";
 }
 static void free_info(vorbis_info_time *i){
 }

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.6 2000/01/28 15:25:09 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.7 2000/02/06 13:39:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -75,7 +75,7 @@ static void free_look(vorbis_look_mapping *look){
     free(l->floor_look);
     free(l->residue_look);
     if(l->psy_look)free(l->psy_look);
-    memset(l,0,sizeof(vorbis_info_mapping0));
+    memset(l,0,sizeof(vorbis_look_mapping0));
     free(l);
   }
 }
@@ -90,7 +90,7 @@ static vorbis_look_mapping *look(vorbis_info *vi,vorbis_info_mode *vm,
   ret->time_look=calloc(map->submaps,sizeof(vorbis_look_time *));
   ret->floor_look=calloc(map->submaps,sizeof(vorbis_look_floor *));
   ret->residue_look=calloc(map->submaps,sizeof(vorbis_look_residue *));
-  ret->psy_look=calloc(map->submaps,sizeof(vorbis_look_psy));
+  if(vi->psys)ret->psy_look=calloc(map->submaps,sizeof(vorbis_look_psy));
 
   ret->time_func=calloc(map->submaps,sizeof(vorbis_func_time *));
   ret->floor_func=calloc(map->submaps,sizeof(vorbis_func_floor *));
@@ -111,10 +111,10 @@ static vorbis_look_mapping *look(vorbis_info *vi,vorbis_info_mode *vm,
     ret->residue_look[i]=ret->residue_func[i]->
       look(vi,vm,vi->residue_param[resnum]);
     
-    if(map->psysubmap){
+    if(vi->psys){
       int psynum=map->psysubmap[i];
       _vp_psy_init(ret->psy_look+i,vi->psy_param[psynum],
-		   vi->blocksizes[vm->blockflag],vi->rate);
+		   vi->blocksizes[vm->blockflag]/2,vi->rate);
     }
   }
 
@@ -237,7 +237,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       
       /* perform residue prequantization.  Do it now so we have all
          the values if we need them */
-      _vp_quantize(look->psy_look+submap,pcm,mask,decfloor,pcmaux[i]);
+      _vp_quantize(look->psy_look+submap,pcm,mask,decfloor,pcmaux[i],0,n/2,n/2);
       
     }
   

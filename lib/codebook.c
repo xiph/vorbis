@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.5 2000/02/05 23:23:58 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.6 2000/02/06 13:39:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -361,13 +361,23 @@ int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b){
   return(book->c->lengthlist[a]);
 }
 
-/* returns the number of bits and *modifies a* to the entry value *****/
+/* returns the number of bits and *modifies a* to the residual error *****/
+static double _dist(double *a, double *b,int dim){
+  int i;
+  double acc=0.;
+  for(i=0;i<dim;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
+  return sqrt(acc);
+}
+
 int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
   encode_aux *t=book->c->encode_tree;
   int dim=book->dim;
   int ptr=0,k;
-
-  while(1){
+  
+  /*while(1){
     double c=0.;
     double *p=book->valuelist+t->p[ptr];
     double *q=book->valuelist+t->q[ptr];
@@ -375,13 +385,27 @@ int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
     for(k=0;k<dim;k++)
       c+=(p[k]-q[k])*(a[k]-(p[k]+q[k])*.5);
 
-    if(c>0.) /* in A */
+    if(c>0.) /* in A 
       ptr= -t->ptr0[ptr];
-    else     /* in B */
+      else     /* in B 
       ptr= -t->ptr1[ptr];
     if(ptr<=0)break;
-  }
-  memcpy(a,book->valuelist-ptr*dim,dim*sizeof(double));
+    }*/
+  
+  {
+    long i;
+    double best=999999.;
+    for(i=0;i<book->entries;i++){
+      double this=_dist(a,book->valuelist+i*dim,dim);
+      if(this<best){
+	best=this;
+	ptr=-i;
+      }
+    }
+  }    
+
+
+  for(k=0;k<dim;k++)a[k]-=(book->valuelist-ptr*dim)[k];
   return(vorbis_book_encode(book,-ptr,b));
 }
 
@@ -407,9 +431,10 @@ long vorbis_book_decode(codebook *book, oggpack_buffer *b){
 /* returns the entry number or -1 on eof ****************************/
 long vorbis_book_decodev(codebook *book, double *a, oggpack_buffer *b){
   long entry=vorbis_book_decode(book,b);
+  int i;
   if(entry==-1)return(-1);
-  memcpy(a,book->valuelist+entry*book->dim,sizeof(double)*book->dim);
-  return(0);
+  for(i=0;i<book->dim;i++)a[i]+=(book->valuelist+entry*book->dim)[i];
+  return(entry);
 }
 
 #ifdef _V_SELFTEST
@@ -546,6 +571,7 @@ int main(){
     double *qv=alloca(sizeof(double)*TESTSIZE);
     double *iv=alloca(sizeof(double)*TESTSIZE);
     memcpy(qv,testvec[ptr],sizeof(double)*TESTSIZE);
+    memset(iv,0,sizeof(double)*TESTSIZE);
 
     fprintf(stderr,"\tpacking/coding %ld... ",ptr);
 
@@ -574,14 +600,14 @@ int main(){
     }
 
     for(i=0;i<TESTSIZE;i+=TESTDIM)
-      if(vorbis_book_decodev(&c,iv+i,&read)){
+      if(vorbis_book_decodev(&c,iv+i,&read)==-1){
 	fprintf(stderr,"Error reading codebook test data (EOP).\n");
 	exit(1);
       }
     for(i=0;i<TESTSIZE;i++)
-      if(qv[i]!=iv[i]){
+      if(fabs(testvec[ptr][i]-qv[i]-iv[i])>.000001){
 	fprintf(stderr,"input (%g) != output (%g) at position (%ld)\n",
-		iv[i],qv[i],i);
+		iv[i],testvec[ptr][i]-qv[i],i);
 	exit(1);
       }
 	  

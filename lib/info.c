@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.19 2000/01/28 14:31:26 xiphmont Exp $
+ last mod: $Id: info.c,v 1.20 2000/02/06 13:39:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -87,19 +87,19 @@ void vorbis_info_clear(vorbis_info *vi){
   /*if(vi->mode_param)free(vi->mode_param);*/
  
   for(i=0;i<vi->maps;i++) /* unpack does the range checking */
-    _mapping_P[i]->free_info(vi->map_param[i]);
+    _mapping_P[vi->map_type[i]]->free_info(vi->map_param[i]);
   /*if(vi->map_param)free(vi->map_param);*/
     
   for(i=0;i<vi->times;i++) /* unpack does the range checking */
-    _time_P[i]->free_info(vi->time_param[i]);
+    _time_P[vi->time_type[i]]->free_info(vi->time_param[i]);
   /*if(vi->time_param)free(vi->time_param);*/
     
   for(i=0;i<vi->floors;i++) /* unpack does the range checking */
-    _floor_P[i]->free_info(vi->floor_param[i]);
+    _floor_P[vi->floor_type[i]]->free_info(vi->floor_param[i]);
   /*if(vi->floor_param)free(vi->floor_param);*/
     
   for(i=0;i<vi->residues;i++) /* unpack does the range checking */
-    _residue_P[i]->free_info(vi->residue_param[i]);
+    _residue_P[vi->residue_type[i]]->free_info(vi->residue_param[i]);
   /*if(vi->residue_param)free(vi->residue_param);*/
 
   /* the static codebooks *are* freed if you call info_clear, because
@@ -447,8 +447,6 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   /* second header packet (comments) **********************************/
 
   _oggpack_reset(&opb);
-  _v_writestring(&opb,"vorbis");
-  _oggpack_write(&opb,0x81,8);
   if(_vorbis_pack_comment(&opb,vc))goto err_out;
 
   if(v->header1)free(v->header1);
@@ -463,8 +461,6 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   /* third header packet (modes/codebooks) ****************************/
 
   _oggpack_reset(&opb);
-  _v_writestring(&opb,"vorbis");
-  _oggpack_write(&opb,0x82,8);
   if(_vorbis_pack_books(&opb,vi))goto err_out;
 
   if(v->header2)free(v->header2);

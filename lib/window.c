@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.5 2000/01/28 15:25:12 xiphmont Exp $
+ last mod: $Id: window.c,v 1.6 2000/02/06 13:39:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -52,6 +52,7 @@ double *_vorbis_window(int type, int window,int left,int right){
 	ret[i+rightbegin]=x;
       }
     }
+    break;
   default:
     free(ret);
     return(NULL);

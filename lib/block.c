@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.24 2000/01/28 09:05:06 xiphmont Exp $
+ last mod: $Id: block.c,v 1.25 2000/02/06 13:39:38 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -116,7 +116,11 @@ void *_vorbis_block_alloc(vorbis_block *vb,long bytes){
     vb->localstore=malloc(vb->localalloc);
     vb->localtop=0;
   }
-  return(vb->localstore+vb->localtop);
+  {
+    void *ret=vb->localstore+vb->localtop;
+    vb->localtop+=bytes;
+    return ret;
+  }
 }
 
 /* reap the chain, pull the ripcord */
@@ -199,9 +203,10 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   /* initialize all the mapping/backend lookups */
   v->mode=calloc(vi->modes,sizeof(vorbis_look_mapping *));
   for(i=0;i<vi->modes;i++){
-    int maptype=vi->mode_param[i]->mapping;
+    int mapnum=vi->mode_param[i]->mapping;
+    int maptype=vi->map_type[mapnum];
     v->mode[i]=_mapping_P[maptype]->look(vi,vi->mode_param[i],
-					 vi->map_param[maptype]);
+					 vi->map_param[mapnum]);
   }
 
   /* initialize the storage vectors to a decent size greater than the
@@ -281,9 +286,10 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     free(v->transform[0]);
     free(v->transform[1]);
 
-    /* free mode lookups */
+    /* free mode lookups; these are actually vorbis_look_mapping structs */
     for(i=0;i<vi->modes;i++){
-      int maptype=vi->mode_param[i]->mapping;
+      int mapnum=vi->mode_param[i]->mapping;
+      int maptype=vi->map_type[mapnum];
       _mapping_P[maptype]->free_look(v->mode[i]);
     }
     if(v->mode)free(v->mode);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.7 2000/01/28 14:31:23 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.8 2000/02/06 13:39:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,6 +48,13 @@ typedef struct vorbis_info_psy{
   double maskthresh[MAX_BARK];
   double lrolldB;
   double hrolldB;
+
+  /* quantization information to match the residue encoding */
+  /*int    blocklen;    comes from res info */
+  /*int    elements[4]; comes from res info */
+  double cutoffs[4];
+  int    quantval[4];
+  
 } vorbis_info_psy;
 
 /* vorbis_info contains all the setup information specific to the
@@ -270,7 +277,7 @@ typedef struct vorbis_block{
 
   /* local storage to avoid remallocing; it's up to the mapping to
      structure it */
-  double             *localstore;
+  void               *localstore;
   long                localtop;
   long                localalloc;
   long                totaluse;

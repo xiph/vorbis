@@ -12,15 +12,26 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.5 2000/01/28 14:34:43 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.6 2000/02/06 13:39:40 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "registry.h"
+#include "lpc.h"
+#include "lsp.h"
+#include "bookinternal.h"
+
+typedef struct {
+  long n;
+  long m;
+  vorbis_info_floor0 *vi;
+  lpc_lookup lpclook;
+} vorbis_look_floor0;
 
 static void free_info(vorbis_info_floor *i){
   if(i){
@@ -28,7 +39,14 @@ static void free_info(vorbis_info_floor *i){
     free(i);
   }
 }
+
 static void free_look(vorbis_look_floor *i){
+  vorbis_look_floor0 *f=(vorbis_look_floor0 *)i;
+  if(i){
+    lpc_clear(&f->lpclook);
+    memset(f,0,sizeof(vorbis_look_floor0));
+    free(f);
+  }
 }
 
 static void pack (vorbis_info_floor *i,oggpack_buffer *opb){
@@ -67,33 +85,98 @@ static vorbis_info_floor *unpack (vorbis_info *vi,oggpack_buffer *opb){
 
 static vorbis_look_floor *look (vorbis_info *vi,vorbis_info_mode *mi,
                               vorbis_info_floor *i){
-
+  vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
+  vorbis_look_floor0 *ret=malloc(sizeof(vorbis_look_floor0));
+  ret->m=d->order;
+  ret->n=vi->blocksizes[mi->blockflag]/2;
+  ret->vi=d;
+  lpc_init(&ret->lpclook,ret->n,d->barkmap,d->rate,ret->m);
+  return ret;
 }
+
+#include <stdio.h>
 
 static int forward(vorbis_block *vb,vorbis_look_floor *i,
 		    double *in,double *out){
+  long j,k,l;
+  vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
+  vorbis_info_floor0 *info=look->vi;
 
+  /* use 'out' as temp storage */
+  /* Convert our floor to a set of lpc coefficients */ 
+  double amp=sqrt(vorbis_curve_to_lpc(in,out,&look->lpclook));
+  double *work=alloca(sizeof(double)*look->m);
 
-      /* Convert our floor to a set of lpc coefficients 
-      vb->amp[i]=sqrt(vorbis_curve_to_lpc(floor,lpc,vl));
+  /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
+  vorbis_lpc_to_lsp(out,out,look->m);
+  memcpy(work,out,sizeof(double)*look->m);
 
-      LSP <-> LPC is orthogonal and LSP quantizes more stably 
-      vorbis_lpc_to_lsp(lpc,lsp,vl->m);
+  for(j=12;j<20;j++)
+    fprintf(stderr,"%0.3g, ",out[j]);
+  fprintf(stderr,"\n");
 
-      code the spectral envelope; mutates the lsp coeffs to reflect
-      what was actually encoded 
-      _vs_spectrum_encode(vb,vb->amp[i],lsp);
+  /* code the spectral envelope, and keep track of the actual quantized
+     values */
+  _oggpack_write(&vb->opb,amp*32768,18);
+  {
+    codebook *b=vb->vd->fullbooks+info->books[0];
+    double last=0.;
+    for(j=0;j<look->m;){
+      double next=out[j+b->dim-1];
+      for(k=0;k<b->dim;k++,j++)out[j]-=last;
+      last=next;
+    }
+  }
 
-      Generate residue from the decoded envelope, which will be
-         slightly different to the pre-encoding floor due to
-         quantization.  Slow, yes, but perhaps more accurate 
+  for(k=0;k<info->stages;k++){
+    codebook *b=vb->vd->fullbooks+info->books[k];
+    for(j=0;j<look->m;j+=b->dim)
+      vorbis_book_encodev(b,out+j,&vb->opb);
+  }
+  
+  for(j=0;j<look->m;j++)
+    out[j]=work[j]-out[j];
 
-      vorbis_lsp_to_lpc(lsp,lpc,vl->m); 
-      vorbis_lpc_to_curve(curve,lpc,vb->amp[i],vl);*/
+        
+
+  /* take the coefficients back to a spectral envelope curve */
+  vorbis_lsp_to_lpc(out,out,look->m); 
+  vorbis_lpc_to_curve(out,out,amp,&look->lpclook);
+
   return(0);
 }
-static int inverse(vorbis_block *vb,vorbis_look_floor *i,
-		    double *buf){
+
+static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
+  vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
+  vorbis_info_floor0 *info=look->vi;
+  int j,k;
+  
+  double amp=_oggpack_read(&vb->opb,18)/32768.;
+  memset(out,0,sizeof(double)*look->m);    
+  for(k=0;k<info->stages;k++){
+    codebook *b=vb->vd->fullbooks+info->books[k];
+    for(j=0;j<look->m;j+=b->dim)
+      vorbis_book_decodev(b,out+j,&vb->opb);
+  }
+  
+  {
+    codebook *b=vb->vd->fullbooks+info->books[0];
+    double last=0.;
+    for(j=0;j<look->m;){
+      for(k=0;k<b->dim;k++,j++)out[j]+=last;
+      last=out[j-1];
+    }
+  }
+
+  for(j=12;j<20;j++)
+    fprintf(stderr,"%0.3g, ",out[j]);
+  fprintf(stderr,"\n");
+  
+
+  /* take the coefficients back to a spectral envelope curve */
+  vorbis_lsp_to_lpc(out,out,look->m); 
+  vorbis_lpc_to_curve(out,out,amp,&look->lpclook);
+
   return(0);
 }
 

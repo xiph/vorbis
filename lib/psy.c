@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.14 2000/01/28 15:25:10 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.15 2000/02/06 13:39:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -123,6 +123,29 @@ void _vp_mask_floor(vorbis_look_psy *p,double *f, double *mask,double *floor){
     if(mask[i]<troll)mask[i]=troll;
     if(floor[i]<troll)floor[i]=troll;
   }
+}
+
+/* take a masking curve and raw residue; eliminate the inaduble and
+   quantize to the final form handed to the VQ.  All and any tricks to
+   squeeze out bits given knowledge of the encoding mode should go
+   here too */
+
+/* modifies the pcm vector, returns book membership in aux */
+
+void _vp_quantize(vorbis_look_psy *p, double *pcm, double *mask, 
+		  double *floor,int *aux,long begin, long n,long subn){
+  long i,j;
+    /* for now, we're not worrying about subvector, but the idea is
+       that we normal blocks not have zeroes; zeroes only exist as an
+       all-zero block */
+
+  for(i=begin;i<n;i++){
+    double value=rint(pcm[i]/floor[i]);
+    if(value>15)value=15;
+    if(value<-15)value=-15;
+    pcm[i]=value;
+  }
+
 }
 
 /* s must be padded at the end with m-1 zeroes */

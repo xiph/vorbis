@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.15 2000/01/28 09:05:11 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.16 2000/02/06 13:39:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -319,6 +319,10 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
   double *lcurve=alloca(sizeof(double)*(l->ln*2));
   int i;
 
+  if(amp==0){
+    memset(curve,0,sizeof(double)*l->n);
+    return;
+  }
   _vlpc_de_helper(lcurve,lpc,amp,l);
 
 #ifdef ANALYSIS
@@ -335,8 +339,6 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
     fclose(out);
   
 #endif
-
-  if(amp==0)return;
 
   for(i=0;i<l->ln;i++)lcurve[i]/=l->barknorm[i];
   for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
