@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.23.4.5 2000/07/31 19:41:00 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23.4.6 2000/08/01 02:00:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -256,15 +256,15 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   /* interpolate curves between */
   for(i=1;i<P_BANDS;i+=2)
     for(j=4;j<P_LEVELS;j+=2){
-      memcpy(p->tonecurves[i][j],p->tonecurves[i-1][j],EHMER_MAX*sizeof(double));
-      /*interp_curve(p->tonecurves[i][j],
+      /*memcpy(p->tonecurves[i][j],p->tonecurves[i-1][j],EHMER_MAX*sizeof(double));*/
+      interp_curve(p->tonecurves[i][j],
 		   p->tonecurves[i-1][j],
-		   p->tonecurves[i+1][j],.5);*/
+		   p->tonecurves[i+1][j],.5);
     }
 
-  for(i=0;i<P_BANDS-1;i++)
+  /*for(i=0;i<P_BANDS-1;i++)
     for(j=4;j<P_LEVELS;j+=2)
-    min_curve(p->tonecurves[i][j],p->tonecurves[i+1][j]);
+    min_curve(p->tonecurves[i][j],p->tonecurves[i+1][j]);*/
 
   /* set up the final curves */
   for(i=0;i<P_BANDS;i++)
