@@ -1,0 +1,14 @@
+
+residuesplit residue_0#0.vqd 0,96,12 res_A ,.5 3,1.5 ,1.5 ,2.5 ,7.5 ,22.5
+mv res_Aaux.vqd res_44_Y_128aux.vqd
+
+residuesplit residue_1#0.vqd 0,768,32 res_B ,.5 4,1.5 ,1.5 ,2.5 ,7.5 ,22.5
+mv res_Baux.vqd res_44_Y_1024aux.vqd
+
+GO
+
+>res_Y_128 noninterleaved
+haux res_44_Y_128aux.vqd 0,8,2
+
+>res_Y noninterleaved
+haux res_44_Y_1024aux.vqd 0,22,2
