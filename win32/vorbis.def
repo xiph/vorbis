@@ -1,5 +1,5 @@
 ; 
-; $Id: vorbis.def,v 1.4 2001/09/07 09:42:01 cwolf Exp $
+; $Id: vorbis.def,v 1.5 2001/09/14 06:57:08 cwolf Exp $
 ;
 LIBRARY
 EXPORTS
@@ -32,3 +32,4 @@ _mapping_P
 _floor_P
 _residue_P
 _time_P
+table_map2mem
