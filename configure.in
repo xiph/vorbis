@@ -187,11 +187,23 @@ dnl --------------------------------------------------
 AC_CHECK_LIB(m, cos, VORBIS_LIBS="-lm", VORBIS_LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
-XIPH_PATH_OGG(, AC_MSG_ERROR(must have Ogg installed!))
-libs_save=$LIBS
-LIBS="$OGG_LIBS $VORBIS_LIBS"
-AC_CHECK_FUNC(oggpack_writealign, , AC_MSG_ERROR(Ogg >= 1.0 required !))
-LIBS=$libs_save
+HAVE_OGG=no
+dnl first check through pkg-config
+dnl check for pkg-config itself so we don't try the m4 macro without pkg-config
+AC_CHECK_PROG(HAVE_PKG_CONFIG, pkg-config, yes)
+if test "x$HAVE_PKG_CONFIG" = "xyes"
+then
+  PKG_CHECK_MODULES(OGG, ogg >= 1.0, HAVE_OGG=yes, HAVE_OGG=no)
+fi
+if test "x$HAVE_OGG" = "xno"
+then
+  dnl fall back to the old school test
+  XIPH_PATH_OGG(, AC_MSG_ERROR(must have Ogg installed!))
+  libs_save=$LIBS
+  LIBS="$OGG_LIBS $VORBIS_LIBS"
+  AC_CHECK_FUNC(oggpack_writealign, , AC_MSG_ERROR(Ogg >= 1.0 required !))
+  LIBS=$libs_save
+fi
 
 dnl --------------------------------------------------
 dnl Check for library functions
