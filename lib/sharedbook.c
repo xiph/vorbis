@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.22 2001/12/21 14:52:36 segher Exp $
+ last mod: $Id: sharedbook.c,v 1.23 2002/01/19 04:52:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -69,16 +69,16 @@ float _float32_unpack(long val){
 /* given a list of word lengths, generate a list of codewords.  Works
    for length ordered or unordered, always assigns the lowest valued
    codewords first.  Extended to handle unused entries (length 0) */
-long *_make_words(long *l,long n){
-  long i,j;
-  long marker[33];
-  long *r=_ogg_malloc(n*sizeof(*r));
+ogg_uint32_t *_make_words(long *l,long n,long sparsecount){
+  long i,j,count=0;
+  ogg_uint32_t marker[33];
+  ogg_uint32_t *r=_ogg_malloc((sparsecount?sparsecount:n)*sizeof(*r));
   memset(marker,0,sizeof(marker));
 
   for(i=0;i<n;i++){
     long length=l[i];
     if(length>0){
-      long entry=marker[length];
+      ogg_uint32_t entry=marker[length];
       
       /* when we claim a node for an entry, we also claim the nodes
 	 below it (pruning off the imagined tree that may have dangled
@@ -91,7 +91,7 @@ long *_make_words(long *l,long n){
 	_ogg_free(r);
 	return(NULL);
       }
-      r[i]=entry;
+      r[count++]=entry;
     
       /* Look to see if the next shorter marker points to the node
 	 above. if so, update it and repeat.  */
@@ -120,77 +120,24 @@ long *_make_words(long *l,long n){
 	  marker[j]=marker[j-1]<<1;
 	}else
 	  break;
-    }    
+    }else
+      if(sparsecount==0)count++;
   }
     
   /* bitreverse the words because our bitwise packer/unpacker is LSb
      endian */
-  for(i=0;i<n;i++){
-    long temp=0;
+  for(i=0,count=0;i<n;i++){
+    ogg_uint32_t temp=0;
     for(j=0;j<l[i];j++){
       temp<<=1;
-      temp|=(r[i]>>j)&1;
+      temp|=(r[count]>>j)&1;
     }
-    r[i]=temp;
+    r[count]=temp;
+    if(l[i] || sparsecount==0)
+      count++;
   }
 
   return(r);
-}
-
-/* build the decode helper tree from the codewords */
-decode_aux *_make_decode_tree(codebook *c){
-  const static_codebook *s=c->c;
-  long top=0,i,j,n;
-  decode_aux *t=_ogg_malloc(sizeof(*t));
-  long *ptr0=t->ptr0=_ogg_calloc(c->entries*2,sizeof(*ptr0));
-  long *ptr1=t->ptr1=_ogg_calloc(c->entries*2,sizeof(*ptr1));
-  long *codelist=_make_words(s->lengthlist,s->entries);
-
-  if(codelist==NULL)return(NULL);
-  t->aux=c->entries*2;
-
-  for(i=0;i<c->entries;i++){
-    if(s->lengthlist[i]>0){
-      long ptr=0;
-      for(j=0;j<s->lengthlist[i]-1;j++){
-	int bit=(codelist[i]>>j)&1;
-	if(!bit){
-	  if(!ptr0[ptr])
-	    ptr0[ptr]= ++top;
-	  ptr=ptr0[ptr];
-	}else{
-	  if(!ptr1[ptr])
-	    ptr1[ptr]= ++top;
-	  ptr=ptr1[ptr];
-	}
-      }
-      if(!((codelist[i]>>j)&1))
-	ptr0[ptr]=-i;
-      else
-	ptr1[ptr]=-i;
-    }
-  }
-  _ogg_free(codelist);
-
-  t->tabn = _ilog(c->entries)-4; /* this is magic */
-  if(t->tabn<5)t->tabn=5;
-  n = 1<<t->tabn;
-  t->tab = _ogg_malloc(n*sizeof(*t->tab));
-  t->tabl = _ogg_malloc(n*sizeof(*t->tabl));
-  for (i = 0; i < n; i++) {
-    long p = 0;
-    for (j = 0; j < t->tabn && (p > 0 || j == 0); j++) {
-      if (i & (1 << j))
-	p = ptr1[p];
-      else
-	p = ptr0[p];
-    }
-    /* now j == length, and p == -code */
-    t->tab[i] = p;
-    t->tabl[i] = j;
-  }
-
-  return(t);
 }
 
 /* there might be a straightforward one-line way to do the below
@@ -229,13 +176,13 @@ long _book_maptype1_quantvals(const static_codebook *b){
    generated algorithmically (each column of the vector counts through
    the values in the quant vector). in map type 2, all the values came
    in in an explicit list.  Both value lists must be unpacked */
-float *_book_unquantize(const static_codebook *b){
-  long j,k;
+float *_book_unquantize(const static_codebook *b,int n,int *sparsemap){
+  long j,k,count=0;
   if(b->maptype==1 || b->maptype==2){
     int quantvals;
     float mindel=_float32_unpack(b->q_min);
     float delta=_float32_unpack(b->q_delta);
-    float *r=_ogg_calloc(b->entries*b->dim,sizeof(*r));
+    float *r=_ogg_calloc(n*b->dim,sizeof(*r));
 
     /* maptype 1 and 2 both use a quantized value vector, but
        different sizes */
@@ -250,26 +197,40 @@ float *_book_unquantize(const static_codebook *b){
 	 that */
       quantvals=_book_maptype1_quantvals(b);
       for(j=0;j<b->entries;j++){
-	float last=0.f;
-	int indexdiv=1;
-	for(k=0;k<b->dim;k++){
-	  int index= (j/indexdiv)%quantvals;
-	  float val=b->quantlist[index];
-	  val=fabs(val)*delta+mindel+last;
-	  if(b->q_sequencep)last=val;	  
-	  r[j*b->dim+k]=val;
-	  indexdiv*=quantvals;
+	if((sparsemap && b->lengthlist[j]) || !sparsemap){
+	  float last=0.f;
+	  int indexdiv=1;
+	  for(k=0;k<b->dim;k++){
+	    int index= (j/indexdiv)%quantvals;
+	    float val=b->quantlist[index];
+	    val=fabs(val)*delta+mindel+last;
+	    if(b->q_sequencep)last=val;	  
+	    if(sparsemap)
+	      r[sparsemap[count]*b->dim+k]=val;
+	    else
+	      r[count*b->dim+k]=val;
+	    indexdiv*=quantvals;
+	  }
+	  count++;
 	}
+
       }
       break;
     case 2:
       for(j=0;j<b->entries;j++){
-	float last=0.f;
-	for(k=0;k<b->dim;k++){
-	  float val=b->quantlist[j*b->dim+k];
-	  val=fabs(val)*delta+mindel+last;
-	  if(b->q_sequencep)last=val;	  
-	  r[j*b->dim+k]=val;
+	if((sparsemap && b->lengthlist[j]) || !sparsemap){
+	  float last=0.f;
+	  
+	  for(k=0;k<b->dim;k++){
+	    float val=b->quantlist[j*b->dim+k];
+	    val=fabs(val)*delta+mindel+last;
+	    if(b->q_sequencep)last=val;	  
+	    if(sparsemap)
+	      r[sparsemap[count]*b->dim+k]=val;
+	    else
+	      r[count*b->dim+k]=val;
+	  }
+	  count++;
 	}
       }
       break;
@@ -313,56 +274,125 @@ void vorbis_staticbook_destroy(static_codebook *b){
 void vorbis_book_clear(codebook *b){
   /* static book is not cleared; we're likely called on the lookup and
      the static codebook belongs to the info struct */
-  if(b->decode_tree){
-    _ogg_free(b->decode_tree->tab);
-    _ogg_free(b->decode_tree->tabl);
-
-    _ogg_free(b->decode_tree->ptr0);
-    _ogg_free(b->decode_tree->ptr1);
-    memset(b->decode_tree,0,sizeof(*b->decode_tree));
-    _ogg_free(b->decode_tree);
-  }
   if(b->valuelist)_ogg_free(b->valuelist);
   if(b->codelist)_ogg_free(b->codelist);
+
+  if(b->dec_index)_ogg_free(b->dec_index);
+  if(b->dec_codelengths)_ogg_free(b->dec_codelengths);
+  if(b->dec_firsttable)_ogg_free(b->dec_firsttable);
+
   memset(b,0,sizeof(*b));
 }
 
 int vorbis_book_init_encode(codebook *c,const static_codebook *s){
-  long j,k;
+
   memset(c,0,sizeof(*c));
   c->c=s;
   c->entries=s->entries;
+  c->used_entries=s->entries;
   c->dim=s->dim;
-  c->codelist=_make_words(s->lengthlist,s->entries);
-  c->valuelist=_book_unquantize(s);
-
-  /* set the 'zero entry' */
-  c->zeroentry=-1;
-  if(c->valuelist){
-    for(j=0;j<s->entries;j++){
-      int flag=1;
-      for(k=0;k<s->dim;k++){
-	if(fabs(c->valuelist[j*s->dim+k])>1e-12f){
-	  flag=0;
-	  break;
-	}
-      }
-      if(flag)
-	c->zeroentry=j;
-    }
-  }
+  c->codelist=_make_words(s->lengthlist,s->entries,0);
+  c->valuelist=_book_unquantize(s,s->entries,NULL);
 
   return(0);
 }
 
+static ogg_uint32_t bitreverse(ogg_uint32_t x){
+  x=    ((x>>16)&0x0000ffffUL) | ((x<<16)&0xffff0000UL);
+  x=    ((x>> 8)&0x00ff00ffUL) | ((x<< 8)&0xff00ff00UL);
+  x=    ((x>> 4)&0x0f0f0f0fUL) | ((x<< 4)&0xf0f0f0f0UL);
+  x=    ((x>> 2)&0x33333333UL) | ((x<< 2)&0xccccccccUL);
+  return((x>> 1)&0x55555555UL) | ((x<< 1)&0xaaaaaaaaUL);
+}
+
+static int sort32a(const void *a,const void *b){
+  return ( (**(ogg_uint32_t **)a>**(ogg_uint32_t **)b)<<1)-1;
+}
+
+
+/* decode codebook arrangement is more heavily optimized than encode */
 int vorbis_book_init_decode(codebook *c,const static_codebook *s){
+  int i,j,n=0,tabn;
+  int *sortindex;
   memset(c,0,sizeof(*c));
-  c->c=s;
+  
+  /* count actually used entries */
+  for(i=0;i<s->entries;i++)
+    if(s->lengthlist[i]>0)
+      n++;
+
   c->entries=s->entries;
+  c->used_entries=n;
   c->dim=s->dim;
-  c->valuelist=_book_unquantize(s);
-  c->decode_tree=_make_decode_tree(c);
-  if(c->decode_tree==NULL)goto err_out;
+
+  /* two different remappings go on here.  
+
+     First, we collapse the likely sparse codebook down only to
+     actually represented values/words.  This collapsing needs to be
+     indexed as map-valueless books are used to encode original entry
+     positions as integers.
+
+     Second, we reorder all vectors, including the entry index above,
+     by sorted bitreversed codeword to allow treeless decode. */
+
+  {
+    /* perform sort */
+    ogg_uint32_t *codes=_make_words(s->lengthlist,s->entries,c->used_entries);
+    ogg_uint32_t **codep=alloca(sizeof(*codep)*n);
+    
+    if(codes==NULL)goto err_out;
+
+    for(i=0;i<n;i++){
+      codes[i]=bitreverse(codes[i]);
+      codep[i]=codes+i;
+    }
+
+    qsort(codep,n,sizeof(*codep),sort32a);
+
+    sortindex=alloca(n*sizeof(*sortindex));
+    c->codelist=_ogg_malloc(n*sizeof(*c->codelist));
+    /* the index is a reverse index */
+    for(i=0;i<n;i++){
+      int position=codep[i]-codes;
+      sortindex[position]=i;
+    }
+
+    for(i=0;i<n;i++)
+      c->codelist[sortindex[i]]=codes[i];
+    _ogg_free(codes);
+  }
+
+  c->valuelist=_book_unquantize(s,n,sortindex);
+  c->dec_index=_ogg_malloc(n*sizeof(*c->dec_index));
+
+  for(n=0,i=0;i<s->entries;i++)
+    if(s->lengthlist[i]>0)
+      c->dec_index[sortindex[n++]]=i;
+  
+  c->dec_codelengths=_ogg_malloc(n*sizeof(*c->dec_codelengths));
+  for(n=0,i=0;i<s->entries;i++)
+    if(s->lengthlist[i]>0)
+      c->dec_codelengths[sortindex[n++]]=s->lengthlist[i];
+
+  c->dec_firsttablen=_ilog(c->used_entries)-4; /* this is magic */
+  if(c->dec_firsttablen<5)c->dec_firsttablen=5;
+  if(c->dec_firsttablen>8)c->dec_firsttablen=8;
+
+  tabn=1<<c->dec_firsttablen;
+  c->dec_firsttable=_ogg_malloc(tabn*sizeof(*c->dec_firsttable));
+  for(i=0;i<tabn;i++)c->dec_firsttable[i]=-1;
+  c->dec_maxlength=0;
+
+  for(i=0;i<n;i++){
+    if(c->dec_maxlength<c->dec_codelengths[i])
+      c->dec_maxlength=c->dec_codelengths[i];
+    if(c->dec_codelengths[i]<=c->dec_firsttablen){
+      ogg_uint32_t orig=bitreverse(c->codelist[i]);
+      for(j=0;j<(1<<(c->dec_firsttablen-c->dec_codelengths[i]));j++)
+	c->dec_firsttable[orig|(j<<c->dec_codelengths[i])]=i;
+    }
+  }
+
   return(0);
  err_out:
   vorbis_book_clear(c);
@@ -531,11 +561,17 @@ int vorbis_book_besterror(codebook *book,float *a,int step,int addmul){
 }
 
 long vorbis_book_codeword(codebook *book,int entry){
-  return book->codelist[entry];
+  if(book->c) /* only use with encode; decode optimizations are
+                 allowed to break this */
+    return book->codelist[entry];
+  return -1;
 }
 
 long vorbis_book_codelen(codebook *book,int entry){
-  return book->c->lengthlist[entry];
+  if(book->c) /* only use with encode; decode optimizations are
+                 allowed to break this */
+    return book->c->lengthlist[entry];
+  return -1;
 }
 
 #ifdef _V_SELFTEST
@@ -631,7 +667,7 @@ static float test5_result[]={-3,-6,-9, 4, 1,-2, -1,-4,-7,
 			      -3,-4,-5, 4, 3, 2, -1,-2,-3};
 
 void run_test(static_codebook *b,float *comp){
-  float *out=_book_unquantize(b);
+  float *out=_book_unquantize(b,b->entries,NULL);
   int i;
 
   if(comp){

@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.35 2001/12/21 14:52:35 segher Exp $
+ last mod: $Id: codebook.c,v 1.36 2002/01/19 04:52:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -299,6 +299,68 @@ int vorbis_book_encodevs(codebook *book,float *a,oggpack_buffer *b,
   return(vorbis_book_encode(book,best,b));
 }
 
+/* the 'eliminate the decode tree' optimization actually requires the
+   codewords to be MSb first, not LSb.  This is an annoying inelegancy
+   (and one of the first places where carefully thought out design
+   turned out to be wrong; Vorbis II and future Ogg codecs should go
+   to an MSb bitpacker), but not actually the huge hit it appears to
+   be.  The first-stage decode table catches most words so that
+   bitreverse is not in the main execution path. */
+
+static ogg_uint32_t bitreverse(ogg_uint32_t x){
+  x=    ((x>>16)&0x0000ffff) | ((x<<16)&0xffff0000);
+  x=    ((x>> 8)&0x00ff00ff) | ((x<< 8)&0xff00ff00);
+  x=    ((x>> 4)&0x0f0f0f0f) | ((x<< 4)&0xf0f0f0f0);
+  x=    ((x>> 2)&0x33333333) | ((x<< 2)&0xcccccccc);
+  return((x>> 1)&0x55555555) | ((x<< 1)&0xaaaaaaaa);
+}
+
+static long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
+  int read;
+  long lok = oggpack_look(b, book->dec_firsttablen);
+
+  if (lok >= 0) {
+    long entry = book->dec_firsttable[lok];
+    if(entry>=0){
+      oggpack_adv(b, book->dec_codelengths[entry]);
+      return(entry);
+    }
+  }
+
+  read=book->dec_maxlength;
+  lok = oggpack_look(b, read);
+
+  while(lok<0 && read>1)
+    lok = oggpack_look(b, --read);
+
+  if(lok<0)return -1;
+
+  /* bisect search for the codeword in the ordered list */
+  {
+    ogg_uint32_t testword=bitreverse((ogg_uint32_t)lok);
+
+    long lo=0;
+    long hi=book->used_entries;
+    long p=(lo+hi)>>1;
+
+    while(hi-lo>1){
+      if(book->codelist[p]<=testword)
+	lo=p;
+      else
+	hi=p;
+      p=(lo+hi)>>1;
+    }
+
+    if(book->dec_codelengths[p]<=read){
+      oggpack_adv(b, book->dec_codelengths[p]);
+      return(p);
+    }
+  }
+  
+  oggpack_adv(b, read);
+  return(-1);
+}
+
 /* Decode side is specced and easier, because we don't need to find
    matches using different criteria; we simply read and map.  There are
    two things we need to do 'depending':
@@ -313,32 +375,14 @@ int vorbis_book_encodevs(codebook *book,float *a,oggpack_buffer *b,
    addmul==1 -> additive
    addmul==2 -> multiplicitive */
 
-/* returns the entry number or -1 on eof *************************************/
+/* returns the [original, not compacted] entry number or -1 on eof *********/
 long vorbis_book_decode(codebook *book, oggpack_buffer *b){
-  long ptr=0;
-  decode_aux *t=book->decode_tree;
-  int lok = oggpack_look(b, t->tabn);
-
-  if (lok >= 0) {
-    ptr = t->tab[lok];
-    oggpack_adv(b, t->tabl[lok]);
-    if (ptr <= 0)
-      return -ptr;
-  }
-
-  do{
-    switch((int)oggpack_read1(b)){
-    case 0:
-      ptr=t->ptr0[ptr];
-      break;
-    case 1:
-      ptr=t->ptr1[ptr];
-      break;
-    case -1:
-      return(-1);
-    }
-  }while(ptr>0);
-  return(-ptr);
+  long packed_entry=decode_packed_entry_number(book,b);
+  if(packed_entry>=0)
+    return(book->dec_index[packed_entry]);
+  
+  /* if there's no dec_index, the codebook unpacking isn't collapsed */
+  return(packed_entry);
 }
 
 /* returns 0 on OK or -1 on eof *************************************/
@@ -349,7 +393,7 @@ long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
   int i,j,o;
 
   for (i = 0; i < step; i++) {
-    entry[i]=vorbis_book_decode(book,b);
+    entry[i]=decode_packed_entry_number(book,b);
     if(entry[i]==-1)return(-1);
     t[i] = book->valuelist+entry[i]*book->dim;
   }
@@ -365,7 +409,7 @@ long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
 
   if(book->dim>8){
     for(i=0;i<n;){
-      entry = vorbis_book_decode(book,b);
+      entry = decode_packed_entry_number(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
       for (j=0;j<book->dim;)
@@ -373,7 +417,7 @@ long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
     }
   }else{
     for(i=0;i<n;){
-      entry = vorbis_book_decode(book,b);
+      entry = decode_packed_entry_number(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
       j=0;
@@ -407,7 +451,7 @@ long vorbis_book_decodev_set(codebook *book,float *a,oggpack_buffer *b,int n){
   float *t;
 
   for(i=0;i<n;){
-    entry = vorbis_book_decode(book,b);
+    entry = decode_packed_entry_number(book,b);
     if(entry==-1)return(-1);
     t     = book->valuelist+entry*book->dim;
     for (j=0;j<book->dim;)
@@ -422,7 +466,7 @@ long vorbis_book_decodevv_add(codebook *book,float **a,long offset,int ch,
   int chptr=0;
 
   for(i=offset/ch;i<(offset+n)/ch;){
-    entry = vorbis_book_decode(book,b);
+    entry = decode_packed_entry_number(book,b);
     if(entry==-1)return(-1);
     {
       const float *t = book->valuelist+entry*book->dim;

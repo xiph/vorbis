@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.55 2001/12/23 11:53:52 xiphmont Exp $
+ last mod: $Id: block.c,v 1.56 2002/01/19 04:52:39 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -221,8 +221,12 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   }else{
     /* finish the codebooks */
     b->fullbooks=_ogg_calloc(ci->books,sizeof(*b->fullbooks));
-    for(i=0;i<ci->books;i++)
+    for(i=0;i<ci->books;i++){
       vorbis_book_init_decode(b->fullbooks+i,ci->book_param[i]);
+      /* decode codebooks are now standalone after init */
+      vorbis_staticbook_destroy(ci->book_param[i]);
+      ci->book_param[i]=NULL;
+    }
   }
 
   /* initialize the storage vectors to a decent size greater than the

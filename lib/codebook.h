@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: codebook.h,v 1.10 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: codebook.h,v 1.11 2002/01/19 04:52:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -96,26 +96,24 @@ typedef struct encode_aux_pigeonhole{
   long *fitlength;
 } encode_aux_pigeonhole;
 
-typedef struct decode_aux{
-  long   *tab;
-  int    *tabl;
-  int    tabn;
-
-  long   *ptr0;
-  long   *ptr1;
-  long   aux;        /* number of tree entries */
-} decode_aux;
-
 typedef struct codebook{
   long dim;           /* codebook dimensions (elements per vector) */
   long entries;       /* codebook entries */
+  long used_entries;  /* populated codebook entries */
   const static_codebook *c;
 
-  float  *valuelist;  /* list of dim*entries actual entry values */
-  long   *codelist;   /* list of bitstream codewords for each entry */
-  struct decode_aux *decode_tree;
+  /* for encode, the below are entry-ordered, fully populated */
+  /* for decode, the below are ordered by bitreversed codeword and only
+     used entries are populated */
+  float        *valuelist;  /* list of dim*entries actual entry values */  
+  ogg_uint32_t *codelist;   /* list of bitstream codewords for each entry */
 
-  long zeroentry;
+  int          *dec_index;  /* only used if sparseness collapsed */
+  char         *dec_codelengths;
+  int          *dec_firsttable;
+  int           dec_firsttablen;
+  int           dec_maxlength;
+
 } codebook;
 
 extern void vorbis_staticbook_clear(static_codebook *b);
@@ -124,7 +122,7 @@ extern int vorbis_book_init_encode(codebook *dest,const static_codebook *source)
 extern int vorbis_book_init_decode(codebook *dest,const static_codebook *source);
 extern void vorbis_book_clear(codebook *b);
 
-extern float *_book_unquantize(const static_codebook *b);
+extern float *_book_unquantize(const static_codebook *b,int n,int *map);
 extern float *_book_logdist(const static_codebook *b,float *vals);
 extern float _float32_unpack(long val);
 extern long   _float32_pack(float val);
