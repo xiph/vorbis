@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.80 2002/10/18 06:00:12 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.81 2002/10/21 07:00:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -785,7 +785,7 @@ void _vp_noisemask(vorbis_look_psy *p,
 
   for(i=0;i<n;i++)work[i]=logmdct[i]-work[i];
   
-  //#if 0
+#if 0
   {
     static int seq=0;
 
@@ -805,7 +805,7 @@ void _vp_noisemask(vorbis_look_psy *p,
       _analysis_output("envelope2L",seq/2,work2,n,1,0,0);
     seq++;
   }
-  //#endif
+#endif
 
   for(i=0;i<n;i++){
     int dB=logmask[i]+.5;
