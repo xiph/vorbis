@@ -34,9 +34,9 @@ needed to develop applications with libvorbis.
 
 %build
 if [ ! -f configure ]; then
-  CFLAGS="$RPM_FLAGS" ./autogen.sh --prefix=/usr
+  CFLAGS="$RPM_OPT_FLAGS" ./autogen.sh --prefix=/usr
 else
-  CFLAGS="$RPM_FLAGS" ./configure --prefix=/usr
+  CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=/usr
 fi
 make
 
