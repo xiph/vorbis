@@ -19,9 +19,11 @@ libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c lpc.c\
 libvorbis_la_LDFLAGS = -version-info @V_LIB_CURRENT@:@V_LIB_REVISION@:@V_LIB_AGE@
 
 libvorbisfile_la_SOURCES = vorbisfile.c
+#libvorbisfile_la_LIBADD = -L$(top_srcdir)/lib/.libs -lvorbis
 libvorbisfile_la_LDFLAGS = -version-info @VF_LIB_CURRENT@:@VF_LIB_REVISION@:@VF_LIB_AGE@
 
 libvorbisenc_la_SOURCES = vorbisenc.c
+#libvorbisenc_la_LIBADD = -L$(top_srcdir)/lib/.libs -lvorbis
 libvorbisenc_la_LDFLAGS = -version-info @VE_LIB_CURRENT@:@VE_LIB_REVISION@:@VE_LIB_AGE@
 
 EXTRA_DIST = barkmel.c tone.c psytune.c lookups.pl

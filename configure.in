@@ -149,7 +149,7 @@ dnl --------------------------------------------------
 AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
-AM_PATH_OGG(, AC_MSG_ERROR(must have Ogg installed!))
+AM_PATH_OGG(LIBS="$LIBS $OGG_LIBS", AC_MSG_ERROR(must have Ogg installed!))
 
 dnl --------------------------------------------------
 dnl Check for library functions
@@ -166,4 +166,4 @@ AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile lib/Makefile lib/modes/Makefile lib/books/Makefile doc/Makefile doc/vorbisfile/Makefile include/Makefile include/vorbis/Makefile examples/Makefile)
+AC_OUTPUT(Makefile lib/Makefile lib/modes/Makefile lib/books/Makefile doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile include/Makefile include/vorbis/Makefile examples/Makefile)
