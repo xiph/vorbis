@@ -1,0 +1,56 @@
+<html>
+
+<head>
+<title>libvorbisfile - Setup/Teardown</title>
+<link rel=stylesheet href="style.css" type="text/css">
+</head>
+
+<body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
+<table border=0 width=100%>
+<tr>
+<td><p class=tiny>libvorbisfile documentation</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+</tr>
+</table>
+
+<h1>Setup/Teardown</h1>
+<p>In order to decode audio using libvorbisfile, a bitstream containing vorbis audio must be properly initialized and cleared when decoding is finished.
+<p>
+All the <b>vorbisfile</b> initialization and deallocation routines are declared in "vorbis/vorbisfile.h".
+<p>
+
+<table border=1 color=black width=50% cellspacing=0 cellpadding=7>
+<tr bgcolor=#cccccc>
+	<td><b>function</b></td>
+	<td><b>purpose</b></td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_open.html">ov_open</a></td>
+	<td>Initializes the Ogg Vorbis bitstream with a pointer to a bitstream and default values.  This must be called before other functions in the library may be
+	used.</td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_open_callbacks.html">ov_open_callbacks</a></td>
+	<td>Initializes the Ogg Vorbis bitstream with a pointer to a bitstream, default values, and custom file/bitstream manipulation routines.  Used instead of <a href="ov_open.html">ov_open</a> when working with a data source other than a file.</td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_clear.html">ov_clear</a></td>
+	<td>Closes the bitstream and cleans up loose ends.  Must be called when we're done with the bitstream.</td>
+</tr>
+</table>
+
+<br><br>
+<hr noshade>
+<table border=0 width=100%>
+<tr valign=top>
+<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+</tr><tr>
+<td><p class=tiny>vorbisfile documentation</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+</tr>
+</table>
+
+</body>
+
+</html>

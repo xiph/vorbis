@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.34 2000/10/12 03:12:52 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.35 2000/11/06 00:07:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,10 +27,12 @@
 
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
-  vorbis_dsp_state *vd=vb->vd;
-  vorbis_info      *vi=vd->vi;
-  int              type;
-  int              mode=0;
+  vorbis_dsp_state     *vd=vb->vd;
+  backend_lookup_state *b=vd->backend_state;
+  vorbis_info          *vi=vd->vi;
+  codec_setup_info     *ci=vi->codec_setup;
+  int                   type,ret;
+  int                   mode=0;
 
   vb->glue_bits=0;
   vb->time_bits=0;
@@ -44,12 +46,12 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 
   /* currently lazy.  Short block dispatches to 0, long to 1. */
 
-  if(vb->W &&vi->modes>1)mode=1;
-  type=vi->map_type[vi->mode_param[mode]->mapping];
+  if(vb->W &&ci->modes>1)mode=1;
+  type=ci->map_type[ci->mode_param[mode]->mapping];
   vb->mode=mode;
 
   /* Encode frame mode, pre,post windowsize, then dispatch */
-  oggpack_write(&vb->opb,mode,vd->modebits);
+  oggpack_write(&vb->opb,mode,b->modebits);
   if(vb->W){
     oggpack_write(&vb->opb,vb->lW,1);
     oggpack_write(&vb->opb,vb->nW,1);
@@ -58,18 +60,18 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
     fprintf(stderr,".");
     }*/
 
-  if(_mapping_P[type]->forward(vb,vd->mode[mode]))
-    return(-1);
-
+  if((ret=_mapping_P[type]->forward(vb,b->mode[mode])))
+    return(ret);
+  
   /* set up the packet wrapper */
-
+  
   op->packet=oggpack_get_buffer(&vb->opb);
   op->bytes=oggpack_bytes(&vb->opb);
   op->b_o_s=0;
   op->e_o_s=vb->eofflag;
   op->granulepos=vb->granulepos;
   op->packetno=vb->sequence; /* for sake of completeness */
-
+  
   return(0);
 }
 

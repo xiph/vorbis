@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.19 2000/10/12 03:13:02 xiphmont Exp $
+ last mod: $Id: train.c,v 1.20 2000/11/06 00:07:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -151,7 +151,7 @@ int main(int argc,char *argv[]){
       for(j=0;j<entries;j++){
 	for(k=0;k<dim;k++){
 	  line=rline(in,out,0);
-	  sscanf(line,"%lf",&a);
+	  sscanf(line,"%f",&a);
 	  v.entrylist[i++]=a;
 	}
       }      
@@ -161,7 +161,7 @@ int main(int argc,char *argv[]){
       i=0;
       for(j=0;j<entries;j++){
 	line=rline(in,out,0);
-	sscanf(line,"%lf",&a);
+	sscanf(line,"%f",&a);
 	v.bias[i++]=a;
       }
       
@@ -173,7 +173,7 @@ int main(int argc,char *argv[]){
 	  for(k=0;k<dim+vqext_aux;k++){
 	    line=rline(in,out,0);
 	    if(!line)break;
-	    sscanf(line,"%lf",b+k);
+	    sscanf(line,"%f",b+k);
 	  }
 	  if(feof(in))break;
 	  vqgen_addpoint(&v,b,b+dim);
@@ -206,11 +206,11 @@ int main(int argc,char *argv[]){
 	}
 	break;
       case 'e':
-	if(sscanf(argv[1],"%lf",&desired)!=1)
+	if(sscanf(argv[1],"%f",&desired)!=1)
 	  goto syner;
 	break;
       case 'd':
-	if(sscanf(argv[1],"%lf",&mindist)!=1)
+	if(sscanf(argv[1],"%f",&mindist)!=1)
 	  goto syner;
 	if(init)v.mindist=mindist;
 	break;
@@ -260,6 +260,9 @@ int main(int argc,char *argv[]){
 	    while(*temp>32)temp++;
 	    while(*temp==' ')temp++;
 	  }
+
+	  fprintf(stderr,"%d colums per line in file %s\n",cols,file);
+
 	}
 	{
 	  int i;

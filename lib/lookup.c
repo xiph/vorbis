@@ -1,38 +1,40 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
   function: lookup based functions
-  last mod: $Id: lookup.c,v 1.2 2000/10/12 03:12:53 xiphmont Exp $
+  last mod: $Id: lookup.c,v 1.3 2000/11/06 00:07:01 xiphmont Exp $
 
  ********************************************************************/
 
 #include <math.h>
 #include "lookup.h"
 #include "lookup_data.h"
+#include "os.h"
 
 #ifdef FLOAT_LOOKUP
 
 /* interpolated lookup based cos function, domain 0 to PI only */
 float vorbis_coslook(float a){
-  float d=a*(.31830989*(float)COS_LOOKUP_SZ);
-  int i=d;
+  double d=a*(.31830989*(float)COS_LOOKUP_SZ);
+  int i=vorbis_ftoi(d-.5);
+
   return COS_LOOKUP[i]+ (d-i)*(COS_LOOKUP[i+1]-COS_LOOKUP[i]);
 }
 
 /* interpolated 1./sqrt(p) where .5 <= p < 1. */
 float vorbis_invsqlook(float a){
-  float d=a*(2.*(float)INVSQ_LOOKUP_SZ)-(float)INVSQ_LOOKUP_SZ;
-  int i=d;
+  double d=a*(2.*(float)INVSQ_LOOKUP_SZ)-(float)INVSQ_LOOKUP_SZ;
+  int i=vorbis_ftoi(d-.5);
   return INVSQ_LOOKUP[i]+ (d-i)*(INVSQ_LOOKUP[i+1]-INVSQ_LOOKUP[i]);
 }
 
@@ -44,7 +46,7 @@ float vorbis_invsq2explook(int a){
 #include <stdio.h>
 /* interpolated lookup based fromdB function, domain -140dB to 0dB only */
 float vorbis_fromdBlook(float a){
-  int i=a*((float)(-(1<<FROMdB2_SHIFT)));
+  int i=vorbis_ftoi(a*((float)(-(1<<FROMdB2_SHIFT)))-5.);
   return (i<0)?1.:
     ((i>=(FROMdB_LOOKUP_SZ<<FROMdB_SHIFT))?0.:
      FROMdB_LOOKUP[i>>FROMdB_SHIFT]*FROMdB2_LOOKUP[i&FROMdB2_MASK]);

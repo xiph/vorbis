@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: *unnormalized* fft transform
- last mod: $Id: smallft.c,v 1.9 2000/10/12 03:12:54 xiphmont Exp $
+ last mod: $Id: smallft.c,v 1.10 2000/11/06 00:07:02 xiphmont Exp $
 
 ********************************************************************/
 
@@ -1241,8 +1241,8 @@ void drft_backward(drft_lookup *l,float *data){
 
 void drft_init(drft_lookup *l,int n){
   l->n=n;
-  l->trigcache=calloc(3*n,sizeof(float));
-  l->splitcache=calloc(32,sizeof(int));
+  l->trigcache=_ogg_calloc(3*n,sizeof(float));
+  l->splitcache=_ogg_calloc(32,sizeof(int));
   fdrffti(n, l->trigcache, l->splitcache);
 }
 

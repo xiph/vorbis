@@ -1,0 +1,65 @@
+<html>
+
+<head>
+<title>vorbisfile - function - ov_bitrate</title>
+<link rel=stylesheet href="style.css" type="text/css">
+</head>
+
+<body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
+<table border=0 width=100%>
+<tr>
+<td><p class=tiny>vorbisfile documentation</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+</tr>
+</table>
+
+<h1>ov_bitrate_instant</h1>
+
+<p><i>declared in "vorbis/vorbisfile.h";</i></p>
+
+<p>Used to find the most recent bitrate played back within the file.  Will return 0 if the bitrate has not changed or it is the beginning of the file.
+
+<br><br>
+<table border=0 color=black cellspacing=0 cellpadding=7>
+<tr bgcolor=#cccccc>
+	<td>
+<pre><b>
+long ov_bitrate_instant(OggVorbis_File *vf);
+</b></pre>
+	</td>
+</tr>
+</table>
+
+<h3>Parameters</h3>
+<dl>
+<dt><i>vf</i></dt>
+<dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible vorbisfile
+functions.
+</dl>
+
+
+<h3>Return Values</h3>
+<blockquote>
+<li>
+0 indicates the beginning of the file or unchanged bitrate info.</li>
+<li><i>n</i> indicates the actual bitrate since the last call.</li>
+<li>OV_FALSE indicates that the call returned a 'false' status.  In this case, this error code is returned if playback is not in progress, and thus there is no instantaneous bitrate information to report.</li>
+</blockquote>
+<p>
+
+<br><br>
+<hr noshade>
+<table border=0 width=100%>
+<tr valign=top>
+<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+</tr><tr>
+<td><p class=tiny>vorbisfile documentation</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+</tr>
+</table>
+
+
+</body>
+
+</html>

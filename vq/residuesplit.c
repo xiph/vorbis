@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.5 2000/10/12 03:13:02 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.6 2000/11/06 00:07:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -162,9 +162,9 @@ int main(int argc, char *argv[]){
   /* how many parts?... */
   parts=argc-3;
   
-  ebound=malloc(sizeof(float)*parts);
-  mbound=malloc(sizeof(float)*parts);
-  subgrp=malloc(sizeof(int)*parts);
+  ebound=_ogg_malloc(sizeof(float)*parts);
+  mbound=_ogg_malloc(sizeof(float)*parts);
+  subgrp=_ogg_malloc(sizeof(int)*parts);
   
   for(i=0;i<parts-1;i++){
     char *pos=strchr(argv[4+i],',');
@@ -217,7 +217,7 @@ int main(int argc, char *argv[]){
     }
   }
   
-  vec=malloc(sizeof(float)*n);
+  vec=_ogg_malloc(sizeof(float)*n);
   /* get the input line by line and process it */
   while(!feof(res)){
     if(getline(res,vec,begin,n))

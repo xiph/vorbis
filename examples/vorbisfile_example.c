@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: simple example decoder using vorbisfile
- last mod: $Id: vorbisfile_example.c,v 1.2 2000/10/12 03:12:39 xiphmont Exp $
+ last mod: $Id: vorbisfile_example.c,v 1.3 2000/11/06 00:06:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -65,20 +65,16 @@ int main(int argc, char **argv){
   
   while(!eof){
     long ret=ov_read(&vf,pcmout,sizeof(pcmout),0,2,1,&current_section);
-    switch(ret){
-    case 0:
+    if (ret == 0) {
       /* EOF */
       eof=1;
-      break;
-    case -1:
+    } else if (ret < 0) {
       /* error in the stream.  Not a problem, just reporting it in
 	 case we (the app) cares.  In this case, we don't. */
-      break;
-    default:
+    } else {
       /* we don't bother dealing with sample rate changes, etc, but
 	 you'll have to*/
       fwrite(pcmout,1,ret,stdout);
-      break;
     }
   }
 

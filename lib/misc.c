@@ -1,12 +1,12 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************/
@@ -42,11 +42,11 @@ static void *_insert(void *ptr,char *file,long line){
   if(pinsert>=palloced){
     palloced+=64;
     if(pointers){
-      pointers=(void **)realloc(pointers,sizeof(void **)*palloced);
-      insertlist=(long *)realloc(insertlist,sizeof(long *)*palloced);
+      pointers=(void **)_ogg_realloc(pointers,sizeof(void **)*palloced);
+      insertlist=(long *)_ogg_realloc(insertlist,sizeof(long *)*palloced);
     }else{
-      pointers=(void **)malloc(sizeof(void **)*palloced);
-      insertlist=(long *)malloc(sizeof(long *)*palloced);
+      pointers=(void **)_ogg_malloc(sizeof(void **)*palloced);
+      insertlist=(long *)_ogg_malloc(sizeof(long *)*palloced);
     }
   }
 
@@ -84,14 +84,14 @@ void _VDBG_dump(void){
   pthread_mutex_unlock(&memlock);
 }
 
-extern void *_VDBG_malloc(void *ptr,long bytes,char *file,long line){
+extern void *_VDBG__ogg_malloc(void *ptr,long bytes,char *file,long line){
   bytes+=HEAD_ALIGN;
   if(ptr){
     ptr-=HEAD_ALIGN;
     _ripremove(ptr);
-    ptr=realloc(ptr,bytes);
+    ptr=_ogg_realloc(ptr,bytes);
   }else{
-    ptr=malloc(bytes);
+    ptr=_ogg_malloc(bytes);
     memset(ptr,0,bytes);
   }
   return _insert(ptr,file,line);

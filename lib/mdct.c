@@ -1,19 +1,19 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: normalized modified discrete cosine transform
            power of two length transform only [16 <= n ]
- last mod: $Id: mdct.c,v 1.17 2000/10/12 03:12:53 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.18 2000/11/06 00:07:01 xiphmont Exp $
 
  Algorithm adapted from _The use of multirate filter banks for coding
  of high quality digital audio_, by T. Sporer, K. Brandenburg and
@@ -45,8 +45,8 @@
    some window function algebra. */
 
 void mdct_init(mdct_lookup *lookup,int n){
-  int    *bitrev=malloc(sizeof(int)*(n/4));
-  float *trig=malloc(sizeof(float)*(n+n/4));
+  int    *bitrev=_ogg_malloc(sizeof(int)*(n/4));
+  float *trig=_ogg_malloc(sizeof(float)*(n+n/4));
   float *AE=trig;
   float *AO=trig+1;
   float *BE=AE+n/2;
@@ -108,21 +108,17 @@ static float *_mdct_kernel(float *x, float *w,
     float *w2=w+n4;
     float *A=init->trig+n2;
 
-    for(i=0;i<n4;){
-      float x0=*xA - *xB;
-      float x1;
+    float x0,x1;
+    i=0;
+    do{
+      x0=*xA - *xB;
       w2[i]=    *xA++ + *xB++;
-
-
       x1=       *xA - *xB;
       A-=4;
-
       w[i++]=   x0 * A[0] + x1 * A[1];
       w[i]=     x1 * A[0] - x0 * A[1];
-
       w2[i++]=  *xA++ + *xB++;
-
-    }
+    }while(i<n4);
   }
 
   /* step 3 */
@@ -141,21 +137,60 @@ static float *_mdct_kernel(float *x, float *w,
 	int w2=w1-(k0>>1);
 	float AEv= A[0],wA;
 	float AOv= A[1],wB;
+        int unroll=i;
 	wbase-=2;
 
 	k0++;
-	for(s=0;s<(2<<i);s++){
-	  wB     =w[w1]   -w[w2];
-	  x[w1]  =w[w1]   +w[w2];
-
-	  wA     =w[++w1] -w[++w2];
-	  x[w1]  =w[w1]   +w[w2];
-
-	  x[w2]  =wA*AEv  - wB*AOv;
-	  x[w2-1]=wB*AEv  + wA*AOv;
-
-	  w1-=k0;
-	  w2-=k0;
+        unroll--;
+        if(unroll>0){
+          s=2<<unroll;
+          s>>=1;
+          do{
+            wB     =w[w1]   -w[w2];
+            x[w1]  =w[w1]   +w[w2];
+            wA     =w[++w1] -w[++w2];
+            x[w1]  =w[w1]   +w[w2];
+            x[w2]  =wA*AEv  - wB*AOv;
+            x[w2-1]=wB*AEv  + wA*AOv;
+            w1-=k0;
+            w2-=k0;
+            wB     =w[w1]   -w[w2];
+            x[w1]  =w[w1]   +w[w2];
+            wA     =w[++w1] -w[++w2];
+            x[w1]  =w[w1]   +w[w2];
+            x[w2]  =wA*AEv  - wB*AOv;
+            x[w2-1]=wB*AEv  + wA*AOv;
+            w1-=k0;
+            w2-=k0;
+            wB     =w[w1]   -w[w2];
+            x[w1]  =w[w1]   +w[w2];
+            wA     =w[++w1] -w[++w2];
+            x[w1]  =w[w1]   +w[w2];
+            x[w2]  =wA*AEv  - wB*AOv;
+            x[w2-1]=wB*AEv  + wA*AOv;
+            w1-=k0;
+            w2-=k0;
+            wB     =w[w1]   -w[w2];
+            x[w1]  =w[w1]   +w[w2];
+            wA     =w[++w1] -w[++w2];
+            x[w1]  =w[w1]   +w[w2];
+            x[w2]  =wA*AEv  - wB*AOv;
+            x[w2-1]=wB*AEv  + wA*AOv;
+            w1-=k0;
+            w2-=k0;
+          }while(--s);
+        }else{
+          s=2<<i;
+          do{
+            wB     =w[w1]   -w[w2];
+            x[w1]  =w[w1]   +w[w2];
+            wA     =w[++w1] -w[++w2];
+            x[w1]  =w[w1]   +w[w2];
+            x[w2]  =wA*AEv  - wB*AOv;
+            x[w2-1]=wB*AEv  + wA*AOv;
+            w1-=k0;
+            w2-=k0;
+          }while(--s);
 	}
 	k0--;
 
@@ -174,7 +209,8 @@ static float *_mdct_kernel(float *x, float *w,
     int *bit=init->bitrev;
     float *x1=x;
     float *x2=x+n2-1;
-    for(i=0;i<n8;i++){
+    i=n8-1;
+    do{
       int t1=*bit++;
       int t2=*bit++;
 
@@ -192,7 +228,7 @@ static float *_mdct_kernel(float *x, float *w,
       *x2--=(-wD+wBCO-wACE)*.5;
       *x1++=( wD+wBCO-wACE)*.5; 
       *x2--=( wC-wACO-wBCE)*.5;
-    }
+    }while(i--);
   }
   return(x);
 }

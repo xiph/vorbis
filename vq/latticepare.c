@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.5 2000/10/12 03:13:01 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.6 2000/11/06 00:07:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -248,7 +248,7 @@ int main(int argc,char *argv[]){
 	      if((lines&0xff)==0)spinnit("counting samples...",lines*cols);
 	      line=setup_line(in);
 	    }
-	    pointlist=malloc((cols*lines+entries*dim)*sizeof(float));
+	    pointlist=_ogg_malloc((cols*lines+entries*dim)*sizeof(float));
 	    
 	    rewind(in);
 	    line=setup_line(in);
@@ -312,15 +312,15 @@ int main(int argc,char *argv[]){
     long indexedpoints=0;
     long *entryindex;
     long *reventry;
-    long *membership=malloc(points*sizeof(long));
-    long *firsthead=malloc(entries*sizeof(long));
-    long *secondary=malloc(points*sizeof(long));
-    long *secondhead=malloc(entries*sizeof(long));
+    long *membership=_ogg_malloc(points*sizeof(long));
+    long *firsthead=_ogg_malloc(entries*sizeof(long));
+    long *secondary=_ogg_malloc(points*sizeof(long));
+    long *secondhead=_ogg_malloc(entries*sizeof(long));
 
-    long *cellcount=calloc(entries,sizeof(long));
-    long *cellcount2=calloc(entries,sizeof(long));
-    float *cellerror=calloc(entries,sizeof(float));
-    float *cellerrormax=calloc(entries,sizeof(float));
+    long *cellcount=_ogg_calloc(entries,sizeof(long));
+    long *cellcount2=_ogg_calloc(entries,sizeof(long));
+    float *cellerror=_ogg_calloc(entries,sizeof(float));
+    float *cellerrormax=_ogg_calloc(entries,sizeof(float));
     long cellsleft=entries;
     for(i=0;i<points;i++)membership[i]=-1;
     for(i=0;i<entries;i++)firsthead[i]=-1;
@@ -355,7 +355,7 @@ int main(int argc,char *argv[]){
     /* which cells are most heavily populated?  Protect as many from
        dispersal as the user has requested */
     {
-      long **countindex=calloc(entries,sizeof(long *));
+      long **countindex=_ogg_calloc(entries,sizeof(long *));
       for(i=0;i<entries;i++)countindex[i]=cellcount+i;
       qsort(countindex,entries,sizeof(long *),longsort);
       for(i=0;i<protect;i++){
@@ -491,7 +491,7 @@ int main(int argc,char *argv[]){
     free(cellerrormax);
     free(secondary);
 
-    pointindex=malloc(points*sizeof(long));
+    pointindex=_ogg_malloc(points*sizeof(long));
     /* make a point index of fall-through points */
     for(i=0;i<points;i++){
       int best=_best(b,pointlist+i*dim,1);
@@ -501,7 +501,7 @@ int main(int argc,char *argv[]){
     }
 
     /* make an entry index */
-    entryindex=malloc(entries*sizeof(long));
+    entryindex=_ogg_malloc(entries*sizeof(long));
     target=0;
     for(i=0;i<entries;i++){
       if(b->c->lengthlist[i]>0)
@@ -509,17 +509,17 @@ int main(int argc,char *argv[]){
     }
 
     /* make working space for a reverse entry index */
-    reventry=malloc(entries*sizeof(long));
+    reventry=_ogg_malloc(entries*sizeof(long));
 
     /* do the split */
     nt=b->c->nearest_tree=
-      calloc(1,sizeof(encode_aux_nearestmatch));
+      _ogg_calloc(1,sizeof(encode_aux_nearestmatch));
 
     nt->alloc=4096;
-    nt->ptr0=malloc(sizeof(long)*nt->alloc);
-    nt->ptr1=malloc(sizeof(long)*nt->alloc);
-    nt->p=malloc(sizeof(long)*nt->alloc);
-    nt->q=malloc(sizeof(long)*nt->alloc);
+    nt->ptr0=_ogg_malloc(sizeof(long)*nt->alloc);
+    nt->ptr1=_ogg_malloc(sizeof(long)*nt->alloc);
+    nt->p=_ogg_malloc(sizeof(long)*nt->alloc);
+    nt->q=_ogg_malloc(sizeof(long)*nt->alloc);
     nt->aux=0;
 
     fprintf(stderr,"Leaves added: %d              \n",
@@ -558,7 +558,7 @@ int main(int argc,char *argv[]){
        the lengths after the build */
     {
       int upper=0;
-      long *lengthlist=calloc(entries,sizeof(long));
+      long *lengthlist=_ogg_calloc(entries,sizeof(long));
       for(i=0;i<entries;i++){
 	if(b->c->lengthlist[i]>0)
 	  entryindex[upper++]=entryindex[i];

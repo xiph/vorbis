@@ -1,73 +1,81 @@
-Summary: The OGG Vorbis lossy audio compression codec.
-Name:  vorbis
-Version: 0.0
-Release: 1
-Copyright: GPL
-Group: Development/Libraries
-Source: http://www.xiph.org/vorbis/download/%{name}-%{version}.src.tgz 
-Url: http://www.xiph.org/vorbis/index.html
-BuildRoot: /var/tmp/vorbis-root
+%define name	libvorbis
+%define version	1.0.0
+%define release 1
 
-%description 
-Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
-general-purpose compressed audio format for high quality (44.1-48.0kHz,
-16+ bit, polyphonic) audio and music at fixed and variable bitrates
-from 16 to 128 kbps/channel. This places Vorbis in the same class as
-audio representations including MPEG-1 audio layer 3, MPEG-4
-audio (AAC and TwinVQ), and PAC.
+Summary:	The Vorbis General Audio Compression Codec
+Name:		%{name}
+Version:	%{version}
+Release:	%{release}
+Group:		Libraries/Multimedia
+Copyright:	LGPL
+URL:		http://www.xiph.org/
+Vendor:		Xiphophorus <team@xiph.org>
+Source:		ftp://ftp.xiph.org/pub/ogg/vorbis/%{name}-%{version}.tar.gz
+BuildRoot:	%{_tmppath}/%{name}-root
+Requires:	libogg >= 1.0.0
+
+%description
+Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
+general-purpose compressed audio format for audio and music at fixed 
+and variable bitrates from 16 to 128 kbps/channel.
 
 %package devel
-Copyright: LGPL
-Summary: Development library for OGG Vorbis
-Group: Development/Libraries
+Summary: 	Vorbis Library Development
+Group: 		Development/Libraries
+Requires:	libogg-devel >= 1.0.0
 
 %description devel
-Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
-general-purpose compressed audio format for high quality (44.1-48.0kHz,
-16+ bit, polyphonic) audio and music at fixed and variable bitrates 
-from 16 to 128 kbps/channel. This places Vorbis in the same class as 
-audio representations including MPEG-1 audio layer 3, MPEG-4 
-audio (AAC and TwinVQ), and PAC.
+The libvorbis-devel package contains the header files and documentation
+needed to develop applications with libvorbis.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}
 
 %build
-rm -rf $RPM_BUILD_ROOT
-CFLAGS="${RPM_OPT_FLAGS}" ./configure --prefix=/usr
-make  
+if [ ! -f configure ]; then
+  CFLAGS="$RPM_FLAGS" ./autogen.sh --prefix=/usr
+else
+  CFLAGS="$RPM_FLAGS" ./configure --prefix=/usr
+fi
+make
 
 %install
-rm -rf $RPM_BUILD_ROOT
-
-install -d $RPM_BUILD_ROOT/usr/include/vorbis 
-install -d $RPM_BUILD_ROOT/usr/include/vorbis/book
-install -d $RPM_BUILD_ROOT/usr/lib
-install -d $RPM_BUILD_ROOT/usr/bin
-install -m 0755 lib/libvorbis.a $RPM_BUILD_ROOT/usr/lib/
-install -m 0755 lib/vorbisfile.a $RPM_BUILD_ROOT/usr/lib/
-install -m 0644 include/vorbis/*.h $RPM_BUILD_ROOT/usr/include/vorbis/
-install -m 0644 include/vorbis/book/*.vqh $RPM_BUILD_ROOT/usr/include/vorbis/book/
-install -m 0755 -s huff/{residuesplit,huffbuild} $RPM_BUILD_ROOT/usr/bin
-install -m 0755 -s vq/{genericvqtrain,lspvqtrain,residuevqtrain,\
-vqbuild,vqcascade,vqmetrics,vqpartition} \
-                   $RPM_BUILD_ROOT/usr/bin/
-
-%clean
-rm -rf $RPM_BUILD_ROOT
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+make DESTDIR=$RPM_BUILD_ROOT install
 
 %files
 %defattr(-,root,root)
-
-%doc README 
-/usr/bin/*
+%doc COPYING
+%doc README
+/usr/lib/libvorbis.so.*
+/usr/lib/libvorbisfile.so.*
+/usr/lib/libvorbisenc.so.*
 
 %files devel
-%defattr(-,root,root)
-%doc README docs/*.{png,html}
-/usr/include/vorbis/*
-/usr/lib/*
+%doc doc/*.html
+%doc doc/*.txt
+%doc doc/*.png
+%doc doc/vorbisfile/*.html
+%doc doc/vorbisfile/*.css
+/usr/include/vorbis/codec.h
+/usr/include/vorbis/vorbisfile.h
+/usr/include/vorbis/vorbisenc.h
+/usr/lib/libvorbis.a
+/usr/lib/libvorbis.so
+/usr/lib/libvorbisfile.a
+/usr/lib/libvorbisfile.so
+/usr/lib/libvorbisenc.a
+/usr/lib/libvorbisenc.so
+
+%clean 
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+%post
+/sbin/ldconfig
+
+%postun
+/sbin/ldconfig
 
 %changelog
-* Sat Apr 29 2000 Peter Jones <pjones@redhat.com>
-- first pass.
+* Sat Oct 21 2000 Jack Moffitt <jack@icecast.org>
+- initial spec file created

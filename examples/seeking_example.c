@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.4 2000/10/12 03:12:39 xiphmont Exp $
+ last mod: $Id: seeking_example.c,v 1.5 2000/11/06 00:06:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,7 +27,7 @@ int main(){
   int i;
 
   /* open the file/pipe on stdin */
-  if(ov_open(stdin,&ov,NULL,-1)==-1){
+  if(ov_open(stdin,&ov,NULL,-1)<0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }

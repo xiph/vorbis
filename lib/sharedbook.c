@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.9 2000/10/12 03:12:54 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.10 2000/11/06 00:07:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,9 +22,8 @@
 #include <ogg/ogg.h>
 #include "os.h"
 #include "vorbis/codec.h"
-#include "vorbis/codebook.h"
+#include "codebook.h"
 #include "scales.h"
-#include "sharedbook.h"
 
 /**** pack/unpack helpers ******************************************/
 int _ilog(unsigned int v){
@@ -74,7 +73,7 @@ float _float32_unpack(long val){
 long *_make_words(long *l,long n){
   long i,j;
   long marker[33];
-  long *r=malloc(n*sizeof(long));
+  long *r=_ogg_malloc(n*sizeof(long));
   memset(marker,0,sizeof(marker));
 
   for(i=0;i<n;i++){
@@ -143,9 +142,9 @@ long *_make_words(long *l,long n){
 decode_aux *_make_decode_tree(codebook *c){
   const static_codebook *s=c->c;
   long top=0,i,j,n;
-  decode_aux *t=malloc(sizeof(decode_aux));
-  long *ptr0=t->ptr0=calloc(c->entries*2,sizeof(long));
-  long *ptr1=t->ptr1=calloc(c->entries*2,sizeof(long));
+  decode_aux *t=_ogg_malloc(sizeof(decode_aux));
+  long *ptr0=t->ptr0=_ogg_calloc(c->entries*2,sizeof(long));
+  long *ptr1=t->ptr1=_ogg_calloc(c->entries*2,sizeof(long));
   long *codelist=_make_words(s->lengthlist,s->entries);
 
   if(codelist==NULL)return(NULL);
@@ -177,8 +176,8 @@ decode_aux *_make_decode_tree(codebook *c){
   t->tabn = _ilog(c->entries)-4; /* this is magic */
   if(t->tabn<5)t->tabn=5;
   n = 1<<t->tabn;
-  t->tab = malloc(n*sizeof(long));
-  t->tabl = malloc(n*sizeof(int));
+  t->tab = _ogg_malloc(n*sizeof(long));
+  t->tabl = _ogg_malloc(n*sizeof(int));
   for (i = 0; i < n; i++) {
     long p = 0;
     for (j = 0; j < t->tabn && (p > 0 || j == 0); j++) {
@@ -237,7 +236,7 @@ float *_book_unquantize(const static_codebook *b){
     int quantvals;
     float mindel=_float32_unpack(b->q_min);
     float delta=_float32_unpack(b->q_delta);
-    float *r=calloc(b->entries*b->dim,sizeof(float));
+    float *r=_ogg_calloc(b->entries*b->dim,sizeof(float));
 
     /* maptype 1 and 2 both use a quantized value vector, but
        different sizes */
@@ -281,23 +280,33 @@ float *_book_unquantize(const static_codebook *b){
 }
 
 void vorbis_staticbook_clear(static_codebook *b){
-  if(b->quantlist)free(b->quantlist);
-  if(b->lengthlist)free(b->lengthlist);
-  if(b->nearest_tree){
-    free(b->nearest_tree->ptr0);
-    free(b->nearest_tree->ptr1);
-    free(b->nearest_tree->p);
-    free(b->nearest_tree->q);
-    memset(b->nearest_tree,0,sizeof(encode_aux_nearestmatch));
-    free(b->nearest_tree);
+  if(b->allocedp){
+    if(b->quantlist)free(b->quantlist);
+    if(b->lengthlist)free(b->lengthlist);
+    if(b->nearest_tree){
+      free(b->nearest_tree->ptr0);
+      free(b->nearest_tree->ptr1);
+      free(b->nearest_tree->p);
+      free(b->nearest_tree->q);
+      memset(b->nearest_tree,0,sizeof(encode_aux_nearestmatch));
+      free(b->nearest_tree);
+    }
+    if(b->thresh_tree){
+      free(b->thresh_tree->quantthresh);
+      free(b->thresh_tree->quantmap);
+      memset(b->thresh_tree,0,sizeof(encode_aux_threshmatch));
+      free(b->thresh_tree);
+    }
+
+    memset(b,0,sizeof(static_codebook));
   }
-  if(b->thresh_tree){
-    free(b->thresh_tree->quantthresh);
-    free(b->thresh_tree->quantmap);
-    memset(b->thresh_tree,0,sizeof(encode_aux_threshmatch));
-    free(b->thresh_tree);
+}
+
+void vorbis_staticbook_destroy(static_codebook *b){
+  if(b->allocedp){
+    vorbis_staticbook_clear(b);
+    free(b);
   }
-  memset(b,0,sizeof(static_codebook));
 }
 
 void vorbis_book_clear(codebook *b){

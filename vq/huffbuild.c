@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.5 2000/10/12 03:13:01 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.6 2000/11/06 00:07:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,11 +20,11 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
-#include "../vq/bookutil.h"
+#include "bookutil.h"
 
 static int nsofar=0;
 static int getval(FILE *in,int begin,int n,int group,int max){
-  double v;
+  float v;
   int i;
   long val=0;
 
@@ -112,8 +112,8 @@ int main(int argc, char *argv[]){
 
   {
     long vals=pow(maxval,subn);
-    long *hist=malloc(vals*sizeof(long));
-    long *lengths=malloc(vals*sizeof(long));
+    long *hist=_ogg_malloc(vals*sizeof(long));
+    long *lengths=_ogg_malloc(vals*sizeof(long));
     
     for(j=0;j<vals;j++)hist[j]=guard;
     
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
  " ********************************************************************/\n\n");
 
     fprintf(file,"#ifndef _V_%s_VQH_\n#define _V_%s_VQH_\n",base,base);
-    fprintf(file,"#include \"vorbis/codebook.h\"\n\n");
+    fprintf(file,"#include \"codebook.h\"\n\n");
     
     /* first, the static vectors, then the book structure to tie it together. */
     /* lengthlist */
@@ -183,7 +183,7 @@ int main(int argc, char *argv[]){
     fprintf(file,"\tNULL,\n");
     fprintf(file,"\tNULL,\n");
     fprintf(file,"\tNULL,\n");
-    fprintf(file,"};\n\n");
+    fprintf(file,"\t0\n};\n\n");
     
     fprintf(file,"\n#endif\n");
     fclose(file);

@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.18 2000/10/12 03:12:52 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.19 2000/11/06 00:07:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,10 +21,8 @@
 #include <math.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
-#include "vorbis/codebook.h"
+#include "codebook.h"
 #include "scales.h"
-#include "sharedbook.h"
-#include "bookinternal.h"
 #include "misc.h"
 #include "os.h"
 
@@ -150,6 +148,7 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
 int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   long i,j;
   memset(s,0,sizeof(static_codebook));
+  s->allocedp=1;
 
   /* make sure alignment is correct */
   if(oggpack_read(opb,24)!=0x564342)goto _eofout;
@@ -163,7 +162,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   switch(oggpack_read(opb,1)){
   case 0:
     /* unordered */
-    s->lengthlist=malloc(sizeof(long)*s->entries);
+    s->lengthlist=_ogg_malloc(sizeof(long)*s->entries);
 
     /* allocated but unused entries? */
     if(oggpack_read(opb,1)){
@@ -191,7 +190,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
     /* ordered */
     {
       long length=oggpack_read(opb,5)+1;
-      s->lengthlist=malloc(sizeof(long)*s->entries);
+      s->lengthlist=_ogg_malloc(sizeof(long)*s->entries);
 
       for(i=0;i<s->entries;){
 	long num=oggpack_read(opb,_ilog(s->entries-i));
@@ -233,7 +232,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
       }
       
       /* quantized values */
-      s->quantlist=malloc(sizeof(float)*quantvals);
+      s->quantlist=_ogg_malloc(sizeof(float)*quantvals);
       for(i=0;i<quantvals;i++)
 	s->quantlist[i]=oggpack_read(opb,s->q_quant);
       
@@ -388,7 +387,7 @@ long vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
 long s_vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
                          int step,int addmul){
   long *entry = alloca(sizeof(long)*step);
-  float **t = alloca(sizeof(float)*step);
+  float **t = alloca(sizeof(float *)*step);
   int i,j,o;
 
   for (i = 0; i < step; i++) {

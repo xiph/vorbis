@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.23 2000/10/12 03:12:52 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.24 2000/11/06 00:07:00 xiphmont Exp $
 
  Preecho calculation.
 
@@ -24,6 +24,7 @@
 #include <math.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 
 #include "os.h"
 #include "scales.h"
@@ -72,23 +73,24 @@ static float cheb_highpass_A[]={
   2.3920318913};
 
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
+  codec_setup_info *ci=vi->codec_setup;
   int ch=vi->channels;
-  int window=vi->envelopesa;
+  int window=ci->envelopesa;
   int i;
   e->winlength=window;
-  e->minenergy=fromdB(vi->preecho_minenergy);
-  e->iir=calloc(ch,sizeof(IIR_state));
-  e->filtered=calloc(ch,sizeof(float *));
+  e->minenergy=fromdB(ci->preecho_minenergy);
+  e->iir=_ogg_calloc(ch,sizeof(IIR_state));
+  e->filtered=_ogg_calloc(ch,sizeof(float *));
   e->ch=ch;
   e->storage=128;
   for(i=0;i<ch;i++){
     IIR_init(e->iir+i,cheb_highpass_stages,cheb_highpass_gain,
 	     cheb_highpass_A,cheb_highpass_B);
-    e->filtered[i]=calloc(e->storage,sizeof(float));
+    e->filtered[i]=_ogg_calloc(e->storage,sizeof(float));
   }
 
   drft_init(&e->drft,window);
-  e->window=malloc(e->winlength*sizeof(float));
+  e->window=_ogg_malloc(e->winlength*sizeof(float));
   /* We just use a straight sin(x) window for this */
   for(i=0;i<e->winlength;i++)
     e->window[i]=sin((i+.5)/e->winlength*M_PI);
@@ -156,14 +158,15 @@ static float _ve_deltai(envelope_lookup *ve,IIR_state *iir,
 
 long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   vorbis_info *vi=v->vi;
-  envelope_lookup *ve=v->ve;
+  codec_setup_info *ci=vi->codec_setup;
+  envelope_lookup *ve=((backend_lookup_state *)(v->backend_state))->ve;
   long i,j;
   
   /* make sure we have enough storage to match the PCM */
   if(v->pcm_storage>ve->storage){
     ve->storage=v->pcm_storage;
     for(i=0;i<ve->ch;i++)
-      ve->filtered[i]=realloc(ve->filtered[i],ve->storage*sizeof(float));
+      ve->filtered[i]=_ogg_realloc(ve->filtered[i],ve->storage*sizeof(float));
   }
 
   /* catch up the highpass to match the pcm */
@@ -171,6 +174,7 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
     float *filtered=ve->filtered[i];
     float *pcm=v->pcm[i];
     IIR_state *iir=ve->iir+i;
+    IIR_clamp(iir,9e-15);
     
     for(j=ve->current;j<v->pcm_current;j++)
       filtered[j]=IIR_filter(iir,pcm[j]);
@@ -180,7 +184,7 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   /* Now search through our cached highpass data for breaking points */
   /* starting point */
   if(v->W)
-    j=v->centerW+vi->blocksizes[1]/4-vi->blocksizes[0]/4;
+    j=v->centerW+ci->blocksizes[1]/4-ci->blocksizes[0]/4;
   else
     j=v->centerW;
 
@@ -190,14 +194,14 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
       IIR_state *iir=ve->iir+i;
       float m=_ve_deltai(ve,iir,filtered-ve->winlength,filtered);
       
-      if(m>vi->preecho_thresh){
+      if(m>ci->preecho_thresh){
 	/*granulepos++;*/
 	return(0);
       }
       /*granulepos++;*/
     }
     
-    j+=vi->blocksizes[0]/2;
+    j+=ci->blocksizes[0]/2;
     if(j>=searchpoint)return(1);
   }
   

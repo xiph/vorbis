@@ -1,0 +1,83 @@
+All 'failure' style returns are <0; this either indicates a generic
+'false' value (eg, ready?  T or F) or an error condition.  Code can
+safely just test for < 0, or look at the specific return code for more
+detail.
+
+---------- (internal calls) ------------
+
+
+long _get_next_page()
+    OV_FALSE, OV_EOF, OV_EREAD	
+
+long _get_prev_page()
+    OV_EREAD, OV_FAULT
+
+int _bisect_forward_serialno()
+    OV_EREAD
+
+int _fetch_headers()
+    OV_EREAD, OV_ENOTVORBIS, OV_EVERSION, OV_EBADHEADER
+
+int _open_seekable()    
+    OV_EREAD, OV_ENOTVORBIS, OV_EVERSION, OV_EBADHEADER, OV_FAULT
+	+ ov_raw_seek
+
+int _open_nonseekable()
+    OV_EREAD, OV_ENOTVORBIS, OV_EVERSION, OV_EBADHEADER
+
+int _process_packet()
+    OV_EOF, OV_HOLE, OV_EBADLINK
+
+---------- public calls ------------
+
+int vorbis_analysis_headerout()
+    OV_EIMPL
+
+int vorbis_analysis_wrote()
+    OV_EINVAL
+
+int vorbis_synthesis_headerin()
+    OV_ENOTVORBIS, OV_EVERSION, OV_EBADHEADER
+
+int vorbis_synthesis()
+    OV_ENOTAUDIO, OV_EBADPACKET
+
+int vorbis_synthesis_read()
+    OV_EINVAL
+
+int ov_open_callbacks()   
+    OV_EREAD, OV_ENOTVORBIS, OV_EVERSION, OV_EBADHEADER, OV_FAULT
+
+int ov_open()
+    OV_EREAD, OV_ENOTVORBIS, OV_EVERSION, OV_EBADHEADER, OV_FAULT
+
+long ov_bitrate()
+    OV_EINVAL, OV_FALSE
+
+long ov_bitrate_instant()
+    OV_FALSE
+
+ogg_int64_t ov_raw_total()
+    OV_EINVAL
+
+ogg_int64_t ov_pcm_total()
+    OV_EINVAL
+
+double ov_time_total()
+    OV_EINVAL
+
+int ov_raw_seek()
+    OV_ENOSEEK, OV_EINVAL, OV_BADLINK
+
+int ov_pcm_seek_page()
+    OV_ENOSEEK, OV_EINVAL, OV_EREAD, OV_BADLINK, OV_FAULT
+
+int ov_pcm_seek()
+    OV_ENOSEEK, OV_EINVAL, OV_EREAD, OV_BADLINK, OV_FAULT
+
+int ov_time_seek()
+    OV_ENOSEEK, OV_EINVAL, OV_EREAD, OV_BADLINK, OV_FAULT
+
+int ov_time_seek_page()
+    OV_ENOSEEK, OV_EINVAL, OV_EREAD, OV_BADLINK, OV_FAULT
+

@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.11 2000/10/12 03:13:02 xiphmont Exp $
+ last mod: $Id: run.c,v 1.12 2000/11/06 00:07:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -44,8 +44,8 @@ extern void process_usage(void);
 
 int main(int argc,char *argv[]){
   char *basename;
-  codebook **b=calloc(1,sizeof(codebook *));
-  int *addmul=calloc(1,sizeof(int));
+  codebook **b=_ogg_calloc(1,sizeof(codebook *));
+  int *addmul=_ogg_calloc(1,sizeof(int));
   int books=0;
   int input=0;
   int interleave=0;
@@ -115,9 +115,9 @@ int main(int argc,char *argv[]){
 	dot=strrchr(basename,'.');
 	if(dot)*dot='\0';
 
-	b=realloc(b,sizeof(codebook *)*(books+2));
+	b=_ogg_realloc(b,sizeof(codebook *)*(books+2));
 	b[books]=codebook_load(name);
-	addmul=realloc(addmul,sizeof(int)*(books+1));
+	addmul=_ogg_realloc(addmul,sizeof(int)*(books+1));
 	addmul[books++]=multp;
 	b[books]=NULL;
       }

@@ -15,12 +15,18 @@ V_LIB_AGE=0
 VF_LIB_CURRENT=0
 VF_LIB_REVISION=0
 VF_LIB_AGE=0
+VE_LIB_CURRENT=0
+VE_LIB_REVISION=0
+VE_LIB_AGE=0
 AC_SUBST(V_LIB_CURRENT)
 AC_SUBST(V_LIB_REVISION)
 AC_SUBST(V_LIB_AGE)
 AC_SUBST(VF_LIB_CURRENT)
 AC_SUBST(VF_LIB_REVISION)
 AC_SUBST(VF_LIB_AGE)
+AC_SUBST(VE_LIB_CURRENT)
+AC_SUBST(VE_LIB_REVISION)
+AC_SUBST(VE_LIB_AGE)
 
 dnl --------------------------------------------------  
 dnl Check for programs
@@ -33,12 +39,6 @@ AC_PROG_CC
 CFLAGS="$cflags_save"
 
 AM_PROG_LIBTOOL
-
-dnl --------------------------------------------------  
-dnl Additional arguments
-dnl --------------------------------------------------  
-
-AC_ARG_WITH(ogg, [  --with-ogg=DIR          Set where the Ogg library is located]) 
 
 dnl --------------------------------------------------
 dnl Set build flags based on environment
@@ -73,8 +73,8 @@ else
 	*86-*-linux*)
 		DEBUG="-g -Wall -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
 		CFLAGS="-O20 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char"
-#              	PROFILE="-Wall -W -pg -O20 -ffast-math -D_REENTRANT -fsigned-char -fno-inline -static"
-		PROFILE="-Wall -W -pg -O20 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char -fno-inline -static"
+#              	PROFILE="-Wall -W -pg -g -O20 -ffast-math -D_REENTRANT -fsigned-char -fno-inline -static"
+		PROFILE="-Wall -W -pg -g -O20 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char -fno-inline -static"
 
 		# glibc < 2.1.3 has a serious FP bug in the math inline header
 		# that will cripple Vorbis.  Look to see if the magic FP stack
@@ -130,116 +130,6 @@ else
         esac
 fi
 
-AC_HEADER_STDC
-
-AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread")
-
-dnl This seems to be the only way to make autoconf only *sometimes* configure
-dnl a subdirectory with AC_CONFIG_SUBDIRS.  "__noconf" is assumed to not 
-dnl exist as a directory, so configure won't try to recursively enter it, unless
-dnl the shell variable $dummy is reset to an existing directory inside the
-dnl if clause.
-
-dummy="__noconf"
-
-# check macro modified from Jon Shiring's to compensate for autoconf's lagging
-# behind the times on type madness
-
-AC_MSG_CHECKING(for int16_t)
-AC_CACHE_VAL(has_int16_t,
-[AC_TRY_RUN([
-#ifdef __BEOS__
-#include <inttypes.h>
-#endif
-#include <sys/types.h>
-int16_t foo;
-int main() {return 0;}
-],
-has_int16_t=yes,
-has_int16_t=no,
-has_int16_t=no
-)])
-AC_MSG_RESULT($has_int16_t)
-
-AC_MSG_CHECKING(for int32_t)
-AC_CACHE_VAL(has_int32_t,
-[AC_TRY_RUN([
-#ifdef __BEOS__
-#include <inttypes.h>
-#endif
-#include <sys/types.h>
-int32_t foo;
-int main() {return 0;}
-],
-has_int32_t=yes,
-has_int32_t=no,
-has_int32_t=no
-)])
-AC_MSG_RESULT($has_int32_t)
-
-AC_MSG_CHECKING(for uint32_t)
-AC_CACHE_VAL(has_uint32_t,
-[AC_TRY_RUN([
-#ifdef __BEOS__
-#include <inttypes.h>
-#endif
-#include <sys/types.h>
-uint32_t foo;
-int main() {return 0;}
-],
-has_uint32_t=yes,
-has_uint32_t=no,
-has_uint32_t=no
-)])
-AC_MSG_RESULT($has_uint32_t)
-
-AC_MSG_CHECKING(for u_int32_t)
-AC_CACHE_VAL(has_u_int32_t,
-[AC_TRY_RUN([
-#ifdef __BEOS__
-#include <inttypes.h>
-#endif
-#include <sys/types.h>
-u_int32_t foo;
-int main() {return 0;}
-],
-has_u_int32_t=yes,
-has_u_int32_t=no,
-has_u_int32_t=no
-)])
-AC_MSG_RESULT($has_u_int32_t)
-
-AC_MSG_CHECKING(for int64_t)
-AC_CACHE_VAL(has_int64_t,
-[AC_TRY_RUN([
-#ifdef __BEOS__
-#include <inttypes.h>
-#endif
-#include <sys/types.h>
-int64_t foo;
-int main() {return 0;}
-],
-has_int64_t=yes,
-has_int64_t=no,
-has_int64_t=no
-)])
-AC_MSG_RESULT($has_int64_t)
-
-AC_CHECK_SIZEOF(short)
-AC_CHECK_SIZEOF(int)
-AC_CHECK_SIZEOF(long)
-AC_CHECK_SIZEOF(long long)
-
-
-if test x$has_int16_t = "xyes" ; then
-	SIZE16="int16_t"
-else
-	case 2 in
-		$ac_cv_sizeof_short) SIZE16="short";;
-		$ac_cv_sizeof_int) SIZE16="int";;
-	esac
-fi
-
 dnl --------------------------------------------------
 dnl Check for headers
 dnl --------------------------------------------------
@@ -259,11 +149,7 @@ dnl --------------------------------------------------
 AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
-dnl Check for libogg
-if test -n $with_ogg; then
-	CFLAGS="$CFLAGS -I$with_ogg/include -L$with_ogg/lib"
-fi 
-AC_CHECK_LIB(ogg, oggpack_read, LIBS="$LIBS -logg", AC_MSG_ERROR([You must have libogg to compile vorbis!!!]))
+AM_PATH_OGG(have_ogg=yes, have_ogg=no)
 
 dnl --------------------------------------------------
 dnl Check for library functions
@@ -280,4 +166,4 @@ AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile lib/Makefile doc/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)
+AC_OUTPUT(Makefile lib/Makefile lib/modes/Makefile lib/books/Makefile doc/Makefile doc/vorbisfile/Makefile include/Makefile include/vorbis/Makefile examples/Makefile)

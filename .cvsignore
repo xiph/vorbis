@@ -11,3 +11,4 @@ configure
 .libs
 .deps
 *.ogg
+vorbis-config

@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.29 2000/10/12 03:12:53 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.30 2000/11/06 00:07:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,6 +39,12 @@ void _vi_psy_free(vorbis_info_psy *i){
     memset(i,0,sizeof(vorbis_info_psy));
     free(i);
   }
+}
+
+vorbis_info_psy *_vi_psy_copy(vorbis_info_psy *i){
+  vorbis_info_psy *ret=_ogg_malloc(sizeof(vorbis_info_psy));
+  memcpy(ret,i,sizeof(vorbis_info_psy));
+  return(ret);
 }
 
 /* Set up decibel threshhold slopes on a Bark frequency scale */
@@ -172,9 +178,9 @@ static void setup_curve(float **c,
 void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   long i,j;
   memset(p,0,sizeof(vorbis_look_psy));
-  p->ath=malloc(n*sizeof(float));
-  p->octave=malloc(n*sizeof(int));
-  p->bark=malloc(n*sizeof(float));
+  p->ath=_ogg_malloc(n*sizeof(float));
+  p->octave=_ogg_malloc(n*sizeof(int));
+  p->bark=_ogg_malloc(n*sizeof(float));
   p->vi=vi;
   p->n=n;
 
@@ -193,18 +199,18 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
     p->octave[i]=oc;
   }  
 
-  p->tonecurves=malloc(P_BANDS*sizeof(float **));
-  p->noiseatt=malloc(P_BANDS*sizeof(float **));
-  p->peakatt=malloc(P_BANDS*sizeof(float *));
+  p->tonecurves=_ogg_malloc(P_BANDS*sizeof(float **));
+  p->noiseatt=_ogg_malloc(P_BANDS*sizeof(float **));
+  p->peakatt=_ogg_malloc(P_BANDS*sizeof(float *));
   for(i=0;i<P_BANDS;i++){
-    p->tonecurves[i]=malloc(P_LEVELS*sizeof(float *));
-    p->noiseatt[i]=malloc(P_LEVELS*sizeof(float));
-    p->peakatt[i]=malloc(P_LEVELS*sizeof(float));
+    p->tonecurves[i]=_ogg_malloc(P_LEVELS*sizeof(float *));
+    p->noiseatt[i]=_ogg_malloc(P_LEVELS*sizeof(float));
+    p->peakatt[i]=_ogg_malloc(P_LEVELS*sizeof(float));
   }
 
   for(i=0;i<P_BANDS;i++)
     for(j=0;j<P_LEVELS;j++){
-      p->tonecurves[i][j]=malloc(EHMER_MAX*sizeof(float));
+      p->tonecurves[i][j]=_ogg_malloc(EHMER_MAX*sizeof(float));
     }
 
   /* OK, yeah, this was a silly way to do it */

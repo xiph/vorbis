@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.18 2000/10/12 03:12:54 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.19 2000/11/06 00:07:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,10 +24,12 @@
 #include "os.h"
 
 int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
-  vorbis_dsp_state *vd=vb->vd;
-  vorbis_info      *vi=vd->vi;
-  oggpack_buffer   *opb=&vb->opb;
-  int              type,mode,i;
+  vorbis_dsp_state     *vd=vb->vd;
+  backend_lookup_state *b=vd->backend_state;
+  vorbis_info          *vi=vd->vi;
+  codec_setup_info     *ci=vi->codec_setup;
+  oggpack_buffer       *opb=&vb->opb;
+  int                   type,mode,i;
  
   /* first things first.  Make sure decode is ready */
   _vorbis_block_ripcord(vb);
@@ -36,19 +38,19 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   /* Check the packet type */
   if(oggpack_read(opb,1)!=0){
     /* Oops.  This is not an audio data packet */
-    return(-1);
+    return(OV_ENOTAUDIO);
   }
 
   /* read our mode and pre/post windowsize */
-  mode=oggpack_read(opb,vd->modebits);
-  if(mode==-1)return(-1);
+  mode=oggpack_read(opb,b->modebits);
+  if(mode==-1)return(OV_EBADPACKET);
   
   vb->mode=mode;
-  vb->W=vi->mode_param[mode]->blockflag;
+  vb->W=ci->mode_param[mode]->blockflag;
   if(vb->W){
     vb->lW=oggpack_read(opb,1);
     vb->nW=oggpack_read(opb,1);
-    if(vb->nW==-1)   return(-1);
+    if(vb->nW==-1)   return(OV_EBADPACKET);
   }else{
     vb->lW=0;
     vb->nW=0;
@@ -60,15 +62,15 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   vb->eofflag=op->e_o_s;
 
   /* alloc pcm passback storage */
-  vb->pcmend=vi->blocksizes[vb->W];
+  vb->pcmend=ci->blocksizes[vb->W];
   vb->pcm=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
   for(i=0;i<vi->channels;i++)
     vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(float));
 
   /* unpack_header enforces range checking */
-  type=vi->map_type[vi->mode_param[mode]->mapping];
+  type=ci->map_type[ci->mode_param[mode]->mapping];
 
-  return(_mapping_P[type]->inverse(vb,vd->mode[mode]));
+  return(_mapping_P[type]->inverse(vb,b->mode[mode]));
 }
 
 

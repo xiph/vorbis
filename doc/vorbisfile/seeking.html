@@ -1,0 +1,67 @@
+<html>
+
+<head>
+<title>vorbisfile - Seeking</title>
+<link rel=stylesheet href="style.css" type="text/css">
+</head>
+
+<body bgcolor=white text=black link="#5555ff" alink="#5555ff" vlink="#5555ff">
+<table border=0 width=100%>
+<tr>
+<td><p class=tiny>vorbisfile documentation</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+</tr>
+</table>
+
+<h1>Seeking</h1>
+<p>Seeking functions allow you to specify a specific point in the stream to begin or continue decoding.
+<p>
+All the <b>vorbisfile</b> seeking routines are declared in "vorbis/vorbisfile.h".
+<p>
+<p>Certain seeking functions are best suited to different situations.  When speed is important, page-level seeking should be used.
+
+</ul>
+
+<table border=1 color=black width=50% cellspacing=0 cellpadding=7>
+<tr bgcolor=#cccccc>
+	<td><b>function</b></td>
+	<td><b>purpose</b></td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_raw_seek.html">ov_raw_seek</a></td>
+	<td>This function seeks to a specific byte in the bitstream, specified in bytes.</td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_pcm_seek.html">ov_pcm_seek</a></td>
+	<td>This function seeks to a specific point in the bitstream, specified in pcm samples.</td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_pcm_seek.html">ov_pcm_seek_page</a></td>
+	<td>This function seeks to the closest page preceding a point in the bitstream, specified in pcm samples.</td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_time_seek.html">ov_time_seek</a></td>
+	<td>This function seeks to a time in the bitstream, specified in seconds.  The easiest and simplest seeking method.</td>
+</tr>
+<tr valign=top>
+	<td><a href="ov_time_seek_page.html">ov_time_seek_page</a></td>
+	<td>This function seeks to the closest page preceding a time in the bitstream, specified in seconds.</td>
+</tr>
+</table>
+
+<br><br>
+<hr noshade>
+<table border=0 width=100%>
+<tr valign=top>
+<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
+<td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
+</tr><tr>
+<td><p class=tiny>vorbisfile documentation</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+</tr>
+</table>
+
+
+</body>
+
+</html>

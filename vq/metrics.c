@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.9 2000/10/12 03:13:02 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.10 2000/11/06 00:07:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -63,11 +63,11 @@ void process_preprocess(codebook **bs,char *basename){
   while(bs[books])books++;
   
   if(books){
-    histogram=calloc(books,sizeof(float *));
-    histogram_error=calloc(books,sizeof(float *));
-    histogram_errorsq=calloc(books,sizeof(float *));
-    histogram_hi=calloc(books,sizeof(float *));
-    histogram_lo=calloc(books,sizeof(float *));
+    histogram=_ogg_calloc(books,sizeof(float *));
+    histogram_error=_ogg_calloc(books,sizeof(float *));
+    histogram_errorsq=_ogg_calloc(books,sizeof(float *));
+    histogram_hi=_ogg_calloc(books,sizeof(float *));
+    histogram_lo=_ogg_calloc(books,sizeof(float *));
   }else{
     fprintf(stderr,"Specify at least one codebook\n");
     exit(1);
@@ -75,11 +75,11 @@ void process_preprocess(codebook **bs,char *basename){
 
   for(i=0;i<books;i++){
     codebook *b=bs[i];
-    histogram[i]=calloc(b->entries,sizeof(float));
-    histogram_error[i]=calloc(b->entries*b->dim,sizeof(float));
-    histogram_errorsq[i]=calloc(b->entries*b->dim,sizeof(float));
-    histogram_hi[i]=calloc(b->entries*b->dim,sizeof(float));
-    histogram_lo[i]=calloc(b->entries*b->dim,sizeof(float));
+    histogram[i]=_ogg_calloc(b->entries,sizeof(float));
+    histogram_error[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
+    histogram_errorsq[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
+    histogram_hi[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
+    histogram_lo[i]=_ogg_calloc(b->entries*b->dim,sizeof(float));
   }
 }
 

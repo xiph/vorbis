@@ -1,19 +1,19 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.7 2000/10/12 03:12:53 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.8 2000/11/06 00:07:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -163,7 +163,7 @@ static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
 
   scale=look->ln/toBARK(22050.);
 
-  look->linearmap=malloc(look->n*sizeof(int));
+  look->linearmap=_ogg_malloc(look->n*sizeof(int));
   for(j=0;j<look->n;j++){
     int val=floor( toBARK(22050./n*j) *scale);
     if(val>look->ln)val=look->ln;
@@ -230,15 +230,15 @@ int main(int argc,char *argv[]){
     argv++;
   }
   
-  pcm[0]=malloc(framesize*sizeof(float));
-  pcm[1]=malloc(framesize*sizeof(float));
-  out[0]=calloc(framesize/2,sizeof(float));
-  out[1]=calloc(framesize/2,sizeof(float));
-  decay[0]=calloc(framesize/2,sizeof(float));
-  decay[1]=calloc(framesize/2,sizeof(float));
-  floor=malloc(framesize*sizeof(float));
-  lpc=malloc(order*sizeof(float));
-  buffer=malloc(framesize*4);
+  pcm[0]=_ogg_malloc(framesize*sizeof(float));
+  pcm[1]=_ogg_malloc(framesize*sizeof(float));
+  out[0]=_ogg_calloc(framesize/2,sizeof(float));
+  out[1]=_ogg_calloc(framesize/2,sizeof(float));
+  decay[0]=_ogg_calloc(framesize/2,sizeof(float));
+  decay[1]=_ogg_calloc(framesize/2,sizeof(float));
+  floor=_ogg_malloc(framesize*sizeof(float));
+  lpc=_ogg_malloc(order*sizeof(float));
+  buffer=_ogg_malloc(framesize*4);
   buffer2=buffer+framesize*2;
   window=_vorbis_window(0,framesize,framesize/2,framesize/2);
   mdct_init(&m_look,framesize);

@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.18 2000/10/12 03:12:53 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.19 2000/11/06 00:07:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,9 +27,9 @@
 #include <stdio.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 #include "registry.h"
-#include "bookinternal.h"
-#include "sharedbook.h"
+#include "codebook.h"
 #include "misc.h"
 #include "os.h"
 
@@ -44,6 +44,13 @@ typedef struct {
   int         partvals;
   int       **decodemap;
 } vorbis_look_residue0;
+
+vorbis_info_residue *res0_copy_info(vorbis_info_residue *vr){
+  vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
+  vorbis_info_residue0 *ret=_ogg_malloc(sizeof(vorbis_info_residue0));
+  memcpy(ret,info,sizeof(vorbis_info_residue0));
+  return(ret);
+}
 
 void res0_free_info(vorbis_info_residue *i){
   if(i){
@@ -89,7 +96,8 @@ void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
 /* vorbis_info is for range checking */
 vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
-  vorbis_info_residue0 *info=calloc(1,sizeof(vorbis_info_residue0));
+  vorbis_info_residue0 *info=_ogg_calloc(1,sizeof(vorbis_info_residue0));
+  codec_setup_info     *ci=vi->codec_setup;
 
   info->begin=oggpack_read(opb,24);
   info->end=oggpack_read(opb,24);
@@ -106,9 +114,9 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   for(j=0;j<acc;j++)
     info->booklist[j]=oggpack_read(opb,8);
 
-  if(info->groupbook>=vi->books)goto errout;
+  if(info->groupbook>=ci->books)goto errout;
   for(j=0;j<acc;j++)
-    if(info->booklist[j]>=vi->books)goto errout;
+    if(info->booklist[j]>=ci->books)goto errout;
 
   return(info);
  errout:
@@ -119,33 +127,35 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
 vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
-  vorbis_look_residue0 *look=calloc(1,sizeof(vorbis_look_residue0));
+  vorbis_look_residue0 *look=_ogg_calloc(1,sizeof(vorbis_look_residue0));
+  backend_lookup_state *be=vd->backend_state;
+
   int j,k,acc=0;
   int dim;
   look->info=info;
   look->map=vm->mapping;
 
   look->parts=info->partitions;
-  look->phrasebook=vd->fullbooks+info->groupbook;
+  look->phrasebook=be->fullbooks+info->groupbook;
   dim=look->phrasebook->dim;
 
-  look->partbooks=calloc(look->parts,sizeof(codebook **));
+  look->partbooks=_ogg_calloc(look->parts,sizeof(codebook **));
 
   for(j=0;j<look->parts;j++){
     int stages=info->secondstages[j];
     if(stages){
-      look->partbooks[j]=malloc(stages*sizeof(codebook *));
+      look->partbooks[j]=_ogg_malloc(stages*sizeof(codebook *));
       for(k=0;k<stages;k++)
-	look->partbooks[j][k]=vd->fullbooks+info->booklist[acc++];
+	look->partbooks[j][k]=be->fullbooks+info->booklist[acc++];
     }
   }
 
   look->partvals=rint(pow(look->parts,dim));
-  look->decodemap=malloc(look->partvals*sizeof(int *));
+  look->decodemap=_ogg_malloc(look->partvals*sizeof(int *));
   for(j=0;j<look->partvals;j++){
     long val=j;
     long mult=look->partvals/look->parts;
-    look->decodemap[j]=malloc(dim*sizeof(int));
+    look->decodemap[j]=_ogg_malloc(dim*sizeof(int));
     for(k=0;k<dim;k++){
       long deco=val/mult;
       val-=deco*mult;
@@ -380,6 +390,7 @@ vorbis_func_residue residue0_exportbundle={
   &res0_pack,
   &res0_unpack,
   &res0_look,
+  &res0_copy_info,
   &res0_free_info,
   &res0_free_look,
   &res0_forward,

@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.15 2000/10/12 03:13:01 xiphmont Exp $
+ last mod: $Id: build.c,v 1.16 2000/11/06 00:07:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,10 +41,10 @@ static char *rline(FILE *in,FILE *out){
       if(sofar>=lbufsize){
 	if(!lbufsize){	
 	  lbufsize=1024;
-	  linebuffer=malloc(lbufsize);
+	  linebuffer=_ogg_malloc(lbufsize);
 	}else{
 	  lbufsize*=2;
-	  linebuffer=realloc(linebuffer,lbufsize);
+	  linebuffer=_ogg_realloc(linebuffer,lbufsize);
 	}
       }
       {
@@ -147,12 +147,12 @@ int main(int argc,char *argv[]){
   /* save quant data; we don't want to requantize later as our method
      is currently imperfect wrt repeated application */
   i=0;
-  quantlist=malloc(sizeof(long)*v.elements*v.entries);
+  quantlist=_ogg_malloc(sizeof(long)*v.elements*v.entries);
   for(j=0;j<entries;j++){
     float a;
     for(k=0;k<dim;k++){
       line=rline(in,out);
-      sscanf(line,"%lf",&a);
+      sscanf(line,"%f",&a);
       v.entrylist[i]=a;
       quantlist[i++]=rint(a);
     }
@@ -172,7 +172,7 @@ int main(int argc,char *argv[]){
       for(k=0;k<dim+aux;k++){
 	line=rline(in,out);
 	if(!line)break;
-	sscanf(line,"%lf",b+k);
+	sscanf(line,"%f",b+k);
       }
       if(feof(in))break;
       vqgen_addpoint(&v,b,NULL);

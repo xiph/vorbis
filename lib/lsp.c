@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.11 2000/10/18 21:27:15 jack Exp $
+  last mod: $Id: lsp.c,v 1.12 2000/11/06 00:07:01 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -65,11 +65,14 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 			    float amp,float ampoffset){
   int i;
   float wdel=M_PI/ln;
+  vorbis_fpu_control fpu;
+  
+  vorbis_fpu_setround(&fpu);
   for(i=0;i<m;i++)lsp[i]=vorbis_coslook(lsp[i]);
 
   i=0;
   while(i<n){
-    int j=0,k=map[i];
+    int k=map[i];
     int qexp;
     float p=.7071067812;
     float q=.7071067812;
@@ -82,16 +85,18 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
       q*=ftmp[1]-w;
       ftmp+=2;
     }while(--c);
-    
+
     q=frexp(p*p*(1.+w)+q*q*(1.-w),&qexp);
     q=vorbis_fromdBlook(amp*             
 			vorbis_invsqlook(q)*
 			vorbis_invsq2explook(qexp+m)- 
 			ampoffset);
 
-    curve[i++]=q;
-    while(map[i]==k)curve[i++]=q;
+    do{
+      curve[i++]=q;
+    }while(map[i]==k);
   }
+  vorbis_fpu_restore(fpu);
 }
 
 #else

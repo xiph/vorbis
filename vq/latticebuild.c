@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.6 2000/10/12 03:13:01 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.7 2000/11/06 00:07:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -77,7 +77,7 @@ int main(int argc,char *argv[]){
 
   {
     char *ptr;
-    char *filename=calloc(strlen(argv[1])+4,1);
+    char *filename=_ogg_calloc(strlen(argv[1])+4,1);
 
     strcpy(filename,argv[1]);
     in=fopen(filename,"r");
@@ -107,13 +107,13 @@ int main(int argc,char *argv[]){
   entries=pow(quantvals,dim);
   c.dim=dim;
   c.entries=entries;
-  c.lengthlist=malloc(entries*sizeof(long));
+  c.lengthlist=_ogg_malloc(entries*sizeof(long));
   c.maptype=1;
   c.q_sequencep=sequencep;
-  c.quantlist=calloc(quantvals,sizeof(long));
+  c.quantlist=_ogg_calloc(quantvals,sizeof(long));
 
-  quantlist=malloc(sizeof(long)*c.dim*c.entries);
-  hits=malloc(c.entries*sizeof(long));
+  quantlist=_ogg_malloc(sizeof(long)*c.dim*c.entries);
+  hits=_ogg_malloc(c.entries*sizeof(long));
   for(j=0;j<entries;j++)hits[j]=1;
   for(j=0;j<entries;j++)c.lengthlist[j]=1;
 

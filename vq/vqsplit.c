@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.20 2000/10/12 03:13:02 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.21 2000/11/06 00:07:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -98,8 +98,8 @@ int vqsp_count(float *entrylist,float *pointlist,int dim,
   long *temppointsB=NULL;
   
   if(splitp){
-    temppointsA=malloc(points*sizeof(long));
-    temppointsB=malloc(points*sizeof(long));
+    temppointsA=_ogg_malloc(points*sizeof(long));
+    temppointsB=_ogg_malloc(points*sizeof(long));
   }
 
   memset(entryA,0,sizeof(long)*entries);
@@ -174,8 +174,8 @@ int lp_split(float *pointlist,long totalpoints,
   int dim=b->dim;
   float *entrylist=b->valuelist;
   long ret;
-  long *entryA=calloc(entries,sizeof(long));
-  long *entryB=calloc(entries,sizeof(long));
+  long *entryA=_ogg_calloc(entries,sizeof(long));
+  long *entryB=_ogg_calloc(entries,sizeof(long));
   long entriesA=0;
   long entriesB=0;
   long entriesC=0;
@@ -320,10 +320,10 @@ int lp_split(float *pointlist,long totalpoints,
     long thisaux=t->aux++;
     if(t->aux>=t->alloc){
       t->alloc*=2;
-      t->ptr0=realloc(t->ptr0,sizeof(long)*t->alloc);
-      t->ptr1=realloc(t->ptr1,sizeof(long)*t->alloc);
-      t->p=realloc(t->p,sizeof(long)*t->alloc);
-      t->q=realloc(t->q,sizeof(long)*t->alloc);
+      t->ptr0=_ogg_realloc(t->ptr0,sizeof(long)*t->alloc);
+      t->ptr1=_ogg_realloc(t->ptr1,sizeof(long)*t->alloc);
+      t->p=_ogg_realloc(t->p,sizeof(long)*t->alloc);
+      t->q=_ogg_realloc(t->q,sizeof(long)*t->alloc);
     }
     
     t->p[thisaux]=besti;
@@ -378,7 +378,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   memset(b,0,sizeof(codebook));
   memset(c,0,sizeof(static_codebook));
   b->c=c;
-  t=c->nearest_tree=calloc(1,sizeof(encode_aux_nearestmatch));
+  t=c->nearest_tree=_ogg_calloc(1,sizeof(encode_aux_nearestmatch));
   c->maptype=2;
 
   /* make sure there are no duplicate entries and that every 
@@ -400,7 +400,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   }
 
   {
-    v->assigned=calloc(v->entries,sizeof(long));
+    v->assigned=_ogg_calloc(v->entries,sizeof(long));
     for(i=0;i<v->points;i++){
       float *ppt=_point(v,i);
       float firstmetric=_Ndist(v->elements,_now(v,0),ppt);
@@ -436,24 +436,24 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   fprintf(stderr,"Building a book with %ld unique entries...\n",v->entries);
 
   {
-    long *entryindex=malloc(v->entries*sizeof(long *));
-    long *pointindex=malloc(v->points*sizeof(long));
-    long *membership=malloc(v->points*sizeof(long));
-    long *reventry=malloc(v->entries*sizeof(long));
+    long *entryindex=_ogg_malloc(v->entries*sizeof(long *));
+    long *pointindex=_ogg_malloc(v->points*sizeof(long));
+    long *membership=_ogg_malloc(v->points*sizeof(long));
+    long *reventry=_ogg_malloc(v->entries*sizeof(long));
     long pointssofar=0;
       
     for(i=0;i<v->entries;i++)entryindex[i]=i;
     for(i=0;i<v->points;i++)pointindex[i]=i;
 
     t->alloc=4096;
-    t->ptr0=malloc(sizeof(long)*t->alloc);
-    t->ptr1=malloc(sizeof(long)*t->alloc);
-    t->p=malloc(sizeof(long)*t->alloc);
-    t->q=malloc(sizeof(long)*t->alloc);
+    t->ptr0=_ogg_malloc(sizeof(long)*t->alloc);
+    t->ptr1=_ogg_malloc(sizeof(long)*t->alloc);
+    t->p=_ogg_malloc(sizeof(long)*t->alloc);
+    t->q=_ogg_malloc(sizeof(long)*t->alloc);
     t->aux=0;
     c->dim=v->elements;
     c->entries=v->entries;
-    c->lengthlist=calloc(c->entries,sizeof(long));
+    c->lengthlist=_ogg_calloc(c->entries,sizeof(long));
     b->valuelist=v->entrylist; /* temporary; replaced later */
     b->dim=c->dim;
     b->entries=c->entries;
@@ -546,7 +546,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   /* run all training points through the decision tree to get a final
      probability count */
   {
-    long *probability=malloc(c->entries*sizeof(long));
+    long *probability=_ogg_malloc(c->entries*sizeof(long));
     for(i=0;i<c->entries;i++)probability[i]=1; /* trivial guard */
     b->dim=c->dim;
 
@@ -573,8 +573,8 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
      assignment and packing to do it now) */
   {
     long *wordlen=c->lengthlist;
-    long *index=malloc(c->entries*sizeof(long));
-    long *revindex=malloc(c->entries*sizeof(long));
+    long *index=_ogg_malloc(c->entries*sizeof(long));
+    long *revindex=_ogg_malloc(c->entries*sizeof(long));
     int k;
     for(i=0;i<c->entries;i++)index[i]=i;
     isortvals=c->lengthlist;
@@ -594,9 +594,9 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     free(revindex);
 
     /* map lengthlist and vallist with index */
-    c->lengthlist=calloc(c->entries,sizeof(long));
-    b->valuelist=malloc(sizeof(float)*c->entries*c->dim);
-    c->quantlist=malloc(sizeof(long)*c->entries*c->dim);
+    c->lengthlist=_ogg_calloc(c->entries,sizeof(long));
+    b->valuelist=_ogg_malloc(sizeof(float)*c->entries*c->dim);
+    c->quantlist=_ogg_malloc(sizeof(long)*c->entries*c->dim);
     for(i=0;i<c->entries;i++){
       long e=index[i];
       for(k=0;k<c->dim;k++){

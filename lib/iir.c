@@ -1,24 +1,25 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.2 2000/10/12 03:12:52 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.3 2000/11/06 00:07:00 xiphmont Exp $
 
  ********************************************************************/
 
 /* LPC is actually a degenerate case of form I/II filters, but we need
    both */
 
+#include <ogg/ogg.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -28,10 +29,9 @@ void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
   memset(s,0,sizeof(IIR_state));
   s->stages=stages;
   s->gain=gain;
-  s->coeff_A=malloc(stages*sizeof(float));
-  s->coeff_B=malloc((stages+1)*sizeof(float));
-  s->z_A=calloc(stages*2,sizeof(float));
-  s->z_B=calloc(stages*2,sizeof(float));
+  s->coeff_A=_ogg_malloc(stages*sizeof(float));
+  s->coeff_B=_ogg_malloc((stages+1)*sizeof(float));
+  s->z_A=_ogg_calloc(stages*2,sizeof(float));
 
   memcpy(s->coeff_A,A,stages*sizeof(float));
   memcpy(s->coeff_B,B,(stages+1)*sizeof(float));
@@ -42,7 +42,6 @@ void IIR_clear(IIR_state *s){
     free(s->coeff_A);
     free(s->coeff_B);
     free(s->z_A);
-    free(s->z_B);
     memset(s,0,sizeof(IIR_state));
   }
 }
@@ -64,6 +63,17 @@ float IIR_filter(IIR_state *s,float in){
   if(++s->ring>=stages)s->ring=0;
 
   return(newB);
+}
+
+/* prevents ringing down to underflow */
+void IIR_clamp(IIR_state *s,float thresh){
+  float *zA=s->z_A+s->ring;
+  int i;
+  for(i=0;i<s->stages;i++)
+    if(fabs(zA[i])>=thresh)break;
+  
+  if(i<s->stages)
+    memset(s->z_A,0,sizeof(float)*s->stages*2);
 }
 
 /* this assumes the symmetrical structure of the feed-forward stage of
@@ -267,7 +277,7 @@ int main(){
 
   /* run the pregenerated Chebyshev filter, then our own distillation
      through the generic and specialized code */
-  float *work=malloc(128*sizeof(float));
+  float *work=_ogg_malloc(128*sizeof(float));
   IIR_state iir;
   int i;
 

@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.16 2000/10/12 03:12:53 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.17 2000/11/06 00:07:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,8 +21,8 @@
 #include <math.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
-#include "vorbis/backends.h"
-#include "bookinternal.h"
+#include "codec_internal.h"
+#include "codebook.h"
 #include "registry.h"
 #include "psy.h"
 #include "misc.h"
@@ -55,6 +55,13 @@ typedef struct {
   long lastframe; /* if a different mode is called, we need to 
 		     invalidate decay */
 } vorbis_look_mapping0;
+
+static vorbis_info_mapping *mapping0_copy_info(vorbis_info_mapping *vm){
+  vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)vm;
+  vorbis_info_mapping0 *ret=_ogg_malloc(sizeof(vorbis_info_mapping0));
+  memcpy(ret,info,sizeof(vorbis_info_mapping0));
+  return(ret);
+}
 
 static void mapping0_free_info(vorbis_info_mapping *i){
   if(i){
@@ -96,48 +103,49 @@ static void mapping0_free_look(vorbis_look_mapping *look){
 static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_mapping *m){
   int i;
-  vorbis_info *vi=vd->vi;
-  vorbis_look_mapping0 *look=calloc(1,sizeof(vorbis_look_mapping0));
+  vorbis_info          *vi=vd->vi;
+  codec_setup_info     *ci=vi->codec_setup;
+  vorbis_look_mapping0 *look=_ogg_calloc(1,sizeof(vorbis_look_mapping0));
   vorbis_info_mapping0 *info=look->map=(vorbis_info_mapping0 *)m;
   look->mode=vm;
   
-  look->time_look=calloc(info->submaps,sizeof(vorbis_look_time *));
-  look->floor_look=calloc(info->submaps,sizeof(vorbis_look_floor *));
+  look->time_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_time *));
+  look->floor_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_floor *));
 
-  look->residue_look=calloc(info->submaps,sizeof(vorbis_look_residue *));
-  if(vi->psys)look->psy_look=calloc(info->submaps,sizeof(vorbis_look_psy));
+  look->residue_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_residue *));
+  if(ci->psys)look->psy_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_psy));
 
-  look->time_func=calloc(info->submaps,sizeof(vorbis_func_time *));
-  look->floor_func=calloc(info->submaps,sizeof(vorbis_func_floor *));
-  look->residue_func=calloc(info->submaps,sizeof(vorbis_func_residue *));
+  look->time_func=_ogg_calloc(info->submaps,sizeof(vorbis_func_time *));
+  look->floor_func=_ogg_calloc(info->submaps,sizeof(vorbis_func_floor *));
+  look->residue_func=_ogg_calloc(info->submaps,sizeof(vorbis_func_residue *));
   
   for(i=0;i<info->submaps;i++){
     int timenum=info->timesubmap[i];
     int floornum=info->floorsubmap[i];
     int resnum=info->residuesubmap[i];
 
-    look->time_func[i]=_time_P[vi->time_type[timenum]];
+    look->time_func[i]=_time_P[ci->time_type[timenum]];
     look->time_look[i]=look->time_func[i]->
-      look(vd,vm,vi->time_param[timenum]);
-    look->floor_func[i]=_floor_P[vi->floor_type[floornum]];
+      look(vd,vm,ci->time_param[timenum]);
+    look->floor_func[i]=_floor_P[ci->floor_type[floornum]];
     look->floor_look[i]=look->floor_func[i]->
-      look(vd,vm,vi->floor_param[floornum]);
-    look->residue_func[i]=_residue_P[vi->residue_type[resnum]];
+      look(vd,vm,ci->floor_param[floornum]);
+    look->residue_func[i]=_residue_P[ci->residue_type[resnum]];
     look->residue_look[i]=look->residue_func[i]->
-      look(vd,vm,vi->residue_param[resnum]);
+      look(vd,vm,ci->residue_param[resnum]);
     
-    if(vi->psys && vd->analysisp){
+    if(ci->psys && vd->analysisp){
       int psynum=info->psysubmap[i];
-      _vp_psy_init(look->psy_look+i,vi->psy_param[psynum],
-		   vi->blocksizes[vm->blockflag]/2,vi->rate);
+      _vp_psy_init(look->psy_look+i,ci->psy_param[psynum],
+		   ci->blocksizes[vm->blockflag]/2,vi->rate);
     }
   }
 
   look->ch=vi->channels;
-  if(vi->psys){
-    look->decay=calloc(vi->channels,sizeof(float *));
+  if(ci->psys){
+    look->decay=_ogg_calloc(vi->channels,sizeof(float *));
     for(i=0;i<vi->channels;i++)
-      look->decay[i]=calloc(vi->blocksizes[vm->blockflag]/2,sizeof(float));
+      look->decay[i]=_ogg_calloc(ci->blocksizes[vm->blockflag]/2,sizeof(float));
   }
 
   return(look);
@@ -163,7 +171,8 @@ static void mapping0_pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer
 /* also responsible for range checking */
 static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int i;
-  vorbis_info_mapping0 *info=calloc(1,sizeof(vorbis_info_mapping0));
+  vorbis_info_mapping0 *info=_ogg_calloc(1,sizeof(vorbis_info_mapping0));
+  codec_setup_info     *ci=vi->codec_setup;
   memset(info,0,sizeof(vorbis_info_mapping0));
 
   info->submaps=oggpack_read(opb,4)+1;
@@ -176,11 +185,11 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
   }
   for(i=0;i<info->submaps;i++){
     info->timesubmap[i]=oggpack_read(opb,8);
-    if(info->timesubmap[i]>=vi->times)goto err_out;
+    if(info->timesubmap[i]>=ci->times)goto err_out;
     info->floorsubmap[i]=oggpack_read(opb,8);
-    if(info->floorsubmap[i]>=vi->floors)goto err_out;
+    if(info->floorsubmap[i]>=ci->floors)goto err_out;
     info->residuesubmap[i]=oggpack_read(opb,8);
-    if(info->residuesubmap[i]>=vi->residues)goto err_out;
+    if(info->residuesubmap[i]>=ci->residues)goto err_out;
   }
 
   return info;
@@ -203,12 +212,13 @@ static long seq=0;
 static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state     *vd=vb->vd;
   vorbis_info          *vi=vd->vi;
+  backend_lookup_state *b=vb->vd->backend_state;
   vorbis_look_mapping0 *look=(vorbis_look_mapping0 *)l;
   vorbis_info_mapping0 *info=look->map;
   vorbis_info_mode     *mode=look->mode;
   int                   n=vb->pcmend;
   int i,j;
-  float *window=vd->window[vb->W][vb->lW][vb->nW][mode->windowtype];
+  float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
 
   float **pcmbundle=alloca(sizeof(float *)*vi->channels);
   int *nonzero=alloca(sizeof(int)*vi->channels);
@@ -229,7 +239,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
-    mdct_forward(vd->transform[vb->W][0],pcm,pcm);
+    mdct_forward(b->transform[vb->W][0],pcm,pcm);
   }
 
   {
@@ -305,13 +315,15 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state     *vd=vb->vd;
   vorbis_info          *vi=vd->vi;
+  codec_setup_info     *ci=vi->codec_setup;
+  backend_lookup_state *b=vd->backend_state;
   vorbis_look_mapping0 *look=(vorbis_look_mapping0 *)l;
   vorbis_info_mapping0 *info=look->map;
   vorbis_info_mode     *mode=look->mode;
   int                   i,j;
-  long                  n=vb->pcmend=vi->blocksizes[vb->W];
+  long                  n=vb->pcmend=ci->blocksizes[vb->W];
 
-  float *window=vd->window[vb->W][vb->lW][vb->nW][mode->windowtype];
+  float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
   float **pcmbundle=alloca(sizeof(float *)*vi->channels);
   int *nonzero=alloca(sizeof(int)*vi->channels);
   
@@ -346,7 +358,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
     _analysis_output("out",seq+i,pcm,n/2,0,1);
-    mdct_backward(vd->transform[vb->W][0],pcm,pcm);
+    mdct_backward(b->transform[vb->W][0],pcm,pcm);
   }
 
   /* now apply the decoded pre-window time information */
@@ -373,8 +385,8 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 
 /* export hooks */
 vorbis_func_mapping mapping0_exportbundle={
-  &mapping0_pack,&mapping0_unpack,&mapping0_look,&mapping0_free_info,
-  &mapping0_free_look,&mapping0_forward,&mapping0_inverse
+  &mapping0_pack,&mapping0_unpack,&mapping0_look,&mapping0_copy_info,
+  &mapping0_free_info,&mapping0_free_look,&mapping0_forward,&mapping0_inverse
 };
 
 

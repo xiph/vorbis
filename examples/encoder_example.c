@@ -1,18 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
+ * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
- * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
+ * by Monty <monty@xiph.org> and the XIPHOPHORUS Company            *
  * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.14 2000/10/12 03:12:39 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.15 2000/11/06 00:06:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <vorbis/mode_C.h>
+#include <vorbis/vorbisenc.h>
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 #include <io.h>
@@ -45,7 +45,7 @@ int main(){
   ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
   ogg_packet       op; /* one raw packet of data for decode */
   
-  vorbis_info     *vi; /* struct that stores all the static vorbis bitstream
+  vorbis_info      vi; /* struct that stores all the static vorbis bitstream
 			  settings */
   vorbis_comment   vc; /* struct that stores all the user comments */
 
@@ -79,14 +79,15 @@ int main(){
 
   /* choose an encoding mode */
   /* (mode 0: 44kHz stereo uncoupled, roughly 128kbps VBR) */
-  vi=&info_C;
+  vorbis_info_init(&vi);
+  vorbis_encode_init(&vi,2,44100, -1, 128000, -1);
 
   /* add a comment */
   vorbis_comment_init(&vc);
   vorbis_comment_add(&vc,"Track encoded by encoder_example.c");
 
   /* set up the analysis state and auxiliary encoding storage */
-  vorbis_analysis_init(&vd,vi);
+  vorbis_analysis_init(&vd,&vi);
   vorbis_block_init(&vd,&vb);
   
   /* set up our packet->stream encoder */
@@ -187,6 +188,7 @@ int main(){
   ogg_stream_clear(&os);
   vorbis_block_clear(&vb);
   vorbis_dsp_clear(&vd);
+  vorbis_info_clear(&vi);
   
   /* ogg_page and ogg_packet structs always point to storage in
      libvorbis.  They're never freed or manipulated directly */
