@@ -12,13 +12,14 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.4 2001/02/01 01:03:30 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.5 2001/02/01 01:12:26 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_MODES_H_
 #define _V_MODES_H_
 
+#include "modes/mode_AA.h"
 #include "modes/mode_A.h"
 #include "modes/mode_B.h"
 #include "modes/mode_C.h"
