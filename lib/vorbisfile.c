@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.62 2002/07/06 04:20:03 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.63 2002/10/11 08:22:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1341,9 +1341,7 @@ ogg_int64_t ov_pcm_tell(OggVorbis_File *vf){
 
 /* return time offset (seconds) of next PCM sample to be read */
 double ov_time_tell(OggVorbis_File *vf){
-  /* translate time to PCM position and call ov_pcm_seek */
-
-  int link=-1;
+  int link=0;
   ogg_int64_t pcm_total=0;
   double time_total=0.f;
   

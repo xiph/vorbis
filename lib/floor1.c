@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.24 2002/07/18 01:41:59 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.25 2002/10/11 08:22:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -663,6 +663,10 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 	  int ly=post_Y(fit_valueA,fit_valueB,ln);
 	  int hy=post_Y(fit_valueA,fit_valueB,hn);
 	  
+	  if(ly==-1 || hy==-1){
+	    exit(1);
+	  }
+
 	  if(inspect_error(lx,hx,ly,hy,logmask,logmdct,info)){
 	    /* outside error bounds/begin search area.  Split it. */
 	    int ly0=-200;
