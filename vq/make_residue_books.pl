@@ -21,7 +21,7 @@ die "Could not open $ARGV[0]: $!" unless open (F,$ARGV[0]);
 $goflag=0;
 while($line=<F>){
 
-    print "\n#### $line\n\n";
+    print "#### $line";
     if($line=~m/^GO/){
 	$goflag=1;
 	next;
@@ -30,7 +30,7 @@ while($line=<F>){
     if($goflag==0){
 	if($line=~m/\S+/ && !($line=~m/^\#/) ){
 	    my $command=$line;
-	    print ">>> $command\n";
+	    print ">>> $command";
 	    die "Couldn't shell command.\n\tcommand:$command\n" 
 		if syst($command);
 	}
@@ -49,7 +49,8 @@ while($line=<F>){
     if($line=~m/^h(.*)/){
 	# build a huffman book (no mapping) 
 	my($name,$datafile,$arg)=split(' ',$1);
-	my $command="huffbuild $datafile $arg > $globalname$name.vqh";
+ 
+	my $command="huffbuild $datafile $arg";
 	print ">>> $command\n";
 	die "Couldn't build huffbook.\n\tcommand:$command\n" 
 	    if syst($command);

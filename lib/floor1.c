@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.10.2.3 2001/08/02 22:14:21 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.10.2.4 2001/08/13 00:20:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -899,18 +899,6 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
       oggpack_write(&vb->opb,fit_valueA[0],ilog(look->quant_q-1));
       oggpack_write(&vb->opb,fit_valueA[1],ilog(look->quant_q-1));
       
-#ifdef TRAIN_FLOOR1
-      {
-	FILE *of;
-	char buffer[80];
-	sprintf(buffer,"line%d_full.vqd",vb->mode);
-	of=fopen(buffer,"a");
-	for(j=2;j<posts;j++)
-	  fprintf(of,"%d\n",fit_valueB[j]);
-	fclose(of);
-      }
-#endif
-      
       
       /* partition by partition */
       for(i=0,j=2;i<info->partitions;i++){
@@ -952,7 +940,8 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	  {
 	    FILE *of;
 	    char buffer[80];
-	    sprintf(buffer,"line%d_class%d.vqd",vb->mode,class);
+	    sprintf(buffer,"line_%dx%d_class%d.vqd",
+		    vb->pcmend/2,posts-2,class);
 	    of=fopen(buffer,"a");
 	    fprintf(of,"%d\n",cval);
 	    fclose(of);
@@ -975,7 +964,8 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	    {
 	      FILE *of;
 	      char buffer[80];
-	      sprintf(buffer,"line%d_%dsub%d.vqd",vb->mode,class,bookas[k]);
+	      sprintf(buffer,"line_%dx%d_%dsub%d.vqd",
+		      vb->pcmend/2,posts-2,class,bookas[k]);
 	      of=fopen(buffer,"a");
 	      fprintf(of,"%d\n",fit_valueB[j+k]);
 	      fclose(of);

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.33.2.5 2001/08/07 03:47:22 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.33.2.6 2001/08/13 00:20:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,6 +36,8 @@
    Why a lookup for each backend in a given mode?  Because the
    blocksize is set by the mode, and low backend lookups may require
    parameters from other areas of the mode/mapping */
+
+extern int analysis_noisy;
 
 typedef struct {
   drft_lookup fft_look;
@@ -411,9 +413,11 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		     local_ampmax[i]);
 
     for(j=0;j<n/2;j++)
-      if(fabs(res[j])>1500)
+      if(fabs(res[j])>1200){
+	analysis_noisy=1;
 	fprintf(stderr,"%ld ",seq+i);
-    
+      }
+
     _analysis_output("res",seq+i,res,n/2,1,0);
     _analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
       

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.44.2.1 2001/08/02 06:14:42 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.44.2.2 2001/08/13 00:20:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,8 @@
 #include "registry.h"
 #include "scales.h"
 #include "os.h"
+
+int analysis_noisy=1;
 
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
@@ -109,7 +111,7 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB){
 
 void _analysis_output(char *base,int i,float *v,int n,int bark,int dB){
 #ifdef ANALYSIS
-  _analysis_output_always(base,i,v,n,bark,dB);
+  if(analysis_noisy)_analysis_output_always(base,i,v,n,bark,dB);
 #endif
 }
 

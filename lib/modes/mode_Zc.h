@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_Zc.h,v 1.1.2.1 2001/08/12 11:03:20 xiphmont Exp $
+ last mod: $Id: mode_Zc.h,v 1.1.2.2 2001/08/13 00:20:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -172,12 +172,12 @@ static vorbis_info_psy _psy_set_Zc0={
 
   /*noisemaskp */
   1,-24.f,     /* suppress any noise curve over maxspec+n */
-  .5f, .5f,   /* low/high window */
-  2, 2, 12,
+  1.f, 1.f,   /* low/high window */
+  2, 2, -1,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-20,-20,-20,-20,-20,-20,-20, -5,  3,  3,  3,  5,  5,  5,  5,  6,  10},
-  {1.f,1.f,1.f,1.f,1.f,1.f,1.f,.7f,.7f,.7f,.7f,.7f,.85f,.88f,.89f,.9f,.9f},
+  {-20,-20,-20,-20,-20,-20,-10, -5,  3,  3,  4,  4,  4,  4,  4,  4,  8},
+  {1.f,1.f,1.f,1.f,1.f,1.f,.8f,.7f,.7f,.7f,.7f,.7f,.8f,.88f,.89f,.9f,.9f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
@@ -203,7 +203,7 @@ static vorbis_info_psy _psy_set_ZcT={
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
   {-20,-20,-20,-20,-20,-20,-20, -6,  3,  3,  4,  5,  5,   5,  5,  6, 10},
-  {1.f,1.f,1.f,1.f,1.f,1.f,1.f,.7f,.7f,.7f,.7f,.7f,.85f,.88f,.89f,.9f,.9f},
+  {1.f,1.f,1.f,1.f,1.f,1.f,.8f,.7f,.7f,.7f,.7f,.7f,.8f,.88f,.89f,.9f,.9f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
@@ -217,7 +217,7 @@ static vorbis_info_psy _psy_set_Zc={
   -110.f,
 
   /* tonemask */
-  3.f,-20.f,&_vp_tonemask_Zc,
+  -3.f,-20.f,&_vp_tonemask_Zc,
   /* peakattp */
   1,  &_vp_peakatt_Zc,
 
@@ -228,7 +228,7 @@ static vorbis_info_psy _psy_set_Zc={
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
   {-20,-20,-20,-20,-20,-20,-10,  0,  3,  3,  4,  5,  5,   5,  5,  6, 10},
-  {1.f,1.f,1.f,1.f,1.f,1.f,.8f,.75f,.75f,.75f,.75f,.75f,.85f,.88f,.89f,.9f,.9f},
+  {1.f,1.f,1.f,1.f,1.f,1.f,.8f,.7f,.7f,.7f,.7f,.8f,.85f,.88f,.89f,.9f,.9f},
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
             tight loop) */
