@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.56.2.6 2001/12/05 08:03:17 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.56.2.7 2001/12/06 07:33:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -837,6 +837,11 @@ void _vp_compute_mask(vorbis_look_psy *p,
 
     /* work[i] holds the median line (.5), logmask holds the upper
        envelope line (1.) */
+    _analysis_output("noisemedian",seq,work,n,1,0);
+
+    for(i=0;i<n;i++)logmask[i]+=work[i];
+    _analysis_output("noiseenvelope",seq,logmask,n,1,0);
+    for(i=0;i<n;i++)logmask[i]-=work[i];
 
     for(i=0;i<n;i++){
       int dB=logmask[i]+.5;
@@ -844,6 +849,7 @@ void _vp_compute_mask(vorbis_look_psy *p,
       logmask[i]= work[i]+p->vi->noisecompand[dB]+p->noiseoffset[i]+bitrate_noise_offset;
       if(logmask[i]>p->vi->noisemaxsupp)logmask[i]=p->vi->noisemaxsupp;
     }
+    _analysis_output("noise",seq,logmask,n,1,0);
 
   }else{
     for(i=0;i<n;i++)logmask[i]=NEGINF;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17.2.2 2001/12/05 08:03:18 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.17.2.3 2001/12/06 07:33:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -77,21 +77,26 @@ static int vorbis_encode_toplevel_init(vorbis_info *vi,int small,int large,int c
     /* time mapping hooks are unused in vorbis I */
     ci->times=1;
     ci->time_type[0]=0;
-    ci->time_param[0]=&_time_dummy;
+    ci->time_param[0]=calloc(1,sizeof(_time_dummy));
+    memcpy(ci->time_param[0],&_time_dummy,sizeof(_time_dummy));
 
     /* by convention, two modes: one for short, one for long blocks.
        short block mode uses mapping sero, long block uses mapping 1 */
     ci->modes=2;
-    ci->mode_param[0]=&_mode_set_short;
-    ci->mode_param[1]=&_mode_set_long;
+    ci->mode_param[0]=calloc(1,sizeof(_mode_set_short));
+    memcpy(ci->mode_param[0],&_mode_set_short,sizeof(_mode_set_short));
+    ci->mode_param[1]=calloc(1,sizeof(_mode_set_long));
+    memcpy(ci->mode_param[1],&_mode_set_long,sizeof(_mode_set_long));
 
     /* by convention two mappings, both mapping type zero (polyphonic
        PCM), first for short, second for long blocks */
     ci->maps=2;
     ci->map_type[0]=0;
-    ci->map_param[0]=&_mapping_set_short;
+    ci->map_param[0]=calloc(1,sizeof(_mapping_set_short));
+    memcpy(ci->map_param[0],&_mapping_set_short,sizeof(_mapping_set_short));
     ci->map_type[1]=0;
-    ci->map_param[1]=&_mapping_set_short;
+    ci->map_param[1]=calloc(1,sizeof(_mapping_set_long));
+    memcpy(ci->map_param[1],&_mapping_set_long,sizeof(_mapping_set_long));
 
     return(0);
   }
@@ -166,27 +171,29 @@ static int vorbis_encode_global_psych_init(vorbis_info *vi,double q,
 
   memcpy(g,in+(int)x[iq],sizeof(*g));
 
+  dq=x[iq]*(1.-dq)+x[iq+1]*dq;
+  iq=(int)dq;
+  dq-=iq;
+  if(dq==0 && iq>0){
+    iq--;
+    dq=1.;
+  }
+
   /* interpolate the trigger threshholds */
   for(i=0;i<4;i++){
     g->preecho_thresh[i]=in[iq].preecho_thresh[i]*(1.-dq)+in[iq+1].preecho_thresh[i]*dq;
-    g->preecho_thresh[i]=in[iq].postecho_thresh[i]*(1.-dq)+in[iq+1].postecho_thresh[i]*dq;
+    g->postecho_thresh[i]=in[iq].postecho_thresh[i]*(1.-dq)+in[iq+1].postecho_thresh[i]*dq;
   }
   g->ampmax_att_per_sec=in[iq].ampmax_att_per_sec*(1.-dq)+in[iq+1].ampmax_att_per_sec*dq;
   return(0);
 }
 
 static int vorbis_encode_psyset_init(vorbis_info *vi,double q,int block,
-					   vorbis_info_psy *in, ...){
-  int i,iq=q*10;
-  double x[11],dq;
+					   vorbis_info_psy *in){
+  int iq=q*10;
+  double dq;
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
-  va_list ap;
-  
-  va_start(ap,in);
-  for(i=0;i<11;i++)
-    x[i]=va_arg(ap,double);
-  va_end(ap);
 
   if(iq==10){
     iq=9;
@@ -212,6 +219,20 @@ static int vorbis_encode_psyset_init(vorbis_info *vi,double q,int block,
   p->tone_abs_limit=in[iq].tone_abs_limit*(1.-dq)+in[iq+1].tone_abs_limit*dq;
 
   p->noisemaxsupp=in[iq].noisemaxsupp*(1.-dq)+in[iq+1].noisemaxsupp*dq;
+
+  switch(block){
+  case 0:
+    p->noisewindowlomin=2;
+    p->noisewindowhimin=2;
+    p->noisewindowfixed=15;
+    break;
+  default:
+    p->noisewindowlomin=4;
+    p->noisewindowhimin=4;
+    p->noisewindowfixed=100;
+    break;
+  }
+
   return(0);
 }
 
@@ -232,7 +253,15 @@ static int vorbis_encode_compand_init(vorbis_info *vi,double q,int block,
     iq=9;
     dq=1.;
   }else{
-    dq=q+10.-iq;
+    dq=q*10.-iq;
+  }
+
+  dq=x[iq]*(1.-dq)+x[iq+1]*dq;
+  iq=(int)dq;
+  dq-=iq;
+  if(dq==0 && iq>0){
+    iq--;
+    dq=1.;
   }
 
   /* interpolate the compander settings */
@@ -242,23 +271,17 @@ static int vorbis_encode_compand_init(vorbis_info *vi,double q,int block,
 }
 
 static int vorbis_encode_tonemask_init(vorbis_info *vi,double q,int block,
-				       vp_adjblock *in, ...){
-  int i,j,iq=q*10;
-  double x[11],dq;
+				       vp_adjblock *in){
+  int i,j,iq=q*5.;
+  double dq;
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
-  va_list ap;
-  
-  va_start(ap,in);
-  for(i=0;i<11;i++)
-    x[i]=va_arg(ap,double);
-  va_end(ap);
 
-  if(iq==10){
-    iq=9;
+  if(iq==5){
+    iq=5;
     dq=1.;
   }else{
-    dq=q*10.-iq;
+    dq=q*5.-iq;
   }
 
   for(i=0;i<P_BANDS;i++)
@@ -269,23 +292,17 @@ static int vorbis_encode_tonemask_init(vorbis_info *vi,double q,int block,
 }
 
 static int vorbis_encode_peak_init(vorbis_info *vi,double q,int block,
-				   vp_adjblock *in, ...){
-  int i,j,iq=q*10;
-  double x[11],dq;
+				   vp_adjblock *in){
+  int i,j,iq=q*5.;
+  double dq;
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
-  va_list ap;
-  
-  va_start(ap,in);
-  for(i=0;i<11;i++)
-    x[i]=va_arg(ap,double);
-  va_end(ap);
 
-  if(iq==10){
-    iq=9;
+  if(iq==5){
+    iq=5;
     dq=1.;
   }else{
-    dq=q*10.-iq;
+    dq=q*5.-iq;
   }
 
   for(i=0;i<P_BANDS;i++)
@@ -296,17 +313,11 @@ static int vorbis_encode_peak_init(vorbis_info *vi,double q,int block,
 }
 
 static int vorbis_encode_noisebias_init(vorbis_info *vi,double q,int block,
-					int in[][17], ...){
+					int in[][17]){
   int i,iq=q*10;
-  double x[11],dq;
+  double dq;
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
-  va_list ap;
-  
-  va_start(ap,in);
-  for(i=0;i<11;i++)
-    x[i]=va_arg(ap,double);
-  va_end(ap);
 
   if(iq==10){
     iq=9;
@@ -338,6 +349,14 @@ static int vorbis_encode_ath_init(vorbis_info *vi,double q,int block,
     dq=1.;
   }else{
     dq=q*10.-iq;
+  }
+
+  dq=x[iq]*(1.-dq)+x[iq+1]*dq;
+  iq=(int)dq;
+  dq-=iq;
+  if(dq==0 && iq>0){
+    iq--;
+    dq=1.;
   }
 
   for(i=0;i<P_BANDS;i++)
@@ -567,6 +586,8 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   ){
   int ret=0;
 
+  base_quality=0.;
+
   if(rate>40000){
     ret|=vorbis_encode_toplevel_init(vi,256,2048,channels,rate);
     ret|=vorbis_encode_floor_init(vi,base_quality,0,_floor_44_128_books,_floor_44_128,
@@ -577,19 +598,13 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
     ret|=vorbis_encode_global_psych_init(vi,base_quality,_psy_global_44,
 					 0., 0., .5, 1., 1., 1., 1., 1., 1., 1., 1.);
     
-    ret|=vorbis_encode_psyset_init(vi,base_quality,0,_psy_settings,
-				   0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.);
-    ret|=vorbis_encode_psyset_init(vi,base_quality,1,_psy_settings,
-				   0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.);
-    ret|=vorbis_encode_psyset_init(vi,base_quality,2,_psy_settings,
-				   0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.);
+    ret|=vorbis_encode_psyset_init(vi,base_quality,0,_psy_settings);
+    ret|=vorbis_encode_psyset_init(vi,base_quality,1,_psy_settings);
+    ret|=vorbis_encode_psyset_init(vi,base_quality,2,_psy_settings);
 
-    ret|=vorbis_encode_tonemask_init(vi,base_quality,0,_vp_tonemask_adj_otherblock,
-				     0., .5, 1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5.);
-    ret|=vorbis_encode_tonemask_init(vi,base_quality,1,_vp_tonemask_adj_otherblock,
-				     0., .5, 1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5.);
-    ret|=vorbis_encode_tonemask_init(vi,base_quality,2,_vp_tonemask_adj_longblock,
-				     0., .5, 1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5.);
+    ret|=vorbis_encode_tonemask_init(vi,base_quality,0,_vp_tonemask_adj_otherblock);
+    ret|=vorbis_encode_tonemask_init(vi,base_quality,1,_vp_tonemask_adj_otherblock);
+    ret|=vorbis_encode_tonemask_init(vi,base_quality,2,_vp_tonemask_adj_longblock);
 
     ret|=vorbis_encode_compand_init(vi,base_quality,0,_psy_compand_44,
 				    1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.);
@@ -598,19 +613,13 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
     ret|=vorbis_encode_compand_init(vi,base_quality,2,_psy_compand_44,
 				    1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.);
     
-    ret|=vorbis_encode_peak_init(vi,base_quality,0,_vp_peakguard,
-				 0., .5, 1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5.);
-    ret|=vorbis_encode_peak_init(vi,base_quality,1,_vp_peakguard,
-				 0., .5, 1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5.);
-    ret|=vorbis_encode_peak_init(vi,base_quality,2,_vp_peakguard,
-				 0., .5, 1., 1.5, 2., 2.5, 3., 3.5, 4., 4.5, 5.);
+    ret|=vorbis_encode_peak_init(vi,base_quality,0,_vp_peakguard);
+    ret|=vorbis_encode_peak_init(vi,base_quality,1,_vp_peakguard);
+    ret|=vorbis_encode_peak_init(vi,base_quality,2,_vp_peakguard);
     
-    ret|=vorbis_encode_noisebias_init(vi,base_quality,0,_psy_noisebias_other,
-				      0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.);
-    ret|=vorbis_encode_noisebias_init(vi,base_quality,1,_psy_noisebias_other,
-				      0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.);
-    ret|=vorbis_encode_noisebias_init(vi,base_quality,2,_psy_noisebias_long,
-				      0., 1., 2., 3., 4., 5., 6., 7., 8., 9., 10.);
+    ret|=vorbis_encode_noisebias_init(vi,base_quality,0,_psy_noisebias_other);
+    ret|=vorbis_encode_noisebias_init(vi,base_quality,1,_psy_noisebias_other);
+    ret|=vorbis_encode_noisebias_init(vi,base_quality,2,_psy_noisebias_long);
 
     ret|=vorbis_encode_ath_init(vi,base_quality,0,ATH_Bark_dB,
 				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
