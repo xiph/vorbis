@@ -199,6 +199,7 @@ void vqgen_init(vqgen *v,int elements,int aux,int entries,
   memset(v,0,sizeof(vqgen));
 
   v->elements=elements;
+  v->aux=aux;
   v->allocated=32768;
   v->pointlist=malloc(v->allocated*(v->elements+v->aux)*sizeof(double));
 
@@ -225,7 +226,7 @@ void vqgen_addpoint(vqgen *v, double *p,double *a){
   }
   
   memcpy(_point(v,v->points),p,sizeof(double)*v->elements);
-  if(v->aux)memcpy(_point(v,v->points)+v->elements,p,sizeof(double)*v->aux);
+  if(v->aux)memcpy(_point(v,v->points)+v->elements,a,sizeof(double)*v->aux);
   v->points++;
   if(v->points==v->entries)_vqgen_seed(v);
 }
