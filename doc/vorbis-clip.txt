@@ -94,30 +94,32 @@ that is not on a packet boundary; we need to ignore a few samples to
 get the desired beginning point.
 
 The process of marking the desired beginning point is similar to
-marking an arbitrary ending point; if the encoder wishes sample zero
-to be some location past the actual beginning of data, it uses a short
-value on the first audio page* with a granule position value greater
-than zero**.  The decoder sees that on the first page that will return
+marking an arbitrary ending point. If the encoder wishes sample zero
+to be some location past the actual beginning of data, it associates a
+'short' granule position value with the completion of the second*
+audio packet.  The granule position is associated with the second
+packet simply by making sure the second packet completes its page.
+
+*(We associate the short value with the second packet for two reasons.
+ a) The first packet only primes the overlap/add buffer.  No data is
+ returned before decoding the second packet; this places the decision
+ information at the point of decision.  b) Placing the short value on
+ the first packet would make the value negative (as the first packet
+ normally represents position zero); a negative value would break the
+ requirement that granule positions increase; the headers have
+ position values of zero)
+
+The decoder sees that on the first page that will return
 data from the overlap/add queue, we have more samples than the granule
 position accounts for, and discards the 'surplus' from the beginning
 of the queue.
 
-*  The first pages of a vorbis logical bitstream are headers.
-
-** It is possible that the first audio page[s] contain only the first
-   packet, from which no data returns immediately due to the
-   overlap/add nature of Vorbis packets.  If the first page[s] contain
-   only the first audio packet, the granule position will only be -1
-   or 0.  The page on which the second packet completes will be the
-   page with the 'short' granule position.
-
 Note that short granule values (indicating less than the actually
 returned about of data) are not legal in the Vorbis spec outside of
-indicating beginning and ending sample positions applying to the
-first/last audio packet.  However, decoders should, at minimum,
-tolerate inadvertant short values elsewhere in the stream (just as
-they should tolerate out-of-order/non-increasing granulepos values,
-although this too is illegal).
+indicating beginning and ending sample positions.  However, decoders
+should, at minimum, tolerate inadvertant short values elsewhere in the
+stream (just as they should tolerate out-of-order/non-increasing
+granulepos values, although this too is illegal).
 
 Beginning point at arbitrary positive timestamp (no 'zero' sample):
 
