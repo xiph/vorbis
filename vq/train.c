@@ -192,7 +192,7 @@ int main(int argc,char *argv[]){
       }
       
       {
-	double *b=alloca(dim*sizeof(double));
+	double *b=alloca((dim+vqext_aux)*sizeof(double));
 	i=0;
 	v.entries=0; /* hack to avoid reseeding */
 	while(1){

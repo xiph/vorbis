@@ -231,15 +231,23 @@ void vqgen_addpoint(vqgen *v, double *p,double *a){
   if(v->points==v->entries)_vqgen_seed(v);
 }
 
+int directdsort(const void *a, const void *b){
+  double av=*((double *)a);
+  double bv=*((double *)b);
+  if(av>bv)return(-1);
+  return(1);
+}
+
 double vqgen_iterate(vqgen *v){
   long   i,j,k;
   double fdesired=(double)v->points/v->entries;
   long  desired=fdesired;
+  long  desired2=desired*2;
   double asserror=0.;
   double meterror=0.;
   double *new=malloc(sizeof(double)*v->entries*v->elements);
   long   *nearcount=malloc(v->entries*sizeof(long));
-  double *nearbias=malloc(v->entries*desired*sizeof(double));
+  double *nearbias=malloc(v->entries*desired2*sizeof(double));
 
 #ifdef NOISY
   char buff[80];
@@ -314,8 +322,8 @@ double vqgen_iterate(vqgen *v){
     for(j=0;j<v->entries;j++){
       
       double thismetric;
-      double *nearbiasptr=nearbias+desired*j;
-      long k=nearcount[j]-1;
+      double *nearbiasptr=nearbias+desired2*j;
+      long k=nearcount[j];
       
       /* 'thismetric' is to be the bias value necessary in the current
 	 arrangement for entry j to capture point i */
@@ -326,33 +334,36 @@ double vqgen_iterate(vqgen *v){
 	/* use the primary entry as the threshhold */
 	thismetric=firstmetric-v->metric_func(v,_now(v,j),ppt);
       }
-      
-      if(k>=0 && thismetric>nearbiasptr[k]){
-	
-	/* start at the end and search backward for where this entry
-	   belongs */
-	
-	for(;k>0;k--) if(nearbiasptr[k-1]>=thismetric)break;
-	
-	/* insert at k.  Shift and inject. */
-	memmove(nearbiasptr+k+1,nearbiasptr+k,(desired-k-1)*sizeof(double));
+
+      /* a cute two-stage delayed sorting hack */
+      if(k<desired){
 	nearbiasptr[k]=thismetric;
+	k++;
+	if(k==desired)
+	  qsort(nearbiasptr,desired,sizeof(double),directdsort);
 	
-	if(nearcount[j]<desired)nearcount[j]++;
-	
-      }else{
-	if(nearcount[j]<desired){
-	  /* we checked the thresh earlier.  We know this is the
-	     last entry */
-	  nearbiasptr[nearcount[j]++]=thismetric;
+      }else if(thismetric>nearbiasptr[desired-1]){
+	nearbiasptr[k]=thismetric;
+	k++;
+	if(k==desired2){
+	  qsort(nearbiasptr,desired2,sizeof(double),directdsort);
+	  k=desired;
 	}
       }
+      nearcount[j]=k;
     }
   }
   
   /* inflate/deflate */
-  for(i=0;i<v->entries;i++)
-    v->bias[i]=nearbias[(i+1)*desired-1];
+  for(i=0;i<v->entries;i++){
+    double *nearbiasptr=nearbias+desired2*i;
+
+    /* due to the delayed sorting, we likely need to finish it off....*/
+    if(nearcount[i]>desired)
+      qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
+
+    v->bias[i]=nearbiasptr[desired-1];
+  }
 
   /* assign midpoints */
 

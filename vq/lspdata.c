@@ -35,7 +35,7 @@ int vqext_aux=1;
    features. */
 
 double global_maxdel=M_PI;
-#define FUDGE ((global_maxdel*2.0)-weight[i])
+#define FUDGE (global_maxdel-weight[i])
 double *weight=NULL;
 
 double *vqext_weight(vqgen *v,double *p){
@@ -99,6 +99,7 @@ void vqext_preprocess(vqgen *v){
     }
   }
 
+  global_maxdel*=1.1;
   weight=malloc(sizeof(double)*v->elements);
 }
 

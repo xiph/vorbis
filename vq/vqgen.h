@@ -43,7 +43,8 @@ typedef struct vqbook{
   int    quant;       /* 0 < quant <= 16 */
   int    sequencep;   /* bitflag */
 
-  double *valuelist;  /* list of dim*entries quant/actual entry values */
+  double *valuelist;  /* list of dim*entries actual entry values */
+  long   *quantlist;  /* list of dim*entries quantized entry values */
   long   *codelist;   /* list of bitstream codewords for each entry */
   long   *lengthlist; /* codeword lengths in bits */
 
@@ -88,8 +89,10 @@ extern void vqgen_addpoint(vqgen *v, double *p,double *aux);
 extern double vqgen_iterate(vqgen *v);
 extern void vqgen_unquantize(vqgen *v,quant_meta *q);
 extern void vqgen_quantize(vqgen *v,quant_meta *q);
+extern long float24_pack(double val);
+extern double float24_unpack(long val);
 
-extern void vqsp_book(vqgen *v,vqbook *b);
+extern void vqsp_book(vqgen *v,vqbook *b,long *quantlist);
 extern int vqenc_entry(vqbook *b,double *val);
 
 #endif

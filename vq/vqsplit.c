@@ -78,10 +78,11 @@ int iascsort(const void *a,const void *b){
 extern double _dist_sq(vqgen *v,double *a, double *b);
 
 /* goes through the split, but just counts it and returns a metric*/
-void vqsp_count(vqgen *v,long *entryindex,long entries, 
+void vqsp_count(vqgen *v,long *membership,
+		long *entryindex,long entries, 
 		long *pointindex,long points,
 		long *entryA,long *entryB,
-		double *n, double c, double slack,
+		double *n, double c,
 		long *entriesA,long *entriesB,long *entriesC){
   long i,j,k;
   long A=0,B=0,C=0;
@@ -89,40 +90,27 @@ void vqsp_count(vqgen *v,long *entryindex,long entries,
   memset(entryA,0,sizeof(long)*entries);
   memset(entryB,0,sizeof(long)*entries);
 
+  /* Do the points belonging to this cell occur on sideA, sideB or
+     both? */
+
   for(i=0;i<points;i++){
     double *ppt=_point(v,pointindex[i]);
-    long   firstentry=0;
-    double firstmetric=_dist_sq(v,_now(v,entryindex[0]),ppt);
+    long   firstentry=membership[i];
     double position=-c;
-    
-    for(j=1;j<entries;j++){
-      double thismetric=_dist_sq(v,_now(v,entryindex[j]),ppt);
-      if(thismetric<firstmetric){
-	firstmetric=thismetric;
-	firstentry=j;
-      }
-    }
 
-    /* count point split */
-    for(k=0;k<v->elements;k++)
+    if(!entryA[firstentry] || !entryB[firstentry]){
+      for(k=0;k<v->elements;k++)
       position+=ppt[k]*n[k];
-    if(position>0.){
-      entryA[firstentry]++;
-    }else{
-      entryB[firstentry]++;
+      if(position>0.)
+	entryA[firstentry]=1;
+      else
+	entryB[firstentry]=1;
     }
   }
 
-  /* look to see if entries are in the slack zone */
   /* The entry splitting isn't total, so that storage has to be
      allocated for recursion.  Reuse the entryA/entryB vectors */
   for(j=0;j<entries;j++){
-    long total=entryA[j]+entryB[j];
-    if((double)entryA[j]/total<slack){
-      entryA[j]=0;
-    }else if((double)entryB[j]/total<slack){
-      entryB[j]=0;
-    }
     if(entryA[j] && entryB[j])C++;
     if(entryA[j])entryA[A++]=entryindex[j];
     if(entryB[j])entryB[B++]=entryindex[j];
@@ -184,7 +172,7 @@ static void spinnit(void){
 int lp_split(vqgen *v,vqbook *b,
 	     long *entryindex,long entries, 
 	     long *pointindex,long points,
-	     long depth,double slack){
+	     long depth){
 
   /* The encoder, regardless of book, will be using a straight
      euclidian distance-to-point metric to determine closest point.
@@ -205,6 +193,28 @@ int lp_split(vqgen *v,vqbook *b,
   long pointsA=0;
   long i,j,k;
 
+  long *membership=malloc(sizeof(long)*points);
+  
+  /* which cells do points belong to?  Do this before n^2 best pair chooser. */
+
+  for(i=0;i<points;i++){
+    double *ppt=_point(v,pointindex[i]);
+    long   firstentry=0;
+    double firstmetric=_dist_sq(v,_now(v,entryindex[0]),ppt);
+    
+    if(points*entries>64*1024)spinnit();
+
+    for(j=1;j<entries;j++){
+      double thismetric=_dist_sq(v,_now(v,entryindex[j]),ppt);
+      if(thismetric<firstmetric){
+	firstmetric=thismetric;
+	firstentry=j;
+      }
+    }
+    
+    membership[i]=firstentry;
+  }
+
   p=alloca(sizeof(double)*v->elements);
   q=alloca(sizeof(double)*v->elements);
   n=alloca(sizeof(double)*v->elements);
@@ -216,7 +226,7 @@ int lp_split(vqgen *v,vqbook *b,
   /* more than one way to do this part.  For small sets, we can brute
      force it. */
 
-  if(entries<32){
+  {
     /* try every pair possibility */
     double best=0;
     long   besti=0;
@@ -226,11 +236,12 @@ int lp_split(vqgen *v,vqbook *b,
       for(j=i+1;j<entries;j++){
 	spinnit();
 	pq_in_out(v,n,&c,_now(v,entryindex[i]),_now(v,entryindex[j]));
-	vqsp_count(v,entryindex,entries, 
-		 pointindex,points,
-		 entryA,entryB,
-		 n, c, slack,
-		 &entriesA,&entriesB,&entriesC);
+	vqsp_count(v,membership,
+		   entryindex,entries, 
+		   pointindex,points,
+		   entryA,entryB,
+		   n, c, 
+		   &entriesA,&entriesB,&entriesC);
 	this=(entriesA-entriesC)*(entriesB-entriesC);
 
 	if(this>best){
@@ -241,55 +252,22 @@ int lp_split(vqgen *v,vqbook *b,
       }
     }
     pq_in_out(v,n,&c,_now(v,entryindex[besti]),_now(v,entryindex[bestj]));
-  }else{
-    double best=0.;
-    long   bestj=0;
-    
-    /* try COG/normal and furthest pairs */
-    /* medianpoint */
-    for(k=0;k<v->elements;k++){
-      spinnit();
-
-      /* just sort the index array */
-      sortvals=v->entrylist+k;
-      els=v->elements;
-      qsort(entryindex,entries,sizeof(long),dascsort);
-      if(entries&0x1){
-	p[k]=v->entrylist[(entryindex[entries/2])*v->elements+k];
-      }else{
-	p[k]=(v->entrylist[(entryindex[entries/2])*v->elements+k]+
-	      v->entrylist[(entryindex[entries/2-1])*v->elements+k])/2.;
-      }
-    }
-
-    spinnit();
-
-    /* try every normal, but just for distance */
-    for(j=0;j<entries;j++){
-      double *ppj=_now(v,entryindex[j]);
-      double this=_dist_sq(v,p,ppj);
-      if(this>best){
-	best=this;
-	bestj=j;
-      }
-    }
-
-    pq_center_out(v,n,&c,p,_point(v,pointindex[bestj]));
-
-
   }
 
   /* find cells enclosing points */
   /* count A/B points */
 
-  vqsp_count(v,entryindex,entries, 
-	   pointindex,points,
-	   entryA,entryB,
-	   n, c, slack,
-	   &entriesA,&entriesB,&entriesC);
+  vqsp_count(v,membership,
+	     entryindex,entries, 
+	     pointindex,points,
+	     entryA,entryB,
+	     n, c,
+	     &entriesA,&entriesB,&entriesC);
 
-  /* the point index is split evenly, so we do an Order n
-     rearrangement into A first/B last and just pass it on */
+  free(membership);
+
+  /* the point index is split, so we do an Order n rearrangement into
+     A first/B last and just pass it on */
   {
     long Aptr=0;
     long Bptr=points-1;
@@ -337,7 +315,7 @@ int lp_split(vqgen *v,vqbook *b,
       b->ptr0[thisaux]=entryA[0];
     }else{
       b->ptr0[thisaux]= -b->aux;
-      ret=lp_split(v,b,entryA,entriesA,pointindex,pointsA,depth+1,slack); 
+      ret=lp_split(v,b,entryA,entriesA,pointindex,pointsA,depth+1); 
     }
     if(entriesB==1){
       ret++;
@@ -345,7 +323,7 @@ int lp_split(vqgen *v,vqbook *b,
     }else{
       b->ptr1[thisaux]= -b->aux;
       ret+=lp_split(v,b,entryB,entriesB,pointindex+pointsA,points-pointsA,
-		   depth+1,slack); 
+		    depth+1); 
     }
   }
   free(entryA);
@@ -353,9 +331,10 @@ int lp_split(vqgen *v,vqbook *b,
   return(ret);
 }
 
-void vqsp_book(vqgen *v, vqbook *b){
-  long *entryindex=malloc(sizeof(double)*v->entries);
-  long *pointindex=malloc(sizeof(double)*v->points);
+void vqsp_book(vqgen *v, vqbook *b, long *quantlist){
+  long *entryindex=malloc(sizeof(long)*v->entries);
+  long *pointindex=malloc(sizeof(long)*v->points);
+  long *membership=malloc(sizeof(long)*v->points);
   long i,j;
 
   memset(b,0,sizeof(vqbook));
@@ -372,9 +351,29 @@ void vqsp_book(vqgen *v, vqbook *b){
   b->c=malloc(sizeof(double)*b->alloc);
   b->lengthlist=calloc(b->entries,sizeof(long));
   
+  /* which cells do points belong to?  Only do this once. */
+
+  for(i=0;i<v->points;i++){
+    double *ppt=_point(v,i);
+    long   firstentry=0;
+    double firstmetric=_dist_sq(v,_now(v,0),ppt);
+    
+    for(j=1;j<v->entries;j++){
+      double thismetric=_dist_sq(v,_now(v,j),ppt);
+      if(thismetric<firstmetric){
+	firstmetric=thismetric;
+	firstentry=j;
+      }
+    }
+    
+    membership[i]=firstentry;
+  }
+
+
   /* first, generate the encoding decision heirarchy */
   fprintf(stderr,"Total leaves: %d\n",
-	  lp_split(v,b,entryindex,v->entries, pointindex,v->points,0,0));
+	  lp_split(v,b,entryindex,v->entries, 
+		   pointindex,v->points,0));
   
   free(entryindex);
   free(pointindex);
@@ -459,18 +458,21 @@ void vqsp_book(vqgen *v, vqbook *b){
     /* n and c stay unchanged */
     for(i=0;i<b->entries;i++)revindex[index[i]]=i;
     for(i=0;i<b->aux;i++){
-      if(b->ptr0[i]>=0)b->ptr0[i]=revindex[i];
-      if(b->ptr1[i]>=0)b->ptr1[i]=revindex[i];
+      if(b->ptr0[i]>=0)b->ptr0[i]=revindex[b->ptr0[i]];
+      if(b->ptr1[i]>=0)b->ptr1[i]=revindex[b->ptr1[i]];
     }
     free(revindex);
 
     /* map lengthlist and vallist with index */
     b->lengthlist=calloc(b->entries,sizeof(long));
     b->valuelist=malloc(sizeof(double)*b->entries*b->dim);
+    b->quantlist=malloc(sizeof(long)*b->entries*b->dim);
     for(i=0;i<b->entries;i++){
       long e=index[i];
-      for(k=0;k<b->dim;k++)
+      for(k=0;k<b->dim;k++){
 	b->valuelist[i*b->dim+k]=v->entrylist[e*b->dim+k];
+	b->quantlist[i*b->dim+k]=quantlist[e*b->dim+k];
+      }
       b->lengthlist[i]=wordlen[e];
     }
 
