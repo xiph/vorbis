@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.3.2.1 2001/12/17 05:39:23 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.3.2.2 2001/12/18 23:49:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -264,7 +264,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
      in use) are taken into account by the min/max limiter (if min/max
      is in use) */
   if(bm->avg_binacc){
-    long desired_center=bm->avg_centerdesired;
+    unsigned long desired_center=bm->avg_centerdesired;
     if(eofflag)desired_center=0;
 
     /* update the avg head */
@@ -335,13 +335,13 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
       if(bm->noisetrigger_postpone<=0){
 	if(bm->noisetrigger_request<0.){
 	  bm->avgnoise-=1.f;
-	  if(bm->noisetrigger_request<bm->avg_sampleacc/2)
+	  if(bm->noisetrigger_request<(signed long)(bm->avg_sampleacc)/2)
             bm->avgnoise-=1.f;
 	  bm->noisetrigger_postpone=bm->avg_sampleacc/2;
 	}
 	if(bm->noisetrigger_request>0.){
 	  bm->avgnoise+=1.f;
-	  if(bm->noisetrigger_request>bm->avg_sampleacc/2)
+	  if(bm->noisetrigger_request>(signed long)(bm->avg_sampleacc)/2)
 	    bm->avgnoise+=1.f;
 	  bm->noisetrigger_postpone=bm->avg_sampleacc/2;
 	}
@@ -373,10 +373,11 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
   
   /* update the min/max queues and enforce limits */
   if(bm->minmax_binstack){
-    long sampledesired=eofflag?0:bm->minmax_sampledesired;
+    unsigned long sampledesired=eofflag?0:bm->minmax_sampledesired;
 
     /* add to stack recent */
     while(minmax_head!=new_minmax_head){
+      unsigned int i;
       int samples=ci->blocksizes[bm->queue_actual[minmax_head]&
 				0x80000000UL?1:0]>>1;
 
@@ -400,7 +401,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
     -bin+1  minmax[0]       <-> floater limited to 1
 	    limited to zero (val= -bin) is implicit
 	*/
-      for(i=0;i<bins;i++){
+      for(i=0;i<(unsigned int)bins;i++){
 	bm->minmax_binstack[bm->minmax_stackptr*bins*2+bins+i]+=
 	  LACING_ADJUST(
 	  BINBITS(minmax_head,

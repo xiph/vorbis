@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.39.2.1 2001/12/17 05:39:24 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.39.2.2 2001/12/18 23:49:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -378,14 +378,11 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     /* perform psychoacoustics; do masking */
     _vp_compute_mask(look->psy_look[blocktype],
-		     b->psy_g_look,
-		     i,
 		     logfft, /* -> logmax */
 		     logmdct,
 		     logmask,
 		     global_ampmax,
 		     local_ampmax[i],
-		     ci->blocksizes[vb->lW]/2,
 		     bm->avgnoise);
 
     _analysis_output("mask",seq+i,logmask,n/2,1,0);
@@ -401,12 +398,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
 
     _vp_remove_floor(look->psy_look[blocktype],
-		     b->psy_g_look,
-		     logmdct,
 		     mdct,
 		     codedflr,
-		     res,
-		     local_ampmax[i]);
+		     res);
 
     /*for(j=0;j<n/2;j++)
       if(fabs(res[j])>1200){
@@ -414,7 +408,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	fprintf(stderr,"%ld ",seq+i);
 	}*/
 
-    //_analysis_output("res",seq+i,res,n/2,1,0);
     _analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
       
   }
@@ -493,8 +486,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			  0);
     }
 
-    //for(i=0;i<vi->channels;i++)
-    //_analysis_output("quant",seq+i,quantized[i],n/2,1,0);
+    for(i=0;i<vi->channels;i++)
+      _analysis_output("quant",seq+i,quantized[i],n/2,1,0);
 
   
     /* classify, by submap */
@@ -555,6 +548,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      lqua[j]=lpcm[j]-lsof[j];
 	  }
 	}else{
+
 	  _vp_quantize_couple(look->psy_look[blocktype],
 			      info,
 			      pcm,
@@ -562,7 +556,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			      quantized,
 			      nonzero,
 			      i);
-	  
 	}
       }
     }

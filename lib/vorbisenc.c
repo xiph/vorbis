@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.23.2.1 2001/12/17 05:39:24 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.23.2.2 2001/12/18 23:49:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -471,12 +471,12 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
     if(stereo_backfill_p && amplitude_select){
       memcpy(psy->couple_pass+iterations,psy->couple_pass+iterations-1,
 	     sizeof(*psy->couple_pass));
-      amplitude_select=amplitude_select-1;
       psy->couple_pass[1].couple_pass[1].amppost_point=stereo_threshholds[amplitude_select-1];
       ci->passlimit[1]=4;
       for(i=0;i<r->partitions;i++)
-	if(in[iq].books_stereo_backfill[amplitude_select-1][i])
+	if(in[iq].books_stereo_backfill[amplitude_select][i])
 	  r->secondstages[i]|=8;
+      amplitude_select=amplitude_select-1;
       iterations++;
     }
     
@@ -485,6 +485,8 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
 	     sizeof(*psy->couple_pass));
       psy->couple_pass[iterations].granulem=.333333333;
       psy->couple_pass[iterations].igranulem=3.;
+      psy->couple_pass[iterations].couple_pass[0].outofphase_requant_limit=1.;
+      psy->couple_pass[iterations].couple_pass[1].outofphase_requant_limit=1.;
       for(i=0;i<r->partitions;i++)
 	if(in[iq].books_residue_backfill[amplitude_select][i][0])
 	  r->secondstages[i]|=(1<<(iterations+2));
@@ -495,6 +497,8 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
 	     sizeof(*psy->couple_pass));
       psy->couple_pass[iterations].granulem=.1111111111;
       psy->couple_pass[iterations].igranulem=9.;
+      psy->couple_pass[iterations].couple_pass[0].outofphase_requant_limit=.3;
+      psy->couple_pass[iterations].couple_pass[1].outofphase_requant_limit=.3;
       for(i=0;i<r->partitions;i++)
 	if(in[iq].books_residue_backfill[amplitude_select][i][1])
 	  r->secondstages[i]|=(1<<(iterations+2));
@@ -521,7 +525,7 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
   
   memcpy(&ci->psy_param[block*2+1]->couple_pass,
 	 &ci->psy_param[block*2]->couple_pass,
-	 sizeof(psy->couple_pass[0]));
+	 sizeof(psy->couple_pass));
   
   /* fill in all the books */
   {
@@ -588,10 +592,10 @@ static int vorbis_encode_lowpass_setup(vorbis_info *vi,double q,int block){
      here to next boundary, or the vorbis spec will round it *down* to
      previous boundary in encode/decode */
   if(ci->residue_type[block]==2)
-    r->end=((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
+    r->end=(int)((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
       r->grouping;
   else
-    r->end=((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
+    r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
       r->grouping;
   return(0);
 }
@@ -815,7 +819,15 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   ){
   int ret=0;
 
-  ret=vorbis_encode_setup_vbr(vi,channels,rate,base_quality);
+  ret=vorbis_encode_setup_vbr(vi,channels,rate,1.);
+  
+  {
+    codec_setup_info *ci=vi->codec_setup;
+    highlevel_encode_setup *hi=&ci->hi;
+    hi->stereo_couple_p=0;
+    hi->residue_backfill_p=1;
+  }
+
   if(ret){
     vorbis_info_clear(vi);
     return ret; 

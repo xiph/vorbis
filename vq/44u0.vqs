@@ -1,0 +1,36 @@
+
+GO
+
+>_44u0 noninterleaved
+	
+#iter 0
+
+#       0   1   2   4  26   1   4   +      
+#           0   0   0   0      
+#
+#       0   1   2   3   4   5   6   7
+#   1                   .           .
+#   2                   .           .
+#   4       .   .   .       .   .   .
+
+:_p1_0 44u0/res_part1_pass2.vqd, 4, nonseq cull, 0 +- 1 
+:_p2_0 44u0/res_part2_pass2.vqd, 4, nonseq cull, 0 +- 1 2
+:_p3_0 44u0/res_part3_pass2.vqd, 2, nonseq cull, 0 +- 1 2 3 4
+:_p4_0 44u0/res_part4_pass0.vqd, 2, nonseq , 0 +- 3 6 9 12 15 18 21 24 27
+:_p4_1 44u0/res_part4_pass1.vqd, 4, nonseq cull, 0 +- 1 
+:_p5_0 44u0/res_part5_pass2.vqd, 4, nonseq cull, 0 +- 1
+:_p6_0 44u0/res_part6_pass2.vqd, 2, nonseq cull, 0 +- 1 2 3 4
+
+:_p7_0 44u0/res_part7_pass0.vqd, 2, nonseq, 0 +- 67 134
+:_p7_1 44u0/res_part7_pass1.vqd, 2, nonseq, 0 +- 3 6 9 12 15 18 21 24 27 30 33
+:_p7_2 44u0/res_part7_pass2.vqd, 4, nonseq, 0 +- 1 
+
+#iter 1
+
+:_p0_r0 44u0/res_part0_pass3.vqd, 2, nonseq cull, 0 +- .33333333
+:_p1_r0 44u0/res_partN_pass3.vqd, 2, nonseq cull, 0 +- .33333333
+
+#iter 2
+
+:_p0_r1 44u0/res_part0_pass4.vqd, 2, nonseq cull, 0 +- .11111111
+:_p1_r1 44u0/res_partN_pass4.vqd, 2, nonseq cull, 0 +- .11111111
