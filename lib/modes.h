@@ -37,7 +37,7 @@ vorbis_info predef_modes[]={
     /* dummy, dummy, dummy, dummy */
     0, NULL, 0, NULL, 
     /* smallblock, largeblock, LPC order (small, large) */
-    {2048, 2048}, {16,16}, 
+    {256, 2048}, {16,16}, 
     /* spectral octaves (small, large), spectral channels */
     {5,5}, 2,
     /* thresh sample period, preecho clamp trigger threshhold, range, dummy */
