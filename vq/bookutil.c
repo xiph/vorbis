@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.5 2000/01/12 11:34:42 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.6 2000/01/21 13:42:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,16 +26,17 @@
 
 void codebook_unquantize(codebook *b){
   long j,k;
-  double mindel=float24_unpack(b->q_min);
-  double delta=float24_unpack(b->q_delta);
-  if(!b->valuelist)b->valuelist=malloc(sizeof(double)*b->entries*b->dim);
+  static_codebook *c=b->c;
+  double mindel=float24_unpack(c->q_min);
+  double delta=float24_unpack(c->q_delta);
+  if(!b->valuelist)b->valuelist=malloc(sizeof(double)*c->entries*c->dim);
   
-  for(j=0;j<b->entries;j++){
+  for(j=0;j<c->entries;j++){
     double last=0.;
-    for(k=0;k<b->dim;k++){
-      double val=b->quantlist[j*b->dim+k]*delta+last+mindel;
-      b->valuelist[j*b->dim+k]=val;
-      if(b->q_sequencep)last=val;
+    for(k=0;k<c->dim;k++){
+      double val=c->quantlist[j*c->dim+k]*delta+last+mindel;
+      b->valuelist[j*c->dim+k]=val;
+      if(c->q_sequencep)last=val;
 
     }
   }
@@ -101,7 +102,8 @@ int get_line_value(FILE *in,double *value){
     value_line_buff=NULL;
     return(-1);
   }else{
-    value_line_buff=next+1;
+    value_line_buff=next;
+    while(*value_line_buff>32)value_line_buff++;
     return(0);
   }
 }
@@ -134,6 +136,7 @@ void reset_next_value(void){
 
 int get_vector(codebook *b,FILE *in,int start, int n,double *a){
   int i;
+  static_codebook *c=b->c;
 
   while(1){
 
@@ -147,14 +150,14 @@ int get_vector(codebook *b,FILE *in,int start, int n,double *a){
       }
     }
 
-    for(i=1;i<b->dim;i++)
+    for(i=1;i<c->dim;i++)
       if(get_line_value(in,a+i))
 	break;
     
-    if(i==b->dim){
-      double temp=a[b->dim-1];
-      for(i=0;i<b->dim;i++)a[i]-=sequence_base;
-      if(b->q_sequencep)sequence_base=temp;
+    if(i==c->dim){
+      double temp=a[c->dim-1];
+      for(i=0;i<c->dim;i++)a[i]-=sequence_base;
+      if(c->q_sequencep)sequence_base=temp;
       v_sofar++;
       return(0);
     }
@@ -185,12 +188,13 @@ char *find_seek_to(FILE *in,char *s){
 
 codebook *codebook_load(char *filename){
   codebook *b=calloc(1,sizeof(codebook));
+  static_codebook *c=b->c=calloc(1,sizeof(static_codebook));
   encode_aux *a=calloc(1,sizeof(encode_aux));
   FILE *in=fopen(filename,"r");
   char *line;
   long i;
 
-  b->encode_tree=a;
+  c->encode_tree=a;
 
   if(in==NULL){
     fprintf(stderr,"Couldn't open codebook %s\n",filename);
@@ -198,13 +202,13 @@ codebook *codebook_load(char *filename){
   }
 
   /* find the codebook struct */
-  find_seek_to(in,"static codebook _vq_book_");
+  find_seek_to(in,"static static_codebook _vq_book_");
 
   /* get the major important values */
   line=get_line(in);
   if(sscanf(line,"%ld, %ld, %ld, %ld, %d, %d",
-	    &(b->dim),&(b->entries),&(b->q_min),&(b->q_delta),&(b->q_quant),
-	    &(b->q_sequencep))!=6){
+	    &(c->dim),&(c->entries),&(c->q_min),&(c->q_delta),&(c->q_quant),
+	    &(c->q_sequencep))!=6){
     fprintf(stderr,"1: syntax in %s in line:\t %s",filename,line);
     exit(1);
   }
@@ -212,8 +216,6 @@ codebook *codebook_load(char *filename){
   /* find the auxiliary encode struct (if any) */
   find_seek_to(in,"static encode_aux _vq_aux_");
   /* how big? */
-  line=get_line(in);
-  line=get_line(in);
   line=get_line(in);
   line=get_line(in);
   line=get_line(in);
@@ -227,19 +229,9 @@ codebook *codebook_load(char *filename){
   /* load the quantized entries */
   find_seek_to(in,"static long _vq_quantlist_");
   reset_next_value();
-  b->quantlist=malloc(sizeof(long)*b->entries*b->dim);
-  for(i=0;i<b->entries*b->dim;i++)
-    if(get_next_ivalue(in,b->quantlist+i)){
-      fprintf(stderr,"out of data while reading codebook %s\n",filename);
-      exit(1);
-    }
-
-  /* load the codewords */
-  find_seek_to(in,"static long _vq_codelist");
-  reset_next_value();
-  b->codelist=malloc(sizeof(long)*b->entries);
-  for(i=0;i<b->entries;i++)
-    if(get_next_ivalue(in,b->codelist+i)){
+  c->quantlist=malloc(sizeof(long)*c->entries*c->dim);
+  for(i=0;i<c->entries*c->dim;i++)
+    if(get_next_ivalue(in,c->quantlist+i)){
       fprintf(stderr,"out of data while reading codebook %s\n",filename);
       exit(1);
     }
@@ -247,9 +239,9 @@ codebook *codebook_load(char *filename){
   /* load the lengthlist */
   find_seek_to(in,"static long _vq_lengthlist");
   reset_next_value();
-  b->lengthlist=malloc(sizeof(long)*b->entries);
-  for(i=0;i<b->entries;i++)
-    if(get_next_ivalue(in,b->lengthlist+i)){
+  c->lengthlist=malloc(sizeof(long)*c->entries);
+  for(i=0;i<c->entries;i++)
+    if(get_next_ivalue(in,c->lengthlist+i)){
       fprintf(stderr,"out of data while reading codebook %s\n",filename);
       exit(1);
     }
@@ -306,24 +298,25 @@ codebook *codebook_load(char *filename){
 }
 
 int codebook_entry(codebook *b,double *val){
-  encode_aux *t=b->encode_tree;
+  static_codebook *c=b->c;
+  encode_aux *t=c->encode_tree;
   int ptr=0,k;
-  double *n=alloca(b->dim*sizeof(double));
+  double *n=alloca(c->dim*sizeof(double));
 
   while(1){
-    double c=0.;
-    double *p=b->valuelist+t->p[ptr]*b->dim;
-    double *q=b->valuelist+t->q[ptr]*b->dim;
+    double C=0.;
+    double *p=b->valuelist+t->p[ptr]*c->dim;
+    double *q=b->valuelist+t->q[ptr]*c->dim;
     
-    for(k=0;k<b->dim;k++){
+    for(k=0;k<c->dim;k++){
       n[k]=p[k]-q[k];
-      c-=(p[k]+q[k])*n[k];
+      C-=(p[k]+q[k])*n[k];
     }
-    c/=2.;
+    C/=2.;
 
-    for(k=0;k<b->dim;k++)
-      c+=n[k]*val[k];
-    if(c>0.) /* in A */
+    for(k=0;k<c->dim;k++)
+      C+=n[k]*val[k];
+    if(C>0.) /* in A */
       ptr= -t->ptr0[ptr];
     else     /* in B */
       ptr= -t->ptr1[ptr];

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.7 2000/01/10 10:42:05 xiphmont Exp $
+ last mod: $Id: run.c,v 1.8 2000/01/21 13:42:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,7 +42,6 @@ extern void process_vector(codebook **b,double *a);
 extern void process_usage(void);
 
 int main(int argc,char *argv[]){
-  char *name;
   char *basename;
   double *a=NULL;
   codebook **b=calloc(1,sizeof(codebook *));
@@ -105,7 +104,7 @@ int main(int argc,char *argv[]){
 	b=realloc(b,sizeof(codebook *)*(books+2));
 	b[books++]=codebook_load(name);
 	b[books]=NULL;
-	if(!a)a=malloc(sizeof(double)*b[books-1]->dim);
+	if(!a)a=malloc(sizeof(double)*b[books-1]->c->dim);
       }
 
       /* data file */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do data partitioning
- last mod: $Id: partition.c,v 1.2 2000/01/07 12:11:32 xiphmont Exp $
+ last mod: $Id: partition.c,v 1.3 2000/01/21 13:42:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,8 +41,8 @@ void process_preprocess(codebook **b,char *basename){
     exit(1);
   }
 
-  out=malloc(sizeof(FILE *)*b0->entries);
-  for(i=0;i<b0->entries;i++){
+  out=malloc(sizeof(FILE *)*b0->c->entries);
+  for(i=0;i<b0->c->entries;i++){
     sprintf(buffer,"%s-%dp.vqd",basename,i);
     out[i]=fopen(buffer,"w");
     if(out[i]==NULL){
@@ -55,7 +55,7 @@ void process_preprocess(codebook **b,char *basename){
 void process_postprocess(codebook **b,char *basename){
   codebook *b0=*b;
   int i;
-  for(i=0;i<b0->entries;i++)
+  for(i=0;i<b0->c->entries;i++)
     fclose(out[i]);
   fprintf(stderr,"Done.                      \n");
 }
@@ -66,7 +66,7 @@ void process_vector(codebook **b,double *a){
   int entry=codebook_entry(b0,a);
   int i;
 
-  for(i=0;i<b0->dim;i++)
+  for(i=0;i<b0->c->dim;i++)
     fprintf(out[entry],"%f, ",a[i]);
   fprintf(out[entry],"\n");
   if(count++%100)spinnit("working.... lines: ",count);
@@ -80,3 +80,7 @@ void process_usage(void){
 	  "       files named <basename>-<n>p.vqh.\n\n");
 
 }
+
+
+
+

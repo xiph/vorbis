@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.4 2000/01/07 12:11:30 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.5 2000/01/21 13:42:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,10 +33,10 @@ void process_preprocess(codebook **bs,char *basename){
   while(*bs){
     codebook *b=*bs;
     if(dim==-1){
-      dim=b->dim;
+      dim=b->c->dim;
       work=malloc(sizeof(double)*dim);
     }else{
-      if(dim!=b->dim){
+      if(dim!=b->c->dim){
 	fprintf(stderr,"Each codebook in a cascade must have the same dimensional order\n");
 	exit(1);
       }
@@ -56,9 +56,9 @@ void process_vector(codebook **bs,double *a){
   while(*bs){
     codebook *b=*bs;
     int entry=codebook_entry(b,work);
-    double *e=b->valuelist+b->dim*entry;
+    double *e=b->valuelist+b->c->dim*entry;
 
-    for(i=0;i<b->dim;i++)work[i]-=e[i];
+    for(i=0;i<b->c->dim;i++)work[i]-=e[i];
     bs++;
   }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.3 2000/01/10 10:42:04 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.4 2000/01/21 13:42:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -54,10 +54,10 @@ void process_preprocess(codebook **bs,char *basename){
   while(bs[books]){
     codebook *b=bs[books];
     if(dim==-1){
-      dim=b->dim;
+      dim=b->c->dim;
       work=malloc(sizeof(double)*dim);
     }else{
-      if(dim!=b->dim){
+      if(dim!=b->c->dim){
 	fprintf(stderr,"Each codebook in a cascade must have the same dimensional order\n");
 	exit(1);
       }
@@ -66,7 +66,7 @@ void process_preprocess(codebook **bs,char *basename){
   }
 
   if(books){
-    codebook *b=bs[books-1];
+    static_codebook *b=bs[books-1]->c;
     histogram=calloc(b->entries,sizeof(double));
     histogram_distance=calloc(b->entries,sizeof(double));
     histogram_errorsq=calloc(b->entries*dim,sizeof(double));
@@ -85,7 +85,7 @@ void process_postprocess(codebook **b,char *basename){
   codebook *bb=b[books-1];
 
   fprintf(stderr,"Done.  Processed %ld data points for %ld entries:\n",
-	  (long)count,bb->entries);
+	  (long)count,bb->c->entries);
   fprintf(stderr,"\tglobal mean amplitude: %g\n",
 	  meanamplitude_acc/(count*dim));
   fprintf(stderr,"\tglobal mean squared amplitude: %g\n",
@@ -107,11 +107,11 @@ void process_postprocess(codebook **b,char *basename){
       exit(1);
     }
 
-    for(i=0;i<bb->entries;i++){
-      for(k=0;k<bb->dim;k++){
+    for(i=0;i<bb->c->entries;i++){
+      for(k=0;k<bb->c->dim;k++){
 	fprintf(out,"%ld, %g, %g\n",
-		i*bb->dim+k,(bb->valuelist+i*bb->dim)[k],
-		sqrt((histogram_errorsq+i*bb->dim)[k]/histogram[i]));
+		i*bb->c->dim+k,(bb->valuelist+i*bb->c->dim)[k],
+		sqrt((histogram_errorsq+i*bb->c->dim)[k]/histogram[i]));
       }
     }
     fclose(out);
@@ -123,11 +123,11 @@ void process_postprocess(codebook **b,char *basename){
       exit(1);
     }
 
-    for(i=0;i<bb->entries;i++){
-      for(k=0;k<bb->dim;k++){
+    for(i=0;i<bb->c->entries;i++){
+      for(k=0;k<bb->c->dim;k++){
 	fprintf(out,"%ld, %g, %g\n",
-		i*bb->dim+k,(bb->valuelist+i*bb->dim)[k],
-		(histogram_error+i*bb->dim)[k]/histogram[i]);
+		i*bb->c->dim+k,(bb->valuelist+i*bb->c->dim)[k],
+		(histogram_error+i*bb->c->dim)[k]/histogram[i]);
       }
     }
     fclose(out);
@@ -139,12 +139,12 @@ void process_postprocess(codebook **b,char *basename){
       exit(1);
     }
 
-    for(i=0;i<bb->entries;i++){
-      for(k=0;k<bb->dim;k++){
+    for(i=0;i<bb->c->entries;i++){
+      for(k=0;k<bb->c->dim;k++){
 	fprintf(out,"%ld, %g, %g, %g\n",
-		i*bb->dim+k,(bb->valuelist+i*bb->dim)[k],
-		(bb->valuelist+i*bb->dim)[k]+(histogram_lo+i*bb->dim)[k],
-		(bb->valuelist+i*bb->dim)[k]+(histogram_hi+i*bb->dim)[k]);
+		i*bb->c->dim+k,(bb->valuelist+i*bb->c->dim)[k],
+		(bb->valuelist+i*bb->c->dim)[k]+(histogram_lo+i*bb->c->dim)[k],
+		(bb->valuelist+i*bb->c->dim)[k]+(histogram_hi+i*bb->c->dim)[k]);
       }
     }
     fclose(out);
@@ -152,21 +152,21 @@ void process_postprocess(codebook **b,char *basename){
 
   {
     FILE *out;
-    long *index=alloca(sizeof(long)*bb->entries);
+    long *index=alloca(sizeof(long)*bb->c->entries);
     sprintf(buffer,"%s-distance.m",basename);
     out=fopen(buffer,"w");
     if(!out){
       fprintf(stderr,"Could not open file %s for writing\n",buffer);
       exit(1);
     }
-    for(j=0;j<bb->entries;j++){
+    for(j=0;j<bb->c->entries;j++){
       if(histogram[j])histogram_distance[j]/=histogram[j];
       index[j]=j;
     }
 
-    qsort(index,bb->entries,sizeof(long),histerrsort);
+    qsort(index,bb->c->entries,sizeof(long),histerrsort);
 
-    for(j=0;j<bb->entries;j++)
+    for(j=0;j<bb->c->entries;j++)
       for(k=0;k<histogram[index[j]];k++)
 	fprintf(out,"%g,\n",histogram_distance[index[j]]);
     fclose(out);
@@ -188,13 +188,13 @@ void process_vector(codebook **bs,double *a){
   for(bi=0;bi<books;bi++){
     codebook *b=bs[bi];
     entry=codebook_entry(b,work);
-    e=b->valuelist+b->dim*entry;
-    for(i=0;i<b->dim;i++)work[i]-=e[i];
+    e=b->valuelist+b->c->dim*entry;
+    for(i=0;i<b->c->dim;i++)work[i]-=e[i];
   }
 
   for(i=0;i<dim;i++){
     double error=work[i];
-    if(bs[0]->q_sequencep){
+    if(bs[0]->c->q_sequencep){
       amplitude=a[i]-base;
       base=a[i];
     }else

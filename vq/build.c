@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from training sets
- last mod: $Id: build.c,v 1.8 2000/01/05 10:14:54 xiphmont Exp $
+ last mod: $Id: build.c,v 1.9 2000/01/21 13:42:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -74,6 +74,7 @@ static char *rline(FILE *in,FILE *out){
 
 int main(int argc,char *argv[]){
   vqgen v;
+  static_codebook c;
   codebook b;
   quant_meta q;
 
@@ -83,6 +84,8 @@ int main(int argc,char *argv[]){
   FILE *in=NULL;
   char *line,*name;
   long i,j,k;
+
+  b.c=&c;
 
   if(argv[1]==NULL){
     fprintf(stderr,"Need a trained data set on the command line.\n");
@@ -210,17 +213,7 @@ int main(int argc,char *argv[]){
   for(j=0;j<entries;j++){
     fprintf(out,"\t");
     for(k=0;k<dim;k++)
-      fprintf(out,"%5ld, ",b.quantlist[i++]);
-    fprintf(out,"\n");
-  }
-  fprintf(out,"};\n\n");
-
-  /* codelist */
-  fprintf(out,"static long _vq_codelist_%s[] = {\n",name);
-  for(j=0;j<entries;){
-    fprintf(out,"\t");
-    for(k=0;k<8 && j<entries;k++,j++)
-      fprintf(out,"%ld,",b.codelist[j]);
+      fprintf(out,"%5ld, ",c.quantlist[i++]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
@@ -230,47 +223,47 @@ int main(int argc,char *argv[]){
   for(j=0;j<entries;){
     fprintf(out,"\t");
     for(k=0;k<16 && j<entries;k++,j++)
-      fprintf(out,"%2ld,",b.lengthlist[j]);
+      fprintf(out,"%2ld,",c.lengthlist[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* ptr0 */
   fprintf(out,"static long _vq_ptr0_%s[] = {\n",name);
-  for(j=0;j<b.encode_tree->aux;){
+  for(j=0;j<c.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",b.encode_tree->ptr0[j]);
+    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.encode_tree->ptr0[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* ptr1 */
   fprintf(out,"static long _vq_ptr1_%s[] = {\n",name);
-  for(j=0;j<b.encode_tree->aux;){
+  for(j=0;j<c.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",b.encode_tree->ptr1[j]);
+    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.encode_tree->ptr1[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* p */
   fprintf(out,"static long _vq_p_%s[] = {\n",name);
-  for(j=0;j<b.encode_tree->aux;){
+  for(j=0;j<c.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",b.encode_tree->p[j]);
+    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.encode_tree->p[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* q */
   fprintf(out,"static long _vq_q_%s[] = {\n",name);
-  for(j=0;j<b.encode_tree->aux;){
+  for(j=0;j<c.encode_tree->aux;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<b.encode_tree->aux;k++,j++)
-      fprintf(out,"%6ld,",b.encode_tree->q[j]);
+    for(k=0;k<8 && j<c.encode_tree->aux;k++,j++)
+      fprintf(out,"%6ld,",c.encode_tree->q[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
@@ -280,21 +273,16 @@ int main(int argc,char *argv[]){
   fprintf(out,"static encode_aux _vq_aux_%s = {\n",name);
   fprintf(out,"\t_vq_ptr0_%s,\n",name);
   fprintf(out,"\t_vq_ptr1_%s,\n",name);
-  fprintf(out,"\t0,\n");
-  fprintf(out,"\t0,\n");
   fprintf(out,"\t_vq_p_%s,\n",name);
   fprintf(out,"\t_vq_q_%s,\n",name);
-  fprintf(out,"\t%ld, %ld\n};\n\n",b.encode_tree->aux,b.encode_tree->aux);
+  fprintf(out,"\t%ld, %ld\n};\n\n",c.encode_tree->aux,c.encode_tree->aux);
 
-  fprintf(out,"static codebook _vq_book_%s = {\n",name);
+  fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
   fprintf(out,"\t%ld, %ld, %ld, %ld, %d, %d,\n",
-	  b.dim,b.entries,q.min,q.delta,q.quant,q.sequencep);
-  fprintf(out,"\t0,\n"); /* valuelist */
+	  c.dim,c.entries,q.min,q.delta,q.quant,q.sequencep);
   fprintf(out,"\t_vq_quantlist_%s,\n",name);
-  fprintf(out,"\t_vq_codelist_%s,\n",name);
   fprintf(out,"\t_vq_lengthlist_%s,\n",name);
   fprintf(out,"\t&_vq_aux_%s,\n",name);
-  fprintf(out,"\t0\n");
   fprintf(out,"};\n\n");
 
   fprintf(out,"\n#endif\n");
