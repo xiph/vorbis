@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.c,v 1.10 2001/09/07 08:42:30 cwolf Exp $
+ last mod: $Id: registry.c,v 1.11 2001/10/18 17:35:36 cwolf Exp $
 
  ********************************************************************/
 
@@ -50,12 +50,3 @@ vorbis_func_residue   *_residue_P[]={
 vorbis_func_mapping   *_mapping_P[]={
   &mapping0_exportbundle,
 };
-
-  /*
-   * For win32 only, the following code needs to be appended to this file 
-   * because the "sizeof" operator can only evaluate the sizes
-   * of statically initialized arrays in the same compilation unit.
-   */ 
-#if defined(_MSC_VER) && defined(STANDALONE_VORBISENC_DLL)
-# include "shmmap_c.h"
-#endif
