@@ -142,11 +142,155 @@ vector to begin with, residue type 1 and type 2 are equivalent.<p>
 
 <h2>header decode</h2>
 
-<h2>packet decode, format 0</h2>
+Header decode for all three residue types is identical.<p>
+<pre>
+  1) [residue_begin] = read 24 bits as unsigned integer
+  2) [residue_end] = read 24 bits as unsigned integer
+  3) [residue_partition_size] = read 24 bits as unsigned integer and add one
+  4) [residue_classifications] = read 6 bits as unsigned integer and add one
+  5) [residue_classbook] = read 8 bits as unsigned integer
+</pre>
 
-<h2>packet decode, format 1</h2>
+<tt>residue_begin</tt> and <tt>residue_end</tt> select the specific
+subportion of each vector that is actually coded; it implements akin
+to a bandpass where, for coding purposes, the vector effectively
+begins at element <tt>residue_begin</tt> and ends at
+<tt>residue_end</tt>.  Preceeding and following values in the unpacked
+vectors are zeroed.  Note that for residue type 2, these values as
+well as <tt>[residue_partition_size</tt>apply to the interleaved
+vector, not the individual vectors before interleave.
+<tt>residue_partition_size</tt> is as explained above,
+<tt>residue_classifications</tt> is the number of possible
+classification to which a partition can belong and
+<tt>residue_classbook</tt> is the codebook number used to code
+classification codewords.  The number of dimensions in book
+<tt>residue_classbook</tt> determines how many classification values
+are grouped into a single classification codeword.<p>
 
-<h2>packet decode, format 2</h2>
+Next we read a bitmap pattern that specifies which partition classes
+code values in which passes.<p>
+
+<pre>
+  1) iterate [i] over the range 0 ... [residue_classifications]-1 {
+  
+       2) [high_bits] = 0
+       3) [low_bits] = read 3 bits as unsigned integer
+       4) [bitflag] = read one bit as boolean
+       5) if ( [bitflag] is set ) then [high_bits] = read five bits as unsigned integer
+       6) vector [residue_cascade] element [i] = [high_bits] * 8 + [low_bits]
+     }
+  7) done
+</pre>
+
+Finally, we read in a list of book numbers, each corresponding to
+specific bit set in the cascade bitmap.  We loop over the possible
+codebook classifications and the maximum possible number of encoding
+stages (8 in Vorbis I, as constrained by the elements of the cascade
+bitmap being eight bits):<p>
+
+<pre>
+  1) iterate [i] over the range 0 ... [residue_classifications]-1 {
+  
+       2) iterate [j] over the range 0 ... 7 {
+  
+            3) if ( vector [residue_cascade] element [i] bit [j] is set ) {
+
+                 4) array [residue_books] element [i][j] = read 8 bits as unsigned integer
+
+               } else {
+
+                 5) array [residue_books] element [i][j] = unused
+
+               }
+          }
+      }
+
+  6) done
+</pre>
+
+An end-of-packet condition at any point in header decode renders the
+stream undecodable.  In addition, any codebook number greater than the
+maximum numbered codebook set up in this stream also renders the
+stream undecodable.<p>
+
+<h2>packet decode</h2>
+
+Format 0 and 1 packet decode is identical except for specific
+partition interleave.  Format 2 packet decode can be built out of the
+format 1 decode process.  Thus we describe first the decode
+infrastructure identical to all three formats.<p>
+
+The following convenience values are conceptually useful to clarifying
+the decode process:<p>
+
+<pre>
+  1) [classvals_per_codeword] = [codebook_dimensions] value of codebook [residue_classbook]
+  2) [n_to_read] = [residue_end] - [residue-begin]
+  3) [partitions_to_read] = [n_to_read] / [residue_partition_size]
+</pre>
+
+Packet decode proceeds as follows, matching the description offered earlier in the document.  We assume that the number of vectors being encoded, <tt>[ch]</tt> is provided by the higher level decoding process.<p>  
+<pre>
+  1) allocate and zero all vectors that will be returned.
+  2) iterate [pass] over the range 0 ... 7 {
+
+       3) [partition_count] = 0
+       4) if ([pass] is zero) {
+     
+            5) iterate [j] over the range 0 .. [ch]-1 {
+
+                 6) [temp] = read from packet using codebook [residue_classbook] in scalar context
+                 7) iterate [k] descending over the range [classvals_per_codeword]-1 ... 0 {
+
+                      8) array [classifications] element [j],([partition_count]+[k]) =
+                         [temp] integer modulo [residue_classifications]
+                      9) [temp] = [temp] / [residue_classifications] using integer division
+
+                    }
+ 
+               }
+            
+          }
+
+      10) [classword_count] = 0
+      11) iterate [j] over the range 0 .. [ch]-1 {
+
+            12) [vqclass] = array [classifications] element [j],([partition_count]+[classword_count])
+            13) [vqbook] = array [residue_books] element [vqclass],[pass]
+            14) if ([vqbook] is not 'unused') {
+
+                  15) decode partition into output vector number [j], starting at scalar 
+                      offset [residue_begin]+[partition_count]*[residue_partition_size] using 
+                      codebook number [vqbook] in VQ context
+                }
+          }
+
+      16) increment [classword_count]
+      17) increment [partition_count]
+      18) if ([classword_count] is less than [classvals_per_codeword]) AND 
+             ([partition_count] is less than [partitions_to_read) then continue at step 11
+      19) if ([partition_count] is less than [partitions_to_read) then continue at step 4
+    }
+ 
+ 20) done
+
+</pre>
+
+An end-of-packet codition during packet decode is to be considered a
+nominal occurence.  End-of-packet during a classification codeword
+read halts decode immediately and returns the partially-decoded
+packet.  If decode hits end-of-packet while reading a partition, the
+partially decoded partition is discarded and decode returns the result
+of vector decode up to that point.<p>
+
+<h2>format 0 specifics</h2>
+
+Format zero decodes 
+
+<h2>format 1 specifics</h2>
+
+<h2>format 2 specifics</h2>
+ 
 
 
 <hr>
