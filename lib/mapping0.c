@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.33.2.3 2001/08/02 06:14:43 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.33.2.4 2001/08/02 22:14:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -282,11 +282,11 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     /* the following makes things clearer to *me* anyway */
     float *pcm     =vb->pcm[i]; 
-    float *mdct    =pcm;
     float *fft     =work;
     float *logfft  =pcm+n/2;
 
     /*float *res     =pcm;
+    float *mdct    =pcm;
     float *codedflr=pcm+n/2;
     float *logmax  =work;
     float *logmask =work+n/2;*/
@@ -329,7 +329,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     for(j=0;j<n/2;j++)
       logmdct[j]=todB(mdct+j);
-    _analysis_output("mdct",seq,logmdct,n/2,1,0);
+    _analysis_output("mdct",seq+i,logmdct,n/2,1,0);
 
 
     /* perform psychoacoustics; do masking */
@@ -343,7 +343,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		     local_ampmax[i],
 		     ci->blocksizes[vb->lW]/2);
 
-    _analysis_output("mask",seq,logmask,n/2,1,0);
+    _analysis_output("mask",seq+i,logmask,n/2,1,0);
     
     /* perform floor encoding */
     nonzero[i]=look->floor_func[submap]->
@@ -356,6 +356,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      codedflr);
 
 
+    _analysis_output("mdct2",seq+i,mdct,n/2,1,1);
     _vp_remove_floor(look->psy_look,
 		     b->psy_g_look,
 		     logmdct,
@@ -365,11 +366,11 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		     local_ampmax[i]);
 
     for(j=0;j<n/2;j++)
-      if(fabs(vb->pcm[i][j])>1500)
-	fprintf(stderr,"%ld ",seq);
+      if(fabs(res[j])>1500)
+	fprintf(stderr,"%ld ",seq+i);
     
-    _analysis_output("res",seq,res,n,1,0);
-    _analysis_output("codedflr",seq++,codedflr,n/2,1,1);
+    _analysis_output("res",seq+i,res,n/2,1,0);
+    _analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
       
   }
 
@@ -405,6 +406,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     long  ***classifications=alloca(sizeof(long**)*info->submaps);
     float ***pcmbundle=alloca(sizeof(float **)*info->submaps);
+    float ***sobundle=alloca(sizeof(float **)*info->submaps);
     int    **zerobundle=alloca(sizeof(int *)*info->submaps);
     int     *chbundle=alloca(sizeof(int)*info->submaps);
     int      chcounter=0;
@@ -414,14 +416,14 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     int   stopflag=0;
 
     for(i=0;i<vi->channels;i++){
-      quantized[i]=perfect[i]+n/2;
+      quantized[i]=pcm[i]+n/2;
       sofar[i]=_vorbis_block_alloc(vb,n/2*sizeof(float));
       memset(sofar[i],0,sizeof(float)*n/2);
     }
 
-    pcmbundle=alloca(sizeof(float *)*vi->channels);
-    sobundle=alloca(sizeof(float *)*vi->channels);
-    zerobundle=alloca(sizeof(int)*vi->channels);
+    pcmbundle[0]=alloca(sizeof(float *)*vi->channels);
+    sobundle[0]=alloca(sizeof(float *)*vi->channels);
+    zerobundle[0]=alloca(sizeof(int)*vi->channels);
 
     /* initial down-quantized coupling */
     _vp_quantize_couple(look->psy_look,
@@ -431,14 +433,18 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			quantized,
 			nonzero,
 			0);
+
+    for(i=0;i<vi->channels;i++)
+      _analysis_output("quant",seq+i,quantized[i],n/2,1,0);
+
   
     /* classify, by submap */
 
     for(i=0;i<info->submaps;i++){
       int ch_in_bundle=0;
-      pcmbundle[i]=pcmbundle+chcounter;
-      sobundle[i]=sobundle+chcounter;
-      zerobundle[i]=zerobundle+chcounter;
+      pcmbundle[i]=pcmbundle[0]+chcounter;
+      sobundle[i]=sobundle[0]+chcounter;
+      zerobundle[i]=zerobundle[0]+chcounter;
 
       for(j=0;j<vi->channels;j++){
 	if(info->chmuxlist[j]==i){
@@ -488,6 +494,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       }
       /* steady as she goes */
     }
+    seq+=vi->channels;
   }
   
   look->lastframe=vb->sequence;
@@ -620,6 +627,12 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 
 /* export hooks */
 vorbis_func_mapping mapping0_exportbundle={
-  &mapping0_pack,&mapping0_unpack,&mapping0_look,&mapping0_copy_info,
-  &mapping0_free_info,&mapping0_free_look,&mapping0_forward,&mapping0_inverse
+  &mapping0_pack,
+  &mapping0_unpack,
+  &mapping0_look,
+  &mapping0_copy_info,
+  &mapping0_free_info,
+  &mapping0_free_look,
+  &mapping0_forward,
+  &mapping0_inverse
 };

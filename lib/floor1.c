@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.10.2.2 2001/08/02 06:14:43 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.10.2.3 2001/08/02 22:14:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -964,9 +964,13 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	for(k=0;k<cdim;k++){
 	  int book=info->class_subbook[class][bookas[k]];
 	  if(book>=0){
-	    look->postbits+=vorbis_book_encode(books+book,
-					       fit_valueB[j+k],&vb->opb);
-	    
+	    /* hack to allow training with 'bad' books */
+	    if(fit_valueB[j+k]<(books+book)->entries)
+	      look->postbits+=vorbis_book_encode(books+book,
+						 fit_valueB[j+k],&vb->opb);
+	    else
+	      fprintf(stderr,"+!");
+
 #ifdef TRAIN_FLOOR1
 	    {
 	      FILE *of;

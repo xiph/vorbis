@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48.2.3 2001/08/02 06:14:44 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.48.2.4 2001/08/02 22:14:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -318,17 +318,20 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   for(i=0;i<P_BANDS;i+=2)
     for(j=4;j<P_LEVELS;j+=2){
       float neutraldB=-vi->toneatt[i][j];
-      for(k=2;k<EHMER_MAX+2;k++)
+      for(k=2;k<EHMER_MAX+2;k++){
+	p->tonecurves[i][j][k]+=vi->tone_masteratt;
 	if(p->tonecurves[i][j][k]-neutraldB>vi->peakatt[i][j])
 	  p->tonecurves[i][j][k]=neutraldB+vi->peakatt[i][j];
+      }
     }
 
   if(vi->peakattp) /* we limit depth only optionally */
-    for(j=4;j<P_LEVELS;j+=2){
-      float neutraldB=-vi->toneatt[i][j];
-      if(p->tonecurves[i][j][EHMER_OFFSET]-neutraldB<vi->peakatt[i][j])
-	p->tonecurves[i][j][EHMER_OFFSET]=neutraldB+vi->peakatt[i][j];
-    }
+    for(i=0;i<P_BANDS;i+=2)
+      for(j=4;j<P_LEVELS;j+=2){
+	float neutraldB=-vi->toneatt[i][j];
+	if(p->tonecurves[i][j][EHMER_OFFSET]-neutraldB<vi->peakatt[i][j])
+	  p->tonecurves[i][j][EHMER_OFFSET]=neutraldB+vi->peakatt[i][j];
+      }
 
 
   /* interpolate curves between */
@@ -470,7 +473,7 @@ static void seed_loop(vorbis_look_psy *p,
 	if(vi->tonemaskp)
 	  seed_curve(seed,
 		     curves[oc],
-		     max+vi->tone_masteratt,
+		     max,
 		     p->octave[i]-p->firstoc,
 		     p->total_octave_lines,
 		     p->eighth_octave_lines,
@@ -931,13 +934,13 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 			 float **pcm,
 			 float **sofar,
 			 float **quantized,
-			 int   *nonzero
+			 int   *nonzero,
 			 int   passno){
 
-  int i,j,k,l,n=p->n;
+  int i,j,k,n=p->n;
   vorbis_info_psy *info=p->vi;
-  float granule=info->couple_pass[passno]->granule;
-  float igranule=info->couple_pass[passno]->igranule;
+  float granule=info->couple_pass[passno].granule;
+  float igranule=info->couple_pass[passno].igranule;
 
   /* perform any requested channel coupling */
   for(i=0;i<vi->coupling_steps;i++){
@@ -958,9 +961,9 @@ void _vp_quantize_couple(vorbis_look_psy *p,
       nonzero[vi->coupling_ang[i]]=1; 
 
       for(j=0,k=0;j<n;k++){
-	vp_couple *part=info->couple_pass[passno]->couple+k;
+	vp_couple *part=info->couple_pass[passno].couple+k;
 
-	for(;j<info->partition*part->partition_limit && j<p->n;j++){
+	for(;j<part->limit && j<p->n;j++){
 	  /* partition by partition; k is our by-location partition
 	     class counter */
 	  float ang,mag=max(fabs(pcmM[j]),fabs(pcmA[j]));

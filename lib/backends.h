@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.9.2.2 2001/08/02 06:14:44 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.9.2.3 2001/08/02 22:14:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -127,7 +127,7 @@ typedef struct{
   vorbis_info_residue *(*copy_info)(vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
-  long (**class)       (struct vorbis_block *,vorbis_look_residue *,
+  long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);
   int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,float **,int *,int,int,long **);
@@ -152,7 +152,7 @@ typedef struct vorbis_info_residue0{
   float  ampmax[64];       /* book amp threshholds*/
   int    subgrp[64];       /* book heuristic subgroup size */
   int    blimit[64];       /* subgroup position limits */
-  int    passlimit[8];     /* iteration limit per couple/quant pass */
+  int    passlimit[32];     /* iteration limit per couple/quant pass */
 } vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/

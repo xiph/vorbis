@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.21.2.2 2001/08/02 06:14:44 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.21.2.3 2001/08/02 22:14:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,8 +30,13 @@
 #define P_BANDS 17
 #define P_LEVELS 11
 
+typedef struct couple_part{
+  float amppost;
+  float threshhold;
+} couple_part;
+
 typedef struct vp_couple{
-  int partition_limit;        /* partition post */
+  int limit;        /* sample post */
 
   couple_part couple_lossless;
   couple_part couple_eightphase;
@@ -40,7 +45,7 @@ typedef struct vp_couple{
   
 } vp_couple;
 
-typedef struct vp_couple_pass={
+typedef struct vp_couple_pass{
   float granule;
   float igranule;
   
@@ -154,14 +159,13 @@ extern void   _vp_compute_mask(vorbis_look_psy *p,
 			       float local_specmax,
 			       int lastsize);
 
-extern void _vp_partition_prequant(vorbis_look_psy *p,
-				   vorbis_info *vi,
-				   float **vbpcm,
-				   int *nonzero);
-extern void _vp_couple(vorbis_look_psy *p,
-		       vorbis_info_mapping0 *vi,
-		       float **vbpcm,
-		       int *nonzero);
+extern void _vp_quantize_couple(vorbis_look_psy *p,
+			 vorbis_info_mapping0 *vi,
+			 float **pcm,
+			 float **sofar,
+			 float **quantized,
+			 int   *nonzero,
+			 int   passno);
 
 extern float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd);
 
