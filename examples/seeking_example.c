@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.12 2001/12/20 01:00:24 segher Exp $
+ last mod: $Id: seeking_example.c,v 1.13 2002/02/28 04:12:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -54,6 +54,16 @@ void _verify(OggVorbis_File *ov,ogg_int64_t pos,
   for(j=0;j<bread;j++){
     if(buffer[j]!=bigassbuffer[j+pos*2]){
       printf("data position after seek doesn't match pcm position\n");
+
+      {
+	FILE *f=fopen("a.m","w");
+	for(j=0;j<bread;j++)fprintf(f,"%d\n",(int)buffer[j]);
+	fclose(f);
+	f=fopen("b.m","w");
+	for(j=0;j<bread;j++)fprintf(f,"%d\n",(int)bigassbuffer[j+pos*2]);
+	fclose(f);
+      }
+
       exit(1);
     }
   }
@@ -94,7 +104,6 @@ int main(){
     
     /* because we want to do sample-level verification that the seek
        does what it claimed, decode the entire file into memory */
-    printf("loading....\n");
     fflush(stdout);
     pcmlength=ov_pcm_total(&ov,-1);
     bigassbuffer=malloc(pcmlength*2); /* w00t */
@@ -107,6 +116,8 @@ int main(){
       }else{
 	pcmlength=i/2;
       }
+      fprintf(stderr,"\rloading.... [%ld left]              ",
+	      (long)(pcmlength*2-i));
     }
     
     /* Exercise all the real seeking cases; ov_raw_seek,
@@ -114,7 +125,7 @@ int main(){
        on pcm_seek */
     {
       ogg_int64_t length=ov.end;
-      printf("testing raw seeking to random places in %ld bytes....\n",
+      printf("\rtesting raw seeking to random places in %ld bytes....\n",
 	     (long)length);
     
       for(i=0;i<1000;i++){
@@ -172,7 +183,7 @@ int main(){
 	  exit(1);
 	}
 	if(ov_pcm_tell(&ov)!=val){
-	  printf("Decalred position didn't perfectly match request: %ld != %ld\n",
+	  printf("Declared position didn't perfectly match request: %ld != %ld\n",
 		 (long)val,(long)ov_pcm_tell(&ov));
 	  exit(1);
 	}

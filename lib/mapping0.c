@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.44 2002/01/22 11:59:00 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.45 2002/02/28 04:12:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -681,7 +681,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 	pcm[j]=0.f;
 
   }
-	    
+
   /* all done! */
   return(0);
 }
@@ -697,3 +697,4 @@ vorbis_func_mapping mapping0_exportbundle={
   &mapping0_forward,
   &mapping0_inverse
 };
+

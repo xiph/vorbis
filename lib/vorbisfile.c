@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.55 2002/01/22 08:06:08 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.56 2002/02/28 04:12:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -416,7 +416,9 @@ static void _decode_clear(OggVorbis_File *vf){
 	    1) got a packet 
 */
 
-static int _process_packet(OggVorbis_File *vf,int readp){
+static int _fetch_and_process_packet(OggVorbis_File *vf,
+				     ogg_packet *op_in,
+				     int readp){
   ogg_page og;
 
   /* handle one packet.  Try to fetch it from current stream state */
@@ -428,31 +430,37 @@ static int _process_packet(OggVorbis_File *vf,int readp){
     if(vf->ready_state==INITSET){
       while(1) {
       	ogg_packet op;
-	int result=ogg_stream_packetout(&vf->os,&op);
+      	ogg_packet *op_ptr=(op_in?op_in:&op);
+	int result=ogg_stream_packetout(&vf->os,op_ptr);
 	ogg_int64_t granulepos;
 
+	op_in=NULL;
 	if(result==-1)return(OV_HOLE); /* hole in the data. */
 	if(result>0){
 	  /* got a packet.  process it */
-	  granulepos=op.granulepos;
-	  if(!vorbis_synthesis(&vf->vb,&op)){ /* lazy check for lazy
-                                                 header handling.  The
-                                                 header packets aren't
-                                                 audio, so if/when we
-                                                 submit them,
-                                                 vorbis_synthesis will
-                                                 reject them */
+	  granulepos=op_ptr->granulepos;
+	  if(!vorbis_synthesis(&vf->vb,op_ptr)){ /* lazy check for lazy
+						    header handling.  The
+						    header packets aren't
+						    audio, so if/when we
+						    submit them,
+						    vorbis_synthesis will
+						    reject them */
 
 	    /* suck in the synthesis data and track bitrate */
 	    {
 	      int oldsamples=vorbis_synthesis_pcmout(&vf->vd,NULL);
+	      /* for proper use of libvorbis within libvorbisfile,
+                 oldsamples will always be zero. */
+	      if(oldsamples)return(OV_EFAULT);
+	      
 	      vorbis_synthesis_blockin(&vf->vd,&vf->vb);
 	      vf->samptrack+=vorbis_synthesis_pcmout(&vf->vd,NULL)-oldsamples;
-	      vf->bittrack+=op.bytes*8;
+	      vf->bittrack+=op_ptr->bytes*8;
 	    }
 	  
 	    /* update the pcm offset. */
-	    if(granulepos!=-1 && !op.e_o_s){
+	    if(granulepos!=-1 && !op_ptr->e_o_s){
 	      int link=(vf->seekable?vf->current_link:0);
 	      int i,samples;
 	    
@@ -466,7 +474,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	         granulepos declares the last frame in the stream, and the
 	         last packet of the last page may be a partial frame.
 	         So, we need a previous granulepos from an in-sequence page
-	         to have a reference point.  Thus the !op.e_o_s clause
+	         to have a reference point.  Thus the !op_ptr->e_o_s clause
 	         above */
 	    
 	      samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
@@ -1125,6 +1133,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   int thisblock,lastblock=0;
   int ret=ov_pcm_seek_page(vf,pos);
   if(ret<0)return(ret);
+  _make_decode_ready(vf);
 
   /* discard leading packets we don't need for the lapping of the
      position we want; don't decode them */
@@ -1136,17 +1145,22 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
     int ret=ogg_stream_packetpeek(&vf->os,&op);
     if(ret>0){
       thisblock=vorbis_packet_blocksize(vf->vi+vf->current_link,&op);
+      if(thisblock<0)thisblock=0; /* non audio packet */
       if(lastblock)vf->pcm_offset+=(lastblock+thisblock)>>2;
-
+      
       if(vf->pcm_offset+((thisblock+
 			  vorbis_info_blocksize(vf->vi,1))>>2)>=pos)break;
-
-      ogg_stream_packetout(&vf->os,NULL);
       
-
+      /* remove the packet from packet queue and track its granulepos */
+      ogg_stream_packetout(&vf->os,NULL);
+      vorbis_synthesis_trackonly(&vf->vb,&op);  /* set up a vb with
+                                                   only tracking, no
+                                                   pcm_decode */
+      vorbis_synthesis_blockin(&vf->vd,&vf->vb); 
+      
       /* end of logical stream case is hard, especially with exact
-         length positioning. */
-
+	 length positioning. */
+      
       if(op.granulepos>-1){
 	int i;
 	/* always believe the stream markers */
@@ -1154,9 +1168,9 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
 	for(i=0;i<vf->current_link;i++)
 	  vf->pcm_offset+=vf->pcmlengths[i];
       }
-
+	
       lastblock=thisblock;
-
+      
     }else{
       if(ret<0 && ret!=OV_HOLE)break;
       
@@ -1176,15 +1190,16 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
 	ogg_stream_init(&vf->os,vf->current_serialno);
 	ogg_stream_reset(&vf->os); 
 	vf->ready_state=STREAMSET;      
+	_make_decode_ready(vf);
 	lastblock=0;
       }
+
       ogg_stream_pagein(&vf->os,&og);
     }
   }
 
   /* discard samples until we reach the desired position. Crossing a
      logical bitstream boundary with abandon is OK. */
-  _make_decode_ready(vf);
   while(vf->pcm_offset<pos){
     float **pcm;
     long target=pos-vf->pcm_offset;
@@ -1195,7 +1210,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
     vf->pcm_offset+=samples;
     
     if(samples<target)
-      if(_process_packet(vf,1)<=0)
+      if(_fetch_and_process_packet(vf,NULL,1)<=0)
 	vf->pcm_offset=ov_pcm_total(vf,-1); /* eof */
   }
   return 0;
@@ -1393,7 +1408,7 @@ long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int *bitstream){
 
     /* suck in another packet */
     {
-      int ret=_process_packet(vf,1);
+      int ret=_fetch_and_process_packet(vf,NULL,1);
       if(ret==OV_EOF)return(0);
       if(ret<=0)return(ret);
     }
@@ -1419,7 +1434,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 
     /* suck in another packet */
     {
-      int ret=_process_packet(vf,1);
+      int ret=_fetch_and_process_packet(vf,NULL,1);
       if(ret==OV_EOF)return(0);
       if(ret<=0)return(ret);
     }
