@@ -14,6 +14,8 @@ doc_DATA = OggVorbis_File.html chaining_example_c.html chainingexample.html\
 	ov_serialnumber.html ov_streams.html ov_time_seek.html\
 	ov_time_tell.html ov_time_total.html overview.html reference.html\
 	seekexample.html seeking.html seeking_test_c.html seekingexample.html\
-	style.css vorbis_comment.html vorbis_info.html vorbisfile_example_c.html
+	style.css vorbis_comment.html vorbis_info.html\
+	vorbisfile_example_c.html ov_read_float.html ov_test.html\
+	ov_test_open.html ov_test_callbacks.html
 
 EXTRA_DIST = $(doc_DATA)
