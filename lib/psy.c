@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.39 2001/02/01 02:10:55 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.40 2001/02/02 02:52:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -207,8 +207,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
     p->octave[i]=toOC((i*.5f+.25f)*rate/n)*(1<<(p->shiftoc+1))+.5f;
 
   p->tonecurves=_ogg_malloc(P_BANDS*sizeof(float **));
-  p->noisemedian=_ogg_malloc(n*sizeof(float *));
-  p->noiseoffset=_ogg_malloc(n*sizeof(float *));
+  p->noisemedian=_ogg_malloc(n*sizeof(float));
+  p->noiseoffset=_ogg_malloc(n*sizeof(float));
   p->peakatt=_ogg_malloc(P_BANDS*sizeof(float *));
   for(i=0;i<P_BANDS;i++){
     p->tonecurves[i]=_ogg_malloc(P_LEVELS*sizeof(float *));
@@ -560,8 +560,8 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 
   for(i=0;i<n;i++){
     /* find new lo/hi */
-    bi=b[i];
-    for(;hi<n && (hi<i+himin || b[hi]<=bi+hiwidth);hi++){
+    bi=b[i]+hiwidth;
+    for(;hi<n && (hi<i+himin || b[hi]<=bi);hi++){
       int bin=BIN(f[hi]);
       if(bin>LASTBIN)bin=LASTBIN;
       if(bin<0)bin=0;
@@ -571,7 +571,8 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
       else
 	countbelow++;
     }
-    for(;lo<i && lo+lomin<i && b[lo]+lowidth<=bi;lo++){
+    bi=b[i]-lowidth;
+    for(;lo<i && lo+lomin<i && b[lo]<=bi;lo++){
       int bin=BIN(f[lo]);
       if(bin>LASTBIN)bin=LASTBIN;
       if(bin<0)bin=0;
@@ -584,16 +585,16 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 
     /* move the median if needed */
     if(countabove+countbelow){
-      threshi = thresh[i];
+      threshi = thresh[i]*(countabove+countbelow);
 
-      while((countabove+countbelow)*threshi>countbelow && median>0){
+      while(threshi>countbelow && median>0){
 	median--;
 	countabove-=radix[median];
 	countbelow+=radix[median];
       }
 
-      while(median<LASTBIN && 
-	    (countabove+countbelow)*thresh[i]<(countbelow-radix[median])){
+      while(threshi<(countbelow-radix[median]) &&
+	    median<LASTBIN){
 	countabove+=radix[median];
 	countbelow-=radix[median];
 	median++;
