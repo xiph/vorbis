@@ -162,11 +162,18 @@ void vqgen_addpoint(vqgen *v, double *p){
   if(v->points==v->entries)_vqgen_seed(v);
 }
 
+static long it=0;
 void vqgen_recenter(vqgen *v){
   long   i,j,k;
   double fdesired=(double)v->points/v->entries;
   double asserror=0.;
   double meterror=0.;
+
+  char buff[80];
+  FILE *out;
+  sprintf(buff,"recenter%d.m",it);
+  out=fopen(buff,"w");
+
 
   if(v->entries<2)exit(1);
 
@@ -222,6 +229,8 @@ void vqgen_recenter(vqgen *v){
 	  asserror/v->entries,fdesired,meterror/v->points);
   
   memset(v->bias,0,sizeof(double)*v->entries);
+  it++;
+  fclose(out);
 }
 
 void vqgen_rebias(vqgen *v){
