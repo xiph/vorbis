@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.12.4.3 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.12.4.4 2000/04/26 07:10:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -187,9 +187,6 @@ codebook *codebook_load(char *filename){
   char *line;
   long i;
 
-  c->nearest_tree=a;
-  c->thresh_tree=t;
-
   if(in==NULL){
     fprintf(stderr,"Couldn't open codebook %s\n",filename);
     exit(1);
@@ -217,7 +214,7 @@ codebook *codebook_load(char *filename){
   /* find the auxiliary encode struct[s] (if any) */
   if(find_seek_to(in,"static encode_aux_nearestmatch _vq_aux_")){
     /* how big? */
-    a=calloc(1,sizeof(encode_aux_nearestmatch));
+    c->nearest_tree=a=calloc(1,sizeof(encode_aux_nearestmatch));
     line=get_line(in);
     line=get_line(in);
     line=get_line(in);
@@ -272,29 +269,35 @@ codebook *codebook_load(char *filename){
   
   if(find_seek_to(in,"static encode_aux_threshmatch _vq_aux_")){
     /* how big? */
-    t=calloc(1,sizeof(encode_aux_threshmatch));
+    c->thresh_tree=t=calloc(1,sizeof(encode_aux_threshmatch));
+    line=get_line(in);
     line=get_line(in);
     line=get_line(in);
     if(sscanf(line,"%d",&(t->quantvals))!=1){
-      fprintf(stderr,"2: syntax in %s in line:\t %s",filename,line);
+      fprintf(stderr,"3: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+    line=get_line(in);
+    if(sscanf(line,"%d",&(t->threshvals))!=1){
+      fprintf(stderr,"4: syntax in %s in line:\t %s",filename,line);
       exit(1);
     }
     /* load quantthresh */
-    find_seek_to(in,"static long _vq_quantthresh_");
+    find_seek_to(in,"static double _vq_quantthresh_");
     reset_next_value();
-    t->quantthresh=malloc(sizeof(long)*t->quantvals);
-    for(i=0;i<t->quantvals;i++)
+    t->quantthresh=malloc(sizeof(double)*t->threshvals);
+    for(i=0;i<t->threshvals-1;i++)
       if(get_next_value(in,t->quantthresh+i)){
-	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	fprintf(stderr,"out of data 1 while reading codebook %s\n",filename);
 	exit(1);
       }    
     /* load quantmap */
     find_seek_to(in,"static long _vq_quantmap_");
     reset_next_value();
-    t->quantmap=malloc(sizeof(long)*t->quantvals);
-    for(i=0;i<t->quantvals;i++)
+    t->quantmap=malloc(sizeof(long)*t->threshvals);
+    for(i=0;i<t->threshvals;i++)
       if(get_next_ivalue(in,t->quantmap+i)){
-	fprintf(stderr,"out of data while reading codebook %s\n",filename);
+	fprintf(stderr,"out of data 2 while reading codebook %s\n",filename);
 	exit(1);
       }    
   }

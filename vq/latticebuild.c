@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.1.2.1 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.1.2.2 2000/04/26 07:10:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,12 +31,13 @@
    command line:
    vqlattice description.vql datafile.vqd 
 
-   the lattice description file contains four lines:
+   the lattice description file contains five lines:
 
    <n> <dim> <multiplicitavep>
    <value_0> <value_1> <value_2> ... <value_n-1>
-   <thresh_0> <thresh_1> <thresh_2> ... <thresh_n-2>
-   <map_0> <map_1> <map_2> ... <map_n-1>
+   <m>
+   <thresh_0> <thresh_1> <thresh_2> ... <thresh_m-2>
+   <map_0> <map_1> <map_2> ... <map_m-1>
 
    vqlattice sends residual data (for the next stage) to stdout, and
    produces description.vqh */
@@ -48,7 +49,7 @@ int main(int argc,char *argv[]){
   double *quantlist;
   long *hits;
 
-  int entries=-1,dim=-1,quantvals=-1,addmul=-1;
+  int entries=-1,dim=-1,quantvals=-1,addmul=-1,threshvals=-1;
   FILE *out=NULL;
   FILE *in=NULL;
   char *line,*name;
@@ -105,9 +106,6 @@ int main(int argc,char *argv[]){
   c.maptype=1;
   c.q_sequencep=0;
   c.quantlist=calloc(quantvals,sizeof(long));
-  t.quantthresh=calloc(quantvals-1,sizeof(double));
-  t.quantmap=calloc(quantvals,sizeof(int));
-  t.quantvals=quantvals;
 
   quantlist=malloc(sizeof(long)*c.dim*c.entries);
   hits=malloc(c.entries*sizeof(long));
@@ -122,18 +120,29 @@ int main(int argc,char *argv[]){
     }
   }
 
+  line=setup_line(in);
+  if(sscanf(line,"%d",&threshvals)!=1){
+    fprintf(stderr,"Syntax error reading book file (line 3)\n");
+    exit(1);
+  }
+  
+  t.quantthresh=calloc(threshvals-1,sizeof(double));
+  t.quantmap=calloc(threshvals,sizeof(int));
+  t.threshvals=threshvals;
+  t.quantvals=quantvals;
+
   setup_line(in);
-  for(j=0;j<quantvals-1;j++){  
+  for(j=0;j<threshvals-1;j++){  
     if(get_line_value(in,t.quantthresh+j)==-1){
-      fprintf(stderr,"Ran out of data on line 3 of description file\n");
+      fprintf(stderr,"Ran out of data on line 4 of description file\n");
       exit(1);
     }
   }
 
   setup_line(in);
-  for(j=0;j<quantvals;j++){  
+  for(j=0;j<threshvals;j++){  
     if(get_next_ivalue(in,t.quantmap+j)==-1){
-      fprintf(stderr,"Ran out of data on line 4 of description file\n");
+      fprintf(stderr,"Ran out of data on line 5 of description file\n");
       exit(1);
     }
   }
@@ -141,12 +150,14 @@ int main(int argc,char *argv[]){
   /* gen a real quant list from the more easily human-grokked input */
   {
     double min=quantlist[0];
-    double mindel=fabs(quantlist[0]-quantlist[1]);
+    double mindel=1;
     for(j=1;j<quantvals;j++){  
       if(quantlist[j]<min)min=quantlist[j];
       for(k=0;k<j;k++){
-	double del=fabs(quantlist[j]-quantlist[k]);
-	if(del<mindel)mindel=del;
+	double del=quantlist[k]-min;
+	/* really underpowered :-P know that this will only factor
+           powers of two (duh) */
+	while((int)(del/mindel)+.01<del/mindel){mindel/=2;}
       }
     }
     c.q_min=_float32_pack(min);
@@ -266,19 +277,19 @@ int main(int argc,char *argv[]){
 
   /* quantthresh */
   fprintf(out,"static double _vq_quantthresh_%s[] = {\n",name);
-  for(j=0;j<t.quantvals-1;){
+  for(j=0;j<t.threshvals-1;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<t.quantvals-1;k++,j++)
-      fprintf(out,"%05g,",t.quantthresh[j]);
+    for(k=0;k<8 && j<t.threshvals-1;k++,j++)
+      fprintf(out,"%.5g, ",t.quantthresh[j]);
     fprintf(out,"\n");
   }
   fprintf(out,"};\n\n");
 
   /* quantmap */
   fprintf(out,"static long _vq_quantmap_%s[] = {\n",name);
-  for(j=0;j<t.quantvals;){
+  for(j=0;j<t.threshvals;){
     fprintf(out,"\t");
-    for(k=0;k<8 && j<t.quantvals;k++,j++)
+    for(k=0;k<8 && j<t.threshvals;k++,j++)
       fprintf(out,"%5ld,",t.quantmap[j]);
     fprintf(out,"\n");
   }
@@ -289,13 +300,14 @@ int main(int argc,char *argv[]){
   fprintf(out,"static encode_aux_threshmatch _vq_aux_%s = {\n",name);
   fprintf(out,"\t_vq_quantthresh_%s,\n",name);
   fprintf(out,"\t_vq_quantmap_%s,\n",name);
-  fprintf(out,"\t%d\n};\n\n",t.quantvals);
+  fprintf(out,"\t%d,\n",t.quantvals);
+  fprintf(out,"\t%d\n};\n\n",t.threshvals);
   
   fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
   
   fprintf(out,"\t%ld, %ld,\n",c.dim,c.entries);
   fprintf(out,"\t_vq_lengthlist_%s,\n",name);
-  fprintf(out,"\t2, %ld, %ld, %d, %d,\n",
+  fprintf(out,"\t1, %ld, %ld, %d, %d,\n",
 	  c.q_min,c.q_delta,c.q_quant,c.q_sequencep);
   fprintf(out,"\t_vq_quantlist_%s,\n",name);
   fprintf(out,"\tNULL,\n");

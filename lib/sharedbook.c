@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.1.2.5 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.1.2.6 2000/04/26 07:10:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -323,6 +323,27 @@ int _best(codebook *book, double *a, int step){
   int dim=book->dim;
   int ptr=0,k,o;
 
+  /* we assume for now that a thresh tree is the only other possibility */
+  if(tt){
+    int index=0;
+    /* find the quant val of each scalar */
+    for(k=0,o=step*(dim-1);k<dim;k++,o-=step){
+      int i;
+      /* linear search the quant list for now; it's small and although
+	 with > 8 entries, it would be faster to bisect, this would be
+	 a misplaced optimization for now */
+      for(i=0;i<tt->threshvals-1;i++)
+	if(a[o]<tt->quantthresh[i])break;
+
+      index=(index*tt->quantvals)+tt->quantmap[i];
+    }
+    /* regular lattices are easy :-) */
+    if(book->c->lengthlist[index]>0) /* is this unused?  If so, we'll
+					use a decision tree after all
+					and fall through*/
+      return(index);
+  }
+
   if(nt){
     /* optimized using the decision tree */
     while(1){
@@ -342,23 +363,6 @@ int _best(codebook *book, double *a, int step){
     return(-ptr);
   }
 
-  /* we assume for now that a thresh tree is the only other possibility */
-  if(tt){
-    int index=0;
-    /* find the quant val of each scalar */
-    for(k=0,o=step*(dim-1);k<dim;k++,o-=step){
-      int i;
-      /* linear search the quant list for now; it's small and although
-	 with > 8 entries, it would be faster to bisect, this would be
-	 a misplaced optimization for now */
-      for(i=0;i<tt->quantvals-1;i++)
-	if(a[o]<tt->quantthresh[i])break;
-
-      index=(index*tt->quantvals)+tt->quantmap[i];
-    }
-    /* regular lattices are easy :-) */
-    return(index);
-  }
   return(-1);
 }
 

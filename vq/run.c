@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.9.4.1 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: run.c,v 1.9.4.2 2000/04/26 07:10:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -140,7 +140,7 @@ int main(int argc,char *argv[]){
 	}
 
 	reset_next_value();
-	line=get_line(in);
+	line=setup_line(in);
 	/* count cols before we start reading */
 	{
 	  char *temp=line;
@@ -161,8 +161,7 @@ int main(int argc,char *argv[]){
 	  /* ignores -s for now */
 	  process_vector(b,addmul,interleave,vec,cols);
 
-	  reset_next_value();
-	  line=get_line(in);
+	  line=setup_line(in);
 	}
 	fclose(in);
       }

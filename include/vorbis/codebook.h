@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.4.4.5 2000/04/21 16:35:38 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.4.4.6 2000/04/26 07:10:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -81,7 +81,8 @@ typedef struct encode_aux_nearestmatch{
 typedef struct encode_aux_threshmatch{
   double *quantthresh;
   long   *quantmap;
-  int     quantvals;
+  int     quantvals; 
+  int     threshvals; 
 } encode_aux_threshmatch;
 
 typedef struct decode_aux{

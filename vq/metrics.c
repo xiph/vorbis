@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.6.4.2 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.6.4.3 2000/04/26 07:10:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,56 +24,62 @@
 #include "../lib/sharedbook.h"
 #include "bookutil.h"
 
+/* collect the following metrics:
+
+   mean and mean squared amplitude
+   mean and mean squared error 
+   mean and mean squared error (per sample) by entry
+   worst case fit by entry
+   entry cell size
+   hits by entry
+   total bits
+   total samples
+   (average bits per sample)*/
+   
+
 /* set up metrics */
 
 double meanamplitude_acc=0.;
 double meanamplitudesq_acc=0.;
 double meanerror_acc=0.;
 double meanerrorsq_acc=0.;
-double meandev_acc=0.;
 
-double *histogram=NULL;
-double *histogram_error=NULL;
-double *histogram_errorsq=NULL;
-double *histogram_distance=NULL;
-double *histogram_hi=NULL;
-double *histogram_lo=NULL;
-
+double **histogram=NULL;
+double **histogram_error=NULL;
+double **histogram_errorsq=NULL;
+double **histogram_hi=NULL;
+double **histogram_lo=NULL;
+double bits=0.;
 double count=0.;
-
-int books=0;
-int lastdim=-1;
 
 static double *_now(codebook *c, int i){
   return c->valuelist+i*c->c->dim;
 }
 
-int histerrsort(const void *a, const void *b){
-  double av=histogram_distance[*((long *)a)];
-  double bv=histogram_distance[*((long *)b)];
-  if(av<bv)return(-1);
-  return(1);
-}
+int books=0;
 
 void process_preprocess(codebook **bs,char *basename){
-  while(bs[books]){
-    codebook *b=bs[books];
-    lastdim=b->c->dim;
-    books++;
-  }
-
-
+  int i;
+  while(bs[books])books++;
+  
   if(books){
-    const static_codebook *b=bs[books-1]->c;
-    histogram=calloc(b->entries,sizeof(double));
-    histogram_distance=calloc(b->entries,sizeof(double));
-    histogram_errorsq=calloc(b->entries*lastdim,sizeof(double));
-    histogram_error=calloc(b->entries*lastdim,sizeof(double));
-    histogram_hi=calloc(b->entries*lastdim,sizeof(double));
-    histogram_lo=calloc(b->entries*lastdim,sizeof(double));
+    histogram=calloc(books,sizeof(double *));
+    histogram_error=calloc(books,sizeof(double *));
+    histogram_errorsq=calloc(books,sizeof(double *));
+    histogram_hi=calloc(books,sizeof(double *));
+    histogram_lo=calloc(books,sizeof(double *));
   }else{
     fprintf(stderr,"Specify at least one codebook\n");
     exit(1);
+  }
+
+  for(i=0;i<books;i++){
+    codebook *b=bs[i];
+    histogram[i]=calloc(b->entries,sizeof(double));
+    histogram_error[i]=calloc(b->entries*b->dim,sizeof(double));
+    histogram_errorsq[i]=calloc(b->entries*b->dim,sizeof(double));
+    histogram_hi[i]=calloc(b->entries*b->dim,sizeof(double));
+    histogram_lo[i]=calloc(b->entries*b->dim,sizeof(double));
   }
 }
 
@@ -87,219 +93,181 @@ static double _dist(int el,double *a, double *b){
   return acc;
 }
 
-void cell_spacing(codebook **b){
-  int i,j,k;
-  for(i=0;i<books;i++){
-    double min,max,mean=0.,meansq=0.;
-    codebook *c=b[i];
-
-    fprintf(stderr,"\nCell spacing for book %d:\n",i);
+void cell_spacing(codebook *c){
+  int j,k;
+  double min,max,mean=0.,meansq=0.;
+  
+  /* minimum, maximum, mean, ms cell spacing */
+  for(j=0;j<c->c->entries;j++){
+    double localmin=-1.;
+    for(k=0;k<c->c->entries;k++){
+      double this=_dist(c->c->dim,_now(c,j),_now(c,k));
+      if(j!=k &&
+	 (localmin==-1 || this<localmin))
+	localmin=this;
+    }
     
-    /* minimum, maximum, mean, ms cell spacing */
-    for(j=0;j<c->c->entries;j++){
-      double localmin=-1.;
-      for(k=0;k<c->c->entries;k++){
-	double this=_dist(c->c->dim,_now(c,j),_now(c,k));
-	if(j!=k &&
-	   (localmin==-1 || this<localmin))
-	  localmin=this;
-      }
-      
-      if(j==0 || localmin<min)min=localmin;
-      if(j==0 || localmin>max)max=localmin;
-      mean+=sqrt(localmin);
-      meansq+=localmin;
-    }
-
-    fprintf(stderr,"\tminimum cell spacing (closest side): %g\n",sqrt(min));
-    fprintf(stderr,"\tmaximum cell spacing (closest side): %g\n",sqrt(max));
-    fprintf(stderr,"\tmean closest side spacing: %g\n",mean/c->c->entries);
-    fprintf(stderr,"\tmean sq closest side spacing: %g\n",sqrt(meansq/c->c->entries));
+    if(j==0 || localmin<min)min=localmin;
+    if(j==0 || localmin>max)max=localmin;
+    mean+=sqrt(localmin);
+    meansq+=localmin;
   }
+  
+  fprintf(stderr,"\tminimum cell spacing (closest side): %g\n",sqrt(min));
+  fprintf(stderr,"\tmaximum cell spacing (closest side): %g\n",sqrt(max));
+  fprintf(stderr,"\tmean closest side spacing: %g\n",mean/c->c->entries);
+  fprintf(stderr,"\tmean sq closest side spacing: %g\n",sqrt(meansq/c->c->entries));
 }
 
-void process_postprocess(codebook **b,char *basename){
-  int i,j,k;
+void process_postprocess(codebook **bs,char *basename){
+  int i,k,book;
   char *buffer=alloca(strlen(basename)+80);
-  codebook *bb=b[books-1];
 
-  fprintf(stderr,"Done.  Processed %ld data points:\n",
+  fprintf(stderr,"Done.  Processed %ld data points:\n\n",
 	  (long)count);
-  fprintf(stderr,"\tglobal mean amplitude: %g\n",
-	  meanamplitude_acc/(count*lastdim));
-  fprintf(stderr,"\tglobal mean squared amplitude: %g\n",
-	  sqrt(meanamplitudesq_acc/(count*lastdim)));
 
-  fprintf(stderr,"\tglobal mean error: %g\n",
-	  meanerror_acc/(count*lastdim));
-  fprintf(stderr,"\tglobal mean squared error: %g\n",
-	  sqrt(meanerrorsq_acc/(count*lastdim)));
-  fprintf(stderr,"\tglobal mean deviation: %g\n",
-	  meandev_acc/(count*lastdim));
+  fprintf(stderr,"Global statistics:******************\n\n");
 
-  cell_spacing(b);
+  fprintf(stderr,"\ttotal samples: %ld\n",(long)count);
+  fprintf(stderr,"\ttotal bits required to code: %ld\n",(long)bits);
+  fprintf(stderr,"\taverage bits per sample: %g\n\n",bits/count);
 
-  {
+  fprintf(stderr,"\tmean sample amplitude: %g\n",
+	  meanamplitude_acc/count);
+  fprintf(stderr,"\tmean squared sample amplitude: %g\n\n",
+	  sqrt(meanamplitudesq_acc/count));
+
+  fprintf(stderr,"\tmean code error: %g\n",
+	  meanerror_acc/count);
+  fprintf(stderr,"\tmean squared code error: %g\n\n",
+	  sqrt(meanerrorsq_acc/count));
+
+  for(book=0;book<books;book++){
     FILE *out;
+    codebook *b=bs[book];
+    int n=b->c->entries;
+    int dim=b->c->dim;
 
-    sprintf(buffer,"%s-mse.m",basename);
+    fprintf(stderr,"Book %d statistics:------------------\n",book);
+
+    cell_spacing(b);
+
+    sprintf(buffer,"%s-%d-mse.m",basename,book);
     out=fopen(buffer,"w");
     if(!out){
       fprintf(stderr,"Could not open file %s for writing\n",buffer);
       exit(1);
     }
-
-    for(i=0;i<bb->c->entries;i++){
-      for(k=0;k<bb->c->dim;k++){
-	fprintf(out,"%ld, %g, %g\n",
-		i*bb->c->dim+k,(bb->valuelist+i*bb->c->dim)[k],
-		sqrt((histogram_errorsq+i*bb->c->dim)[k]/histogram[i]));
+    
+    for(i=0;i<n;i++){
+      for(k=0;k<dim;k++){
+	fprintf(out,"%d, %g, %g\n",
+		i*dim+k,(b->valuelist+i*dim)[k],
+		sqrt((histogram_errorsq[book]+i*dim)[k]/histogram[book][i]));
+      }
+    }
+    fclose(out);
+      
+    sprintf(buffer,"%s-%d-me.m",basename,book);
+    out=fopen(buffer,"w");
+    if(!out){
+      fprintf(stderr,"Could not open file %s for writing\n",buffer);
+      exit(1);
+    }
+    
+    for(i=0;i<n;i++){
+      for(k=0;k<dim;k++){
+	fprintf(out,"%d, %g, %g\n",
+		i*dim+k,(b->valuelist+i*dim)[k],
+		(histogram_error[book]+i*dim)[k]/histogram[book][i]);
       }
     }
     fclose(out);
 
-    sprintf(buffer,"%s-me.m",basename);
+    sprintf(buffer,"%s-%d-worst.m",basename,book);
     out=fopen(buffer,"w");
     if(!out){
       fprintf(stderr,"Could not open file %s for writing\n",buffer);
       exit(1);
     }
-
-    for(i=0;i<bb->c->entries;i++){
-      for(k=0;k<bb->c->dim;k++){
-	fprintf(out,"%ld, %g, %g\n",
-		i*bb->c->dim+k,(bb->valuelist+i*bb->c->dim)[k],
-		(histogram_error+i*bb->c->dim)[k]/histogram[i]);
+    
+    for(i=0;i<n;i++){
+      for(k=0;k<dim;k++){
+	fprintf(out,"%d, %g, %g, %g\n",
+		i*dim+k,(b->valuelist+i*dim)[k],
+		(b->valuelist+i*dim)[k]+(histogram_lo[book]+i*dim)[k],
+		(b->valuelist+i*dim)[k]+(histogram_hi[book]+i*dim)[k]);
       }
     }
     fclose(out);
-
-    sprintf(buffer,"%s-worst.m",basename);
-    out=fopen(buffer,"w");
-    if(!out){
-      fprintf(stderr,"Could not open file %s for writing\n",buffer);
-      exit(1);
-    }
-
-    for(i=0;i<bb->c->entries;i++){
-      for(k=0;k<bb->c->dim;k++){
-	fprintf(out,"%ld, %g, %g, %g\n",
-		i*bb->c->dim+k,(bb->valuelist+i*bb->c->dim)[k],
-		(bb->valuelist+i*bb->c->dim)[k]+(histogram_lo+i*bb->c->dim)[k],
-		(bb->valuelist+i*bb->c->dim)[k]+(histogram_hi+i*bb->c->dim)[k]);
-      }
-    }
-    fclose(out);
-  }
-
-  {
-    FILE *out;
-    long *index=alloca(sizeof(long)*bb->c->entries);
-    sprintf(buffer,"%s-distance.m",basename);
-    out=fopen(buffer,"w");
-    if(!out){
-      fprintf(stderr,"Could not open file %s for writing\n",buffer);
-      exit(1);
-    }
-    for(j=0;j<bb->c->entries;j++){
-      if(histogram[j])histogram_distance[j]/=histogram[j];
-      index[j]=j;
-    }
-
-    qsort(index,bb->c->entries,sizeof(long),histerrsort);
-
-    for(j=0;j<bb->c->entries;j++)
-      for(k=0;k<histogram[index[j]];k++)
-	fprintf(out,"%g,\n",histogram_distance[index[j]]);
-    fclose(out);
-		
   }
 }
+
+void process_one(codebook *b,int book,double *a,int dim,int step,int addmul){
+  int j,entry;
+  double base=0.;
+  double amplitude=0.;
+
+  if(book==0)
+    for(j=0;j<dim;j++){
+      if(b->c->q_sequencep){
+	amplitude=a[j*step]-base;
+	base=a[j*step];
+      }else
+	amplitude=a[j*step];
+      meanamplitude_acc+=fabs(amplitude);
+      meanamplitudesq_acc+=amplitude*amplitude;
+      count++;
+    }
+
+  entry=vorbis_book_besterror(b,a,step,addmul);
+  
+  histogram[book][entry]++;  
+  bits+=vorbis_book_codelen(b,entry);
+	  
+  for(j=0;j<dim;j++){
+    double error=a[j*step];
+
+    if(book==books-1){
+      meanerror_acc+=fabs(error);
+      meanerrorsq_acc+=error*error;
+    }
+    histogram_errorsq[book][entry*dim+j]+=error*error;
+    histogram_error[book][entry*dim+j]+=fabs(error);
+    if(histogram[book][entry]==0 || histogram_hi[book][entry*dim+j]<error)
+      histogram_hi[book][entry*dim+j]=error;
+    if(histogram[book][entry]==0 || histogram_lo[book][entry*dim+j]>error)
+      histogram_lo[book][entry*dim+j]=error;
+  }
+}
+
 
 void process_vector(codebook **bs,int *addmul,int inter,double *a,int n){
   int bi;
-  int i,j;
-  double base=0.;
-  double *work=alloca(sizeof(double)*n);
-  double amplitude=0.;
-
-  memcpy(work,a,sizeof(double)*n);
+  int i;
 
   for(bi=0;bi<books;bi++){
     codebook *b=bs[bi];
     int dim=b->dim;
-
+    
     if(inter){
-      for(i=0;i<n/dim;i++){
-	int entry=vorbis_book_besterror(b,work+i,n/dim,addmul[bi]);
-	
-	if(bi==books-1){
-	  double distance=0;
-	  histogram[entry]++;  
-	  
-	  for(j=0;j<dim;j++){
-	    double error=work[i+j*(n/dim)];
-	    histogram_errorsq[entry*dim+j]+=error*error;
-	    histogram_error[entry*dim+j]+=fabs(error);
-	    if(histogram[entry]==0 || histogram_hi[entry*dim+j]<error)
-	      histogram_hi[entry*dim+j]=error;
-	    if(histogram[entry]==0 || histogram_lo[entry*dim+j]>error)
-	      histogram_lo[entry*dim+j]=error;
-	    distance+=error*error;    
-	  }
-	  histogram_distance[entry]+=sqrt(distance);
-	}
-      }
+      for(i=0;i<n/dim;i++)
+	process_one(b,bi,a+i,dim,n/dim,addmul[bi]);
     }else{
-      for(i=0;i<=n-dim;i+=dim){
-	int entry=vorbis_book_besterror(b,work+i,1,addmul[bi]);
-	if(bi==books-1){
-	  double distance=0;
-	  histogram[entry]++;  
-	  
-	  for(j=0;j<dim;j++){
-	    double error=work[i+j];
-	    histogram_errorsq[entry*dim+j]+=error*error;
-	    histogram_error[entry*dim+j]+=fabs(error);
-	    if(histogram[entry]==0 || histogram_hi[entry*dim+j]<error)
-	      histogram_hi[entry*dim+j]=error;
-	    if(histogram[entry]==0 || histogram_lo[entry*dim+j]>error)
-	      histogram_lo[entry*dim+j]=error;
-	    distance+=error*error;    
-	  }
-	  histogram_distance[entry]+=sqrt(distance);
-	}
-      }
+      for(i=0;i<=n-dim;i+=dim)
+	process_one(b,bi,a+i,dim,1,addmul[bi]);
     }
   }
-
-  for(i=0;i<n;i++){
-    double error=work[i];
-    if(bs[0]->c->q_sequencep){
-      amplitude=a[i]-base;
-      base=a[i];
-    }else
-      amplitude=a[i];
-    
-    meanamplitude_acc+=fabs(amplitude);
-    meanamplitudesq_acc+=amplitude*amplitude;
-    meanerror_acc+=fabs(error);
-    meanerrorsq_acc+=error*error;
-    
-    if(amplitude)
-      meandev_acc+=fabs(error/amplitude);
-    else
-      meandev_acc+=fabs(error); /* yeah, yeah */
-  }
-
-  if((long)(count++)%100)spinnit("working.... lines: ",count);
+  
+  if((long)(count)%100)spinnit("working.... samples: ",count);
 }
 
 void process_usage(void){
   fprintf(stderr,
-	  "usage: vqmetrics +|*<codebook>.vqh [ +|*<codebook.vqh> ]... \n"
+	  "usage: vqmetrics [-i] +|*<codebook>.vqh [ +|*<codebook.vqh> ]... \n"
 	  "                 datafile.vqd [datafile.vqd]...\n\n"
-	  "       data can be taken on stdin.  Output goes to output files:\n"
+	  "       data can be taken on stdin.  -i indicates interleaved coding.\n"
+	  "       Output goes to output files:\n"
 	  "       basename-me.m:       gnuplot: mean error by entry value\n"
 	  "       basename-mse.m:      gnuplot: mean square error by entry value\n"
 	  "       basename-worst.m:    gnuplot: worst error by entry value\n"

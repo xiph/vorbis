@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.10.4.2 2000/04/21 16:35:40 xiphmont Exp $
+# $Id: Makefile.in,v 1.10.4.3 2000/04/26 07:10:15 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -29,7 +29,8 @@ HFILES =	../include/vorbis/codebook.h vqgen.h vqext.h bookutil.h
 
 OFILES = 	vqgen.o vqsplit.o bookutil.o ../lib/sharedbook.o
 ALLOFILES = 	$(OFILES) lspdata.o genericdata.o train.o build.o run.o\
-		cascade.o partition.o metrics.o residuedata.o latticebuild.o
+		cascade.o partition.o metrics.o residuedata.o latticebuild.o\
+		latticepare.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -40,7 +41,7 @@ debug:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-target:	lspvqtrain genericvqtrain residuevqtrain vqbuild vqcascade vqmetrics latticebuild
+target:	lspvqtrain genericvqtrain residuevqtrain vqbuild vqcascade vqmetrics latticebuild latticepare
 
 lspvqtrain:	$(OFILES) lspdata.o train.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
@@ -61,6 +62,9 @@ vqmetrics:	$(OFILES) run.o metrics.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 latticebuild:	$(OFILES) latticebuild.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+
+latticepare:	$(OFILES) latticepare.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 
