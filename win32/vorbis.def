@@ -1,14 +1,11 @@
 ;
-; $Id: vorbis.def,v 1.9 2002/03/18 04:46:40 segher Exp $
+; $Id: vorbis.def,v 1.10 2002/07/04 09:13:41 msmith Exp $
 ; 
 LIBRARY
 EXPORTS
 _floor_P
 _mapping_P
 _residue_P
-_time_P
-_vi_psy_copy
-residue_free_info
 vorbis_analysis
 vorbis_analysis_blockout
 vorbis_analysis_buffer
@@ -27,6 +24,9 @@ vorbis_comment_query
 vorbis_comment_query_count
 vorbis_commentheader_out
 vorbis_dsp_clear
+vorbis_encode_setup_init
+vorbis_encode_setup_managed
+vorbis_encode_setup_vbr
 vorbis_info_blocksize
 vorbis_info_clear
 vorbis_info_init

@@ -157,10 +157,6 @@ SOURCE=..\lib\synthesis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\time0.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\window.c
 # End Source File
 # End Group

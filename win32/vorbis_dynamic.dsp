@@ -179,7 +179,7 @@ SOURCE=..\lib\synthesis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\time0.c
+SOURCE=..\lib\vorbisenc.c
 # End Source File
 # Begin Source File
 
