@@ -53,7 +53,7 @@ Carsten Bormann
 #include "smallft.h"
 #include "lpc.h"
 
-/* This is pared down for Vorbis, where we only use LPC to encode
+/* This is pared down for Vorbis where we only use LPC to encode
    spectral envelope curves.  Thus we only are interested in
    generating the coefficients and recovering the curve from the
    coefficients.  Autocorrelation LPC coeff generation algorithm
@@ -64,6 +64,7 @@ Carsten Bormann
 
 double vorbis_curve_to_lpc(double *curve,int n,double *lpc,int m){
   double aut[m+1],work[n+n],error;
+  drft_lookup dl;
   int i,j;
 
   /* input is a real curve. make it complex-real */
@@ -73,7 +74,9 @@ double vorbis_curve_to_lpc(double *curve,int n,double *lpc,int m){
   }
 
   n*=2;
-  fft_backward(n,work,NULL,NULL);
+  drft_init(&dl,n);
+  drft_backward(&dl,work);
+  drft_clear(&dl);
 
   /* The autocorrelation will not be circular.  Shift, else we lose
      most of the power in the edges. */
@@ -142,7 +145,7 @@ static double vorbis_lpc_magnitude(double w,double *lpc, int m){
     real+=lpc[k]*cos((k+1)*w);
     imag+=lpc[k]*sin((k+1)*w);
   }  
-  return(1/sqrt(real*real+imag*imag));
+  return(1./sqrt(real*real+imag*imag));
 }
 
 /* generate the whole freq response curve on an LPC IIR filter */

@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.7 1999/08/07 23:36:32 xiphmont Exp $
+# $Id: Makefile.in,v 1.8 1999/08/09 21:11:38 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -27,7 +27,8 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-OFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o
+OFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
+		lsp.o lpc.o analysis.o synthesis.o psy.o
 TARGETFILES =	libvorbis.a
 
 all:
@@ -48,9 +49,8 @@ selftest:
 	@./test_framing
 	@./test_bitwise
 
-dsptest:
-		$(MAKE) target CFLAGS="$(DEBUG)"
-		$(CC) $(DEBUG) $(LDFLAGS) $(OFILES) dsptest.c -o dsptest -lm
+dsptest:	debug
+		$(CC) $(DEBUG) $(LDFLAGS) dsptest.c libvorbis.a -o dsptest -lm
 
 target:	$(TARGETFILES)
 
@@ -64,4 +64,4 @@ $(OFILES): 	mdct.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	-rm -f *.o *.a test* *~ *.out ogg config.*
+	-rm -f *.o *.a test* *~ *.out ogg config.* dsptest

@@ -1,10 +1,8 @@
 #include <math.h>
 #include <stdio.h>
 #include "codec.h"
-#include "envelope.h"
-#include "mdct.h"
 
-#define READ 4096
+#define READ 1024
 
 int main(){
    vorbis_dsp_state encode,decode;
@@ -15,11 +13,11 @@ int main(){
    int done=0;
    char *temp[]={ "Test" ,"the Test band", "test records",NULL };
    int mtemp[]={0,1};
+   int mtemp2[]={0,1};
    int frame=0;
 
    signed char buffer[READ*4+44];
    
-  
    vi.channels=2;
    vi.rate=44100;
    vi.version=0;
@@ -31,9 +29,12 @@ int main(){
    vi.envelopesa=64;
    vi.envelopech=2;
    vi.envelopemap=mtemp;
+   vi.floormap=mtemp2;
+   vi.floororder=20;
+   vi.floorch=2;
    vi.channelmap=NULL;
    vi.preecho_thresh=10.;
-   vi.preecho_clamp=4.;
+   vi.preecho_clamp=.5;
 
    vorbis_analysis_init(&encode,&vi);
    vorbis_synthesis_init(&decode,&vi);
@@ -60,45 +61,14 @@ int main(){
      while(vorbis_analysis_blockout(&encode,&vb)){
        double **pcm;
        int avail;
-       double *window=encode.window[vb.W][vb.lW][vb.nW];
  
        /* analysis */
 
-       /* apply envelope */
-       _ve_envelope_sparsify(&vb);
-       _ve_envelope_apply(&vb,0);
- 
-       for(i=0;i<vb.pcm_channels;i++)
-	 mdct_forward(&vb.vd->vm[vb.W],vb.pcm[i],vb.pcm[i],window);
- 
+       vorbis_analysis(&vb);
 
        /* synthesis */
 
-       for(i=0;i<vb.pcm_channels;i++)
-	 mdct_backward(&vb.vd->vm[vb.W],vb.pcm[i],vb.pcm[i],window);
- 
- 
-       /*{
-	 FILE *out;
-	 char path[80];
-	 int i;
-	 
-	 int avail=encode.block_size[vb.W];
-	 int beginW=countermid-avail/2;
-	 
-	 sprintf(path,"ana%d",vb.frameno);
-	 out=fopen(path,"w");
-	 
-	 for(i=0;i<avail;i++)
-	   fprintf(out,"%d %g\n",i+beginW,vb.pcm[0][i]);
-	 fprintf(out,"\n");
-	 for(i=0;i<avail;i++)
-	   fprintf(out,"%d %g\n",i+beginW,window[i]);
-	 
-	 fclose(out);
-       }*/
- 
-       _ve_envelope_apply(&vb,1);
+       vorbis_synthesis(&vb);
 
        counterin+=bread/4;
        vorbis_synthesis_blockin(&decode,&vb);

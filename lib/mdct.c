@@ -145,13 +145,17 @@ static inline void _mdct_kernel(double *x,
       for(r=0;r<(n4>>i);r+=4){
 	int w1=wbase;
 	int w2=wbase-(k0>>1);
+	double AEv= *AE,wA;
+	double AOv= *AO,wB;
 	wbase-=4;
 
 	for(s=0;s<(2<<i);s++){
 	  x[w1+2]=w[w1+2]+w[w2+2];
 	  x[w1]  =w[w1]+w[w2];
-	  x[w2+2]=(w[w1+2]-w[w2+2])* *AE-(w[w1]-w[w2])* *AO;
-	  x[w2]  =(w[w1]-w[w2])* *AE+(w[w1+2]-w[w2+2])* *AO;
+	  wA     =w[w1+2]-w[w2+2];
+	  wB     =w[w1]-w[w2];
+	  x[w2+2]=wA*AEv - wB*AOv;
+	  x[w2]  =wB*AEv + wA*AOv;
 	  w1-=k0;
 	  w2-=k0;
 	}
@@ -317,16 +321,16 @@ void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
     double scale=n/4.;
     
     for(i=0;i<n4;i++){
+      double BEv=BE[i];
+      double BOv=BO[i];
 #ifdef VORBIS_SPECIFIC_MODIFICATIONS
-      double temp1= (*x * *BO - *(x+2) * *BE)/ scale;
-      double temp2= (*x * *BE + *(x+2) * *BO)/ -scale;
-    
-      out[o1]=-temp1*window[o1];
-      out[o2]=temp1*window[o2];
-      out[o3]=out[o4]=temp2;
+      double temp= (*x * BOv - *(x+2) * BEv)/ scale;
+      out[o3]=out[o4]=(*x * BEv + *(x+2) * BOv)/ -scale;
+      out[o1]=-temp*window[o1];
+      out[o2]=temp*window[o2];
 #else
-      double temp1= (*x * *BO - *(x+2) * *BE)* scale;
-      double temp2= (*x * *BE + *(x+2) * *BO)* -scale;
+      double temp1= (*x * BOv - *(x+2) * BEv)* scale;
+      double temp2= (*x * BEv + *(x+2) * BOv)* -scale;
     
       out[o1]=-temp1*window[o1];
       out[o2]=temp1*window[o2];
@@ -339,7 +343,6 @@ void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
       o3++;
       o4--;
       x+=4;
-      BE++;BO++;
     }
   }
 }

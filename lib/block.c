@@ -227,10 +227,13 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
 
 int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   int i;
+  memset(vb,0,sizeof(vorbis_block));
   vb->pcm_storage=v->block_size[1];
   vb->pcm_channels=v->pcm_channels;
   vb->mult_storage=v->block_size[1]/v->samples_per_envelope_step;
   vb->mult_channels=v->envelope_channels;
+  vb->floor_channels=v->vi.floorch;
+  vb->floor_storage=v->vi.floororder;
   
   vb->pcm=malloc(vb->pcm_channels*sizeof(double *));
   for(i=0;i<vb->pcm_channels;i++)
@@ -239,6 +242,15 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   vb->mult=malloc(vb->mult_channels*sizeof(double *));
   for(i=0;i<vb->mult_channels;i++)
     vb->mult[i]=malloc(vb->mult_storage*sizeof(double));
+
+  vb->lsp=malloc(vb->floor_channels*sizeof(double *));
+  vb->lpc=malloc(vb->floor_channels*sizeof(double *));
+  vb->amp=malloc(vb->floor_channels*sizeof(double));
+  for(i=0;i<vb->floor_channels;i++){
+    vb->lsp[i]=malloc(vb->floor_storage*sizeof(double));
+    vb->lpc[i]=malloc(vb->floor_storage*sizeof(double));
+  }
+
   return(0);
 }
 
@@ -284,42 +296,46 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   /* overconserve for now; any block with a non-placeholder multiplier
      should be minimal size. We can be greedy and only look at nW size */
   
-  if(v->W)
-    /* this is a long window; we start the search forward of centerW
-       because that's the fastest we could react anyway */
-    i=v->centerW+v->block_size[1]/4-v->block_size[0]/4;
-  else
-    /* short window.  Search from centerW */
-    i=v->centerW;
-  i/=v->samples_per_envelope_step;
-
-  for(;i<v->envelope_current;i++){
-    for(j=0;j<v->envelope_channels;j++)
-      if(v->multipliers[j][i-1]*v->vi.preecho_thresh<  
-	 v->multipliers[j][i])break;
-    if(j<v->envelope_channels)break;
-  }
-  
-  if(i<v->envelope_current){
-    /* Ooo, we hit a multiplier. Is it beyond the boundary to make the
-       upcoming block large ? */
-    long largebound;
+  if(v->vi.smallblock<v->vi.largeblock){
+    
     if(v->W)
-      largebound=v->centerW+v->block_size[1];
+      /* this is a long window; we start the search forward of centerW
+	 because that's the fastest we could react anyway */
+      i=v->centerW+v->block_size[1]/4-v->block_size[0]/4;
     else
-      largebound=v->centerW+v->block_size[0]/4+v->block_size[1]*3/4;
-    largebound/=v->samples_per_envelope_step;
-
-    if(i>=largebound)
+      /* short window.  Search from centerW */
+      i=v->centerW;
+    i/=v->samples_per_envelope_step;
+    
+    for(;i<v->envelope_current;i++){
+      for(j=0;j<v->envelope_channels;j++)
+	if(v->multipliers[j][i-1]*v->vi.preecho_thresh<  
+	   v->multipliers[j][i])break;
+      if(j<v->envelope_channels)break;
+    }
+    
+    if(i<v->envelope_current){
+      /* Ooo, we hit a multiplier. Is it beyond the boundary to make the
+	 upcoming block large ? */
+      long largebound;
+      if(v->W)
+	largebound=v->centerW+v->block_size[1];
+      else
+	largebound=v->centerW+v->block_size[0]/4+v->block_size[1]*3/4;
+      largebound/=v->samples_per_envelope_step;
+      
+      if(i>=largebound)
+	v->nW=1;
+      else
+	v->nW=0;
+      
+    }else{
+      /* Assume maximum; if the block is incomplete given current
+	 buffered data, this will be detected below */
       v->nW=1;
-    else
-      v->nW=0;
-
-  }else{
-    /* Assume maximum; if the block is incomplete given current
-       buffered data, this will be detected below */
+    }
+  }else
     v->nW=1;
-  }
 
   /* Do we actually have enough data *now* for the next block? The
      reason to check is that if we had no multipliers, that could
@@ -343,7 +359,9 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   vb->pcmend=v->block_size[v->W];
   vb->multend=vb->pcmend / v->samples_per_envelope_step;
 
-  if(v->pcm_channels!=vb->pcm_channels ||
+  if(vb->floor_channels!=v->vi.floorch ||
+     vb->floor_storage!=v->vi.floororder ||
+     v->pcm_channels!=vb->pcm_channels ||
      v->block_size[1]!=vb->pcm_storage ||
      v->envelope_channels!=vb->mult_channels){
 

@@ -53,7 +53,11 @@ typedef struct vorbis_info{
   int envelopesa;
   int envelopech;
   int *envelopemap; /* which envelope applies to what pcm channel */
-  int **channelmap; /* which encoding channels produce what pcm */
+  int **Echannelmap; /* which encoding channels produce what pcm (decode) */
+  int **channelmap;   /* which pcm channels produce what floors   (encode) */
+  int floororder;
+  int floorch;
+  int *floormap;
 
   double preecho_thresh;
   double preecho_clamp;
@@ -154,10 +158,16 @@ typedef struct vorbis_dsp_state{
 typedef struct vorbis_block{
   double **pcm;
   double **mult;
+  double **lpc;
+  double **lsp;
+  double *amp;
+  
   int    pcm_channels; /* allocated, not used */
   int    pcm_storage;  /* allocated, not used */
   int    mult_channels; /* allocated, not used */
   int    mult_storage;  /* allocated, not used */
+  int    floor_channels;
+  int    floor_storage;
 
   long  lW;
   long  W;
@@ -225,8 +235,8 @@ extern double **vorbis_analysis_buffer(vorbis_dsp_state *vd,int vals);
 extern int      vorbis_analysis_wrote(vorbis_dsp_state *vd,int vals);
 extern int      vorbis_analysis_blockout(vorbis_dsp_state *vd,
 					 vorbis_block *vb);
-extern int      vorbis_analysis_packetout(vorbis_dsp_state *vd,
-					  vorbis_block *vb,
+extern int      vorbis_analysis(vorbis_block *vb);
+extern int      vorbis_analysis_packetout(vorbis_block *vb,
 					  ogg_packet *op);
 
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
@@ -234,6 +244,7 @@ extern int      vorbis_analysis_packetout(vorbis_dsp_state *vd,
 extern void vorbis_synthesis_free(vorbis_dsp_state *vd);
 extern int  vorbis_synthesis_init(vorbis_dsp_state *vd,vorbis_info *vi);
 
+extern int vorbis_synthesis(vorbis_block *vb);
 extern int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
 extern int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
 extern int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes);
@@ -241,6 +252,11 @@ extern int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes);
 
 extern int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
 
+
+#define min(x,y)  ((x)>(y)?(y):(x))
+#define max(x,y)  ((x)<(y)?(y):(x))
+#define todB(x)   (x==0?-9.e40:log(fabs(x))*8.6858896)  /* 20log10(x) */
+#define fromdB(x) (exp((x)*.11512925))
 
 #endif
 

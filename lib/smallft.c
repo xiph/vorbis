@@ -500,9 +500,10 @@ void drft_forward(drft_lookup *l,double *data){
 
 void drft_backward(drft_lookup *l,double *data){
   int i;
+  double n1=1./l->n;
   if (l->n==1)return;
   drftb1(l->n,data,l->trigcache,l->trigcache+l->n,l->splitcache);
-  for(i=0;i<l->n;i++)data[i]/=l->n;
+  for(i=0;i<l->n;i++)data[i]*=n1;
 }
 
 void drft_init(drft_lookup *l,int n){
