@@ -14,7 +14,7 @@
  function: build a VQ codebook 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Dec 08 1999
+ last modification date: Dec 09 1999
 
  ********************************************************************/
 
@@ -75,12 +75,6 @@ typedef struct vqgen{
 
   double (*metric_func)   (struct vqgen *v,double *a,double *b);
 } vqgen;
-
-typedef struct vqbook{
-
-
-
-} vqbook;
 
 /* internal helpers *****************************************************/
 #define vN(data,i) (data+v->elements*i)
@@ -336,6 +330,26 @@ double vqgen_iterate(vqgen *v){
    (provided parameter), we may choose to ignore the overlap in order
    to pare the tree down */
 
+typedef struct vqbook{
+  long elements;
+  long entries;
+  double *valuelist;
+  long   *codelist;
+  long   *lengthlist;
+
+  /* auxiliary encoding/decoding information */
+  long   *ptr0;
+  long   *ptr1;
+
+  /* auxiliary encoding information */
+  double *n;
+  double *c;
+  long   aux;
+  long   alloc;
+
+} vqbook;
+
+
 double *sortvals;
 int els;
 int iascsort(const void *a,const void *b){
@@ -419,9 +433,10 @@ void pq_center_out(vqgen *v,double *n,double *c,double *center,double *q){
   }
 }
 
-int lp_split(vqgen *v,long *entryindex,long entries, 
-	     long *pointindex,long points,long depth,
-	     double slack){
+int lp_split(vqgen *v,vqbook *b,
+	     long *entryindex,long entries, 
+	     long *pointindex,long points,
+	     long depth,double slack){
 
   /* The encoder, regardless of book, will be using a straight
      euclidian distance-to-point metric to determine closest point.
@@ -447,31 +462,13 @@ int lp_split(vqgen *v,long *entryindex,long entries,
   n=alloca(sizeof(double)*v->elements);
   memset(p,0,sizeof(double)*v->elements);
 
-  /* depth limit */
-  if(depth>20){
-    printf("leaf: entries %ld, depth %ld\n",entries,depth);
-    return(entries);
-  }
-
-  /* nothing to do */
-  if(entries==1){
-    printf("leaf: entry %ld, depth %ld\n",entryindex[0],depth);
-    return(1);
-  }
-
-  /* The result must be an even split */
-  if(entries==2){
-    printf("even split: depth %ld\n",depth);
-    return(2);
-  }
-
   /* We need to find the dividing hyperplane. find the median of each
      axis as the centerpoint and the normal facing farthest point */
 
   /* more than one way to do this part.  For small sets, we can brute
      force it. */
 
-  if(entries<64){
+  if(entries<32){
     /* try every pair possibility */
     double best=0;
     long   besti=0;
@@ -543,15 +540,15 @@ int lp_split(vqgen *v,long *entryindex,long entries,
   {
     long Aptr=0;
     long Bptr=points-1;
-    while(Aptr<Bptr){
-      while(Aptr<Bptr){
+    while(Aptr<=Bptr){
+      while(Aptr<=Bptr){
 	double position=-c;
 	for(k=0;k<v->elements;k++)
 	  position+=_point(v,pointindex[Aptr])[k]*n[k];
-	if(position<0.)break; /* not in A */
+	if(position<=0.)break; /* not in A */
 	Aptr++;
       }
-      while(Aptr<Bptr){
+      while(Aptr<=Bptr){
 	double position=-c;
 	for(k=0;k<v->elements;k++)
 	  position+=_point(v,pointindex[Bptr])[k]*n[k];
@@ -564,25 +561,103 @@ int lp_split(vqgen *v,long *entryindex,long entries,
 	pointindex[Bptr]=temp;
       }
       pointsA=Aptr;
-      Aptr++;
-      Bptr--;
     }
   }
 
   fprintf(stderr,"split: total=%ld depth=%ld set A=%ld:%ld:%ld=B\n",
 	  entries,depth,entriesA-entriesC,entriesC,entriesB-entriesC);
+  {
+    long thisaux=b->aux++;
+    if(b->aux>=b->alloc){
+      b->alloc*=2;
+      b->ptr0=realloc(b->ptr0,sizeof(long)*b->alloc);
+      b->ptr1=realloc(b->ptr1,sizeof(long)*b->alloc);
+      b->n=realloc(b->n,sizeof(double)*b->elements*b->alloc);
+      b->c=realloc(b->c,sizeof(double)*b->alloc);
+    }
+    
+    memcpy(b->n+b->elements*thisaux,n,sizeof(double)*v->elements);
+    b->c[thisaux]=c;
 
-  ret=lp_split(v,entryA,entriesA,pointindex,pointsA,depth+1,slack); 
-  ret+=lp_split(v,entryB,entriesB,pointindex+pointsA,points-pointsA,
-		depth+1,slack); 
+    if(entriesA==1){
+      ret=1;
+      b->ptr0[thisaux]=entryA[0];
+    }else{
+      b->ptr0[thisaux]= -b->aux;
+      ret=lp_split(v,b,entryA,entriesA,pointindex,pointsA,depth+1,slack); 
+    }
+    if(entriesB==1){
+      ret++;
+      b->ptr1[thisaux]=entryB[0];
+    }else{
+      b->ptr1[thisaux]= -b->aux;
+      ret=lp_split(v,b,entryB,entriesB,pointindex+pointsA,points-pointsA,
+		   depth+1,slack); 
+    }
+  }
+  free(entryA);
+  free(entryB);
   return(ret);
 }
 
-void vqgen_book(vqgen *v){
+int vqenc_entry(vqbook *b,double *val){
+  int ptr=0,k;
+  while(1){
+    double c= -b->c[ptr];
+    double *nptr=b->n+b->elements*ptr;
+    for(k=0;k<b->elements;k++)
+      c+=nptr[k]*val[k];
+    if(c>0.) /* in A */
+      ptr= -b->ptr0[ptr];
+    else     /* in B */
+      ptr= -b->ptr1[ptr];
+    if(ptr<=0)break;
+  }
+  return(-ptr);
+}
 
+void vqgen_book(vqgen *v,vqbook *b){
+  long i;
+  long *entryindex=malloc(sizeof(double)*v->entries);
+  long *pointindex=malloc(sizeof(double)*v->points);
 
+  memset(b,0,sizeof(vqbook));
+  for(i=0;i<v->entries;i++)entryindex[i]=i;
+  for(i=0;i<v->points;i++)pointindex[i]=i;
+  b->elements=v->elements;
+  b->entries=v->entries;
+  b->alloc=4096;
+  b->ptr0=malloc(sizeof(long)*b->alloc);
+  b->ptr1=malloc(sizeof(long)*b->alloc);
+  b->n=malloc(sizeof(double)*b->elements*b->alloc);
+  b->c=malloc(sizeof(double)*b->alloc);
 
+  b->valuelist=malloc(sizeof(double)*b->elements*b->entries);
+  b->codelist=malloc(sizeof(long)*b->entries);
+  b->lengthlist=malloc(b->entries*sizeof(long));
+  
+  /* first, generate the encoding decision heirarchy */
+  lp_split(v,b,entryindex,v->entries, pointindex,v->points,0,0);
+  
+  /* run all training points through the decision tree to get a final
+     probability count */
+  {
+    long *probability=calloc(b->entries*2,sizeof(long));
+    for(i=0;i<v->points;i++){
+      int ret=vqenc_entry(b,v->pointlist+i*v->elements);
+      probability[ret]++;
+    }
 
+    for(i=0;i<b->entries;i++){
+      fprintf(stderr,"point %ld: %ld\n",i,probability[i]);
+    }
+
+  }
+
+  /* generate the codewords (short to long) */
+
+  free(entryindex);
+  free(pointindex);
 }
 
 static double testset24[48]={
@@ -853,6 +928,7 @@ static double testset256[1024]={
 int main(int argc,char *argv[]){
   FILE *in=fopen(argv[1],"r");
   vqgen v;
+  vqbook b;
   char buffer[160];
   int i,j;
 
@@ -882,15 +958,7 @@ int main(int argc,char *argv[]){
 
   memcpy(v.entrylist,testset256,sizeof(testset256));
 
-  {
-    long entryindex[v.entries];
-    long pointindex[v.points];
-    for(i=0;i<v.entries;i++)entryindex[i]=i;
-    for(i=0;i<v.points;i++)pointindex[i]=i;
-
-    fprintf(stderr,"\n\nleaves=%d\n",
-	    lp_split(&v,entryindex,v.entries, pointindex,v.points,0,0));
-  }
+  vqgen_book(&v,&b);
   
   return(0);
 }
