@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.20 2000/08/15 09:09:42 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.21 2000/08/19 11:46:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,6 +41,7 @@ typedef struct {
 
   vorbis_info_floor0 *vi;
   lpc_lookup lpclook;
+  double *lsp_look;
 
 } vorbis_look_floor0;
 
@@ -82,6 +83,7 @@ static void free_look(vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   if(i){
     if(look->linearmap)free(look->linearmap);
+    if(look->lsp_look)free(look->lsp_look);
     lpc_clear(&look->lpclook);
     memset(look,0,sizeof(vorbis_look_floor0));
     free(look);
@@ -145,7 +147,9 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
   look->n=vi->blocksizes[mi->blockflag]/2;
   look->ln=info->barkmap;
   look->vi=info;
-  lpc_init(&look->lpclook,look->ln,look->m);
+
+  if(vd->analysisp)
+    lpc_init(&look->lpclook,look->ln,look->m);
 
   /* we choose a scaling constant so that:
      floor(bark(rate/2-1)*C)=mapped-1
@@ -165,6 +169,10 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
     if(val>look->ln)val=look->ln; /* guard against the approximation */
     look->linearmap[j]=val;
   }
+
+  look->lsp_look=malloc(look->ln*sizeof(double));
+  for(j=0;j<look->ln;j++)
+    look->lsp_look[j]=2*cos(M_PI/look->ln*j);
 
   return look;
 }
@@ -235,31 +243,17 @@ double _curve_to_lpc(double *curve,double *lpc,
 
 /* generate the whole freq response curve of an LPC IIR filter */
 
-void _lpc_to_curve(double *curve,double *lpc,double amp,
+void _lsp_to_curve(double *curve,double *lsp,double amp,
 			  vorbis_look_floor0 *l,char *name,long frameno){
   /* l->m+1 must be less than l->ln, but guard in case we get a bad stream */
-  double *lcurve=alloca(sizeof(double)*max(l->ln*2,l->m*2+2));
+  double *lcurve=alloca(sizeof(double)*l->ln);
   int i;
 
   if(amp==0){
     memset(curve,0,sizeof(double)*l->n);
     return;
   }
-  vorbis_lpc_to_curve(lcurve,lpc,amp,&(l->lpclook));
-
-#if 0
-    { /******************/
-      FILE *of;
-      char buffer[80];
-      int i;
-
-      sprintf(buffer,"%s_%d.m",name,frameno);
-      of=fopen(buffer,"w");
-      for(i=0;i<l->ln;i++)
-	fprintf(of,"%g\n",lcurve[i]);
-      fclose(of);
-    }
-#endif
+  vorbis_lsp_to_curve(lcurve,l->ln,lsp,l->m,amp,l->lsp_look);
 
   for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
 
@@ -335,7 +329,7 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 #ifdef ANALYSIS
     if(vb->W==0){fprintf(stderr,"%d ",seq);} 
     vorbis_lsp_to_lpc(out,work,look->m); 
-    _lpc_to_curve(work,work,amp,look,"Ffloor",seq);
+    _lsp_to_curve(work,work,amp,look,"Ffloor",seq);
     for(j=0;j<look->n;j++)work[j]-=info->ampdB;
     _analysis_output("rawfloor",seq,work,look->n,0,0);
     {
@@ -394,8 +388,7 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 #endif
 
     /* take the coefficients back to a spectral envelope curve */
-    vorbis_lsp_to_lpc(work,out,look->m); 
-    _lpc_to_curve(out,out,amp,look,"Ffloor",seq++);
+    _lsp_to_curve(out,work,amp,look,"Ffloor",seq++);
     for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
     return(1);
   }
@@ -430,8 +423,7 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
       }
       
       /* take the coefficients back to a spectral envelope curve */
-      vorbis_lsp_to_lpc(out,out,look->m); 
-      _lpc_to_curve(out,out,amp,look,"",0);
+      _lsp_to_curve(out,out,amp,look,"",0);
       
       for(j=0;j<look->n;j++)out[j]=fromdB(out[j]-info->ampdB);
       return(1);

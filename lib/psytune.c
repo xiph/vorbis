@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.5 2000/08/15 09:09:43 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.6 2000/08/19 11:46:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -151,7 +151,7 @@ typedef struct {
 
 extern double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
 			    long frameno);
-extern void _lpc_to_curve(double *curve,double *lpc,double amp,
+extern void _lsp_to_curve(double *curve,double *lpc,double amp,
 			  vorbis_look_floor0 *l,char *name,long frameno);
 
 long frameno=0;
@@ -299,7 +299,8 @@ int main(int argc,char *argv[]){
 	
 	for(j=0;j<framesize/2;j++)floor[j]=todB(floor[j])+150;
 	amp=_curve_to_lpc(floor,lpc,&floorlook,frameno);
-	_lpc_to_curve(floor,lpc,sqrt(amp),&floorlook,"Ffloor",frameno);
+	vorbis_lpc_to_lsp(lpc,lpc,order);
+	_lsp_to_curve(floor,lpc,sqrt(amp),&floorlook,"Ffloor",frameno);
 	for(j=0;j<framesize/2;j++)floor[j]=fromdB(floor[j]-150);
 	analysis("floor",frameno,floor,framesize/2,1,1);
 

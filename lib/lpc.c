@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.23 2000/08/15 09:09:43 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.24 2000/08/19 11:46:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -162,130 +162,6 @@ void lpc_init(lpc_lookup *l,long mapped, int m){
 void lpc_clear(lpc_lookup *l){
   if(l){
     drft_clear(&l->fft);
-  }
-}
-
-/* One can do this the long way by generating the transfer function in
-   the time domain and taking the forward FFT of the result.  The
-   results from direct calculation are cleaner and faster. 
-
-   This version does a linear curve generation and then later
-   interpolates the log curve from the linear curve.  */
-
-void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,
-			 lpc_lookup *l){
-  int i;
-  memset(curve,0,sizeof(double)*l->ln*2);
-  if(amp==0)return;
-
-  for(i=0;i<l->m;i++){
-    curve[i*2+1]=lpc[i]/(4*amp);
-    curve[i*2+2]=-lpc[i]/(4*amp);
-  }
-
-  drft_backward(&l->fft,curve); /* reappropriated ;-) */
-
-  {
-    int l2=l->ln*2;
-    double unit=1./amp;
-    curve[0]=(1./(curve[0]*2+unit));
-    for(i=1;i<l->ln;i++){
-      double real=(curve[i]+curve[l2-i]);
-      double imag=(curve[i]-curve[l2-i]);
-
-      double a = real + unit;
-      curve[i] = 1.0 / FAST_HYPOT(a, imag);
-    }
-  }
-}  
-
-/* subtract or add an lpc filter to data. */
-
-void vorbis_lpc_filter(double *coeff,double *prime,int m,
-			double *data,long n,double amp){
-
-  /* in: coeff[0...m-1] LPC coefficients 
-         prime[0...m-1] initial values 
-         data[0...n-1] data samples 
-    out: data[0...n-1] residuals from LPC prediction */
-
-  long i,j;
-  double *work=alloca(sizeof(double)*(m+n));
-  double y;
-
-  if(!prime)
-    for(i=0;i<m;i++)
-      work[i]=0;
-  else
-    for(i=0;i<m;i++)
-      work[i]=prime[i];
-
-  for(i=0;i<n;i++){
-    y=0;
-    for(j=0;j<m;j++)
-      y-=work[i+j]*coeff[m-j-1];
-    
-    data[i]=work[i+m]=data[i]+y;
-
-  }
-}
-
-void vorbis_lpc_residue(double *coeff,double *prime,int m,
-			double *data,long n){
-
-  /* in: coeff[0...m-1] LPC coefficients 
-         prime[0...m-1] initial values 
-         data[0...n-1] data samples 
-    out: data[0...n-1] residuals from LPC prediction */
-
-  long i,j;
-  double *work=alloca(sizeof(double)*(m+n));
-  double y;
-
-  if(!prime)
-    for(i=0;i<m;i++)
-      work[i]=0;
-  else
-    for(i=0;i<m;i++)
-      work[i]=prime[i];
-
-  for(i=0;i<n;i++){
-    y=0;
-    for(j=0;j<m;j++)
-      y-=work[i+j]*coeff[m-j-1];
-    
-    work[i+m]=data[i];
-    data[i]-=y;
-  }
-}
-
-void vorbis_lpc_predict(double *coeff,double *prime,int m,
-                     double *data,long n){
-
-  /* in: coeff[0...m-1] LPC coefficients 
-         prime[0...m-1] initial values (allocated size of n+m-1)
-         data[0...n-1] residuals from LPC prediction   
-    out: data[0...n-1] data samples */
-
-  long i,j,o,p;
-  double y;
-  double *work=alloca(sizeof(double)*(m+n));
-
-  if(!prime)
-    for(i=0;i<m;i++)
-      work[i]=0.;
-  else
-    for(i=0;i<m;i++)
-      work[i]=prime[i];
-
-  for(i=0;i<n;i++){
-    y=data[i];
-    o=i;
-    p=m;
-    for(j=0;j<m;j++)
-      y-=work[o++]*coeff[--p];
-    
-    data[i]=work[o]=y;
   }
 }
 

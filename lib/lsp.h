@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.h,v 1.3 1999/12/30 07:26:43 xiphmont Exp $
+  last mod: $Id: lsp.h,v 1.4 2000/08/19 11:46:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,9 @@
 #ifndef _V_LSP_H_
 #define _V_LSP_H_
 
-extern void vorbis_lsp_to_lpc(double *lsp,double *lpc,int m); 
 extern void vorbis_lpc_to_lsp(double *lpc,double *lsp,int m);
+extern void vorbis_lsp_to_curve(double *curve,int n,
+				double *lsp,int m,double amp,
+				double *w);
   
 #endif

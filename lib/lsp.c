@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.8 2000/05/08 20:49:49 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.9 2000/08/19 11:46:28 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -39,51 +39,21 @@
 #include "os.h"
 #include "misc.h"
 
-void vorbis_lsp_to_lpc(double *lsp,double *lpc,int m){ 
-  int i,j,m2=m/2;
-  double *O=alloca(sizeof(double)*m2);
-  double *E=alloca(sizeof(double)*m2);
-  double A;
-  double *Ae=alloca(sizeof(double)*(m2+1));
-  double *Ao=alloca(sizeof(double)*(m2+1));
-  double B;
-  double *Be=alloca(sizeof(double)*(m2));
-  double *Bo=alloca(sizeof(double)*(m2));
-  double temp;
+void vorbis_lsp_to_curve(double *curve,int n,double *lsp,int m,double amp,
+			 double *w){
+  int i,j,k;
+  double *coslsp=alloca(m*sizeof(double));
+  for(i=0;i<m;i++)coslsp[i]=2*cos(lsp[i]);
 
-  /* even/odd roots setup */
-  for(i=0;i<m2;i++){
-    O[i]=-2.*cos(lsp[i*2]);
-    E[i]=-2.*cos(lsp[i*2+1]);
-  }
-
-  /* set up impulse response */
-  for(j=0;j<m2;j++){
-    Ae[j]=0.;
-    Ao[j]=1.;
-    Be[j]=0.;
-    Bo[j]=1.;
-  }
-  Ao[j]=1.;
-  Ae[j]=1.;
-
-  /* run impulse response */
-  for(i=1;i<m+1;i++){
-    A=B=0.;
-    for(j=0;j<m2;j++){
-      temp=O[j]*Ao[j]+Ae[j];
-      Ae[j]=Ao[j];
-      Ao[j]=A;
-      A+=temp;
-
-      temp=E[j]*Bo[j]+Be[j];
-      Be[j]=Bo[j];
-      Bo[j]=B;
-      B+=temp;
+  for(k=0;k<n;k++){
+    double p=.70710678118654752440;
+    double q=.70710678118654752440;
+    for(j=0;j<m;){
+      p*= *w-coslsp[j++];
+      q*= *w-coslsp[j++];
     }
-    lpc[i-1]=(A+Ao[j]+B-Ae[j])/2;
-    Ao[j]=A;
-    Ae[j]=B;
+    curve[k]=amp/sqrt(p*p*(1.+ *w*.5)+q*q*(1.- *w*.5));
+    w++;
   }
 }
 
