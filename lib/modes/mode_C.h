@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_C.h,v 1.2 2000/11/06 00:07:24 xiphmont Exp $
+ last mod: $Id: mode_C.h,v 1.3 2000/11/08 06:08:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -118,7 +118,7 @@ static vorbis_info_psy _psy_set_C={
  
   100.,
 
-  -0., -.004   /* attack/decay control */
+  -6., -.006   /* attack/decay control */
 };
 
 /* with GNUisms, this could be short and readable. Oh well */

@@ -12,12 +12,14 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: codebook.h,v 1.2 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.3 2000/11/08 06:08:11 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_CODEBOOK_H_
 #define _V_CODEBOOK_H_
+
+#include "ogg/ogg.h"
 
 /* This structure encapsulates huffman and VQ style encoding books; it
    doesn't do anything specific to either.
@@ -114,6 +116,7 @@ typedef struct codebook{
   long   *codelist;   /* list of bitstream codewords for each entry */
   struct decode_aux *decode_tree;
 
+  long zeroentry;
 } codebook;
 
 extern void vorbis_staticbook_clear(static_codebook *b);

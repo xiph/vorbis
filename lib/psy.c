@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.30 2000/11/06 00:07:01 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.31 2000/11/08 06:08:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -164,15 +164,15 @@ static void setup_curve(float **c,
      20dB down will be in a range ...+80], 40dB down is from ...+60],
      etc... */
 
-  for(i=P_LEVELS-1;i>0;i--){
-    for(j=0;j<i;j++)
-      min_curve(c[i],tempc[j]);
+  for(j=1;j<P_LEVELS;j++){
+    min_curve(tempc[j],tempc[j-1]);
+    min_curve(c[j],tempc[j]);
   }
 
   /* take things out of dB domain into linear amplitude */
   for(i=0;i<P_LEVELS;i++)
     linear_curve(c[i]);
-      
+
 }
 
 void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
@@ -597,10 +597,12 @@ void _vp_compute_mask(vorbis_look_psy *p,float *f,
   float *smooth=alloca(sizeof(float)*p->n);
   int i,n=p->n;
   float specmax=0.;
+  static int seq=0;
 
   float *seed=alloca(sizeof(float)*p->n);
   float *seed2=alloca(sizeof(float)*p->n);
 
+  _analysis_output("mdct",seq,f,n,1,1);
   memset(flr,0,n*sizeof(float));
 
   /* noise masking */
@@ -633,6 +635,8 @@ void _vp_compute_mask(vorbis_look_psy *p,float *f,
     smooth[n-1]=sqrt(acc);
   }
 
+  _analysis_output("smooth",seq,smooth,n,1,1);
+
   /* find the highest peak so we know the limits *************************/
   for(i=0;i<n;i++){
     if(smooth[i]>specmax)specmax=smooth[i];
@@ -650,6 +654,8 @@ void _vp_compute_mask(vorbis_look_psy *p,float *f,
       if(av>flr[i])flr[i]=av;
     }
   }
+
+  _analysis_output("ath",seq,flr,n,1,1);
 
   /* peak attenuation ******/
   if(p->vi->peakattp){
@@ -679,12 +685,15 @@ void _vp_compute_mask(vorbis_look_psy *p,float *f,
     
   }
 
+  _analysis_output("final",seq,flr,n,1,1);
+
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */
 
   for(i=0;i<n;i++)if(2.*f[i]>flr[i] || -2.*f[i]>flr[i])break;
   if(i==n)memset(flr,0,sizeof(float)*n);
 
+  seq++;
 }
 
 

@@ -12,12 +12,12 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.3 2000/11/08 06:08:16 xiphmont Exp $
+ last mod: $Id: mode_AA.h,v 1.1 2000/11/08 06:08:16 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_MODES_A_H_
-#define _V_MODES_A_H_
+#ifndef _V_MODES_AA_H_
+#define _V_MODES_AA_H_
 
 #include <stdio.h>
 #include "vorbis/codec.h"
@@ -26,26 +26,23 @@
 #include "books/lsp12_0.vqh"
 #include "books/lsp30_0.vqh"
 
-#include "books/res0_128_128aux.vqh"
-#include "books/res0_128_1024aux.vqh"
+#include "books/res0_96_128aux.vqh"
+#include "books/res0_96_1024aux.vqh"
 
-#include "books/res0_128_128_1.vqh"
-#include "books/res0_128_128_2.vqh"
-#include "books/res0_128_128_3.vqh"
-#include "books/res0_128_128_4.vqh"
-#include "books/res0_128_128_5.vqh"
+#include "books/res0_96_128_1.vqh"
+#include "books/res0_96_128_2.vqh"
+#include "books/res0_96_128_3.vqh"
+#include "books/res0_96_128_4.vqh"
 
-#include "books/res0_128_1024_1.vqh"
-#include "books/res0_128_1024_2.vqh"
-#include "books/res0_128_1024_3.vqh"
-#include "books/res0_128_1024_4.vqh"
-#include "books/res0_128_1024_5.vqh"
-#include "books/res0_128_1024_6.vqh"
-#include "books/res0_128_1024_7.vqh"
-#include "books/res0_128_1024_8.vqh"
-#include "books/res0_128_1024_9.vqh"
+#include "books/res0_96_1024_1.vqh"
+#include "books/res0_96_1024_2.vqh"
+#include "books/res0_96_1024_3.vqh"
+#include "books/res0_96_1024_4.vqh"
+#include "books/res0_96_1024_5.vqh"
+#include "books/res0_96_1024_6.vqh"
+#include "books/res0_96_1024_7.vqh"
 
-static vorbis_info_psy _psy_set_A={
+static vorbis_info_psy _psy_set_AA={
   1,/*athp*/
   1,/*decayp*/
   1,/*smoothp*/
@@ -123,81 +120,78 @@ static vorbis_info_psy _psy_set_A={
  
   100.,
 
-  -0., -.006   /* attack/decay control */
+  -0., -.004   /* attack/decay control */
 };
 
 
 /* with GNUisms, this could be short and readable. Oh well */
-static vorbis_info_time0 _time_set0A={0};
-static vorbis_info_floor0 _floor_set0A={12, 44100,  64, 12,150, 1, {0} };
-static vorbis_info_floor0 _floor_set1A={30, 44100, 256, 12,150, 1, {1} };
-static vorbis_info_residue0 _residue_set0A={0,128, 32,6,2,
-					    {0,1,1,1,1,1},
-					    {4,5,6,7,8},
+static vorbis_info_time0 _time_set0AA={0};
+static vorbis_info_floor0 _floor_set0AA={12, 44100,  64, 12,150, 1, {0} };
+static vorbis_info_floor0 _floor_set1AA={30, 44100, 256, 12,150, 1, {1} };
+static vorbis_info_residue0 _residue_set0AA={0,128, 32,5,2,
+					    {0,1,1,1,1},
+					    {4,5,6,7},
 					    
-					    {0,99999,9999,9999,9999},
-					    {99,1.5,2.5,6.5,12.5},
-					    {5,5,5,5,5},
-					    {99,99,99,99,99}};
+					    {0,9999,9999,9999},
+					    {99,2.,9.5,12.5},
+					    {5,5,5,5},
+					    {99,99,99,99}};
 
-static vorbis_info_residue0 _residue_set1A={0,1024, 32,10,3,
-					    {0,1,1,1,1,1,1,1,1,1},
-					    {9,10,11,12,13,14,15,16,17},
+static vorbis_info_residue0 _residue_set1AA={0,1024, 32,8,3,
+					    {0,1,1,1,1,1,1,1},
+					    {8,9,10,11,12,13,14},
 					   
-					    {0,8,9999,17,9999,
-					     28,9999,9999,9999},
-					    {99,1.5,1.5,2.5,2.5,4,4,6.5,12.5},
-					    {5,5,5,5,5,5,5,5,5},
-					    {99,99,99,99,99,99,99,99,99}};
+					    {0,9,9999,21,9999,
+					     9999,9999,9999},
+					    {99,2,2,4,4,9.5,15.5},
+					    {5,5,5,5,5,5,5},
+					    {99,99,99,99,99,99,99}};
 
-static vorbis_info_mapping0 _mapping_set0A={1, {0,0}, {0}, {0}, {0}, {0}};
-static vorbis_info_mapping0 _mapping_set1A={1, {0,0}, {0}, {1}, {1}, {0}};
-static vorbis_info_mode _mode_set0A={0,0,0,0};
-static vorbis_info_mode _mode_set1A={1,0,0,1};
+static vorbis_info_mapping0 _mapping_set0AA={1, {0,0}, {0}, {0}, {0}, {0}};
+static vorbis_info_mapping0 _mapping_set1AA={1, {0,0}, {0}, {1}, {1}, {0}};
+static vorbis_info_mode _mode_set0AA={0,0,0,0};
+static vorbis_info_mode _mode_set1AA={1,0,0,1};
 
 /* CD quality stereo, no channel coupling */
-codec_setup_info info_A={
+codec_setup_info info_AA={
 
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   18,   1,
+  2,          2,    1,     2,       2,   15,   1,
   /* modes */
-  {&_mode_set0A,&_mode_set1A},
+  {&_mode_set0AA,&_mode_set1AA},
   /* maps */
-  {0,0},{&_mapping_set0A,&_mapping_set1A},
+  {0,0},{&_mapping_set0AA,&_mapping_set1AA},
   /* times */
-  {0,0},{&_time_set0A},
+  {0,0},{&_time_set0AA},
   /* floors */
-  {0,0},{&_floor_set0A,&_floor_set1A},
+  {0,0},{&_floor_set0AA,&_floor_set1AA},
   /* residue */
-  {0,0},{&_residue_set0A,&_residue_set1A},
+  {0,0},{&_residue_set0AA,&_residue_set1AA},
   /* books */
   {&_vq_book_lsp12_0,      /* 0 */
    &_vq_book_lsp30_0,      /* 1 */
 
-   &_huff_book_res0_128_128aux,
-   &_huff_book_res0_128_1024aux,
+   &_huff_book_res0_96_128aux,
+   &_huff_book_res0_96_1024aux,
 
-   &_vq_book_res0_128_128_1,
-   &_vq_book_res0_128_128_2,
-   &_vq_book_res0_128_128_3,
-   &_vq_book_res0_128_128_4,
-   &_vq_book_res0_128_128_5,
+   &_vq_book_res0_96_128_1,
+   &_vq_book_res0_96_128_2,
+   &_vq_book_res0_96_128_3,
+   &_vq_book_res0_96_128_4,
 
-   &_vq_book_res0_128_1024_1,
-   &_vq_book_res0_128_1024_2,
-   &_vq_book_res0_128_1024_3,
-   &_vq_book_res0_128_1024_4,
-   &_vq_book_res0_128_1024_5,
-   &_vq_book_res0_128_1024_6,
-   &_vq_book_res0_128_1024_7,
-   &_vq_book_res0_128_1024_8,
-   &_vq_book_res0_128_1024_9,
+   &_vq_book_res0_96_1024_1,
+   &_vq_book_res0_96_1024_2,
+   &_vq_book_res0_96_1024_3,
+   &_vq_book_res0_96_1024_4,
+   &_vq_book_res0_96_1024_5,
+   &_vq_book_res0_96_1024_6,
+   &_vq_book_res0_96_1024_7,
 
   },
   /* psy */
-  {&_psy_set_A},
+  {&_psy_set_AA},
   /* thresh sample period, preecho clamp trigger threshhold, range, minenergy */
   256, 32, 6, -96.
 };
