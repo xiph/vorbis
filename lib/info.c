@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.33 2000/11/14 00:05:31 xiphmont Exp $
+ last mod: $Id: info.c,v 1.34 2001/01/18 10:54:32 msmith Exp $
 
  ********************************************************************/
 
@@ -493,6 +493,25 @@ static int _vorbis_pack_books(oggpack_buffer *opb,vorbis_info *vi){
 err_out:
   return(-1);
 } 
+
+int vorbis_commentheader_out(vorbis_comment *vc,
+    				      ogg_packet *op){
+
+  oggpack_buffer opb;
+
+  oggpack_writeinit(&opb);
+  if(_vorbis_pack_comment(&opb,vc)) return OV_EIMPL;
+
+  op->packet = _ogg_malloc(oggpack_bytes(&opb));
+  memcpy(op->packet, opb.buffer, oggpack_bytes(&opb));
+
+  op->bytes=oggpack_bytes(&opb);
+  op->b_o_s=0;
+  op->e_o_s=0;
+  op->granulepos=0;
+
+  return 0;
+}
 
 int vorbis_analysis_headerout(vorbis_dsp_state *v,
 			      vorbis_comment *vc,

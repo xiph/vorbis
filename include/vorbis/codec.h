@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.33 2000/11/06 00:06:55 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.34 2001/01/18 10:54:31 msmith Exp $
 
  ********************************************************************/
 
@@ -178,6 +178,7 @@ extern void     vorbis_dsp_clear(vorbis_dsp_state *v);
 /* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
 
 extern int      vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi);
+extern int      vorbis_commentheader_out(vorbis_comment *vc, ogg_packet *op);
 extern int      vorbis_analysis_headerout(vorbis_dsp_state *v,
 					  vorbis_comment *vc,
 					  ogg_packet *op,
