@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.32 2000/06/14 01:38:32 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.33 2000/07/17 12:55:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -539,7 +539,7 @@ double vqgen_iterate(vqgen *v,int biasp){
     fprintf(bias,"%g\n",v->bias[j]);
 #endif
     asserror+=fabs(v->assigned[j]-fdesired);
-    if(v->assigned[j])
+    if(v->assigned[j]){
       if(v->centroid==0){
 	for(k=0;k<v->elements;k++)
 	  _now(v,j)[k]=vN(new,j)[k]/v->assigned[j];
@@ -547,6 +547,7 @@ double vqgen_iterate(vqgen *v,int biasp){
 	for(k=0;k<v->elements;k++)
 	  _now(v,j)[k]=(vN(new,j)[k]+vN(new2,j)[k])/2.;
       }
+    }
   }
 
   asserror/=(v->entries*fdesired);

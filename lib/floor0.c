@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.18 2000/07/12 09:36:17 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.19 2000/07/17 12:55:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,17 +33,6 @@
 #include "misc.h"
 #include <stdio.h>
 
-/* error relationship from coefficient->curve is nonlinear, so fit
-   using curve lookups, not the coefficients */
-typedef struct {
-  int usage;
-  long *entrymap;
-  double **fits;
-  int fitsize;
-  codebook *book;
-  lpc_lookup lpclook;
-} LSP_fit_lookup;
-
 typedef struct {
   long n;
   int ln;
@@ -53,124 +42,30 @@ typedef struct {
   vorbis_info_floor0 *vi;
   lpc_lookup lpclook;
 
-  LSP_fit_lookup *encodefit;
 } vorbis_look_floor0;
 
-/* infrastructure for setting up, finding and encoding fit */
-static void _f0_fit_init(LSP_fit_lookup *f,codebook *b){
-  int i,j,usage=0;
-  double max=0;
-  int dim=b->dim;
-  double *work;
-  double *lsp;
-
-  memset(f,0,sizeof(LSP_fit_lookup));
-
-  /* count actual codeword usage in case the book is sparse */
-  for(i=0;i<b->entries;i++)
-    if(b->c->lengthlist[i]>0){
-      if(b->valuelist[(i+1)*b->dim-1]>max)
-	max=b->valuelist[(i+1)*b->dim-1];
-      usage++;
-    }
-
-  /* allocate memory */
-  f->usage=usage;
-  f->entrymap=malloc(usage*sizeof(long));
-  f->fits=malloc(usage*sizeof(double *));
-  f->fitsize=16;
-  f->book=b;
-  lpc_init(&f->lpclook,f->fitsize,dim-1);
-
-  usage=0;
-  work=alloca(f->fitsize*2*sizeof(double));
-  lsp=alloca(dim*sizeof(double));
-  for(i=0;i<b->entries;i++)
-    if(b->c->lengthlist[i]>0){
-      double *orig=b->valuelist+i*b->dim;
-      double norm=orig[b->dim-1];
-      f->fits[usage]=malloc(f->fitsize*sizeof(double));
-
-      for(j=0;j<dim-1;j++)
-	lsp[j]=orig[j]/norm*M_PI;
-      vorbis_lsp_to_lpc(lsp,lsp,dim-1); 
-      vorbis_lpc_to_curve(work,lsp,norm*norm,&f->lpclook);
-      memcpy(f->fits[usage],work,f->fitsize*sizeof(double));
-
-      f->entrymap[usage]=i;
-
-      usage++;
-    }
-}
-
-static void _f0_fit_clear(LSP_fit_lookup *f){
-  if(f){
-    int i;
-    for(i=0;i<f->usage;i++)
-      free(f->fits[i]);
-    free(f->fits);
-    free(f->entrymap);
-    lpc_clear(&f->lpclook);
-    memset(f,0,sizeof(LSP_fit_lookup));
-  }
-}
-
-double _curve_error1(double *curve1,double *curve2,long n){
-  double acc=0.;
-  long i;
-  for(i=0;i<n;i++){
-    double val=curve1[i]-curve2[i];
-    acc+=val*val;
-  }
-  return(acc);
-}
-
-double _curve_error2(double *curve1,double *curve2,long n,double max){
-  double acc=0.;
-  long i;
-  for(i=0;i<n;i++){
-    double val=curve1[i]-curve2[i];
-    acc+=val*val;
-    if(acc>max)return(acc);
-  }
-  return(acc);
-}
-
-static long _f0_fit(LSP_fit_lookup *f, 
-		    codebook *book,
+/* infrastructure for finding fit */
+static long _f0_fit(codebook *book,
 		    double *orig,
 		    double *workfit,
 		    int cursor){
   int dim=book->dim;
   double norm,base=0.,err=0.;
   int i,best=0;
-  double *lsp=alloca(dim*sizeof(double));
-  double *ref=alloca(f->fitsize*2*sizeof(double));
-
-  if(f->usage<=0)return(-1);
+  double *lsp=workfit+cursor;
 
   /* gen a curve for fitting */
   if(cursor)base=workfit[cursor-1];
   norm=orig[cursor+dim-1]-base;
-  for(i=0;i<dim-1;i++)
-    lsp[i]=(orig[i+cursor]-base)/norm*M_PI;
-  vorbis_lsp_to_lpc(lsp,lsp,dim-1); 
-  vorbis_lpc_to_curve(ref,lsp,norm*norm,&f->lpclook);
 
-  err=_curve_error1(f->fits[0],ref,f->fitsize);
-  for(i=1;i<f->usage;i++){
-    double this=_curve_error2(f->fits[i],ref,f->fitsize,err);
-    if(this<err){
-      err=this;
-      best=i;
-    }
-  }
 
-  /* choose the best fit from the tests and set workfit to it */
-  best=f->entrymap[best];
-  memcpy(workfit+cursor,book->valuelist+best*dim,dim*sizeof(double));
   for(i=0;i<dim;i++)
-    workfit[i+cursor]+=base;
+    lsp[i]=(orig[i+cursor]-base);
+  best=_best(book,lsp,1);
+
+  memcpy(lsp,book->valuelist+best*dim,dim*sizeof(double));
+  for(i=0;i<dim;i++)
+    lsp[i]+=base;
   return(best);
 }
 
@@ -186,10 +81,6 @@ static void free_info(vorbis_info_floor *i){
 static void free_look(vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   if(i){
-    int j;
-    for(j=0;j<look->vi->numbooks;j++)
-      _f0_fit_clear(look->encodefit+j);
-    free(look->encodefit);
     if(look->linearmap)free(look->linearmap);
     lpc_clear(&look->lpclook);
     memset(look,0,sizeof(vorbis_look_floor0));
@@ -275,14 +166,6 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
     look->linearmap[j]=val;
   }
 
-  if(vd->analysisp){
-    look->encodefit=calloc(info->numbooks,sizeof(LSP_fit_lookup));
-    for(j=0;j<info->numbooks;j++){
-      codebook *b=vd->fullbooks+info->books[j];
-      _f0_fit_init(look->encodefit+j,b);
-    }
-  }
-    
   return look;
 }
 
@@ -444,7 +327,6 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     /* the spec supports using one of a number of codebooks.  Right
        now, encode using this lib supports only one */
     codebook *b=vb->vd->fullbooks+info->books[0];
-    LSP_fit_lookup *f=look->encodefit;
     _oggpack_write(&vb->opb,0,_ilog(info->numbooks));
 
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
@@ -481,11 +363,8 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
        nailed to the last quantized value of the previous block. */
 
     for(j=0;j<look->m;j+=b->dim){
-      int entry=_f0_fit(f,b,out,work,j);
+      int entry=_f0_fit(b,out,work,j);
       bits+=vorbis_book_encode(b,entry,&vb->opb);
-#ifdef ANALYSIS
-      if(entry==2921)fprintf(stderr,"\n*************found\n");
-#endif
 
 #ifdef TRAIN_LSP
       fprintf(ef,"%d,\n",entry);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.5 2000/05/08 20:49:43 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.6 2000/07/17 12:55:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,20 +48,14 @@ typedef struct static_codebook{
   int      q_quant;     /* bits: 0 < quant <= 16 */
   int      q_sequencep; /* bitflag */
 
-  /* additional information for log (dB) mapping; the linear mapping
-     is assumed to actually be values in dB.  encodebias is used to
-     assign an error weight to 0 dB. We have two additional flags:
-     zeroflag indicates if entry zero is to represent -Inf dB; negflag
-     indicates if we're to represent negative linear values in a
-     mirror of the positive mapping. */
-
-  long     *quantlist;  /* map == 1: (int)(entries/dim) element column map
+  long     *quantlist;  /* map == 1: (int)(entries^(1/dim)) element column map
 			   map == 2: list of dim*entries quantized entry vals
 			*/
 
   /* encode helpers ********************************************************/
   struct encode_aux_nearestmatch *nearest_tree;
   struct encode_aux_threshmatch  *thresh_tree;
+  struct encode_aux_pigeonhole  *pigeon_tree;
 } static_codebook;
 
 /* this structures an arbitrary trained book to quickly find the
@@ -84,6 +78,20 @@ typedef struct encode_aux_threshmatch{
   int     quantvals; 
   int     threshvals; 
 } encode_aux_threshmatch;
+
+typedef struct encode_aux_pigeonhole{
+  double min;
+  double del;
+
+  int  mapentries;
+  int  quantvals;
+  long *pigeonmap;
+
+  long fittotal;
+  long *fitlist;
+  long *fitmap;
+  long *fitlength;
+} encode_aux_pigeonhole;
 
 typedef struct decode_aux{
   long   *ptr0;

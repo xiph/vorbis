@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.5 2000/06/18 12:33:47 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.6 2000/07/17 12:55:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -329,13 +329,17 @@ static double _dist(int el,double *ref, double *b,int step){
   return(acc);
 }
 
+#include <stdio.h>
 int _best(codebook *book, double *a, int step){
   encode_aux_nearestmatch *nt=book->c->nearest_tree;
   encode_aux_threshmatch *tt=book->c->thresh_tree;
+  encode_aux_pigeonhole *pt=book->c->pigeon_tree;
   int dim=book->dim;
   int ptr=0,k,o;
+  int savebest=-1;
+  double saverr;
 
-  /* we assume for now that a thresh tree is the only other possibility */
+  /* do we have a threshhold encode hint? */
   if(tt){
     int index=0;
     /* find the quant val of each scalar */
@@ -354,6 +358,50 @@ int _best(codebook *book, double *a, int step){
 					use a decision tree after all
 					and fall through*/
       return(index);
+  }
+
+  /* do we have a pigeonhole encode hint? */
+  if(pt){
+    const static_codebook *c=book->c;
+    int i,besti=-1;
+    double best;
+    int entry=0;
+
+    /* dealing with sequentialness is a pain in the ass */
+    if(c->q_sequencep){
+      int pv;
+      long mul=1;
+      double qlast=0;
+      for(k=0,o=0;k<dim;k++,o+=step){
+	pv=(int)((a[o]-qlast-pt->min)/pt->del);
+	if(pv<0 || pv>=pt->mapentries)break;
+	entry+=pt->pigeonmap[pv]*mul;
+	mul*=pt->quantvals;
+	qlast+=pv*pt->del+pt->min;
+      }
+    }else{
+      for(k=0,o=step*(dim-1);k<dim;k++,o-=step){
+	int pv=(int)((a[o]-pt->min)/pt->del);
+	if(pv<0 || pv>=pt->mapentries)break;
+	entry=entry*pt->quantvals+pt->pigeonmap[pv];
+      }
+    }
+
+    /* must be within the pigeonholable range; if we quant outside,
+       the search lists are inaccurate at the boundaries */
+    if(k==dim){
+      /* search the abbreviated list */
+      long *list=pt->fitlist+pt->fitmap[entry];
+      for(i=0;i<pt->fitlength[entry];i++){
+	double this=_dist(dim,book->valuelist+list[i]*dim,a,step);
+	if(besti==-1 || this<best){
+	  best=this;
+	  besti=list[i];
+	}
+      }
+
+      return(besti); 
+    }
   }
 
   if(nt){
@@ -391,6 +439,21 @@ int _best(codebook *book, double *a, int step){
       }
       e+=dim;
     }
+
+    /*if(savebest!=-1 && savebest!=besti){
+      fprintf(stderr,"brute force/pigeonhole disagreement:\n"
+	      "original:");
+      for(i=0;i<dim*step;i+=step)fprintf(stderr,"%g,",a[i]);
+      fprintf(stderr,"\n"
+	      "pigeonhole (entry %d, err %g):",savebest,saverr);
+      for(i=0;i<dim;i++)fprintf(stderr,"%g,",
+				(book->valuelist+savebest*dim)[i]);
+      fprintf(stderr,"\n"
+	      "bruteforce (entry %d, err %g):",besti,best);
+      for(i=0;i<dim;i++)fprintf(stderr,"%g,",
+				(book->valuelist+besti*dim)[i]);
+      fprintf(stderr,"\n");
+      }*/
     return(besti);
   }
 }

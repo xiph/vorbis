@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.14 2000/07/12 09:36:18 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.15 2000/07/17 12:55:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -173,15 +173,16 @@ char *find_seek_to(FILE *in,char *s){
 }
 
 
-/* this reads the format as written by vqbuild; innocent (legal)
-   tweaking of the file that would not affect its valid header-ness
-   will break this routine */
+/* this reads the format as written by vqbuild/latticebuild; innocent
+   (legal) tweaking of the file that would not affect its valid
+   header-ness will break this routine */
 
 codebook *codebook_load(char *filename){
   codebook *b=calloc(1,sizeof(codebook));
   static_codebook *c=(static_codebook *)(b->c=calloc(1,sizeof(static_codebook)));
   encode_aux_nearestmatch *a=NULL;
   encode_aux_threshmatch *t=NULL;
+  encode_aux_pigeonhole *p=NULL;
   int quant_to_read=0;
   FILE *in=fopen(filename,"r");
   char *line;
@@ -302,6 +303,60 @@ codebook *codebook_load(char *filename){
       }    
   }
     
+  if(find_seek_to(in,"static encode_aux_pigeonhole _vq_aux")){
+    /* how big? */
+    c->pigeon_tree=p=calloc(1,sizeof(encode_aux_pigeonhole));
+    line=get_line(in);
+    if(sscanf(line,"%lf, %lf, %d, %d",&(p->min),&(p->del),
+	      &(p->mapentries),&(p->quantvals))!=4){
+      fprintf(stderr,"5: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+    line=get_line(in);
+    line=get_line(in);
+    if(sscanf(line,"%ld",&(p->fittotal))!=1){
+      fprintf(stderr,"6: syntax in %s in line:\t %s",filename,line);
+      exit(1);
+    }
+    /* load pigeonmap */
+    find_seek_to(in,"static long _vq_pigeonmap_");
+    reset_next_value();
+    p->pigeonmap=malloc(sizeof(long)*p->mapentries);
+    for(i=0;i<p->mapentries;i++)
+      if(get_next_ivalue(in,p->pigeonmap+i)){
+	fprintf(stderr,"out of data (pigeonmap) while reading codebook %s\n",filename);
+	exit(1);
+      }    
+    /* load fitlist */
+    find_seek_to(in,"static long _vq_fitlist_");
+    reset_next_value();
+    p->fitlist=malloc(sizeof(long)*p->fittotal);
+    for(i=0;i<p->fittotal;i++)
+      if(get_next_ivalue(in,p->fitlist+i)){
+	fprintf(stderr,"out of data (fitlist) while reading codebook %s\n",filename);
+	exit(1);
+      }    
+    /* load fitmap */
+    find_seek_to(in,"static long _vq_fitmap_");
+    reset_next_value();
+    p->fitmap=malloc(sizeof(long)*c->entries);
+    for(i=0;i<c->entries;i++)
+      if(get_next_ivalue(in,p->fitmap+i)){
+	fprintf(stderr,"out of data (fitmap) while reading codebook %s\n",filename);
+	exit(1);
+      }    
+ 
+    /* load fitlength */
+    find_seek_to(in,"static long _vq_fitlength_");
+    reset_next_value();
+    p->fitlength=malloc(sizeof(long)*c->entries);
+    for(i=0;i<c->entries;i++)
+      if(get_next_ivalue(in,p->fitlength+i)){
+	fprintf(stderr,"out of data (fitlength) while reading codebook %s\n",filename);
+	exit(1);
+      }    
+  }
+
   switch(c->maptype){
   case 0:
     quant_to_read=0;
@@ -431,9 +486,12 @@ void build_tree_from_lengths(int vals, long *hist, long *lengths){
       bitsum+=(histsave[i]-1)*lengths[i];
       samples+=histsave[i]-1;
     }
-    fprintf(stderr,"\rTotal samples in training set: %ld      \n",samples);
-    fprintf(stderr,"\rTotal bits used to represent training set: %ld\n",
-	    bitsum);
+
+    if(samples){
+      fprintf(stderr,"\rTotal samples in training set: %ld      \n",samples);
+      fprintf(stderr,"\rTotal bits used to represent training set: %ld\n",
+	      bitsum);
+    }
   }
 
   free(membership);
@@ -471,6 +529,7 @@ void build_tree_from_lengths0(int vals, long *hist, long *lengths){
 }
 
 void write_codebook(FILE *out,char *name,const static_codebook *c){
+  encode_aux_pigeonhole *p=c->pigeon_tree;
   encode_aux_threshmatch *t=c->thresh_tree;
   encode_aux_nearestmatch *n=c->nearest_tree;
   int j,k;
@@ -546,6 +605,56 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     fprintf(out,"\t%d\n};\n\n",t->threshvals);
   }
 
+  if(p){
+    /* pigeonmap */
+    fprintf(out,"static long _vq_pigeonmap_%s[] = {\n",name);
+    for(j=0;j<p->mapentries;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<p->mapentries;k++,j++)
+	fprintf(out,"%5ld, ",p->pigeonmap[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+    /* fitlist */
+    fprintf(out,"static long _vq_fitlist_%s[] = {\n",name);
+    for(j=0;j<p->fittotal;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<p->fittotal;k++,j++)
+	fprintf(out,"%5ld, ",p->fitlist[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+    /* fitmap */
+    fprintf(out,"static long _vq_fitmap_%s[] = {\n",name);
+    for(j=0;j<c->entries;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<c->entries;k++,j++)
+	fprintf(out,"%5ld, ",p->fitmap[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+    /* fitlength */
+    fprintf(out,"static long _vq_fitlength_%s[] = {\n",name);
+    for(j=0;j<c->entries;){
+      fprintf(out,"\t");
+      for(k=0;k<8 && j<c->entries;k++,j++)
+	fprintf(out,"%5ld, ",p->fitlength[j]);
+      fprintf(out,"\n");
+    }
+    fprintf(out,"};\n\n");
+
+    fprintf(out,"static encode_aux_pigeonhole _vq_auxp_%s = {\n",name);
+    fprintf(out,"\t%g, %g, %d, %d,\n",
+	    p->min,p->del,p->mapentries,p->quantvals);
+
+    fprintf(out,"\t_vq_pigeonmap_%s,\n",name);
+
+    fprintf(out,"\t%ld,\n",p->fittotal);
+    fprintf(out,"\t_vq_fitlist_%s,\n",name);
+    fprintf(out,"\t_vq_fitmap_%s,\n",name);
+    fprintf(out,"\t_vq_fitlength_%s\n};\n\n",name);
+  }
+
   if(n){
     
     /* ptr0 */
@@ -615,6 +724,10 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     fprintf(out,"\tNULL,\n");
   if(t)
     fprintf(out,"\t&_vq_auxt_%s,\n",name);
+  else
+    fprintf(out,"\tNULL,\n");
+  if(p)
+    fprintf(out,"\t&_vq_auxp_%s,\n",name);
   else
     fprintf(out,"\tNULL,\n");
 
