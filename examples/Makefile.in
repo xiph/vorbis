@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.10 2000/06/19 15:14:15 xiphmont Exp $
+# $Id: Makefile.in,v 1.11 2000/06/26 11:25:32 omnic Exp $
 
 ###############################################################################
 #                                                                             #
@@ -77,7 +77,8 @@ $(OFILES): 	$(HFILES)
 
 clean:
 	-rm -f *.o *.a test* *~ *.out ogg config.* \
-		encoder_example decoder_example chaining_example
+		encoder_example decoder_example chaining_example \
+		vorbisfile_example seeking_test
 
 distclean:	clean
 	-rm -f Makefile

@@ -1,5 +1,5 @@
 # vorbis makefile configured for use with gcc on any platform
-# $Id: Makefile.in,v 1.31 2000/06/19 15:14:16 xiphmont Exp $
+# $Id: Makefile.in,v 1.32 2000/06/26 11:25:32 omnic Exp $
 
 ###############################################################################
 #                                                                             #
@@ -93,7 +93,7 @@ $(VF_LFILES): 	$(VF_HFILES)
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	-rm -f *.o *.a test* *~ *.out ogg config.* tone 
+	-rm -f *.o *.a test* *~ *.out ogg config.* tone psytune
 
 distclean:	clean
 	-rm -f Makefile

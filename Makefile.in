@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.8 2000/06/19 11:59:21 xiphmont Exp $
+# $Id: Makefile.in,v 1.9 2000/06/26 11:25:32 omnic Exp $
 
 ###############################################################################
 #                                                                             #
@@ -17,10 +17,11 @@
 
 @SET_MAKE@
 
-SUBDIRS =	lib examples # vorbis-tools cmdline xmms vq huff 
+SUBDIRS =	lib examples # vorbis-tools cmdline xmms vq huff kmpg
 
 all debug profile selftest target clean:
-	@for dir in $(SUBDIRS); do (cd $$dir && $(MAKE) $(MFLAGS) $@) || exit 1; done
+	echo $(MAKECMDGOALS)
+	@for dir in $(SUBDIRS); do (cd $$dir && $(MAKE) $(MFLAGS) $(MAKECMDGOALS)) || exit 1; done
 	-rm -f *~
 
 distclean:	clean
