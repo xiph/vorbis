@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.1.2.3 2000/12/31 23:56:07 xiphmont Exp $
+ last mod: $Id: distribution.c,v 1.1.2.4 2001/01/03 03:32:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,7 +28,7 @@
 */
 
 int ascend(const void *a,const void *b){
-  return(*((long *)a)-*((long *)b));
+  return(**((long **)a)-**((long **)b));
 }
 
 int main(int argc,char *argv[]){
@@ -98,7 +98,7 @@ int main(int argc,char *argv[]){
 	long base=c->lengthlist[0];
 	countarray=calloc(bins,sizeof(long));
 
-	for(i=0;i<bins;i++)sort[i]=countarray+i;
+	for(i=0;i<bins;i++)sort[i]=c->quantlist+i;
 	qsort(sort,bins,sizeof(long *),ascend);
 
 	for(i=0;i<b->entries;i++)
@@ -124,9 +124,9 @@ int main(int argc,char *argv[]){
 	    if(countarray[i]>maxcount)maxcount=countarray[i];
       
 	  for(i=0;i<bins;i++){
-	    int ptr=sort[i]-countarray;
+	    int ptr=sort[i]-c->quantlist;
 	    int stars=rint(50./maxcount*countarray[ptr]);
-	    printf("%08f (%8ld) |",c->quantlist[ptr]*delta+min,countarray[ptr]);
+	    printf("%+08f (%8ld) |",c->quantlist[ptr]*delta+min,countarray[ptr]);
 	    for(j=0;j<stars;j++)printf("*");
 	    printf("\n");
 	  }
