@@ -1,68 +1,28 @@
 Source: vorbis
-Section: sound
+Section: devel
 Priority: optional
-Maintainer: Michael Beattie <mjb@debian.org>
-Build-Depends: debhelper (>= 2.1.5), xmms-dev
-Standards-Version: 3.0.1
+Maintainer: Chris Cheney <ccheney@debian.org>
+Build-Depends: debhelper
+Standards-Version: 3.1.1
 
 Package: libvorbis-dev
-Section: devel
 Architecture: any
-Depends: libc6-dev (>= 2.1.3)
+Depends: libvorbis (= ${Source-Version}), libc6-dev
+Description: Development library for OGG Vorbis
+ Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
+ general-purpose compressed audio format for high quality (44.1-48.0kHz,
+ 16+ bit, polyphonic) audio and music at fixed and variable bitrates 
+ from 16 to 128 kbps/channel. This places Vorbis in the same class as 
+ audio representations including MPEG-1 audio layer 3, MPEG-4 
+ audio (AAC and TwinVQ), and PAC.
+
+Package: libvorbis
+Architecture: any
+Depends: ${shlibs:Depends}
 Description: The OGG Vorbis lossy audio compression codec.
- This Package contains the development libraries and header files for
- Ogg Vorbis.
- .
  Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
  general-purpose compressed audio format for high quality (44.1-48.0kHz,
  16+ bit, polyphonic) audio and music at fixed and variable bitrates
  from 16 to 128 kbps/channel. This places Vorbis in the same class as
  audio representations including MPEG-1 audio layer 3, MPEG-4
  audio (AAC and TwinVQ), and PAC.
-
-Package: xmms-vorbis
-Architecture: any
-Depends: ${shlibs:Depends}, xmms
-Description: An xmms plugin to play Ogg Vorbis files.
- This Package contains a plugin for xmms to play files encoded using the
- Ogg Vorbis lossy audio compression codec.
- .
- Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
- general-purpose compressed audio format for high quality (44.1-48.0kHz,
- 16+ bit, polyphonic) audio and music at fixed and variable bitrates
- from 16 to 128 kbps/channel. This places Vorbis in the same class as
- audio representations including MPEG-1 audio layer 3, MPEG-4
- audio (AAC and TwinVQ), and PAC.
-
-Package: ogg123
-Architecture: any
-Depends: ${shlibs:Depends}
-Description: A player for Ogg Vorbis files.
- This Package contains a commandline player for files encoded using the
- Ogg Vorbis lossy audio compression codec.
- .
- Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
- general-purpose compressed audio format for high quality (44.1-48.0kHz,
- 16+ bit, polyphonic) audio and music at fixed and variable bitrates
- from 16 to 128 kbps/channel. This places Vorbis in the same class as
- audio representations including MPEG-1 audio layer 3, MPEG-4
- audio (AAC and TwinVQ), and PAC.
-
-Package: vorbis-tools
-Architecture: any
-Depends: ${shlibs:Depends}
-Suggests: ogg123 | xmms-vorbis
-Description: An encoder for the Ogg Vorbis lossy audio compression codec.
- This Package contains two Ogg Vorbis encoders, oggenc and vorbize.
- An example script for converting .mp3's to .ogg's is included.
- (/usr/share/doc/vorbize/examples/mp3tovorbis)
- NOTE: Currently vorbis only works with 44kHz, 16bit stereo raw PCM or
- wav files. Use sox to coax any other formats into line.
- .
- Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
- general-purpose compressed audio format for high quality (44.1-48.0kHz,
- 16+ bit, polyphonic) audio and music at fixed and variable bitrates
- from 16 to 128 kbps/channel. This places Vorbis in the same class as
- audio representations including MPEG-1 audio layer 3, MPEG-4
- audio (AAC and TwinVQ), and PAC.
-

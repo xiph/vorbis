@@ -1,170 +1,94 @@
 #!/usr/bin/make -f
-# Sample debian/rules that uses debhelper. 
-# GNU copyright 1997 by Joey Hess.
-# Modified for Ogg Vorbis, 2000 by Michael Beattie
+# Sample debian/rules that uses debhelper.
+# GNU copyright 1997 to 1999 by Joey Hess.
 
-# Uncomment this to turn on verbose mode. 
+# Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
 # This is the debhelper compatability version to use.
-export DH_COMPAT=1
+export DH_COMPAT=2
 
-# This has to be exported to make some magic below work.
-export DH_OPTIONS
+configure: configure-stamp
+configure-stamp:
+	dh_testdir
+	# Add here commands to configure the package.
+	
+	./autogen.sh --prefix=/usr
 
-build: build-stamp
+	touch configure-stamp
+
+build: configure-stamp build-stamp
 build-stamp:
 	dh_testdir
 
-	./configure --disable-alsa --prefix=/usr \
-		--mandir=\$${prefix}/share/man \
-		--infodir=\$${prefix}/share/info
 	# Add here commands to compile the package.
 	$(MAKE)
-	cd vorbis-tools && $(MAKE) && $(MAKE) ogg123
-	cd xmms && $(MAKE)
 
 	touch build-stamp
 
 clean:
 	dh_testdir
 	dh_testroot
-	rm -f build-stamp 
+	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	-$(MAKE) distclean
+	-$(MAKE) clean
 
 	dh_clean
 
+install: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# Add here commands to install the package into debian/tmp.
+	$(MAKE) install DESTDIR=`pwd`/debian/tmp
+
 
 # Build architecture-independent files here.
-binary-arch: libvorbis-dev ogg123 vorbis-tools xmms-vorbis
-
-libvorbis-dev: DH_OPTIONS=-plibvorbis-dev
-libvorbis-dev: build
-	# Need this version of debhelper for DH_OPTIONS to work.
-	dh_testversion 1.1.17
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-
-	-cp -a include/vorbis/*.h `pwd`/debian/tmp/usr/include/vorbis/
-	-cp -a include/vorbis/book/*.vqh `pwd`/debian/tmp/usr/include/vorbis/book/
-	-cp lib/*.a `pwd`/debian/tmp/usr/lib/
-
-	-cp docs/*.html docs/*.png `pwd`/debian/tmp/usr/share/doc/libvorbis-dev/html/
-
-	dh_installdocs
-	dh_installexamples
-#	dh_installmanpages
-#	dh_installinfo
-#	dh_undocumented
-	dh_installchangelogs 
-	dh_strip
-	dh_link
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-#	dh_makeshlibs
-#	dh_shlibdeps
-	dh_gencontrol -u -isp
-	dh_md5sums
-	dh_builddeb
-
-
-
-ogg123: DH_OPTIONS=-pogg123
-ogg123: build
-	# Need this version of debhelper for DH_OPTIONS to work.
-	dh_testversion 1.1.17
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-
-	install -m 755 vorbis-tools/ogg123 `pwd`/debian/ogg123/usr/bin/
-
-	dh_installdocs vorbis-tools/README
-#	dh_installmenu
-	dh_installmanpages vorbize.1 oggenc.1
-#	dh_installinfo
-#	dh_undocumented
-	dh_installchangelogs vorbis-tools/Changelog
-	dh_strip
-	dh_link
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-#	dh_makeshlibs
-	dh_shlibdeps
-	dh_gencontrol -u -isp
-	dh_md5sums
-	dh_builddeb
-
-
-
-vorbis-tools: DH_OPTIONS=-pvorbis-tools
-vorbis-tools: build
-	# Need this version of debhelper for DH_OPTIONS to work.
-	dh_testversion 1.1.17
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-
-	install -m 755 vorbis-tools/vorbize `pwd`/debian/vorbis-tools/usr/bin/
-	install -m 755 vorbis-tools/oggenc `pwd`/debian/vorbis-tools/usr/bin/
-	install -m 755 vorbis-tools/vorbiscomment `pwd`/debian/vorbis-tools/usr/bin/
-
-	dh_installdocs vorbis-tools/README
-	dh_installexamples vorbis-tools/mp3tovorbis
-#	dh_installmenu
-	dh_installmanpages ogg123.1
-#	dh_installinfo
-#	dh_undocumented
-	dh_installchangelogs vorbis-tools/Changelog
-	dh_strip
-	dh_link
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-#	dh_makeshlibs
-	dh_shlibdeps
-	dh_gencontrol -u -isp
-	dh_md5sums
-	dh_builddeb
-
-
-
-xmms-vorbis: DH_OPTIONS=-pxmms-vorbis
-xmms-vorbis: build install
-	# Need this version of debhelper for DH_OPTIONS to work.
-	dh_testversion 1.1.17
-	dh_testdir
-	dh_testroot
-	dh_clean -k
-	dh_installdirs
-
-	install -m 644 xmms/libvorbis.so `pwd`/debian/xmms-vorbis/usr/lib/xmms/Input/
-
-	dh_installdocs
-	dh_installchangelogs 
-	dh_strip
-	dh_link
-	dh_compress
-	dh_fixperms
-	dh_installdeb
-#
-	dh_shlibdeps
-	dh_gencontrol -u -isp
-	dh_md5sums
-	dh_builddeb
-
+binary-indep: build install
+# We have nothing to do by default.
 
 # Build architecture-dependent files here.
-binary-indep:
+binary-arch: build install
+#	dh_testversion
+	dh_testdir
+	dh_testroot
+	#
+	# build libvorbis${major} package by moving files from vorbis-dev
+	#
+#	dh_movefiles -plibvorbis$(major)             \
+#	usr/lib/libvorbis.so.$(major)        \
+#	usr/lib/libvorbis.so.$(version)
 
+	dh_movefiles
+
+#	dh_installdebconf	
+	dh_installdocs doc/*.html doc/*.txt doc/*.png doc/vorbisfile/*.html
+	dh_installexamples
+#	dh_installmenu
+#	dh_installemacsen
+#	dh_installpam
+#	dh_installinit
+#	dh_installcron
+	dh_installmanpages
+#	dh_installinfo
+#	dh_undocumented
+	dh_installchangelogs 
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	# You may want to make some executables suid here.
+#	dh_suidregister
+	dh_makeshlibs
+	dh_installdeb
+#	dh_perl
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
 
 binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install
+.PHONY: build clean binary-indep binary-arch binary install configure

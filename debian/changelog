@@ -1,3 +1,11 @@
+vorbis (1.0beta3-1) unstable; urgency=low
+
+  * New Maintainer.
+  * Upstream source was reorganized.
+  * Package split according to the upstream reorganization.
+
+ -- Chris Cheney <ccheney@debian.org>  Tue, 31 Oct 2000 15:08:22 -0600
+
 vorbis (1.0beta2-1) unstable; urgency=low
 
   * New upstream version. Closes: #67326, #68416
@@ -22,4 +30,5 @@ vorbis (0.0-1) unstable; urgency=low
 
 Local variables:
 mode: debian-changelog
+add-log-mailing-address "ccheney@debian.org"
 End:
