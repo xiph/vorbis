@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.14 2000/11/06 20:36:07 jack Exp $
+ last mod: $Id: os.h,v 1.15 2000/11/08 22:38:57 jack Exp $
 
  ********************************************************************/
 
@@ -62,6 +62,8 @@
 
 #if defined(__i386__) && defined(__GNUC__)
 
+#ifndef __BEOS__
+
 /* both GCC and MSVC are kinda stupid about rounding/casting to int.
    Because of encapsulation constraints (GCC can't see inside the asm
    block and so we end up doing stupid things like a store/load that
@@ -94,6 +96,18 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
   __asm__("fistl %0": "=m"(i) : "t"(f));
   return(i);
 }
+
+#else
+/* this is for beos */
+static int vorbis_ftoi(double f){
+  return (int)(f+.5);
+}
+
+/* We don't have special code for this compiler/arch, so do it the slow way */
+#define vorbis_fpu_setround(vorbis_fpu_control) {}
+#define vorbis_fpu_restore(vorbis_fpu_control) {}
+
+#endif
 
 #else
 
