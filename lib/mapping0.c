@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.33.2.1 2001/07/08 08:48:01 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.33.2.2 2001/07/11 05:23:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -392,20 +392,20 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	    ang=B-A;
 	}else{
 	  mag=B;
-	if(B>0)
-	  ang=A-B;
-	else
-	  ang=B-A;
+	  if(B>0)
+	    ang=A-B;
+	  else
+	    ang=B-A;
 	}
 	
 	if(j>12){
 	  
 	  if(j>=n*3/64){
-
+	    
 	    if(j>=n*3/32){
 	      ang=0;
 	    }else{
-	      ang=rint(ang/rint(mag))*rint(mag);
+	      if(mag!=0.f)ang=rint(ang/mag)*mag;
 	      //if(fabs(mag)<2.5)
 	      //ang=0;
 	    }
