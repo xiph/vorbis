@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.11.2.2 2000/03/29 20:08:49 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.11.2.2.2.1 2000/03/30 09:37:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -239,8 +239,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
 
       /* perform psychoacoustics; do masking */
       /*memset(mask,0,sizeof(double)*n/2);*/
-      _vp_tone_tone_mask(look->psy_look+submap,pcm,mask,
-			 1,1,decay);
+      _vp_tone_tone_mask(look->psy_look+submap,pcm,mask,decay);
  
       /* perform floor encoding */
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2 2000/03/29 20:08:49 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.1 2000/03/30 09:37:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -186,6 +186,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   /* set up the lookups for a given blocksize and sample rate */
   /* Vorbis max sample rate is limited by 26 Bark (54kHz) */
   set_curve(ATH_Bark_dB, p->ath,n,rate);
+  for(i=0;i<n;i++)
+    p->ath[i]=fromdB(p->ath[i]+vi->ath_att);
 
   for(i=0;i<n;i++){
     double oc=toOC((i+.5)*rate2/n);
@@ -302,7 +304,7 @@ static double _eights[EHMER_MAX]={
   22.62741699796952076,24.67537320652705316,
   26.90868528811886536,29.34412938254947939};
 
-static double seed_peaks(double *floor,int *len,double **curve,
+static double seed_peaks(double *floor,double **curve,
 		       double amp,double specmax,
 		       int *pre,int *post,
 		       int x,int n,double specatt){
@@ -349,46 +351,43 @@ static void add_seeds(double *floor,int n){
   double acc=0.;
   for(i=0;i<n;i++){
     acc+=floor[i];
-    floor[i]=(acc<=0?-DYNAMIC_RANGE_dB:todB(sqrt(acc)));
+    floor[i]=(acc<=0.?0.:sqrt(acc));
   }
 }
 
-/* octave/dB SL scale for masking curves, Bark/dB SPL scale for ATH.
-   Why Bark scale for encoding but not masking? Because masking has a
+/* Why Bark scale for encoding but not masking? Because masking has a
    strong harmonic dependancy */
-void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr, 
-			int athp, int decayp, double *decay){
+static void _vp_tone_tone_iter(vorbis_look_psy *p,double *f, double *flr, 
+			double *decay){
   vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
-  double *acctemp=alloca(n*sizeof(double));
   double *work=alloca(n*sizeof(double));
-  double *workdB=alloca(n*sizeof(double));
-  double specmax=-DYNAMIC_RANGE_dB;
+  double specmax=0;
   double acc=0.;
-  
-  for(i=0;i<n;i++)work[i]=fabs(f[i]);
+
+  memcpy(work,f,p->n*sizeof(double));
   
   /* handle decay */
-  if(decayp){
+  if(vi->decayp && decay){
     double decscale=1.-pow(vi->decay_coeff,n); 
     double attscale=1.-pow(vi->attack_coeff,n); 
     for(i=0;i<n;i++){
-      double del=fabs(f[i])-decay[i];
+      double del=work[i]-decay[i];
       if(del>0)
 	/* add energy */
 	decay[i]+=del*attscale;
       else
 	/* remove energy */
 	decay[i]+=del*decscale;
-      if(decay[i]>fabs(work[i]))work[i]=decay[i];
+      if(decay[i]>work[i])work[i]=decay[i];
     }
   }
 
   for(i=0;i<n;i++){
-    workdB[i]=todB(work[i]);
-    if(workdB[i]>specmax)specmax=workdB[i];
+    if(work[i]>specmax)specmax=work[i];
   }
 
+  specmax=todB(specmax);
   memset(flr,0,sizeof(double)*n);
 
   /* prime the working vector with peak values */
@@ -400,20 +399,133 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr,
       if(o<0)o=0;
       if(o>10)o=10;
 
-      acc+=seed_peaks(flr,NULL,p->curves[o],workdB[i],
+      acc+=seed_peaks(flr,p->curves[o],todB(work[i]),
 		      specmax,p->pre,p->post,i,n,vi->max_curve_dB);
     }
-    acctemp[i]=acc;
   }
 
   /* now, chase curves down from the peak seeds */
   add_seeds(flr,n);
 
   /* mask off the ATH */
-  if(athp)
+  if(p->vi->athp)
     for(i=0;i<n;i++)
-      if(flr[i]<p->ath[i]+vi->ath_att)
-	flr[i]=p->ath[i]+vi->ath_att; 
+      if(flr[i]<p->ath[i])
+	flr[i]=p->ath[i];
 
 }
 
+static int comp(const void *a,const void *b){
+  return(**(double **)a<**(double **)b);
+}
+
+/* this applies the floor and (optionally) tries to preserve noise
+   energy in low resolution portions of the spectrum */
+static void _vp_apply_floor(vorbis_look_psy *p,double *f, 
+		      double *flr){
+  double *work=alloca(p->n*sizeof(double));
+  double thresh=fromdB(p->vi->noisefit_threshdB);
+  int i,j;
+  thresh*=thresh;
+
+  /* subtract the floor */
+  for(j=0;j<p->n;j++){
+    if(f[j]==0)
+      work[j]=0;
+    else{
+      double val=rint((todB(f[j])-flr[j]));
+      if(val<=0.){
+	val=0.;
+      }else{
+	if(f[j]<0)val= -val;
+      }
+      work[j]=val;
+    }
+  }
+
+  /* look at spectral energy levels.  Noise is noise; sensation level
+     is important */
+  if(p->vi->noisefitp){
+    double **index=alloca(p->vi->noisefit_subblock*sizeof(double *));
+
+    /* we're looking for zero values that we want to reinstate (to
+       floor level) in order to raise the SL noise level back closer
+       to original.  Desired result; the SL of each block being as
+       close to (but still less than) the original as possible.  Don't
+       bother if the net result is a change of less than
+       p->vi->noisefit_thresh dB */
+    for(i=0;i<p->n;i++){
+      double original_SL=0.;
+      double current_SL=0.;
+      int nonz=0;
+
+      /* compute current SL */
+      for(j=0;j<p->vi->noisefit_subblock;j++){
+	double y=(f[j+i]*f[j+i]);
+	original_SL+=y;
+	if(work[j]){
+	  index[nonz]=f+j+i;
+	  nonz++;
+	  current_SL+=y;
+	}
+      }
+      /* sort the zeroed values; add back the largest first, stop when
+         we violate the desired result above (which may be
+         immediately) */
+      if(nonz<p->vi->noisefit_subblock){
+	qsort(index,nonz,sizeof(double *),&comp);
+	for(j=0;j<nonz;j++)
+	  fprintf(stderr,"%02g ", *(index[j]));
+	fprintf(stderr,"::");
+
+	for(j=0;j<nonz;j++){
+	  int p=index[j]-f;
+	  double val=flr[p]*flr[p]+current_SL;
+	  
+	  if(val<original_SL){
+	    if(f[p]<0)
+	      work[p]=.01;
+	    else
+	      work[p]=-.01;
+	    current_SL=val;
+	    if(val*thresh>original_SL)break;
+	  }else
+	    break;
+
+	}
+      }
+    }
+  }
+  memcpy(f,work,p->n*sizeof(double));
+}
+
+extern int frameno;
+extern void analysis(char *base,int i,double *v,int n,int bark,int dB);
+
+void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr, 
+			     double *decay){
+  double *iter=alloca(sizeof(double)*p->n);
+  int i,j;
+
+  for(i=0;i<p->n;i++)iter[i]=fabs(f[i]);  
+
+  for(i=0;i<p->vi->curve_fit_iterations;i++){
+    if(i==0)
+      _vp_tone_tone_iter(p,iter,flr,decay);
+    else{
+      _vp_tone_tone_iter(p,iter,iter,decay);
+      for(j=0;j<p->n;j++)
+	flr[j]=(flr[j]+iter[j])/2.;
+    }
+    if(i!=p->vi->curve_fit_iterations-1)
+      for(j=0;j<p->n;j++)
+	if(fabs(f[j])<flr[j])
+	  iter[j]=0.;
+	else
+	  iter[j]=fabs(f[j]);
+
+    analysis("Pmask",frameno*10+i,flr,p->n,1,1);
+  
+  }
+  for(j=0;j<p->n;j++)flr[j]=todB(flr[j]);
+}

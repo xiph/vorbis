@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.11.2.2 2000/03/29 20:08:49 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.11.2.2.2.1 2000/03/30 09:37:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,7 +42,7 @@ extern void   _vp_psy_clear(vorbis_look_psy *p);
 extern void  *_vi_psy_dup(void *source);
 extern void   _vi_psy_free(vorbis_info_psy *i);
 extern void   _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *floor, 
-				 int athp, int decayp, double *decay);
+				 double *decay);
 
 #endif
 

@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.2 2000/03/29 20:08:49 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2.2.1 2000/03/30 09:37:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,6 +30,8 @@
 #include "lpc.h"
 
 static vorbis_info_psy _psy_set0={
+  3,1,0,0,
+
   -130.,
 
   {-35.,-40.,-60.,-80.,-85.},
@@ -53,7 +55,7 @@ static vorbis_info_psy _psy_set0={
   {-8.,-12.,-18.,-20.,-24.},
   -25.,-12.,
 
-  110.,
+  100.,
 
   .9998, .9997  /* attack/decay control */
 };
@@ -210,38 +212,10 @@ int main(int argc,char *argv[]){
 
 	analysis("maskmdct",frameno,mask,framesize/2,1,1);
 
-	{
-	  double *iter=malloc(sizeof(double)*framesize/2);
-
-	  _vp_tone_tone_mask(&p_look,mask,floor,
-			     ath,0,decay[i]);
+	_vp_tone_tone_mask(&p_look,mask,floor,decay[i]);
 	
-	  memcpy(iter,mask,sizeof(double)*framesize/2);
-	  for(j=0;j<framesize/2;j++)
-	    if(fabs(iter[j])<fromdB(floor[j]))iter[j]=0.;
-	  _vp_tone_tone_mask(&p_look,iter,iter,
-			     ath,0,decay[i]);
-	  for(j=0;j<framesize/2;j++)
-	    floor[j]=(floor[j]+iter[j])/2.;
-
-	  memcpy(iter,mask,sizeof(double)*framesize/2);
-	  for(j=0;j<framesize/2;j++)
-	    if(fabs(iter[j])<fromdB(floor[j]))iter[j]=0.;
-	  _vp_tone_tone_mask(&p_look,iter,iter,
-			     ath,0,decay[i]);
-	  for(j=0;j<framesize/2;j++)
-	    floor[j]=(floor[j]+iter[j])/2.;
-	  
-	  memcpy(iter,mask,sizeof(double)*framesize/2);
-	  for(j=0;j<framesize/2;j++)
-	    if(fabs(iter[j])<fromdB(floor[j]))iter[j]=0.;
-	  _vp_tone_tone_mask(&p_look,iter,mask,
-			     ath,0,decay[i]);
-	}	  
-
-
-	analysis("mask",frameno,mask,framesize/2,1,0);
-	analysis("lmask",frameno,mask,framesize/2,0,0);
+	analysis("mask",frameno,floor,framesize/2,1,0);
+	analysis("lmask",frameno,floor,framesize/2,0,0);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
 	analysis("ldecay",frameno,decay[i],framesize/2,0,1);
 	
@@ -257,7 +231,7 @@ int main(int argc,char *argv[]){
 	{
 	  double amp;
 
-	  for(j=0;j<framesize/2;j++)floor[j]=mask[j]+DYNAMIC_RANGE_dB;
+	  for(j=0;j<framesize/2;j++)floor[j]+=DYNAMIC_RANGE_dB;
 	  amp=sqrt(vorbis_curve_to_lpc(floor,lpc,&lpc_look));
 	  fprintf(stderr,"amp=%g\n",amp);
 	  vorbis_lpc_to_curve(floor,lpc,amp,&lpc_look);
@@ -274,11 +248,10 @@ int main(int argc,char *argv[]){
 	    val=0;
 	  else{
 	    val=rint((todB(pcm[i][j])-floor[j]));
-	    if(val<0.){
+	    if(val<=0.){
 	      val=0.;
 	    }else{
 	      nonz+=1;
-	      val+=1;
 	      if(pcm[i][j]<0)val= -val;
 	    }
 	  }
@@ -289,9 +262,9 @@ int main(int argc,char *argv[]){
 	    pcm[i][j]=0.;
 	  else{
 	    if(val>0)
-	      pcm[i][j]=fromdB((val-1.)+floor[j]);
+	      pcm[i][j]=fromdB(val+floor[j]);
 	    else
-	      pcm[i][j]=-fromdB(floor[j]-(val+1.));
+	      pcm[i][j]=-fromdB(floor[j]-val);
 	  }
 	}
 
