@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.20.2.3 2000/06/09 01:07:34 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.20.2.4 2000/06/14 01:24:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -530,26 +530,6 @@ static void quarter_octave_noise(vorbis_look_psy *p,double *f,double *noise){
   }
 }
 
-static void eighth_octave_noise(vorbis_look_psy *p,double *f,double *noise){
-  long i,n=p->n;
-  long lo=0,hi=0;
-  double acc=0.;
-
-  for(i=0;i<n;i++){
-    /* not exactly correct, (the center frequency should be centered
-       on a *log* scale), but not worth quibbling */
-    long newhi=i*_eights[17]+noiseBIAS;
-    long newlo=i*_eights[16]-noiseBIAS;
-    if(newhi>n)newhi=n;
-
-    for(;lo<newlo;lo++)
-      acc-=todB(f[lo]); /* yeah, this ain't RMS */
-    for(;hi<newhi;hi++)
-      acc+=todB(f[hi]);
-    noise[i]=fromdB(acc/(hi-lo));
-  }
-}
-
 /* stability doesn't matter */
 static int comp(const void *a,const void *b){
   if(fabs(**(double **)a)<fabs(**(double **)b))
@@ -582,7 +562,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
   
   /* don't use the smoothed data for noise */
   if(p->vi->noisemaskp){
-    eighth_octave_noise(p,f,work2);
+    quarter_octave_noise(p,f,work2);
     seed_generic(p,p->noisecurves,work2,flr,specmax);
   }
   
