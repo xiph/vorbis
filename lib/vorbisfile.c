@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.66 2003/03/02 21:32:00 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.67 2003/03/04 21:22:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -444,6 +444,14 @@ static void _decode_clear(OggVorbis_File *vf){
   vf->samptrack=0.f;
 }
 
+/* restart the decoder, but don't clear out machine init */
+static void _decode_restart(OggVorbis_File *vf){
+  vorbis_synthesis_restart(&vf->vd);
+  vf->bittrack=0.f;
+  vf->samptrack=0.f;
+}
+
+
 /* fetch and process a packet.  Handles the case where we're at a
    bitstream boundary and dumps the decoding machine.  If the decoding
    machine is unloaded, it loads it.  It also keeps pcm_offset up to
@@ -540,17 +548,22 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
     }
 
     if(vf->ready_state>=OPENED){
+      int ret;
       if(!readp)return(0);
-      if(_get_next_page(vf,&og,-1)<0)return(OV_EOF); /* eof. 
-							leave unitialized */
-      /* bitrate tracking; add the header's bytes here, the body bytes
-	 are done by packet above */
+      if((ret=_get_next_page(vf,&og,-1))<0){
+	return(OV_EOF); /* eof. 
+			   leave unitialized */
+      }
+
+	/* bitrate tracking; add the header's bytes here, the body bytes
+	   are done by packet above */
       vf->bittrack+=og.header_len*8;
       
       /* has our decoding just traversed a bitstream boundary? */
       if(vf->ready_state==INITSET){
 	if(vf->current_serialno!=ogg_page_serialno(&og)){
-	  if(!spanp)return(OV_EOF);
+	  if(!spanp)
+	    return(OV_EOF);
 
 	  _decode_clear(vf);
 	  
@@ -908,6 +921,8 @@ double ov_time_total(OggVorbis_File *vf,int i){
 
 int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
   ogg_stream_state work_os;
+  int i;
+  ogg_int64_t count=0;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
   if(!vf->seekable)
@@ -915,9 +930,15 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
 
   if(pos<0 || pos>vf->end)return(OV_EINVAL);
 
-  /* clear out decoding machine state */
+  /* don't yet clear out decoding machine (if it's initialized), in
+     the case we're in the same link.  Restart the decode lapping, and
+     let _fetch_and_process_packet deal with a potential bitstream
+     boundary */
   vf->pcm_offset=-1;
-  _decode_clear(vf);
+  ogg_stream_reset_serialno(&vf->os,
+			    vf->current_serialno); /* must set serialno */
+  _decode_restart(vf);
+  //_decode_clear(vf);
   
   _seek_helper(vf,pos);
 
@@ -944,17 +965,25 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
     int thisblock;
     int eosflag;
 
-    ogg_stream_init(&work_os,-1); /* get the memory ready */
+    ogg_stream_init(&work_os,vf->current_serialno); /* get the memory ready */
+    ogg_stream_reset(&work_os); /* eliminate the spurious OV_HOLE
+                                   return from not necessarily
+                                   starting from the beginning */
 
     while(1){
-      if(vf->ready_state==STREAMSET){
+      if(vf->ready_state>=STREAMSET){
 	/* snarf/scan a packet if we can */
 	int result=ogg_stream_packetout(&work_os,&op);
       
 	if(result>0){
 
-	  if(vf->vi[vf->current_link].codec_setup)
+	  if(vf->vi[vf->current_link].codec_setup){
 	    thisblock=vorbis_packet_blocksize(vf->vi+vf->current_link,&op);
+	    if(thisblock<0){
+	      ogg_stream_packetout(&vf->os,NULL);
+	      continue;
+	    }
+	  }
 	  if(eosflag)
 	    ogg_stream_packetout(&vf->os,NULL);
 	  else
@@ -987,11 +1016,11 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
       }
       
       /* has our decoding just traversed a bitstream boundary? */
-      if(vf->ready_state==STREAMSET)
+      if(vf->ready_state>=STREAMSET)
 	if(vf->current_serialno!=ogg_page_serialno(&og)){
-	_decode_clear(vf); /* clear out stream state */
-	ogg_stream_clear(&work_os);
-      }
+	  _decode_clear(vf); /* clear out stream state */
+	  ogg_stream_clear(&work_os);
+	}
 
       if(vf->ready_state<STREAMSET){
 	int link;
@@ -1127,17 +1156,26 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
     {
       ogg_page og;
       ogg_packet op;
-      /* clear out decoding machine state */
-      _decode_clear(vf);  
+      
       /* seek */
       _seek_helper(vf,best);
+      vf->pcm_offset=-1;
       
       if(_get_next_page(vf,&og,-1)<0)return(OV_EOF); /* shouldn't happen */
-      vf->current_serialno=ogg_page_serialno(&og);
-      vf->current_link=link;
       
+      if(link!=vf->current_link){
+	/* Different link; dump entire decode machine */
+	_decode_clear(vf);  
+	
+	vf->current_link=link;
+	vf->current_serialno=ogg_page_serialno(&og);
+	vf->ready_state=STREAMSET;
+	
+      }else{
+	_decode_restart(vf);  
+      }
+
       ogg_stream_reset_serialno(&vf->os,vf->current_serialno);
-      vf->ready_state=STREAMSET;
       ogg_stream_pagein(&vf->os,&og);
 
       /* pull out all but last packet; the one with granulepos */
@@ -1148,10 +1186,10 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
              preceeding page. Keep fetching previous pages until we
              get one with a granulepos or without the 'continued' flag
              set.  Then just use raw_seek for simplicity. */
-
-	  _decode_clear(vf);  
+	  
+	  //_decode_restart(vf);  
 	  _seek_helper(vf,best);
-
+	  
 	  while(1){
 	    result=_get_prev_page(vf,&og);
 	    if(result<0) goto seek_error;
@@ -1163,9 +1201,9 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	  }
 	}
 	if(result<0){
-      result = OV_EBADPACKET; 
-      goto seek_error;
-    }
+	  result = OV_EBADPACKET; 
+	  goto seek_error;
+	}
 	if(op.granulepos!=-1){
 	  vf->pcm_offset=op.granulepos-vf->pcmlengths[vf->current_link*2];
 	  if(vf->pcm_offset<0)vf->pcm_offset=0;
@@ -1210,7 +1248,10 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
     int ret=ogg_stream_packetpeek(&vf->os,&op);
     if(ret>0){
       thisblock=vorbis_packet_blocksize(vf->vi+vf->current_link,&op);
-      if(thisblock<0)thisblock=0; /* non audio packet */
+      if(thisblock<0){
+	ogg_stream_packetout(&vf->os,NULL);
+	continue; /* non audio packet */
+      }
       if(lastblock)vf->pcm_offset+=(lastblock+thisblock)>>2;
       
       if(vf->pcm_offset+((thisblock+
@@ -1469,8 +1510,10 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
     /* suck in another packet */
     {
       int ret=_fetch_and_process_packet(vf,NULL,1,1);
-      if(ret==OV_EOF)return(0);
-      if(ret<=0)return(ret);
+      if(ret==OV_EOF)
+	return(0);
+      if(ret<=0)
+	return(ret);
     }
 
   }

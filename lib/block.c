@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.70 2003/03/02 21:32:00 xiphmont Exp $
+ last mod: $Id: block.c,v 1.71 2003/03/04 21:22:11 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -186,8 +186,8 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   mdct_init(b->transform[1][0],ci->blocksizes[1]);
 
   /* Vorbis I uses only window type 0 */
-  b->window[0]=_vorbis_window(0,ci->blocksizes[0]/2);
-  b->window[1]=_vorbis_window(0,ci->blocksizes[1]/2);
+  b->window[0]=_vorbis_window_create(0,ci->blocksizes[0]/2);
+  b->window[1]=_vorbis_window_create(0,ci->blocksizes[1]/2);
 
   if(encp){ /* encode/decode differ here */
 
@@ -637,13 +637,30 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   return(1);
 }
 
-int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
-  _vds_shared_init(v,vi,0);
+int vorbis_synthesis_restart(vorbis_dsp_state *v){
+  vorbis_info *vi=v->vi;
+  codec_setup_info *ci;
 
+  if(!v->backend_state)return -1;
+  if(!vi)return -1;
+  ci=vi->codec_setup;
+  if(!ci)return -1;
+
+  v->centerW=ci->blocksizes[1]/2;
+  v->pcm_current=v->centerW;
+  
   v->pcm_returned=-1;
   v->granulepos=-1;
   v->sequence=-1;
+  v->eofflag=0;
   ((private_state *)(v->backend_state))->sample_count=-1;
+
+  return(0);
+}
+
+int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
+  _vds_shared_init(v,vi,0);
+  vorbis_synthesis_restart(v);
 
   return(0);
 }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.19 2003/03/02 11:45:17 xiphmont Exp $
+ last mod: $Id: window.c,v 1.20 2003/03/04 21:22:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,7 @@
 #include "os.h"
 #include "misc.h"
 
-float *_vorbis_window(int type, int left){
+float *_vorbis_window_create(int type, int left){
   float *ret=_ogg_calloc(left,sizeof(*ret));
   int i;
 
