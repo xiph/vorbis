@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.6 2000/02/06 13:39:39 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.7 2000/02/06 13:40:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -362,22 +362,12 @@ int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b){
 }
 
 /* returns the number of bits and *modifies a* to the residual error *****/
-static double _dist(double *a, double *b,int dim){
-  int i;
-  double acc=0.;
-  for(i=0;i<dim;i++){
-    double val=(a[i]-b[i]);
-    acc+=val*val;
-  }
-  return sqrt(acc);
-}
-
 int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
   encode_aux *t=book->c->encode_tree;
   int dim=book->dim;
   int ptr=0,k;
-  
-  /*while(1){
+
+  while(1){
     double c=0.;
     double *p=book->valuelist+t->p[ptr];
     double *q=book->valuelist+t->q[ptr];
@@ -385,26 +375,12 @@ int vorbis_book_encodev(codebook *book, double *a, oggpack_buffer *b){
     for(k=0;k<dim;k++)
       c+=(p[k]-q[k])*(a[k]-(p[k]+q[k])*.5);
 
-    if(c>0.) /* in A 
+    if(c>0.) /* in A */
       ptr= -t->ptr0[ptr];
-      else     /* in B 
+    else     /* in B */
       ptr= -t->ptr1[ptr];
     if(ptr<=0)break;
-    }*/
-  
-  {
-    long i;
-    double best=999999.;
-    for(i=0;i<book->entries;i++){
-      double this=_dist(a,book->valuelist+i*dim,dim);
-      if(this<best){
-	best=this;
-	ptr=-i;
-      }
-    }
-  }    
-
-
+  }
   for(k=0;k<dim;k++)a[k]-=(book->valuelist-ptr*dim)[k];
   return(vorbis_book_encode(book,-ptr,b));
 }
