@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.9.2.4 2000/09/26 22:31:50 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.9.2.5 2000/10/05 21:35:40 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -244,8 +244,8 @@ static int comp(const void *a,const void *b){
 /* CACM algorithm 283. */
 static void cacm283(float *a,int ord,float *r){
   int i, k;
-  float val, p, delta, error;
-  float rooti;
+  double val, p, delta, error;
+  double rooti;
 
   for(i=0; i<ord;i++) r[i] = 2.0 * (i+0.5) / ord - 1.0;
   
