@@ -32,6 +32,7 @@
 #include <math.h>
 #include <string.h>
 #include "vqgen.h"
+#include <sys/time.h>
 
 /* Codebook generation happens in two steps: 
 
@@ -143,6 +144,36 @@ void pq_center_out(vqgen *v,double *n,double *c,double *center,double *q){
   }
 }
 
+static void spinnit(void){
+  static int p=0;
+  static long lasttime=0;
+  long test;
+  struct timeval thistime;
+
+  gettimeofday(&thistime,NULL);
+  test=thistime.tv_sec*10+thistime.tv_usec/100000;
+  if(lasttime!=test){
+    lasttime=test;
+
+    p++;if(p>3)p=0;
+    switch(p){
+    case 0:
+      fprintf(stderr,"|\b");
+      break;
+    case 1:
+      fprintf(stderr,"/\b");
+      break;
+    case 2:
+      fprintf(stderr,"-\b");
+      break;
+    case 3:
+      fprintf(stderr,"\\\b");
+      break;
+    }
+    fflush(stderr);
+  }
+}
+
 int lp_split(vqgen *v,vqbook *b,
 	     long *entryindex,long entries, 
 	     long *pointindex,long points,
@@ -186,6 +217,7 @@ int lp_split(vqgen *v,vqbook *b,
     double this;
     for(i=0;i<entries-1;i++){
       for(j=i+1;j<entries;j++){
+	spinnit();
 	pq_in_out(v,n,&c,_now(v,entryindex[i]),_now(v,entryindex[j]));
 	vqsp_count(v,entryindex,entries, 
 		 pointindex,points,
@@ -205,22 +237,26 @@ int lp_split(vqgen *v,vqbook *b,
   }else{
     double best=0.;
     long   bestj=0;
-
+    
     /* try COG/normal and furthest pairs */
     /* medianpoint */
     for(k=0;k<v->elements;k++){
+      spinnit();
+
       /* just sort the index array */
-      sortvals=v->pointlist+k;
+      sortvals=v->entrylist+k;
       els=v->elements;
-      qsort(pointindex,points,sizeof(long),iascsort);
-      if(points&0x1){
-	p[k]=v->pointlist[(pointindex[points/2])*v->elements+k];
+      qsort(entryindex,entries,sizeof(long),iascsort);
+      if(entries&0x1){
+	p[k]=v->entrylist[(entryindex[entries/2])*v->elements+k];
       }else{
-	p[k]=(v->pointlist[(pointindex[points/2])*v->elements+k]+
-	      v->pointlist[(pointindex[points/2-1])*v->elements+k])/2.;
+	p[k]=(v->entrylist[(entryindex[entries/2])*v->elements+k]+
+	      v->entrylist[(entryindex[entries/2-1])*v->elements+k])/2.;
       }
     }
-    
+
+    spinnit();
+
     /* try every normal, but just for distance */
     for(j=0;j<entries;j++){
       double *ppj=_now(v,entryindex[j]);
