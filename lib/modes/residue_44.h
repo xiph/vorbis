@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.1.2.5 2001/12/07 08:36:59 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.1.2.6 2001/12/11 08:19:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,13 +48,13 @@ static bitrate_manager_info _bm_44_default={
  
        0   4   4   4   3   4   4   4   3   7 */
 static vorbis_info_residue0 _residue_44_low={
-  0,-1, -1, 10,-1,
+  0,-1, -1, 8,-1,
   {0},
   {-1},
-  {9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999, 9999},
-  {  .5,  1.5,  2.5,  4.5, 26.5,  1.5,  2.5,  4.5, 26.5},
+  {9999, 9999, 9999, 9999, 9999, 9999, 9999},
+  {  .5,  1.5,  2.5,  4.5, 26.5,  1.5,  4.5},
   {0},
-  {  99,   -1,   -1,   -1,   -1,   99,   99,   99,   99}
+  {  99,   -1,   -1,   -1,   -1,   99,   99}
 };
 
 /*     0   1   2   4   1   2   4  16  42   +      
@@ -107,28 +107,25 @@ static vorbis_info_residue0 _residue_44_high={
 #include "books/coupled/_44c0_s0_p4_0.vqh"
 #include "books/coupled/_44c0_s0_p4_1.vqh"
 #include "books/coupled/_44c0_s1_p5_0.vqh"
-#include "books/coupled/_44c0_s1_p6_0.vqh"
-#include "books/coupled/_44c0_s2_p7_0.vqh"
-#include "books/coupled/_44c0_s4_p8_0.vqh"
-#include "books/coupled/_44c0_s4_p8_1.vqh"
-#include "books/coupled/_44c0_s4_p9_0.vqh"
-#include "books/coupled/_44c0_s4_p9_1.vqh"
-#include "books/coupled/_44c0_s4_p9_2.vqh"
+#include "books/coupled/_44c0_s2_p6_0.vqh"
+#include "books/coupled/_44c0_s4_p7_0.vqh"
+#include "books/coupled/_44c0_s4_p7_1.vqh"
+#include "books/coupled/_44c0_s4_p7_2.vqh"
 
 /* residue backfill is entered in the template array as if stereo
    backfill is not in use.  It's up to vorbisenc to make the
    appropriate index adjustment */
 static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 0; 64-ish */
-  {&_residue_44_low,  {&_huff_book__44c0_short,&_huff_book__44c0_long},
+  {{&_residue_44_low, &_residue_44_low},  
+   {&_huff_book__44c0_short,&_huff_book__44c0_long},
    { {{0}}, /* lossless stereo */
      {{0}}, /* 6dB (2.5) stereo */
      {{0}}, /* 12dB (4.5) stereo */
      {{0}}, /* 18dB (8.5) stereo */
      {{0},{0,0,&_44c0_s0_p1_0},{0,0,&_44c0_s0_p2_0},{0,0,&_44c0_s0_p3_0},
-      {&_44c0_s0_p4_0,&_44c0_s0_p4_1},{0,0,&_44c0_s1_p5_0},{0,0,&_44c0_s1_p6_0},
-      {0,0,&_44c0_s2_p7_0},{&_44c0_s4_p8_0,&_44c0_s4_p8_1},
-      {&_44c0_s4_p9_0,&_44c0_s4_p9_1,&_44c0_s4_p9_2}}, /* 24dB (16.5) stereo */
+      {&_44c0_s0_p4_0,&_44c0_s0_p4_1},{0,0,&_44c0_s1_p5_0},{0,0,&_44c0_s2_p6_0},
+      {&_44c0_s4_p7_0,&_44c0_s4_p7_1,&_44c0_s4_p7_2}}, /* 24dB (16.5) stereo */
    },
    { {0}, /* lossless stereo */
      {0}, /* 6dB (2.5) stereo */
@@ -153,3 +150,4 @@ static vorbis_residue_template _residue_template_44_stereo[11]={
   /* mode 1; 80-ish */
 
 };
+

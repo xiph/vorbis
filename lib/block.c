@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.50.2.7 2001/12/05 08:03:16 xiphmont Exp $
+ last mod: $Id: block.c,v 1.50.2.8 2001/12/11 08:19:39 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -494,6 +494,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   vorbis_look_psy_global *g=b->psy_g_look;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
   long beginW=v->centerW-ci->blocksizes[v->W]/2,centerNext;
+  vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
 
   /* check to see if we're started... */
   if(!v->preextrapolate)return(0);
@@ -506,17 +507,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      which lets us compute the shape of the current block's window */
   
   if(ci->blocksizes[0]<ci->blocksizes[1]){
-    long largebound;
-    long bp;
-
-    if(v->W)
-      /* min boundary; nW large, next small */
-      largebound=v->centerW+ci->blocksizes[1]*3/4+ci->blocksizes[0]/4;
-    else
-      /* min boundary; nW large, next small */
-      largebound=v->centerW+ci->blocksizes[1]/2+ci->blocksizes[0]/2;
-
-    bp=_ve_envelope_search(v,largebound);
+    long bp=_ve_envelope_search(v);
     if(bp==-1)return(0); /* not enough data currently to search for a
                             full long block */
     v->nW=bp;
@@ -537,6 +528,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
                                                the search is not run
                                                if we only use one
                                                block size */
+
+
   }
   
   /* fill in the block.  Note that for a short window, lW and nW are *short*
@@ -552,6 +545,19 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     vb->W=v->W;
     vb->nW=0;
   }
+
+  if(v->W){
+    if(!v->lW || !v->nW)
+      vbi->blocktype=BLOCKTYPE_TRANSITION;
+    else
+      vbi->blocktype=BLOCKTYPE_LONG;
+  }else{
+    if(_ve_envelope_mark(v))
+      vbi->blocktype=BLOCKTYPE_IMPULSE;
+    else
+      vbi->blocktype=BLOCKTYPE_PADDING;
+  }
+ 
   vb->vd=v;
   vb->sequence=v->sequence;
   vb->granulepos=v->granulepos;

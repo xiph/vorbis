@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17.2.7 2001/12/07 08:38:27 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.17.2.8 2001/12/11 08:19:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -34,7 +34,7 @@
    with > 10 partition types, or a different division of iteration,
    this needs to be updated. */
 typedef struct {
-  vorbis_info_residue0 *res;
+  vorbis_info_residue0 *res[2];
   static_codebook *book_aux[2];
   static_codebook *books_base[5][10][3];
   static_codebook *books_stereo_backfill[5][10];
@@ -58,12 +58,11 @@ static vorbis_info_mode _mode_set_long={1,0,0,1};
 
 /* mapping conventions:
    only one submap (this would change for efficient 5.1 support for example)*/
-/* three psychoacoustic profiles are used: One for
-   short blocks, and two for long blocks (transition and regular) */
+/* Four psychoacoustic profiles are used, one for each blocktype */
 static vorbis_info_mapping0 _mapping_set_short={
-  1, {0,0}, {0}, {0}, {0}, {0,0}, 0,{0},{0}};
+  1, {0,0}, {0}, {0}, {0}, {0,1}, 0,{0},{0}};
 static vorbis_info_mapping0 _mapping_set_long={
-  1, {0,0}, {0}, {1}, {1}, {1,2}, 0,{0},{0}};
+  1, {0,0}, {0}, {1}, {1}, {2,3}, 0,{0},{0}};
 
 static int vorbis_encode_toplevel_init(vorbis_info *vi,int small,int large,int ch,long rate){
   if(vi && vi->codec_setup){
@@ -222,19 +221,6 @@ static int vorbis_encode_psyset_init(vorbis_info *vi,double q,int block,
 
   p->noisemaxsupp=in[iq].noisemaxsupp*(1.-dq)+in[iq+1].noisemaxsupp*dq;
 
-  switch(block){
-  case 0:
-    p->noisewindowlomin=2;
-    p->noisewindowhimin=2;
-    p->noisewindowfixed=15;
-    break;
-  default:
-    p->noisewindowlomin=4;
-    p->noisewindowhimin=4;
-    p->noisewindowfixed=100;
-    break;
-  }
-
   return(0);
 }
 
@@ -315,7 +301,7 @@ static int vorbis_encode_peak_init(vorbis_info *vi,double q,int block,
 }
 
 static int vorbis_encode_noisebias_init(vorbis_info *vi,double q,int block,
-					int in[][17]){
+					int in[][17],int guard[33]){
   int i,iq=q*10;
   double dq;
   codec_setup_info *ci=vi->codec_setup;
@@ -327,6 +313,10 @@ static int vorbis_encode_noisebias_init(vorbis_info *vi,double q,int block,
   }else{
     dq=q*10.-iq;
   }
+
+  p->noisewindowlomin=guard[iq*3];
+  p->noisewindowhimin=guard[iq*3+1];
+  p->noisewindowfixed=guard[iq*3+2];
 
   for(i=0;i<P_BANDS;i++)
     p->noiseoff[i]=in[iq][i]*(1.-dq)+in[iq+1][i]*dq;
@@ -361,7 +351,7 @@ static int vorbis_encode_ath_init(vorbis_info *vi,double q,int block,
     dq=1.;
   }
 
-  for(i=0;i<P_BANDS;i++)
+  for(i=0;i<27;i++)
     p->ath[i]=in[iq][i]*(1.-dq)+in[iq+1][i]*dq;
   return(0);
 }
@@ -383,7 +373,7 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
 
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_residue0 *r;
-  vorbis_info_psy *psy=ci->psy_param[block];
+  vorbis_info_psy *psy=ci->psy_param[block*2];
   va_list ap;
   
   va_start(ap,in);
@@ -399,7 +389,7 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     residue_free_info(ci->residue_param[block],ci->residue_type[block]);
 
   r=ci->residue_param[block]=malloc(sizeof(*r));
-  memcpy(r,in[iq].res,sizeof(*r));
+  memcpy(r,in[iq].res[block],sizeof(*r));
   if(ci->residues<=block)ci->residues=block+1;
 
   if(block){
@@ -494,9 +484,6 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     }
     ci->coupling_passes=iterations;
 
-    if(block)
-      memcpy(ci->psy_param[block+1],psy,sizeof(*psy));
-
   }else{
     ci->passlimit[0]=3;
 
@@ -513,6 +500,10 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     }else
       ci->coupling_passes=1;
   }
+
+  memcpy(&ci->psy_param[block*2+1]->couple_pass,
+	 &ci->psy_param[block*2]->couple_pass,
+	 sizeof(psy->couple_pass[0]));
   
   /* fill in all the books */
   {
@@ -581,10 +572,10 @@ static int vorbis_encode_lowpass_init(vorbis_info *vi,double q,int block,...){
      here to next boundary, or the vorbis spec will round it *down* to
      previous boundary in encode/decode */
   if(ci->residue_type[block]==2)
-    r->end=((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
+    r->end=rint((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
       r->grouping;
   else
-    r->end=((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
+    r->end=rint((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
       r->grouping;
   return(0);
 }
@@ -610,30 +601,40 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				  0,0,0,0,0,0,0,0,0,0,0);
     
     ret|=vorbis_encode_global_psych_init(vi,base_quality,_psy_global_44,
-					 0., 0., .5, 1., 1., 1., 1., 1., 1., 1., 1.);
+					 0., 1., 1.5, 2., 2., 2., 2., 2., 2., 2., 2.);
     
     ret|=vorbis_encode_psyset_init(vi,base_quality,0,_psy_settings);
     ret|=vorbis_encode_psyset_init(vi,base_quality,1,_psy_settings);
     ret|=vorbis_encode_psyset_init(vi,base_quality,2,_psy_settings);
+    ret|=vorbis_encode_psyset_init(vi,base_quality,3,_psy_settings);
 
     ret|=vorbis_encode_tonemask_init(vi,base_quality,0,_vp_tonemask_adj_otherblock);
     ret|=vorbis_encode_tonemask_init(vi,base_quality,1,_vp_tonemask_adj_otherblock);
-    ret|=vorbis_encode_tonemask_init(vi,base_quality,2,_vp_tonemask_adj_longblock);
+    ret|=vorbis_encode_tonemask_init(vi,base_quality,2,_vp_tonemask_adj_otherblock);
+    ret|=vorbis_encode_tonemask_init(vi,base_quality,3,_vp_tonemask_adj_longblock);
 
-    ret|=vorbis_encode_compand_init(vi,base_quality,0,_psy_compand_44,
+    ret|=vorbis_encode_compand_init(vi,base_quality,0,_psy_compand_44_short,
 				    1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.);
-    ret|=vorbis_encode_compand_init(vi,base_quality,1,_psy_compand_44,
+    ret|=vorbis_encode_compand_init(vi,base_quality,1,_psy_compand_44_short,
 				    1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.);
     ret|=vorbis_encode_compand_init(vi,base_quality,2,_psy_compand_44,
+				    1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.);
+    ret|=vorbis_encode_compand_init(vi,base_quality,3,_psy_compand_44,
 				    1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.);
     
     ret|=vorbis_encode_peak_init(vi,base_quality,0,_vp_peakguard);
     ret|=vorbis_encode_peak_init(vi,base_quality,1,_vp_peakguard);
     ret|=vorbis_encode_peak_init(vi,base_quality,2,_vp_peakguard);
+    ret|=vorbis_encode_peak_init(vi,base_quality,3,_vp_peakguard);
     
-    ret|=vorbis_encode_noisebias_init(vi,base_quality,0,_psy_noisebias_other);
-    ret|=vorbis_encode_noisebias_init(vi,base_quality,1,_psy_noisebias_other);
-    ret|=vorbis_encode_noisebias_init(vi,base_quality,2,_psy_noisebias_long);
+    ret|=vorbis_encode_noisebias_init(vi,base_quality,0,_psy_noisebias_impulse,
+				      _psy_noiseguards_short);
+    ret|=vorbis_encode_noisebias_init(vi,base_quality,1,_psy_noisebias_other,
+				      _psy_noiseguards_short);
+    ret|=vorbis_encode_noisebias_init(vi,base_quality,2,_psy_noisebias_other,
+				      _psy_noiseguards_long);
+    ret|=vorbis_encode_noisebias_init(vi,base_quality,3,_psy_noisebias_long,
+				      _psy_noiseguards_long);
 
     ret|=vorbis_encode_ath_init(vi,base_quality,0,ATH_Bark_dB,
 				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
@@ -641,7 +642,9 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
     ret|=vorbis_encode_ath_init(vi,base_quality,2,ATH_Bark_dB,
 				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
-    
+    ret|=vorbis_encode_ath_init(vi,base_quality,3,ATH_Bark_dB,
+				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
+
     if(ret){
       vorbis_info_clear(vi);
       return ret; 
@@ -658,7 +661,7 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				      0, /* no residue backfill */
 				      _residue_template_44_stereo,
 				      4,  3,  3,  2,   1,  0,  0,  0,  0,  0,  0,
-				      4., 4., 6., 6., 10., 4., 4., 4., 4., 4., 4.);
+				      4., 6., 6., 6., 10., 6., 6., 6., 6., 6., 6.);
       
       ret|=vorbis_encode_residue_init(vi,base_quality,1,
 				      1, /* coupled */
@@ -666,10 +669,10 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				      0, /* no residue backfill */
 				      _residue_template_44_stereo,
 				      4,  3,  3,   2,   1,  0,  0,  0,  0,  0,  0,
-				      4., 6., 6., 10., 10., 4., 4., 4., 4., 4., 4.);      
+				      6., 6., 6., 10., 10., 6., 6., 6., 6., 6., 6.);      
 
       ret|=vorbis_encode_lowpass_init(vi,base_quality,0,
-				      12.1,14.9,16.9,17.9,19.9,
+				      15.1,15.9,16.9,17.9,19.9,
 				      999.,999.,999.,999.,999.,999.);
       ret|=vorbis_encode_lowpass_init(vi,base_quality,1,
 				      15.1,15.9,16.9,17.9,19.9,

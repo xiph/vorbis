@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.9.4.7 2001/12/04 11:16:19 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.9.4.8 2001/12/11 08:19:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,9 +20,15 @@
 #include "envelope.h"
 #include "codebook.h"
 
+#define BLOCKTYPE_IMPULSE    0
+#define BLOCKTYPE_PADDING    1
+#define BLOCKTYPE_TRANSITION 0 
+#define BLOCKTYPE_LONG       1
+
 typedef struct vorbis_block_internal{
   float  **pcmdelay;  /* this is a pointer into local storage */ 
   float  ampmax;
+  int    blocktype;
 
   ogg_uint32_t *packet_markers;
 } vorbis_block_internal;

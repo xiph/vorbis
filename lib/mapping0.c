@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.12 2001/12/07 08:38:26 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.13 2001/12/11 08:19:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -302,7 +302,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   float global_ampmax=vbi->ampmax;
   float *local_ampmax=alloca(sizeof(*local_ampmax)*vi->channels);
-  int blocktype;
+  int blocktype=vbi->blocktype;
 
   /* we differentiate between short and long block types to help the
      masking engine; the window shapes also matter.
@@ -315,15 +315,17 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
      long block (run of the mill long block)
   */
 
-  if(vb->W){
-    if(!vb->lW || !vb->nW)
-      blocktype=BLOCKTYPE_TRANSITION;
+  if(seq%10==0)fprintf(stderr,"%d",seq);
+  if(!vb->W){
+    if(blocktype==BLOCKTYPE_IMPULSE)
+      fprintf(stderr,"|");
     else
-      blocktype=BLOCKTYPE_LONG;
+      fprintf(stderr,".");
   }else{
-    /* right now we're missing the infrastructure to distingush the
-       two short types */
-    blocktype=BLOCKTYPE_IMPULSE;
+    if(blocktype==BLOCKTYPE_TRANSITION)
+      fprintf(stderr,"-");
+    else
+      fprintf(stderr,"_");
   }
 
   for(i=0;i<vi->channels;i++){
@@ -340,10 +342,14 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     float *logmax  =work;
     float *logmask =work+n/2;*/
 
+    _analysis_output("pcm",seq+i,pcm,n,0,0);
+
     /* window the PCM data */
     for(j=0;j<n;j++)
       fft[j]=pcm[j]*=window[j];
     
+    _analysis_output("windowed",seq+i,pcm,n,0,0);
+
     /* transform the PCM data */
     /* only MDCT right now.... */
     mdct_forward(b->transform[vb->W][0],pcm,pcm);
