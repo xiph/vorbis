@@ -14,7 +14,7 @@
   function: LPC low level routines
   author: Monty <monty@xiph.org>
   modifications by: Monty
-  last modification date: Oct 18 1999
+  last modification date: Nov 16 1999
 
  ********************************************************************/
 
@@ -50,6 +50,7 @@ Carsten Bormann
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "os.h"
 #include "smallft.h"
 #include "lpc.h"
 #include "xlogmap.h"
@@ -63,7 +64,8 @@ Carsten Bormann
 
 
 double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
-  double aut[m+1],error;
+  double *aut=alloca(sizeof(double)*(m+1));
+  double error;
   int i,j;
 
   /* autocorrelation, p+1 lag coefficients */
@@ -119,7 +121,7 @@ double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
 double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l){
   int n=l->ln;
   int m=l->m;
-  double work[n+n];
+  double *work=alloca(sizeof(double)*(n+n));
   double fscale=.5/n;
   int i,j;
   
@@ -254,7 +256,7 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
      slightly if mapped != n */
   
   int mapped=l->ln;
-  double work[mapped];
+  double *work=alloca(sizeof(double)*mapped);
   int i;
 
   /* fairly correct for low frequencies, naieve for high frequencies
@@ -295,11 +297,9 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
 
 /* One can do this the long way by generating the transfer function in
    the time domain and taking the forward FFT of the result.  The
-   results from direct calculation are cleaner and faster. If one
-   looks at the below in the context of the calling function, there's
-   lots of redundant trig, but at least it's clear */
+   results from direct calculation are cleaner and faster. 
 
-/* This version does a linear curve generation and then later
+   This version does a linear curve generation and then later
    interpolates the log curve from the linear curve.  This could stand
    optimization; it could both be more precise as well as not compute
    quite a few unused values */
@@ -333,7 +333,7 @@ void _vlpc_de_helper(double *curve,double *lpc,double amp,
 /* generate the whole freq response curve on an LPC IIR filter */
 
 void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
-  double lcurve[l->ln*2];
+  double *lcurve=alloca(sizeof(double)*(l->ln*2));
   int i;
 
   _vlpc_de_helper(lcurve,lpc,amp,l);
@@ -364,7 +364,7 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
 }
 
 void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
-  double lcurve[l->ln*2];
+  double *lcurve=alloca(sizeof(double)*((l->ln+l->n)*2));
   int i;
 
   if(amp==0){
@@ -383,7 +383,7 @@ void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
   }
 }
 
-/* subtract or add an lpc filter to data */
+/* subtract or add an lpc filter to data.  Vorbis doesn't actually use this. */
 
 void vorbis_lpc_residue(double *coeff,double *prime,int m,
 			double *data,long n){
@@ -394,7 +394,8 @@ void vorbis_lpc_residue(double *coeff,double *prime,int m,
     out: data[0...n-1] residuals from LPC prediction */
 
   long i,j;
-  double work[m+n],y;
+  double *work=alloca(sizeof(double)*(m+n));
+  double y;
 
   if(!prime)
     for(i=0;i<m;i++)
@@ -424,7 +425,7 @@ void vorbis_lpc_predict(double *coeff,double *prime,int m,
 
   long i,j,o,p;
   double y;
-  double work[n+m];
+  double *work=alloca(sizeof(double)*(m+n));
 
   if(!prime)
     for(i=0;i<m;i++)

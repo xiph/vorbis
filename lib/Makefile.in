@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.14 1999/11/02 23:27:32 xiphmont Exp $
+# $Id: Makefile.in,v 1.15 1999/11/17 03:52:56 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -16,7 +16,7 @@
 # (unless, of course, you know what you are doing :) ##########################
 
 @SET_MAKE@
-FLAGS=-I. @TYPESIZES@ @CFLAGS@
+FLAGS=-I. @TYPESIZES@ @CFLAGS@ 
 OPT=@OPT@ $(FLAGS)
 DEBUG=@DEBUG@ $(FLAGS)
 PROFILE=@PROFILE@ $(FLAGS)
@@ -28,15 +28,13 @@ RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
 HFILES =	mdct.h codec.h bitwise.h envelope.h lpc.h lsp.h \
-		psy.h smallft.h window.h xlogmap.h
-
+		psy.h smallft.h window.h xlogmap.h os.h
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
 		spectrum.o
-
 FFILES = 	vorbisfile.o
-
 EFILES =	encoder_example.o decoder_example.o chaining_example.o
+BINFILES =      encoder_example decoder_example chaining_example
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -50,8 +48,7 @@ analysis:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-target:	libvorbis.a vorbisfile.a \
-	encoder_example decoder_example chaining_example
+target:	libvorbis.a vorbisfile.a $(BINFILES)
 
 selftest:	
 	$(MAKE) clean
@@ -93,4 +90,8 @@ info.o:		modes.h
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	-rm -f *.o *.a test* *~ *.out ogg config.* dsptest
+	-rm -f *.o *.a test* *~ *.out ogg config.* $(BINFILES) tone 
+
+distclean:	clean
+	-rf -f Makefile
+

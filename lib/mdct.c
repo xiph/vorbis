@@ -41,6 +41,7 @@
 #include <string.h>
 #include <math.h>
 #include "mdct.h"
+#include "os.h"
 
 /* build lookups for trig functions; also pre-figure scaling and
    some window function algebra. */
@@ -97,9 +98,9 @@ void mdct_clear(mdct_lookup *l){
   }
 }
 
-static inline double *_mdct_kernel(double *x, double *w,
-				int n, int n2, int n4, int n8,
-				mdct_lookup *init){
+static double *_mdct_kernel(double *x, double *w,
+			    int n, int n2, int n4, int n8,
+			    mdct_lookup *init){
   int i;
   /* step 2 */
 
@@ -200,8 +201,8 @@ static inline double *_mdct_kernel(double *x, double *w,
 
 void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
   int n=init->n;
-  double x[n/2];
-  double w[n/2];
+  double *x=alloca(sizeof(double)*(n/2));
+  double *w=alloca(sizeof(double)*(n/2));
   double *xx;
   int n2=n>>1;
   int n4=n>>2;
@@ -269,8 +270,8 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
 
 void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
   int n=init->n;
-  double x[n/2];
-  double w[n/2];
+  double *x=alloca(sizeof(double)*(n/2));
+  double *w=alloca(sizeof(double)*(n/2));
   double *xx;
   int n2=n>>1;
   int n4=n>>2;

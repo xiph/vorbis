@@ -14,12 +14,14 @@
  function: simple example encoder
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 29 1999
+ last modification date: Nov 16 1999
 
  ********************************************************************/
 
 /* takes a stereo 16bit 44.1kHz WAV file from stdin and encodes it into
    a Vorbis bitstream */
+
+/* Note that this is POSIX, not ANSI, code */
 
 #include <stdio.h>
 #include <stdlib.h>

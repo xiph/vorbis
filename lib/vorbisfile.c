@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "os.h"
 #include "codec.h"
 #include "vorbisfile.h"
 

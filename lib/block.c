@@ -460,7 +460,7 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
      things crystallize */
   lpc_init(&v->vl[0],vi->blocksize[0]/2,vi->blocksize[0]/2,
 	   vi->floororder[0],vi->flooroctaves[0],0);
-  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/2,
+  lpc_init(&v->vl[1],vi->blocksize[1]/2,vi->blocksize[1]/4,
 	   vi->floororder[1],vi->flooroctaves[1],0);
   /*lpc_init(&v->vbal[0],vi->blocksize[0]/2,256,
 	   vi->balanceorder,vi->balanceoctaves,0);

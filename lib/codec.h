@@ -73,6 +73,7 @@ typedef struct lpclook{
   drft_lookup fft;
 
   /* en/decode lookups */
+  long *dscale;
   int *iscale;
   double *ifrac;
   double *norm;

@@ -14,14 +14,15 @@
  function: simple example decoder
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 29 1999
+ last modification date: Nov 16 1999
 
  ********************************************************************/
 
 /* Takes a vorbis bitstream from stdin and writes raw stereo PCM to
-   stdout.  Decodes simple and chained OggVorbis files from beginning to
-   end.
-*/
+   stdout.  Decodes simple and chained OggVorbis files from beginning
+   to end.  Vorbisfile.a is somewhat more complex than the code below.  */
+
+/* Note that this is POSIX, not ANSI code */
 
 #include <stdio.h>
 #include <math.h>
@@ -158,7 +159,7 @@ int main(){
 	fprintf(stderr,"%s\n",*ptr);
 	++ptr;
       }
-      fprintf(stderr,"\nBitstream is %d channel, %dHz\n",vi.channels,vi.rate);
+      fprintf(stderr,"\nBitstream is %d channel, %ldHz\n",vi.channels,vi.rate);
       fprintf(stderr,"Encoded by: %s\n\n",vi.vendor);
     }
     
@@ -214,7 +215,7 @@ int main(){
 		  int16_t *ptr=convbuffer+i;
 		  double  *mono=pcm[i];
 		  for(j=0;j<out;j++){
-		    int val=rint(mono[j]*32767.);
+		    int val=mono[j]*32767.;
 		    /* might as well guard against clipping */
 		    if(val>32767){
 		      val=32767;

@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "os.h"
 #include "codec.h"
 #include "mdct.h"
 #include "envelope.h"
@@ -55,11 +56,11 @@ void _ve_envelope_clear(envelope_lookup *e){
 static void _ve_deltas(double *deltas,double *pcm,int n,double *window,
 		       int winsize,mdct_lookup *m){
   int i,j;
-  double out[winsize/2];
+  double *out=alloca(sizeof(double)*winsize/2);
   
   for(j=0;j<n;j++){
     double acc=0.;
-
+    
     mdct_forward(m,pcm+j*winsize,out,window);
     for(i=winsize/10;i<winsize/2;i++)
       acc+=fabs(out[i]);
@@ -70,7 +71,7 @@ static void _ve_deltas(double *deltas,double *pcm,int n,double *window,
 void _ve_envelope_deltas(vorbis_dsp_state *v){
   vorbis_info *vi=v->vi;
   int step=vi->envelopesa;
-
+  
   int dtotal=v->pcm_current/vi->envelopesa;
   int dcurr=v->envelope_current;
   int pch;

@@ -14,7 +14,7 @@
   function: LSP (also called LSF) conversion routines
   author: Monty <monty@xiph.org>
   modifications by: Monty
-  last modification date: Aug 03 1999
+  last modification date: Nov 16 1999
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -27,12 +27,18 @@
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
+#include "os.h"
 
 void vorbis_lsp_to_lpc(double *lsp,double *lpc,int m){ 
   int i,j,m2=m/2;
-  double O[m2],E[m2];
-  double A,Ae[m2+1],Ao[m2+1];
-  double B,Be[m2],Bo[m2];
+  double *O=alloca(sizeof(double)*m2);
+  double *E=alloca(sizeof(double)*m2);
+  double A;
+  double *Ae=alloca(sizeof(double)*(m2+1));
+  double *Ao=alloca(sizeof(double)*(m2+1));
+  double B;
+  double *Be=alloca(sizeof(double)*(m2));
+  double *Bo=alloca(sizeof(double)*(m2));
   double temp;
 
   /* even/odd roots setup */
@@ -72,8 +78,8 @@ void vorbis_lsp_to_lpc(double *lsp,double *lpc,int m){
 }
 
 static void kw(double *r,int n) {
-  double s[n/2+1];
-  double c[n+1];
+  double *s=alloca(sizeof(double)*(n/2+1));
+  double *c=alloca(sizeof(double)*(n+1));
   int i, j, k;
   
   s[0] = 1.0;
@@ -132,8 +138,10 @@ static void cacm283(double *a,int ord,double *r){
 /* Convert lpc coefficients to lsp coefficients */
 void vorbis_lpc_to_lsp(double *lpc,double *lsp,int m){
   int order2=m/2;
-  double g1[order2+1], g2[order2+1];
-  double g1r[order2+1], g2r[order2+1];
+  double *g1=alloca(sizeof(double)*(order2+1));
+  double *g2=alloca(sizeof(double)*(order2+1));
+  double *g1r=alloca(sizeof(double)*(order2+1));
+  double *g2r=alloca(sizeof(double)*(order2+1));
   int i;
 
   /* Compute the lengths of the x polynomials. */

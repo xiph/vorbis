@@ -11,46 +11,28 @@
  *                                                                  *
  ********************************************************************
 
- function: window functions
- author: Monty <xiphmont@mit.edu>
- modifications by: Monty
- last modification date: Nov 16 1999
+  function: #ifdef jail to whip a few platforms into the UNIX ideal.
 
  ********************************************************************/
 
-#include <stdlib.h>
-#include <math.h>
-#include "os.h"
+#ifndef _V_IFDEFJAIL_H_
+#define _V_IFDEFJAIL_H_
 
-/* The 'vorbis window' is sin(sin(x)*sin(x)*2pi) */
+#ifndef M_PI
+#define M_PI (3.1415926539)
+#endif
 
-double *_vorbis_window(int window,int left,int right){
-  double *ret=calloc(window,sizeof(double));
-  int leftbegin=window/4-left/2;
-  int rightbegin=window-window/4-right/2;
-  int i;
-  
-  for(i=0;i<left;i++){
-    double x=(i+.5)/left*M_PI/2.;
-    x=sin(x);
-    x*=x;
-    x*=M_PI/2.;
-    x=sin(x);
-    ret[i+leftbegin]=x;
-  }
+#ifndef rint
+/* not strictly correct, but Vorbis doesn't care */
+#define rint(x)   (floor((x)+0.5)) 
+#endif
 
-  for(i=leftbegin+left;i<rightbegin;i++)
-    ret[i]=1.;
+#ifndef alloca
+#ifdef _WIN32
+#define alloca(x) (_alloca(x))
+#endif
+#endif
 
-  for(i=0;i<right;i++){
-    double x=(right-i-.5)/right*M_PI/2.;
-    x=sin(x);
-    x*=x;
-    x*=M_PI/2.;
-    x=sin(x);
-    ret[i+rightbegin]=x;
-  }
+#endif
 
-  return(ret);
-}
 

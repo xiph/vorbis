@@ -408,7 +408,7 @@ char *ogg_sync_buffer(ogg_sync_state *oy, long size){
   }
 
   /* expose a segment at least as large as requested at the fill mark */
-  return(oy->data+oy->fill);
+  return((char *)oy->data+oy->fill);
 }
 
 int ogg_sync_wrote(ogg_sync_state *oy, long bytes){

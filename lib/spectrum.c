@@ -14,12 +14,13 @@
  function: spectrum envelope and residue code/decode
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 17 1999
+ last modification date: Nov 16 1999
 
  ********************************************************************/
 
 #include <stdio.h>
 #include <math.h>
+#include "os.h"
 #include "codec.h"
 #include "bitwise.h"
 #include "spectrum.h"
@@ -27,7 +28,7 @@
 /* this code is still seriously abbreviated.  I'm filling in pieces as
    we go... --Monty 19991004 */
 
-/* unlike other LPC-based coders, we never apply the filter, only
+/* unlike other LPC-based coders, we never apply the filter but only
    inspect the frequency response, thus we don't need to guard against
    instability.  However, two coefficients quantising to the same
    value will cause the response to explode.  */
@@ -45,7 +46,7 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
   
   int bits=rint(log(n)/log(2));
   int i;
-  
+ 
   _oggpack_write(&vb->opb,amp*327680,18);
   
   for(i=0;i<m;i++){
@@ -53,7 +54,8 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
     _oggpack_write(&vb->opb,val,bits);
     lsp[i]=(last+=val)*M_PI/n;
 
-    /* Underpowered but sufficient */
+    /* Underpowered but sufficient for now. In the real spec (coming
+       soon), a distance of zero can't happen. */
     if(lsp[i]<dlast+min)lsp[i]=dlast+min;
     dlast=lsp[i];
   }
@@ -91,8 +93,8 @@ void _vs_residue_quantize(double *data,double *curve,
   int i;
 
   for(i=0;i<n;i++){
-
-    int val=rint(data[i]/curve[i]);
+    int val=0;
+    if(curve[i]!=0.)val=rint(data[i]/curve[i]);
     if(val>16)val=16;
     if(val<-16)val=-16;
 

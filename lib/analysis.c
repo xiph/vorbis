@@ -14,16 +14,17 @@
  function: single-block PCM analysis
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 21 1999
+ last modification date: Nov 16 1999
 
  ********************************************************************/
 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "os.h"
+#include "codec.h"
 #include "lpc.h"
 #include "lsp.h"
-#include "codec.h"
 #include "envelope.h"
 #include "mdct.h"
 #include "psy.h"
@@ -81,8 +82,8 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
     for(i=0;i<vi->channels;i++){
       static int frameno=0;
       int j;
-      double floor[n/2];
-      double curve[n/2];
+      double *floor=alloca(n/2*sizeof(double));
+      double *curve=alloca(n/2*sizeof(double));
       double *lpc=vb->lpc[i];
       double *lsp=vb->lsp[i];
 
