@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0 and 1 implementation
- last mod: $Id: res0.c,v 1.28 2001/06/04 05:50:10 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.29 2001/06/04 05:56:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,9 +45,6 @@ typedef struct {
   int         partvals;
   int       **decodemap;
 
-  long        phrase;
-  long        bits[32];
-  long        vals[32];
 } vorbis_look_residue0;
 
 vorbis_info_residue *res0_copy_info(vorbis_info_residue *vr){
@@ -70,17 +67,6 @@ void res0_free_look(vorbis_look_residue *i){
     vorbis_look_residue0 *look=(vorbis_look_residue0 *)i;
     long resbitsT=0;
     long resvalsT=0;
-
-    for(j=0;j<look->parts;j++)resbitsT+=look->bits[j];
-    for(j=0;j<look->parts;j++)resvalsT+=look->vals[j];
-    fprintf(stderr,
-	    "Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
-	    resvalsT,look->phrase,resbitsT);
-    for(j=1;j<look->parts;j++)
-      fprintf(stderr,"%ld(%ld):%ld  %g/sample\n",j,look->vals[j],look->bits[j],
-	      (float)look->bits[j]/look->vals[j]);
-    fprintf(stderr,"\n");
- 
 
     for(j=0;j<look->parts;j++)
       if(look->partbooks[j])_ogg_free(look->partbooks[j]);
