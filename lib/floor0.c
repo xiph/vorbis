@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.22 2000/08/23 06:38:49 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.23 2000/08/23 10:16:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -55,10 +55,8 @@ static long _f0_fit(codebook *book,
   int i,best=0;
   double *lsp=workfit+cursor;
 
-  /* gen a curve for fitting */
   if(cursor)base=workfit[cursor-1];
   norm=orig[cursor+dim-1]-base;
-
 
   for(i=0;i<dim;i++)
     lsp[i]=(orig[i+cursor]-base);
@@ -325,23 +323,6 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
-
-#ifdef ANALYSIS
-    if(vb->W==0){fprintf(stderr,"%d ",seq);} 
-    vorbis_lsp_to_lpc(out,work,look->m); 
-    _lsp_to_curve(work,work,amp,look,"Ffloor",seq);
-    for(j=0;j<look->n;j++)work[j]-=info->ampdB;
-    _analysis_output("rawfloor",seq,work,look->n,0,0);
-    {
-      double last=0;
-      for(j=0;j<look->m;j++){
-	work[j]=out[j]-last;
-	last=out[j];
-      }
-    }
-    _analysis_output("rawlsp",seq,work,look->m,0,0);
-	
-#endif
 
 #if 1
 #ifdef TRAIN_LSP

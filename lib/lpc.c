@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.24 2000/08/19 11:46:28 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.25 2000/08/23 10:16:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -165,3 +165,31 @@ void lpc_clear(lpc_lookup *l){
   }
 }
 
+void vorbis_lpc_predict(double *coeff,double *prime,int m,
+                     double *data,long n){
+
+  /* in: coeff[0...m-1] LPC coefficients 
+         prime[0...m-1] initial values (allocated size of n+m-1)
+    out: data[0...n-1] data samples */
+
+  long i,j,o,p;
+  double y;
+  double *work=alloca(sizeof(double)*(m+n));
+
+  if(!prime)
+    for(i=0;i<m;i++)
+      work[i]=0.;
+  else
+    for(i=0;i<m;i++)
+      work[i]=prime[i];
+
+  for(i=0;i<n;i++){
+    y=0;
+    o=i;
+    p=m;
+    for(j=0;j<m;j++)
+      y-=work[o++]*coeff[--p];
+    
+    data[i]=work[o]=y;
+  }
+}

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.35 2000/07/12 09:36:17 xiphmont Exp $
+ last mod: $Id: block.c,v 1.36 2000/08/23 10:16:56 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -353,27 +353,94 @@ double **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   return(v->pcmret);
 }
 
+static void _preinterpolate_helper(vorbis_dsp_state *v){
+  int i;
+  int order=32;
+  double *lpc=alloca(order*sizeof(double));
+  double *work=alloca(v->pcm_current*sizeof(double));
+  long j;
+  v->preinterp=1;
+
+  if(v->pcm_current-v->centerW>order*2){ /* safety */
+    for(i=0;i<v->vi->channels;i++){
+      
+      /* need to run the interpolation in reverse! */
+      for(j=0;j<v->pcm_current;j++)
+	work[j]=v->pcm[i][v->pcm_current-j-1];
+      
+      /* prime as above */
+      vorbis_lpc_from_data(work,lpc,v->pcm_current-v->centerW,order);
+      
+      /* run the predictor filter */
+      vorbis_lpc_predict(lpc,work+v->pcm_current-v->centerW-order,
+			 order,
+			 work+v->pcm_current-v->centerW,
+			 v->centerW);
+      for(j=0;j<v->pcm_current;j++)
+	v->pcm[i][v->pcm_current-j-1]=work[j];
+    }
+  }
+}
+
+
 /* call with val<=0 to set eof */
 
 int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
   vorbis_info *vi=v->vi;
   if(vals<=0){
+    int order=32;
+    int i;
+    double *lpc=alloca(order*sizeof(double));
+
+    /* if it wasn't done earlier (very short sample) */
+    if(!v->preinterp)
+      _preinterpolate_helper(v);
+
     /* We're encoding the end of the stream.  Just make sure we have
        [at least] a full block of zeroes at the end. */
+    /* actually, we don't want zeroes; that could drop a large
+       amplitude off a cliff, creating spread spectrum noise that will
+       suck to encode.  Extrapolate for the sake of cleanliness. */
 
-    int i;
     vorbis_analysis_buffer(v,v->vi->blocksizes[1]*2);
     v->eofflag=v->pcm_current;
     v->pcm_current+=v->vi->blocksizes[1]*2;
-    for(i=0;i<vi->channels;i++)
-      memset(v->pcm[i]+v->eofflag,0,
-	     (v->pcm_current-v->eofflag)*sizeof(double));
+
+    for(i=0;i<vi->channels;i++){
+      if(v->eofflag>order*2){
+	/* extrapolate with LPC to fill in */
+	long n;
+
+	/* make a predictor filter */
+	n=v->eofflag;
+	if(n>v->vi->blocksizes[1])n=v->vi->blocksizes[1];
+	vorbis_lpc_from_data(v->pcm[i]+v->eofflag-n,lpc,n,order);
+
+	/* run the predictor filter */
+	vorbis_lpc_predict(lpc,v->pcm[i]+v->eofflag-order,order,
+			   v->pcm[i]+v->eofflag,v->pcm_current-v->eofflag);
+      }else{
+	/* not enough data to interpolate (unlikely to happen due to
+           guarding the overlap, but bulletproof in case that
+           assumtion goes away). zeroes will do. */
+	memset(v->pcm[i]+v->eofflag,0,
+	       (v->pcm_current-v->eofflag)*sizeof(double));
+
+      }
+    }
   }else{
-    
+
     if(v->pcm_current+vals>v->pcm_storage)
       return(-1);
 
     v->pcm_current+=vals;
+
+    /* we may want to reverse interpolate the beginning of a stream
+       too... in case we're beginning on a cliff! */
+    /* clumsy, but simple.  It only runs once, so simple is good. */
+    if(!v->preinterp && v->pcm_current-v->centerW>v->vi->blocksizes[1])
+      _preinterpolate_helper(v);
+
   }
   return(0);
 }
@@ -384,6 +451,9 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   int i;
   vorbis_info *vi=v->vi;
   long beginW=v->centerW-vi->blocksizes[v->W]/2,centerNext;
+
+  /* check to see if we're started... */
+  if(!v->preinterp)return(0);
 
   /* check to see if we're done... */
   if(v->eofflag==-1)return(0);
