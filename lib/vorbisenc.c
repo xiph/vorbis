@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.47 2002/07/11 06:40:50 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.48 2003/12/30 11:02:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -832,18 +832,19 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   vi->bitrate_nominal=setting_to_approx_bitrate(vi);
   vi->bitrate_lower=hi->bitrate_min;
   vi->bitrate_upper=hi->bitrate_max;
-  vi->bitrate_window=hi->bitrate_limit_window;
+  vi->bitrate_window=(double)hi->bitrate_reservoir/vi->rate;
 
   if(hi->managed){
-    ci->bi.queue_avg_time=hi->bitrate_av_window;
-    ci->bi.queue_avg_center=hi->bitrate_av_window_center;
-    ci->bi.queue_minmax_time=hi->bitrate_limit_window;
-    ci->bi.queue_hardmin=hi->bitrate_min;
-    ci->bi.queue_hardmax=hi->bitrate_max;
-    ci->bi.queue_avgmin=hi->bitrate_av_lo;
-    ci->bi.queue_avgmax=hi->bitrate_av_hi;
-    ci->bi.avgfloat_downslew_max=-999999.f;
-    ci->bi.avgfloat_upslew_max=999999.f;
+    ci->bi.avg_rate=hi->bitrate_av;
+    ci->bi.min_rate=hi->bitrate_min;
+    ci->bi.max_rate=hi->bitrate_max;
+
+    ci->bi.reservoir_bits=hi->bitrate_reservoir;
+    ci->bi.reservoir_bias=
+      hi->bitrate_reservoir_bias;
+    
+    ci->bi.slew_damp=hi->bitrate_av_damp;
+
   }
 
   return(0);
@@ -966,15 +967,13 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
   }
 
   /* initialize management with sane defaults */
-      /* initialize management with sane defaults */
   hi->managed=1;
-  hi->bitrate_av_window=4.;
-  hi->bitrate_av_window_center=.5;
-  hi->bitrate_limit_window=2.;
   hi->bitrate_min=min_bitrate;
   hi->bitrate_max=max_bitrate;
-  hi->bitrate_av_lo=tnominal;
-  hi->bitrate_av_hi=tnominal;
+  hi->bitrate_av=tnominal;
+  hi->bitrate_av_damp=.75f; /* full range in no less than 3/4 second */
+  hi->bitrate_reservoir=tnominal;
+  hi->bitrate_reservoir_bias=.2; /* bias toward hoarding bits */
 
   return(ret);
 
@@ -1010,8 +1009,10 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
     int setp=(number&0xf); /* a read request has a low nibble of 0 */
 
     if(setp && hi->set_in_stone)return(OV_EINVAL);
-
+    
     switch(number){
+      
+    /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_GET:
       {
 	
@@ -1019,17 +1020,18 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
 	  (struct ovectl_ratemanage_arg *)arg;
 	
 	ai->management_active=hi->managed;
-	ai->bitrate_av_window=hi->bitrate_av_window;
-	ai->bitrate_av_window_center=hi->bitrate_av_window_center;
-	ai->bitrate_hard_window=hi->bitrate_limit_window;
+	ai->bitrate_hard_window=ai->bitrate_av_window=
+	  (double)hi->bitrate_reservoir/vi->rate;
+	ai->bitrate_av_window_center=1.;
 	ai->bitrate_hard_min=hi->bitrate_min;
 	ai->bitrate_hard_max=hi->bitrate_max;
-	ai->bitrate_av_lo=hi->bitrate_av_lo;
-	ai->bitrate_av_hi=hi->bitrate_av_hi;
+	ai->bitrate_av_lo=hi->bitrate_av;
+	ai->bitrate_av_hi=hi->bitrate_av;
 	
       }
       return(0);
     
+    /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_SET:
       {
 	struct ovectl_ratemanage_arg *ai=
@@ -1044,33 +1046,19 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
       }
       return 0;
 
+    /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_AVG:
       {
 	struct ovectl_ratemanage_arg *ai=
 	  (struct ovectl_ratemanage_arg *)arg;
 	if(ai==NULL){
-	  hi->bitrate_av_lo=0;
-	  hi->bitrate_av_hi=0;
-	  hi->bitrate_av_window=0;
+	  hi->bitrate_av=0;
 	}else{
-	  hi->bitrate_av_window=ai->bitrate_av_window;
-	  hi->bitrate_av_window_center=ai->bitrate_av_window_center;
-	  hi->bitrate_av_lo=ai->bitrate_av_lo;
-	  hi->bitrate_av_hi=ai->bitrate_av_hi;
+	  hi->bitrate_av=(ai->bitrate_av_lo+ai->bitrate_av_hi)*.5;
 	}
-
-	if(hi->bitrate_av_window<.25)hi->bitrate_av_window=.25;
-	if(hi->bitrate_av_window>10.)hi->bitrate_av_window=10.;
-	if(hi->bitrate_av_window_center<0.)hi->bitrate_av_window=0.;
-	if(hi->bitrate_av_window_center>1.)hi->bitrate_av_window=1.;
-	
-	if( ( (hi->bitrate_av_lo<=0 && hi->bitrate_av_hi<=0)||
-	      (hi->bitrate_av_window<=0) ) &&
-	    ( (hi->bitrate_min<=0 && hi->bitrate_max<=0)||
-	      (hi->bitrate_limit_window<=0) ))
-	  hi->managed=0;
       }
       return(0);
+    /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_HARD:
       {
 	struct ovectl_ratemanage_arg *ai=
@@ -1078,23 +1066,79 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
 	if(ai==NULL){
 	  hi->bitrate_min=0;
 	  hi->bitrate_max=0;
-	  hi->bitrate_limit_window=0;
 	}else{
-	  hi->bitrate_limit_window=ai->bitrate_hard_window;
 	  hi->bitrate_min=ai->bitrate_hard_min;
 	  hi->bitrate_max=ai->bitrate_hard_max;
+	  hi->bitrate_reservoir=ai->bitrate_hard_window*
+	    (hi->bitrate_max+hi->bitrate_min)*.5;
 	}
-	if(hi->bitrate_limit_window<0.)hi->bitrate_limit_window=0.;
-	if(hi->bitrate_limit_window>10.)hi->bitrate_limit_window=10.;
-	
-	if( ( (hi->bitrate_av_lo<=0 && hi->bitrate_av_hi<=0)||
-	      (hi->bitrate_av_window<=0) ) &&
-	    ( (hi->bitrate_min<=0 && hi->bitrate_max<=0)||
-	      (hi->bitrate_limit_window<=0) ))
-	  hi->managed=0;
-      }
+	if(hi->bitrate_reservoir<128.)
+	  hi->bitrate_reservoir=128.;
+      }   
       return(0);
 
+      /* replacement ratemanage interface */
+    case OV_ECTL_RATEMANAGE2_GET:
+      {
+	struct ovectl_ratemanage2_arg *ai=
+	  (struct ovectl_ratemanage2_arg *)arg;
+	if(ai==NULL)return OV_EINVAL;
+	
+	ai->management_active=hi->managed;
+	ai->bitrate_limit_min_kbps=hi->bitrate_min;
+	ai->bitrate_limit_max_kbps=hi->bitrate_max;
+	ai->bitrate_average_kbps=hi->bitrate_av;
+	ai->bitrate_average_damping=hi->bitrate_av_damp;
+	ai->bitrate_limit_reservoir_bits=hi->bitrate_reservoir;
+	ai->bitrate_limit_reservoir_bias=hi->bitrate_reservoir_bias;
+      }
+      return (0);
+    case OV_ECTL_RATEMANAGE2_SET:
+      {
+	struct ovectl_ratemanage2_arg *ai=
+	  (struct ovectl_ratemanage2_arg *)arg;
+	if(ai==NULL){
+	  hi->managed=0;
+	}else{
+	  /* sanity check; only catch invariant violations */
+	  if(ai->bitrate_limit_min_kbps>0 &&
+	     ai->bitrate_average_kbps>0 &&
+	     ai->bitrate_limit_min_kbps>ai->bitrate_average_kbps)
+	    return OV_EINVAL;
+
+	  if(ai->bitrate_limit_max_kbps>0 &&
+	     ai->bitrate_average_kbps>0 &&
+	     ai->bitrate_limit_max_kbps<ai->bitrate_average_kbps)
+	    return OV_EINVAL;
+
+	  if(ai->bitrate_limit_min_kbps>0 &&
+	     ai->bitrate_limit_max_kbps>0 &&
+	     ai->bitrate_limit_min_kbps>ai->bitrate_limit_max_kbps)
+	    return OV_EINVAL;
+
+	  if(ai->bitrate_average_damping <= 0.)
+	    return OV_EINVAL;
+
+	  if(ai->bitrate_limit_reservoir_bits < 0)
+	    return OV_EINVAL;
+
+	  if(ai->bitrate_limit_reservoir_bias < 0.)
+	    return OV_EINVAL;
+
+	  if(ai->bitrate_limit_reservoir_bias > 1.)
+	    return OV_EINVAL;
+
+	  hi->managed=ai->management_active;
+	  hi->bitrate_min=ai->bitrate_limit_min_kbps;
+	  hi->bitrate_max=ai->bitrate_limit_max_kbps;
+	  hi->bitrate_av=ai->bitrate_average_kbps;
+	  hi->bitrate_av_damp=ai->bitrate_average_damping;
+	  hi->bitrate_reservoir=ai->bitrate_limit_reservoir_bits;
+	  hi->bitrate_reservoir_bias=ai->bitrate_limit_reservoir_bias;
+	}
+      }
+      return 0;
+      
     case OV_ECTL_LOWPASS_GET:
       {
 	double *farg=(double *)arg;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: vorbis encode-engine setup
- last mod: $Id: vorbisenc.h,v 1.10 2002/07/01 11:20:10 xiphmont Exp $
+ last mod: $Id: vorbisenc.h,v 1.11 2003/12/30 11:02:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,17 +59,11 @@ extern int vorbis_encode_setup_init(vorbis_info *vi);
 
 extern int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg);
 
+  /* deprecated rate management supported only for compatability */
 #define OV_ECTL_RATEMANAGE_GET       0x10
-
 #define OV_ECTL_RATEMANAGE_SET       0x11
 #define OV_ECTL_RATEMANAGE_AVG       0x12
 #define OV_ECTL_RATEMANAGE_HARD      0x13
-
-#define OV_ECTL_LOWPASS_GET          0x20
-#define OV_ECTL_LOWPASS_SET          0x21
-
-#define OV_ECTL_IBLOCK_GET           0x30
-#define OV_ECTL_IBLOCK_SET           0x31
 
 struct ovectl_ratemanage_arg {
   int    management_active;
@@ -83,6 +77,31 @@ struct ovectl_ratemanage_arg {
   double bitrate_av_window;
   double bitrate_av_window_center;
 };
+
+
+  /* new rate setup */
+#define OV_ECTL_RATEMANAGE2_GET      0x14
+#define OV_ECTL_RATEMANAGE2_SET      0x15
+
+struct ovectl_ratemanage2_arg {
+  int    management_active;
+
+  long   bitrate_limit_min_kbps;
+  long   bitrate_limit_max_kbps;
+  long   bitrate_limit_reservoir_bits;
+  double bitrate_limit_reservoir_bias;
+
+  long   bitrate_average_kbps;
+  double bitrate_average_damping;
+};
+
+
+
+#define OV_ECTL_LOWPASS_GET          0x20
+#define OV_ECTL_LOWPASS_SET          0x21
+
+#define OV_ECTL_IBLOCK_GET           0x30
+#define OV_ECTL_IBLOCK_SET           0x31
 
 #ifdef __cplusplus
 }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.h,v 1.7 2002/07/11 06:40:48 xiphmont Exp $
+ last mod: $Id: bitrate.h,v 1.8 2003/12/30 11:02:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,54 +24,29 @@
 
 /* encode side bitrate tracking */
 typedef struct bitrate_manager_state {
-  ogg_uint32_t  *queue_binned;
-  ogg_uint32_t  *queue_actual;
-  int            queue_size;
+  int            managed;
 
-  int            queue_head;
-  int            queue_bins;
+  long           avg_reservoir;
+  long           minmax_reservoir;
+  long           avg_bitsper;
+  long           min_bitsper;
+  long           max_bitsper;
 
-  long          *avg_binacc;
-  int            avg_center;
-  int            avg_tail;
-  ogg_uint32_t   avg_centeracc;
-  ogg_uint32_t   avg_sampleacc;
-  ogg_uint32_t   avg_sampledesired;
-  ogg_uint32_t   avg_centerdesired;
-
-  long          *minmax_binstack;
-  long          *minmax_posstack;
-  long          *minmax_limitstack;
-  long           minmax_stackptr;
-
-  long           minmax_acctotal;
-  int            minmax_tail;
-  ogg_uint32_t   minmax_sampleacc;
-  ogg_uint32_t   minmax_sampledesired;
-
-  int            next_to_flush;
-  int            last_to_flush;
-  
+  long           short_per_long;
   double         avgfloat;
 
-  /* unfortunately, we need to hold queued packet data somewhere */
-  oggpack_buffer *packetbuffers;
-  ogg_packet     *packets;
-
+  vorbis_block  *vb;
+  int            choice;
 } bitrate_manager_state;
 
 typedef struct bitrate_manager_info{
-  /* detailed bitrate management setup */
-  double queue_avg_time;
-  double queue_avg_center;
-  double queue_minmax_time;
-  double queue_hardmin;
-  double queue_hardmax;
-  double queue_avgmin;
-  double queue_avgmax;
+  long           avg_rate;
+  long           min_rate;
+  long           max_rate;
+  long           reservoir_bits;
+  double         reservoir_bias;
 
-  double avgfloat_downslew_max;
-  double avgfloat_upslew_max;
+  double         slew_damp;
 
 } bitrate_manager_info;
 

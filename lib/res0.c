@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.49 2003/01/18 08:28:37 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.50 2003/12/30 11:02:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -487,7 +487,8 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
   return(partword);
 }
 
-static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
+static int _01forward(oggpack_buffer *opb,
+		      vorbis_block *vb,vorbis_look_residue *vl,
 		      float **in,int ch,
 		      long **partword,
 		      int (*encode)(oggpack_buffer *,float *,int,
@@ -540,7 +541,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 
 	  /* training hack */
 	  if(val<look->phrasebook->entries)
-	    look->phrasebits+=vorbis_book_encode(look->phrasebook,val,&vb->opb);
+	    look->phrasebits+=vorbis_book_encode(look->phrasebook,val,opb);
 #if 0 /*def TRAIN_RES*/
 	  else
 	    fprintf(stderr,"!");
@@ -575,7 +576,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	      }
 #endif
 	      
-	      ret=encode(&vb->opb,in[j]+offset,samples_per_partition,
+	      ret=encode(opb,in[j]+offset,samples_per_partition,
 			 statebook,accumulator);
 
 	      look->postbits+=ret;
@@ -719,7 +720,7 @@ int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
     return(0);
 }
 
-int res1_forward(vorbis_block *vb,vorbis_look_residue *vl,
+int res1_forward(oggpack_buffer *opb,vorbis_block *vb,vorbis_look_residue *vl,
 		 float **in,float **out,int *nonzero,int ch,
 		 long **partword){
   int i,j,used=0,n=vb->pcmend/2;
@@ -732,7 +733,7 @@ int res1_forward(vorbis_block *vb,vorbis_look_residue *vl,
     }
 
   if(used){
-    int ret=_01forward(vb,vl,in,used,partword,_encodepart);
+    int ret=_01forward(opb,vb,vl,in,used,partword,_encodepart);
     if(out){
       used=0;
       for(i=0;i<ch;i++)
@@ -786,7 +787,8 @@ long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
 /* res2 is slightly more different; all the channels are interleaved
    into a single vector and encoded. */
 
-int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
+int res2_forward(oggpack_buffer *opb,
+		 vorbis_block *vb,vorbis_look_residue *vl,
 		 float **in,float **out,int *nonzero,int ch,
 		 long **partword){
   long i,j,k,n=vb->pcmend/2,used=0;
@@ -803,7 +805,7 @@ int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
   }
   
   if(used){
-    int ret=_01forward(vb,vl,&work,1,partword,_encodepart);
+    int ret=_01forward(opb,vb,vl,&work,1,partword,_encodepart);
     /* update the sofar vector */
     if(out){
       for(i=0;i<ch;i++){

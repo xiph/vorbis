@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.14 2002/07/11 06:40:48 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.15 2003/12/30 11:02:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -94,7 +94,8 @@ typedef struct{
   void (*free_look)    (vorbis_look_residue *);
   long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);
-  int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
+  int  (*forward)      (oggpack_buffer *,struct vorbis_block *,
+			vorbis_look_residue *,
 			float **,float **,int *,int,long **);
   int  (*inverse)      (struct vorbis_block *,vorbis_look_residue *,
 			float **,int *,int);

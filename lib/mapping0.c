@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.60 2003/09/01 23:05:49 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.61 2003/12/30 11:02:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -235,7 +235,8 @@ extern int *floor1_fit(vorbis_block *vb,vorbis_look_floor *look,
 extern int *floor1_interpolate_fit(vorbis_block *vb,vorbis_look_floor *look,
 				   int *A,int *B,
 				   int del);
-extern int floor1_encode(vorbis_block *vb,vorbis_look_floor *look,
+extern int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
+			 vorbis_look_floor *look,
 			 int *post,int *ilogmask);
 
 
@@ -536,16 +537,17 @@ static int mapping0_forward(vorbis_block *vb){
     for(k=(vorbis_bitrate_managed(vb)?0:PACKETBLOBS/2);
 	k<=(vorbis_bitrate_managed(vb)?PACKETBLOBS-1:PACKETBLOBS/2);
 	k++){
+      oggpack_buffer *opb=vbi->packetblob[k];
 
       /* start out our new packet blob with packet type and mode */
       /* Encode the packet type */
-      oggpack_write(&vb->opb,0,1);
+      oggpack_write(opb,0,1);
       /* Encode the modenumber */
       /* Encode frame mode, pre,post windowsize, then dispatch */
-      oggpack_write(&vb->opb,modenumber,b->modebits);
+      oggpack_write(opb,modenumber,b->modebits);
       if(vb->W){
-	oggpack_write(&vb->opb,vb->lW,1);
-	oggpack_write(&vb->opb,vb->nW,1);
+	oggpack_write(opb,vb->lW,1);
+	oggpack_write(opb,vb->nW,1);
       }
 
       /* encode floor, compute masking curve, sep out residue */
@@ -556,7 +558,7 @@ static int mapping0_forward(vorbis_block *vb){
 	int   *ilogmask=ilogmaskch[i]=
 	  _vorbis_block_alloc(vb,n/2*sizeof(**gmdct));
       
-	nonzero[i]=floor1_encode(vb,b->flr[info->floorsubmap[submap]],
+	nonzero[i]=floor1_encode(opb,vb,b->flr[info->floorsubmap[submap]],
 				 floor_posts[i][k],
 				 ilogmask);
 #if 0
@@ -629,14 +631,11 @@ static int mapping0_forward(vorbis_block *vb){
 	  class(vb,b->residue[resnum],couple_bundle,zerobundle,ch_in_bundle);
 	
 	_residue_P[ci->residue_type[resnum]]->
-	  forward(vb,b->residue[resnum],
+	  forward(opb,vb,b->residue[resnum],
 		  couple_bundle,NULL,zerobundle,ch_in_bundle,classifications);
       }
       
-      /* ok, done encoding.  Mark this protopacket and prepare next. */
-      oggpack_writealign(&vb->opb);
-      vbi->packetblob_markers[k]=oggpack_bytes(&vb->opb);
-      
+      /* ok, done encoding.  Next protopacket. */
     }
     
   }

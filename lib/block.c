@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.75 2003/09/02 04:39:26 xiphmont Exp $
+ last mod: $Id: block.c,v 1.76 2003/12/30 11:02:22 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -86,6 +86,7 @@ static int ilog2(unsigned int v){
 #endif
 
 int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
+  int i;
   memset(vb,0,sizeof(*vb));
   vb->vd=v;
   vb->localalloc=0;
@@ -93,8 +94,17 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   if(v->analysisp){
     vorbis_block_internal *vbi=
       vb->internal=_ogg_calloc(1,sizeof(vorbis_block_internal));
-    oggpack_writeinit(&vb->opb);
     vbi->ampmax=-9999;
+
+    for(i=0;i<PACKETBLOBS;i++){
+      if(i==PACKETBLOBS/2){
+	vbi->packetblob[i]=&vb->opb;
+      }else{
+	vbi->packetblob[i]=
+	  _ogg_calloc(1,sizeof(oggpack_buffer));
+      }
+      oggpack_writeinit(vbi->packetblob[i]);
+    }    
   }
   
   return(0);
@@ -147,15 +157,19 @@ void _vorbis_block_ripcord(vorbis_block *vb){
 }
 
 int vorbis_block_clear(vorbis_block *vb){
-  if(vb->vd)
-    if(vb->vd->analysisp)
-      oggpack_writeclear(&vb->opb);
+  int i;
+  vorbis_block_internal *vbi=vb->internal;
+
   _vorbis_block_ripcord(vb);
   if(vb->localstore)_ogg_free(vb->localstore);
 
-  if(vb->internal)
-    _ogg_free(vb->internal);
-
+  if(vbi){
+    for(i=0;i<PACKETBLOBS;i++){
+      oggpack_writeclear(vbi->packetblob[i]);
+      if(i!=PACKETBLOBS/2)_ogg_free(vbi->packetblob[i]);
+    }
+    _ogg_free(vbi);
+  }
   memset(vb,0,sizeof(*vb));
   return(0);
 }
