@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.50 2002/01/22 08:06:06 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.51 2002/02/26 05:21:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -181,7 +181,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
   for(j=0;j<look->n;j++){
     int val=floor( toBARK((info->rate/2.f)/look->n*j) 
 		   *scale); /* bark numbers represent band edges */
-    if(val>=look->ln)val=look->ln; /* guard against the approximation */
+    if(val>=look->ln)val=look->ln-1; /* guard against the approximation */
     look->linearmap[j]=val;
   }
   look->linearmap[j]=-1;
