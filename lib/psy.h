@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.27.2.1 2001/12/27 08:09:33 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.27.2.2 2002/01/01 02:27:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -92,7 +92,7 @@ typedef struct{
   float     preecho_minenergy;
 
   float     ampmax_att_per_sec;
-
+  
   /* delay caching... how many samples to keep around prior to our
      current block to aid in analysis? */
   int       delaycache;
@@ -155,9 +155,11 @@ extern void _vp_quantize_couple(vorbis_look_psy *p,
 			 int   passno);
 
 extern float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd);
+
 extern void psy_normalize_noise(vorbis_block *vb,float *pcm,int n);
 
 #endif
+
 
 
 

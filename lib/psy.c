@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.64.2.1 2001/12/27 08:09:33 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.64.2.2 2002/01/01 02:27:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -942,7 +942,7 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 			 int   passno){
 
   int i,j,k,n=p->n;
-  vorbis_info_psy *info=p->vi;
+  vorbis_info_psy        *info=p->vi;
 
   /* perform any requested channel coupling */
   for(i=0;i<vi->coupling_steps;i++){
@@ -1013,45 +1013,42 @@ static int apsort(const void *a, const void *b){
 }
 
 void psy_normalize_noise(vorbis_block *vb,float *pcm,int n){
-  /* sort in ascending order */
-  int i;
-  float **index=alloca(n*sizeof(*index));
-  float acc=0,qacc=0;
-  
-  for(i=0;i<n;i++)index[i]=pcm+i;
-  qsort(index,n,sizeof(*index),apsort);
+  vorbis_dsp_state       *vd=vb->vd;
+  vorbis_info            *vi=vd->vi;
+  codec_setup_info       *ci=vi->codec_setup;
+  highlevel_encode_setup *hi=&ci->hi;
 
-  for(i=0;i<n;i++)acc+=fabs(pcm[i]);
-  for(i=0;i<n;i++){
-    float qval=rint(*index[i]);
-
-    if(qval!=0.f){
-      qacc+=fabs(qval);
-    }else{
-      if(fabs(*index[i])<.1f)break;
-      if(*index[i]<0){
-	qacc+=1.f;
-	*index[i]= -1.;
+  if(hi->normalize_noise_p){
+    /* sort in decending order */
+    int i;
+    float **index=alloca(n*sizeof(*index));
+    float acc=0,qacc=0;
+    
+    for(i=0;i<n;i++)index[i]=pcm+i;
+    qsort(index,n,sizeof(*index),apsort);
+    
+    for(i=0;i<n;i++)acc+=fabs(pcm[i]);
+    for(i=0;i<n;i++){
+      float qval=rint(*index[i]);
+      
+      if(qval!=0.f){
+	qacc+=fabs(qval);
       }else{
-	qacc+=1.f;
-	*index[i]=1.;
+	if(fabs(*index[i])<hi->normalize_noise_minimum_upgrade)break;
+	if(*index[i]<0){
+	  qacc+=hi->normalize_noise_unit_weight;
+	  *index[i]= -1.;
+	}else{
+	  qacc+=hi->normalize_noise_unit_weight;
+	  *index[i]=  1.;
+	}
+	if(qacc>acc)break;
       }
-      if(qacc>acc)break;
+      
     }
-
+    for(;i<n;i++){
+      *index[i]=0.;
+    }
   }
-  for(;i<n;i++){
-    *index[i]=0.;
-  }
-
 }
-
-
-
-
-
-
-
-
-
 
