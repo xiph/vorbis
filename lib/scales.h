@@ -11,11 +11,11 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.17 2001/12/20 01:00:29 segher Exp $
+ last mod: $Id: scales.h,v 1.18 2001/12/22 05:17:11 segher Exp $
 
  ********************************************************************/
 
-#ifndef _V_SCALE_H_
+#ifndef _V_SCALES_H_
 #define _V_SCALES_H_
 
 #include <math.h>
