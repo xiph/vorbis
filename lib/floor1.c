@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.1.2.5 2001/05/11 22:07:49 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.1.2.6 2001/05/13 22:40:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -516,20 +516,22 @@ static int accumulate_fit(const float *flr,const float *mdct,
 
   for(i=x0;i<x1;i++){
     int quantized=vorbis_floor1_dBquant(flr+i);
-    if(mdct[i]+info->twofitatten>=flr[i]){
-      xa  += i;
-      ya  += quantized;
-      x2a += i*i;
-      y2a += quantized*quantized;
-      xya += i*quantized;
-      na++;
-    }else{
-      xb  += i;
-      yb  += quantized;
-      x2b += i*i;
-      y2b += quantized*quantized;
-      xyb += i*quantized;
-      nb++;
+    if(quantized){
+      if(mdct[i]+info->twofitatten>=flr[i]){
+	xa  += i;
+	ya  += quantized;
+	x2a += i*i;
+	y2a += quantized*quantized;
+	xya += i*quantized;
+	na++;
+      }else{
+	xb  += i;
+	yb  += quantized;
+	x2b += i*i;
+	y2b += quantized*quantized;
+	xyb += i*quantized;
+	nb++;
+      }
     }
   }
 
@@ -640,7 +642,7 @@ static void fit_line_point(lsfit_acc *a,int fits,int *y0,int *y1){
   *y0=*y1=y;
 }
 
-static int inspect_error(int x0,int x1,int y0,int y1,const float *flr,
+static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
 			 const float *mdct,
 			 vorbis_info_floor1 *info){
   int dy=y1-y0;
@@ -651,13 +653,13 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *flr,
   int x=x0;
   int y=y0;
   int err=0;
-  int val=vorbis_floor1_dBquant(flr+x);
+  int val=vorbis_floor1_dBquant(mask+x);
   int mse=0;
   int n=0;
 
   ady-=abs(base*adx);
   
-  if(mdct[x]+info->twofitatten>=flr[x]){
+  if(mdct[x]+info->twofitatten>=mask[x]){
     if(y+info->maxover<val)return(1);
     if(y-info->maxunder>val)return(1);
     mse=(y-val);
@@ -674,8 +676,8 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *flr,
       y+=base;
     }
 
-    if(mdct[x]+info->twofitatten>=flr[x]){
-      val=vorbis_floor1_dBquant(flr+x);
+    if(mdct[x]+info->twofitatten>=mask[x]){
+      val=vorbis_floor1_dBquant(mask+x);
       if(val){
 	if(y+info->maxover<val)return(1);
 	if(y-info->maxunder>val)return(1);
@@ -685,9 +687,11 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *flr,
     }
   }
   
-  if(info->maxover*info->maxover/n>info->maxerr)return(0);
-  if(info->maxunder*info->maxunder/n>info->maxerr)return(0);
-  if(mse/n>info->maxerr)return(1);
+  if(n){
+    if(info->maxover*info->maxover/n>info->maxerr)return(0);
+    if(info->maxunder*info->maxunder/n>info->maxerr)return(0);
+    if(mse/n>info->maxerr)return(1);
+  }
   return(0);
 }
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_A.h,v 1.14.4.3 2001/05/11 22:07:53 xiphmont Exp $
+ last mod: $Id: mode_A.h,v 1.14.4.4 2001/05/13 22:40:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -259,7 +259,7 @@ static vorbis_info_floor1 _floor_set0A={4,
 					{3,3,3},
 					{1,2,2},
 					{0,1,2},
-					{{7,8},{-1,9,10,11},{-1,12,13,14}},
+					{{3,4},{-1,5,6,7},{-1,8,9,10}},
 
 					4,
 					{0,128,
@@ -270,30 +270,36 @@ static vorbis_info_floor1 _floor_set0A={4,
 					 45,30,73},
 					
 					60,30,600,
-					999,999,0,0.,
+					999,999,0,18.,
 					8,96};
 
 static vorbis_info_floor1 _floor_set1A={10,
-					{0,1,2,2,2,2,3,3,3,3},
+					{0,1,2,2,2,2,2, 3,3,3},
 					
 					{3,4,3,3},
 					{1,1,2,2},
-					{3,4,5,6},
-					{{15,16},{17,18},
-					 {-1,19,20,21},{-1,22,23,24}},
+					{11,12,13,14},
+					{{15,16},
+					 {17,18},
+					 {-1,19,20,21},
+					 {-1,22,23,24},
+					},
 
 					4,
 					{0,1024,
-					 88,31,243,
-					 14,54,143,460,
 
+					 88,31,243,
+
+					 14,54,143,460,
+					 
 					 6,3,10, 22,18,26, 41,36,47, 
 					 69,61,78, 112,99,126, 185,162,211,  
-					 329,282,387, 672,553,825},
+					 329,282,387, 672,553,825
+					 },
 					
 					60,30,600,
 					20,8,1,18.,
-					40,768};
+					20,768};
 
 static vorbis_info_residue0 _residue_set0A={0,96,16,6,25,
 					    {0,1,1,1,1,1},
@@ -341,27 +347,28 @@ codec_setup_info info_A={
   {&_huff_book_line0_class0, /* 0 */
    &_huff_book_line0_class1,
    &_huff_book_line0_class2, /* 2 */
-   &_huff_book_line1_class0,
-   &_huff_book_line1_class1, /* 4 */
-   &_huff_book_line1_class2,
-   &_huff_book_line1_class3, /* 6 */
    
-   &_huff_book_line0_0sub0,
+   &_huff_book_line0_0sub0,  /* 3 */
    &_huff_book_line0_0sub1,
-   &_huff_book_line0_1sub1,
+   &_huff_book_line0_1sub1,  /* 5 */
    &_huff_book_line0_1sub2,
-   &_huff_book_line0_1sub3,
+   &_huff_book_line0_1sub3,  /* 7 */
    &_huff_book_line0_2sub1,
-   &_huff_book_line0_2sub2,
-   &_huff_book_line0_2sub3, /* 14 */
+   &_huff_book_line0_2sub2,  /* 9 */
+   &_huff_book_line0_2sub3, 
+
+   &_huff_book_line1_class0,
+   &_huff_book_line1_class1, /* 12 */
+   &_huff_book_line1_class2,
+   &_huff_book_line1_class3, /* 14 */
 
    &_huff_book_line1_0sub0,
-   &_huff_book_line1_0sub1,
-   &_huff_book_line1_1sub0,
+   &_huff_book_line1_0sub1, /* 16 */
+   &_huff_book_line1_1sub0, 
    &_huff_book_line1_1sub1,
-   &_huff_book_line1_2sub1,
-   &_huff_book_line1_2sub2,
-   &_huff_book_line1_2sub3,
+   &_huff_book_line1_2sub1,  
+   &_huff_book_line1_2sub2, /* 20 */
+   &_huff_book_line1_2sub3, 
    &_huff_book_line1_3sub1,
    &_huff_book_line1_3sub2,
    &_huff_book_line1_3sub3, /* 24 */

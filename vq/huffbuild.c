@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.8.4.1 2001/05/11 22:07:54 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.8.4.2 2001/05/13 22:40:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -106,7 +106,11 @@ int main(int argc, char *argv[]){
   file=fopen(infile,"r");
   if(!file){
     fprintf(stderr,"Could not open file %s\n",infile);
-    exit(1);
+    if(!maxval)
+      exit(1);
+    else
+      fprintf(stderr,"  making untrained books.\n");
+
   }
 
   if(!maxval){
@@ -129,15 +133,17 @@ int main(int argc, char *argv[]){
     
     for(j=loval;j<vals;j++)hist[j]=guard;
     
-    reset_next_value();
-    i/=subn;
-    while(!feof(file)){
-      long val=getval(file,begin,n,subn,maxval);
-      if(val==-1 || val>=maxval)break;
-      hist[val]++;
-      if(!(i--&0xff))spinnit("loading... ",i*subn);
+    if(file){
+      reset_next_value();
+      i/=subn;
+      while(!feof(file)){
+	long val=getval(file,begin,n,subn,maxval);
+	if(val==-1 || val>=maxval)break;
+	hist[val]++;
+	if(!(i--&0xff))spinnit("loading... ",i*subn);
+      }
+      fclose(file);
     }
-    fclose(file);
  
     /* we have the probabilities, build the tree */
     fprintf(stderr,"Building tree for %ld entries\n",vals);

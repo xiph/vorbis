@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.27.4.4 2001/05/11 22:07:50 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.27.4.5 2001/05/13 22:40:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -279,7 +279,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      res,
 	      codedflr);
 
-    _analysis_output("codedflr",seq,codedflr,n/2,0,0);
+    _analysis_output("codedflr",seq,codedflr,n/2,0,1);
     _analysis_output("res",seq++,res,n/2,0,0);
       
 #ifdef TRAIN_RES
