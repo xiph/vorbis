@@ -5,6 +5,14 @@ libvorbis (1.0beta4-1) unstable; urgency=low
 
  -- Christopher L Cheney <ccheney@debian.org>  Wed, 24 Jan 2001 21:52:29 -0600
 
+libvorbis (1.0beta3-3) unstable; urgency=low
+
+  * Fixed Build-Depends libogg-dev version dependency.
+  * Fixed Sections.
+  * Updated to Standards-Version to 3.5.1.0
+
+ -- Christopher L Cheney <ccheney@debian.org>  Sat, 17 Feb 2001 18:14:53 -0600
+
 libvorbis (1.0beta3-2) unstable; urgency=low
 
   * Added dependency for libogg-dev (closes: #78262)

@@ -3,7 +3,7 @@ Section: libs
 Priority: optional
 Maintainer: Christopher L Cheney <ccheney@debian.org>
 Build-Depends: debhelper, libogg-dev (>> 1.0beta4)
-Standards-Version: 3.1.1
+Standards-Version: 3.5.1.0
 
 Package: libvorbis-dev
 Architecture: any
