@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.32 2001/06/15 23:59:47 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.33 2001/06/17 22:25:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -252,7 +252,6 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "envelope.h"
 #include "mdct.h"
 #include "psy.h"
-#define VORBIS_IEEE_FLOAT32
 #include "scales.h"
 
 /* no time mapping implementation for now */
@@ -335,9 +334,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      res,
 	      codedflr);
 
-    for(j=0;j<n/2;j++)
-      if(fabs(vb->pcm[i][j]>1000))
-	fprintf(stderr,"%ld ",seq);
+    /*for(j=0;j<n/2;j++)
+      if(fabs(vb->pcm[i][j]>200))
+      fprintf(stderr,"%ld ",seq);*/
     
     _analysis_output("res",seq-vi->channels+j,vb->pcm[i],n,0,0);
     _analysis_output("codedflr",seq++,codedflr,n/2,0,1);
@@ -397,13 +396,13 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	/*if(fabs(mag)<3.5f)
 	  ang=rint(ang/(mag*2.f))*mag*2.f;*/
 	
-	if(fabs(mag)<1.5)
+	/*if(fabs(mag)<1.5)
 	ang=0;
       
 	if(j>(n*3/16))
 	  ang=0;
 	
-	if(ang>=fabs(mag*2))ang=-fabs(mag*2);
+	  if(ang>=fabs(mag*2))ang=-fabs(mag*2);*/
 	
 	pcmM[j]=mag;
 	pcmA[j]=ang;
