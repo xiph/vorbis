@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_AA.h,v 1.3.2.1 2000/12/27 23:46:38 xiphmont Exp $
+ last mod: $Id: mode_AA.h,v 1.3.2.2 2001/01/09 19:13:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -47,7 +47,6 @@
 static vorbis_info_psy _psy_set_AA0={
   1,/*athp*/
   1,/*decayp*/
-  1,/*smoothp*/
 
   -100.,
   -140.,
@@ -100,6 +99,7 @@ static vorbis_info_psy _psy_set_AA0={
   },
 
   1,/*noisemaskp */
+  0.,
   .5, /* low window */
   .5, /* high window */
   15,
@@ -124,6 +124,7 @@ static vorbis_info_psy _psy_set_AA0={
   },
  
    95.,
+  -32.,
 
   -0., -.004   /* attack/decay control */
 };
@@ -131,7 +132,6 @@ static vorbis_info_psy _psy_set_AA0={
 static vorbis_info_psy _psy_set_AA={
   1,/*athp*/
   1,/*decayp*/
-  1,/*smoothp*/
 
   -100.f,
   -140.f,
@@ -184,6 +184,7 @@ static vorbis_info_psy _psy_set_AA={
   },
 
   1,/*noisemaskp */
+  0.,
   .5, /* low window */
   .5, /* high window */
   25,
@@ -208,6 +209,7 @@ static vorbis_info_psy _psy_set_AA={
   },
  
    95.f,
+  -32.,
 
   -0.f, -.004f   /* attack/decay control */
 };

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.22.2.1 2000/12/27 23:46:35 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.22.2.2 2001/01/09 19:13:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -220,11 +220,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   float **floor=_vorbis_block_alloc(vb,vi->channels*sizeof(float *));
   float *additional=_vorbis_block_alloc(vb,n*sizeof(float));
 
-  vorbis_bitbuffer      vbb_res;
-  vorbis_bitbuffer      *vbb_flr=_vorbis_block_alloc(vb,
-						     sizeof(vorbis_bitbuffer)*
-						     vi->channels);
-
   for(i=0;i<vi->channels;i++)
     bitbuf_init(vbb_flr+i,vb);
   bitbuf_init(&vbb_res,vb);
@@ -234,10 +229,14 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     float scale=4.f/n;
     int submap=info->chmuxlist[i];
 
+    _analysis_output("pcm",seq,pcm,n,0,0);
+
     /* window the PCM data */
     for(j=0;j<n;j++)
       additional[j]=pcm[j]*=window[j];
 	    
+    _analysis_output("windowed",seq,pcm,n,0,0);
+
     /* transform the PCM data */
     /* only MDCT right now.... */
     mdct_forward(b->transform[vb->W][0],pcm,pcm);
@@ -251,16 +250,16 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     /* set up our masking data working vector, and stash unquantized
        data for later */
-    memcpy(pcm+n/2,pcm,n*sizeof(float)/2);
+    /*memcpy(pcm+n/2,pcm,n*sizeof(float)/2);*/
     memcpy(additional+n/2,pcm,n*sizeof(float)/2);
 
     /* begin masking work */
     floor[i]=_vorbis_block_alloc(vb,n*sizeof(float)/2);
 
-    _analysis_output("fft",seq,additional,n/2,0,1);
-    _analysis_output("mdct",seq,additional+n/2,n/2,0,1);
-    _analysis_output("lfft",seq,additional,n/2,0,0);
-    _analysis_output("lmdct",seq,additional+n/2,n/2,0,0);
+    //_analysis_output("fft",seq,additional,n/2,0,1);
+    //_analysis_output("mdct",seq,additional+n/2,n/2,0,1);
+    //_analysis_output("lfft",seq,additional,n/2,0,0);
+    //_analysis_output("lmdct",seq,additional+n/2,n/2,0,0);
 
     /* perform psychoacoustics; do masking */
     _vp_compute_mask(look->psy_look+submap,additional,additional+n/2,
@@ -270,13 +269,13 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     
     /* perform floor encoding */
     nonzero[i]=look->floor_func[submap]->
-      forward(vb,look->floor_look[submap],floor[i],vbb_flr+i);
+      forward(vb,look->floor_look[submap],floor[i]);
 
     _analysis_output("floor",seq,floor[i],n/2,0,1);
 
     /* apply the floor, do optional noise levelling */
     _vp_apply_floor(look->psy_look+submap,pcm,floor[i]);
-      
+
     _analysis_output("res",seq++,pcm,n/2,0,0);
       
 #ifdef TRAIN_RES
@@ -309,53 +308,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     }
     
     look->residue_func[i]->forward(vb,look->residue_look[i],
-				   pcmbundle,ch_in_bundle,&vbb_res);
+				   pcmbundle,ch_in_bundle);
   }
   
-  /* go back and compute the original MDCT inverse and our quantized
-     inverse; we'll want to give the floor mapping a shot at
-     massaging things before we write out the final version. */
-  
-  {
-    for(i=0;i<vi->channels;i++){
-      float *pcm=vb->pcm[i];
-      float *pcmori=vb->pcm[i]+n/2;
-      float *quant=floor[i];
-      float num=0.f,den=0.f;
-      int submap=info->chmuxlist[i];
-      
-      if(nonzero[i]){
-
-	mdct_backward(b->transform[vb->W][0],pcm+n/2,additional);
-	for(j=0;j<n;j++)
-	  additional[j]*=window[j];
-
-	for(j=0;j<n/2;j++)
-	  pcm[j]=pcmori[j]-pcm[j]*quant[j];	
-	mdct_backward(b->transform[vb->W][0],pcm,pcm);
-	for(j=0;j<n;j++)
-	  pcm[j]*=window[j];
-	
-	/* weighted compare twixt original and quantized mdct output */
-	for(j=0;j<n;j++){
-	  den+=(pcm[j]*pcm[j]);
-	  num+=(additional[j]*additional[j]);
-	}
-	
-	num=sqrt(num);
-	den=sqrt(den);
-	
-      }
-      
-      look->floor_func[submap]->
-	forward2(vb,look->floor_look[submap],
-		 nonzero[i],den==0.f?0.:num/den,vbb_flr+i);
-      
-    }
-  }
-
-  bitbuf_pack(&vb->opb,&vbb_res);
-
   look->lastframe=vb->sequence;
   return(0);
 }

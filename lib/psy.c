@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.34.2.1 2000/12/27 23:46:35 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.34.2.2 2001/01/09 19:13:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -338,7 +338,7 @@ static void seed_curve(float *seed,
 
   int choice=(int)((amp+dBoffset)*.1f);
   choice=max(choice,0);
-  choice=min(choice,8);
+  choice=min(choice,P_LEVELS-1);
   posts=curves[choice];
   curve=posts+2;
   seedptr=oc+(posts[0]-16)*linesper-(linesper>>1);
@@ -376,7 +376,8 @@ static void seed_loop(vorbis_look_psy *p,
 		      float **att,
 		      float *f, 
 		      float *flr,
-		      float *seeds,
+		      float *minseed,
+		      float *maxseed,
 		      float specmax){
   vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
@@ -386,7 +387,7 @@ static void seed_loop(vorbis_look_psy *p,
 
   for(i=0;i<n;i++){
       float max=f[i];
-      int oc=p->octave[i];
+      long oc=p->octave[i];
       while(i+1<n && p->octave[i+1]==oc){
 	i++;
 	if(f[i]>max)max=f[i];
@@ -397,7 +398,7 @@ static void seed_loop(vorbis_look_psy *p,
 	if(oc>=P_BANDS)oc=P_BANDS-1;
 	if(oc<0)oc=0;
 	if(vi->tonemaskp)
-	  seed_curve(seeds,
+	  seed_curve(minseed,
 		     curves[oc],
 		     max,
 		     p->octave[i]-p->firstoc,
@@ -405,7 +406,7 @@ static void seed_loop(vorbis_look_psy *p,
 		     p->eighth_octave_lines,
 		     dBoffset);
 	if(vi->peakattp)
-	  seed_peak(seeds,
+	  seed_peak(maxseed,
 		    att[oc],
 		    max,
 		    p->octave[i]-p->firstoc,
@@ -415,13 +416,30 @@ static void seed_loop(vorbis_look_psy *p,
   }
 }
 
-/* bleaugh, this is more complicated than it needs to be */
-static void max_seeds(vorbis_look_psy *p,float *seeds,float *flr){
-  long   n=p->total_octave_lines,i;
-  int    linesper=p->eighth_octave_lines;
+static void bound_loop(vorbis_look_psy *p,
+		       float *f, 
+		       float *seeds,
+		       float *flr,
+		       float att){
+  vorbis_info_psy *vi=p->vi;
+  long n=p->n,i;
+
+  long off=(p->eighth_octave_lines>>1)+p->firstoc;
+  long *ocp=p->octave;
+
+  for(i=0;i<n;i++){
+    long oc=ocp[i]-off;
+    float v=f[i]+att;
+    if(seeds[oc]<v)seeds[oc]=v;
+  }
+}
+
+static void seed_chase(float *seeds, int linesper, long n){
   long  *posstack=alloca(n*sizeof(long));
   float *ampstack=alloca(n*sizeof(float));
   long   stack=0;
+  long   pos=0;
+  long   i;
 
   for(i=0;i<n;i++){
     if(stack<2){
@@ -453,45 +471,63 @@ static void max_seeds(vorbis_look_psy *p,float *seeds,float *flr){
 
   /* the stack now contains only the positions that are relevant. Scan
      'em straight through */
-  {
-    long pos=0;
-    long linpos=0;
-    for(i=0;i<stack;i++){
-      long endpos;
-      if(i<stack-1 && ampstack[i+1]>ampstack[i]){
-	endpos=posstack[i+1];
-      }else{
-	endpos=posstack[i]+linesper+1; /* +1 is important, else bin 0 is
-					  discarded in short frames */
-      }
-      if(endpos>n)endpos=n;
-      for(;pos<endpos;pos++)
-	seeds[pos]=ampstack[i];
-    }
 
-    pos=0;
-    while(linpos+1<p->n){
-      float min=seeds[pos];
-      long end=((p->octave[linpos]+p->octave[linpos+1])>>1)-p->firstoc;
-      while(pos+1<=end){
-	pos++;
-	if((seeds[pos]>NEGINF && seeds[pos]<min) || min==NEGINF)min=seeds[pos];
-      }
-
-      /* seed scale is log.  Floor is linear.  Map back to it */
-      end=pos+p->firstoc;
-      for(;linpos<p->n && p->octave[linpos]<=end;linpos++)
-	if(flr[linpos]<min)flr[linpos]=min;
+  for(i=0;i<stack;i++){
+    long endpos;
+    if(i<stack-1 && ampstack[i+1]>ampstack[i]){
+      endpos=posstack[i+1];
+    }else{
+      endpos=posstack[i]+linesper+1; /* +1 is important, else bin 0 is
+					discarded in short frames */
     }
-    {
-      float v=seeds[p->total_octave_lines-1];
-      for(;linpos<p->n;linpos++)
-	if(flr[linpos]<v)flr[linpos]=v;
-    }
-  }   
-
+    if(endpos>n)endpos=n;
+    for(;pos<endpos;pos++)
+      seeds[pos]=ampstack[i];
+  }
+  
   /* there.  Linear time.  I now remember this was on a problem set I
      had in Grad Skool... I didn't solve it at the time ;-) */
+
+}
+
+/* bleaugh, this is more complicated than it needs to be */
+static void max_seeds(vorbis_look_psy *p,float *minseed,float *maxseed,
+		      float *flr){
+  long   n=p->total_octave_lines,i;
+  int    linesper=p->eighth_octave_lines;
+  long   linpos=0;
+  long   pos;
+
+  seed_chase(minseed,linesper,n); /* for masking */
+  seed_chase(maxseed,linesper,n); /* for peak att */
+ 
+  pos=p->octave[0]-p->firstoc-(linesper>>1);
+  while(linpos+1<p->n){
+    float min=minseed[pos];
+    float max=maxseed[pos];
+    long end=((p->octave[linpos]+p->octave[linpos+1])>>1)-p->firstoc;
+    while(pos+1<=end){
+      pos++;
+      if((minseed[pos]>NEGINF && minseed[pos]<min) || min==NEGINF)
+	min=minseed[pos];
+      if(maxseed[pos]>max)max=maxseed[pos];
+    }
+    if(max<min)max=min;
+    
+    /* seed scale is log.  Floor is linear.  Map back to it */
+    end=pos+p->firstoc;
+    for(;linpos<p->n && p->octave[linpos]<=end;linpos++)
+      if(flr[linpos]<max)flr[linpos]=max;
+  }
+  
+  {
+    float min=minseed[p->total_octave_lines-1];
+    float max=maxseed[p->total_octave_lines-1];
+    if(max<min)max=min;
+    for(;linpos<p->n;linpos++)
+      if(flr[linpos]<max)flr[linpos]=max;
+  }
+  
 }
 
 #define BIN(x) ((int)((x)*-4.))
@@ -546,7 +582,6 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 	median++;
       }
     }
-    
     noise[i]=BINdB(median);
   }
 
@@ -561,8 +596,9 @@ void _vp_compute_mask(vorbis_look_psy *p,
   float specmax=NEGINF;
   static int seq=0;
 
-  float *seed=alloca(sizeof(float)*p->total_octave_lines);
-  for(i=0;i<p->total_octave_lines;i++)seed[i]=NEGINF;
+  float *minseed=alloca(sizeof(float)*p->total_octave_lines);
+  float *maxseed=alloca(sizeof(float)*p->total_octave_lines);
+  for(i=0;i<p->total_octave_lines;i++)minseed[i]=maxseed[i]=NEGINF;
 
   /* go to dB scale. Also find the highest peak so we know the limits */
   for(i=0;i<n;i++){
@@ -610,17 +646,11 @@ void _vp_compute_mask(vorbis_look_psy *p,
 
   /* XXX apply decay to the fft here */
 
-  seed_loop(p,p->tonecurves,p->peakatt,fft,flr,seed,specmax);
-  _analysis_output("seed",seq,seed,p->total_octave_lines,0,0);
-  max_seeds(p,seed,flr);
-
-  /* treat the near-DC offset bin[s] special care */
-  {
-    float v=mdct[0]+p->vi->nearDCdB;
-    for(i=0;i<p->vi->nearDCp;i++)
-      if(flr[i]>v)flr[i]=v;
-  }
-
+  seed_loop(p,p->tonecurves,p->peakatt,fft,flr,minseed,maxseed,specmax);
+  bound_loop(p,mdct,maxseed,flr,p->vi->bound_att_dB);
+  _analysis_output("minseed",seq,minseed,p->total_octave_lines,0,0);
+  _analysis_output("maxseed",seq,maxseed,p->total_octave_lines,0,0);
+  max_seeds(p,minseed,maxseed,flr);
   _analysis_output("final",seq,flr,n,0,0);
 
   /* doing this here is clean, but we need to find a faster way to do
@@ -628,6 +658,7 @@ void _vp_compute_mask(vorbis_look_psy *p,
 
   for(i=0;i<n;i++)if(mdct[i]>=flr[i])break;
   if(i==n)for(i=0;i<n;i++)flr[i]=NEGINF;
+
 
   seq++;
 }
@@ -650,5 +681,8 @@ void _vp_apply_floor(vorbis_look_psy *p,float *f, float *flr){
 
   memcpy(f,work,p->n*sizeof(float));
 }
+
+
+
 
 

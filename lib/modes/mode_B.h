@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_B.h,v 1.6.2.1 2000/12/27 23:46:38 xiphmont Exp $
+ last mod: $Id: mode_B.h,v 1.6.2.2 2001/01/09 19:13:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,7 +48,6 @@
 static vorbis_info_psy _psy_set_B={
   1,/*athp*/
   1,/*decayp*/
-  1,/*smoothp*/
 
   -100.f,
   -140.f,
@@ -101,6 +100,7 @@ static vorbis_info_psy _psy_set_B={
   },
 
   1,/*noisemaskp */
+  0.,
   .5, /* low window */
   .5, /* high window */
   25,
@@ -125,6 +125,7 @@ static vorbis_info_psy _psy_set_B={
   },
  
   110.f,
+  -32.,
 
   -3.f, -.004f   /* attack/decay control */
 };
