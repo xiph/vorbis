@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = foreign dist-zip
 
-SUBDIRS = lib include doc
+SUBDIRS = lib include doc examples
 
 EXTRA_DIST = README COPYING todo.txt libvorbis.spec
 
