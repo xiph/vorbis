@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel settings for 44.1/48kHz
- last mod: $Id: setup_44.h,v 1.1.2.1 2002/06/26 09:34:38 xiphmont Exp $
+ last mod: $Id: setup_44.h,v 1.1.2.2 2002/06/27 07:05:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,11 +41,11 @@ static double _psy_compand_long_mapping[11]={
 static double _global_mapping_44[11]={
   0., 1., 1.5, 2., 2., 2.5, 3., 3.5, 4., 4., 4.
 };
-static int _floor_short_mapping_44[10]={
-  0,0,2,2,4,5,5,5,5,5
+static int _floor_short_mapping_44[11]={
+  0,0,2,2,4,5,5,5,5,5,5
 };
-static int _floor_long_mapping_44[10]={
-  7,7,7,7,7,7,7,7,7,7
+static int _floor_long_mapping_44[11]={
+  7,7,7,7,7,7,7,7,7,7,7
 };
 
 ve_setup_data_template ve_setup_44_stereo={

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.9 2002/06/26 00:37:39 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.10 2002/06/27 07:05:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,7 +30,7 @@
 #include "misc.h"
 
 #define NEGINF -9999.f
-static double stereo_threshholds[]={0.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
+static double stereo_threshholds[]={0.0, .5, 1.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
