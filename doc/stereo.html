@@ -12,7 +12,7 @@ Stereo Channel Coupling in the Vorbis CODEC
 <h2>Abstract</h2> The Vorbis audio CODEC provides a channel coupling
 mechanisms designed to reduce effective bitrate by both eliminating
 interchannel redundancy and eliminating stereo image information
-labelled inaudible or undesireable according to spatial psychoacoustic
+labeled inaudible or undesirable according to spatial psychoacoustic
 models.  This document describes both the mechanical coupling
 mechanisms available within the Vorbis specification, as well as the
 specific stereo coupling models used by the reference
@@ -32,7 +32,7 @@ appear in context.<p>
 mechanical metric, of how carefully an output matches an input.  For
 example, a stereo amplifier may claim to introduce less that .01%
 total harmonic distortion when amplifying an input signal; this claim
-is easy to verify given proper equiment, and any number of testers are
+is easy to verify given proper equipment, and any number of testers are
 likely to arrive at the same, exact results.  One need not listen to
 the equipment to make this measurement.<p>
 
@@ -72,7 +72,7 @@ output signal; it does not necessarily imply that the differences in
 output are displeasing or that the output sounds poor (although this
 is often the case).  Tube amplifiers are <em>not</em> higher fidelity
 than modern solid state and digital systems.  They simply produce a
-form of distortion and coloring that is either unnoticable or actually
+form of distortion and coloring that is either unnoticeable or actually
 pleasing to many ears.<p>
 
 As compared to an original signal using hard metrics, all perceptual
@@ -80,12 +80,12 @@ codecs [ASPEC, ATRAC, MP3, WMA, AAC, TwinVQ, AC3 and Vorbis included]
 lose objective fidelity in order to reduce bitrate.  This is fact. The
 idea is to lose fidelity in ways that cannot be perceived.  However,
 most current streaming applications demand bitrates lower than what
-can be acheived by sacrificing only objective fidelity; this is also
+can be achieved by sacrificing only objective fidelity; this is also
 fact, despite whatever various company press releases might claim.
 Subjective fidelity eventually must suffer in one way or another.<p>
 
 The goal is to choose the best possible tradeoff such that the
-fidelity loss is graceful and not obviously noticable.  Most listeners
+fidelity loss is graceful and not obviously noticeable.  Most listeners
 of FM radio do not realize how much lower fidelity that medium is as
 compared to compact discs or DAT.  However, when compared directly to
 source material, the difference is obvious.  A cassette tape is lower
@@ -100,7 +100,7 @@ to satisfy a user's requirements, the result should be a
 <em>difference</em> that is generally either difficult to notice
 without comparison, or easy to ignore.  An <em>artifact</em>, on the
 other hand, is an element introduced into the output that is
-immediately noticable, obviously foreign, and undesired.  The famous
+immediately noticeable, obviously foreign, and undesired.  The famous
 'underwater' or 'twinkling' effect synonymous with low bitrate (or
 poorly encoded) mp3 is an example of an <em>artifact</em>.  This
 working definition differs slightly from common usage, but the coined
@@ -118,10 +118,10 @@ in Vorbis's channel coupling design.<p>
 <h2>Mechanisms</h2>
 
 In encoder release beta 4 and earlier, Vorbis supported multiple
-channel encoding, but the channels were encoded entirely seperately
+channel encoding, but the channels were encoded entirely separately
 with no cross-analysis or redundancy elimination between channels.
 This multichannel strategy is very similar to the mp3's <em>dual
-stereo</em> mode and Vorbis uses the same name for it's analagous
+stereo</em> mode and Vorbis uses the same name for it's analogous
 uncoupled multichannel modes.
 
 However, the Vorbis spec provides for, and Vorbis release 1.0 rc1 and
@@ -166,7 +166,7 @@ across left and right; think for example of individual instruments
 mixed into different portions of the stereo image, or a stereo
 recording with a dominant feature not perfectly in the center.  The
 floor functions, each specific to a channel, provide the perfect means
-of normaizing left and right energies across the spectrum to maximize
+of normalizing left and right energies across the spectrum to maximize
 correlation before coupling. This feature of the Vorbis format is not
 a convenient accident.<p>
 
@@ -184,11 +184,11 @@ The first advantage of a polar representation is that it effectively
 seperates the spatial audio information into a 'point image'
 (magnitude) at a given frequency and located somewhere in the sound
 field, and a 'diffuse image' (angle) that fills a large amount of
-space silmultaneously.  Even if we preserve only the magnitude (point)
+space simultaneously.  Even if we preserve only the magnitude (point)
 data, a detailed and carefully chosen floor function in each channel
 provides us with a free, fine-grained, frequency relative intensity
 stereo*.  Angle information represents diffuse sound fields, such as
-reverberation that fills the entre space silmultaneously.<p>
+reverberation that fills the entire space simultaneously.<p>
 
 *<em>Because the Vorbis model supports a number of different possible
 stereo models and these models may be mixed, we do not use the term
@@ -205,8 +205,8 @@ results in unstable imaging).  Reverberation and diffuse sounds tend
 to contain less energy and be psychoacoustically dominated by the
 point sources embedded in them.  Thus, we again tend to concentrate
 more represented energy into a predictably smaller number of numbers.
-Seperating representation of point and diffuse imaging also allows us
-to model and manipulate point and diffuse qualities seperately.<p>
+Separating representation of point and diffuse imaging also allows us
+to model and manipulate point and diffuse qualities separately.<p>
 
 <h4>controlling bit leakage and symbol crosstalk</h4> Because polar
 representation concentrates represented energy into fewer large
@@ -291,7 +291,7 @@ possible values are:
 Cartesian representation (note that, for example, <tt>5,-10</tt> is
 the same as <tt>-5,10</tt>, so there's no reason to represent
 both. 2,10 cannot happen, and there's no reason to account for it.)
-It's also obvious that this mapping is exactly reversable.<p>
+It's also obvious that this mapping is exactly reversible.<p>
 
 <h3>Channel interleaving</h3>
 
@@ -306,7 +306,7 @@ amplitude of the angle is bounded by its corresponding magnitude
 value.<p>
 
 Entropy coding the results, then, further benefits from the entropy
-model being able to compress magnitude and angle silmultaneously.  For
+model being able to compress magnitude and angle simultaneously.  For
 this reason, Vorbis implements residuebackend #2 which preinterleaves
 a number of input vectors (in the stereo case, two, A and B) into a
 single output vector (with the elements in the order of
@@ -326,10 +326,10 @@ it will work as intended.<p>
 
 However, when we leave the ideal/theoretical domain, we notice that
 polar mapping does give additional practical benefits, as discussed in
-the above section on polar mapping and summarised again here:<p>
+the above section on polar mapping and summarized again here:<p>
 <ul>
 <li>Polar mapping aids in controlling entropy 'leakage' between stages
-of a cascaded codebook.  <li>Polar mapping seperates the stereo image
+of a cascaded codebook.  <li>Polar mapping separates the stereo image
 into point and diffuse components which may be analyzed and handled
 differently.
 </ul>
@@ -338,8 +338,8 @@ differently.
 
 <h3>Dual Stereo</h3>
 
-Dual stereo referrs to stereo encoding where the channels are entirely
-seperate; they are analyzed and encoded as entirely distinct entities.
+Dual stereo refers to stereo encoding where the channels are entirely
+separate; they are analyzed and encoded as entirely distinct entities.
 This terminology is familiar from mp3.<p>
 
 <h3>Lossless Stereo</h3>
@@ -370,13 +370,13 @@ demostration before finding the counterexample.<p>
 'Phase stereo' is simply a more aggressive quantization of the polar
 angle vector; above 4kHz it's generally quite safe to quantize noise
 and noisy elements to only a handful of allowed phases.  The phases of
-high ampliude pure tones may or may not be preserved more carefully
+high amplitude pure tones may or may not be preserved more carefully
 (they are relatively rare and L/R tend to be in phase, so there is
 generally little reason not to spend a few more bits on them) <p>
 
 <h4>eight phase stereo</h4>
 
-Vorbis implements phase stereo coupling by preserving the entirety of the magnitude vector (essential to fine amlitdude and energy resolution overall) and quantizing the angle vector to one of only four possible values. Given that the magnitude vector may be positive or negative, this results in left and right phase having eight possible permutation, thus 'eight phase stereo':<p>
+Vorbis implements phase stereo coupling by preserving the entirety of the magnitude vector (essential to fine amplitude and energy resolution overall) and quantizing the angle vector to one of only four possible values. Given that the magnitude vector may be positive or negative, this results in left and right phase having eight possible permutation, thus 'eight phase stereo':<p>
 
 <img src="eightphase.png"><p>
 
@@ -392,7 +392,7 @@ only in-phase and 180 degree out-out-phase signals:<p>
 
 <h3>Point Stereo</h3>
 
-Point stero eliminates the possibility of out-of-phase signal
+Point stereo eliminates the possibility of out-of-phase signal
 entirely.  Any diffuse quality to a sound source tends to collapse
 inward to a point somewhere within the stereo image.  A practical
 example would be balanced reverberations within a large, live space;
@@ -401,15 +401,15 @@ volume.  In point-stereo, the reverberations would still exist, but
 sound fairly firmly centered within the image (assuming the
 reverberation was centered overall; if the reverberation is stronger
 to the left, then the point of localization in point stereo would be
-to the left).  This effect is most noticable at low and mid
+to the left).  This effect is most noticeable at low and mid
 frequencies and using headphones (which grant perfect stereo
-seperation). Point stereo is is a graceful but generally easy to
+separation). Point stereo is is a graceful but generally easy to
 detect degrdation to the sound quality and is thus used in frequency
-ranges where it is least noticable.<p>
+ranges where it is least noticeable.<p>
 
 <h3>Mixed Stereo</h3>
 
-Mixed stereo is the silmultaneous use of more than one of the above
+Mixed stereo is the simultaneous use of more than one of the above
 stereo encoding models, generally using more aggressive modes in
 higher frequencies, lower amplitudes or 'nearly' in-phase sound.<p>
 
@@ -437,15 +437,15 @@ by the user:<p>
 <dt>aggressive eight phase stereo
 <dd>a mixed mode combining lossless stereo for frequencies to approximately 2 kHz (and for all strong pure tones) and eight phase stereo above<p>
 
-<dt>eight/four phase stero <dd>A mixed mode combining lossless stereo
+<dt>eight/four phase stereo <dd>A mixed mode combining lossless stereo
 for bass, eight phase stereo for noisy content and lossless stereo for
 tones to approximately 4kHz and four phase stereo above 4kHz.<p>
 
-<dt>eight phase/point stero <dd>A mixed mode combining lossless stereo
+<dt>eight phase/point stereo <dd>A mixed mode combining lossless stereo
 for bass, eight phase stereo for noisy content and lossless stereo for
 tones to approximately 4kHz and point stereo above 4kHz.<p>
 
-<dt>aggressive eight phase/point stero
+<dt>aggressive eight phase/point stereo
 <dd>A mixed mode combining lossless stereo
 for bass, eight phase stereo to approximately 2kHz and point stereo above 2kHz.<p>
 
