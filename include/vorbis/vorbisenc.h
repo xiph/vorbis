@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: vorbis encode-engine setup
- last mod: $Id: vorbisenc.h,v 1.8 2001/12/20 01:00:25 segher Exp $
+ last mod: $Id: vorbisenc.h,v 1.9 2002/06/30 08:45:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,7 +59,24 @@ extern int vorbis_encode_setup_init(vorbis_info *vi);
 
 extern int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg);
 
+#define OV_ECTL_RATEMANAGE_GET       0x10
 
+#define OV_ECTL_RATEMANAGE_SET       0x11
+#define OV_ECTL_RATEMANAGE_AVG       0x12
+#define OV_ECTL_RATEMANAGE_HARD      0x13
+
+struct ovectl_ratemanage_arg {
+  int    management_active;
+
+  long   bitrate_hard_min;
+  long   bitrate_hard_max;
+  double bitrate_hard_window;
+
+  long   bitrate_av_lo;
+  long   bitrate_av_hi;
+  double bitrate_av_window;
+  double bitrate_av_window_center;
+};
 
 #ifdef __cplusplus
 }
