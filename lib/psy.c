@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.23.4.7 2000/08/07 20:44:18 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23.4.8 2000/08/08 02:25:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -256,10 +256,12 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   /* interpolate curves between */
   for(i=1;i<P_BANDS;i+=2)
     for(j=4;j<P_LEVELS;j+=2){
-      /*memcpy(p->tonecurves[i][j],p->tonecurves[i-1][j],EHMER_MAX*sizeof(double));*/
-      interp_curve(p->tonecurves[i][j],
+      memcpy(p->tonecurves[i][j],p->tonecurves[i-1][j],EHMER_MAX*sizeof(double));
+      /*interp_curve(p->tonecurves[i][j],
 		   p->tonecurves[i-1][j],
-		   p->tonecurves[i+1][j],.5);
+		   p->tonecurves[i+1][j],.5);*/
+      min_curve(p->tonecurves[i][j],p->tonecurves[i+1][j]);
+      min_curve(p->tonecurves[i][j],p->tonecurves[i-1][j]);
     }
 
   /*for(i=0;i<P_BANDS-1;i++)
@@ -301,11 +303,16 @@ void _vp_psy_clear(vorbis_look_psy *p){
   }
 }
 
-static void compute_decay(vorbis_look_psy *p,double *f, double *decay, int n){
+static void compute_decay_adaptive(vorbis_look_psy *p,double *f, double *decay, int n){
   /* handle decay */
   int i;
   double decscale=1.-pow(p->vi->decay_coeff,n); 
   double attscale=1.-pow(p->vi->attack_coeff,n); 
+  static int frameno=0;
+
+  _analysis_output("drive",frameno,f,n,0,1);
+  _analysis_output("decay",frameno++,decay,n,0,1);
+
   for(i=0;i<n;i++){
     double del=f[i]-decay[i];
     if(del>0)
@@ -315,6 +322,34 @@ static void compute_decay(vorbis_look_psy *p,double *f, double *decay, int n){
       /* remove energy */
       decay[i]+=del*decscale;
     if(decay[i]>f[i])f[i]=decay[i];
+  }
+}
+
+static void compute_decay_fixed(vorbis_look_psy *p,double *f, double *decay, int n){
+  /* handle decay */
+  int i;
+  double decscale=fromdB(p->vi->decay_coeff*n); 
+  double attscale=1./fromdB(p->vi->attack_coeff); 
+
+  static int frameno=0;
+
+  _analysis_output("drive",frameno,f,n,0,1);
+  _analysis_output("decay",frameno++,decay,n,0,1);
+
+  for(i=0;i<n;i++){
+    double pre=decay[i];
+    if(decay[i]){
+      double val=decay[i]*decscale;
+      double att=fabs(f[i]/val);
+
+      if(att>attscale)
+	decay[i]=fabs(f[i]/attscale);
+      else
+	decay[i]=val;
+    }else{
+      decay[i]=fabs(f[i]/attscale);
+    }
+    if(pre>f[i])f[i]=pre;
   }
 }
 
@@ -659,9 +694,8 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
     /* chase the seeds */
     max_seeds(p,seed,seed);
 
-    /* compute, update and apply decay accumulator */
     if(p->vi->decayp)
-      compute_decay(p,seed,decay,n);
+      compute_decay_fixed(p,seed,decay,n);
 
     for(i=0;i<n;i++)if(flr[i]<seed[i])flr[i]=seed[i];
 
