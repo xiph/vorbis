@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.8 2000/02/23 11:22:46 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.9 2000/04/03 09:45:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -340,9 +340,11 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
 
   for(i=info->begin,l=0;i<info->end;){
     /* fetch the partition word for each channel */
-    for(j=0;j<ch;j++)
-      partword[j]=look->decodemap[vorbis_book_decode(look->phrasebook,
-						     &vb->opb)];
+    for(j=0;j<ch;j++){
+      int temp=vorbis_book_decode(look->phrasebook,&vb->opb);
+      partword[j]=look->decodemap[temp];
+      if(partword[j]==NULL)exit(1);
+    }
     
     /* now we decode interleaved residual values for the partitions */
     for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition)

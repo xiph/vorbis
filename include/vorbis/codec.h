@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.10 2000/02/16 22:34:43 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.11 2000/04/03 09:45:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -340,7 +340,7 @@ extern int      ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op);
 
 extern int      ogg_stream_init(ogg_stream_state *os,int serialno);
 extern int      ogg_stream_clear(ogg_stream_state *os);
-extern int      ogg_stream_reset(ogg_stream_state *os,long expected_pageno);
+extern int      ogg_stream_reset(ogg_stream_state *os);
 extern int      ogg_stream_destroy(ogg_stream_state *os);
 extern int      ogg_stream_eof(ogg_stream_state *os);
 

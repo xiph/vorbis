@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.18 2000/04/03 08:30:49 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.19 2000/04/03 09:45:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -486,7 +486,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	vf->current_link=link;
 
 	ogg_stream_init(&vf->os,vf->current_serialno);
-	ogg_stream_reset(&vf->os,ogg_page_pageno(&og));
+	ogg_stream_reset(&vf->os); 
 
       }else{
 	/* we're streaming */
