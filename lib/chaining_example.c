@@ -46,8 +46,9 @@ int main(){
   for(i=0;i<ov_streams(&ov);i++){
     vorbis_info *vi=ov_info(&ov,i);
     printf("\tlogical bitstream section %d information:\n",i+1);
-    printf("\t\t%ldHz %d channels serial number=%ld\n",
-	   vi->rate,vi->channels,ov_serialnumber(&ov,i));
+    printf("\t\t%ldHz %d channels bitrate %dkbps serial number=%ld\n",
+	   vi->rate,vi->channels,ov_bitrate(&ov,i)/1000,
+	   ov_serialnumber(&ov,i));
     printf("\t\tcompressed length: %ld bytes ",ov_raw_total(&ov,i));
     printf(" play time: %lds\n",(long)ov_time_total(&ov,i));
   }

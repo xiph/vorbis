@@ -157,12 +157,12 @@ static void _bisect_forward_serialno(OggVorbis_File *vf,
   long endsearched=end;
   long next=end;
   ogg_page og;
+  long ret;
   
   /* the below guards against garbage seperating the last and
      first pages of two links. */
   while(searched<endsearched){
     long bisect;
-    long ret;
     
     if(endsearched-searched<CHUNKSIZE){
       bisect=searched;
@@ -179,12 +179,16 @@ static void _bisect_forward_serialno(OggVorbis_File *vf,
       searched=ret+og.header_len+og.body_len;
     }
   }
-  if(searched>=end){
+
+  _seek_helper(vf,next);
+  ret=_get_next_page(vf,&og,-1);
+  
+  if(searched>=end || ret==-1){
     vf->links=m+1;
     vf->offsets=malloc((m+2)*sizeof(long));
     vf->offsets[m+1]=searched;
   }else{
-    _bisect_forward_serialno(vf,next,next,
+    _bisect_forward_serialno(vf,next,vf->offset,
 			     end,ogg_page_serialno(&og),m+1);
   }
   
@@ -246,7 +250,8 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
    vorbis_info structs and PCM positions.  Only called by the seekable
    initialization (local stream storage is hacked slightly; pay
    attention to how that's done) */
-static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first){
+static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first,
+				  long dataoffset){
   ogg_page og;
   int i,ret;
   
@@ -261,6 +266,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first){
          saves the waste of grabbing it again */
       memcpy(vf->vi+i,first,sizeof(vorbis_info));
       memset(first,0,sizeof(vorbis_info));
+      vf->dataoffsets[i]=dataoffset;
     }else{
 
       /* seek to the location of the initial header */
@@ -309,10 +315,12 @@ static int _open_seekable(OggVorbis_File *vf){
   vorbis_info initial;
   long serialno,end;
   int ret;
+  long dataoffset;
   ogg_page og;
   
   /* is this even vorbis...? */
   ret=_fetch_headers(vf,&initial,&serialno);
+  dataoffset=vf->offset;
   ogg_stream_clear(&vf->os);
   if(ret==-1)return(-1);
   
@@ -339,7 +347,7 @@ static int _open_seekable(OggVorbis_File *vf){
 
   }
 
-  _prefetch_all_headers(vf,&initial);
+  _prefetch_all_headers(vf,&initial,dataoffset);
 
   return(0);
 }
@@ -567,17 +575,17 @@ long ov_seekable(OggVorbis_File *vf){
 
 long ov_bitrate(OggVorbis_File *vf,int i){
   if(i>=vf->links)return(-1);
-  if(!vf->seekable)return(ov_bitrate(vf,0));
+  if(!vf->seekable && i!=0)return(ov_bitrate(vf,0));
   if(i<0){
     size64 bits;
     int i;
     for(i=0;i<vf->links;i++)
-      bits+=vf->offsets[i+1]-vf->dataoffsets[i];
+      bits+=(vf->offsets[i+1]-vf->dataoffsets[i])*8;
     return(rint(bits/ov_time_total(vf,-1)));
   }else{
     if(vf->seekable){
       /* return the actual bitrate */
-      return(rint((vf->offsets[i+1]-vf->dataoffsets[i])/ov_time_total(vf,i)));
+      return(rint((vf->offsets[i+1]-vf->dataoffsets[i])*8/ov_time_total(vf,i)));
     }else{
       /* return nominal if set */
       if(vf->vi[i].bitrate_nominal>0){
