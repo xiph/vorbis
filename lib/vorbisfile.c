@@ -14,7 +14,7 @@
  function: stdio-based convenience library for opening/seeking/decoding
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Nov 04 1999
+ last modification date: Nov 16 1999
 
  ********************************************************************/
 
@@ -351,6 +351,7 @@ static int _open_seekable(OggVorbis_File *vf){
   }
 
   _prefetch_all_headers(vf,&initial,dataoffset);
+  ov_raw_seek(vf,0);
 
   return(0);
 }
@@ -404,28 +405,35 @@ static int _process_packet(OggVorbis_File *vf,int readp){
       if(result>0){
 	/* got a packet.  process it */
 	frameno=op.frameno;
-	vorbis_synthesis(&vf->vb,&op);
-	vorbis_synthesis_blockin(&vf->vd,&vf->vb);
-	
-	/* update the pcm offset. */
-	if(frameno!=-1){
-	  int link=(vf->seekable?vf->current_link:0);
-	  double **dummy;
-	  int i,samples;
+	if(!vorbis_synthesis(&vf->vb,&op)){ /* lazy check for lazy
+                                               header handling.  The
+                                               header packets aren't
+                                               audio, so if/when we
+                                               submit them,
+                                               vorbis_synthesis will
+                                               reject them */
+	  vorbis_synthesis_blockin(&vf->vd,&vf->vb);
 	  
-	  /* this packet has a pcm_offset on it (the last packet
-	     completed on a page carries the offset) After processing
-	     (above), we know the pcm position of the *last* sample
-	     ready to be returned. Find the offset of the *first* */
-	  
-	  samples=vorbis_synthesis_pcmout(&vf->vd,&dummy);
-	  
-	  frameno-=samples;
-	  for(i=0;i<link;i++)
-	    frameno+=vf->pcmlengths[i];
-	  vf->pcm_offset=frameno;
+	  /* update the pcm offset. */
+	  if(frameno!=-1){
+	    int link=(vf->seekable?vf->current_link:0);
+	    double **dummy;
+	    int i,samples;
+	    
+	    /* this packet has a pcm_offset on it (the last packet
+	       completed on a page carries the offset) After processing
+	       (above), we know the pcm position of the *last* sample
+	       ready to be returned. Find the offset of the *first* */
+	    
+	    samples=vorbis_synthesis_pcmout(&vf->vd,&dummy);
+	    
+	    frameno-=samples;
+	    for(i=0;i<link;i++)
+	      frameno+=vf->pcmlengths[i];
+	    vf->pcm_offset=frameno;
+	  }
+	  return(1);
 	}
-	return(1);
       }
     }
 
@@ -998,7 +1006,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	
 	vorbis_synthesis_read(&vf->vd,samples);
 	vf->pcm_offset+=samples;
-	*bitstream=vf->current_link;
+	if(bitstream)*bitstream=vf->current_link;
 	return(samples*bytespersample);
       }
     }
