@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.48 2002/07/11 06:40:50 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.49 2003/01/18 08:28:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -331,7 +331,7 @@ static int local_book_besterror(codebook *book,float *a){
 	  best=i;
 	}
       }
-      e++;
+      e+=dim;
     }
   }
 
