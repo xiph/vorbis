@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.3 2000/05/01 05:46:47 jon Exp $
+ last mod: $Id: os.h,v 1.4 2000/05/01 06:26:52 jon Exp $
 
  ********************************************************************/
 
@@ -37,14 +37,14 @@
 #endif
 
 #ifdef _WIN32
-typedef __int64 int64_t;
-typedef unsigned int u_int32_t;
 #  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
 #else // if not _WIN32
 #  define FAST_HYPOT hypot
 #endif
 
 #endif
+
+#include "../include/vorbis/os_types.h"
 
 #endif // _OS_H
 
