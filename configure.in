@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.4 1999/10/13 03:52:39 xiphmont Exp $
+# $Id: configure.in,v 1.5 1999/10/15 02:51:07 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -42,19 +42,23 @@ if test -z "$GCC"; then
 		PROFILE="-g -p" ;;
         esac
 else
+
+# -D__NO_MATH_INLINES avoids some serious FP assembly related bugs in
+# glibc 2.0/2.1
+
 	case $host in 
 	i?86-*-linux*)
-		DEBUG="-g -Wall -fsigned-char"
-		OPT="-O20 -ffast-math -fsigned-char"
+		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char"
+		OPT="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char"
 		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char";;
 	sparc-sun-*)
-		DEBUG="-g -Wall -fsigned-char -mv8"
-		OPT="-O20 -ffast-math -fsigned-char -mv8"
-		PROFILE="-pg -g -O20 -fsigned-char -mv8" ;;
+		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char -mv8"
+		OPT="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char -mv8"
+		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char -mv8" ;;
 	*)
-		DEBUG="-g -Wall -fsigned-char"
-		OPT="-O20 -fsigned-char"
-		PROFILE="-O20 -g -pg -fsigned-char" ;;
+		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char"
+		OPT="-O20 -D__NO_MATH_INLINES -fsigned-char"
+		PROFILE="-O20 -g -pg -D__NO_MATH_INLINES -fsigned-char" ;;
         esac
 fi
 
