@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.58 2003/08/18 05:34:01 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.59 2003/09/01 22:59:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -157,7 +157,7 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "psy.h"
 #include "scales.h"
 
-#if 0
+//#if 0
 static long seq=0;
 static ogg_int64_t total=0;
 static float FLOOR1_fromdB_LOOKUP[256]={
@@ -227,7 +227,7 @@ static float FLOOR1_fromdB_LOOKUP[256]={
   0.82788260F, 0.88168307F, 0.9389798F, 1.F, 
 };
 
-#endif 
+//#endif 
 
 extern int *floor1_fit(vorbis_block *vb,vorbis_look_floor *look,
 		       const float *logmdct,   /* in */
@@ -275,24 +275,24 @@ static int mapping0_forward(vorbis_block *vb){
 
     scale_dB=todB(&scale);
 
-#if 0
+    //#if 0
     if(vi->channels==2)
       if(i==0)
 	_analysis_output("pcmL",seq,pcm,n,0,0,total-n/2);
       else
 	_analysis_output("pcmR",seq,pcm,n,0,0,total-n/2);
-#endif
+    //#endif
   
     /* window the PCM data */
     _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
 
-#if 0
+    //#if 0
     if(vi->channels==2)
       if(i==0)
 	_analysis_output("windowedL",seq,pcm,n,0,0,total-n/2);
       else
 	_analysis_output("windowedR",seq,pcm,n,0,0,total-n/2);
-#endif
+    //#endif
 
     /* transform the PCM data */
     /* only MDCT right now.... */
@@ -641,10 +641,10 @@ static int mapping0_forward(vorbis_block *vb){
     
   }
 
-#if 0
+  //#if 0
   seq++;
   total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;
-#endif
+  //#endif
   return(0);
 }
 

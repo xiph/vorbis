@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.22 2003/08/18 05:34:01 xiphmont Exp $
+ last mod: $Id: window.c,v 1.23 2003/09/01 22:59:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -2101,13 +2101,13 @@ float *_vorbis_window_get(int n){
 
 void _vorbis_apply_window(float *d,int *winno,long *blocksizes,
 			  int lW,int W,int nW){
-  float *windowLW=vwin[winno[lW]];
-  float *windowNW=vwin[winno[nW]];
-
   lW=(W?lW:0);
   nW=(W?nW:0);
-
+  
   {
+    float *windowLW=vwin[winno[lW]];
+    float *windowNW=vwin[winno[nW]];
+
     long n=blocksizes[W];
     long ln=blocksizes[lW];
     long rn=blocksizes[nW];
