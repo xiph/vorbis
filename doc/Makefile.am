@@ -57,13 +57,13 @@ EXTRA_DIST = $(static_docs) $(built_docs)
 doc_sources = xml/Vorbis_I_spec.xml \
 	xml/01-introduction.xml \
 	xml/02-bitpacking.xml \
-	xml/03-codebook.xml \  
-	xml/04-codec.xml \	     
-	xml/05-comment.xml \	     
+	xml/03-codebook.xml \
+	xml/04-codec.xml \
+	xml/05-comment.xml \
 	xml/06-floor0.xml \
-	xml/07-floor1.xml \ 
-	xml/08-residue.xml \ 
-	xml/09-helper.xml \ 
+	xml/07-floor1.xml \
+	xml/08-residue.xml \
+	xml/09-helper.xml \
 	xml/10-tables.xml \
 	xml/a1-encapsulation_ogg.xml \
 	xml/a2-encapsulation_rtp.xml \
