@@ -24,9 +24,9 @@ int main (int argc,char *argv[]){
     
     f[i]=atof(argv[i+1]);
     if(pos)
-      amp[i]=atof(pos+1)*32767.;
+      amp[i]=atof(pos+1)*32767.f;
     else
-      amp[i]=32767.;
+      amp[i]=32767.f;
 
     fprintf(stderr,"%g Hz, %g amp\n",f[i],amp[i]);
 
@@ -37,11 +37,11 @@ int main (int argc,char *argv[]){
     float val=0;
     int ival;
     for(j=0;j<argc-1;j++)
-      val+=amp[j]*sin(i/44100.*f[j]*2*M_PI);
+      val+=amp[j]*sin(i/44100.f*f[j]*2*M_PI);
     ival=rint(val);
 
-    if(ival>32767.)ival=32767.;
-    if(ival<-32768.)ival=-32768.;
+    if(ival>32767.f)ival=32767.f;
+    if(ival<-32768.f)ival=-32768.f;
 
     fprintf(stdout,"%c%c%c%c",
 	    (char)(ival&0xff),

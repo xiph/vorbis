@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.19 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.20 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -108,11 +108,11 @@ int get_next_ivalue(FILE *in,long *ivalue){
   return(ret);
 }
 
-static float sequence_base=0.;
+static float sequence_base=0.f;
 static int v_sofar=0;
 void reset_next_value(void){
   value_line_buff=NULL;
-  sequence_base=0.;
+  sequence_base=0.f;
   v_sofar=0;
 }
 
@@ -150,7 +150,7 @@ int get_vector(codebook *b,FILE *in,int start, int n,float *a){
       v_sofar++;
       return(0);
     }
-    sequence_base=0.;
+    sequence_base=0.f;
   }
 
   return(-1);

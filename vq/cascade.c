@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.9 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.10 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 
 /* set up metrics */
 
-float count=0.;
+float count=0.f;
 
 
 void process_preprocess(codebook **bs,char *basename){
@@ -58,7 +58,7 @@ void process_vector(codebook **bs,int *addmul,int inter,float *a,int n){
   int booknum=0;
   
   while(*bs){
-    float base=0.;
+    float base=0.f;
     codebook *b=*bs;
     int dim=b->dim;
     

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.33 2000/12/12 08:54:27 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.34 2000/12/21 21:04:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,7 @@ static long _f0_fit(codebook *book,
 		    float *workfit,
 		    int cursor){
   int dim=book->dim;
-  float norm,base=0.;
+  float norm,base=0.f;
   int i,best=0;
   float *lsp=workfit+cursor;
 
@@ -163,7 +163,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
   /* we choose a scaling constant so that:
      floor(bark(rate/2-1)*C)=mapped-1
      floor(bark(rate/2)*C)=mapped */
-  scale=look->ln/toBARK(info->rate/2.);
+  scale=look->ln/toBARK(info->rate/2.f);
 
   /* the mapping from a linear scale to a smaller bark scale is
      straightforward.  We do *not* make sure that the linear mapping
@@ -173,7 +173,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
      accurate */
   look->linearmap=_ogg_malloc((look->n+1)*sizeof(int));
   for(j=0;j<look->n;j++){
-    int val=floor( toBARK((info->rate/2.)/look->n*j) 
+    int val=floor( toBARK((info->rate/2.f)/look->n*j) 
 		   *scale); /* bark numbers represent band edges */
     if(val>=look->ln)val=look->ln; /* guard against the approximation */
     look->linearmap[j]=val;
@@ -224,7 +224,7 @@ float _curve_to_lpc(float *curve,float *lpc,
       long span=bark-last;
       for(j=1;j<span;j++){
 	float del=(float)j/span;
-	work[j+last]=work[bark]*del+work[last]*(1.-del);
+	work[j+last]=work[bark]*del+work[last]*(1.f-del);
       }
     }
     last=bark;
@@ -318,7 +318,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 #if 1
 #ifdef TRAIN_LSP
     {
-      float last=0.;
+      float last=0.f;
       for(j=0;j<look->m;j++){
 	fprintf(of,"%.12g, ",out[j]-last);
 	last=out[j];
@@ -389,7 +389,7 @@ static float floor0_forward2(vorbis_block *vb,vorbis_look_floor *i,
     oggpack_write(&vb->opb,0,info->ampbits);
     bitbuf_pack(&vb->opb,vbb);
   }    
-  return(0.);
+  return(0.f);
 }
 
 
@@ -408,7 +408,7 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
     if(booknum!=-1){
       backend_lookup_state *be=vb->vd->backend_state;
       codebook *b=be->fullbooks+info->books[booknum];
-      float last=0.;
+      float last=0.f;
       
       memset(out,0,sizeof(float)*look->m);    
       

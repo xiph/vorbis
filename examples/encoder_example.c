@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.16 2000/12/12 08:54:26 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.17 2000/12/21 21:04:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -147,9 +147,9 @@ int main(){
       /* uninterleave samples */
       for(i=0;i<bytes/4;i++){
 	buffer[0][i]=((readbuffer[i*4+1]<<8)|
-		      (0x00ff&(int)readbuffer[i*4]))/32768.;
+		      (0x00ff&(int)readbuffer[i*4]))/32768.f;
 	buffer[1][i]=((readbuffer[i*4+3]<<8)|
-		      (0x00ff&(int)readbuffer[i*4+2]))/32768.;
+		      (0x00ff&(int)readbuffer[i*4+2]))/32768.f;
       }
     
       /* tell the library how much we actually submitted */

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.12 2000/11/14 00:05:31 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.13 2000/12/21 21:04:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -198,7 +198,7 @@ decode_aux *_make_decode_tree(codebook *c){
    that's portable and totally safe against roundoff, but I haven't
    thought of it.  Therefore, we opt on the side of caution */
 long _book_maptype1_quantvals(const static_codebook *b){
-  long vals=floor(pow(b->entries,1./b->dim));
+  long vals=floor(pow(b->entries,1.f/b->dim));
 
   /* the above *should* be reliable, but we'll not assume that FP is
      ever reliable when bitstream sync is at stake; verify via integer
@@ -251,7 +251,7 @@ float *_book_unquantize(const static_codebook *b){
 	 that */
       quantvals=_book_maptype1_quantvals(b);
       for(j=0;j<b->entries;j++){
-	float last=0.;
+	float last=0.f;
 	int indexdiv=1;
 	for(k=0;k<b->dim;k++){
 	  int index= (j/indexdiv)%quantvals;
@@ -265,7 +265,7 @@ float *_book_unquantize(const static_codebook *b){
       break;
     case 2:
       for(j=0;j<b->entries;j++){
-	float last=0.;
+	float last=0.f;
 	for(k=0;k<b->dim;k++){
 	  float val=b->quantlist[j*b->dim+k];
 	  val=fabs(val)*delta+mindel+last;
@@ -343,7 +343,7 @@ int vorbis_book_init_encode(codebook *c,const static_codebook *s){
     for(j=0;j<s->entries;j++){
       int flag=1;
       for(k=0;k<s->dim;k++){
-	if(fabs(c->valuelist[j*s->dim+k])>1e-12){
+	if(fabs(c->valuelist[j*s->dim+k])>1e-12f){
 	  flag=0;
 	  break;
 	}
@@ -372,7 +372,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
 static float _dist(int el,float *ref, float *b,int step){
   int i;
-  float acc=0.;
+  float acc=0.f;
   for(i=0;i<el;i++){
     float val=(ref[i]-b[i*step]);
     acc+=val*val;
@@ -458,14 +458,14 @@ int _best(codebook *book, float *a, int step){
   if(nt){
     /* optimized using the decision tree */
     while(1){
-      float c=0.;
+      float c=0.f;
       float *p=book->valuelist+nt->p[ptr];
       float *q=book->valuelist+nt->q[ptr];
       
       for(k=0,o=0;k<dim;k++,o+=step)
 	c+=(p[k]-q[k])*(a[o]-(p[k]+q[k])*.5);
       
-      if(c>0.) /* in A */
+      if(c>0.f) /* in A */
 	ptr= -nt->ptr0[ptr];
       else     /* in B */
 	ptr= -nt->ptr1[ptr];

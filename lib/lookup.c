@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: lookup based functions
-  last mod: $Id: lookup.c,v 1.3 2000/11/06 00:07:01 xiphmont Exp $
+  last mod: $Id: lookup.c,v 1.4 2000/12/21 21:04:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,8 +33,8 @@ float vorbis_coslook(float a){
 
 /* interpolated 1./sqrt(p) where .5 <= p < 1. */
 float vorbis_invsqlook(float a){
-  double d=a*(2.*(float)INVSQ_LOOKUP_SZ)-(float)INVSQ_LOOKUP_SZ;
-  int i=vorbis_ftoi(d-.5);
+  double d=a*(2.f*(float)INVSQ_LOOKUP_SZ)-(float)INVSQ_LOOKUP_SZ;
+  int i=vorbis_ftoi(d-.5f);
   return INVSQ_LOOKUP[i]+ (d-i)*(INVSQ_LOOKUP[i+1]-INVSQ_LOOKUP[i]);
 }
 
@@ -46,9 +46,9 @@ float vorbis_invsq2explook(int a){
 #include <stdio.h>
 /* interpolated lookup based fromdB function, domain -140dB to 0dB only */
 float vorbis_fromdBlook(float a){
-  int i=vorbis_ftoi(a*((float)(-(1<<FROMdB2_SHIFT)))-5.);
-  return (i<0)?1.:
-    ((i>=(FROMdB_LOOKUP_SZ<<FROMdB_SHIFT))?0.:
+  int i=vorbis_ftoi(a*((float)(-(1<<FROMdB2_SHIFT)))-5.f);
+  return (i<0)?1.f:
+    ((i>=(FROMdB_LOOKUP_SZ<<FROMdB_SHIFT))?0.f:
      FROMdB_LOOKUP[i>>FROMdB_SHIFT]*FROMdB2_LOOKUP[i&FROMdB2_MASK]);
 }
 
@@ -77,8 +77,8 @@ long vorbis_invsqlook_i(long a,long e){
 /* a is in n.12 format */
 float vorbis_fromdBlook_i(long a){
   int i=(-a)>>(12-FROMdB2_SHIFT);
-  return (i<0)?1.:
-    ((i>=(FROMdB_LOOKUP_SZ<<FROMdB_SHIFT))?0.:
+  return (i<0)?1.f:
+    ((i>=(FROMdB_LOOKUP_SZ<<FROMdB_SHIFT))?0.f:
      FROMdB_LOOKUP[i>>FROMdB_SHIFT]*FROMdB2_LOOKUP[i&FROMdB2_MASK]);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: generic euclidian distance metric for VQ codebooks
- last mod: $Id: genericdata.c,v 1.7 2000/11/06 00:07:25 xiphmont Exp $
+ last mod: $Id: genericdata.c,v 1.8 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,7 +39,7 @@ float *vqext_weight(vqgen *v,float *p){
                             /* candidate,actual */
 float vqext_metric(vqgen *v,float *e, float *p){
   int i;
-  float acc=0.;
+  float acc=0.f;
   for(i=0;i<v->elements;i++){
     float val=p[i]-e[i];
     acc+=val*val;

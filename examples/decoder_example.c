@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.14 2000/11/06 00:06:53 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.15 2000/12/21 21:04:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -240,9 +240,9 @@ int main(int argc, char **argv){
 		  float  *mono=pcm[i];
 		  for(j=0;j<bout;j++){
 #if 1
-		    int val=mono[j]*32767.;
+		    int val=mono[j]*32767.f;
 #else /* optional dither */
-		    int val=mono[j]*32767.+drand48()-0.5;
+		    int val=mono[j]*32767.f+drand48()-0.5f;
 #endif
 		    /* might as well guard against clipping */
 		    if(val>32767){

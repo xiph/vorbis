@@ -12,15 +12,11 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.41 2000/11/14 00:05:30 xiphmont Exp $
+ last mod: $Id: block.c,v 1.42 2000/12/21 21:04:38 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
  
- Vorbis manipulates the dynamic range of the incoming PCM data
- envelope to minimise time-domain energy leakage from percussive and
- plosive waveforms being quantized in the MDCT domain.
-
  ********************************************************************/
 
 #include <stdio.h>
@@ -614,7 +610,12 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
   /* Shift out any PCM that we returned previously */
   /* centerW is currently the center of the last block added */
-  if(v->pcm_returned  && v->centerW>ci->blocksizes[1]/2){
+
+  if(v->centerW>ci->blocksizes[1]/2 &&
+  /* Quick additional hack; to avoid *alot* of shifts, use an
+     oversized buffer.  This increases memory usage, but doesn't make
+     much difference wrt L1/L2 cache pressure. */
+     v->pcm_returned>8192){
 
     /* don't shift too much; we need to have a minimum PCM buffer of
        1/2 long block */
@@ -677,6 +678,8 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       beginSl=ci->blocksizes[1]/4-ci->blocksizes[v->lW]/4;
       endSl=beginSl+ci->blocksizes[v->lW]/2;
       break;
+    default:
+      return(-1);
     }
 
     for(j=0;j<vi->channels;j++){

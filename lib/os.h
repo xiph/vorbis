@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.18 2000/12/17 08:47:46 xiphmont Exp $
+ last mod: $Id: os.h,v 1.19 2000/12/21 21:04:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,18 +25,26 @@
 #define _V_IFDEFJAIL_H_
 
 #ifndef M_PI
-#define M_PI (3.14159265358979323846)
+#define M_PI (3.1415926536f)
 #endif
 
 #ifndef __GNUC__
 #ifdef _WIN32
 #  include <malloc.h>
-#  define rint(x)   (floor((x)+0.5)) 
+#  define rint(x)   (floor((x)+0.5f)) 
 #endif
 
 #define STIN static
 #else
 #define STIN static inline
+#define sqrt sqrtf
+#define log logf
+#define exp expf
+#define pow powf
+#define acos acosf
+#define atan atanf
+#define frexp frexpf
+#define rint rintf
 #endif
 
 

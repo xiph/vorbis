@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: flexible, delayed bitpacking abstraction
- last mod: $Id: bitbuffer.c,v 1.1 2000/11/17 11:57:49 xiphmont Exp $
+ last mod: $Id: bitbuffer.c,v 1.2 2000/12/21 21:04:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,7 +46,6 @@ void bitbuf_write(vorbis_bitbuffer *vbb,unsigned long word,int length){
 }
 
 void bitbuf_pack(oggpack_buffer *dest,vorbis_bitbuffer *vbb){
-  vorbis_block *vb=vbb->vb;
   vorbis_bitbuffer_chain *vbc=vbb->first;
   int i;
   

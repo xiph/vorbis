@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.10 2000/11/14 00:05:31 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.11 2000/12/21 21:04:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -127,7 +127,7 @@ void analysis(char *base,int i,float *v,int n,int bark,int dB){
 	  fprintf(of,"\n\n");
       else{
 	if(bark)
-	  fprintf(of,"%g ",toBARK(22050.*j/n));
+	  fprintf(of,"%g ",toBARK(22050.f*j/n));
 	else
 	  fprintf(of,"%g ",(float)j);
       
@@ -162,11 +162,11 @@ static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
   look->ln=ln;
   lpc_init(&look->lpclook,look->ln,look->m);
 
-  scale=look->ln/toBARK(22050.);
+  scale=look->ln/toBARK(22050.f);
 
   look->linearmap=_ogg_malloc(look->n*sizeof(int));
   for(j=0;j<look->n;j++){
-    int val=floor( toBARK(22050./n*j) *scale);
+    int val=floor( toBARK(22050.f/n*j) *scale);
     if(val>look->ln)val=look->ln;
     look->linearmap[j]=val;
   }
@@ -174,9 +174,9 @@ static void floorinit(vorbis_look_floor0 *look,int n,int m,int ln){
 
 int main(int argc,char *argv[]){
   int eos=0;
-  float nonz=0.;
-  float acc=0.;
-  float tot=0.;
+  float nonz=0.f;
+  float acc=0.f;
+  float tot=0.f;
 
   int framesize=2048;
   int order=32;
@@ -272,9 +272,9 @@ int main(int argc,char *argv[]){
       /* uninterleave samples */
       for(i=0;i<framesize;i++){
         pcm[0][i]=((buffer[i*4+1]<<8)|
-                      (0x00ff&(int)buffer[i*4]))/32768.;
+                      (0x00ff&(int)buffer[i*4]))/32768.f;
         pcm[1][i]=((buffer[i*4+3]<<8)|
-		   (0x00ff&(int)buffer[i*4+2]))/32768.;
+		   (0x00ff&(int)buffer[i*4+2]))/32768.f;
       }
       
       for(i=0;i<2;i++){
@@ -297,22 +297,6 @@ int main(int argc,char *argv[]){
 	analysis("floor",frameno,floor,framesize/2,1,1);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
 
-	/*for(j=0;j<framesize/2;){
-	  float energy=0.;
-	  float acc=0.;
-	  float *v=pcm[i]+j;
-	  int flag=0;
-	  for(k=0;k<32;k++){
-	    energy+=v[k]*v[k];
-	    if(fabs(v[k]/floor[j+k])>.5)acc+=v[k]*v[k];
-	  }
-	  if(acc*2<energy){
-	    if(acc>0.)fprintf(stderr,"culling\n");
-	    for(k=0;k<32;k++)v[k]=0;
-	  }
-	  j+=k;
-	  }*/
-
 	_vp_apply_floor(&p_look,pcm[i],floor);
 
 
@@ -324,10 +308,10 @@ int main(int argc,char *argv[]){
 	  tot++;
 	  if(val){
 	    nonz++;
-	    acc+=log(fabs(val)*2.+1.)/log(2);
+	    acc+=log(fabs(val)*2.f+1.f)/log(2);
 	    pcm[i][j]=val*floor[j];
 	  }else{
-	    pcm[i][j]=0;
+	    pcm[i][j]=0.f;
 	  }
 	}
 	

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: bark scale utility
- last mod: $Id: barkmel.c,v 1.2 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: barkmel.c,v 1.3 2000/12/21 21:04:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,31 +22,31 @@ int main(){
   int i;
   double rate;
   for(i=64;i<32000;i*=2){
-    rate=48000.;
+    rate=48000.f;
     fprintf(stderr,"rate=%gHz, block=%d, f(1)=%.2gHz bark(1)=%.2g (of %.2g)\n",
 	    rate,i,rate/2 / (i/2),toBARK(rate/2 /(i/2)),toBARK(rate/2));
 
-    rate=44100.;
+    rate=44100.f;
     fprintf(stderr,"rate=%gHz, block=%d, f(1)=%.2gHz bark(1)=%.2g (of %.2g)\n",
 	    rate,i,rate/2 / (i/2),toBARK(rate/2 /(i/2)),toBARK(rate/2));
 
-    rate=32000.;
+    rate=32000.f;
     fprintf(stderr,"rate=%gHz, block=%d, f(1)=%.2gHz bark(1)=%.2g (of %.2g)\n",
 	    rate,i,rate/2 / (i/2),toBARK(rate/2 /(i/2)),toBARK(rate/2));
 
-    rate=22050.;
+    rate=22050.f;
     fprintf(stderr,"rate=%gHz, block=%d, f(1)=%.2gHz bark(1)=%.2g (of %.2g)\n",
 	    rate,i,rate/2 / (i/2),toBARK(rate/2 /(i/2)),toBARK(rate/2));
 
-    rate=16000.;
+    rate=16000.f;
     fprintf(stderr,"rate=%gHz, block=%d, f(1)=%.2gHz bark(1)=%.2g (of %.2g)\n",
 	    rate,i,rate/2 / (i/2),toBARK(rate/2 /(i/2)),toBARK(rate/2));
 
-    rate=11025.;
+    rate=11025.f;
     fprintf(stderr,"rate=%gHz, block=%d, f(1)=%.2gHz bark(1)=%.2g (of %.2g)\n",
 	    rate,i,rate/2 / (i/2),toBARK(rate/2 /(i/2)),toBARK(rate/2));
 
-    rate=8000.;
+    rate=8000.f;
     fprintf(stderr,"rate=%gHz, block=%d, f(1)=%.2gHz bark(1)=%.2g (of %.2g)\n\n",
 	    rate,i,rate/2 / (i/2),toBARK(rate/2 /(i/2)),toBARK(rate/2));
 

@@ -13,7 +13,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [64 <= n ]
- last mod: $Id: mdct.c,v 1.22 2000/12/17 08:50:27 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.23 2000/12/21 21:04:39 xiphmont Exp $
 
  Original algorithm adapted long ago from _The use of multirate filter
  banks for coding of high quality digital audio_, by T. Sporer,
@@ -87,7 +87,7 @@ void mdct_init(mdct_lookup *lookup,int n){
 
     }
   }
-  lookup->scale=FLOAT_CONV(4./n);
+  lookup->scale=FLOAT_CONV(4.f/n);
 }
 
 /* 8 point butterfly (in place, 4 register) */

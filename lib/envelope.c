@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.27 2000/12/13 07:37:20 msmith Exp $
+ last mod: $Id: envelope.c,v 1.28 2000/12/21 21:04:39 xiphmont Exp $
 
  Preecho calculation.
 
@@ -41,36 +41,38 @@
 
 #if 0
 static int    cheb_bandpass_stages=10;
-static float cheb_bandpass_gain=5.589612458e+01;
-static float cheb_bandpass_B[]={-1.,0.,5.,0.,-10.,0.,10.,0.,-5.,0.,1};
+static float cheb_bandpass_gain=5.589612458e+01f;
+static float cheb_bandpass_B[]={-1.f,0.f,5.f,0.f,-10.f,0.f,
+				10.f,0.f,-5.f,0.f,1f};
 static float cheb_bandpass_A[]={
-  -0.1917409386,
-  0.0078657069,
-  -0.7126903444,
-  0.0266343467,
-  -1.4047174730,
-  0.0466964232,
-  -1.9032773429,
-  0.0451493360,
-  -1.4471447397,
-  0.0303413711};
+  -0.1917409386f,
+  0.0078657069f,
+  -0.7126903444f,
+  0.0266343467f,
+  -1.4047174730f,
+  0.0466964232f,
+  -1.9032773429f,
+  0.0451493360f,
+  -1.4471447397f,
+  0.0303413711f};
 #endif 
 
 static int    cheb_highpass_stages=10;
-static float cheb_highpass_gain= 5.291963434e+01;
+static float cheb_highpass_gain= 5.291963434e+01f;
 /* z^-stage, z^-stage+1... */
-static float cheb_highpass_B[]={1,-10,45,-120,210,-252,210,-120,45,-10,1};
+static float cheb_highpass_B[]={1.f,-10.f,45.f,-120.f,210.f,
+				-252.f,210.f,-120.f,45.f,-10.f,1.f};
 static float cheb_highpass_A[]={
-  -0.1247628029,
-  0.1334086523,
-  -0.3997715614,
-  0.3213011089,
-  -1.1131924119,
-  1.7692446626,
-  -3.6241199038,
-  4.1950871291,
-  -4.2771757867,
-  2.3920318913};
+  -0.1247628029f,
+  0.1334086523f,
+  -0.3997715614f,
+  0.3213011089f,
+  -1.1131924119f,
+  1.7692446626f,
+  -3.6241199038f,
+  4.1950871291f,
+  -4.2771757867f,
+  2.3920318913f};
 
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -109,13 +111,13 @@ void _ve_envelope_clear(envelope_lookup *e){
   memset(e,0,sizeof(envelope_lookup));
 }
 
-static float _ve_deltai(envelope_lookup *ve,IIR_state *iir,
+static float _ve_deltai(envelope_lookup *ve,
 		      float *pre,float *post){
   long n2=ve->winlength*2;
   long n=ve->winlength;
 
-  float *workA=alloca(sizeof(float)*n2),A=0.;
-  float *workB=alloca(sizeof(float)*n2),B=0.;
+  float *workA=alloca(sizeof(float)*n2),A=0.f;
+  float *workB=alloca(sizeof(float)*n2),B=0.f;
   long i;
 
   /*_analysis_output("A",granulepos,pre,n,0,0);
@@ -196,8 +198,7 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   while(j+ve->winlength<=v->pcm_current){
     for(i=0;i<ve->ch;i++){
       float *filtered=ve->filtered[i]+j;
-      IIR_state *iir=ve->iir+i;
-      float m=_ve_deltai(ve,iir,filtered-ve->winlength,filtered);
+      float m=_ve_deltai(ve,filtered-ve->winlength,filtered);
       
       if(m>ci->preecho_thresh){
 	/*granulepos++;*/

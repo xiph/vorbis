@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.10 2000/11/14 00:05:32 xiphmont Exp $
+ last mod: $Id: window.c,v 1.11 2000/12/21 21:04:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,22 +33,22 @@ float *_vorbis_window(int type, int window,int left,int right){
       int i;
     
       for(i=0;i<left;i++){
-	float x=(i+.5)/left*M_PI/2.;
+	float x=(i+.5f)/left*M_PI/2.;
 	x=sin(x);
 	x*=x;
-	x*=M_PI/2.;
+	x*=M_PI/2.f;
 	x=sin(x);
 	ret[i+leftbegin]=x;
       }
       
       for(i=leftbegin+left;i<rightbegin;i++)
-	ret[i]=1.;
+	ret[i]=1.f;
       
       for(i=0;i<right;i++){
-	float x=(right-i-.5)/right*M_PI/2.;
+	float x=(right-i-.5f)/right*M_PI/2.;
 	x=sin(x);
 	x*=x;
-	x*=M_PI/2.;
+	x*=M_PI/2.f;
 	x=sin(x);
 	ret[i+rightbegin]=x;
       }

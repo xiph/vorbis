@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.22 2000/11/08 03:23:24 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.23 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -69,7 +69,7 @@ int iascsort(const void *a,const void *b){
 
 static float _Ndist(int el,float *a, float *b){
   int i;
-  float acc=0.;
+  float acc=0.f;
   for(i=0;i<el;i++){
     float val=(a[i]-b[i]);
     acc+=val*val;
@@ -197,7 +197,7 @@ int lp_split(float *pointlist,long totalpoints,
   /* more than one way to do this part.  For small sets, we can brute
      force it. */
 
-  if(entries<8 || (float)points*entries*entries<16.*1024*1024){
+  if(entries<8 || (float)points*entries*entries<16.f*1024*1024){
     /* try every pair possibility */
     float best=0;
     float this;
@@ -231,7 +231,7 @@ int lp_split(float *pointlist,long totalpoints,
   }else{
     float *p=alloca(dim*sizeof(float));
     float *q=alloca(dim*sizeof(float));
-    float best=0.;
+    float best=0.f;
     
     /* try COG/normal and furthest pairs */
     /* meanpoint */
@@ -240,7 +240,7 @@ int lp_split(float *pointlist,long totalpoints,
     for(k=0;k<dim;k++){
       spinnit(spinbuf,entries);
       
-      p[k]=0.;
+      p[k]=0.f;
       for(j=0;j<entries;j++)
 	p[k]+=b->valuelist[entryindex[j]*dim+k];
       p[k]/=entries;
@@ -253,7 +253,7 @@ int lp_split(float *pointlist,long totalpoints,
 
     for(i=0;i<entries;i++){
       float *ppi=_Nnow(entryindex[i]);
-      float ref_best=0.;
+      float ref_best=0.f;
       float ref_j=-1;
       float this;
       spinnit(spinbuf,entries-i);
@@ -386,7 +386,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   for(i=0;i<v->entries;){
     /* duplicate? if so, eliminate */
     for(j=0;j<i;j++){
-      if(_Ndist(v->elements,_now(v,i),_now(v,j))==0.){
+      if(_Ndist(v->elements,_now(v,i),_now(v,j))==0.f){
 	fprintf(stderr,"found a duplicate entry!  removing...\n");
 	v->entries--;
 	memcpy(_now(v,i),_now(v,v->entries),sizeof(float)*v->elements);

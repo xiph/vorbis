@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.8 2000/11/07 00:15:08 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.9 2000/12/21 21:04:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,10 +22,10 @@
 #include <math.h>
 
 /* 20log10(x) */
-#define DYNAMIC_RANGE_dB 200.
-#define todB(x)   ((x)==0?-9.e20:log(fabs(x))*8.6858896)
-#define todB_nn(x)   ((x)==0?-400:log(x)*8.6858896)
-#define fromdB(x) (exp((x)*.11512925))
+#define DYNAMIC_RANGE_dB 200.f
+#define todB(x)   ((x)==0?-9e20f:log(fabs(x))*8.6858896f)
+#define todB_nn(x)   ((x)==0.f?-400.f:log(x)*8.6858896f)
+#define fromdB(x) (exp((x)*.11512925f))
 
 
 /* The bark scale equations are approximations, since the original
@@ -37,16 +37,16 @@
 
    all f in Hz, z in Bark */
 
-#define toBARK(f)   (13.1*atan(.00074*(f))+2.24*atan((f)*(f)*1.85e-8)+1e-4*(f))
-#define fromBARK(z) (102.*(z)-2.*pow(z,2.)+.4*pow(z,3)+pow(1.46,z)-1.)
-#define toMEL(f)    (log(1.+(f)*.001)*1442.695)
-#define fromMEL(m)  (1000.*exp((m)/1442.695)-1000.)
+#define toBARK(f)   (13.1f*atan(.00074f*(f))+2.24f*atan((f)*(f)*1.85e-8f)+1e-4f*(f))
+#define fromBARK(z) (102.f*(z)-2.f*pow(z,2.f)+.4f*pow(z,3.f)+pow(1.46f,z)-1.f)
+#define toMEL(f)    (log(1.f+(f)*.001f)*1442.695f)
+#define fromMEL(m)  (1000.f*exp((m)/1442.695f)-1000.f)
 
 /* Frequency to octave.  We arbitrarily declare 125.0 Hz to be octave
    0.0 */
 
-#define toOC(f)     (log(f)*1.442695-6.965784)
-#define fromOC(o)   (exp(((o)+6.965784)*.693147))
+#define toOC(f)     (log(f)*1.442695f-6.965784f)
+#define fromOC(o)   (exp(((o)+6.965784f)*.693147f))
 
 #endif
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: modified discrete cosine transform prototypes
- last mod: $Id: mdct.h,v 1.15 2000/12/17 01:07:45 xiphmont Exp $
+ last mod: $Id: mdct.h,v 1.16 2000/12/21 21:04:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,7 +45,7 @@
 
 #define FLOAT_CONV(x) (x)
 #define MULT_NORM(x) (x)
-#define HALVE(x) ((x)*.5)
+#define HALVE(x) ((x)*.5f)
 
 #endif
 

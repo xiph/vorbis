@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.5 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.6 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -70,7 +70,7 @@ static void setvals(int dim,encode_aux_pigeonhole *p,
 		    long *temptrack,float *tempmin,float *tempmax,
 		    int seqp){
   int i;
-  float last=0.;
+  float last=0.f;
   for(i=0;i<dim;i++){
     tempmin[i]=(temptrack[i])*p->del+p->min+last;
     tempmax[i]=tempmin[i]+p->del;
@@ -85,9 +85,9 @@ static void setvals(int dim,encode_aux_pigeonhole *p,
 static float minerror(int dim,float *a,encode_aux_pigeonhole *p,
 		       long *temptrack,float *tempmin,float *tempmax){
   int i;
-  float err=0.;
+  float err=0.f;
   for(i=0;i<dim;i++){
-    float eval=0.;
+    float eval=0.f;
     if(a[i]<tempmin[i]){
       eval=tempmin[i]-a[i];
     }else if(a[i]>tempmax[i]){
@@ -101,7 +101,7 @@ static float minerror(int dim,float *a,encode_aux_pigeonhole *p,
 static float maxerror(int dim,float *a,encode_aux_pigeonhole *p,
 		       long *temptrack,float *tempmin,float *tempmax){
   int i;
-  float err=0.,eval;
+  float err=0.f,eval;
   for(i=0;i<dim;i++){
     if(a[i]<tempmin[i]){
       eval=tempmax[i]-a[i];
@@ -327,7 +327,7 @@ int main(int argc,char *argv[]){
        improbable is determined by c->lengthlist; we assume that
        pigeonholing is in sync with the codeword cells, which it is */
     /*for(i=0;i<entries;i++){
-      float probability= 1./(1<<c->lengthlist[i]);
+      float probability= 1.f/(1<<c->lengthlist[i]);
       if(c->lengthlist[i]==0 || probability*entries<cutoff){
 	totalstack-=tempcount[i];
 	tempcount[i]=0;

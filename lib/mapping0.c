@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.21 2000/12/12 08:54:27 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.22 2000/12/21 21:04:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -337,7 +337,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	float *pcmori=vb->pcm[i]+n/2;
 	float *orig=nonquant[i];
 	float *quant=floor[i];
-	float num=0.,den=0.;
+	float num=0.f,den=0.f;
 	int submap=info->chmuxlist[i];
 	
 	if(nonzero[i]){
@@ -362,7 +362,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
 	num=look->floor_func[submap]->
 	  forward2(vb,look->floor_look[submap],
-		   nonzero[i],den==0.?0:num/den,vbb_flr+i);
+		   nonzero[i],den==0.f?0.:num/den,vbb_flr+i);
 
 	/*for(j=0;j<n;j++)
 	  pcm[j]*=num;
@@ -441,7 +441,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 	pcm[j]*=window[j];
     else
       for(j=0;j<n;j++)
-	pcm[j]=0.;
+	pcm[j]=0.f;
     _analysis_output("final",seq++,pcm,n,0,0);
   }
 	    

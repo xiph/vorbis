@@ -13,7 +13,7 @@ LDFLAGS = -static
 LDADD = ../lib/libvorbis.la
 
 lspvqtrain_SOURCES = lspdata.c train.c vqgen.c bookutil.c\
-	 vqgen.h bookutil.h vqext.h
+	vqgen.h bookutil.h vqext.h
 genericvqtrain_SOURCES = genericdata.c train.c vqgen.c bookutil.c\
 	vqgen.h bookutil.h vqext.h
 residuevqtrain_SOURCES = residuedata.c train.c vqgen.c bookutil.c\
@@ -39,8 +39,11 @@ residuesplit_SOURCES = residuesplit.c vqgen.c bookutil.c\
 
 EXTRA_DIST = residue_entropy auxpartition.pl
 
-debug:
-	$(MAKE) all CFLAGS="@DEBUG@"
+debugvq:
+	$(MAKE) vq CFLAGS="@DEBUG@"
 
-profile:
-	$(MAKE) all CFLAGS="@PROFILE@"
+profilevq:
+	$(MAKE) vq CFLAGS="@PROFILE@"
+
+vq: 
+	$(MAKE) $(EXTRA_PROGRAMS) 

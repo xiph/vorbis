@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.36 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.37 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,7 +61,7 @@
 float _dist(vqgen *v,float *a, float *b){
   int i;
   int el=v->elements;
-  float acc=0.;
+  float acc=0.f;
   for(i=0;i<el;i++){
     float val=(a[i]-b[i]);
     acc+=val*val;
@@ -90,7 +90,7 @@ int directdsort(const void *a, const void *b){
 
 void vqgen_cellmetric(vqgen *v){
   int j,k;
-  float min=-1.,max=-1.,mean=0.,acc=0.;
+  float min=-1.f,max=-1.f,mean=0.f,acc=0.f;
   long dup=0,unused=0;
  #ifdef NOISY
   int i;
@@ -177,7 +177,7 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
   mindel=maxdel=_now(v,0)[0];
   
   for(j=0;j<v->entries;j++){
-    float last=0.;
+    float last=0.f;
     for(k=0;k<v->elements;k++){
       if(mindel>_now(v,j)[k]-last)mindel=_now(v,j)[k]-last;
       if(maxdel<_now(v,j)[k]-last)maxdel=_now(v,j)[k]-last;
@@ -190,7 +190,7 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
      encoded.  Loosen the delta slightly to allow for additional error
      during sequence quantization */
 
-  delta=(maxdel-mindel)/((1<<q->quant)-1.5);
+  delta=(maxdel-mindel)/((1<<q->quant)-1.5f);
 
   q->min=_float32_pack(mindel);
   q->delta=_float32_pack(delta);
@@ -229,7 +229,7 @@ void vqgen_unquantize(vqgen *v,quant_meta *q){
   float delta=_float32_unpack(q->delta);
 
   for(j=0;j<v->entries;j++){
-    float last=0.;
+    float last=0.f;
     for(k=0;k<v->elements;k++){
       float now=_now(v,j)[k];
       now=fabs(now)*delta+last+mindel;
@@ -286,7 +286,7 @@ void vqgen_addpoint(vqgen *v, float *p,float *a){
   if(v->aux)memcpy(_point(v,v->points)+v->elements,a,sizeof(float)*v->aux);
  
   /* quantize to the density mesh if it's selected */
-  if(v->mindist>0.){
+  if(v->mindist>0.f){
     /* quantize to the mesh */
     for(k=0;k<v->elements+v->aux;k++)
       _point(v,v->points)[k]=
@@ -306,7 +306,7 @@ static int meshcomp(const void *a,const void *b){
 
 void vqgen_sortmesh(vqgen *v){
   sortit=0;
-  if(v->mindist>0.){
+  if(v->mindist>0.f){
     long i,march=1;
 
     /* sort to make uniqueness detection trivial */
@@ -339,8 +339,8 @@ float vqgen_iterate(vqgen *v,int biasp){
   long  desired;
   long  desired2;
 
-  float asserror=0.;
-  float meterror=0.;
+  float asserror=0.f;
+  float meterror=0.f;
   float *new;
   float *new2;
   long   *nearcount;
@@ -544,7 +544,7 @@ float vqgen_iterate(vqgen *v,int biasp){
 	  _now(v,j)[k]=vN(new,j)[k]/v->assigned[j];
       }else{
 	for(k=0;k<v->elements;k++)
-	  _now(v,j)[k]=(vN(new,j)[k]+vN(new2,j)[k])/2.;
+	  _now(v,j)[k]=(vN(new,j)[k]+vN(new2,j)[k])/2.f;
       }
     }
   }

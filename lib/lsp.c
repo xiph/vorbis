@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.12 2000/11/06 00:07:01 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.13 2000/12/21 21:04:39 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -52,7 +52,7 @@
    ARM family. */
 
 /* undefine both for the 'old' but more precise implementation */
-#define  FLOAT_LOOKUP
+#undef   FLOAT_LOOKUP
 #undef   INT_LOOKUP
 
 #ifdef FLOAT_LOOKUP
@@ -74,8 +74,8 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
   while(i<n){
     int k=map[i];
     int qexp;
-    float p=.7071067812;
-    float q=.7071067812;
+    float p=.7071067812f;
+    float q=.7071067812f;
     float w=vorbis_coslook(wdel*k);
     float *ftmp=lsp;
     int c=m>>1;
@@ -86,7 +86,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
       ftmp+=2;
     }while(--c);
 
-    q=frexp(p*p*(1.+w)+q*q*(1.-w),&qexp);
+    q=frexp(p*p*(1.f+w)+q*q*(1.f-w),&qexp);
     q=vorbis_fromdBlook(amp*             
 			vorbis_invsqlook(q)*
 			vorbis_invsq2explook(qexp+m)- 
@@ -131,10 +131,10 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 
   /* set up for using all int later */
   int i;
-  int ampoffseti=rint(ampoffset*4096.);
-  int ampi=rint(amp*16.);
+  int ampoffseti=rint(ampoffset*4096.f);
+  int ampi=rint(amp*16.f);
   long *ilsp=alloca(m*sizeof(long));
-  for(i=0;i<m;i++)ilsp[i]=vorbis_coslook_i(lsp[i]/M_PI*65536.+.5);
+  for(i=0;i<m;i++)ilsp[i]=vorbis_coslook_i(lsp[i]/M_PI*65536.f+.5f);
 
   i=0;
   while(i<n){
@@ -208,20 +208,20 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 			    float amp,float ampoffset){
   int i;
   float wdel=M_PI/ln;
-  for(i=0;i<m;i++)lsp[i]=2*cos(lsp[i]);
+  for(i=0;i<m;i++)lsp[i]=2.f*cos(lsp[i]);
 
   i=0;
   while(i<n){
     int j,k=map[i];
-    float p=.5;
-    float q=.5;
-    float w=2*cos(wdel*k);
+    float p=.5f;
+    float q=.5f;
+    float w=2.f*cos(wdel*k);
     for(j=0;j<m;j+=2){
       p *= w-lsp[j];
       q *= w-lsp[j+1];
     }
-    p*=p*(2.+w);
-    q*=q*(2.-w);
+    p*=p*(2.f+w);
+    q*=q*(2.f-w);
     q=fromdB(amp/sqrt(p+q)-ampoffset);
 
     curve[i]=q;
@@ -235,7 +235,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 static void cheby(float *g, int ord) {
   int i, j;
 
-  g[0] *= 0.5;
+  g[0] *= .5f;
   for(i=2; i<= ord; i++) {
     for(j=ord; j >= i; j--) {
       g[j-2] -= g[j];
@@ -284,7 +284,7 @@ static void Newton_Raphson_Maehly(float *a,int ord,float *r){
 
   for(i=0; i<ord;i++) root[i] = 2.0 * (i+0.5) / ord - 1.0;
   
-  while(error>1.e-20){
+  while(error>1e-20){
     error=0;
     
     for(i=0; i<ord; i++) { /* Update each point. */
@@ -304,7 +304,7 @@ static void Newton_Raphson_Maehly(float *a,int ord,float *r){
       /* don't allow the correction to scream off into infinity if we
          happened to polish right at a local mini/maximum */
 
-      if(delta<-3)delta=-3;
+      if(delta<-3.)delta=-3.;
       if(delta>3.)delta=3.; /* 3 is not a random choice; it's large
                                enough to make sure the first pass
                                can't accidentally limit two poles to
@@ -321,7 +321,7 @@ static void Newton_Raphson_Maehly(float *a,int ord,float *r){
     if(!count || error<besterror){
       for(i=0; i<ord; i++) r[i]=root[i]; 
       besterror=error;
-      if(error<1.e-6){ /* rough minimum criteria */
+      if(error<1e-6){ /* rough minimum criteria */
 	maxiter=count*2+10;
 	if(maxiter>100)maxiter=100;
       }
@@ -351,9 +351,9 @@ void vorbis_lpc_to_lsp(float *lpc,float *lsp,int m){
   /* Compute half of the symmetric and antisymmetric polynomials. */
   /* Remove the roots at +1 and -1. */
   
-  g1[order2] = 1.0;
+  g1[order2] = 1.f;
   for(i=0;i<order2;i++) g1[order2-i-1] = lpc[i]+lpc[m-i-1];
-  g2[order2] = 1.0;
+  g2[order2] = 1.f;
   for(i=0;i<order2;i++) g2[order2-i-1] = lpc[i]-lpc[m-i-1];
   
   for(i=0; i<order2;i++) g1[order2-i-1] -= g1[order2-i];

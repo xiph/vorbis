@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.7 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.8 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,7 +26,7 @@
    subgroup request of 32.  Max subn of 128 */
 static void _testhack(float *vec,int n,float *entropy){
   int i,j=0;
-  float max=0.;
+  float max=0.f;
   float temp[128];
 
   /* setup */
@@ -47,7 +47,7 @@ static void _testhack(float *vec,int n,float *entropy){
     for(i=0;i<n;i++){
       temp[i]+=temp[i+n];
     }
-    max=0.;
+    max=0.f;
     for(i=0;i<n;i++)
       if(temp[i]>max)max=temp[i];
   }
@@ -66,7 +66,7 @@ int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts,
   int aux;
 
   for(i=0;i<=n-subn;i+=subn){
-    float max=0.;
+    float max=0.f;
 
     _testhack(res+i,subn,entropy);
     for(j=0;j<subn;j++)
@@ -168,16 +168,16 @@ int main(int argc, char *argv[]){
   for(i=0;i<parts-1;i++){
     char *pos=strchr(argv[4+i],',');
     if(*argv[4+i]==',')
-      ebound[i]=1e50;
+      ebound[i]=1e50f;
     else
       ebound[i]=atof(argv[4+i]);
 
     if(!pos){
-      mbound[i]=1e50;
+      mbound[i]=1e50f;
       subgrp[i]=_ilog(subn)-1;
      }else{
        if(*(pos+1)==',')
-	 mbound[i]=1e50;
+	 mbound[i]=1e50f;
        else
 	 mbound[i]=atof(pos+1);
        pos=strchr(pos+1,',');
@@ -190,8 +190,8 @@ int main(int argc, char *argv[]){
      }
   }
 
-  ebound[i]=1e50;
-  mbound[i]=1e50;
+  ebound[i]=1e50f;
+  mbound[i]=1e50f;
   subgrp[i]=_ilog(subn)-1;
 
   res=fopen(argv[1],"r");

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.7 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.8 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,7 +59,7 @@
 
 static float _dist(int el,float *a, float *b){
   int i;
-  float acc=0.;
+  float acc=0.f;
   for(i=0;i<el;i++){
     float val=(a[i]-b[i]);
     acc+=val*val;
@@ -358,7 +358,7 @@ int main(int argc,char *argv[]){
       qsort(countindex,entries,sizeof(long *),longsort);
       for(i=0;i<protect;i++){
 	int ptr=countindex[i]-cellcount;
-	cellerrormax[ptr]=9e50;
+	cellerrormax[ptr]=9e50f;
       }
     }
 

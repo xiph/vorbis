@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.20 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: train.c,v 1.21 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -79,7 +79,7 @@ int main(int argc,char *argv[]){
 
   int entries=-1,dim=-1;
   int start=0,num=-1;
-  float desired=.05,mindist=0.;
+  float desired=.05f,mindist=0.f;
   int iter=1000;
   int biasp=1;
   int centroid=0;

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.27 2000/11/06 00:07:01 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.28 2000/12/21 21:04:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -102,7 +102,7 @@ float vorbis_lpc_from_data(float *data,float *lpc,int n,int m){
     }
     if(i%2)lpc[j]+=lpc[j]*r;
     
-    error*=1.0-r*r;
+    error*=1.0f-r*r;
   }
   
   /* we need the error value to know how big an impulse to hit the
@@ -118,7 +118,7 @@ float vorbis_lpc_from_curve(float *curve,float *lpc,lpc_lookup *l){
   int n=l->ln;
   int m=l->m;
   float *work=alloca(sizeof(float)*(n+n));
-  float fscale=.5/n;
+  float fscale=.5f/n;
   int i,j;
   
   /* input is a real curve. make it complex-real */
@@ -178,7 +178,7 @@ void vorbis_lpc_predict(float *coeff,float *prime,int m,
 
   if(!prime)
     for(i=0;i<m;i++)
-      work[i]=0.;
+      work[i]=0.f;
   else
     for(i=0;i<m;i++)
       work[i]=prime[i];

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.22 2000/11/17 11:47:18 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.23 2000/12/21 21:04:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -175,7 +175,7 @@ static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
 		     int auxparts,int auxpartnum){
   vorbis_info_residue0 *info=look->info;
   int i,j=0;
-  float max,localmax=0.;
+  float max,localmax=0.f;
   float temp[128];
   float entropy[8];
 
@@ -198,7 +198,7 @@ static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
     for(i=0;i<n;i++){
       temp[i]+=temp[i+n];
     }
-    localmax=0.;
+    localmax=0.f;
     for(i=0;i<n;i++)
       if(temp[i]>localmax)localmax=temp[i];
   }

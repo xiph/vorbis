@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.6 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.7 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include "../lib/scales.h"
 #include "vqext.h"
 
-float scalequant=3.;
+float scalequant=3.f;
 char *vqext_booktype="RESdata";  
 quant_meta q={0,0,0,0};          /* set sequence data */
 int vqext_aux=0;
@@ -77,7 +77,7 @@ void vqext_quantize(vqgen *v,quant_meta *q){
      information (as we know granularity beforehand and don't need to
      maximize it) */
 
-  q->min=_float32_pack(0.);
+  q->min=_float32_pack(0.f);
   q->delta=_float32_pack(scalequant);
   q->quant=_ilog(max);
 
@@ -90,7 +90,7 @@ void vqext_quantize(vqgen *v,quant_meta *q){
                             /* candidate,actual */
 float vqext_metric(vqgen *v,float *e, float *p){
   int i;
-  float acc=0.;
+  float acc=0.f;
   for(i=0;i<v->elements;i++){
     float val=p[i]-e[i];
     acc+=val*val;

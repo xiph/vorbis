@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.33 2000/12/13 07:37:20 msmith Exp $
+ last mod: $Id: psy.c,v 1.34 2000/12/21 21:04:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -86,8 +86,8 @@ static void attenuate_curve(float *c,float att){
 static void linear_curve(float *c){
   int i;  
   for(i=0;i<EHMER_MAX;i++)
-    if(c[i]<=-200.)
-      c[i]=0.;
+    if(c[i]<=-200.f)
+      c[i]=0.f;
     else
       c[i]=fromdB(c[i]);
 }
@@ -95,7 +95,7 @@ static void linear_curve(float *c){
 static void interp_curve(float *c,float *c1,float *c2,float del){
   int i;
   for(i=0;i<EHMER_MAX;i++)
-    c[i]=c2[i]*del+c1[i]*(1.-del);
+    c[i]=c2[i]*del+c1[i]*(1.f-del);
 }
 
 static void setup_curve(float **c,
@@ -123,18 +123,18 @@ static void setup_curve(float **c,
     float ath_min,ath_max;
 
     if(ibark<26)
-      ath_min=ATH_Bark_dB[ibark]*(1.-del)+ATH_Bark_dB[ibark+1]*del;
+      ath_min=ATH_Bark_dB[ibark]*(1.f-del)+ATH_Bark_dB[ibark+1]*del;
     else
-      ath_min=200.;
+      ath_min=200.f;
 
     bark=toBARK(fromOC(oc_max));
     ibark=floor(bark);
     del=bark-ibark;
 
     if(ibark<26)
-      ath_max=ATH_Bark_dB[ibark]*(1.-del)+ATH_Bark_dB[ibark+1]*del;
+      ath_max=ATH_Bark_dB[ibark]*(1.f-del)+ATH_Bark_dB[ibark+1]*del;
     else
-      ath_max=200.;
+      ath_max=200.f;
 
     ath[i]=min(ath_min,ath_max);
   }
@@ -150,7 +150,7 @@ static void setup_curve(float **c,
   for(i=0;i<P_LEVELS;i++){
     attenuate_curve(c[i],curveatt_dB[i]);
     memcpy(tempc[i],ath,EHMER_MAX*sizeof(float));
-    attenuate_curve(tempc[i],-i*10.);
+    attenuate_curve(tempc[i],-i*10.f);
     max_curve(tempc[i],c[i]);
   }
 
@@ -193,7 +193,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
     p->bark[i]=toBARK(rate/(2*n)*i); 
 
   for(i=0;i<n;i++){
-    int oc=toOC((i+.5)*rate/(2*n))*2.+2; /* half octaves, actually */
+    int oc=toOC((i+.5)*rate/(2.f*n))*2.f+2.f; /* half octaves, actually */
     if(oc<0)oc=0;
     if(oc>=P_BANDS)oc=P_BANDS-1;
     p->octave[i]=oc;
@@ -314,7 +314,7 @@ static void compute_decay_fixed(vorbis_look_psy *p,float *f, float *decay, int n
   /* handle decay */
   int i;
   float decscale=fromdB(p->vi->decay_coeff*n); 
-  float attscale=1./fromdB(p->vi->attack_coeff); 
+  float attscale=1.f/fromdB(p->vi->attack_coeff); 
 
   for(i=10;i<n;i++){
     float pre=decay[i];
@@ -359,7 +359,7 @@ static int seed_curve(float *flr,
   float *curve;
 
   /* make this attenuation adjustable */
-  int choice=(int)((todB(amp)-specmax+specatt)/10.+.5);
+  int choice=(int)((todB(amp)-specmax+specatt)/10.f+.5f);
   choice=max(choice,0);
   choice=min(choice,P_LEVELS-1);
 
@@ -369,7 +369,7 @@ static int seed_curve(float *flr,
   curve=curves[choice];
 
   for(;i>=0;i--)
-    if(curve[i]>0.)break;
+    if(curve[i]>0.f)break;
   
   for(;i>=0;i--){
     float lin=curve[i];
@@ -389,7 +389,7 @@ static void seed_peak(float *flr,
   int prevx=(x*_eights[16])>>12;
 
   /* make this attenuation adjustable */
-  int choice=rint((todB(amp)-specmax+specatt)/10.+.5);
+  int choice=rint((todB(amp)-specmax+specatt)/10.f+.5f);
   if(choice<0)choice=0;
   if(choice>=P_LEVELS)choice=P_LEVELS-1;
 
@@ -471,9 +471,9 @@ static void max_seeds(vorbis_look_psy *p,float *seeds,float *flr){
 	  ampstack[stack++]=seeds[i];
 	  break;
 	}else{
-	  if(i<posstack[stack-1]*1.0905077080){
+	  if(i<posstack[stack-1]*1.0905077080f){
 	    if(stack>1 && ampstack[stack-1]<ampstack[stack-2] &&
-	       i<posstack[stack-2]*1.0905077080){
+	       i<posstack[stack-2]*1.0905077080f){
 	      /* we completely overlap, making stack-1 irrelevant.  pop it */
 	      stack--;
 	      continue;
@@ -497,7 +497,7 @@ static void max_seeds(vorbis_look_psy *p,float *seeds,float *flr){
       if(i<stack-1 && ampstack[i+1]>ampstack[i]){
 	endpos=posstack[i+1];
       }else{
-	endpos=posstack[i]*1.0905077080+1; /* +1 is important, else bin 0 is
+	endpos=posstack[i]*1.0905077080f+1.f; /* +1 is important, else bin 0 is
                                        discarded in short frames */
       }
       if(endpos>n)endpos=n;
@@ -514,7 +514,7 @@ static void max_seeds(vorbis_look_psy *p,float *seeds,float *flr){
 
 static void bark_noise(long n,float *b,float *f,float *noise){
   long i=1,lo=0,hi=2;
-  float acc=0.,val,del=0.;
+  float acc=0.f,val,del=0.f;
 
   float *norm=alloca(n*sizeof(float));
 
@@ -522,14 +522,14 @@ static void bark_noise(long n,float *b,float *f,float *noise){
   memset(norm,0,n*sizeof(float));
 
   while(hi<n){
-    val=todB_nn(f[i]*f[i])+400.;
-    del=1./(i-lo);
+    val=todB_nn(f[i]*f[i])+400.f;
+    del=1.f/(i-lo);
     noise[lo]+=val*del;
     noise[i]-=val*del;
     norm[lo]+=del;
     norm[i]-=del;
  
-    del=1./(hi-i);
+    del=1.f/(hi-i);
     noise[i]-=val*del;
     noise[hi]+=val*del;
     norm[hi]+=del;
@@ -547,20 +547,20 @@ static void bark_noise(long n,float *b,float *f,float *noise){
     long hii=hi-i;
 
     for(;i<n;i++){
-      val=todB_nn(f[i]*f[i])+400.;
-      del=1./(hii);
+      val=todB_nn(f[i]*f[i])+400.f;
+      del=1.f/(hii);
       noise[i]-=val*del;
       norm[i]-=del;
      
-      del=1./(ilo);
+      del=1.f/(ilo);
       noise[i-ilo]+=val*del;
       noise[i]-=val*del;      
       norm[i-ilo]+=del;
       norm[i]-=del;      
     }
     for(i=1,lo=n-ilo;lo<n;lo++,i++){
-      val=todB_nn(f[n-i]*f[n-i])+400.;
-      del=1./ilo;
+      val=todB_nn(f[n-i]*f[n-i])+400.f;
+      del=1.f/ilo;
       noise[lo]+=val*del;
       norm[lo]+=del;
     }
@@ -583,7 +583,7 @@ static void bark_noise(long n,float *b,float *f,float *noise){
     val+=norm[i];
     acc+=noise[i];
     if(val==0){
-      noise[i]=0.;
+      noise[i]=0.f;
       norm[i]=0;
     }else{
       float v=acc/val-400;
@@ -597,7 +597,7 @@ void _vp_compute_mask(vorbis_look_psy *p,float *f,
 		      float *decay){
   float *smooth=alloca(sizeof(float)*p->n);
   int i,n=p->n;
-  float specmax=0.;
+  float specmax=0.f;
   static int seq=0;
 
   float *seed=alloca(sizeof(float)*p->n);
@@ -691,7 +691,7 @@ void _vp_compute_mask(vorbis_look_psy *p,float *f,
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */
 
-  for(i=0;i<n;i++)if(2.*f[i]>flr[i] || -2.*f[i]>flr[i])break;
+  for(i=0;i<n;i++)if(2.f*f[i]>flr[i] || -2.f*f[i]>flr[i])break;
   if(i==n)memset(flr,0,sizeof(float)*n);
 
   seq++;
@@ -708,7 +708,7 @@ void _vp_apply_floor(vorbis_look_psy *p,float *f, float *flr){
   /* subtract the floor */
   for(j=0;j<p->n;j++){
     if(flr[j]<=0)
-      work[j]=0.;
+      work[j]=0.f;
     else
       work[j]=f[j]/flr[j];
   }

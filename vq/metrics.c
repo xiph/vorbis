@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.11 2000/11/08 03:23:23 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.12 2000/12/21 21:04:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,18 +37,18 @@
 
 /* set up metrics */
 
-float meanamplitude_acc=0.;
-float meanamplitudesq_acc=0.;
-float meanerror_acc=0.;
-float meanerrorsq_acc=0.;
+float meanamplitude_acc=0.f;
+float meanamplitudesq_acc=0.f;
+float meanerror_acc=0.f;
+float meanerrorsq_acc=0.f;
 
 float **histogram=NULL;
 float **histogram_error=NULL;
 float **histogram_errorsq=NULL;
 float **histogram_hi=NULL;
 float **histogram_lo=NULL;
-float bits=0.;
-float count=0.;
+float bits=0.f;
+float count=0.f;
 
 static float *_now(codebook *c, int i){
   return c->valuelist+i*c->c->dim;
@@ -83,7 +83,7 @@ void process_preprocess(codebook **bs,char *basename){
 
 static float _dist(int el,float *a, float *b){
   int i;
-  float acc=0.;
+  float acc=0.f;
   for(i=0;i<el;i++){
     float val=(a[i]-b[i]);
     acc+=val*val;
@@ -93,7 +93,7 @@ static float _dist(int el,float *a, float *b){
 
 void cell_spacing(codebook *c){
   int j,k;
-  float min=-1,max=-1,mean=0.,meansq=0.;
+  float min=-1.f,max=-1.f,mean=0.f,meansq=0.f;
   long total=0;
 
   /* minimum, maximum, mean, ms cell spacing */
@@ -210,7 +210,7 @@ void process_postprocess(codebook **bs,char *basename){
 float process_one(codebook *b,int book,float *a,int dim,int step,int addmul,
 		   float base){
   int j,entry;
-  float amplitude=0.;
+  float amplitude=0.f;
 
   if(book==0){
     float last=base;
@@ -267,7 +267,7 @@ void process_vector(codebook **bs,int *addmul,int inter,float *a,int n){
   for(bi=0;bi<books;bi++){
     codebook *b=bs[bi];
     int dim=b->dim;
-    float base=0.;
+    float base=0.f;
 
     if(inter){
       for(i=0;i<n/dim;i++)

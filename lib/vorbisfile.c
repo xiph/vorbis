@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.33 2000/11/29 21:13:34 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.34 2000/12/21 21:04:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -411,8 +411,8 @@ static void _decode_clear(OggVorbis_File *vf){
   vorbis_block_clear(&vf->vb);
   vf->decode_ready=0;
 
-  vf->bittrack=0.;
-  vf->samptrack=0.;
+  vf->bittrack=0.f;
+  vf->samptrack=0.f;
 }
 
 /* fetch and process a packet.  Handles the case where we're at a
@@ -701,8 +701,8 @@ long ov_bitrate_instant(OggVorbis_File *vf){
   long ret;
   if(vf->samptrack==0)return(OV_FALSE);
   ret=vf->bittrack/vf->samptrack*vf->vi[link].rate+.5;
-  vf->bittrack=0.;
-  vf->samptrack=0.;
+  vf->bittrack=0.f;
+  vf->samptrack=0.f;
   return(ret);
 }
 
@@ -1011,7 +1011,7 @@ double ov_time_tell(OggVorbis_File *vf){
 
   int link=-1;
   ogg_int64_t pcm_total=0;
-  double time_total=0.;
+  double time_total=0.f;
   
   if(vf->seekable){
     pcm_total=ov_pcm_total(vf,-1);
@@ -1140,7 +1140,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	    vorbis_fpu_setround(&fpu);
 	    for(j=0;j<samples;j++)
 	      for(i=0;i<channels;i++){
-		val=vorbis_ftoi(pcm[i][j]*128.);
+		val=vorbis_ftoi(pcm[i][j]*128.f);
 		if(val>127)val=127;
 		else if(val<-128)val=-128;
 		*buffer++=val+off;
@@ -1157,7 +1157,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		  float *src=pcm[i];
 		  short *dest=((short *)buffer)+i;
 		  for(j=0;j<samples;j++) {
-		    val=vorbis_ftoi(src[j]*32768.);
+		    val=vorbis_ftoi(src[j]*32768.f);
 		    if(val>32767)val=32767;
 		    else if(val<-32768)val=-32768;
 		    *dest=val;
@@ -1173,7 +1173,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		  float *src=pcm[i];
 		  short *dest=((short *)buffer)+i;
 		  for(j=0;j<samples;j++) {
-		    val=vorbis_ftoi(src[j]*32768.);
+		    val=vorbis_ftoi(src[j]*32768.f);
 		    if(val>32767)val=32767;
 		    else if(val<-32768)val=-32768;
 		    *dest=val+off;
@@ -1188,7 +1188,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	      vorbis_fpu_setround(&fpu);
 	      for(j=0;j<samples;j++)
 		for(i=0;i<channels;i++){
-		  val=vorbis_ftoi(pcm[i][j]*32768.);
+		  val=vorbis_ftoi(pcm[i][j]*32768.f);
 		  if(val>32767)val=32767;
 		  else if(val<-32768)val=-32768;
 		  val+=off;
@@ -1202,7 +1202,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	      vorbis_fpu_setround(&fpu);
 	      for(j=0;j<samples;j++)
 	 	for(i=0;i<channels;i++){
-		  val=vorbis_ftoi(pcm[i][j]*32768.);
+		  val=vorbis_ftoi(pcm[i][j]*32768.f);
 		  if(val>32767)val=32767;
 		  else if(val<-32768)val=-32768;
 		  val+=off;
