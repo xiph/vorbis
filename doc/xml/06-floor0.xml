@@ -1,7 +1,7 @@
 <section id="vorbis-spec-floor0">
 <sectioninfo>
 <releaseinfo>
-  $Id: 06-floor0.xml,v 1.2 2002/10/13 14:32:16 giles Exp $
+  $Id: 06-floor0.xml,v 1.3 2002/10/13 15:18:46 giles Exp $
   <emphasis>Last update to this document: July 19, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>  
@@ -12,8 +12,8 @@
 <title>Overview</title>
 
 <para>
-Vorbis floor type zero uses Line Spectral Pair [LSP, also alternately
-known as Line Spectral Frequency or LSF] representation to encode a
+Vorbis floor type zero uses Line Spectral Pair (LSP, also alternately
+known as Line Spectral Frequency or LSF) representation to encode a
 smooth spectral envelope curve as the frequency response of the LSP
 filter.  This representation is equivalent to a traditional all-pole
 infinite impulse response filter as would be used in linear predictive
@@ -94,7 +94,7 @@ Packet decode proceeds as follows:</para>
 Take note of the following properties of decode:
 <itemizedlist>
  <listitem><simpara>An <varname>[amplitude]</varname> value of zero must result in a return code that indicates this channel is unused in this frame (the output of the channel will be all-zeroes in synthesis).  Several later stages of decode don't occur for an unused channel.</simpara></listitem>
- <listitem><simpara>>An end-of-packet condition during decode should be considered a
+ <listitem><simpara>An end-of-packet condition during decode should be considered a
 nominal occruence; if end-of-packet is reached during any read
 operation above, floor decode is to return 'unused' status as if the
 <varname>[amplitude]</varname> value had read zero at the beginning of decode.</simpara></listitem>

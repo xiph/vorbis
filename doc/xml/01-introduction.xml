@@ -1,7 +1,7 @@
 <section id="vorbis-spec-intro">
 <sectioninfo>
 <releaseinfo>
- $Id: 01-introduction.xml,v 1.1 2002/10/12 20:37:11 giles Exp $
+ $Id: 01-introduction.xml,v 1.2 2002/10/13 15:18:46 giles Exp $
 <emphasis>Last update to this document: July 18, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -101,8 +101,8 @@ For these reasons, configurable aspects codec setup intentionally
 lean toward the extreme of forward adaptive.</para>
 
 <para>
-The single most controversial design decision in Vorbis [and the most
-unusual for a Vorbis developer to keep in mind] is that the entire
+The single most controversial design decision in Vorbis (and the most
+unusual for a Vorbis developer to keep in mind) is that the entire
 probability model of the codec, the Huffman and VQ codebooks, is
 packed into the bitstream header along with extensive CODEC setup
 parameters (often several hundred fields).  This makes it impossible,
@@ -136,7 +136,7 @@ The Vorbis format is well-defined by its decode specification; any
 encoder that produces packets that are correctly decoded by the
 reference Vorbis decoder described below may be considered a proper
 Vorbis encoder.  A decoder must faithfully and completely implement
-the specification defined below [except where noted] to be considered
+the specification defined below (except where noted) to be considered
 a proper Vorbis decoder.</para>
 </section>
 
@@ -337,10 +337,11 @@ sample rate and number of channels.</para>
 
 <section><title>Comment Header</title>
 <para>
-The comment header includes user text comments ["tags"] and a vendor
+The comment header includes user text comments ("tags") and a vendor
 string for the application/library that produced the bitstream.  The
 encoding of the comment header is described within this document; the
-proper use of the comment fields is described in <ulink url="v-comment.html">the Ogg Vorbis comment field specification</ulink>.</para>
+proper use of the comment fields is described in 
+<xref linkend="vorbis-spec-comment"/>.</para>
 </section>
 
 <section><title>Setup Header</title>
@@ -360,7 +361,7 @@ fundamentally the same.
 <orderedlist>
 <listitem><simpara>decode packet type flag</simpara></listitem>
 <listitem><simpara>decode mode number</simpara></listitem>
-<listitem><simpara>decode window shape [long windows only]</simpara></listitem>
+<listitem><simpara>decode window shape (long windows only)</simpara></listitem>
 <listitem><simpara>decode floor</simpara></listitem>
 <listitem><simpara>decode residue into residue vectors</simpara></listitem>
 <listitem><simpara>inverse channel coupling of residue vectors</simpara></listitem>
@@ -412,7 +413,7 @@ the mode instance index. </para>
 </section>
 
 <section id="vorbis-spec-window">
-<title>Window shape decode [long windows only]</title>
+<title>Window shape decode (long windows only)</title>
 
 <para>
 Vorbis frames may be one of two PCM sample sizes specified during

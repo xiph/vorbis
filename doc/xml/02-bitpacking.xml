@@ -1,7 +1,7 @@
 <section id="vorbis-spec-bitpacking">
 <sectioninfo>
 <releaseinfo>
- $Id: 02-bitpacking.xml,v 1.1 2002/10/12 20:37:11 giles Exp $
+ $Id: 02-bitpacking.xml,v 1.2 2002/10/13 15:18:46 giles Exp $
  <emphasis>Last update to this document: July 14, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -48,9 +48,9 @@ that a byte is one octet for purposes of example.</para>
 </section><section><title>bit order</title>
 
 <para>
-A byte has a well-defined 'least significant' bit [LSb], which is the
+A byte has a well-defined 'least significant' bit (LSb), which is the
 only bit set when the byte is storing the two's complement integer
-value +1.  A byte's 'most significant' bit [MSb] is at the opposite
+value +1.  A byte's 'most significant' bit (MSb) is at the opposite
 end of the byte. Bits in a byte are numbered from zero at the LSb to
 <emphasis>n</emphasis> (<emphasis>n</emphasis>=7 in an octet) for the
 MSb.</para>
