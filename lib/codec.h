@@ -14,7 +14,7 @@
  function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 6 1999
+ last modification date: Oct 12 1999
 
  ********************************************************************/
 
@@ -24,14 +24,14 @@
 #include <sys/types.h> /* get BSD style 16/32/64 bit types */
 
 /* If we have defines from the configure script, use those */
-#ifdef size64
-#  define int64_t size64
+#ifndef size64
+#  define size64 int64_t 
 #endif
-#ifdef size32
-#  define int32_t size32
+#ifndef size32
+#  define size32 int32_t 
 #endif
-#ifdef size16
-#  define int16_t size16
+#ifndef size16
+#  define size16 int16_t
 #endif
 
 /* lookup structures for various simple transforms *****************/
@@ -227,6 +227,11 @@ typedef struct vorbis_dsp_state{
   long frame;
   long samples;
 
+  size64 gluebits;
+  size64 time_envelope_bits;
+  size64 spectral_envelope_bits;
+  size64 spectral_residue_bits;
+
 } vorbis_dsp_state;
 
 /* vorbis_block is a single block of data to be processed as part of
@@ -258,6 +263,12 @@ typedef struct vorbis_block{
   int eofflag;
   int frameno;
   vorbis_dsp_state *vd; /* For read-only access of configuration */
+
+  long gluebits;
+  long time_envelope_bits;
+  long spectral_envelope_bits;
+  long spectral_residue_bits;
+
 } vorbis_block;
 
 /* libvorbis encodes in two abstraction layers; first we perform DSP
@@ -341,7 +352,9 @@ extern int vorbis_synthesis_read(vorbis_dsp_state *v,int samples);
 
 #define min(x,y)  ((x)>(y)?(y):(x))
 #define max(x,y)  ((x)<(y)?(y):(x))
-#define todB(x)   (x==0?-9.e40:log(fabs(x))*8.6858896)  /* 20log10(x) */
+
+  /* 20log10(x) */
+#define todB(x)   ((x)==0?-9.e40:log(fabs(x))*8.6858896)
 #define fromdB(x) (exp((x)*.11512925))
 
 #endif
