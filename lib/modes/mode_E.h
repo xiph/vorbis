@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_E.h,v 1.10 2001/02/18 09:53:12 xiphmont Exp $
+ last mod: $Id: mode_E.h,v 1.11 2001/02/18 12:05:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,7 +42,7 @@
 #include "books/res0_256_1024_4.vqh"
 #include "books/res0_256_1024_5.vqh"
 #include "books/res0_256_1024_6.vqh"
-#include "books/res0_256_1024_7.vqh"
+#include "books/res0_350_1024_7.vqh"
 
 
 static vorbis_info_psy _psy_set_E0={
@@ -259,7 +259,7 @@ codec_setup_info info_E={
    &_vq_book_res0_256_1024_4,
    &_vq_book_res0_256_1024_5,
    &_vq_book_res0_256_1024_6,
-   &_vq_book_res0_256_1024_7,
+   &_vq_book_res0_350_1024_7,
 
   },
   /* psy */
