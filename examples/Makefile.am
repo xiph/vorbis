@@ -12,7 +12,9 @@ LDADD = $(top_srcdir)/lib/.libs/libvorbis.a
 decoder_example_SOURCES = decoder_example.c
 encoder_example_SOURCES = encoder_example.c
 chaining_example_SOURCES = chaining_example.c
+chaining_example_LDADD = $(top_srcdir)/lib/.libs/libvorbisfile.a $(top_srcdir)/lib/.libs/libvorbis.a
 vorbisfile_example_SOURCES = vorbisfile_example.c
+vorbisfile_example_LDADD = $(top_srcdir)/lib/.libs/libvorbisfile.a $(top_srcdir)/lib/.libs/libvorbis.a
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"
