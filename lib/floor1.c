@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.16.2.1 2001/11/22 06:21:08 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.16.2.2 2001/11/30 07:19:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1137,7 +1137,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
 	ly=hy;
       }
     }
-    for(j=hx;j<n;j++)out[j]*=out[j-1]; /* be certain */    
+    for(j=hx;j<n;j++)out[j]*=ly; /* be certain */    
     return(1);
   }
   memset(out,0,sizeof(*out)*n);
