@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_Z.h,v 1.2 2001/08/13 01:37:13 xiphmont Exp $
+ last mod: $Id: mode_44c_Z.h,v 1.3 2001/08/13 02:01:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -244,7 +244,6 @@ static vorbis_info_mapping0 _mapping_set_44c_Z={
 static vorbis_info_mode _mode_set_44c_Z0={0,0,0,0};
 static vorbis_info_mode _mode_set_44c_Z={1,0,0,1};
 
-/* CD quality stereo, no channel coupling */
 codec_setup_info info_44c_Z={
 
   /* smallblock, largeblock */
@@ -303,7 +302,7 @@ codec_setup_info info_44c_Z={
    &_vq_book_res_Zc_7,
    &_vq_book_res_Zc_8,
    &_vq_book_res_Zc_9,
-   &_vq_book_res_Zc_9a,
+v   &_vq_book_res_Zc_9a,
    &_vq_book_res_Zc_9b,
 
   },
