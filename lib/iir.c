@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.3 2000/11/06 00:07:00 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.4 2000/11/07 09:51:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,6 +46,10 @@ void IIR_clear(IIR_state *s){
   }
 }
 
+void IIR_reset(IIR_state *s){
+  memset(s->z_A,0,sizeof(float)*s->stages*2);
+}
+
 float IIR_filter(IIR_state *s,float in){
   int stages=s->stages,i;
   float newA;
@@ -63,17 +67,6 @@ float IIR_filter(IIR_state *s,float in){
   if(++s->ring>=stages)s->ring=0;
 
   return(newB);
-}
-
-/* prevents ringing down to underflow */
-void IIR_clamp(IIR_state *s,float thresh){
-  float *zA=s->z_A+s->ring;
-  int i;
-  for(i=0;i<s->stages;i++)
-    if(fabs(zA[i])>=thresh)break;
-  
-  if(i<s->stages)
-    memset(s->z_A,0,sizeof(float)*s->stages*2);
 }
 
 /* this assumes the symmetrical structure of the feed-forward stage of

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.26 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.27 2000/11/07 09:51:42 xiphmont Exp $
 
  ********************************************************************/
 
@@ -246,6 +246,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
   float *work=alloca((look->ln+look->n)*sizeof(float));
   float amp;
   long bits=0;
+  static int seq=0;
 
 #ifdef TRAIN_LSP
   FILE *of;
@@ -300,6 +301,19 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
 
+#ifdef ANALYSIS
+    {
+      float *lspwork=alloca(look->m*sizeof(float));
+      memcpy(lspwork,out,look->m*sizeof(float));
+      vorbis_lsp_to_curve(lspwork,look->linearmap,look->n,look->ln,
+			  work,look->m,amp,info->ampdB);
+      _analysis_output("prefit",seq,work,look->n,0,1);
+
+    }
+
+#endif
+
+
 #if 1
 #ifdef TRAIN_LSP
     {
@@ -350,6 +364,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
   }
 
   memset(out,0,sizeof(float)*look->n);
+  seq++;
   return(0);
 }
 

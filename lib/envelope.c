@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.24 2000/11/06 00:07:00 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.25 2000/11/07 09:51:42 xiphmont Exp $
 
  Preecho calculation.
 
@@ -174,11 +174,15 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
     float *filtered=ve->filtered[i];
     float *pcm=v->pcm[i];
     IIR_state *iir=ve->iir+i;
-    IIR_clamp(iir,9e-15);
+    int flag=1;
     
-    for(j=ve->current;j<v->pcm_current;j++)
+    for(j=ve->current;j<v->pcm_current;j++){
       filtered[j]=IIR_filter(iir,pcm[j]);
+      if(pcm[j])flag=0;
+    }
+    if(flag && ve->current+64<v->pcm_current)IIR_reset(iir);
   }
+
   ve->current=v->pcm_current;
 
   /* Now search through our cached highpass data for breaking points */

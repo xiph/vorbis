@@ -12,11 +12,12 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.17 2000/11/06 00:07:01 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.18 2000/11/07 09:51:43 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <ogg/ogg.h>
