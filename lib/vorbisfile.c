@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.56 2002/02/28 04:12:48 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.57 2002/02/28 07:12:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -136,6 +136,7 @@ static long _get_next_page(OggVorbis_File *vf,ogg_page *og,int boundary){
 /* returns offset or OV_EREAD, OV_FAULT */
 static long _get_prev_page(OggVorbis_File *vf,ogg_page *og){
   long begin=vf->offset;
+  long end=begin;
   long ret;
   int offset=-1;
 
@@ -144,8 +145,8 @@ static long _get_prev_page(OggVorbis_File *vf,ogg_page *og){
     if(begin<0)
       begin=0;
     _seek_helper(vf,begin);
-    while(vf->offset<begin+CHUNKSIZE){
-      ret=_get_next_page(vf,og,begin+CHUNKSIZE-vf->offset);
+    while(vf->offset<end){
+      ret=_get_next_page(vf,og,end-vf->offset);
       if(ret==OV_EREAD)return(OV_EREAD);
       if(ret<0){
 	break;
@@ -1092,6 +1093,10 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
              preceeding page. Keep fetching previous pages until we
              get one with a granulepos or without the 'continued' flag
              set.  Then just use raw_seek for simplicity. */
+
+	  _decode_clear(vf);  
+	  _seek_helper(vf,best);
+
 	  while(1){
 	    ret=_get_prev_page(vf,&og);
 	    if(ret<0)goto seek_error;
