@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.20.4.3 2002/05/18 01:39:27 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.20.4.4 2002/06/26 00:37:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,7 +59,6 @@ typedef struct lsfit_acc{
   long xya; 
   long n;
   long an;
-  long un;
   long edgey0;
   long edgey1;
 } lsfit_acc;
@@ -77,10 +76,10 @@ static void floor1_free_info(vorbis_info_floor *i){
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
   if(look){
-    /*fprintf(stderr,"floor 1 bit usage %f:%f (%f total)\n",
+    fprintf(stderr,"floor 1 bit usage %f:%f (%f total)\n",
 	    (float)look->phrasebits/look->frames,
 	    (float)look->postbits/look->frames,
-	    (float)(look->postbits+look->phrasebits)/look->frames);*/
+	    (float)(look->postbits+look->phrasebits)/look->frames);
 
     memset(look,0,sizeof(*look));
     _ogg_free(look);
@@ -456,12 +455,8 @@ static int accumulate_fit(const float *flr,const float *mdct,
 
   /* weight toward the actually used frequencies if we meet the threshhold */
   {
-    int weight;
-    if(nb<info->twofitminsize || na<info->twofitminused){
-      weight=0;
-    }else{
-      weight=nb*info->twofitweight/na;
-    }
+    int weight=info->twofitweight/na;
+
     a->xa=xa*weight+xb;
     a->ya=ya*weight+yb;
     a->x2a=x2a*weight+x2b;
@@ -469,8 +464,6 @@ static int accumulate_fit(const float *flr,const float *mdct,
     a->xya=xya*weight+xyb;
     a->an=na*weight+nb;
     a->n=nb;
-    a->un=na;
-    if(nb>=info->unusedminsize)a->un++;
   }
 
   a->edgey1=-200;
@@ -488,18 +481,16 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
   long x1=a[fits-1].x1;
 
   for(i=0;i<fits;i++){
-    if(a[i].un){
-      x+=a[i].xa;
-      y+=a[i].ya;
-      x2+=a[i].x2a;
-      y2+=a[i].y2a;
-      xy+=a[i].xya;
-      n+=a[i].n;
-      an+=a[i].an;
-    }
+    x+=a[i].xa;
+    y+=a[i].ya;
+    x2+=a[i].x2a;
+    y2+=a[i].y2a;
+    xy+=a[i].xya;
+    n+=a[i].n;
+    an+=a[i].an;
   }
 
-  if(*y0>=0){  /* hint used to break degenerate cases */
+  if(*y0>=0){
     x+=   x0;
     y+=  *y0;
     x2+=  x0 *  x0;
@@ -509,7 +500,7 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     an++;
   }
 
-  if(*y1>=0){  /* hint used to break degenerate cases */
+  if(*y1>=0){
     x+=   x1;
     y+=  *y1;
     x2+=  x1 *  x1;
@@ -518,8 +509,6 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     n++;
     an++;
   }
-
-  if(n<2)return(n-2);
   
   {
     /* need 64 bit multiplies, which C doesn't give portably as int */
@@ -570,12 +559,12 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
 
   ady-=abs(base*adx);
   
+  mse=(y-val);
+  mse*=mse;
+  n++;
   if(mdct[x]+info->twofitatten>=mask[x]){
     if(y+info->maxover<val)return(1);
     if(y-info->maxunder>val)return(1);
-    mse=(y-val);
-    mse*=mse;
-    n++;
   }
 
   while(++x<x1){
@@ -587,22 +576,20 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
       y+=base;
     }
 
+    val=vorbis_dBquant(mask+x);
+    mse+=((y-val)*(y-val));
+    n++;
     if(mdct[x]+info->twofitatten>=mask[x]){
-      val=vorbis_dBquant(mask+x);
       if(val){
 	if(y+info->maxover<val)return(1);
 	if(y-info->maxunder>val)return(1);
-	mse+=((y-val)*(y-val));
-	n++;
       }
     }
   }
   
-  if(n){
-    if(info->maxover*info->maxover/n>info->maxerr)return(0);
-    if(info->maxunder*info->maxunder/n>info->maxerr)return(0);
-    if(mse/n>info->maxerr)return(1);
-  }
+  if(info->maxover*info->maxover/n>info->maxerr)return(0);
+  if(info->maxunder*info->maxunder/n>info->maxerr)return(0);
+  if(mse/n>info->maxerr)return(1);
   return(0);
 }
 
@@ -615,34 +602,29 @@ static int post_Y(int *A,int *B,int pos){
   return (A[pos]+B[pos])>>1;
 }
 
+static int seq=0;
+
 int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 			  const float *logmdct,   /* in */
 			  const float *logmask){
   long i,j;
   vorbis_info_floor1 *info=look->vi;
-  long n=info->n;
+  long n=look->n;
   long posts=look->posts;
   long nonzero=0;
   lsfit_acc fits[VIF_POSIT+1];
   int fit_valueA[VIF_POSIT+2]; /* index by range list position */
   int fit_valueB[VIF_POSIT+2]; /* index by range list position */
-  int fit_flag[VIF_POSIT+2];
 
   int loneighbor[VIF_POSIT+2]; /* sorted index of range list position (+2) */
   int hineighbor[VIF_POSIT+2]; 
   int *output=NULL;
   int memo[VIF_POSIT+2];
   
-  memset(fit_flag,0,sizeof(fit_flag));
   for(i=0;i<posts;i++)loneighbor[i]=0; /* 0 for the implicit 0 post */
   for(i=0;i<posts;i++)hineighbor[i]=1; /* 1 for the implicit post at n */
   for(i=0;i<posts;i++)memo[i]=-1;      /* no neighbor yet */
-  
-  /* Scan back from high edge to first 'used' frequency */
-  for(;n>info->unusedmin_n;n--)
-    if(logmdct[n-1]>-floor1_rangedB && 
-       logmdct[n-1]+info->twofitatten>logmask[n-1])break;
-  
+
   /* quantize the relevant floor points and collect them into line fit
      structures (one per minimal division) at the same time */
   if(posts==0){
@@ -666,8 +648,6 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
       fit_line(fits,posts-1,&y0,&y1);
     }
 
-    fit_flag[0]=1;
-    fit_flag[1]=1;
     fit_valueA[0]=y0;
     fit_valueB[0]=y0;
     fit_valueB[1]=y1;
@@ -690,21 +670,7 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 	  int hsortpos=look->reverse_index[hn];
 	  memo[ln]=hn;
 
-	  /* if this is an empty segment, its endpoints don't matter.
-	     Mark as such */
-	  for(j=lsortpos;j<hsortpos;j++)
-	    if(fits[j].un)break;
-	  if(j==hsortpos){
-	    /* empty segment; important to note that this does not
-               break 0/n post case */
-	    fit_valueB[ln]=-200;
-	    if(fit_valueA[ln]<0)
-	      fit_flag[ln]=0;
-	    fit_valueA[hn]=-200;
-	    if(fit_valueB[hn]<0)
-	      fit_flag[hn]=0;
- 
-	  }else{
+	  {
 	    /* A note: we want to bound/minimize *local*, not global, error */
 	    int lx=info->postlist[ln];
 	    int hx=info->postlist[hn];	  
@@ -759,11 +725,6 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 	      fit_valueA[hn]=hy1;
 	      if(hn==1 && hy1>=0)fit_valueB[hn]=hy1;
 
-	      if(ly0<0 && fit_valueA[ln]<0)
-		fit_flag[ln]=0;
-	      if(hy1<0 && fit_valueB[hn]<0)
-		fit_flag[hn]=0;
-
 	      if(ly1>=0 || hy0>=0){
 		/* store new neighbor values */
 		for(j=sortpos-1;j>=0;j--)
@@ -777,9 +738,10 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 		  else
 		    break;
 		
-		/* store flag (set) */
-		fit_flag[i]=1;
 	      }
+	    }else{
+	      fit_valueA[i]=-200;
+	      fit_valueB[i]=-200;
 	    }
 	  }
 	}
@@ -803,14 +765,10 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
       int y1=output[hn];
       
       int predicted=render_point(x0,x1,y0,y1,info->postlist[i]);
+      int vx=post_Y(fit_valueA,fit_valueB,i);
 	
-      if(fit_flag[i]){
-	int vx=post_Y(fit_valueA,fit_valueB,i);
-	if(predicted!=vx){
-	  output[i]=vx;
-	}else{
-	  output[i]= predicted|0x8000;
-	}
+      if(vx>=0 && predicted!=vx){ 
+	output[i]=vx;
       }else{
 	output[i]= predicted|0x8000;
       }
@@ -828,14 +786,8 @@ int *floor1_interpolate_fit(vorbis_block *vb,vorbis_look_floor1 *look,
   long i;
   long posts=look->posts;
   int *output=NULL;
-  int dummy[VIF_POSIT+2];
   
-  if(A || B){
-    if(!A || !B){
-      memset(dummy,0,sizeof(dummy));
-      if(!A)A=dummy;
-      if(!B)B=dummy;
-    }
+  if(A && B){
     output=_vorbis_block_alloc(vb,sizeof(*output)*posts);
     
     for(i=0;i<posts;i++){
@@ -853,7 +805,7 @@ int floor1_encode(vorbis_block *vb,vorbis_look_floor1 *look,
 
   long i,j;
   vorbis_info_floor1 *info=look->vi;
-  long n=info->n;
+  long n=look->n;
   long posts=look->posts;
   codec_setup_info *ci=vb->vd->vi->codec_setup;
   int out[VIF_POSIT+2];
@@ -1038,7 +990,6 @@ int floor1_encode(vorbis_block *vb,vorbis_look_floor1 *look,
 	}
       }
       for(j=hx;j<vb->pcmend/2;j++)ilogmask[j]=ly; /* be certain */    
-      for(j=n;j<vb->pcmend/2;j++)ilogmask[j]=0;
       seq++;
       return(1);
     }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.49.2.6 2002/06/20 03:55:27 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.49.2.7 2002/06/26 00:37:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -365,6 +365,7 @@ static int mapping0_forward(vorbis_block *vb){
          later rate tweaking (fits represent hi/lo) */
       if(vorbis_bitrate_managed(vb) && floor_posts[i][PACKETBLOBS/2]){
 	/* higher rate by way of lower noise curve */
+
 	_vp_offset_and_mix(psy_look,
 			   noise,
 			   tone,
@@ -566,24 +567,25 @@ static int mapping0_forward(vorbis_block *vb){
 	  };
 
 	  char buf[80];
-	  sprintf(buf,"maskI%d",k);
+	  sprintf(buf,"maskI%c%d",i?'L':'R',k);
 	  float work[n/2];
 	  for(j=0;j<n/2;j++)
 	    work[j]=FLOOR1_fromdB_LOOKUP[ilogmask[j]];
-	  _analysis_output_always(buf,seq+i,work,n/2,1,1,0);
+	  _analysis_output_always(buf,seq,work,n/2,1,1,0);
 	}
 #endif
 	_vp_remove_floor(psy_look,
 			 mdct,
 			 ilogmask,
-			 res);
+			 res,
+			 ci->psy_g_param.sliding_lowpass[vb->W][k]);
 	_vp_noise_normalize(psy_look,res,res+n/2,sortindex[i]);
 	
 #if 0
 	{
 	  char buf[80];
-	  sprintf(buf,"resI%d",k);
-	  _analysis_output_always(buf,seq+i,res,n/2,1,1,0);
+	  sprintf(buf,"resI%d",k,i);
+	  _analysis_output_always(buf,seq,res,n/2,1,1,0);
 	}
 #endif
       }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.28.2.6 2002/06/24 00:06:02 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.28.2.7 2002/06/26 00:37:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -80,6 +80,7 @@ typedef struct{
   int   coupling_pointlimit[2][PACKETBLOBS];  
   int   coupling_prepointamp[PACKETBLOBS];  
   int   coupling_postpointamp[PACKETBLOBS];  
+  int   sliding_lowpass[2][PACKETBLOBS];  
 
 } vorbis_info_psy_global;
 
@@ -121,7 +122,8 @@ extern vorbis_info_psy *_vi_psy_copy(vorbis_info_psy *i);
 extern void _vp_remove_floor(vorbis_look_psy *p,
 			     float *mdct,
 			     int *icodedflr,
-			     float *residue);
+			     float *residue,
+			     int sliding_lowpass);
 
 extern void _vp_noisemask(vorbis_look_psy *p,
 			  float *logmdct, 

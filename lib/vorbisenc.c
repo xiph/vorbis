@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.39.2.7 2002/06/24 00:06:02 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.39.2.8 2002/06/26 00:37:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -75,6 +75,7 @@ typedef struct {
   int   pre[PACKETBLOBS];
   int   post[PACKETBLOBS];
   float kHz[PACKETBLOBS];
+  float lowpasskHz[PACKETBLOBS];
 } adj_stereo;
 
 typedef struct {
@@ -108,8 +109,9 @@ typedef struct {
 
   noiseguard  *psy_noiseguards;
   noise3      *psy_noise_bias_impulse;
+  noise3      *psy_noise_bias_padding;
+  noise3      *psy_noise_bias_trans;
   noise3      *psy_noise_bias_long;
-  noise3      *psy_noise_bias_other;
   int         *psy_noise_dBsuppress;
 
   compandblock  *psy_noise_compand;
@@ -242,8 +244,8 @@ static int vorbis_encode_global_stereo(vorbis_info *vi,
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy_global *g=&ci->psy_g_param;
 
-  memcpy(g->coupling_prepointamp,p[is].pre,sizeof(*p[is].pre));
-  memcpy(g->coupling_postpointamp,p[is].post,sizeof(*p[is].post));
+  memcpy(g->coupling_prepointamp,p[is].pre,sizeof(*p[is].pre)*PACKETBLOBS);
+  memcpy(g->coupling_postpointamp,p[is].post,sizeof(*p[is].post)*PACKETBLOBS);
 
   if(hi->managed){
     /* interpolate the kHz threshholds */
@@ -252,14 +254,23 @@ static int vorbis_encode_global_stereo(vorbis_info *vi,
       g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
       g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
       g->coupling_pkHz[i]=kHz;
+
+      kHz=p[is].lowpasskHz[i]*(1.-ds)+p[is+1].lowpasskHz[i]*ds;
+      g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+      g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
     }
   }else{
     float kHz=p[is].kHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].kHz[PACKETBLOBS/2]*ds;
     for(i=0;i<PACKETBLOBS;i++){
-
       g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
       g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
       g->coupling_pkHz[i]=kHz;
+    }
+
+    kHz=p[is].lowpasskHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].lowpasskHz[PACKETBLOBS/2]*ds;
+    for(i=0;i<PACKETBLOBS;i++){
+      g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+      g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
     }
   }
 
@@ -711,11 +722,11 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 				     setup->psy_noiseguards);
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[1].noise_bias_setting,1,
 				     setup->psy_noise_dBsuppress,
-				     setup->psy_noise_bias_other,
+				     setup->psy_noise_bias_padding,
 				     setup->psy_noiseguards);
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[2].noise_bias_setting,2,
 				     setup->psy_noise_dBsuppress,
-				     setup->psy_noise_bias_other,
+				     setup->psy_noise_bias_trans,
 				     setup->psy_noiseguards);
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[3].noise_bias_setting,3,
 				     setup->psy_noise_dBsuppress,

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.8 2002/06/24 00:06:01 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.9 2002/06/26 00:37:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -704,13 +704,18 @@ static float FLOOR1_fromdB_INV_LOOKUP[256]={
 void _vp_remove_floor(vorbis_look_psy *p,
 		      float *mdct,
 		      int *codedflr,
-		      float *residue){ 
+		      float *residue,
+		      int sliding_lowpass){ 
 
   int i,n=p->n;
+ 
+  if(sliding_lowpass>n)sliding_lowpass=n;
   
-  for(i=0;i<n;i++)
+  for(i=0;i<sliding_lowpass;i++)
     residue[i]=
       mdct[i]*FLOOR1_fromdB_INV_LOOKUP[codedflr[i]];
+  for(;i<n;i++)
+    residue[i]=0.;
 }
 
 void _vp_noisemask(vorbis_look_psy *p,
@@ -1041,10 +1046,4 @@ void _vp_couple(int blobno,
     }
   }
 }
-
-
-
-
-
-
 

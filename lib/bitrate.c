@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.11.4.2 2002/05/31 00:16:10 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.11.4.3 2002/06/26 00:37:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -107,8 +107,8 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
       
       bm->queue_size=maxpackets;
       bm->queue_bins=bins;
-      bm->queue_binned=_ogg_malloc(maxpackets*bins*sizeof(*bm->queue_binned));
-      bm->queue_actual=_ogg_malloc(maxpackets*sizeof(*bm->queue_actual));
+      bm->queue_binned=_ogg_calloc(maxpackets,bins*sizeof(*bm->queue_binned));
+      bm->queue_actual=_ogg_calloc(maxpackets,sizeof(*bm->queue_actual));
       
       if((bi->queue_avgmin>0 || bi->queue_avgmax>0) &&
 	 bi->queue_avg_time>0){

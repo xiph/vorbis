@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.12.6.4 2002/05/31 00:16:10 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.12.6.5 2002/06/26 00:37:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -77,12 +77,8 @@ typedef struct{
   float maxunder;  
   float maxerr;    
 
-  int   twofitminsize;
-  int   twofitminused;
-  int   twofitweight;  
+  float twofitweight;  
   float twofitatten;
-  int   unusedminsize;
-  int   unusedmin_n;
 
   int   n;
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.11.6.7 2002/06/24 00:06:05 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.11.6.8 2002/06/26 00:37:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,24 +45,6 @@ static vorbis_info_residue0 _residue_44_lo={
   {  .5,   .5, 999.,   .5,  999.,  .5,  4.5,   .5,  8.5,  16.5, 32.5},
 };
 
-#include "books/coupled/_44c0_s_short.vqh"
-#include "books/coupled/_44c0_s_long.vqh"
-
-#include "books/coupled/_44c0_s_p1_0.vqh"
-#include "books/coupled/_44c0_s_p2_0.vqh"
-#include "books/coupled/_44c0_s_p3_0.vqh"
-#include "books/coupled/_44c0_s_p4_0.vqh"
-#include "books/coupled/_44c0_s_p5_0.vqh"
-#include "books/coupled/_44c0_s_p6_0.vqh"
-#include "books/coupled/_44c0_s_p7_0.vqh"
-#include "books/coupled/_44c0_s_p8_0.vqh"
-#include "books/coupled/_44c0_s_p9_0.vqh"
-#include "books/coupled/_44c0_s_p9_1.vqh"
-#include "books/coupled/_44c0_s_p10_0.vqh"
-#include "books/coupled/_44c0_s_p10_1.vqh"
-#include "books/coupled/_44c0_s_p11_0.vqh"
-#include "books/coupled/_44c0_s_p11_1.vqh"
-
 #include "books/coupled/_44c4_s_short.vqh"
 #include "books/coupled/_44c4_s_long.vqh"
 
@@ -84,6 +66,9 @@ static vorbis_info_residue0 _residue_44_lo={
 #include "books/coupled/_44c4_sm_long.vqh"
 
 
+#include "books/coupled/res_44c0.vqh"
+
+
 /* mapping conventions:
    only one submap (this would change for efficient 5.1 support for example)*/
 /* Four psychoacoustic profiles are used, one for each blocktype */
@@ -101,19 +86,6 @@ static static_bookblock _resbook_44s_4={
    }
 };
 
-static static_bookblock _resbook_44s_0={
-  {
-    {0},
-    {0,0,&_44c0_s_p1_0},{0,0,&_44c0_s_p2_0},
-    {0,&_44c0_s_p3_0},  {0,&_44c0_s_p4_0},
-    {0,&_44c0_s_p5_0},  {0,&_44c0_s_p6_0},
-    {0,&_44c0_s_p7_0},  {0,&_44c0_s_p8_0},
-    {&_44c0_s_p9_0,&_44c0_s_p9_1},
-    {&_44c0_s_p10_0,&_44c0_s_p10_1},
-    {&_44c0_s_p11_0,&_44c0_s_p11_1}
-   }
-};
-
 static vorbis_residue_template _res_44s_4[]={
   {2,0,  &_residue_44_mid,
    &_huff_book__44c4_s_short,&_huff_book__44c4_sm_short,&_resbook_44s_4},
@@ -122,16 +94,25 @@ static vorbis_residue_template _res_44s_4[]={
    &_huff_book__44c4_s_long,&_huff_book__44c4_sm_long,&_resbook_44s_4}
 };
 
-static vorbis_residue_template _res_44s_0[]={
-  {2,0,  &_residue_44_lo,
-   &_huff_book__44c0_s_short,&_huff_book__44c0_s_short,&_resbook_44s_0},
+static static_bookblock _resbook_44s_0={
+  {
+    {0},{0,0,&_44c0_s_p1_0},{0,0,&_44c0_s_p2_0},{0,0,&_44c0_s_p3_0},
+    {0,0,&_44c0_s_p4_0},{0,0,&_44c0_s_p5_0},{0,0,&_44c0_s_p6_0},
+    {&_44c0_s_p7_0,&_44c0_s_p7_1},{&_44c0_s_p8_0,&_44c0_s_p8_1},
+    {&_44c0_s_p9_0,&_44c0_s_p9_1,&_44c0_s_p9_2}
+   }
+};
 
-  {2,0,  &_residue_44_lo,
-   &_huff_book__44c0_s_long,&_huff_book__44c0_s_long,&_resbook_44s_0}
+static vorbis_residue_template _res_44s_0[]={
+  {2,0,  &_residue_44_mid,
+   &_huff_book__44c0_s_short,&_huff_book__44c0_s_short,&_resbook_44s_4},
+
+  {2,0,  &_residue_44_mid,
+   &_huff_book__44c0_s_long,&_huff_book__44c0_s_long,&_resbook_44s_4}
 };
 
 static vorbis_mapping_template _mapres_template_44_stereo[]={
-  { _map_nominal, _res_44s_4 }, /* 0 */
+  { _map_nominal, _res_44s_0 }, /* 0 */
   { _map_nominal, _res_44s_4 }, /* 1 */
   { _map_nominal, _res_44s_4 }, /* 2 */
   { _map_nominal, _res_44s_4 }, /* 3 */

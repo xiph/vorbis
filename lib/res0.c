@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.45.4.5 2002/06/24 00:06:02 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.45.4.6 2002/06/26 00:37:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -88,7 +88,7 @@ void res0_free_look(vorbis_look_residue *i){
 	    codebook *statebook=look->partbooks[j][k];
 	    
 	    /* long and short into the same bucket by current convention */
-	    sprintf(buffer,"res%d_part_pass%d.vqd",j,k);
+	    sprintf(buffer,"res_part%d_pass%d.vqd",j,k);
 	    of=fopen(buffer,"a");
 
 	    for(l=0;l<statebook->entries;l++)
