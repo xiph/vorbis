@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.3 2000/03/30 11:54:08 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.4 2000/03/31 00:23:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -469,6 +469,8 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 	  index[z++]=f+i;
 	}	
       }
+
+      XXX we also want to add back only if the current_SL is less than/on the order of the energy represented by the floor.  Otherwise we'll get tricked by log scale quantization...
 
       /* sort the zeroed values; add back the largest first, stop when
          we violate the desired result above (which may be

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.10.2.1 2000/03/30 01:46:47 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.10.2.2 2000/03/31 00:23:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,6 +45,14 @@ typedef struct {
 
 /* psychoacoustic setup ********************************************/
 typedef struct vorbis_info_psy{
+  int    curve_fit_iterations;
+  int    athp;
+  int    decayp;
+
+  int    noisefitp;
+  int    noisefit_subblock;
+  double noisefit_threshdB;
+
   double ath_att;
   
   double curveatt_250Hz[5];
