@@ -105,6 +105,7 @@ $(BUILDDIR)/draft-rtp.xml: draft-kerr-avt-vorbis-rtp-03.txt
 # cat $< | sed 's///g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' > $@
 
 # explicit rules for generating docs
+if BUILD_DOCS
 Vorbis_I_spec.html: $(SPEC_PNG_BUILD) $(BUILDDIR)/Vorbis_I_spec.xml
 	cd build; xsltproc --xinclude --output Vorbis_I_spec.html spec-html.xsl Vorbis_I_spec.xml && mv $@ ..
 
@@ -117,6 +118,15 @@ Vorbis_I_spec.pdf: Vorbis_I_spec.fo $(SPEC_PNG_BUILD) $(SPEC_PDF_BUILD)
 	cd build; pdfxmltex --interaction nonstopmode spec.fo
 	rm build/spec.fo
 	mv build/spec.pdf $@
+else
+Vorbis_I_spec.html: NO_DOCS_ERROR
+Vorbis_I_spec.pdf: NO_DOCS_ERROR
+NO_DOCS_ERROR:
+	@echo
+	@echo "*** Documentation has not been built! ***"
+	@echo "Try re-running after passing --enable-docs to configure."
+	@echo
+endif
 
 # clean up build dir
 clean-local:
