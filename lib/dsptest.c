@@ -51,8 +51,8 @@ int main(){
      /* uninterleave samples */
      
      for(i=0;i<bread/4;i++){
-       buf[0][i]=(int)((buffer[i*4+1]<<8)|(0x00ff&(int)buffer[i*4]));
-       buf[1][i]=(int)((buffer[i*4+3]<<8)|(0x00ff&(int)buffer[i*4+2]));
+       buf[0][i]=((buffer[i*4+1]<<8)|(0x00ff&(int)buffer[i*4]))/32768.;
+       buf[1][i]=((buffer[i*4+3]<<8)|(0x00ff&(int)buffer[i*4+2]))/32768.;
      }
   
      vorbis_analysis_wrote(&encode,i);
@@ -69,13 +69,13 @@ int main(){
        _ve_envelope_apply(&vb,0);
  
        for(i=0;i<vb.pcm_channels;i++)
-	 mdct_forward(&vb.vd->vi[vb.W],vb.pcm[i],vb.pcm[i],window);
+	 mdct_forward(&vb.vd->vm[vb.W],vb.pcm[i],vb.pcm[i],window);
  
 
        /* synthesis */
 
        for(i=0;i<vb.pcm_channels;i++)
-	 mdct_backward(&vb.vd->vi[vb.W],vb.pcm[i],vb.pcm[i],window);
+	 mdct_backward(&vb.vd->vm[vb.W],vb.pcm[i],vb.pcm[i],window);
  
  
        /*{
@@ -153,84 +153,3 @@ int main(){
    }
    return 0;
 }
-
-
-
-
- #endif
-
-  signed char buffer[BANDS*4+44];
-  long count=0;
-  double max=0;
-  int imax=0;
-  
-  double left[BANDS+POINTS],right[BANDS+POINTS];
-
-  fread(buffer,1,44,stdin);
-  fwrite(buffer,1,44,stdout);
-
-
-  while(!feof(stdin)){
-    long bread=fread(buffer,1,BANDS*4,stdin);
-    long i;
-
-    /* uninterleave samples */
-    
-    for(i=0;i<BANDS;i++){
-      left[i]=(int)((buffer[i*4+1]<<8)|(0x00ff&(int)buffer[i*4]));
-      right[i]=(int)((buffer[i*4+3]<<8)|(0x00ff&(int)buffer[i*4+2]));
-    }
-  
-    /*{
-      FILE *out=fopen("in.m","w");
-      for(i=0;i<BANDS;i++)
-	fprintf(out,"%g\n",left[i]);
-      fclose(out);
-    }*/
-
-    /* analysis bank */
-      
-    input_subbander(filterIL,left);
-    input_subbander(filterIR,right);
-  
-    ppQMF_subband_b32_w512(filterIL,left);
-    ppQMF_subband_b32_w512(filterIR,right);
-
-    for(i=0;i<BANDS;i++){
-      double c=left[i]+right[i];
-      double d=(left[i]-right[i])*4.; /* Stereo expansion */
-      
-      left[i]=(c+d)/2.;
-      right[i]=(c-d)/2.;
-
-      left[i]=alog(left[i]); 
-      right[i]=alog(right[i]);
-
-    }
-
-    ppQMF_synth_b32_w512(filterOL,left);
-    ppQMF_synth_b32_w512(filterOR,right);
-    
-    output_subbander(filterOL,left);
-    output_subbander(filterOR,right);
-
-    for(i=0;i<BANDS;i++){
-      int l=rint(left[i]/80.);
-      int r=rint(right[i]/80.);
-      if(abs(l)>32767 || abs(r)>32768){
-	fprintf(stderr,"\nClipping!\n");
-	exit(0);
-      }
-      buffer[i*4]=l&0xff;
-      buffer[i*4+1]=(l>>8)&0xff;
-      buffer[i*4+2]=r&0xff;
-      buffer[i*4+3]=(r>>8)&0xff;
-    }    
-
-    fwrite(buffer,1,bread,stdout);
-  }
-  return(0);
-}
-
-
-
