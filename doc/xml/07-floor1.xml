@@ -7,8 +7,8 @@
 <section id="vorbis-spec-floor1">
 <sectioninfo>
 <releaseinfo>
- $Id: 07-floor1.xml,v 1.4 2002/10/27 16:20:47 giles Exp $
- <emphasis>Last update to this document: October 15, 2002</emphasis>
+ $Id: 07-floor1.xml,v 1.5 2003/03/11 11:02:17 xiphmont Exp $
+ <emphasis>Last update to this document: March 11, 2003</emphasis>
 </releaseinfo>
 </sectioninfo>
 <title>Floor type 1 setup and decode</title>
@@ -185,9 +185,8 @@ context.</para>
        20) iterate [j] over the range 0 ... ([floor1_class_dimensions] element [current_class_number])-1 {
              21) vector [floor1_X_list] element ([j] + [floor1_values]) = 
                  read [rangebits] bits as unsigned integer
-            }
-
-       22) [floor1_values] = [floor1_values] + [floor1_class_dimensions] element [i]
+             22) increment [floor1_values] by one
+           }
      }
  
  23) done

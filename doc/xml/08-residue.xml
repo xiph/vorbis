@@ -7,8 +7,8 @@
 <section id="vorbis-spec-residue">
 <sectioninfo>
  <releaseinfo>
-  $Id: 08-residue.xml,v 1.4 2002/10/27 16:20:47 giles Exp $
-  <emphasis>Last update to this document: July 19, 2002</emphasis>
+  $Id: 08-residue.xml,v 1.5 2003/03/11 11:02:17 xiphmont Exp $
+  <emphasis>Last update to this document: March 11, 2003</emphasis>
  </releaseinfo>
 </sectioninfo>
 <title>Residue setup and decode</title>
@@ -286,8 +286,8 @@ The following convenience values are conceptually useful to clarifying
 the decode process:</para>
 
 <programlisting>
-  1) [classvals_per_codeword] = [codebook_dimensions] value of codebook [residue_classbook]
-  2) [n_to_read] = [residue_end] - [residue-begin]
+  1) [classwords_per_codeword] = [codebook_dimensions] value of codebook [residue_classbook]
+  2) [n_to_read] = [residue_end] - [residue_begin]
   3) [partitions_to_read] = [n_to_read] / [residue_partition_size]
 </programlisting>
 
@@ -298,6 +298,7 @@ Packet decode proceeds as follows, matching the description offered earlier in t
   2) iterate [pass] over the range 0 ... 7 {
 
        3) [partition_count] = 0
+
        4) if ([pass] is zero) {
      
             5) iterate [j] over the range 0 .. [ch]-1 {
@@ -305,9 +306,9 @@ Packet decode proceeds as follows, matching the description offered earlier in t
                  6) if vector [j] is not marked 'do not decode' {
 
                       7) [temp] = read from packet using codebook [residue_classbook] in scalar context
-                      8) iterate [k] descending over the range [classvals_per_codeword]-1 ... 0 {
+                      8) iterate [i] descending over the range [classwords_per_codeword]-1 ... 0 {
 
-                           9) array [classifications] element [j],([partition_count]+[k]) =
+                           9) array [classifications] element [j],([i]+[partition_count]) =
                               [temp] integer modulo [residue_classifications]
                           10) [temp] = [temp] / [residue_classifications] using integer division
 
@@ -319,32 +320,29 @@ Packet decode proceeds as follows, matching the description offered earlier in t
         
           }
 
-      11) [classword_count] = 0
-      12) iterate [j] over the range 0 .. [ch]-1 {
+      11) iterate [i] over the range 0 .. ([classwords_per_codeword] - 1) while [partition_count] 
+          is also less than [partitions_to_read] {
 
-            13) if vector [j] is not marked 'do not decode' {
-
-  
-                 14) [vqclass] = array [classifications] element [j],([partition_count]+[classword_count])
-                 15) [vqbook] = array [residue_books] element [vqclass],[pass]
-                 16) if ([vqbook] is not 'unused') {
+            12) iterate [j] over the range 0 .. [ch]-1 {
    
-                       17) decode partition into output vector number [j], starting at scalar 
+                 13) if vector [j] is not marked 'do not decode' {
+   
+                      14) [vqclass] = array [classifications] element [j],[partition_count]
+                      15) [vqbook] = array [residue_books] element [vqclass],[pass]
+                      16) if ([vqbook] is not 'unused') {
+   
+                           17) decode partition into output vector number [j], starting at scalar 
                            offset [residue_begin]+[partition_count]*[residue_partition_size] using 
                            codebook number [vqbook] in VQ context
                      }
-               }
+                }
+   
+            18) increment [partition_count] by one
 
           }
-
-      18) increment [classword_count]
-      19) increment [partition_count]
-      20) if ([classword_count] is less than [classvals_per_codeword]) AND 
-             ([partition_count] is less than [partitions_to_read) then continue at step 11
-      21) if ([partition_count] is less than [partitions_to_read) then continue at step 4
-    }
+     }
  
- 22) done
+ 19) done
 
 </programlisting>
 
@@ -424,18 +422,27 @@ presents the same algorithm. Assume:</para>
 <section><title>format 2 specifics</title>
  
 <para>
-Format 2 is reducible to format 1 through the following steps, performed in order:
+Format 2 is reducible to format 1.  It may be implemented as an additional stepprior to and an additional post-decode step after a normal format 1 decode.
+</para>
+
+<para>
+Format 2 handles 'do not decode' vectors differently than residue 0 or
+1; if all vectors are marked 'do not decode', no decode occurrs.
+However, if at least one vector is to be decoded, all the vectors are
+decoded.  We then request normal format 1 to decode a single vector
+representing all output channels, rather than a vector for each
+channel.  After decode, deinterleave the vector into independent vectors, one for each output channel.  That is:</para>
 
 <orderedlist>
- <listitem><simpara>Assume format 2 is to decode <emphasis>ch</emphasis> vectors of length <emphasis>n</emphasis>.</simpara></listitem>
- <listitem><simpara>Decode, using format 1, a single vector <varname>[v]</varname>of length <emphasis>ch</emphasis>*<emphasis>n</emphasis>.</simpara></listitem>
- <listitem><para>Deinterleave this single vector <varname>[v]</varname> into <emphasis>ch</emphasis> independent vectors according to:
+ <listitem><simpara>If all vectors 0 through <emphasis>ch</emphasis>-1 are marked 'do not decode', allocate and clear a single vector <varname>[v]</varname>of length <emphasis>ch*n</emphasis> and skip step 2 below; proceed directly to the post-decode step.</simpara></listitem>
+ <listitem><simpara>Rather than performing format 1 decode to produce <emphasis>ch</emphasis> vectors of length <emphasis>n</emphasis> each, call format 1 decode to produce a single vector <varname>[v]</varname> of length <emphasis>ch*n</emphasis>. </simpara></listitem>
+ <listitem><para>Post decode: Deinterleave the single vector <varname>[v]</varname> returned by format 1 decode as described above into <emphasis>ch</emphasis> independent vectors, one for each outputchannel, according to:
   <programlisting>
   1) iterate [i] over the range 0 ... [n]-1 {
 
        2) iterate [j] over the range 0 ... [ch]-1 {
 
-            3) output vector number [j] element [i] = vector [t] element ([i] * [ch] +[j])
+            3) output vector number [j] element [i] = vector [v] element ([i] * [ch] + [j])
 
           }
      }
@@ -444,16 +451,10 @@ Format 2 is reducible to format 1 through the following steps, performed in orde
   </programlisting>
  </para></listitem>
 </orderedlist>
-</para>
-
-<para>
-Format 2 handles 'do not decode' vectors differently that residue 0 or
-1; if all vectors are marked 'do not decode', no decode occurrs.
-However, if at least one vector is to be decoded, all the vectors are
-decoded.</para>
 
 </section>
 
 </section>
 
 </section>
+

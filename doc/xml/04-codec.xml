@@ -7,8 +7,8 @@
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.7 2002/10/27 16:20:47 giles Exp $
- <emphasis>Last update to this document: October 15, 2002</emphasis>
+ $Id: 04-codec.xml,v 1.8 2003/03/11 11:02:17 xiphmont Exp $
+ <emphasis>Last update to this document: March 11, 2003</emphasis>
 </releaseinfo>
 </sectioninfo>
 <title>Codec Setup and Packet Decode</title>
@@ -357,7 +357,6 @@ proceeds as follows:</para>
 
 <orderedlist>
  <listitem><simpara> <varname>[window_center]</varname> = <varname>[n]</varname> / 2</simpara></listitem>
- <listitem><simpara> <varname>[left_window_start]</varname></simpara></listitem>
  <listitem><para> if (<varname>[vorbis_mode_blockflag]</varname> is set and <varname>[previous_window_flag]</varname> is
 not set) then
   <orderedlist>
@@ -393,7 +392,7 @@ set) then
  <listitem><simpara> for <varname>[i]</varname> in range <varname>[left_window_start]</varname> ...
 <varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5) / <varname>[left_n]</varname> * .5 * &pi;) )</simpara></listitem>
  <listitem><simpara> window from range <varname>[left_window_end]</varname> ... <varname>[right_window_start]</varname>-1
-inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * &pi;/2. + .5 * &pi;) )</simpara></listitem>
+inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * &pi; + .5 * &pi;) )</simpara></listitem>
 <listitem><simpara> window from range <varname>[rigth_window_start]</varname> ... <varname>[n]</varname>-1 is
 zero</simpara></listitem>
 </orderedlist>
@@ -483,17 +482,17 @@ for each submap <varname>[i]</varname> in order from 0 ... <varname>[vorbis_mapp
 
 <orderedlist>
  <listitem><simpara><varname>[ch]</varname> = 0</simpara></listitem>
- <listitem><simpara>for each channel <varname>[j]</varname> in order from 0 ... <varname>[audio_channels]</varname></simpara>
+ <listitem><simpara>for each channel <varname>[j]</varname> in order from 0 ... <varname>[audio_channels]</varname> - 1</simpara>
   <orderedlist>
-   <listitem><simpara>if channel <varname>[j]</varname> is in submap <varname>[i]</varname> (vector <varname>[vorbis_mapping_mux]</varname> element <varname>[j]</varname> is equal to <varname>[i]</varname>)</simpara>
+   <listitem><simpara>if channel <varname>[j]</varname> in submap <varname>[i]</varname> (vector <varname>[vorbis_mapping_mux]</varname> element <varname>[j]</varname> is equal to <varname>[i]</varname>)</simpara>
     <orderedlist>
      <listitem><para>if vector <varname>[no_residue]</varname> element <varname>[j]</varname> is true
       <orderedlist>
-       <listitem><simpara>vector <varname>[do_not_decode_flag]</varname> element <varname>[channels_in_bundle]</varname> is set</simpara></listitem>
+       <listitem><simpara>vector <varname>[do_not_decode_flag]</varname> element <varname>[ch]</varname> is set</simpara></listitem>
       </orderedlist>
      else
       <orderedlist>
-       <listitem><simpara>vector <varname>[do_not_decode_flag]</varname> element <varname>[channels_in_bundle]</varname> is unset</simpara></listitem>
+       <listitem><simpara>vector <varname>[do_not_decode_flag]</varname> element <varname>[ch]</varname> is unset</simpara></listitem>
       </orderedlist></para>
      </listitem>
      <listitem><simpara>increment <varname>[ch]</varname></simpara></listitem>
