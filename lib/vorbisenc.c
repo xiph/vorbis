@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.40 2002/06/28 22:19:37 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.41 2002/06/29 11:17:36 xiphmont Exp $
 
  ********************************************************************/
 
@@ -144,8 +144,7 @@ typedef struct {
 
 static ve_setup_data_template *setup_list[]={
   &ve_setup_44_stereo,
-
-
+  &ve_setup_44_stereo_low,
   0
 };
 
@@ -259,6 +258,7 @@ static int vorbis_encode_global_stereo(vorbis_info *vi,
       kHz=p[is].lowpasskHz[i]*(1.-ds)+p[is+1].lowpasskHz[i]*ds;
       g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
       g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+
     }
   }else{
     float kHz=p[is].kHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].kHz[PACKETBLOBS/2]*ds;
@@ -578,6 +578,7 @@ static void get_setup_template(vorbis_info *vi,
   int i=0,j;
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
+  if(q_or_bitrate)req/=ch;
 
   while(setup_list[i]){
     if(setup_list[i]->coupling_restriction==-1 ||
@@ -588,12 +589,11 @@ static void get_setup_template(vorbis_info *vi,
 	double *map=(q_or_bitrate?
 		     setup_list[i]->rate_mapping:
 		     setup_list[i]->quality_mapping);
-	if(q_or_bitrate)req/=ch;
 
 	/* the template matches.  Does the requested quality mode
 	   fall within this template's modes? */
-	if(req<map[0])continue;
-	if(req>map[setup_list[i]->mappings])continue;
+	if(req<map[0]){++i;continue;}
+	if(req>map[setup_list[i]->mappings]){++i;continue;}
 	for(j=0;j<mappings;j++)
 	  if(req>=map[j] && req<map[j+1])break;
 	/* an all-points match */
