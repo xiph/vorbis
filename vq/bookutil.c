@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.24.6.1 2001/10/12 00:08:15 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.24.6.2 2001/12/07 08:52:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -191,7 +191,7 @@ codebook *codebook_load(char *filename){
   }
 
   /* find the codebook struct */
-  find_seek_to(in,"static static_codebook _");
+  find_seek_to(in,"static static_codebook ");
 
   /* get the major important values */
   line=get_line(in);
@@ -708,7 +708,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
 
   /* tie it all together */
   
-  fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
+  fprintf(out,"static static_codebook %s = {\n",name);
   
   fprintf(out,"\t%ld, %ld,\n",c->dim,c->entries);
   fprintf(out,"\t_vq_lengthlist_%s,\n",name);

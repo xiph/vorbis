@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.27.2.3 2001/11/22 06:19:52 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.27.2.4 2001/12/07 08:52:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -95,7 +95,8 @@ int main(){
   /* choose an encoding mode */
   /* (mode 0: 44kHz stereo uncoupled, roughly 128kbps VBR) */
   vorbis_info_init(&vi);
-  vorbis_encode_init(&vi,2,44100, -1, 128000, -1);
+
+  vorbis_encode_init_vbr(&vi,2,44100,.4);
 
   /* add a comment */
   vorbis_comment_init(&vc);
