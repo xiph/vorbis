@@ -6,24 +6,24 @@
 Ogg Vorbis I format specification: helper equations
 </font></h1>
 
-<em>Last update to this document: July 18, 2002</em><p>
+<em>Last update to this document: August 8, 2002</em><p>
 
 <h1>Overview</h1>
 
 The equations below are used in multiple places by the Vorbis codec
 specification.  Rather than cluttering up the main specification
-documents, they are defined here and linked int he main documents
+documents, they are defined here and linked in the main documents
 where appropriate.<p>
 
 <a name=log><h2>ilog</h2></a>
 
 
-The "ilog(x)" function returns the highest set bit in the two's complement integer value
+The "ilog(x)" function returns the position number (1 through n) of the highest set bit in the two's complement integer value
 <tt>[x]</tt>.  Values of <tt>[x]</tt> less than zero are defined to return zero.
 
 <pre>
   1) [return_value] = 0;
-  2) if ( [x] is greater than nonzero ){
+  2) if ( [x] is greater than zero ){
       
        3) increment [return_value];
        4) logical shift [x] one bit to the right, padding the MSb with zero
@@ -56,8 +56,8 @@ host-native floating point number.<p>
 <pre>
   1) [mantissa] = [x] bitwise AND 0x1fffff (unsigned result)
   2) [sign] = [x] bitwise AND 0x80000000 (unsigned result)
-  3) [exponent] = ( [x] bitwise AND 0x7fe00000) shifted left 21 bits (unsigned result)
-  4) if ( [mantissa] is nonzero ) then negate [mantissa]
+  3) [exponent] = ( [x] bitwise AND 0x7fe00000) shifted right 21 bits (unsigned result)
+  4) if ( [sign] is nonzero ) then negate [mantissa]
   5) return [mantissa] * ( 2 ^ ( [exponent] - 788 ) )
 </pre>
 
