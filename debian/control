@@ -8,8 +8,6 @@ Standards-Version: 3.1.1
 Package: libvorbis-dev
 Architecture: any
 Depends: libvorbis0 (= ${Source-Version}), libogg-dev, libc6-dev
-Replaces: libvorbis-dev
-Conflicts: libvorbis-dev
 Description: Development library for OGG Vorbis
  Ogg Vorbis is a fully Open, non-proprietary, patent-and-royalty-free,
  general-purpose compressed audio format for high quality (44.1-48.0kHz,
