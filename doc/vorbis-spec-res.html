@@ -14,13 +14,14 @@ A residue vector represents the fine detail of the audio spectrum of
 one channel in an audio frame after the encoder subtracts the floor
 curve and performs any channel coupling.  A residue vector may
 represent spectral lines, spectral magnitude, spectral phase or
-hybrids as mixed by channel coupling.<p>
+hybrids as mixed by channel coupling.  The exact semantic content of
+the vector does not matter to the residue abstraction.<p>
 
-Whatever the exact qualities, the Vorbis residue abstraction codes
-groups of residue vectors of the same length into the bitstream
-packet, and then reconstructs the vectors into the same groups during
-decode.  Vorbis makes use of three different encoding variants
-(numbered 0, 1 and 2) of the same basic vector encoding abstration.<p>
+Whatever the exact qualities, the Vorbis residue abstraction codes the
+residue vectors into the bitstream packet, and then reconstructs the
+vectors during decode.  Vorbis makes use of three different encoding
+variants (numbered 0, 1 and 2) of the same basic vector encoding
+abstration.<p>
 
 <h1>Residue format</h1>
 
@@ -28,26 +29,106 @@ Reside format takes the bundles of vectors, partitions the vectors
 into chunks, classifies each chunk, encodes the chunk classifications
 and finally encodes the chunks using the the specific VQ arrangement
 defined for each selected selected classification.  The exact
-interleaving and partitioning vary by residue encoding number.<p>
+interleaving and partitioning vary by residue encoding number, however
+the high-level process used to classify and encode the residue vector
+is the same in all three variants.<p>
 
-<h2> residue 0 </h2>
+A set of coded residue vectors are all of the same length.  High level
+coding structure, ignoring for the moment exactly how a partition is
+encoded and simply trusting that it is, is as follows:<p>
 
-Residue format zero partitions each channel vector seperately
-according to the chunksize specified in setup.  Each chunk for each
-channel has a unique classification.  Classification numbers are coded
-by group to increase entropy coding efficiency.  Coding of residue
-values is both interleaved and cascaded.<p>
+<ul>
+<li>Each vector is partitioned into multiple equal sized chunks
+according to configuration specified.  If we have a vector size of
+<i>n</i>, a partition size <i>residue_partition_size</i>, and a total
+of <i>ch</i> residue vectors, the total number of paritioned chunks
+coded is <i>n</i>/<i>residue_partition_size</i>*<i>ch</i>.  It is
+important to note that the integer division truncates.  In the below
+example, we assume an example <i>residue_partition_size</i> of 8.<p>
 
-Residue element interleave within each chunk 
+<li>Each partition in each vector has a classification number that
+specifies which of multiple configured VQ codebook setups are used to
+decode that partition.  The classification numbers of each partition
+can be thought of as forming a vector, as in the illustration below.
+Just as the residue vectors are coded in grouped partitions to
+increase encoding efficiency, the classification vector is also
+partitioned into chunks.  The integer elements of each scalar in a
+classification chunk are built into a single scalar that represents
+the classification numbers in that chunk.  In the below example, the
+classification codeword encodes two classification numbers.<p>
 
+<li>The values in a residue vector may be encoded monolithically in a
+single pass through the residue vector, but more often efficient
+codebook design dictates that each vector is encoded as the additive
+sum of several passes through the residue vector using more than one
+VQ codebook.  Thus, each residue value potentially accumulates values
+from multiple decode passes.  The classification value associated with
+a partition is the same in each pass, thus the classification codeword
+is coded only in the first pass.<p>
 
+</ul>
 
-Coding order is rougly as follows
+<img src="residue-pack.png"><p>
 
+<h2>residue 0</h2>
+
+Residue 0 and 1 differ only in the way the values within a residue
+partition are interleaved during partition encoding (visually treated
+as a black box- or cyan box or brown box- in the above figure).<p>
+
+Residue encoding 0 interleaves VQ encoding according to the
+dimension of the codebook used to encode a partition in a specific
+pass.  The dimension of the codebook need not be the same in multiple
+passes, however the partition size must be an even multiple of the
+codebook dimension.<p>
+
+As an example, assume a partition vector of size eight, to be encoded
+by residue 0 using codebook sizes of 8, 4, 2 and 1:<p>
+
+<pre>
+
+            original residue vector: [ 0 1 2 3 4 5 6 7 ]
+
+codebook dimensions = 8  encoded as: [ 0 1 2 3 4 5 6 7 ]
+
+codebook dimensions = 4  encoded as: [ 0 2 4 6 ], [ 1 3 5 7 ]
+
+codebook dimensions = 2  encoded as: [ 0 4 ], [ 1 5 ], [ 2 6 ], [ 3 7 ]
+
+codebook dimensions = 1  encoded as: [ 0 ], [ 1 ], [ 2 ], [ 3 ], [ 4 ], [ 5 ], [ 6 ], [ 7 ]
+
+</pre>
+
+It is worth mentioning at this point that no configurable value in the
+residue coding setup is restricted to a power of two.<p>
 
 <h2> residue 1 </h2>
 
+Residue 1 does not interleave VQ encoding.  It represents partition
+vector scalars in order.  As with residue 0, however, partition length
+must be an integer multiple of the codebook dimension, although
+dimension may vary from pass to pass.
+
+As an example, assume a partition vector of size eight, to be encoded
+by residue 0 using codebook sizes of 8, 4, 2 and 1:<p>
+
+<pre>
+
+            original residue vector: [ 0 1 2 3 4 5 6 7 ]
+
+codebook dimensions = 8  encoded as: [ 0 1 2 3 4 5 6 7 ]
+
+codebook dimensions = 4  encoded as: [ 0 1 2 3 ], [ 4 5 6 7 ]
+
+codebook dimensions = 2  encoded as: [ 0 1 ], [ 2 3 ], [ 4 5 ], [ 6 7 ]
+
+codebook dimensions = 1  encoded as: [ 0 ], [ 1 ], [ 2 ], [ 3 ], [ 4 ], [ 5 ], [ 6 ], [ 7 ]
+
+</pre>
+
 <h2> residue 2 </h2>
+
+
 
 <h1>Residue decode</h1>
 
