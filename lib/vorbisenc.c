@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.48 2003/12/30 11:02:22 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.49 2003/12/30 12:23:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -947,7 +947,10 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
 
   if(nominal_bitrate<=0.){
     if(max_bitrate>0.){
-      nominal_bitrate=max_bitrate*.875;
+      if(min_bitrate>0.)
+	nominal_bitrate=(max_bitrate+min_bitrate)*.5;
+      else
+	nominal_bitrate=max_bitrate*.875;
     }else{
       if(min_bitrate>0.){
 	nominal_bitrate=min_bitrate;
