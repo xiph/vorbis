@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.43 2001/06/15 23:31:00 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.44 2001/06/18 09:07:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -381,6 +381,8 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
     _analysis_output("lsp2",seq-1,lspwork,look->m,0,0);
 
     /* take the coefficients back to a spectral envelope curve */
+    for(j=0;j<look->n;j++)
+      codedflr[j]=1.f;
     vorbis_lsp_to_curve(codedflr,look->linearmap,look->n,look->ln,
 			lspwork,look->m,amp,info->ampdB);
 

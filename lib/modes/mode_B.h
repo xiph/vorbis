@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_B.h,v 1.14 2001/05/27 06:44:05 xiphmont Exp $
+ last mod: $Id: mode_B.h,v 1.15 2001/06/18 09:07:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,7 +48,7 @@
 
 
 static vorbis_info_psy _psy_set_B0={
-  1,/*athp*/
+  ATH_Bark_dB_lspconservative,
   1,/*decayp*/
 
   -100.,
@@ -135,7 +135,7 @@ static vorbis_info_psy _psy_set_B0={
 };
 
 static vorbis_info_psy _psy_set_B={
-  1,/*athp*/
+  ATH_Bark_dB_lspconservative,
   1,/*decayp*/
 
   -100.f,

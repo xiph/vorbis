@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.46 2001/06/15 21:15:40 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.47 2001/06/18 09:07:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -97,7 +97,7 @@ static void setup_curve(float **c,
   int i,j;
   float ath[EHMER_MAX];
   float tempc[P_LEVELS][EHMER_MAX];
-  float *ATH=ATH_Bark_dB_lineconservative; /* just for limiting here */
+  float *ATH=ATH_Bark_dB_lspconservative; /* just for limiting here */
 
   memcpy(c[0]+2,c[4]+2,sizeof(float)*EHMER_MAX);
   memcpy(c[2]+2,c[4]+2,sizeof(float)*EHMER_MAX);
