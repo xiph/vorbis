@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.21 2000/04/23 15:34:12 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.22 2000/05/01 05:48:26 jon Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
+
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"
 
@@ -368,8 +370,8 @@ static int _open_seekable(OggVorbis_File *vf){
 static int _open_nonseekable(OggVorbis_File *vf){
   /* we cannot seek. Set up a 'single' (current) logical bitstream entry  */
   vf->links=1;
-  vf->vi=malloc(sizeof(vorbis_info));
-  vf->vc=malloc(sizeof(vorbis_info));
+  vf->vi=calloc(vf->links,sizeof(vorbis_info));
+  vf->vc=calloc(vf->links,sizeof(vorbis_info));
 
   /* Try to fetch the headers, maintaining all the storage */
   if(_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno)==-1)return(-1);
@@ -966,6 +968,15 @@ vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
   }
 }
 
+int host_is_big_endian() {
+  short pattern = 0xbabe;
+  unsigned char *bytewise = (unsigned char *)&pattern;
+  if (bytewise[0] == 0xba) return 1;
+
+  assert(bytewise[0] == 0xbe);
+  return 0;
+}
+
 /* up to this point, everything could more or less hide the multiple
    logical bitstream nature of chaining from the toplevel application
    if the toplevel application didn't particularly care.  However, at
@@ -1000,6 +1011,7 @@ vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
 long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int bigendianp,int word,int sgned,int *bitstream){
   int i,j;
+  int host_endian = host_is_big_endian();
 
   while(1){
     if(vf->decode_ready){
@@ -1027,7 +1039,37 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	  }else{
 	    int off=(sgned?0:32768);
 
-	    if(bigendianp){
+	    if(host_endian==bigendianp){
+	      if(sgned){
+		short *dest;
+		for(i=0;i<channels;i++) { /* It's faster in this order */
+		  double *src=pcm[i];
+		  short *dest=((short *)buffer)+i;
+		  for(j=0;j<samples;j++) {
+		    val=(int)(src[j]*32768. + 0.5);
+		    if(val>32767)val=32767;
+		    else if(val<-32768)val=-32768;
+		    *dest=val;
+		    dest+=channels;
+		  }
+		}
+		buffer=(char *)dest;
+	      }else{
+		short *dest;
+		for(i=0;i<channels;i++) {
+		  double *src=pcm[i];
+		  short *dest=((short *)buffer)+i;
+		  for(j=0;j<samples;j++) {
+		    val=(int)(src[j]*32768. + 0.5);
+		    if(val>32767)val=32767;
+		    else if(val<-32768)val=-32768;
+		    *dest=val+off;
+		    dest+=channels;
+		  }
+		}
+		buffer=(char *)dest;
+	      }
+	    }else if(bigendianp){
 	      for(j=0;j<samples;j++)
 		for(i=0;i<channels;i++){
 		  val=(int)(pcm[i][j]*32768. + 0.5);
