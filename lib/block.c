@@ -14,11 +14,10 @@
  function: PCM data vector blocking, windowing and dis/reassembly
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 29 1999
+ last modification date: Aug 05 1999
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
- more amusing by Vorbis' current two allowed block sizes (512 and 2048
- elements/channel).
+ more amusing by Vorbis' current two allowed block sizes.
  
  Vorbis manipulates the dynamic range of the incoming PCM data
  envelope to minimise time-domain energy leakage from percussive and
@@ -73,6 +72,10 @@
 
 static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   memset(v,0,sizeof(vorbis_dsp_state));
+
+  memcpy(&v->vi,vi,sizeof(vorbis_info));
+  _ve_envelope_init(&v->ve,vi->envelopesa);
+
   v->samples_per_envelope_step=vi->envelopesa;
   v->block_size[0]=vi->smallblock;
   v->block_size[1]=vi->largeblock;
@@ -112,11 +115,11 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   if(vi->envelopech){
     v->envelope_storage=v->pcm_storage/v->samples_per_envelope_step;
     v->envelope_channels=vi->envelopech;
-    v->multipliers=calloc(v->envelope_channels,sizeof(int *));
+    v->multipliers=calloc(v->envelope_channels,sizeof(double *));
     {
       int i;
       for(i=0;i<v->envelope_channels;i++){
-	v->multipliers[i]=calloc(v->envelope_storage,sizeof(int));
+	v->multipliers[i]=calloc(v->envelope_storage,sizeof(double));
       }
     }
   }
@@ -140,6 +143,11 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   vi->largeblock=2048;
   vi->envelopesa=64;
   vi->envelopech=vi->channels;
+  vi->preecho_thresh=10.;
+  vi->preecho_thresh=4.;
+  vi->envelopemap=calloc(2,sizeof(int));
+  vi->envelopemap[0]=0;
+  vi->envelopemap[1]=1;
 
   _vds_shared_init(v,vi);
 
@@ -229,9 +237,9 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   for(i=0;i<vb->pcm_channels;i++)
     vb->pcm[i]=malloc(vb->pcm_storage*sizeof(double));
   
-  vb->mult=malloc(vb->mult_channels*sizeof(int *));
+  vb->mult=malloc(vb->mult_channels*sizeof(double *));
   for(i=0;i<vb->mult_channels;i++)
-    vb->mult[i]=malloc(vb->mult_storage*sizeof(int));
+    vb->mult[i]=malloc(vb->mult_storage*sizeof(double));
   return(0);
 }
 
@@ -265,6 +273,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      data, fill them up in before proceeding. */
 
   if(v->pcm_current/v->samples_per_envelope_step>v->envelope_current){
+    /* This generates the multipliers, but does not sparsify the vector.
+       That's done by block before coding */
     _ve_envelope_multipliers(v);
   }
 
@@ -286,7 +296,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 
   for(;i<v->envelope_current;i++){
     for(j=0;j<v->envelope_channels;j++)
-      if(v->multipliers[j][i])break;
+      if(v->multipliers[j][i-1]*v->vi.preecho_thresh<  
+	 v->multipliers[j][i])break;
     if(j<v->envelope_channels)break;
   }
   
@@ -349,7 +360,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     memcpy(vb->pcm[i],v->pcm[i]+beginW,v->block_size[v->W]*sizeof(double));
   for(i=0;i<v->envelope_channels;i++)
     memcpy(vb->mult[i],v->multipliers[i]+beginM,v->block_size[v->W]/
-	   v->samples_per_envelope_step*sizeof(int));
+	   v->samples_per_envelope_step*sizeof(double));
 
   vb->frameno=v->frame;
 
@@ -370,13 +381,17 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     int movementW=centerNext-new_centerNext;
     int movementM=movementW/v->samples_per_envelope_step;
 
+    /* the multipliers and pcm stay synced up because the blocksizes
+       must be multiples of samples_per_envelope_step (minimum
+       multiple is 2) */
+
     for(i=0;i<v->pcm_channels;i++)
       memmove(v->pcm[i],v->pcm[i]+movementW,
 	      (v->pcm_current-movementW)*sizeof(double));
     
     for(i=0;i<v->envelope_channels;i++){
       memmove(v->multipliers[i],v->multipliers[i]+movementM,
-	      (v->envelope_current-movementM)*sizeof(int));
+	      (v->envelope_current-movementM)*sizeof(double));
     }
 
     v->pcm_current-=movementW;
@@ -398,15 +413,20 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 }
 
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
+  int temp=vi->envelopech;
+  vi->envelopech=0; /* we don't need multiplier buffering in syn */
   _vds_shared_init(v,vi);
+  vi->envelopech=temp;
+
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;
   v->centerW-= v->block_size[v->W]/4+v->block_size[v->lW]/4;
   return(0);
 }
 
-/* Unike in analysis, the window is only partially applied, and
-   envelope *not* applied. */
+/* Unike in analysis, the window is only partially applied.  Envelope
+   is previously applied (the whole envelope, if any, is shipped in
+   each block) */
 
 int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
@@ -433,15 +453,13 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   }
 
   {
-    int envperlong=v->block_size[1]/v->samples_per_envelope_step;
-    int envperW=v->block_size[v->W]/v->samples_per_envelope_step;
     int sizeW=v->block_size[vb->W];
     int centerW=v->centerW+v->block_size[vb->lW]/4+sizeW/4;
     int beginW=centerW-sizeW/2;
     int endW=beginW+sizeW;
     int beginSl;
     int endSl;
-    int i,j,k;
+    int i,j;
     double *window;
 
     /* Do we have enough PCM storage for the block? */
@@ -454,45 +472,6 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 	v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(double)); 
     }
 
-    /* multiplier storage works differently in decode than it does in
-       encode; we only need to buffer the last 'half largeblock' and
-       we don't need to keep it aligned with the PCM. */
-
-    /* fill in the first half of the block's multipliers */
-    i=v->envelope_current-1;
-    j=envperW/2-1;
-    for(;j>=0;j--)
-      for(k=0;k<v->envelope_channels;k++)
-	vb->mult[k][j]=v->multipliers[k][i];
-      
-    /* shift out unneeded buffered multipliers */
-    {
-      int needed=(envperlong-envperW)/2;
-      if(needed){
-	/* We need to keep some of the buffered ones */
-	for(k=0;k<v->envelope_channels;k++)
-	  memmove(v->multipliers[k],
-		  v->multipliers[k]+v->envelope_current-needed,
-		  needed*sizeof(int));
-      }
-      v->envelope_current=needed;
-    }
-
-    /* add block's second half to the multiplier buffer */
-    /* init makes certain we have enough storage; we only buffer a
-       half longblock */
-    
-    for(i=envperW/2;i<envperW;i++){
-      j=v->envelope_current;
-      for(k=0;k<v->envelope_channels;k++)
-	v->multipliers[k][j++]=vb->mult[k][i];
-    }
-    v->envelope_current+=envperW/2;
-
-    /* manufacture/apply multiplier vector */
-
-    _ve_envelope_apply(vb);
-    
     /* Overlap/add */
     switch(vb->W){
     case 0:
@@ -549,26 +528,6 @@ int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes){
 #include <stdio.h>
 #include <math.h>
 
-void _ve_envelope_multipliers(vorbis_dsp_state *v){
-  /* set 'random' deltas... */
-  int new_current=v->pcm_current/v->samples_per_envelope_step;
-  int i,j;
-
-  for(i=v->envelope_current;i<new_current;i++){
-    int flag=0;
-    for(j=0;j<v->samples_per_envelope_step;j++)
-      if(v->pcm[0][j+i*v->samples_per_envelope_step]>5)flag=1;
-    
-    for(j=0;j<v->envelope_channels;j++)
-      v->multipliers[j][i]=flag;
-  }
-  v->envelope_current=i;
-}
-
-void _ve_envelope_apply(vorbis_block *vb){
-
-}
-
 /* basic test of PCM blocking:
 
    construct a PCM vector and block it using preset sizing in our fake
@@ -594,7 +553,6 @@ int main(){
   vi.rate=44100;
   vi.version=0;
   vi.mode=0;
-
   vi.user_comments=temp;
   vi.vendor="Xiphophorus";
 
@@ -631,6 +589,10 @@ int main(){
 
       double *window=encode.window[vb.W][vb.lW][vb.nW];
 
+      /* apply envelope */
+      _ve_envelope_sparsify(&vb);
+      _ve_envelope_apply(&vb,0);
+
       for(i=0;i<vb.pcm_channels;i++)
 	MDCT(vb.pcm[i],vb.pcm[i],ml[vb.W],window);
 
@@ -650,16 +612,17 @@ int main(){
 	out=fopen(path,"w");
 
 	for(i=0;i<avail;i++)
-	  fprintf(out,"%ld %g\n",i+beginW,vb.pcm[0][i]);
+	  fprintf(out,"%d %g\n",i+beginW,vb.pcm[0][i]);
 	fprintf(out,"\n");
 	for(i=0;i<avail;i++)
-	  fprintf(out,"%ld %g\n",i+beginW,window[i]);
+	  fprintf(out,"%d %g\n",i+beginW,window[i]);
 
 	fclose(out);
 	countermid+=encode.block_size[vb.W]/4+encode.block_size[vb.nW]/4;
       }
 
 
+      _ve_envelope_apply(&vb,1);
       vorbis_synthesis_blockin(&decode,&vb);
       
 

@@ -43,6 +43,11 @@ typedef struct vorbis_info{
   int largeblock;
   int envelopesa;
   int envelopech;
+  int *envelopemap; /* which envelope applies to what pcm channel */
+  int **channelmap; /* which encoding channels produce what pcm */
+
+  double preecho_thresh;
+  double preecho_clamp;
 } vorbis_info;
  
 typedef struct {
@@ -103,17 +108,16 @@ typedef struct {
 } ogg_sync_state;
 
 typedef struct {
-    int divisor;
+  int winlen;
   double *window;
-} _ve_lookup;
-
+} envelope_lookup;
 
 typedef struct vorbis_dsp_state{
   int samples_per_envelope_step;
   int block_size[2];
   double *window[2][2][2]; /* windowsize, leadin, leadout */
 
-  _ve_lookup ve;
+  envelope_lookup ve;
   vorbis_info vi;
 
   double **pcm;
@@ -123,7 +127,7 @@ typedef struct vorbis_dsp_state{
   int      pcm_current;
   int      pcm_returned;
 
-  int    **multipliers;
+  double **multipliers;
   int      envelope_storage;
   int      envelope_channels;
   int      envelope_current;
@@ -142,7 +146,7 @@ typedef struct vorbis_dsp_state{
 
 typedef struct vorbis_block{
   double **pcm;
-  int    **mult;
+  double **mult;
   int    pcm_channels; /* allocated, not used */
   int    pcm_storage;  /* allocated, not used */
   int    mult_channels; /* allocated, not used */

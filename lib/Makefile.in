@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.5 1999/08/04 09:18:28 xiphmont Exp $
+# $Id: Makefile.in,v 1.6 1999/08/07 00:09:13 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -27,7 +27,7 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-OFILES = 	framing.o
+OFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o
 TARGETFILES =	libvorbis.a
 
 all:
@@ -39,14 +39,19 @@ debug:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-selftest:
+selftest:	
 	$(MAKE) clean
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
 		-o test_bitwise -lm
+	$(CC) $(DEBUG) -c envelope.c mdct.c window.c
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST envelope.o mdct.o window.c\
+			block.c -o test_blocking -lm
+
 	@echo
 	@./test_framing
 	@./test_bitwise
+	@./test_blocking
 
 target:	$(TARGETFILES)
 

@@ -14,7 +14,7 @@
  function: PCM data envelope analysis and manipulation
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 27 1999
+ last modification date: Aug 06 1999
 
  ********************************************************************/
 
@@ -22,7 +22,9 @@
 #define _V_ENVELOPE_
 
 extern void _ve_envelope_multipliers(vorbis_dsp_state *v);
-extern void _ve_envelope_apply(vorbis_block *vb);
+extern void _ve_envelope_apply(vorbis_block *vb,int multp);
+extern void _ve_envelope_sparsify(vorbis_block *vb);
+extern void _ve_envelope_init(envelope_lookup *e,int samples_per);
 
 #endif
 
