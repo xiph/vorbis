@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.1 2002/05/07 23:47:14 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.2 2002/05/08 01:06:33 xiphmont Exp $
 
  ********************************************************************/
 
@@ -717,6 +717,9 @@ static void bark_noise_hybridmp(int n,const long *b,
   float tN, tX, tXX, tY, tXY;
   float fi;
   int i;
+
+  int lo, hi;
+  float R, A, B, D;
   
   tN = tX = tXX = tY = tXY = 0.f;
   for (i = 0, fi = 0.f; i < n; i++, fi += 1.f) {
@@ -744,8 +747,6 @@ static void bark_noise_hybridmp(int n,const long *b,
   XY[i] = tXY;
   
   for (i = 0, fi = 0.f;; i++, fi += 1.f) {
-    int lo, hi;
-    float R, A, B, D;
     
     lo = b[i] >> 16;
     if( lo>=0 ) break;
@@ -766,10 +767,8 @@ static void bark_noise_hybridmp(int n,const long *b,
     
     noise[i] = R - offset;
   }
-
-  for ( ; i < n; i++, fi += 1.f) {
-    int lo, hi;
-    float R, A, B, D;
+  
+  for ( ; hi < n; i++, fi += 1.f) {
     
     lo = b[i] >> 16;
     hi = b[i] & 0xffff;
@@ -788,13 +787,17 @@ static void bark_noise_hybridmp(int n,const long *b,
     
     noise[i] = R - offset;
   }
+  for ( ; i < n; i++, fi += 1.f) {
+    
+    R = (A + fi * B) / D;
+    if (R < 0.f) R = 0.f;
+    
+    noise[i] = R - offset;
+  }
   
   if (fixed <= 0) return;
   
   for (i = 0, fi = 0.f; i < (fixed + 1) / 2; i++, fi += 1.f) {
-    int lo, hi;
-    float R, A, B, D;
-    
     hi = i + fixed / 2;
     lo = hi - fixed;
     
@@ -812,9 +815,7 @@ static void bark_noise_hybridmp(int n,const long *b,
 
     if (R > 0.f && R - offset < noise[i]) noise[i] = R - offset;
   }
-  for ( ; i < n; i++, fi += 1.f) {
-    int lo, hi;
-    float R, A, B, D;
+  for ( ; hi < n; i++, fi += 1.f) {
     
     hi = i + fixed / 2;
     lo = hi - fixed;
@@ -830,6 +831,10 @@ static void bark_noise_hybridmp(int n,const long *b,
     D = tN * tXX - tX * tX;
     R = (A + fi * B) / D;
     
+    if (R > 0.f && R - offset < noise[i]) noise[i] = R - offset;
+  }
+  for ( ; i < n; i++, fi += 1.f) {
+    R = (A + fi * B) / D;
     if (R > 0.f && R - offset < noise[i]) noise[i] = R - offset;
   }
 }
