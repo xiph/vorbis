@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.21.2.1 2000/07/29 13:27:57 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.21.2.2 2000/07/31 19:40:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,6 +51,8 @@ typedef struct {
 } vorbis_info_mode;
 
 /* psychoacoustic setup ********************************************/
+#define P_BANDS 17
+#define P_LEVELS 11
 typedef struct vorbis_info_psy{
   int    athp;
   int    decayp;
@@ -62,38 +64,24 @@ typedef struct vorbis_info_psy{
   double ath_adjatt;
   double ath_maxatt;
 
+  /*     0  1  2   3   4   5   6   7   8   9  10  11  12  13  14  15   16   */
+  /* x: 63 88 125 175 250 350 500 700 1k 1.4k 2k 2.8k 4k 5.6k 8k 11.5k 16k Hz */
+  /* y: 0 10 20 30 40 50 60 70 80 90 100 dB */
+
   int tonemaskp;
-  double toneatt_125Hz[5];
-  double toneatt_250Hz[5];
-  double toneatt_500Hz[5];
-  double toneatt_1000Hz[5];
-  double toneatt_2000Hz[5];
-  double toneatt_4000Hz[5];
-  double toneatt_8000Hz[5];
+  double toneatt[P_BANDS][P_LEVELS];
 
   int peakattp;
-  double peakatt_125Hz[5];
-  double peakatt_250Hz[5];
-  double peakatt_500Hz[5];
-  double peakatt_1000Hz[5];
-  double peakatt_2000Hz[5];
-  double peakatt_4000Hz[5];
-  double peakatt_8000Hz[5];
+  double peakatt[P_BANDS][P_LEVELS];
 
   int noisemaskp;
-  double noiseatt_125Hz[5];
-  double noiseatt_250Hz[5];
-  double noiseatt_500Hz[5];
-  double noiseatt_1000Hz[5];
-  double noiseatt_2000Hz[5];
-  double noiseatt_4000Hz[5];
-  double noiseatt_8000Hz[5];
+  double noiseatt[P_BANDS][P_LEVELS];
 
   double max_curve_dB;
 
+  /* decay setup */
   double attack_coeff;
   double decay_coeff;
-
 } vorbis_info_psy;
 
 /* vorbis_info contains all the setup information specific to the
