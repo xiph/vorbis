@@ -34,12 +34,6 @@ CFLAGS="$cflags_save"
 
 AM_PROG_LIBTOOL
 
-dnl --------------------------------------------------  
-dnl Additional arguments
-dnl --------------------------------------------------  
-
-AC_ARG_WITH(ogg, [  --with-ogg=DIR          Set where the Ogg library is located]) 
-
 dnl --------------------------------------------------
 dnl Set build flags based on environment
 dnl --------------------------------------------------
@@ -149,11 +143,7 @@ dnl --------------------------------------------------
 AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
-dnl Check for libogg
-if test -n $with_ogg; then
-	CFLAGS="$CFLAGS -I$with_ogg/include -L$with_ogg/lib"
-fi 
-AC_CHECK_LIB(ogg, oggpack_read, LIBS="$LIBS -logg", AC_MSG_ERROR([You must have libogg to compile vorbis!!!]))
+AM_PATH_OGG(1.0.0, have_ogg=yes, have_ogg=no)
 
 dnl --------------------------------------------------
 dnl Check for library functions
