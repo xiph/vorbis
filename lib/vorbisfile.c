@@ -214,6 +214,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
   /* extract the initial header from the first page and verify that the
      Ogg bitstream is in fact Vorbis data */
   
+  vorbis_info_clear(vi);
   vorbis_info_init(vi);
   
   i=0;
@@ -238,6 +239,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
 	goto bail_header;
       }
   }
+  ogg_stream_clear(&vf->os);
   return 0; 
 
  bail_header:
@@ -255,7 +257,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first,
   ogg_page og;
   int i,ret;
   
-  vf->vi=malloc(vf->links*sizeof(vorbis_info));
+  vf->vi=calloc(vf->links,sizeof(vorbis_info));
   vf->dataoffsets=malloc(vf->links*sizeof(long));
   vf->pcmlengths=malloc(vf->links*sizeof(size64));
   vf->serialnos=malloc(vf->links*sizeof(long));
@@ -319,6 +321,7 @@ static int _open_seekable(OggVorbis_File *vf){
   ogg_page og;
   
   /* is this even vorbis...? */
+  memset(&initial,0,sizeof(vorbis_info));
   ret=_fetch_headers(vf,&initial,&serialno);
   dataoffset=vf->offset;
   ogg_stream_clear(&vf->os);
@@ -768,13 +771,13 @@ int ov_pcm_seek(OggVorbis_File *vf,size64 pos){
       }
     
       _seek_helper(vf,bisect);
-      ret=_get_next_page(vf,&og,-1);
+      ret=_get_next_page(vf,&og,end-bisect);
       
       if(ret==-1){
 	end=bisect;
       }else{
 	size64 frameno=ogg_page_frameno(&og);
-	if(ogg_page_serialno(&og)==vf->serialnos[link] && frameno<target){
+	if(frameno<target){
 	  best=ret;  /* raw offset of packet with frameno */ 
 	  begin=vf->offset; /* raw offset of next packet */
 	}else{

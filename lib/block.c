@@ -111,6 +111,17 @@ int vorbis_block_clear(vorbis_block *vb){
       free(vb->pcm[i]);
     free(vb->pcm);
   }
+  if(vb->lpc){
+    for(i=0;i<vb->floor_channels;i++)
+      free(vb->lpc[i]);
+    free(vb->lpc);
+  }
+  if(vb->lsp){
+    for(i=0;i<vb->floor_channels;i++)
+      free(vb->lsp[i]);
+    free(vb->lsp);
+  }
+  if(vb->amp)free(vb->amp);
   if(vb->vd)
     if(vb->vd->analysisp)
       _oggpack_writeclear(&vb->opb);
