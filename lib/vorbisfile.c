@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.74 2003/09/12 18:30:16 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.75 2003/09/16 20:28:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -672,8 +672,8 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
 }
 
 static int _ov_open2(OggVorbis_File *vf){
-  if(vf->ready_state < OPENED)
-    vf->ready_state=OPENED;
+  if(vf->ready_state != PARTOPEN) return OV_EINVAL;
+  vf->ready_state=OPENED;
   if(vf->seekable){
     int ret=_open_seekable2(vf);
     if(ret){
@@ -681,7 +681,9 @@ static int _ov_open2(OggVorbis_File *vf){
       ov_clear(vf);
     }
     return(ret);
-  }
+  }else
+    vf->ready_state=STREAMSET;
+
   return 0;
 }
 
