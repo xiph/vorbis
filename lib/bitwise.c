@@ -39,6 +39,7 @@ static unsigned long mask[]=
 void _oggpack_writeinit(oggpack_buffer *b){
   memset(b,0,sizeof(oggpack_buffer));
   b->ptr=b->buffer=malloc(BUFFER_INCREMENT);
+  b->buffer[0]='\0';
   b->storage=BUFFER_INCREMENT;
 }
 
