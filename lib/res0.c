@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.5 2000/02/12 08:33:09 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.6 2000/02/13 11:53:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -114,7 +114,7 @@ int forward(vorbis_block *vb,vorbis_look_residue *l,
   vorbis_info_residue0 *info=look->info;
   for(i=0;i<ch;i++)
     for(j=0;j<vb->pcmend/2;j++)
-      _oggpack_write(&vb->opb,rint(in[i][j])+16,5);
+      _oggpack_write(&vb->opb,rint(in[i][j])+32,6);
   return(0);
 }
 
@@ -122,7 +122,7 @@ int inverse(vorbis_block *vb,vorbis_look_residue *l,double **in,int ch){
   long i,j;
   for(i=0;i<ch;i++)
     for(j=0;j<vb->pcmend/2;j++)
-      in[i][j]*=_oggpack_read(&vb->opb,5)-16;
+      in[i][j]*=_oggpack_read(&vb->opb,6)-32;
   return(0);
 }
 

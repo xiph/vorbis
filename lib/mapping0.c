@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.9 2000/02/12 08:33:06 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.10 2000/02/13 11:53:46 xiphmont Exp $
 
  ********************************************************************/
 
@@ -228,15 +228,16 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       _vp_mask_floor(look->psy_look+submap,pcm,mask,1);
  
       /* perform floor encoding; takes transform floor, returns decoded floor */
+      /*      nonzero[i]=look->floor_func[submap]->
+	      forward(vb,look->floor_look[submap],floor,decfloor);*/
       nonzero[i]=look->floor_func[submap]->
-	forward(vb,look->floor_look[submap],floor,decfloor);
-      
-      /* no iterative residue/floor tuning at the moment */
-      
+	forward(vb,look->floor_look[submap],mask,decfloor);
+
 #ifdef TRAIN
       if(nonzero[i]){
 	FILE *of;
 	char buffer[80];
+	int i;
 	
 	sprintf(buffer,"masked_%d.vqd",vb->mode);
 	of=fopen(buffer,"a");
@@ -253,6 +254,9 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       }
 #endif      
 
+      /* no iterative residue/floor tuning at the moment */
+      if(nonzero[i])for(j=0;j<n/2;j++)pcm[j]/=decfloor[j];
+      
     }
     
     /* perform residue encoding with residue mapping; this is
@@ -263,7 +267,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       int ch_in_bundle=0;
       for(j=0;j<vi->channels;j++){
 	if(map->chmuxlist[j]==i && nonzero[j]==1){
-	  pcmbundle[ch_in_bundle]=vb->pcm[j];
+	  pcmbundle[ch_in_bundle++]=vb->pcm[j];
 	}
       }
       
