@@ -1,0 +1,33 @@
+cp resaux_short.vqd _44c2_short.vqd
+cp resaux_long.vqd _44c2_long.vqd
+
+GO
+
+>_44c2s noninterleaved
+haux _44c2_short.vqd 0,12,2
+
+>_44c2 noninterleaved
+haux _44c2_long.vqd 0,48,2
+	
+#iter 0
+
+#       0   1   2   4  26   1   4   +      
+#           0   0   0   0      
+#
+#       0   1   2   3   4   5   6   7
+#   1                   .           .
+#   2                   .           .
+#   4       .   .   .       .   .   .
+
+:_s0_p1_0 res_long_part1_it0.vqd, 4, nonseq cull, 0 +- 1 2
+:_s0_p2_0 res_long_part2_it0.vqd, 2, nonseq cull, 0 +- 1 2 3 4
+:_s0_p3_0 res_long_part3_it0.vqd, 2, nonseq cull, 0 +- 1 2 3 4 5 6 7 8
+:_s0_p4_0 res_long_part4_it0.vqd, 2, nonseq , 0 +- 7 14 21 28 35 42 49
++_s0_p4_1, 2, nonseq cull, 0 +- 1 2 3 
+:_s1_p5_0 res_long_part5_it0.vqd, 4, nonseq cull, 0 +- 1
+:_s2_p6_0 res_long_part6_it0.vqd, 2, nonseq cull, 0 +- 1 2 3 4
+
+:_s2_p7_0 res_long_part7_it0.vqd, 2, nonseq, 0 +- 67 134 201	
++_s2_p7_1, 2, nonseq, 0 +- 3 6 9 12 15 18 21 24 27 30 33
++_s2_p7_2, 4, nonseq, 0 +- 1 
+
