@@ -1,19 +1,26 @@
-%define name	libvorbis
-%define version	1.0
-%define release 1
-
+Name:		libvorbis
+Version:	1.0
+Release:	1
 Summary:	The Vorbis General Audio Compression Codec
-Name:		%{name}
-Version:	%{version}
-Release:	%{release}
-Group:		Libraries/Multimedia
-Copyright:	BSD
+
+Group:		System Environment/Libraries
+License:	BSD
 URL:		http://www.xiph.org/
 Vendor:		Xiph.org Foundation <team@xiph.org>
-Source:		ftp://ftp.xiph.org/pub/ogg/vorbis/%{name}-%{version}.tar.gz
-BuildRoot:	%{_tmppath}/%{name}-root
-Requires:	libogg >= 1.0rc3
+Source:		http://www.xiph.org/pub/ogg/vorbis/download/%{name}-%{version}.tar.gz
 Prefix:		%{_prefix}
+BuildRoot:	%{_tmppath}/%{name}-root
+
+# We're forced to use an epoch since both Red Hat and Ximian use it in their
+# rc packages
+Epoch:          2
+# Dirty trick to tell rpm that this package actually provides what the
+# last rc and beta was offering
+Provides:       %{name} = %{epoch}:1.0rc3-%{release}
+Provides:       %{name} = %{epoch}:1.0beta4-%{release}
+
+Requires:	libogg >= 1.0
+BuildRequires:	libogg-devel >= 1.0
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
@@ -23,27 +30,37 @@ and variable bitrates from 16 to 128 kbps/channel.
 %package devel
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
-Requires:	libogg-devel >= 1.0rc3
+Requires:	libogg-devel >= 1.0
 Requires:	libvorbis = %{version}
+# Dirty trick to tell rpm that this package actually provides what the
+# last rc and beta was offering
+Provides:       %{name}-devel = %{epoch}:1.0rc3-%{release}
+Provides:       %{name}-devel = %{epoch}:1.0beta4-%{release}
 
 %description devel
-The libvorbis-devel package contains the header files and documentation
-needed to develop applications with libvorbis.
+The libvorbis-devel package contains the header files, static libraries 
+and documentation needed to develop applications with libvorbis.
 
 %prep
 %setup -q -n %{name}-%{version}
 
 %build
-if [ ! -f configure ]; then
-  CFLAGS="$RPM_OPT_FLAGS" ./autogen.sh --prefix=%{_prefix}
-else
-  CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{_prefix}
-fi
+CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{_prefix} --enable-static
 make
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
 make DESTDIR=$RPM_BUILD_ROOT install
+
+%clean 
+[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+
+%post
+/sbin/ldconfig
+
+%postun
+/sbin/ldconfig
 
 %files
 %defattr(-,root,root)
@@ -71,16 +88,11 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %{_libdir}/libvorbisenc.a
 %{_libdir}/libvorbisenc.so
 
-%clean 
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-
-%post
-/sbin/ldconfig
-
-%postun
-/sbin/ldconfig
-
 %changelog
+* Sun Jul 14 2002 Thomas Vander Stichele <thomas@apestaart.org>
+- Added BuildRequires:
+- updated for 1.0 release
+
 * Sat May 25 2002 Michael Smith <msmith@icecast.org>
 - Fixed requires, copyright string.
 * Sun Dec 31 2001 Jack Moffitt <jack@xiph.org>

@@ -164,6 +164,7 @@ AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
 XIPH_PATH_OGG(, AC_MSG_ERROR(must have Ogg installed!))
+AC_CHECK_LIB(ogg, oggpack_writealign, , AC_MSG_ERROR(Ogg >= 1.0 required !))
 
 dnl --------------------------------------------------
 dnl Check for library functions
