@@ -57,7 +57,7 @@ libvorbis-dev: build
 
 	dh_installdocs
 	dh_installexamples
-	dh_installmanpages
+#	dh_installmanpages
 #	dh_installinfo
 #	dh_undocumented
 	dh_installchangelogs 
