@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.15 2001/09/07 08:42:30 cwolf Exp $
+ last mod: $Id: vorbisenc.c,v 1.16 2001/09/13 21:38:45 cwolf Exp $
 
  ********************************************************************/
 
@@ -37,6 +37,8 @@
 #if defined(_MSC_VER) && defined(STANDALONE_VORBISENC_DLL)
 # include "shmmap.h"
 
+  SHARED_MAP *g_shared_map;
+
 # define _time_P    g_shared_map->p_time_P
 # define _floor_P   g_shared_map->p_floor_P
 # define _residue_P g_shared_map->p_residue_P
@@ -48,6 +50,13 @@
 static void codec_setup_partialcopy(codec_setup_info *ci,
 				 codec_setup_info *cs){
   int i;
+
+#if defined(_MSC_VER) && defined(STANDALONE_VORBISENC_DLL)
+  int maplen;
+
+  if ((g_shared_map = table_map2mem(&maplen)) == (SHARED_MAP*)0)
+  ; /* some error handling for memory exhaustion */
+#endif
 
   memcpy(ci,cs,sizeof(codec_setup_info)); /* to get the flat numbers */
 
