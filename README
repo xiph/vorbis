@@ -2,8 +2,8 @@
 *                                                                  *
 * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
 * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
-* THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
-* PLEASE READ THESE TERMS DISTRIBUTING.                            *
+* THE GNU LESSER/LIBRARY PUBLIC LICENSE 2, WHICH IS INCLUDED WITH  *
+* THIS SOURCE.  PLEASE READ THESE TERMS DISTRIBUTING.              *
 *                                                                  *
 * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
 * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
@@ -104,4 +104,4 @@ This will install the vorbis libraries (static and shared) into
 
 Monty <monty@xiph.org>
 
-$Id: README,v 1.4.8.1 2000/10/05 22:41:25 xiphmont Exp $
+$Id: README,v 1.4.8.2 2000/10/10 22:20:14 xiphmont Exp $

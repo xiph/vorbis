@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.9.2.5 2000/10/05 21:35:40 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.9.2.6 2000/10/10 22:20:14 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -241,31 +241,87 @@ static int comp(const void *a,const void *b){
     return(-1);
 }
 
-/* CACM algorithm 283. */
-static void cacm283(float *a,int ord,float *r){
-  int i, k;
-  double val, p, delta, error;
-  double rooti;
+/* This is one of those 'mathemeticians should not write code' kind of
+   cases.  Newton's method of polishing roots is straightforward
+   enough... except in those cases where it just fails in the real
+   world.  In our case below, we're worried about a local mini/maxima
+   shooting a root estimation off to infinity, or the new estimation
+   chaotically oscillating about convergence (shouldn't actually be a
+   problem in our usage.
 
-  for(i=0; i<ord;i++) r[i] = 2.0 * (i+0.5) / ord - 1.0;
+   Maehly's modification (zero suppression, to prevent two tenative
+   roots from collapsing to the same actual root) similarly can
+   temporarily shoot a root off toward infinity.  It would come
+   back... if it were not for the fact that machine representation has
+   limited dynamic range and resolution.  This too is guarded by
+   limiting delta.
+
+   Last problem is convergence criteria; we don't know what a 'double'
+   is on our hardware/compiler, and the convergence limit is bounded
+   by roundoff noise.  So, we hack convergence:
+
+   Require at most 1e-6 mean squared error for all zeroes.  When
+   converging, start the clock ticking at 1e-6; limit our polishing to
+   as many more iterations as took us to get this far, 100 max.
+
+   Past max iters, quit when MSE is no longer decreasing *or* we go
+   below ~1e-20 MSE, whichever happens first. */
+
+static void Newton_Raphson_Maehly(float *a,int ord,float *r){
+  int i, k, count=0, maxiter=0;
+  double error=1.,besterror=1.;
+  double *root=alloca(ord*sizeof(double));
+
+  for(i=0; i<ord;i++) root[i] = 2.0 * (i+0.5) / ord - 1.0;
   
-  for(error=1 ; error > 1.e-12; ) {
-    error = 0;
-    for( i=0; i<ord; i++) {  /* Update each point. */
-      rooti = r[i];
-      val = a[ord];
-      p = a[ord];
+  while(error>1.e-20){
+    error=0;
+    
+    for(i=0; i<ord; i++) { /* Update each point. */
+      double ac=0.,pp=0.,delta;
+      double rooti=root[i];
+      double p=a[ord];
       for(k=ord-1; k>= 0; k--) {
-	val = val * rooti + a[k];
-	if (k != i) p *= rooti - r[k];
-      }
-      delta = val/p;
-      r[i] -= delta;
 
+	pp= pp* rooti + p;
+	p = p * rooti+ a[k];
+	if (k != i) ac += 1./(rooti - root[k]);
+      }
+      ac=p*ac;
+
+      delta = p/(pp-ac);
+
+      /* don't allow the correction to scream off into infinity if we
+         happened to polish right at a local mini/maximum */
+
+      if(delta<-3)delta=-3;
+      if(delta>3.)delta=3.; /* 3 is not a random choice; it's large
+                               enough to make sure the first pass
+                               can't accidentally limit two poles to
+                               the same value in a fatal nonelastic
+                               collision.  */
+
+      root[i] -= delta;
       error += delta*delta;
     }
+    
+    if(maxiter && count>maxiter && error>=besterror)break;
+
+    /* anything to help out the polisher; converge using doubles */
+    if(!count || error<besterror){
+      for(i=0; i<ord; i++) r[i]=root[i]; 
+      besterror=error;
+      if(error<1.e-6){ /* rough minimum criteria */
+	maxiter=count*2+10;
+	if(maxiter>100)maxiter=100;
+      }
+    }
+
+    count++;
   }
-  
+
+  fprintf(stderr,"***** error=%g, count=%d\n",error,count);
+
   /* Replaced the original bubble sort with a real sort.  With your
      help, we can eliminate the bubble sort in our lifetime. --Monty */
   
@@ -301,8 +357,8 @@ void vorbis_lpc_to_lsp(float *lpc,float *lsp,int m){
 
   /* Find the roots of the 2 even polynomials.*/
   
-  cacm283(g1,order2,g1r);
-  cacm283(g2,order2,g2r);
+  Newton_Raphson_Maehly(g1,order2,g1r);
+  Newton_Raphson_Maehly(g2,order2,g2r);
   
   for(i=0;i<m;i+=2){
     lsp[i] = acos(g1r[i/2]);
