@@ -7,7 +7,7 @@
 Stereo Channel Coupling in the Vorbis CODEC
 </font></h1>
 
-<em>Last update to this document: June 27, 2001</em><br> 
+<em>Last update to this document: July 2, 2002</em><br> 
 
 <h2>Abstract</h2> The Vorbis audio CODEC provides a channel coupling
 mechanisms designed to reduce effective bitrate by both eliminating
@@ -121,7 +121,7 @@ In encoder release beta 4 and earlier, Vorbis supported multiple
 channel encoding, but the channels were encoded entirely separately
 with no cross-analysis or redundancy elimination between channels.
 This multichannel strategy is very similar to the mp3's <em>dual
-stereo</em> mode and Vorbis uses the same name for it's analogous
+stereo</em> mode and Vorbis uses the same name for its analogous
 uncoupled multichannel modes.
 
 However, the Vorbis spec provides for, and Vorbis release 1.0 rc1 and
@@ -132,15 +132,16 @@ residue backend #2, and the second is <em>square polar mapping</em>.
 These two general mechanisms are particularly well suited to coupling
 due to the structure of Vorbis encoding, as we'll explore below, and
 using both we can implement both totally <em>lossless stereo image
-coupling</em>, as well as various lossy models that seek to eliminate
-inaudible or unimportant aspects of the stereo image in order to
-enhance bitrate. The exact coupling implementation is generalized to
-allow the encoder a great deal of flexibility in implementation of a
-stereo model without requiring any significant complexity increase
-over the combinatorically simpler mid/side joint stereo of mp3 and
-other current audio codecs.<p>
+coupling</em> [bit-for-bit decode-identical to uncoupled modes], as
+well as various lossy models that seek to eliminate inaudible or
+unimportant aspects of the stereo image in order to enhance
+bitrate. The exact coupling implementation is generalized to allow the
+encoder a great deal of flexibility in implementation of a stereo
+model without requiring any significant complexity increase over the
+combinatorically simpler mid/side joint stereo of mp3 and other
+current audio codecs.<p>
 
-Channel interleaving may be applied directly to more than a single
+An encoder may apply channel coupling directly to more than a single
 channel and polar mapping is hierarchical such that polar coupling may be
 extrapolated to an arbitrary number of channels and is not restricted
 to only stereo, quadriphonics, ambisonics or 5.1 surround.  However,
@@ -229,11 +230,12 @@ mechanism that results in bit-identical decompressed output compared
 to an uncoupled encoding should the encoder desire it.<p>
 
 Vorbis uses a mapping that preserves the most useful qualities of
-polar representation, relies only on addition/subtraction, and makes
-it trivial before or after quantization to represent an
-angle/magnitude through a one-to-one mapping from possible left/right
-value permutations.  We do this by basing our polar representation on
-the unit square rather than the unit-circle.<p>
+polar representation, relies only on addition/subtraction (during
+decode; high quality encoding still requires some trig), and makes it
+trivial before or after quantization to represent an angle/magnitude
+through a one-to-one mapping from possible left/right value
+permutations.  We do this by basing our polar representation on the
+unit square rather than the unit-circle.<p>
 
 Given a magnitude and angle, we recover left and right using the
 following function (note that A/B may be left/right or right/left
@@ -299,11 +301,10 @@ We can remap and A/B vector using polar mapping into a magnitude/angle
 vector, and it's clear that, in general, this concentrates energy in
 the magnitude vector and reduces the amount of information to encode
 in the angle vector.  Encoding these vectors independently with
-residue backend #0 or residue backend #1 will result in substantial
-bitrate savings.  However, there are still implicit correlations
-between the magnitude and angle vectors.  The most obvious is that the
-amplitude of the angle is bounded by its corresponding magnitude
-value.<p>
+residue backend #0 or residue backend #1 will result in bitrate
+savings.  However, there are still implicit correlations between the
+magnitude and angle vectors.  The most obvious is that the amplitude
+of the angle is bounded by its corresponding magnitude value.<p>
 
 Entropy coding the results, then, further benefits from the entropy
 model being able to compress magnitude and angle simultaneously.  For
@@ -347,8 +348,8 @@ This terminology is familiar from mp3.<p>
 Using polar mapping and/or channel interleaving, it's possible to
 couple Vorbis channels losslessly, that is, construct a stereo
 coupling encoding that both saves space but also decodes
-bit-identically to dual stereo.  OggEnc 1.0 and later offers this
-mode.<p>
+bit-identically to dual stereo.  OggEnc 1.0 and later uses this
+mode in all high-bitrate encoding.<p>
 
 Overall, this stereo mode is overkill; however, it offers a safe
 alternative to users concerned about the slightest possible
@@ -359,38 +360,44 @@ degredation to the stereo image or archival quality audio.<p>
 Phase stereo is the least aggressive means of gracefully dropping
 resolution from the stereo image; it affects only diffuse imaging.<p>
 
-It's often quoted that the human ear is nearly entirely deaf to signal
-phase above about 4kHz; this is nearly true and a passable rule of
-thumb, but it can be demonstrated that even an average user can tell
-the difference between high frequency in-phase and out-of-phase noise.
-Obviously then, the statement is not entirely true.  However, it's
-also the case that one must resort to nearly such an extreme
-demostration before finding the counterexample.<p>
+It's often quoted that the human ear is deaf to signal phase above
+about 4kHz; this is nearly true and a passable rule of thumb, but it
+can be demonstrated that even an average user can tell the difference
+between high frequency in-phase and out-of-phase noise.  Obviously
+then, the statement is not entirely true.  However, it's also the case
+that one must resort to nearly such an extreme demostration before
+finding the counterexample.<p>
 
 'Phase stereo' is simply a more aggressive quantization of the polar
 angle vector; above 4kHz it's generally quite safe to quantize noise
-and noisy elements to only a handful of allowed phases.  The phases of
-high amplitude pure tones may or may not be preserved more carefully
-(they are relatively rare and L/R tend to be in phase, so there is
-generally little reason not to spend a few more bits on them) <p>
+and noisy elements to only a handful of allowed phases, or to thin the
+phase with respect to the magnitude.  The phases of high amplitude
+pure tones may or may not be preserved more carefully (they are
+relatively rare and L/R tend to be in phase, so there is generally
+little reason not to spend a few more bits on them) <p>
 
-<h4>eight phase stereo</h4>
+<h4>example: eight phase stereo</h4>
 
-Vorbis implements phase stereo coupling by preserving the entirety of the magnitude vector (essential to fine amplitude and energy resolution overall) and quantizing the angle vector to one of only four possible values. Given that the magnitude vector may be positive or negative, this results in left and right phase having eight possible permutation, thus 'eight phase stereo':<p>
+Vorbis may implement phase stereo coupling by preserving the entirety
+of the magnitude vector (essential to fine amplitude and energy
+resolution overall) and quantizing the angle vector to one of only
+four possible values. Given that the magnitude vector may be positive
+or negative, this results in left and right phase having eight
+possible permutation, thus 'eight phase stereo':<p>
 
 <img src="eightphase.png"><p>
 
 Left and right may be in phase (positive or negative), the most common
 case by far, or out of phase by 90 or 180 degrees.<p>
 
-<h4>four phase stereo</h4>
+<h4>example: four phase stereo</h4>
 
-Four phase stereo takes the quantization one step further; it allows
-only in-phase and 180 degree out-out-phase signals:<p>
+Similarly, four phase stereo takes the quantization one step further;
+it allows only in-phase and 180 degree out-out-phase signals:<p>
 
 <img src="fourphase.png"><p>
 
-<h3>Point Stereo</h3>
+<h3>example: point stereo</h3>
 
 Point stereo eliminates the possibility of out-of-phase signal
 entirely.  Any diffuse quality to a sound source tends to collapse
@@ -418,45 +425,12 @@ lossless coupling to avoid frame blocking artifacts.<p>
 
 <h3>Vorbis Stereo Modes</h3>
 
-Vorbis, for the most part, uses lossless stereo and a number of mixed
-modes constructed out of the above models.  As of the current pre-1.0
-testing version of the encoder, oggenc supports the following modes.
-Oggenc's default choice varies by bitrate and each mode is selectable
-by the user:<p>
+Vorbis, as of 1.0, uses lossless stereo and a number of mixed modes
+constructed out of lossless and point stereo.  Phase stereo was used
+in the rc2 encoder, but is not currently used for simplicity's sake.  It
+will likely be readded to the stereo model in the future.
 
-<dl>
-<dt>dual stereo
-<dd>uncoupled stereo encoding<p>
-
-<dt>lossless stereo
-<dd>lossless stereo coupling; produces exactly equivalent output to dual stereo<p>
-
-<dt>eight phase stereo
-<dd>a mixed mode combining lossless stereo for frequencies to approximately 4 kHz (and all strong pure tones) and eight phase stereo above<p>
-
-<dt>aggressive eight phase stereo
-<dd>a mixed mode combining lossless stereo for frequencies to approximately 2 kHz (and for all strong pure tones) and eight phase stereo above<p>
-
-<dt>eight/four phase stereo <dd>A mixed mode combining lossless stereo
-for bass, eight phase stereo for noisy content and lossless stereo for
-tones to approximately 4kHz and four phase stereo above 4kHz.<p>
-
-<dt>eight phase/point stereo <dd>A mixed mode combining lossless stereo
-for bass, eight phase stereo for noisy content and lossless stereo for
-tones to approximately 4kHz and point stereo above 4kHz.<p>
-
-<dt>aggressive eight phase/point stereo
-<dd>A mixed mode combining lossless stereo
-for bass, eight phase stereo to approximately 2kHz and point stereo above 2kHz.<p>
-
-<dt>point stereo
-<dd>A mixed mode combining lossless stereo to approximately 4kHz and point stereo above 4kHz.<p>
-
-<dt>aggressive point stereo
-<dd>A mixed mode combining lossless stereo to approximately 1-2kHz and point stereo above.<p>
-
-</dl>
-
+<p>
 <hr>
 <a href="http://www.xiph.org/">
 <img src="white-xifish.png" align=left border=0>
