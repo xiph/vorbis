@@ -32,7 +32,7 @@ echo "checking for automake... "
 
 echo -n "checking for libtool... "
 for LIBTOOLIZE in libtoolize glibtoolize nope; do
-  (which $LIBTOOLIZE) > /dev/null 2>&1 && break
+  (type $LIBTOOLIZE) > /dev/null 2>&1 && break
 done
 if test x$LIBTOOLIZE = xnope; then
   echo "nope."
@@ -62,6 +62,8 @@ echo "Generating configuration files for $package, please wait...."
 
 echo "  aclocal $ACLOCAL_FLAGS"
 aclocal $ACLOCAL_FLAGS || exit 1
+echo "  autoheader"
+autoheader || exit 1
 echo "  $LIBTOOLIZE --automake"
 $LIBTOOLIZE --automake || exit 1
 echo "  automake --add-missing $AUTOMAKE_FLAGS"
