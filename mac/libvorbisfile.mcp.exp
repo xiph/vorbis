@@ -4,6 +4,10 @@ ov_clear
 ov_open
 ov_open_callbacks
 
+ov_test
+ov_test_callbacks
+ov_test_open
+
 ov_bitrate
 ov_bitrate_instant
 ov_streams
@@ -28,3 +32,4 @@ ov_info
 ov_comment
 
 ov_read
+ov_read_float

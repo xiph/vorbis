@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.47 2002/07/11 06:50:31 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.48 2002/07/12 15:07:52 giles Exp $
 
  ********************************************************************/
 
@@ -32,7 +32,7 @@
 #include <fcntl.h>
 #endif
 
-#if defined(macintosh) && defined(__MWERKS__)
+#if defined(__MACOS__) && defined(__MWERKS__)
 #include <console.h>      /* CodeWarrior's Mac "command-line" support */
 #endif
 
@@ -85,7 +85,7 @@ int main(){
   {
     fread(readbuffer,1,2,stdin);
 
-    if ( ! strncmp(readbuffer, "da", 2) )
+    if ( ! strncmp((char*)readbuffer, "da", 2) )
     {
       founddata = 1;
       fread(readbuffer,1,6,stdin);

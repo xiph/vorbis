@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.26 2002/07/11 06:40:47 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.27 2002/07/12 15:07:52 giles Exp $
 
  ********************************************************************/
 
@@ -31,7 +31,7 @@
 #include <fcntl.h>
 #endif
 
-#if defined(macintosh) && defined(__MWERKS__)
+#if defined(__MACOS__) && defined(__MWERKS__)
 #include <console.h>      /* CodeWarrior's Mac "command-line" support */
 #endif
 
