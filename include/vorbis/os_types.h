@@ -14,13 +14,17 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os_types.h,v 1.1 2000/05/01 06:27:54 jon Exp $
+ last mod: $Id: os_types.h,v 1.2 2000/05/10 23:22:35 xiphmont Exp $
 
  ********************************************************************/
 
 #ifdef _WIN32
 typedef __int64 int64_t;
 typedef unsigned int u_int32_t;
+#endif
+
+#ifdef __BEOS__
+#include <inttypes.h>
 #endif
 
 #endif // _OS_TYPES_H
