@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.39 2001/12/12 09:45:24 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.40 2001/12/19 23:13:33 segher Exp $
 
  Preecho calculation.
 
@@ -84,8 +84,8 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
   int ch=vi->channels;
-  int window=e->winlength=ci->blocksizes[0]/2; /* not random */
   int i;
+  e->winlength=ci->blocksizes[0]/2; /* not random */
   e->minenergy=fromdB(gi->preecho_minenergy);
   e->iir=_ogg_calloc(ch*4,sizeof(*e->iir));
   e->filtered=_ogg_calloc(ch*4,sizeof(*e->filtered));

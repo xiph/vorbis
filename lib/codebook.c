@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.32 2001/12/16 04:15:46 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.33 2001/12/19 23:13:33 segher Exp $
 
  ********************************************************************/
 
@@ -222,7 +222,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
     s->q_sequencep=oggpack_read(opb,1);
 
     {
-      int quantvals;
+      int quantvals=0;
       switch(s->maptype){
       case 1:
 	quantvals=_book_maptype1_quantvals(s);
@@ -237,7 +237,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
       for(i=0;i<quantvals;i++)
 	s->quantlist[i]=oggpack_read(opb,s->q_quant);
       
-      if(s->quantlist[quantvals-1]==-1)goto _eofout;
+      if(quantvals&&s->quantlist[quantvals-1]==-1)goto _eofout;
     }
     break;
   default:

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.18 2001/12/12 09:45:25 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.19 2001/12/19 23:13:33 segher Exp $
 
  ********************************************************************/
 
@@ -1121,7 +1121,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
   if(memo){
     /* render the lines */
     int *fit_value=(int *)memo;
-    int hx;
+    int hx=0;
     int lx=0;
     int ly=fit_value[0]*info->mult;
     for(j=1;j<look->posts;j++){

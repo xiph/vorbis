@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.40 2001/12/19 01:08:15 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.41 2001/12/19 23:13:33 segher Exp $
 
  ********************************************************************/
 
@@ -302,6 +302,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
 }
 
 
+#if 0
 /* does not guard against invalid settings; eg, a subn of 16 and a
    subgroup request of 32.  Max subn of 128 */
 static int _interleaved_testhack(float *vec,int n,vorbis_look_residue0 *look,
@@ -344,6 +345,8 @@ static int _interleaved_testhack(float *vec,int n,vorbis_look_residue0 *look,
 
   return(i);
 }
+#endif
+
 
 static int _testhack(float *vec,int n,vorbis_look_residue0 *look,
 		     int auxparts,int auxpartnum){
@@ -584,12 +587,11 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 
 	  /* training hack */
 	  if(val<look->phrasebook->entries)
-	    ret=vorbis_book_encode(look->phrasebook,val,&vb->opb);
+	    look->phrasebits+=vorbis_book_encode(look->phrasebook,val,&vb->opb);
 #ifdef TRAIN_RES
 	  else
 	    fprintf(stderr,"!");
 #endif
-	  look->phrasebits+=ret;
 	
 	}
       }

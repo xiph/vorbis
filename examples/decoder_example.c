@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.23 2001/12/18 01:07:53 segher Exp $
+ last mod: $Id: decoder_example.c,v 1.24 2001/12/19 23:13:32 segher Exp $
 
  ********************************************************************/
 
@@ -62,9 +62,12 @@ int main(){
 #endif
 
 #if defined(macintosh) && defined(__MWERKS__)
-
-  argc = ccommand(&argv); /* get a "command line" from the Mac user */
-                          /* this also lets the user set stdin and stdout */
+  {
+    int argc;
+    char **argv;
+    argc=ccommand(&argv); /* get a "command line" from the Mac user */
+                     /* this also lets the user set stdin and stdout */
+  }
 #endif
 
   /********** Decode setup ************/

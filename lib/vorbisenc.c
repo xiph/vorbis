@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.27 2001/12/19 08:10:03 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.28 2001/12/19 23:13:33 segher Exp $
 
  ********************************************************************/
 
@@ -393,8 +393,8 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
 
   int i,iq=q*10;
   int n,k;
-  int partition_position;
-  int res_position;
+  int partition_position=0;
+  int res_position=0;
   int iterations=1;
   int amplitude_select=0;
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.19 2001/12/12 09:45:25 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.20 2001/12/19 23:13:33 segher Exp $
 
  ********************************************************************/
 
@@ -413,7 +413,7 @@ int _best(codebook *book, float *a, int step){
   if(pt){
     const static_codebook *c=book->c;
     int i,besti=-1;
-    float best;
+    float best=0.f;
     int entry=0;
 
     /* dealing with sequentialness is a pain in the ass */
@@ -476,7 +476,7 @@ int _best(codebook *book, float *a, int step){
   {
     const static_codebook *c=book->c;
     int i,besti=-1;
-    float best;
+    float best=0.f;
     float *e=book->valuelist;
     for(i=0;i<book->entries;i++){
       if(c->lengthlist[i]>0){
