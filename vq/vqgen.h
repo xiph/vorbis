@@ -17,6 +17,7 @@
 typedef struct vqgen{
   int it;
   int elements;
+  int aux;
 
   /* point cache */
   double *pointlist; 
@@ -29,7 +30,8 @@ typedef struct vqgen{
   double *bias;
   long   entries;
 
-  double (*metric_func)   (struct vqgen *v,double *a,double *b);
+  double  (*metric_func) (struct vqgen *v,double *entry,double *point);
+  double *(*weight_func) (struct vqgen *v,double *point);
 } vqgen;
 
 typedef struct vqbook{
@@ -67,19 +69,23 @@ typedef struct {
 } quant_meta;
 
 static inline double *_point(vqgen *v,long ptr){
-  return v->pointlist+(v->elements*ptr);
+  return v->pointlist+((v->elements+v->aux)*ptr);
+}
+
+static inline double *_aux(vqgen *v,long ptr){
+  return _point(v,ptr)+v->aux;
 }
 
 static inline double *_now(vqgen *v,long ptr){
   return v->entrylist+(v->elements*ptr);
 }
 
-extern void vqgen_init(vqgen *v,int elements,int entries,
-		       double (*metric)(vqgen *,double *, double *));
-extern void vqgen_addpoint(vqgen *v, double *p);
-extern double *vqgen_midpoint(vqgen *v);
-extern double vqgen_iterate(vqgen *v);
+extern void vqgen_init(vqgen *v,int elements,int aux,int entries,
+		       double  (*metric)(vqgen *,double *, double *),
+		       double *(*weight)(vqgen *,double *));
+extern void vqgen_addpoint(vqgen *v, double *p,double *aux);
 
+extern double vqgen_iterate(vqgen *v);
 extern void vqgen_unquantize(vqgen *v,quant_meta *q);
 extern void vqgen_quantize(vqgen *v,quant_meta *q);
 

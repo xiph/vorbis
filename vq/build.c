@@ -78,7 +78,7 @@ int main(int argc,char *argv[]){
   quant_meta q;
   int *quantlist=NULL;
 
-  int entries=-1,dim=-1;
+  int entries=-1,dim=-1,dummy;
   FILE *out=NULL;
   FILE *in=NULL;
   char *line,*name;
@@ -122,13 +122,13 @@ int main(int argc,char *argv[]){
   line=rline(in,out,1);
   
   line=rline(in,out,1);
-  if(sscanf(line,"%d %d",&entries,&dim)!=2){
+  if(sscanf(line,"%d %d %d",&entries,&dim,&dummy)!=2){
     fprintf(stderr,"Syntax error reading book file\n");
     exit(1);
   }
   
   /* just use it to allocate mem */
-  vqgen_init(&v,dim,entries,NULL);
+  vqgen_init(&v,dim,0,entries,NULL,NULL);
   
   /* quant */
   line=rline(in,out,1);
@@ -170,7 +170,7 @@ int main(int argc,char *argv[]){
 	sscanf(line,"%lf",b+k);
       }
       if(feof(in))break;
-      vqgen_addpoint(&v,b);
+      vqgen_addpoint(&v,b,NULL);
     }
     v.entries=entries;
   }

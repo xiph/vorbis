@@ -22,9 +22,11 @@
 
 extern char *vqext_booktype;
 extern quant_meta q;
+extern int vqext_aux;
 
-extern double vqext_metric(vqgen *v,double *b, double *a);
-extern void vqext_adjdata(double *b,int start,int dim);
+extern double vqext_metric(vqgen *v,double *e, double *p);
+extern double *vqext_weight(vqgen *v,double *p);
+extern void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols);
 extern void vqext_preprocess(vqgen *v);
 
 #endif

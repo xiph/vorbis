@@ -156,12 +156,12 @@ int main(int argc,char *argv[]){
       } 
       
       line=rline(in,out,1);
-      if(sscanf(line,"%d %d",&entries,&dim)!=2){
+      if(sscanf(line,"%d %d %d",&entries,&dim,&vqext_aux)!=3){
 	fprintf(stderr,"Syntax error reading book file\n");
 	exit(1);
       }
       
-      vqgen_init(&v,dim,entries,vqext_metric);
+      vqgen_init(&v,dim,vqext_aux,entries,vqext_metric,vqext_weight);
       init=1;
       
       /* quant setup */
@@ -196,13 +196,13 @@ int main(int argc,char *argv[]){
 	i=0;
 	v.entries=0; /* hack to avoid reseeding */
 	while(1){
-	  for(k=0;k<dim;k++){
+	  for(k=0;k<dim+vqext_aux;k++){
 	    line=rline(in,out,0);
 	    if(!line)break;
 	    sscanf(line,"%lf",b+k);
 	  }
 	  if(feof(in))break;
-	  vqgen_addpoint(&v,b);
+	  vqgen_addpoint(&v,b,b+dim);
 	}
 	v.entries=entries;
       }
@@ -256,7 +256,7 @@ int main(int argc,char *argv[]){
 	  fprintf(stderr,"-p required when training a new set\n");
 	  exit(1);
 	}
-	vqgen_init(&v,dim,entries,vqext_metric);
+	vqgen_init(&v,dim,vqext_aux,entries,vqext_metric,vqext_weight);
 	init=1;
       }
 
@@ -300,10 +300,9 @@ int main(int argc,char *argv[]){
 	    while(*line==' ')line++;
 	  }
 	  if(num<=0)num=(cols-start)/dim;
-	  for(i=0;i<num;i++){
-	    vqext_adjdata(b,start+i*dim,dim);
-	    vqgen_addpoint(&v,b+start+i*dim);
-	  }
+	  for(i=0;i<num;i++)
+	    vqext_addpoint_adj(&v,b,start+i*dim,dim,cols);
+
 	  free(b);
 	}
       }
@@ -334,7 +333,7 @@ int main(int argc,char *argv[]){
 
   fprintf(out,"# OggVorbis VQ codebook trainer, intermediate file\n");
   fprintf(out,"%s\n",vqext_booktype);
-  fprintf(out,"%d %d\n",entries,dim);
+  fprintf(out,"%d %d %d\n",entries,dim,vqext_aux);
   fprintf(out,"%ld %ld %d %d\n",q.min,q.delta,q.quant,q.sequencep);
 
   /* quantized entries */
@@ -352,7 +351,7 @@ int main(int argc,char *argv[]){
   fprintf(out,"# points---\n");
   i=0;
   for(j=0;j<v.points;j++)
-    for(k=0;k<dim && k<80;k++)
+    for(k=0;k<dim+vqext_aux;k++)
       fprintf(out,"%f\n",v.pointlist[i++]);
 
   fclose(out);

@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.2 1999/12/17 13:19:30 xiphmont Exp $
+# $Id: Makefile.in,v 1.3 1999/12/28 03:41:52 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -51,6 +51,8 @@ $(ALLOFILES): 	$(HFILES)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
+
+$(OFILES):	$(HFILES)
 
 clean:
 	-rm -f *.o *.a test* *~ *.out *.m config.* \

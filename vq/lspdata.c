@@ -18,6 +18,7 @@
 
  ********************************************************************/
 
+#include <stdlib.h>
 #include <math.h>
 #include <stdio.h>
 #include "vqgen.h"
@@ -25,6 +26,7 @@
 
 char *vqext_booktype="LSPdata";  
 quant_meta q={0,0,0,1};          /* set sequence data */
+int vqext_aux=1;
 
 /* LSP training metric.  We weight error proportional to distance
    *between* LSP vector values.  The idea of this metric is not to set
@@ -33,41 +35,54 @@ quant_meta q={0,0,0,1};          /* set sequence data */
    features. */
 
 double global_maxdel=M_PI;
-#define FUDGE ((global_maxdel*2.0)-testdist)
+#define FUDGE ((global_maxdel*2.0)-weight[i])
+double *weight=NULL;
+
+double *vqext_weight(vqgen *v,double *p){
+  int i;
+  int el=v->elements;
+  double lastp=0.;
+  for(i=0;i<el;i++){
+    double predist=(p[i]-lastp);
+    double postdist=(p[i+1]-p[i]);
+    weight[i]=(predist<postdist?predist:postdist);
+    lastp=p[i];
+  }
+  return p;
+}
 
                             /* candidate,actual */
-double vqext_metric(vqgen *v,double *b, double *a){
+double vqext_metric(vqgen *v,double *e, double *p){
   int i;
   int el=v->elements;
   double acc=0.;
-  /*double lasta=0.;*/
-  double lastb=0.;
   for(i=0;i<el;i++){
-
-    /*    double needdist=(a[i]-lastb);
-	  double actualdist=(a[i]-lasta);*/
-    double testdist=(b[i]-lastb);
-
-    double val=(a[i]-b[i])*FUDGE;
-
+    double val=(p[i]-e[i])*FUDGE;
     acc+=val*val;
-
-    /*lasta=a[i];*/
-    lastb=b[i];
   }
   return acc;
 }
 
 /* Data files are line-vectors, starting with zero.  If we want to
    train on a subvector starting in the middle, we need to adjust the
-   data as if it was starting at zero */
+   data as if it was starting at zero.  we also need to add the 'aux'
+   value, which is an extra point at the end so we have leading and
+   trailing space */
 
-void vqext_adjdata(double *b,int start,int dim){
-  if(start>0){
-    int i;
-    double base=b[start-1];
-    for(i=start;i<start+dim;i++)b[i]-=base;
-  }
+/* assume vqext_aux==1 */
+void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
+  double *a=alloca(sizeof(double)*(dim+1)); /* +aux */
+  double base=0;
+  int i;
+
+  if(start>0)base=b[start-1];
+  for(i=0;i<dim;i++)a[i]=b[i+start]-base;
+  if(start+dim+1>cols) /* +aux */
+    a[i]=M_PI-base;
+  else
+    a[i]=b[i+start]-base;
+  
+  vqgen_addpoint(v,a,a+dim);
 }
 
 /* we just need to calc the global_maxdel from the training set */
@@ -75,12 +90,15 @@ void vqext_preprocess(vqgen *v){
   long j,k;
 
   global_maxdel=0.;
-  for(j=0;j<v->entries;j++){
+  for(j=0;j<v->points;j++){
     double last=0.;
-    for(k=0;k<v->elements;k++){
-      double now=_now(v,j)[k];
-      if(now-last>global_maxdel)global_maxdel=now-last;
-      last=now;
+    for(k=0;k<v->elements+v->aux;k++){
+      double p=_point(v,j)[k];
+      if(p-last>global_maxdel)global_maxdel=p-last;
+      last=p;
     }
   }
+
+  weight=malloc(sizeof(double)*v->elements);
 }
+

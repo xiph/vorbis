@@ -14,7 +14,7 @@
  function: build a VQ codebook 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Dec 10 1999
+ last modification date: Dec 27 1999
 
  ********************************************************************/
 
@@ -69,9 +69,15 @@ double _dist_sq(vqgen *v,double *a, double *b){
   return acc;
 }
 
+double *_weight_null(vqgen *v,double *a){
+  return a;
+}
+
 /* *must* be beefed up. */
 void _vqgen_seed(vqgen *v){
-  memcpy(v->entrylist,v->pointlist,sizeof(double)*v->entries*v->elements);
+  long i;
+  for(i=0;i<v->entries;i++)
+    memcpy(_now(v,i),_point(v,i),sizeof(double)*v->elements);
 }
 
 /* External calls *******************************************************/
@@ -187,13 +193,14 @@ void vqgen_unquantize(vqgen *v,quant_meta *q){
   }
 }
 
-void vqgen_init(vqgen *v,int elements,int entries,
-		double (*metric)(vqgen *,double *, double *)){
+void vqgen_init(vqgen *v,int elements,int aux,int entries,
+		double  (*metric)(vqgen *,double *, double *),
+		double *(*weight)(vqgen *,double *)){
   memset(v,0,sizeof(vqgen));
 
   v->elements=elements;
   v->allocated=32768;
-  v->pointlist=malloc(v->allocated*v->elements*sizeof(double));
+  v->pointlist=malloc(v->allocated*(v->elements+v->aux)*sizeof(double));
 
   v->entries=entries;
   v->entrylist=malloc(v->entries*v->elements*sizeof(double));
@@ -203,15 +210,22 @@ void vqgen_init(vqgen *v,int elements,int entries,
     v->metric_func=metric;
   else
     v->metric_func=_dist_sq;
+  if(weight)
+    v->weight_func=weight;
+  else
+    v->weight_func=_weight_null;
+
 }
 
-void vqgen_addpoint(vqgen *v, double *p){
+void vqgen_addpoint(vqgen *v, double *p,double *a){
   if(v->points>=v->allocated){
     v->allocated*=2;
-    v->pointlist=realloc(v->pointlist,v->allocated*v->elements*sizeof(double));
+    v->pointlist=realloc(v->pointlist,v->allocated*(v->elements+v->aux)*
+			 sizeof(double));
   }
   
   memcpy(_point(v,v->points),p,sizeof(double)*v->elements);
+  if(v->aux)memcpy(_point(v,v->points)+v->elements,p,sizeof(double)*v->aux);
   v->points++;
   if(v->points==v->entries)_vqgen_seed(v);
 }
