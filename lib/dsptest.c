@@ -15,6 +15,7 @@ int main(){
    int mtemp[]={0,1};
    int mtemp2[]={0,1};
    int frame=0;
+   int i;
 
    signed char buffer[READ*4+44];
    
@@ -30,8 +31,13 @@ int main(){
    vi.envelopech=2;
    vi.envelopemap=mtemp;
    vi.floormap=mtemp2;
-   vi.floororder=20;
+   vi.floororder=30;
+   vi.flooroctaves=5;
    vi.floorch=2;
+
+   vi.balanceorder=4;
+   vi.balanceoctaves=5;
+
    vi.channelmap=NULL;
    vi.preecho_thresh=10.;
    vi.preecho_clamp=.5;
@@ -43,11 +49,12 @@ int main(){
    fread(buffer,1,44,stdin);
    fwrite(buffer,1,44,stdout);
    
+   for(i=0;i<0;i++)
+     fread(buffer,1,READ*4,stdin);
    
    while(!done){
      long bread=fread(buffer,1,READ*4,stdin);
      double **buf=vorbis_analysis_buffer(&encode,READ);
-     long i;
      
      /* uninterleave samples */
      

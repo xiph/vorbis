@@ -9,11 +9,7 @@
 #ifndef _V_SMFT_H_
 #define _V_SMFT_H_
 
-typedef struct {
-  int n;
-  double *trigcache;
-  int *splitcache;
-} drft_lookup;
+#include "codec.h"
 
 extern void drft_forward(drft_lookup *l,double *data);
 extern void drft_backward(drft_lookup *l,double *data);

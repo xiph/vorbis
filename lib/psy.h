@@ -18,6 +18,10 @@
 #ifndef _V_PSY_H_
 #define _V_PSY_H_
 
+extern double _vp_balance_compute(double *A, double *B, double *lpc,
+			   lpc_lookup *vb);
+extern void _vp_balance_apply(double *A, double *B, double *lpc, double amp,
+			      lpc_lookup *vb,int divp);
 
 
 #endif

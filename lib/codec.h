@@ -14,20 +14,47 @@
  function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 28 1999
+ last modification date: Aug 21 1999
 
  ********************************************************************/
 
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
 
-#include "mdct.h"
-#include "smallft.h"
+typedef struct {
+  int n;
+  int log2n;
+  
+  double *trig;
+  int    *bitrev;
+
+} mdct_lookup;
+
+typedef struct {
+  int n;
+  double *trigcache;
+  int *splitcache;
+} drft_lookup;
 
 typedef struct {
   int winlen;
   double *window;
 } envelope_lookup;
+
+typedef struct lpclook{
+  /* encode lookups */
+  int *bscale;
+  double *escale;
+  drft_lookup fft;
+
+  /* en/decode lookups */
+  double *dscale;
+  double *norm;
+  int n;
+  int ln;
+  int m;
+
+} lpc_lookup;
 
 
 typedef struct {
@@ -56,8 +83,12 @@ typedef struct vorbis_info{
   int **Echannelmap; /* which encoding channels produce what pcm (decode) */
   int **channelmap;   /* which pcm channels produce what floors   (encode) */
   int floororder;
+  int flooroctaves;
   int floorch;
   int *floormap;
+
+  int balanceorder;
+  int balanceoctaves;
 
   double preecho_thresh;
   double preecho_clamp;
@@ -126,8 +157,9 @@ typedef struct vorbis_dsp_state{
   double *window[2][2][2]; /* windowsize, leadin, leadout */
 
   envelope_lookup ve;
-  drft_lookup vf[2];
   mdct_lookup vm[2];
+  lpc_lookup vl[2];
+  lpc_lookup vbal[2];
 
   vorbis_info vi;
 

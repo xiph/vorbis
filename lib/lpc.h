@@ -20,9 +20,15 @@
 
 #include "codec.h"
 
-extern double lpc_init(lpc_lookup *l,int n, int m, int oct, int encode_p);
+extern void lpc_init(lpc_lookup *l,int n, int mapped,
+		       int m, int oct, int encode_p);
 extern void lpc_clear(lpc_lookup *l);
 
+/* simple linear scale LPC code */
+extern double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l);
+extern double vorbis_lpc_magnitude(double w,double *lpc, int m);
+
+/* log scale layer */
 extern double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l);
 extern void vorbis_lpc_to_curve(double *curve,double *lpc, double amp,
 				lpc_lookup *l);

@@ -16,5 +16,5 @@
 
 extern void vorbis_lsp_to_lpc(double *lsp,double *lpc,int m); 
 extern void vorbis_lpc_to_lsp(double *lpc,double *lsp,int m);
-
+  
 #endif

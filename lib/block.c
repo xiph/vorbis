@@ -142,8 +142,18 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
 /* arbitrary settings and spec-mandated numbers get filled in here */
 int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   _vds_shared_init(v,vi);
-  drft_init(&v->vf[0],vi->smallblock); /* only used in analysis */
-  drft_init(&v->vf[1],vi->largeblock); /* only used in analysis */
+
+  /* Yes, wasteful to have four lookups.  This will get collapsed once
+     things crystallize */
+  lpc_init(&v->vl[0],vi->smallblock/2,vi->smallblock/2,
+	   vi->floororder,vi->flooroctaves,1);
+  lpc_init(&v->vl[1],vi->largeblock/2,vi->largeblock/2,
+	   vi->floororder,vi->flooroctaves,1);
+
+  lpc_init(&v->vbal[0],vi->smallblock/2,256,
+	   vi->balanceorder,vi->balanceoctaves,1);
+  lpc_init(&v->vbal[1],vi->largeblock/2,256,
+	   vi->balanceorder,vi->balanceoctaves,1);
 
   return(0);
 }
@@ -168,8 +178,6 @@ void vorbis_analysis_clear(vorbis_dsp_state *v){
       free(v->multipliers);
     }
     _ve_envelope_clear(&v->ve);
-    drft_clear(&v->vf[0]);
-    drft_clear(&v->vf[1]);
     mdct_clear(&v->vm[0]);
     mdct_clear(&v->vm[1]);
     memset(v,0,sizeof(vorbis_dsp_state));
@@ -336,6 +344,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     }
   }else
     v->nW=1;
+    v->nW=1;
 
   /* Do we actually have enough data *now* for the next block? The
      reason to check is that if we had no multipliers, that could
@@ -434,6 +443,18 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
   vi->envelopech=0; /* we don't need multiplier buffering in syn */
   _vds_shared_init(v,vi);
   vi->envelopech=temp;
+
+  /* Yes, wasteful to have four lookups.  This will get collapsed once
+     things crystallize */
+  lpc_init(&v->vl[0],vi->smallblock/2,vi->smallblock/2,
+	   vi->floororder,vi->flooroctaves,0);
+  lpc_init(&v->vl[1],vi->largeblock/2,vi->largeblock/2,
+	   vi->floororder,vi->flooroctaves,0);
+  lpc_init(&v->vbal[0],vi->smallblock/2,256,
+	   vi->balanceorder,vi->balanceoctaves,0);
+  lpc_init(&v->vbal[1],vi->largeblock/2,256,
+	   vi->balanceorder,vi->balanceoctaves,0);
+
 
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;

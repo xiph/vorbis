@@ -60,60 +60,15 @@ Carsten Bormann
    coefficients.  Autocorrelation LPC coeff generation algorithm
    invented by N. Levinson in 1947, modified by J. Durbin in 1959. */
 
-/*  Input : n element envelope curve
-    Output: m lpc coefficients, excitation energy */
+/* Input : n element envelope curve
+   Output: m lpc coefficients, excitation energy */
 
-double memcof(double *data, int n, int m, double *d){
-  int k,j,i;
-  double p=0.,wk1[n],wk2[n],wkm[m],xms;
-  
-  memset(wk1,0,sizeof(wk1));
-  memset(wk2,0,sizeof(wk2));
-  memset(wkm,0,sizeof(wkm));
-    
-  for (j=0;j<n;j++) p += data[j]*data[j];
-  xms=p/n;
-
-  wk1[0]=data[0];
-  wk2[n-2]=data[n-1];
-
-  for (j=2;j<=n-1;j++) {
-    wk1[j-1]=data[j-1];
-    wk2[j-2]=data[j-1];
-  }
-
-  for (k=1;k<=m;k++) {
-    double num=0.,denom=0.;
-    for (j=1;j<=(n-k);j++) {
-
-      num += wk1[j-1]*wk2[j-1];
-      denom += wk1[j-1]*wk1[j-1] + wk2[j-1]*wk2[j-1];
-
-    }
-
-    d[k-1]=2.0*num/denom;
-    xms *= (1.0-d[k-1]*d[k-1]);
-
-    for (i=1;i<=(k-1);i++)
-      d[i-1]=wkm[i-1]-d[k-1]*wkm[k-i-1];
-
-    if (k == m) return xms;
-   
-    for (i=1;i<=k;i++) wkm[i-1]=d[i-1];
-    for (j=1;j<=(n-k-1);j++) {
-
-      wk1[j-1] -= wkm[k-1]*wk2[j-1];
-      wk2[j-1]=wk2[j]-wkm[k-1]*wk1[j];
-
-    }
-  }
-}
-
-static double vorbis_gen_lpc(double *curve,int n,double *lpc,int m){
+double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l){
+  int n=l->ln;
+  int m=l->m;
   double aut[m+1],work[n+n],error;
-  drft_lookup dl;
   int i,j;
-
+  
   /* input is a real curve. make it complex-real */
   for(i=0;i<n;i++){
     work[i*2]=curve[i];
@@ -121,9 +76,7 @@ static double vorbis_gen_lpc(double *curve,int n,double *lpc,int m){
   }
 
   n*=2;
-  drft_init(&dl,n);
-  drft_backward(&dl,work);
-  drft_clear(&dl);
+  drft_backward(&l->fft,work);
 
   /* The autocorrelation will not be circular.  Shift, else we lose
      most of the power in the edges. */
@@ -133,7 +86,7 @@ static double vorbis_gen_lpc(double *curve,int n,double *lpc,int m){
     work[i++]=work[j];
     work[j++]=temp;
   }
-
+  
   /* autocorrelation, p+1 lag coefficients */
 
   j=m+1;
@@ -177,7 +130,7 @@ static double vorbis_gen_lpc(double *curve,int n,double *lpc,int m){
 
   /* we need the error value to know how big an impulse to hit the
      filter with later */
-
+  
   return error;
 }
 
@@ -187,7 +140,7 @@ static double vorbis_gen_lpc(double *curve,int n,double *lpc,int m){
    looks at the below in the context of the calling function, there's
    lots of redundant trig, but at least it's clear */
 
-static double vorbis_lpc_magnitude(double w,double *lpc, int m){
+double vorbis_lpc_magnitude(double w,double *lpc, int m){
   int k;
   double real=1,imag=0;
   double wn=w;
@@ -228,14 +181,16 @@ static double vorbis_lpc_magnitude(double w,double *lpc, int m){
    oct == octaves in normalized scale, encode_p == encode (1) or
    decode (0) */
 
-double lpc_init(lpc_lookup *l,int n, int m, int oct, int encode_p){
+void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
   double bias=LOG_BIAS(n,oct);
-  double scale=(float)n/(float)oct; /* where n==mapped */    
+  double scale=(float)mapped/(float)oct; /* where n==mapped */    
   int i;
 
+  memset(l,0,sizeof(lpc_lookup));
+
   l->n=n;
+  l->ln=mapped;
   l->m=m;
-  l->escale=malloc(n*sizeof(double));
   l->dscale=malloc(n*sizeof(double));
   l->norm=malloc(n*sizeof(double));
 
@@ -251,10 +206,15 @@ double lpc_init(lpc_lookup *l,int n, int m, int oct, int encode_p){
 
   if(encode_p){
     /* encode */
+    l->bscale=malloc(n*sizeof(int));
+    l->escale=malloc(n*sizeof(double));
 
-    for(i=0;i<n;i++)
+    for(i=0;i<n;i++){
       l->escale[i]=LINEAR_X(i/scale,bias);
-    
+      l->bscale[i]=rint(LOG_X(i,bias)*scale);
+    }   
+
+    drft_init(&l->fft,mapped*2);
   }
   /* decode; encode may use this too */
   
@@ -267,7 +227,9 @@ double lpc_init(lpc_lookup *l,int n, int m, int oct, int encode_p){
 
 void lpc_clear(lpc_lookup *l){
   if(l){
+    if(l->bscale)free(l->bscale);
     if(l->escale)free(l->escale);
+    drft_clear(&l->fft);
     free(l->dscale);
     free(l->norm);
   }
@@ -281,10 +243,10 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
   /* map the input curve to a log curve for encoding */
 
   /* for clarity, mapped and n are both represented although setting
-     'em equal is a decent rule of thumb. */
+     'em equal is a decent rule of thumb. The below must be reworked
+     slightly if mapped != n */
   
   int n=l->n;
-  int m=l->m;
   int mapped=n;
   double work[mapped];
   int i;
@@ -305,7 +267,7 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
 
   memcpy(curve,work,sizeof(work));
 
-  return vorbis_gen_lpc(work,mapped,lpc,l->m);
+  return vorbis_gen_lpc(work,lpc,l);
 }
 
 /* generate the whole freq response curve on an LPC IIR filter */

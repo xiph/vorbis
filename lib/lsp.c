@@ -163,4 +163,3 @@ void vorbis_lpc_to_lsp(double *lpc,double *lsp,int m){
     lsp[i+1] = acos(g2r[i/2]*.5);
   }
 }
-
