@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.61 2001/12/19 18:06:17 segher Exp $
+ last mod: $Id: psy.c,v 1.62 2001/12/21 14:52:35 segher Exp $
 
  ********************************************************************/
 
@@ -80,7 +80,7 @@ static void set_curve(float *ref,float *c,int n, float crate){
   int i,j=0;
 
   for(i=0;i<MAX_BARK-1;i++){
-    int endpos=rint(fromBARK(i+1)*2*n/crate);
+    int endpos=rint(fromBARK((float)(i+1))*2*n/crate);
     float base=ref[i];
     if(j<endpos){
       float delta=(ref[i+1]-base)/(endpos-j);
@@ -211,7 +211,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 
 
   p->eighth_octave_lines=gi->eighth_octave_lines;
-  p->shiftoc=rint(log(gi->eighth_octave_lines*8)/log(2))-1;
+  p->shiftoc=rint(log(gi->eighth_octave_lines*8.f)/log(2.f))-1;
 
   p->firstoc=toOC(.25f*rate/n)*(1<<(p->shiftoc+1))-gi->eighth_octave_lines;
   maxoc=toOC((n*.5f-.25f)*rate/n)*(1<<(p->shiftoc+1))+.5f;
@@ -227,7 +227,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 
   /* set up the lookups for a given blocksize and sample rate */
   if(vi->ath)
-    set_curve(vi->ath, p->ath,n,rate);
+    set_curve(vi->ath, p->ath,n,(float)rate);
   for(i=0;i<n;i++){
     float bark=toBARK(rate/(2*n)*i); 
 

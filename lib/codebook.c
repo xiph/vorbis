@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.34 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: codebook.c,v 1.35 2001/12/21 14:52:35 segher Exp $
 
  ********************************************************************/
 
@@ -160,7 +160,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   if(s->entries==-1)goto _eofout;
 
   /* codeword ordering.... length ordered or unordered? */
-  switch(oggpack_read(opb,1)){
+  switch((int)oggpack_read(opb,1)){
   case 0:
     /* unordered */
     s->lengthlist=_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
@@ -327,7 +327,7 @@ long vorbis_book_decode(codebook *book, oggpack_buffer *b){
   }
 
   do{
-    switch(oggpack_read1(b)){
+    switch((int)oggpack_read1(b)){
     case 0:
       ptr=t->ptr0[ptr];
       break;
@@ -377,7 +377,7 @@ long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
       j=0;
-      switch(book->dim){
+      switch((int)book->dim){
       case 8:
 	a[i++]+=t[j++];
       case 7:

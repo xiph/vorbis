@@ -12,7 +12,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [64 <= n ]
- last mod: $Id: mdct.c,v 1.27 2001/12/20 01:00:29 segher Exp $
+ last mod: $Id: mdct.c,v 1.28 2001/12/21 14:52:35 segher Exp $
 
  Original algorithm adapted long ago from _The use of multirate filter
  banks for coding of high quality digital audio_, by T. Sporer,
@@ -54,7 +54,7 @@ void mdct_init(mdct_lookup *lookup,int n){
   
   int i;
   int n2=n>>1;
-  int log2n=lookup->log2n=rint(log(n)/log(2));
+  int log2n=lookup->log2n=rint(log((float)n)/log(2.f));
   lookup->n=n;
   lookup->trig=T;
   lookup->bitrev=bitrev;

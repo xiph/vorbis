@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.48 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: floor0.c,v 1.49 2001/12/21 14:52:35 segher Exp $
 
  ********************************************************************/
 
@@ -392,7 +392,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
     for(j=0;j<look->n;j++)
       codedflr[j]=1.f;
     vorbis_lsp_to_curve(codedflr,look->linearmap,look->n,look->ln,
-			lspwork,look->m,amp,info->ampdB);
+			lspwork,look->m,amp,(float)info->ampdB);
 
     _analysis_output("barklsp",seq-1,codedflr,look->n,1,1);
     _analysis_output("lsp3",seq-1,codedflr,look->n,0,1);
@@ -452,7 +452,7 @@ static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
 
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_curve(out,look->linearmap,look->n,look->ln,
-			lsp,look->m,amp,info->ampdB);
+			lsp,look->m,amp,(float)info->ampdB);
     return(1);
   }
   memset(out,0,sizeof(*out)*look->n);

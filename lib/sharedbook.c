@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.21 2001/12/20 01:00:30 segher Exp $
+ last mod: $Id: sharedbook.c,v 1.22 2001/12/21 14:52:36 segher Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,7 @@ long _float32_pack(float val){
     sign=0x80000000;
     val= -val;
   }
-  exp= floor(log(val)/log(2));
+  exp= floor(log(val)/log(2.f));
   mant=rint(ldexp(val,(VQ_FMAN-1)-exp));
   exp=(exp+VQ_FEXP_BIAS)<<VQ_FMAN;
 
@@ -197,7 +197,7 @@ decode_aux *_make_decode_tree(codebook *c){
    that's portable and totally safe against roundoff, but I haven't
    thought of it.  Therefore, we opt on the side of caution */
 long _book_maptype1_quantvals(const static_codebook *b){
-  long vals=floor(pow(b->entries,1.f/b->dim));
+  long vals=floor(pow((float)b->entries,1.f/b->dim));
 
   /* the above *should* be reliable, but we'll not assume that FP is
      ever reliable when bitstream sync is at stake; verify via integer

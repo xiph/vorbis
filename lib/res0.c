@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.42 2001/12/20 01:00:29 segher Exp $
+ last mod: $Id: res0.c,v 1.43 2001/12/21 14:52:36 segher Exp $
 
  ********************************************************************/
 
@@ -272,7 +272,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
     }
   }
 
-  look->partvals=rint(pow(look->parts,dim));
+  look->partvals=rint(pow((float)look->parts,(pow)dim));
   look->stages=maxstage;
   look->decodemap=_ogg_malloc(look->partvals*sizeof(*look->decodemap));
   for(j=0;j<look->partvals;j++){

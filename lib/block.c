@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.53 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: block.c,v 1.54 2001/12/21 14:52:35 segher Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -712,7 +712,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
     /* overlap/add PCM */
 
-    switch(v->W){
+    switch((int)v->W){
     case 0:
       beginSl=0;
       endSl=ci->blocksizes[0]/2;
