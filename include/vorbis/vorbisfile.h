@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.4 2000/04/23 15:34:12 msmith Exp $
+ last mod: $Id: vorbisfile.h,v 1.5 2000/06/14 10:13:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,7 +39,7 @@ extern "C"
  */
 typedef struct {
   size_t (*read_func)  (void *ptr, size_t size, size_t nmemb, void *datasource);
-  int    (*seek_func)  (void *datasource, long offset, int whence);
+  int    (*seek_func)  (void *datasource, int64_t offset, int whence);
   int    (*close_func) (void *datasource);
   long   (*tell_func)  (void *datasource);
 } ov_callbacks;
@@ -48,15 +48,15 @@ typedef struct {
 typedef struct {
   void             *datasource; /* Pointer to a FILE *, etc. */
   int              seekable;
-  long             offset;
-  long             end;
+  int64_t          offset;
+  int64_t          end;
   ogg_sync_state   oy; 
 
   /* If the FILE handle isn't seekable (eg, a pipe), only the current
      stream appears */
   int              links;
-  long             *offsets;
-  long             *dataoffsets;
+  int64_t          *offsets;
+  int64_t          *dataoffsets;
   long             *serialnos;
   int64_t          *pcmlengths;
   vorbis_info      *vi;
@@ -87,7 +87,7 @@ extern long ov_streams(OggVorbis_File *vf);
 extern long ov_seekable(OggVorbis_File *vf);
 extern long ov_serialnumber(OggVorbis_File *vf,int i);
 
-extern long ov_raw_total(OggVorbis_File *vf,int i);
+extern int64_t ov_raw_total(OggVorbis_File *vf,int i);
 extern int64_t ov_pcm_total(OggVorbis_File *vf,int i);
 extern double ov_time_total(OggVorbis_File *vf,int i);
 
@@ -95,7 +95,7 @@ extern int ov_raw_seek(OggVorbis_File *vf,long pos);
 extern int ov_pcm_seek(OggVorbis_File *vf,int64_t pos);
 extern int ov_time_seek(OggVorbis_File *vf,double pos);
 
-extern long ov_raw_tell(OggVorbis_File *vf);
+extern int64_t ov_raw_tell(OggVorbis_File *vf);
 extern int64_t ov_pcm_tell(OggVorbis_File *vf);
 extern double ov_time_tell(OggVorbis_File *vf);
 

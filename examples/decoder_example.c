@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.7 2000/05/12 08:38:20 msmith Exp $
+ last mod: $Id: decoder_example.c,v 1.8 2000/06/14 10:13:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -201,6 +201,7 @@ int main(int argc, char **argv){
 					 this point */
 	  while(1){
 	    result=ogg_stream_packetout(&os,&op);
+
 	    if(result==0)break; /* need more data */
 	    if(result==-1){ /* missing or corrupt data at this page position */
 	      /* no reason to complain; already complained above */
@@ -245,7 +246,7 @@ int main(int argc, char **argv){
 		}
 		
 		if(clipflag)
-		  fprintf(stderr,"Clipping in frame %ld\n",vd.sequence);
+		  fprintf(stderr,"Clipping in frame %ld\n",(long)(vd.sequence));
 		
 		
 		fwrite(convbuffer,2*vi.channels,bout,stdout);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.30 2000/05/08 20:49:48 xiphmont Exp $
+ last mod: $Id: block.c,v 1.31 2000/06/14 10:13:35 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -508,6 +508,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     if(v->centerW>=v->eofflag){
       v->eofflag=-1;
       vb->eofflag=1;
+      return(1);
     }
   }
 
@@ -516,6 +517,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     int new_centerNext=vi->blocksizes[1]/2;
     int movementW=centerNext-new_centerNext;
     int movementM=movementW/vi->envelopesa;
+
+
 
     /* the multipliers and pcm stay synced up because the blocksize
        must be multiples of samples_per_envelope_step (minimum
@@ -536,10 +539,17 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     v->centerW=new_centerNext;
 
     v->sequence++;
-    v->frameno+=movementW;
 
-    if(v->eofflag)
+    if(v->eofflag){
       v->eofflag-=movementW;
+      /* do not add padding to end of stream! */
+      if(v->centerW>=v->eofflag){
+	v->frameno+=v->eofflag;
+      }else{
+	v->frameno+=movementW;
+      }
+    }else
+      v->frameno+=movementW;
   }
 
   /* done */
@@ -552,6 +562,9 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;
   v->centerW-= vi->blocksizes[v->W]/4+vi->blocksizes[v->lW]/4;
+  v->frameno=-1;
+  v->sequence=-1;
+
   return(0);
 }
 
@@ -592,6 +605,10 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   v->time_bits+=vb->time_bits;
   v->floor_bits+=vb->floor_bits;
   v->res_bits+=vb->res_bits;
+
+  if(v->sequence+1 != vb->sequence)v->frameno=-1; /* out of sequence;
+                                                     lose count */
+
   v->sequence=vb->sequence;
 
   {
@@ -636,6 +653,31 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 	pcm[i]=vb->pcm[j][i];
     }
 
+    /* track the frame number... This is for convenience, but also
+       making sure our last packet doesn't end with added padding.  If
+       the last packet is partial, the number of samples we'll have to
+       return will be past the vb->frameno.
+       
+       This is not foolproof!  It will be confused if we begin
+       decoding at the last page after a seek or hole.  In that case,
+       we don't have a starting point to judge where the last frame
+       is.  For this reason, vorbisfile will always try to make sure
+       it reads the last two marked pages in proper sequence */
+
+    if(v->frameno==-1)
+      v->frameno=vb->frameno;
+    else{
+      v->frameno+=(centerW-v->centerW);
+      if(vb->frameno!=-1 && v->frameno!=vb->frameno){
+	if(v->frameno>vb->frameno && vb->eofflag){
+	  /* partial last frame.  Strip the padding off */
+	  centerW-=(v->frameno-vb->frameno);
+	}/* else{ Shouldn't happen *unless* the bitstream is out of
+            spec.  Either way, believe the bitstream } */
+	v->frameno=vb->frameno;
+      }
+    }
+
     /* Update, cleanup */
 
     v->centerW=centerW;
@@ -643,6 +685,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
     if(vb->eofflag)v->eofflag=1;
   }
+
   return(0);
 }
 

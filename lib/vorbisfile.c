@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.23 2000/05/16 11:38:36 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.24 2000/06/14 10:13:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -189,7 +189,7 @@ static void _bisect_forward_serialno(OggVorbis_File *vf,
   
   if(searched>=end || ret==-1){
     vf->links=m+1;
-    vf->offsets=malloc((m+2)*sizeof(long));
+    vf->offsets=malloc((m+2)*sizeof(int64_t));
     vf->offsets[m+1]=searched;
   }else{
     _bisect_forward_serialno(vf,next,vf->offset,
@@ -265,7 +265,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
   
   vf->vi=calloc(vf->links,sizeof(vorbis_info));
   vf->vc=calloc(vf->links,sizeof(vorbis_info));
-  vf->dataoffsets=malloc(vf->links*sizeof(long));
+  vf->dataoffsets=malloc(vf->links*sizeof(int64_t));
   vf->pcmlengths=malloc(vf->links*sizeof(int64_t));
   vf->serialnos=malloc(vf->links*sizeof(long));
   
@@ -428,7 +428,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	  vorbis_synthesis_blockin(&vf->vd,&vf->vb);
 	  
 	  /* update the pcm offset. */
-	  if(frameno!=-1){
+	  if(frameno!=-1 && !op.e_o_s){
 	    int link=(vf->seekable?vf->current_link:0);
 	    double **dummy;
 	    int i,samples;
@@ -436,7 +436,15 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	    /* this packet has a pcm_offset on it (the last packet
 	       completed on a page carries the offset) After processing
 	       (above), we know the pcm position of the *last* sample
-	       ready to be returned. Find the offset of the *first* */
+	       ready to be returned. Find the offset of the *first*
+
+	       As an aside, this trick is inaccurate if we begin
+	       reading anew right at the last page; the end-of-stream
+	       frameno declares the last frame in the stream, and the
+	       last packet of the last page may be a partial frame.
+	       So, we need a previous frameno from an in-sequence page
+	       to have a reference point.  Thus the !op.e_o_s clause
+	       above */
 	    
 	    samples=vorbis_synthesis_pcmout(&vf->vd,&dummy);
 	    
@@ -538,6 +546,10 @@ int ov_clear(OggVorbis_File *vf){
   return(0);
 }
 
+static int _fseek64_wrap(FILE *f,int64_t off,int whence){
+  return fseek(f,(int)off,whence);
+}
+
 /* inspects the OggVorbis file and finds/documents all the logical
    bitstreams contained in it.  Tries to be tolerant of logical
    bitstream sections that are truncated/woogie. 
@@ -549,7 +561,7 @@ int ov_clear(OggVorbis_File *vf){
 int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
   ov_callbacks callbacks = {
     (size_t (*)(void *, size_t, size_t, void *))  fread,
-    (int (*)(void *, long, int))                  fseek,
+    (int (*)(void *, int64_t, int))              _fseek64_wrap,
     (int (*)(void *))                             fclose,
     (long (*)(void *))                            ftell
   };
@@ -659,7 +671,7 @@ long ov_serialnumber(OggVorbis_File *vf,int i){
             raw (compressed) length of that logical bitstream for i==0 to n
 	    -1 if the stream is not seekable (we can't know the length)
 */
-long ov_raw_total(OggVorbis_File *vf,int i){
+int64_t ov_raw_total(OggVorbis_File *vf,int i){
   if(!vf->seekable || i>=vf->links)return(-1);
   if(i<0){
     long acc=0;
@@ -887,7 +899,7 @@ int ov_time_seek(OggVorbis_File *vf,double seconds){
 
 /* tell the current stream offset cursor.  Note that seek followed by
    tell will likely not give the set offset due to caching */
-long ov_raw_tell(OggVorbis_File *vf){
+int64_t ov_raw_tell(OggVorbis_File *vf){
   return(vf->offset);
 }
 

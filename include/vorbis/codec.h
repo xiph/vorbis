@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.16 2000/06/14 01:38:27 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.17 2000/06/14 10:13:35 xiphmont Exp $
 
  ********************************************************************/
 
@@ -191,8 +191,8 @@ typedef struct {
   int     b_o_s;          /* set after we've written the initial page
 			     of a logical bitstream */
   long     serialno;
-  long     pageno;
-  long     packetno;      /* sequence number for decode; the framing
+  int      pageno;
+  int64_t  packetno;      /* sequence number for decode; the framing
                              knows where there's a hole in the data,
                              but we need coupling so that the codec
                              (which is in a seperate abstraction
@@ -211,7 +211,7 @@ typedef struct {
   long  e_o_s;
 
   int64_t  frameno;
-  long    packetno;       /* sequence number for decode; the framing
+  int64_t  packetno;       /* sequence number for decode; the framing
                              knows where there's a hole in the data,
                              but we need coupling so that the codec
                              (which is in a seperate abstraction
@@ -255,8 +255,8 @@ typedef struct vorbis_dsp_state{
   long nW;
   long centerW;
 
-  long frameno;
-  long sequence;
+  int64_t frameno;
+  int64_t sequence;
 
   int64_t glue_bits;
   int64_t time_bits;
@@ -303,8 +303,8 @@ typedef struct vorbis_block{
   int   mode;
 
   int eofflag;
-  int frameno;
-  int sequence;
+  int64_t frameno;
+  int64_t sequence;
   vorbis_dsp_state *vd; /* For read-only access of configuration */
 
   /* local storage to avoid remallocing; it's up to the mapping to
