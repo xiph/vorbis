@@ -47,8 +47,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %defattr(-,root,root)
 %doc COPYING
 %doc README
-/usr/lib/libvorbis.so*
-/usr/lib/libvorbisfile.so*
+/usr/lib/libvorbis.so.*
+/usr/lib/libvorbisfile.so.*
 
 %files devel
 %doc doc/programming.html
@@ -72,6 +72,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 /usr/include/vorbis/book/res0_*.vqh
 /usr/include/vorbis/book/resaux0_*.vqh
 /usr/lib/libvorbis.a
+/usr/lib/libvorbis.so
+/usr/bin/vorbis-config
 
 %clean 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
