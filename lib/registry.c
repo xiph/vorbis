@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.c,v 1.9 2001/08/13 01:36:57 xiphmont Exp $
+ last mod: $Id: registry.c,v 1.10 2001/09/07 08:42:30 cwolf Exp $
 
  ********************************************************************/
 
@@ -19,6 +19,7 @@
 #include "codec_internal.h"
 #include "registry.h"
 #include "misc.h"
+
 
 /* seems like major overkill now; the backend numbers will grow into
    the infrastructure soon enough */
@@ -50,3 +51,11 @@ vorbis_func_mapping   *_mapping_P[]={
   &mapping0_exportbundle,
 };
 
+  /*
+   * For win32 only, the following code needs to be appended to this file 
+   * because the "sizeof" operator can only evaluate the sizes
+   * of statically initialized arrays in the same compilation unit.
+   */ 
+#if defined(_MSC_VER) && defined(STANDALONE_VORBISENC_DLL)
+# include "shmmap_c.h"
+#endif

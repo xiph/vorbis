@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.14 2001/09/01 06:14:50 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.15 2001/09/07 08:42:30 cwolf Exp $
 
  ********************************************************************/
 
@@ -29,6 +29,19 @@
 #include "os.h"
 #include "misc.h"
 
+/*
+ * If this module gets built into a separate shared library 
+ * on win32 (DLL), then the backend mappings from registry.c
+ * need to be referenced from a file-mapped shared memory segment.
+ */
+#if defined(_MSC_VER) && defined(STANDALONE_VORBISENC_DLL)
+# include "shmmap.h"
+
+# define _time_P    g_shared_map->p_time_P
+# define _floor_P   g_shared_map->p_floor_P
+# define _residue_P g_shared_map->p_residue_P
+# define _mapping_P g_shared_map->p_mapping_P
+#endif
 
 /* deepcopy all but the codebooks; in this usage, they're static
    (don't copy as they could be big) */
