@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.26 2000/07/29 08:45:33 msmith Exp $
+ last mod: $Id: info.c,v 1.27 2000/07/30 13:10:10 msmith Exp $
 
  ********************************************************************/
 
@@ -73,7 +73,7 @@ void vorbis_comment_add(vorbis_comment *vc,char *comment){
 void vorbis_comment_add_tag(vorbis_comment *vc, char *tag, char *contents){
   char *comment=alloca(strlen(tag)+strlen(contents)+2); /* +2 for = and \0 */
   strcpy(comment, tag);
-  comment[strlen(tag)] = '=';
+  strcat(comment, "=");
   strcat(comment, contents);
   vorbis_comment_add(vc, comment);
 }
@@ -94,9 +94,13 @@ char *vorbis_comment_query(vorbis_comment *vc, char *tag, int count){
   long i;
   int found = 0;
   int taglen = strlen(tag);
+  char *fulltag = alloca(taglen+ 2);
+
+  strcpy(fulltag, tag);
+  strcat(fulltag, "=");
   
   for(i=0;i<vc->comments;i++){
-    if(!tagcompare(vc->user_comments[i], tag, taglen)){
+    if(!tagcompare(vc->user_comments[i], fulltag, taglen)){
       if(count == found)
 	/* We return a pointer to the data, not a copy */
       	return vc->user_comments[i] + taglen + 1;
