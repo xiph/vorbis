@@ -2,8 +2,9 @@ Note that these instructions are *not* necessary for distribution
 tarballs; they have separate configure/build instructions.  
 
 Building this package from CVS is mainly intended for developers.
-General users should obtain office distribution packages; both source
-and binary distributions are available at http://www.vorbis.com/.
+General users should obtain official distribution packages; both
+source and binary distributions are available at
+http://www.vorbis.com/.
 
 -----
 
@@ -22,7 +23,7 @@ a developer's copy):
    perform this step.  
 
    *** IF YOU ARE NOT BUILDING WITH GNU MAKE *AND* GCC: you must set
-   the AUTOMAKE_FLAGS envirnoment variable to "--include-deps"
+   the AUTOMAKE_FLAGS environment variable to "--include-deps"
    before running autogen.sh.  For example:
 
    csh% setenv AUTOMAKE_FLAGS --include-deps
