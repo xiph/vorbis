@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.22 2003/12/30 11:02:22 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.23 2003/12/30 13:17:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -157,30 +157,30 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
   /* Choice of packetblobs now made based on floater, and min/max
      requirements. Now boundary check extreme choices */
 
-  if(choice>=PACKETBLOBS){
-    /* choosing a larger packetblob is insufficient to prop up bitrate.
-       pad this frame out with zeroes */
-    long minsize=(min_target_bits-bm->minmax_reservoir+7)/8;
-    bm->choice=choice=PACKETBLOBS-1;
-
-    minsize-=oggpack_bytes(vbi->packetblob[choice]);
-
-    while(minsize--)oggpack_write(vbi->packetblob[choice],0,8);
-    this_bits=oggpack_bytes(vbi->packetblob[choice])*8;
-
-  }else if(choice<0){
+  if(choice<0){
     /* choosing a smaller packetblob is insufficient to trim bitrate.
        frame will need to be truncated */
     long maxsize=(max_target_bits+(bi->reservoir_bits-bm->minmax_reservoir))/8;
     bm->choice=choice=0;
-
+    
     if(oggpack_bytes(vbi->packetblob[choice])>maxsize){
-
+      
       oggpack_writetrunc(vbi->packetblob[choice],maxsize*8);
       this_bits=oggpack_bytes(vbi->packetblob[choice])*8;
     }
-  }else
+  }else{
+    long minsize=(min_target_bits-bm->minmax_reservoir+7)/8;
+    if(choice>=PACKETBLOBS)
+      choice=PACKETBLOBS-1;
+
     bm->choice=choice;
+
+    /* prop up bitrate according to demand. pad this frame out with zeroes */
+    minsize-=oggpack_bytes(vbi->packetblob[choice]);
+    while(minsize-->0)oggpack_write(vbi->packetblob[choice],0,8);
+    this_bits=oggpack_bytes(vbi->packetblob[choice])*8;
+
+  }
 
   /* now we have the final packet and the final packet size.  Update statistics */
   /* min and max reservoir */
