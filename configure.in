@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.22 2000/08/30 07:09:46 xiphmont Exp $
+# $Id: configure.in,v 1.23 2000/08/31 03:28:43 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -25,7 +25,11 @@ case $host in
 
 esac
 
-AC_PROG_CC	
+cflags_save="$CFLAGS"
+AC_PROG_CC
+# because AC_PROG_CC likes to set -g 
+CFLAGS="$cflags_save"
+
 AC_PROG_CPP
 AC_PROG_RANLIB
 AC_CHECK_PROG(AR,ar,ar)
