@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.20.2.2 2000/06/02 23:48:37 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.20.2.3 2000/06/09 01:07:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -48,10 +48,12 @@ static void set_curve(double *ref,double *c,int n, double crate){
   for(i=0;i<MAX_BARK-1;i++){
     int endpos=rint(fromBARK(i+1)*2*n/crate);
     double base=ref[i];
-    double delta=(ref[i+1]-base)/(endpos-j);
-    for(;j<endpos && j<n;j++){
-      c[j]=base;
-      base+=delta;
+    if(j<endpos){
+      double delta=(ref[i+1]-base)/(endpos-j);
+      for(;j<endpos && j<n;j++){
+	c[j]=base;
+	base+=delta;
+      }
     }
   }
 }
