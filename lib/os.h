@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.15 2000/11/08 22:38:57 jack Exp $
+ last mod: $Id: os.h,v 1.16 2000/11/08 22:45:58 jack Exp $
 
  ********************************************************************/
 
@@ -99,6 +99,8 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
 
 #else
 /* this is for beos */
+
+typedef int vorbis_fpu_control;
 static int vorbis_ftoi(double f){
   return (int)(f+.5);
 }
