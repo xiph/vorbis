@@ -15,8 +15,8 @@
 
  ********************************************************************/
 
-#ifndef _OGG_MDCT_H_
-#define _OGG_MDCT_H_
+#ifndef _OGG_mdct_H_
+#define _OGG_mdct_H_
 
 typedef struct {
   int n;
@@ -25,12 +25,14 @@ typedef struct {
   double *trig;
   int    *bitrev;
 
-} MDCT_lookup;
+} mdct_lookup;
 
-extern MDCT_lookup *MDCT_init(int n);
-extern void MDCT_free(MDCT_lookup *l);
-extern void MDCT(double *in, double *out, MDCT_lookup *init, double *window);
-extern void iMDCT(double *in, double *out, MDCT_lookup *init, double *window);
+extern void mdct_init(mdct_lookup *lookup,int n);
+extern void mdct_clear(mdct_lookup *l);
+extern void mdct_forward(mdct_lookup *init, double *in, 
+			 double *out, double *window);
+extern void mdct_backward(mdct_lookup *init, double *in, 
+			  double *out, double *window);
 
 #endif
 

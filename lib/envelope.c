@@ -14,7 +14,7 @@
  function: PCM data envelope analysis and manipulation
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Aug 05 1999
+ last modification date: Aug 07 1999
 
  Vorbis manipulates the dynamic range of the incoming PCM data
  envelope to minimise time-domain energy leakage from percussive and
@@ -43,6 +43,11 @@ void _ve_envelope_init(envelope_lookup *e,int samples_per){
   }
 }
 
+void _ve_envelope_clear(envelope_lookup *e){
+  if(e->window)free(e->window);
+  memset(e,0,sizeof(envelope_lookup));
+}
+
 /* initial and final blocks are special cases. Eg:
    ______
          `--_            
@@ -64,46 +69,32 @@ void _ve_envelope_init(envelope_lookup *e,int samples_per){
    span the threshhold (assuming the threshhold is active), we use an 
    abbreviated vector */
 
-static void _ve_envelope_generate(double *mult,double *env,double *look,
-				  int n,int step){
+static int _ve_envelope_generate(double *mult,double *env,double *look,
+				 int n,int step){
   int i,j,p;
-  double m;
-  n*=step;
+  double m,mo;
 
+  for(j=0;j<n;j++)if(mult[j]!=1)break;
+  if(j==n)return(0);
+
+  n*=step;
   /* first multiplier special case */
-  m=ldexp(2,mult[0]-1);
-  for(i=0;i<step/2;i++)env[i]=m;
-  p=i;
-  for(i=step;i<step*2;i++,p++)env[p]=m*look[i];
+  m=ldexp(1,mult[0]-1);
+  for(p=0;p<step/2;p++)env[p]=m;
   
   /* mid multipliers normal case */
   for(j=1;p<n-step/2;j++){
-    p-=step;
-    m=ldexp(2,mult[j]-1);
-    for(i=0;i<step;i++,p++)env[p]+=m*look[i];
-    for(;i<step*2;i++,p++)env[p]=m*look[i];
+    mo=m;
+    m=ldexp(1,mult[j]-1);
+    if(mo==m)
+      for(i=0;i<step;i++,p++)env[p]=m;
+    else
+      for(i=0;i<step;i++,p++)env[p]=m*look[i]+mo*look[i+step];
   }
 
   /* last multiplier special case */
-  p-=step;
-  m=ldexp(2,mult[j]-1);
-  for(i=0;i<step;i++,p++)env[p]+=m*look[i];
   for(;p<n;p++)env[p]=m;
-  
-  {
-    static int frameno=0;
-    FILE *out;
-    char path[80];
-    int i;
-    
-    sprintf(path,"env%d",frameno);
-    out=fopen(path,"w");
-    for(i=0;i<n;i++)
-      fprintf(out,"%g\n",env[i]);
-    fclose(out);
-
-    frameno++;
-  }
+  return(1);
 }
 
 /* right now, we do things simple and dirty (read: our current preecho
@@ -235,21 +226,22 @@ void _ve_envelope_apply(vorbis_block *vb,int multp){
     }
 
     /* compute the envelope curve */
-    _ve_envelope_generate(mult,env,look->window,vb->multend,vi->envelopesa);
-
-    /* apply the envelope curve */
-    for(j=0;j<vi->channels;j++){
-
-      /* check to see if the generated envelope applies to this channel */
-      if(vi->envelopemap[j]==i){
+    if(_ve_envelope_generate(mult,env,look->window,vb->multend,
+			     vi->envelopesa)){
+      
+      /* apply the envelope curve */
+      for(j=0;j<vi->channels;j++){
 	
-	if(multp)
-	  for(k=0;k<vb->multend*vi->envelopesa;k++)
-	    vb->pcm[j][k]*=env[k];
-	else
-	  for(k=0;k<vb->multend*vi->envelopesa;k++)
-	    vb->pcm[j][k]/=env[k];
-
+	/* check to see if the generated envelope applies to this channel */
+	if(vi->envelopemap[j]==i){
+	  
+	  if(multp)
+	    for(k=0;k<vb->multend*vi->envelopesa;k++)
+	      vb->pcm[j][k]*=env[k];
+	  else
+	    for(k=0;k<vb->multend*vi->envelopesa;k++)
+	      vb->pcm[j][k]/=env[k];
+	}
       }
     }
   }

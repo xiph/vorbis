@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.6 1999/08/07 00:09:13 xiphmont Exp $
+# $Id: Makefile.in,v 1.7 1999/08/07 23:36:32 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -44,14 +44,13 @@ selftest:
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
 		-o test_bitwise -lm
-	$(CC) $(DEBUG) -c envelope.c mdct.c window.c
-	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST envelope.o mdct.o window.c\
-			block.c -o test_blocking -lm
-
 	@echo
 	@./test_framing
 	@./test_bitwise
-	@./test_blocking
+
+dsptest:
+		$(MAKE) target CFLAGS="$(DEBUG)"
+		$(CC) $(DEBUG) $(LDFLAGS) $(OFILES) dsptest.c -o dsptest -lm
 
 target:	$(TARGETFILES)
 

@@ -40,17 +40,14 @@
 #define VORBIS_SPECIFIC_MODIFICATIONS
 
 #include <stdlib.h>
-#include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "mdct.h"
-
-static double oPI  = 3.14159265358979323846;
 
 /* build lookups for trig functions; also pre-figure scaling and
    some window function algebra. */
 
-MDCT_lookup *MDCT_init(int n){
-  MDCT_lookup *lookup=malloc(sizeof(MDCT_lookup));
+void mdct_init(mdct_lookup *lookup,int n){
   int    *bitrev=malloc(sizeof(int)*(n/4));
   double *trig=malloc(sizeof(double)*(n+n/4));
   double *AE=trig;
@@ -72,14 +69,14 @@ MDCT_lookup *MDCT_init(int n){
   /* trig lookups... */
 
   for(i=0;i<n/4;i++){
-    AE[i]=cos((oPI/n)*(4*i));
-    AO[i]=-sin((oPI/n)*(4*i));
-    BE[i]=cos((oPI/(2*n))*(2*i+1));
-    BO[i]=sin((oPI/(2*n))*(2*i+1));
+    AE[i]=cos((M_PI/n)*(4*i));
+    AO[i]=-sin((M_PI/n)*(4*i));
+    BE[i]=cos((M_PI/(2*n))*(2*i+1));
+    BO[i]=sin((M_PI/(2*n))*(2*i+1));
   }
   for(i=0;i<n/8;i++){
-    CE[i]=cos((oPI/n)*(4*i+2));
-    CO[i]=-sin((oPI/n)*(4*i+2));
+    CE[i]=cos((M_PI/n)*(4*i+2));
+    CO[i]=-sin((M_PI/n)*(4*i+2));
   }
 
   /* bitreverse lookup... */
@@ -95,21 +92,19 @@ MDCT_lookup *MDCT_init(int n){
       bitB[i]=acc*2;
     }
   }
-
-  return(lookup);
 }
 
-void MDCT_free(MDCT_lookup *l){
+void mdct_clear(mdct_lookup *l){
   if(l){
     if(l->trig)free(l->trig);
     if(l->bitrev)free(l->bitrev);
-    free(l);
+    memset(l,0,sizeof(mdct_lookup));
   }
 }
 
-static inline void _MDCT_kernel(double *x, 
+static inline void _mdct_kernel(double *x, 
 				int n, int n2, int n4, int n8,
-				MDCT_lookup *init){
+				mdct_lookup *init){
   double *w=x+1; /* interleaved access improves cache locality */ 
   int i;
   /* step 2 */
@@ -205,7 +200,7 @@ static inline void _MDCT_kernel(double *x,
   }
 }
 
-void MDCT(double *in, double *out, MDCT_lookup *init, double *window){
+void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
   int n=init->n;
   double *x=alloca(n*sizeof(double));
   int n2=n>>1;
@@ -255,7 +250,7 @@ void MDCT(double *in, double *out, MDCT_lookup *init, double *window){
     }
   }
 
-  _MDCT_kernel(x,n,n2,n4,n8,init);
+  _mdct_kernel(x,n,n2,n4,n8,init);
 
   /* step 8 */
 
@@ -273,7 +268,7 @@ void MDCT(double *in, double *out, MDCT_lookup *init, double *window){
   }
 }
 
-void iMDCT(double *in, double *out, MDCT_lookup *init, double *window){
+void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
   int n=init->n;
   double *x=alloca(n*sizeof(double));
   int n2=n>>1;
@@ -310,7 +305,7 @@ void iMDCT(double *in, double *out, MDCT_lookup *init, double *window){
 
   }
 
-  _MDCT_kernel(x,n,n2,n4,n8,init);
+  _mdct_kernel(x,n,n2,n4,n8,init);
 
   /* step 8 */
 

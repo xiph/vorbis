@@ -75,6 +75,8 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
 
   memcpy(&v->vi,vi,sizeof(vorbis_info));
   _ve_envelope_init(&v->ve,vi->envelopesa);
+  mdct_init(&v->vm[0],vi->smallblock);
+  mdct_init(&v->vm[1],vi->largeblock);
 
   v->samples_per_envelope_step=vi->envelopesa;
   v->block_size[0]=vi->smallblock;
@@ -139,17 +141,9 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
 
 /* arbitrary settings and spec-mandated numbers get filled in here */
 int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
-  vi->smallblock=512;
-  vi->largeblock=2048;
-  vi->envelopesa=64;
-  vi->envelopech=vi->channels;
-  vi->preecho_thresh=10.;
-  vi->preecho_thresh=4.;
-  vi->envelopemap=calloc(2,sizeof(int));
-  vi->envelopemap[0]=0;
-  vi->envelopemap[1]=1;
-
   _vds_shared_init(v,vi);
+  drft_init(&v->vf[0],vi->smallblock); /* only used in analysis */
+  drft_init(&v->vf[1],vi->largeblock); /* only used in analysis */
 
   return(0);
 }
@@ -173,6 +167,11 @@ void vorbis_analysis_clear(vorbis_dsp_state *v){
 	if(v->multipliers[i])free(v->multipliers[i]);
       free(v->multipliers);
     }
+    _ve_envelope_clear(&v->ve);
+    drft_clear(&v->vf[0]);
+    drft_clear(&v->vf[1]);
+    mdct_clear(&v->vm[0]);
+    mdct_clear(&v->vm[1]);
     memset(v,0,sizeof(vorbis_dsp_state));
   }
 }
@@ -524,138 +523,3 @@ int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes){
   return(0);
 }
 
-#ifdef _V_SELFTEST
-#include <stdio.h>
-#include <math.h>
-
-/* basic test of PCM blocking:
-
-   construct a PCM vector and block it using preset sizing in our fake
-   delta/multiplier generation.  Immediately hand the block over to
-   'synthesis' and rebuild it. */
-
-int main(){
-  int blocksize=1024;
-  int fini=100*1024;
-  vorbis_dsp_state encode,decode;
-  vorbis_info vi;
-  vorbis_block vb;
-  long counterin=0;
-  long countermid=0;
-  long counterout=0;
-  int done=0;
-  char *temp[]={ "Test" ,"the Test band", "test records",NULL };
-  int frame=0;
-
-  MDCT_lookup *ml[2];
-
-  vi.channels=2;
-  vi.rate=44100;
-  vi.version=0;
-  vi.mode=0;
-  vi.user_comments=temp;
-  vi.vendor="Xiphophorus";
-
-  vorbis_analysis_init(&encode,&vi);
-  vorbis_synthesis_init(&decode,&vi);
-
-  memset(&vb,0,sizeof(vorbis_block));
-  vorbis_block_init(&encode,&vb);
-
-  ml[0]=MDCT_init(encode.block_size[0]);
-  ml[1]=MDCT_init(encode.block_size[1]);
-
-  /* Submit 100K samples of data reading out blocks... */
-  
-  while(!done){
-    int i;
-    double **buf=vorbis_analysis_buffer(&encode,blocksize);
-    for(i=0;i<blocksize;i++){
-      buf[0][i]=sin((counterin+i)%500/500.*M_PI*2)+2;
-      buf[1][i]=-1;
-
-      if((counterin+i)%15000>13000)buf[0][i]+=10;
-    }
-
-    i=(counterin+blocksize>fini?fini-counterin:blocksize);
-    vorbis_analysis_wrote(&encode,i);
-    counterin+=i;
-
-    while(vorbis_analysis_blockout(&encode,&vb)){
-      double **pcm;
-      int avail;
-
-      /* temp fixup */
-
-      double *window=encode.window[vb.W][vb.lW][vb.nW];
-
-      /* apply envelope */
-      _ve_envelope_sparsify(&vb);
-      _ve_envelope_apply(&vb,0);
-
-      for(i=0;i<vb.pcm_channels;i++)
-	MDCT(vb.pcm[i],vb.pcm[i],ml[vb.W],window);
-
-      for(i=0;i<vb.pcm_channels;i++)
-	iMDCT(vb.pcm[i],vb.pcm[i],ml[vb.W],window);
-
-
-      {
-	FILE *out;
-	char path[80];
-	int i;
-
-	int avail=encode.block_size[vb.W];
-	int beginW=countermid-avail/2;
-	
-	sprintf(path,"ana%d",vb.frameno);
-	out=fopen(path,"w");
-
-	for(i=0;i<avail;i++)
-	  fprintf(out,"%d %g\n",i+beginW,vb.pcm[0][i]);
-	fprintf(out,"\n");
-	for(i=0;i<avail;i++)
-	  fprintf(out,"%d %g\n",i+beginW,window[i]);
-
-	fclose(out);
-	countermid+=encode.block_size[vb.W]/4+encode.block_size[vb.nW]/4;
-      }
-
-
-      _ve_envelope_apply(&vb,1);
-      vorbis_synthesis_blockin(&decode,&vb);
-      
-
-      while((avail=vorbis_synthesis_pcmout(&decode,&pcm))){
-	FILE *out;
-	char path[80];
-	int i;
-	
-	sprintf(path,"syn%d",frame);
-	out=fopen(path,"w");
-
-	for(i=0;i<avail;i++)
-	  fprintf(out,"%ld %g\n",i+counterout,pcm[0][i]);
-	fprintf(out,"\n");
-	for(i=0;i<avail;i++)
-	  fprintf(out,"%ld %g\n",i+counterout,pcm[1][i]);
-
-	fclose(out);
-
-	vorbis_synthesis_read(&decode,avail);
-
-	counterout+=avail;
-	frame++;
-      }
-      
-
-      if(vb.eofflag){
-	done=1;
-	break;
-      }
-    }
-  }
-  return 0;
-}
-
-#endif

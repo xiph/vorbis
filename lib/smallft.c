@@ -12,6 +12,7 @@
  ******************************************************************/
 
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "smallft.h"
 
@@ -300,11 +301,6 @@ static void drftf1(int n,double *c,double *ch,double *wa,int *ifac){
   for(i=0;i<n;i++)c[i]=ch[i];
 }
 
-static void fdrfftf(int n,double *r,double *wsave,int *ifac){
-  if(n==1)return;
-  drftf1(n,r,wsave,wsave+n,ifac);
-}
-
 static void dradb2(int ido,int l1,double *cc,double *ch,double *wa1){
   int i,k,t0,t1,t2,t3,t4,t5,t6;
   double ti2,tr2;
@@ -497,52 +493,29 @@ static void drftb1(int n, double *c, double *ch, double *wa, int *ifac){
   for(i=0;i<n;i++)c[i]=ch[i];
 }
 
-static void fdrfftb(int n, double *r, double *wsave, int *ifac){
-  if (n == 1)return;
-  drftb1(n, r, wsave, wsave+n, ifac);
+void drft_forward(drft_lookup *l,double *data){
+  if(l->n==1)return;
+  drftf1(l->n,data,l->trigcache,l->trigcache+l->n,l->splitcache);
 }
 
-void fft_forward(int n, double *buf,double *trigcache,int *splitcache){
-  int flag=0;
-
-  if(!trigcache || !splitcache){
-    trigcache=calloc(3*n,sizeof(double));
-    splitcache=calloc(32,sizeof(int));
-    fdrffti(n, trigcache, splitcache);
-    flag=1;
-  }
-
-  fdrfftf(n, buf, trigcache, splitcache);
-
-  if(flag){
-    free(trigcache);
-    free(splitcache);
-  }
-}
-
-void fft_backward(int n, double *buf, double *trigcache,int *splitcache){
+void drft_backward(drft_lookup *l,double *data){
   int i;
-  int flag=0;
-
-  if(!trigcache || !splitcache){
-    trigcache=calloc(3*n,sizeof(double));
-    splitcache=calloc(32,sizeof(int));
-    fdrffti(n, trigcache, splitcache);
-    flag=1;
-  }
-
-  fdrfftb(n, buf, trigcache, splitcache);
-
-  for(i=0;i<n;i++)buf[i]/=n;
-
-  if(flag){
-    free(trigcache);
-    free(splitcache);
-  }
+  if (l->n==1)return;
+  drftb1(l->n,data,l->trigcache,l->trigcache+l->n,l->splitcache);
+  for(i=0;i<l->n;i++)data[i]/=l->n;
 }
 
-void fft_i(int n, double **trigcache, int **splitcache){
-  *trigcache=calloc(3*n,sizeof(double));
-  *splitcache=calloc(32,sizeof(int));
-  fdrffti(n, *trigcache, *splitcache);
+void drft_init(drft_lookup *l,int n){
+  l->n=n;
+  l->trigcache=calloc(3*n,sizeof(double));
+  l->splitcache=calloc(32,sizeof(int));
+  fdrffti(n, l->trigcache, l->splitcache);
+}
+
+void drft_clear(drft_lookup *l){
+  if(l){
+    if(l->trigcache)free(l->trigcache);
+    if(l->splitcache)free(l->splitcache);
+    memset(l,0,sizeof(drft_lookup));
+  }
 }

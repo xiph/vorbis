@@ -21,6 +21,15 @@
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
 
+#include "mdct.h"
+#include "smallft.h"
+
+typedef struct {
+  int winlen;
+  double *window;
+} envelope_lookup;
+
+
 typedef struct {
   long endbyte;     
   int  endbit;      
@@ -107,17 +116,15 @@ typedef struct {
   int bodybytes;
 } ogg_sync_state;
 
-typedef struct {
-  int winlen;
-  double *window;
-} envelope_lookup;
-
 typedef struct vorbis_dsp_state{
   int samples_per_envelope_step;
   int block_size[2];
   double *window[2][2][2]; /* windowsize, leadin, leadout */
 
   envelope_lookup ve;
+  drft_lookup vf[2];
+  mdct_lookup vm[2];
+
   vorbis_info vi;
 
   double **pcm;
@@ -231,6 +238,8 @@ extern int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
 extern int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
 extern int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes);
 
+
+extern int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
 
 
 #endif
