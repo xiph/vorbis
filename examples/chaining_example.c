@@ -11,16 +11,28 @@
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id: chaining_example.c,v 1.10 2001/08/13 01:36:55 xiphmont Exp $
+ last mod: $Id: chaining_example.c,v 1.11 2001/09/13 23:34:46 cwolf Exp $
 
  ********************************************************************/
 
 #include <vorbis/codec.h>
 #include <vorbis/vorbisfile.h>
 
+#ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
+#include <io.h>
+#include <fcntl.h>
+#endif
+
 int main(){
   OggVorbis_File ov;
   int i;
+
+#ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
+  /* Beware the evil ifdef. We avoid these where we can, but this one we 
+     cannot. Don't add any more, you'll probably go to hell if you do. */
+  _setmode( _fileno( stdin ), _O_BINARY );
+  _setmode( _fileno( stdout ), _O_BINARY );
+#endif
 
   /* open the file/pipe on stdin */
   if(ov_open(stdin,&ov,NULL,-1)<0){
