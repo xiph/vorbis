@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.23.4.6 2000/08/01 02:00:10 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23.4.7 2000/08/07 20:44:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -498,19 +498,82 @@ static void max_seeds(vorbis_look_psy *p,double *seeds,double *flr){
 }
 
 static void bark_noise(long n,double *b,double *f,double *noise){
-  long i,lo=0,hi=0;
-  double acc=0.;
+  long i=1,lo=0,hi=2;
+  double acc=0.,val,del=0.;
+
+  double *norm=alloca(n*sizeof(double));
+  double normacc=0;
+
+  memset(noise,0,n*sizeof(double));
+  memset(norm,0,n*sizeof(double));
+
+  while(hi<n){
+    val=todB(f[i]*f[i])+200.;
+    del=1./(i-lo);
+    noise[lo]+=val*del;
+    noise[i]-=val*del;
+    norm[lo]+=del;
+    norm[i]-=del;
+ 
+    del=1./(hi-i);
+    noise[i]-=val*del;
+    noise[hi]+=val*del;
+    norm[hi]+=del;
+    norm[i]-=del;
+    
+
+    i++;
+    for(;b[hi]-.5<b[i] && hi<n;hi++);
+    for(;b[lo]+.5<b[i] && lo<i;lo++);
+    if(i==hi)hi++;
+  }
+
+  {
+    long ilo=i-lo;
+    long hii=hi-i;
+    long hilo=hi-lo;
+
+    for(;i<n;i++){
+      val=todB(f[i]*f[i])+200.;
+
+      del=1./(hii);
+      noise[i]-=val*del;
+      norm[i]-=del;
+     
+      del=1./(ilo);
+      noise[i-ilo]+=val*del;
+      noise[i]-=val*del;      
+      norm[i-ilo]+=del;
+      norm[i]-=del;      
+    }
+    for(i=1,lo=n-ilo;lo<n;lo++,i++){
+      val=todB(f[n-i]*f[n-i])+200.;
+      del=1./ilo;
+      noise[lo]+=val*del;
+      norm[lo]+=del;
+    }
+  }
+
+
+  acc=0;
+  val=0;
 
   for(i=0;i<n;i++){
+    val+=norm[i];
+    norm[i]=val;
+    acc+=noise[i];
+    noise[i]=acc;
+  }
 
-    for(;b[hi]-.5<b[i] && hi<n;hi++)
-      acc+=f[hi]*f[hi];
-    for(;b[lo]+.5<b[i];lo++)
-      acc-=f[lo]*f[lo];
-    if(hi-lo>0)
-      noise[i]=sqrt(acc/(hi-lo));
-    else
+  val=0;
+  acc=0;
+  for(i=0;i<n;i++){
+    val+=norm[i];
+    acc+=noise[i];
+    if(val==0)
       noise[i]=0.;
+    else
+      noise[i]=sqrt(fromdB(acc/val-200.));
   }
 }
 
@@ -590,6 +653,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
   /* seed the tone masking */
   if(p->vi->tonemaskp){
     memset(seed,0,n*sizeof(double));
+
     seed_generic(p,p->tonecurves,smooth,flr,seed,specmax);
     
     /* chase the seeds */

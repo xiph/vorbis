@@ -12,17 +12,18 @@
  ********************************************************************
 
  function: masking curve data for psychoacoustics
- last mod: $Id: masking.h,v 1.3.4.3 2000/07/31 19:41:00 xiphmont Exp $
+ last mod: $Id: masking.h,v 1.3.4.4 2000/08/07 20:44:18 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_MASKING_H_
 #define _V_MASKING_H_
 
+/* Not really an ATH, more a bottom curve to limit LSP dynamic range */
 double ATH_Bark_dB[]={  
-   50,   30,   20,    15,    11,    10,     8,    7,    7,    7,
+   15,   15,   15,    15,    11,    10,     8,    7,    7,    7,
     6,    2,    0,     0,    -3,    -5,    -6,   -6, -4.5,  2.5,
-   15,   20,   21,    17,    25,    100,   120};
+   10,   15,   15,    15,    15,    15,   15};
 
 /* The below masking curves are straight from the R. Ehmer
    (J. Acoustical Society of America) papers ca 1958-59.  I modified
