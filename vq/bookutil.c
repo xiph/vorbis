@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.8 2000/02/07 19:39:44 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.9 2000/02/13 10:23:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -103,7 +103,8 @@ int get_line_value(FILE *in,double *value){
     return(-1);
   }else{
     value_line_buff=next;
-    while(*value_line_buff>32)value_line_buff++;
+    while(*value_line_buff>44)value_line_buff++;
+    if(*value_line_buff==44)value_line_buff++;
     return(0);
   }
 }
@@ -297,12 +298,36 @@ codebook *codebook_load(char *filename){
   return(b);
 }
 
+static double _dist(int el,double *a, double *b){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
+  return acc;
+}
+
 int codebook_entry(codebook *b,double *val){
   const static_codebook *c=b->c;
   encode_aux *t=c->encode_tree;
   int ptr=0,k;
+ 
+  /*{
+    brute force 
+    double this,best=_dist(c->dim,val,b->valuelist);
+    int i;
+    for(i=1;i<c->entries;i++){
+      this=_dist(c->dim,val,b->valuelist+i*c->dim);
+      if(this<best){
+        ptr=-i;
+        best=this;
+      }
+    }
+  }*/
+  
   double *n=alloca(c->dim*sizeof(double));
-
+  
   while(1){
     double C=0.;
     double *p=b->valuelist+t->p[ptr];
@@ -313,10 +338,10 @@ int codebook_entry(codebook *b,double *val){
       C-=(p[k]+q[k])*n[k];
     }
     C/=2.;
-
+    
     for(k=0;k<c->dim;k++)
       C+=n[k]*val[k];
-
+    
     if(C>0.) /* in A */
       ptr= -t->ptr0[ptr];
     else     /* in B */

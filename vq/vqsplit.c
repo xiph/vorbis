@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.14 2000/01/28 09:05:21 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.15 2000/02/13 10:23:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -371,18 +371,14 @@ int lp_split(vqgen *v,codebook *b,
 static int _node_eq(encode_aux *v, long a, long b){
   long    Aptr0=v->ptr0[a];
   long    Aptr1=v->ptr1[a];
-  long    Ap   =v->p[a];
-  long    Aq   =v->q[a];
   long    Bptr0=v->ptr0[b];
   long    Bptr1=v->ptr1[b];
-  long    Bp   =v->p[b];
-  long    Bq   =v->q[b];
 
   /* the possibility of choosing the same p and q, but switched, can;t
      happen because we always look for the best p/q in the same search
      order and the search is stable */
 
-  if(Aptr0==Bptr0 && Aptr1==Bptr1 && Ap==Bp && Aq==Bq)
+  if(Aptr0==Bptr0 && Aptr1==Bptr1)
     return(1);
 
   return(0);
@@ -428,10 +424,8 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   /* The tree is likely big and redundant.  Pare and reroute branches */
   {
     int changedflag=1;
-    long *unique_entries=alloca(t->aux*sizeof(long));
 
     while(changedflag){
-      int nodes=0;
       changedflag=0;
 
       fprintf(stderr,"\t...");
@@ -442,19 +436,16 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
 	int k;
 
 	/* check list of unique decisions */
-	for(j=0;j<nodes;j++)
-	  if(_node_eq(t,i,unique_entries[j]))break;
+	for(j=0;j<i;j++)
+	  if(_node_eq(t,i,j))break;
 
-	if(j==nodes){
-	  /* a new entry */
-	  unique_entries[nodes++]=i++;
-	}else{
+	if(j<i){
 	  /* a redundant entry; find all higher nodes referencing it and
              short circuit them to the previously noted unique entry */
 	  changedflag=1;
 	  for(k=0;k<t->aux;k++){
-	    if(t->ptr0[k]==-i)t->ptr0[k]=-unique_entries[j];
-	    if(t->ptr1[k]==-i)t->ptr1[k]=-unique_entries[j];
+	    if(t->ptr0[k]==-i)t->ptr0[k]=-j;
+	    if(t->ptr1[k]==-i)t->ptr1[k]=-j;
 	  }
 
 	  /* Now, we need to fill in the hole from this redundant
@@ -471,7 +462,8 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
 	  }
 	  /* hole plugged */
 
-	}
+	}else
+	  i++;
       }
 
       fprintf(stderr," %ld remaining\n",t->aux);
