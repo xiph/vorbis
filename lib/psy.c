@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.73 2002/07/13 06:12:46 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.74 2002/07/13 10:18:33 giles Exp $
 
  ********************************************************************/
 
@@ -1032,7 +1032,6 @@ void _vp_noise_normalize(vorbis_look_psy *p,
 	}
       }
       
-      //if(!flag && i<3)i=0;
       for(;i<partition;i++){
 	k=sortedindex[i+j-start];
 	out[k]=0.;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.51 2002/07/11 06:40:48 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.52 2002/07/13 10:18:33 giles Exp $
 
  ********************************************************************/
 
@@ -245,7 +245,6 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 
     ve->mark[j+VE_POST]=0;
     if(ret&1){
-      //ve->mark[j-1]=1;
       ve->mark[j]=1;
       ve->mark[j+1]=1;
     }
