@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.12 2001/08/13 11:33:39 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.13 2001/08/16 01:36:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -422,7 +422,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
 			  int x0, int x1,lsfit_acc *a,
 			  int n,vorbis_info_floor1 *info){
   long i;
-  int quantized=vorbis_dBquant(flr);
+  int quantized=vorbis_dBquant(flr+x0);
 
   long xa=0,ya=0,x2a=0,y2a=0,xya=0,na=0, xb=0,yb=0,x2b=0,y2b=0,xyb=0,nb=0;
 
