@@ -8,7 +8,7 @@
 
 # >res0_128_128
 # haux res0_96_128aux.vqd 0,4,2
-# :1 res0_128_128_1.vqd, 4, nonseq, 0 +- 1
+# :1 res0_128_128_1.vqd, 4, nonseq cull, 0 +- 1
 # +a 4, nonseq, 0 +- .25 .5
 # :2 res0_128_128_2.vqd, 4, nonseq, 0 +- 1 2
 # :3 res0_128_128_3.vqd, 4, nonseq, 0 +- 1 3 5
@@ -83,10 +83,17 @@ while($line=<F>){
 	die "Couldn't pre-hint latticebook.\n\tcommand:$command\n" 
 	    if syst($command);
 	
-	my $command="restune temp$$.vqh $datafile > $globalname$name.vqh";
-	print ">>> $command\n";
-	die "Couldn't tune latticebook.\n\tcommand:$command\n" 
-	    if syst($command);
+	if($seqp=~/cull/){
+	    my $command="restune temp$$.vqh $datafile 1 > $globalname$name.vqh";
+	    print ">>> $command\n";
+	    die "Couldn't tune latticebook.\n\tcommand:$command\n" 
+		if syst($command);
+	}else{
+	    my $command="restune temp$$.vqh $datafile > $globalname$name.vqh";
+	    print ">>> $command\n";
+	    die "Couldn't tune latticebook.\n\tcommand:$command\n" 
+		if syst($command);
+	}
 
 	my $command="latticehint $globalname$name.vqh > temp$$.vqh";
 	print ">>> $command\n";

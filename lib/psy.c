@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.34.2.3 2001/01/15 00:35:36 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.34.2.4 2001/01/19 16:03:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -167,16 +167,13 @@ static void setup_curve(float **c,
   for(j=0;j<P_LEVELS;j++){
 
     for(i=0;i<EHMER_MAX;i++)
-      if(c[j][i+2]>-200.f){
-	c[j][0]=i;
-	break;
-      }
+      if(c[j][i+2]>-200.f)break;  
+    c[j][0]=i;
 
     for(i=EHMER_MAX-1;i>=0;i--)
-      if(c[j][i+2]>-200.f){
-	c[j][1]=i;
+      if(c[j][i+2]>-200.f)
 	break;
-      }
+    c[j][1]=i;
 
   }
 }
@@ -211,6 +208,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
 
   p->tonecurves=_ogg_malloc(P_BANDS*sizeof(float **));
   p->noisemedian=_ogg_malloc(n*sizeof(float *));
+  p->noiseoffset=_ogg_malloc(n*sizeof(float *));
   p->peakatt=_ogg_malloc(P_BANDS*sizeof(float *));
   for(i=0;i<P_BANDS;i++){
     p->tonecurves[i]=_ogg_malloc(P_LEVELS*sizeof(float *));
@@ -300,8 +298,11 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
     del=halfoc-inthalfoc;
 
     p->noisemedian[i]=
-      p->vi->noisemedian[inthalfoc]*(1.-del) + 
-      p->vi->noisemedian[inthalfoc+1]*del;
+      p->vi->noisemedian[inthalfoc*2]*(1.-del) + 
+      p->vi->noisemedian[inthalfoc*2+2]*del;
+    p->noiseoffset[i]=
+      p->vi->noisemedian[inthalfoc*2+1]*(1.-del) + 
+      p->vi->noisemedian[inthalfoc*2+3]*del;
   }
   /*_analysis_output("mediancurve",0,p->noisemedian,n,0,0);*/
 }
@@ -535,7 +536,7 @@ static void max_seeds(vorbis_look_psy *p,float *minseed,float *maxseed,
 static void bark_noise_median(long n,float *b,float *f,float *noise,
 			      float lowidth,float hiwidth,
 			      int lomin,int himin,
-			      float *thresh){
+			      float *thresh,float *off){
   long i=0,lo=0,hi=0;
   long *radix=alloca(200*4*sizeof(long)); /* quarter-dB bins */
 
@@ -582,7 +583,7 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 	median++;
       }
     }
-    noise[i]=BINdB(median);
+    noise[i]=BINdB(median)+off[i];
   }
 
 }
@@ -623,7 +624,8 @@ float _vp_compute_mask(vorbis_look_psy *p,
 		      p->vi->noisewindowhi,
 		      p->vi->noisewindowlomin,
 		      p->vi->noisewindowhimin,
-		      p->noisemedian);
+		      p->noisemedian,
+		      p->noiseoffset);
     /* suppress any noise curve > specmax+p->vi->noisemaxsupp */
     for(i=0;i<n;i++)
       if(flr[i]>specmax+p->vi->noisemaxsupp)

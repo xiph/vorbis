@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.16.2.3 2001/01/15 00:35:36 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.16.2.4 2001/01/19 16:03:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -53,7 +53,7 @@ typedef struct vorbis_info_psy{
   float noisewindowhi;
   int   noisewindowlomin;
   int   noisewindowhimin;
-  float noisemedian[P_BANDS];
+  float noisemedian[P_BANDS*2];
 
   float max_curve_dB;
   float bound_att_dB;
@@ -70,6 +70,7 @@ typedef struct {
   float ***tonecurves;
   float **peakatt;
   float *noisemedian;
+  float *noiseoffset;
 
   float *ath;
   long  *octave;             /* in n.ocshift format */

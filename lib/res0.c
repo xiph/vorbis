@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.23.2.2 2001/01/15 00:35:36 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.23.2.3 2001/01/19 16:03:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -106,6 +106,9 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   info->groupbook=oggpack_read(opb,8);
   for(j=0;j<info->partitions;j++){
     int cascade=info->secondstages[j]=oggpack_read(opb,4);
+    if(cascade>1)goto errout; /* temporary!  when cascading gets
+                                 reworked and actually used, we don't
+                                 want old code to DTWT */
     acc+=cascade;
   }
   for(j=0;j<acc;j++){
@@ -144,8 +147,7 @@ vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
     int stages=info->secondstages[j];
     if(stages){
       look->partbooks[j]=_ogg_malloc(stages*sizeof(codebook *));
-      for(k=0;k<stages;k++)
-	look->partbooks[j][k]=be->fullbooks+info->booklist[acc++];
+      look->partbooks[j][0]=be->fullbooks+info->booklist[acc++];
     }
   }
 
@@ -239,10 +241,10 @@ static int _decodepart(oggpack_buffer *opb,float *work,float *vec, int n,
   int i;
   
   memset(work,0,sizeof(float)*n);
-  for(i=0;i<stages;i++){
-    int dim=books[i]->dim;
+  if(stages){
+    int dim=books[0]->dim;
     int step=n/dim;
-    if(s_vorbis_book_decodevs(books[i],work,opb,step,0)==-1)
+    if(s_vorbis_book_decodevs(books[0],work,opb,step,0)==-1)
       return(-1);
   }
   
