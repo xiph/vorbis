@@ -30,7 +30,7 @@
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>
-long ov_read(<a href="OggVorbis_File.html">OggVorbis_File</a> *vf, float ***pcm_channels, int *bitstream);
+long ov_read_float(<a href="OggVorbis_File.html">OggVorbis_File</a> *vf, float ***pcm_channels, int samples, int *bitstream);
 </b></pre>
 	</td>
 </tr>
@@ -43,6 +43,9 @@ long ov_read(<a href="OggVorbis_File.html">OggVorbis_File</a> *vf, float ***pcm_
 functions.</dd>
 <dt><i>pcm_channels</i></dt>
 <dd>A pointer to an output buffer.  The pointer will be set to the decoded output buffer.</dd>
+<dt><i>samples</i></dt>
+<dd>Maximum number of decoded samples to produce.</dd>
+<dt><i>bitstream</i></dt>
 <dt><i>bitstream</i></dt>
 <dd>A pointer to the number of the current logical bitstream.</dd>
 </dl>
@@ -71,10 +74,10 @@ functions.</dd>
 <p><b>Typical usage:</b>
 <blockquote>
 <tt>float **pcm;
-bytes_read = ov_read_float(&amp;vf,pcm,&amp;current_section)</tt>
+bytes_read = ov_read_float(&amp;vf,pcm, 1024, &amp;current_section)</tt>
 </blockquote>
 
-This decodes one packet's worth of float samples.
+This decodes up to 1024 float samples.
 </p>
 
 <br>
