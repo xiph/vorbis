@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.20.4.2 2002/05/14 07:06:41 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.20.4.3 2002/05/18 01:39:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -618,7 +618,6 @@ static int post_Y(int *A,int *B,int pos){
 int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 			  const float *logmdct,   /* in */
 			  const float *logmask){
-  static int seq=0;
   long i,j;
   vorbis_info_floor1 *info=look->vi;
   long n=info->n;
@@ -1143,7 +1142,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
   vorbis_info_floor1 *info=look->vi;
 
   codec_setup_info   *ci=vb->vd->vi->codec_setup;
-  int                  n=ci->blocksizes[vb->mode]/2;
+  int                  n=ci->blocksizes[vb->W]/2;
   int j;
 
   if(memo){

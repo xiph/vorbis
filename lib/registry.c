@@ -11,17 +11,14 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.c,v 1.13.6.2 2002/05/14 07:06:42 xiphmont Exp $
+ last mod: $Id: registry.c,v 1.13.6.3 2002/05/18 01:39:28 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "registry.h"
-#include "registry-api.h"
 #include "misc.h"
-
-
 /* seems like major overkill now; the backend numbers will grow into
    the infrastructure soon enough */
 

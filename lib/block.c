@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.64.2.2 2002/05/14 07:06:40 xiphmont Exp $
+ last mod: $Id: block.c,v 1.64.2.3 2002/05/18 01:39:27 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -33,7 +33,8 @@
 
 static int ilog2(unsigned int v){
   int ret=0;
-  while(v>1){
+  if(v)--v;
+  while(v){
     ret++;
     v>>=1;
   }
@@ -192,7 +193,7 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
     /* analysis always needs an fft */
     drft_init(&b->fft_look[0],ci->blocksizes[0]);
-    drft_init(&b->fft_look[1],ci->blocksizes[0]);
+    drft_init(&b->fft_look[1],ci->blocksizes[1]);
 
     /* finish the codebooks */
     if(!ci->fullbooks){
@@ -246,16 +247,16 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   v->pcm_current=v->centerW;
 
   /* initialize all the backend lookups */
-  b->floor=_ogg_calloc(ci->floors,sizeof(*b->floor));
+  b->flr=_ogg_calloc(ci->floors,sizeof(*b->flr));
   b->residue=_ogg_calloc(ci->residues,sizeof(*b->residue));
 
   for(i=0;i<ci->floors;i++)
-    b->floor[i]=_floor_P[ci->floor_type[i]]->
-      look(vd,ci->floor_param[i]);
+    b->flr[i]=_floor_P[ci->floor_type[i]]->
+      look(v,ci->floor_param[i]);
 
   for(i=0;i<ci->residues;i++)
     b->residue[i]=_residue_P[ci->residue_type[i]]->
-      look(vd,ci->residue_param[i]);    
+      look(v,ci->residue_param[i]);    
 
   return(0);
 }
@@ -306,11 +307,11 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	_ogg_free(b->transform[1]);
       }
 
-      if(b->floor){
+      if(b->flr){
 	for(i=0;i<ci->floors;i++)
 	  _floor_P[ci->floor_type[i]]->
-	    free_look(b->floor[i]);
-	_ogg_free(b->floor);
+	    free_look(b->flr[i]);
+	_ogg_free(b->flr);
       }
       if(b->residue){
 	for(i=0;i<ci->residues;i++)

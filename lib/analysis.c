@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.51.2.2 2002/05/14 07:06:40 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.51.2.3 2002/05/18 01:39:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,12 +30,7 @@ int analysis_noisy=1;
 
 /* decides between modes, dispatches to the appropriate mapping. */
 int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
-  vorbis_dsp_state     *vd=vb->vd;
-  backend_lookup_state *b=vd->backend_state;
-  vorbis_info          *vi=vd->vi;
-  codec_setup_info     *ci=vi->codec_setup;
-  int                   type,ret;
-  int                   mode=0;
+  int                   ret;
 
   vb->glue_bits=0;
   vb->time_bits=0;

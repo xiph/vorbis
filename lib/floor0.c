@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.51.4.2 2002/05/14 07:06:40 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.51.4.3 2002/05/18 01:39:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -112,12 +112,13 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
    linear block and mapping sizes */
 
 static void floor0_map_lazy_init(vorbis_block      *vb,
-				 vorbis_info_floor *info,
+				 vorbis_info_floor *infoX,
 				 vorbis_look_floor0 *look){
-  if(!look->linearmap[W]){
+  if(!look->linearmap[vb->W]){
     vorbis_dsp_state   *vd=vb->vd;
     vorbis_info        *vi=vd->vi;
     codec_setup_info   *ci=vi->codec_setup;
+    vorbis_info_floor0 *info=(vorbis_info_floor0 *)infoX;
     int W=vb->W;
     int n=ci->blocksizes[W]/2,j;
 
@@ -147,13 +148,9 @@ static void floor0_map_lazy_init(vorbis_block      *vb,
 static vorbis_look_floor *floor0_look(vorbis_dsp_state *vd,
 				      vorbis_info_floor *i){
   int j;
-  float scale;
-  vorbis_info        *vi=vd->vi;
-  codec_setup_info   *ci=vi->codec_setup;
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
   vorbis_look_floor0 *look=_ogg_calloc(1,sizeof(*look));
   look->m=info->order;
-  look->n=ci->blocksizes[mi->blockflag]/2;
   look->ln=info->barkmap;
   look->vi=info;
 

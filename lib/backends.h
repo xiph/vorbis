@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.12.6.2 2002/05/14 07:06:40 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.12.6.3 2002/05/18 01:39:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -118,7 +118,7 @@ typedef struct vorbis_info_residue0{
 
   /* encode-only heuristic settings */
   float  ampmax[64];       /* book amp threshholds*/
-  int    blimit[64];       /* subgroup position limits *
+  int    blimit[64];       /* subgroup position limits */
 
 } vorbis_info_residue0;
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: key psychoacoustic settings for 44.1/48kHz
- last mod: $Id: psych_44.h,v 1.15.2.2 2002/05/14 07:06:46 xiphmont Exp $
+ last mod: $Id: psych_44.h,v 1.15.2.3 2002/05/18 01:39:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,26 +24,31 @@ static vorbis_info_psy_global _psy_global_44[5]={
    {20.f,14.f,12.f,12.f,12.f,12.f,12.f}, 
    {-60.f,-30.f,-40.f,-40.f,-40.f,-40.f,-40.f}, 2,-75.f,
    -6.f, 0,
+   {99.,99.,99.}
   },
   {8,   /* lines per eighth octave */
    {14.f,10.f,10.f,10.f,10.f,10.f,10.f}, 
    {-40.f,-30.f,-25.f,-25.f,-25.f,-25.f,-25.f}, 2,-80.f,
    -6.f, 0,
+   {99.,99.,99.}
   },
   {8,   /* lines per eighth octave */
    {12.f,10.f,10.f,10.f,10.f,10.f,10.f}, 
    {-20.f,-20.f,-15.f,-15.f,-15.f,-15.f,-15.f}, 0,-80.f,
    -6.f, 0,
+   {99.,99.,99.}
   },
   {8,   /* lines per eighth octave */
    {10.f,8.f,8.f,8.f,8.f,8.f,8.f}, 
    {-20.f,-15.f,-12.f,-12.f,-12.f,-12.f,-12.f}, 0,-80.f,
    -6.f, 0,
+   {99.,99.,99.}
   },
   {8,   /* lines per eighth octave */
    {10.f,6.f,6.f,6.f,6.f,6.f,6.f}, 
    {-15.f,-15.f,-12.f,-12.f,-12.f,-12.f,-12.f}, 0,-85.f,
    -6.f, 0,
+   {99.,99.,99.}
   },
 };
 
@@ -690,13 +695,14 @@ static int _psy_ehmer_bandlimit[11]={
 };
 
 static vorbis_info_psy _psy_info_template={
-    {-1},-110.,-140.,
-    /* tonemask att,guard,suppr,curves  peakattp,curvelimitp,peaksettings*/
-    0.f,            -40.f,-40.f, {{{0.}}},         1,          0,        {{{0.}}},
-    
-    /*noisemaskp,supp, low/high window, low/hi guard, minimum */
-    1,          -0.f,         .5f, .5f,         0,0,0,
-    {{-1},{-1},{-1}},{-1},105.f,{-1,-1,-1,-1}
+  -1,
+  {-1},-110.,-140.,
+  /* tonemask att,guard,suppr,curves  peakattp,curvelimitp,peaksettings*/
+  {0.f,0.f,0.f},  -40.f,-40.f, {{{0.}}},         1,          0,        {{{0.}}},
+  
+  /*noisemaskp,supp, low/high window, low/hi guard, minimum */
+  1,          -0.f,         .5f, .5f,         0,0,0,
+  {{-1},{-1},{-1}},{-1},105.f
 };
 
 /* ath ****************/
@@ -759,7 +765,7 @@ static int _psy_stereo_modes_44[10][PACKETBLOBS]={
   /*0  1  2  3  4  5  6  7  8  9 10 11 12 13 14*/
   {0}, /* 9 */
 
-}
+};
 
 static double _psy_stereo_point_kHz_44[2][11]={
   {4., 6., 6.,  6., 10., 6., 6., 4., 4., 4., 4.},

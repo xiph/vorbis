@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.11.6.2 2002/05/14 07:06:46 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.11.6.3 2002/05/18 01:39:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -50,7 +50,6 @@ static vorbis_info_residue0 _residue_44_low={
   {-1},
   {  .5,  1.5,  2.5,  4.5, 26.5,  1.5,  4.5},
   {  99,   -1,   -1,   -1,   -1,   99,   99}
-  -1,-1
 };
 /* 26 doesn't cascade well; use 28 instead */
 static vorbis_info_residue0 _residue_44_low_un={
@@ -59,7 +58,6 @@ static vorbis_info_residue0 _residue_44_low_un={
   {-1},
   {  .5,  1.5,  2.5,  4.5, 28.5,  1.5,  4.5},
   {  99,   -1,   -1,   -1,   -1,   99,   99}
-  -1,-1
 };
 
 /*     0   1   2   4   1   2   4  16  42   +      
@@ -78,7 +76,6 @@ static vorbis_info_residue0 _residue_44_mid={
   {-1},
   {  .5,  1.5,  1.5,  2.5,  2.5,  4.5,  4.5, 16.5, 42.5},
   {  99,   -1,   99,   -1,   99,   -1,   99,   99,   99}
-  -1,-1
 };
 
 
@@ -98,7 +95,6 @@ static vorbis_info_residue0 _residue_44_high={
   {-1},
   {  .5,  8.5, 42.5,  1.5,  2.5,  4.5,  8.5, 16.5, 56.5},
   {  99,   -1,   -1,   99,   99,   99,   99,   99,   99}
-  -1,-1
 };
 /* 56 doesn't cascade well; use 59 */
 static vorbis_info_residue0 _residue_44_high_un={
@@ -108,7 +104,6 @@ static vorbis_info_residue0 _residue_44_high_un={
   {-1},
   {  .5,  8.5, 42.5,  1.5,  2.5,  4.5,  8.5, 16.5, 59.5},
   {  99,   -1,   -1,   99,   99,   99,   99,   99,   99}
-  -1,-1
 };
 
 #include "books/coupled/_44c0_short.vqh"

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.39.2.2 2002/05/14 07:06:42 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.39.2.3 2002/05/18 01:39:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,7 +24,6 @@
 #include "vorbis/vorbisenc.h"
 
 #include "codec_internal.h"
-#include "registry-api.h"
 
 #include "os.h"
 #include "misc.h"
@@ -45,8 +44,6 @@ typedef struct {
   int     couple_pointamp[2][PACKETBLOBS];
 } mode_easy_setup;
 
-static double stereo_threshholds[]={0.0, 2.5, 4.5, 8.5, 16.5};
-
 typedef struct vp_adjblock{
   int block[P_BANDS][P_LEVELS];
 } vp_adjblock;
@@ -65,8 +62,8 @@ static vorbis_info_mode _mode_template[2]={
    only one submap (this would change for efficient 5.1 support for example)*/
 /* Four psychoacoustic profiles are used, one for each blocktype */
 static vorbis_info_mapping0 _mapping_template[2]={
-  {1, {0,0}, {0}, {-1}, {0,1}, 0,{0},{0},0,0},
-  {1, {0,0}, {1}, {-1}, {2,3}, 0,{0},{0},0,0}
+  {1, {0,0}, {0}, {-1}, 0,{0},{0},0,0},
+  {1, {0,0}, {1}, {-1}, 0,{0},{0},0,0}
 };
 
 static int vorbis_encode_toplevel_setup(vorbis_info *vi,int small,
@@ -183,12 +180,13 @@ static int vorbis_encode_psyset_setup(vorbis_info *vi,int block){
   }
 
   memcpy(p,&_psy_info_template,sizeof(*p));
+  p->blockflag=block>>1;
 
   return 0;
 }
 
 static int vorbis_encode_tonemask_setup(vorbis_info *vi,double q,int block,
-				       double **att,
+				       double att[11][3],
 				       double *max,
 				       int *peaklimit_bands,
 				       vp_adjblock *in){
@@ -392,20 +390,23 @@ static int vorbis_encode_residue_one(vorbis_info *vi,
   vorbis_info_residue0 *r=ci->residue_param[number]=
     _ogg_malloc(sizeof(*r));
   vorbis_info_mapping0 *map=ci->map_param[number]=
-    _ogg_calloc(1,sizeof(*_mapping_set));
+    _ogg_calloc(1,sizeof(*map));
+  vorbis_info_mode *mode=ci->mode_param[number]=
+    _ogg_calloc(1,sizeof(*mode));
   
-  ci->mode_param[number]=_ogg_calloc(1,sizeof(*_mode_set));
-
-  memcpy(ci->mode_param[number],&_mode_set[block],sizeof(*_mode_set));
+  memcpy(ci->mode_param[number],&_mode_template[block],
+	 sizeof(*_mode_template));
   if(number>=ci->modes)ci->modes=number+1;
   ci->mode_param[number]->mapping=number;
+  ci->mode_param[number]->blockflag=block;
 
   ci->map_type[number]=0;
-  memcpy(ci->map_param[number],&_mapping_set[block],sizeof(*_mapping_set));
-  if(number>=ci->mappings)ci->mappings=number+1;
-  ci->map_param[number]->residuesubmap[0]=number;
+  memcpy(ci->map_param[number],&_mapping_template[block],
+	 sizeof(*_mapping_template));
+  if(number>=ci->maps)ci->maps=number+1;
+  ((vorbis_info_mapping0 *)(ci->map_param[number]))->residuesubmap[0]=number;
 
-  memcpy(r,in[iq].res[number],sizeof(*r));
+  memcpy(r,in[iq].res[block],sizeof(*r));
   if(ci->residues<=number)ci->residues=number+1;
 
   if(block){
@@ -470,6 +471,33 @@ static int vorbis_encode_residue_one(vorbis_info *vi,
     }
   }
 
+  /* lowpass setup */
+  {
+    double freq=ci->hi.lowpass_kHz[block]*1000.;
+    vorbis_info_floor1 *f=ci->floor_param[block];
+    double nyq=vi->rate/2.;
+    long blocksize=ci->blocksizes[block]>>1;
+    
+    if(freq>vi->rate/2)freq=vi->rate/2;
+    /* lowpass needs to be set in the floor and the residue. */
+    
+    /* in the floor, the granularity can be very fine; it doesn't alter
+       the encoding structure, only the samples used to fit the floor
+       approximation */
+    f->n=freq/nyq*blocksize; 
+
+    /* in the residue, we're constrained, physically, by partition
+       boundaries.  We still lowpass 'wherever', but we have to round up
+       here to next boundary, or the vorbis spec will round it *down* to
+       previous boundary in encode/decode */
+    if(ci->residue_type[block]==2)
+      r->end=(int)((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
+	r->grouping;
+    else
+      r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
+	r->grouping;
+  }
+  
   return(0);
 }
 
@@ -479,13 +507,10 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
 				       int *point_dB,
 				       double point_kHz){
 
-  int i,iq=q*10;
-  int n,k;
-  int partition_position=0;
-  int res_position=0;
+  int i;
   int alternate_modes=1;
-  codec_setup_info *ci=vi->codec_setup;
-  
+   codec_setup_info *ci=vi->codec_setup;
+ 
   /* more complex than in rc3 due to coupling; we may be using
      multiple modes, each with a different residue setup, as a helper
      to bitrate managemnt, letting us change the stereo model
@@ -500,58 +525,26 @@ static int vorbis_encode_residue_setup(vorbis_info *vi,double q,int block,
 
     vorbis_encode_residue_one(vi,q,block,block*alternate_modes,
 			      coupled_p,in,point_dB[0],point_kHz);
-    count++;
-    for(i=1;i<PACKETBLOBS;i++)
+
+    ci->modeselect[block][0]=block*alternate_modes+count;
+    for(i=1;i<PACKETBLOBS;i++){
       if(point_dB[i-1]!=point_dB[i])
-	vorbis_encode_residue_one(vi,q,block,block*alternate_modes+count++,
+	vorbis_encode_residue_one(vi,q,block,block*alternate_modes+ ++count,
 				  coupled_p,in,point_dB[i],point_kHz);
+      ci->modeselect[block][i]=block*alternate_modes+count;
+    }
+
+
   }else{
     vorbis_encode_residue_one(vi,q,block,block*alternate_modes,
-			      coupled_p,in,point_dB[PACKETBLOBS/2],
+			      coupled_p,in,0,
 			      point_kHz);
+    for(i=0;i<PACKETBLOBS;i++)
+      ci->modeselect[block][i]=block*alternate_modes;
   }
 
   return(0);
 }      
-
-static int vorbis_encode_lowpass_setup(vorbis_info *vi,double q,int block){
-  int iq=q*10;
-  double dq;
-  double freq;
-  codec_setup_info *ci=vi->codec_setup;
-  vorbis_info_floor1 *f=ci->floor_param[block];
-  vorbis_info_residue0 *r=ci->residue_param[block];
-  int blocksize=ci->blocksizes[block]>>1;
-  double nyq=vi->rate/2.;
-
-  if(iq==10){
-    iq=9;
-    dq=1.;
-  }else{
-    dq=q*10.-iq;
-  }
-  
-  freq=ci->hi.lowpass_kHz[block]*1000.;
-  if(freq>vi->rate/2)freq=vi->rate/2;
-  /* lowpass needs to be set in the floor and the residue. */
-
-  /* in the floor, the granularity can be very fine; it doesn't alter
-     the encoding structure, only the samples used to fit the floor
-     approximation */
-  f->n=freq/nyq*blocksize;
-
-  /* in the residue, we're constrained, physically, by partition
-     boundaries.  We still lowpass 'wherever', but we have to round up
-     here to next boundary, or the vorbis spec will round it *down* to
-     previous boundary in encode/decode */
-  if(ci->residue_type[block]==2)
-    r->end=(int)((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
-      r->grouping;
-  else
-    r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
-      r->grouping;
-  return(0);
-}
 
 /* encoders will need to use vorbis_info_init beforehand and call
    vorbis_info clear when all done */
@@ -583,16 +576,20 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   ret|=vorbis_encode_psyset_setup(vi,3);
   
   ret|=vorbis_encode_tonemask_setup(vi,hi->blocktype[0].tone_mask_quality,0,
-				    _psy_tone_masteratt,_psy_tone_0dB,_psy_ehmer_bandlimit,
+				    _psy_tone_masteratt_44,_psy_tone_0dB,
+				    _psy_ehmer_bandlimit,
 				    _vp_tonemask_adj_otherblock);
   ret|=vorbis_encode_tonemask_setup(vi,hi->blocktype[1].tone_mask_quality,1,
-				    _psy_tone_masteratt,_psy_tone_0dB,_psy_ehmer_bandlimit,
+				    _psy_tone_masteratt_44,_psy_tone_0dB,
+				    _psy_ehmer_bandlimit,
 				    _vp_tonemask_adj_otherblock);
   ret|=vorbis_encode_tonemask_setup(vi,hi->blocktype[2].tone_mask_quality,2,
-				    _psy_tone_masteratt,_psy_tone_0dB,_psy_ehmer_bandlimit,
+				    _psy_tone_masteratt_44,_psy_tone_0dB,
+				    _psy_ehmer_bandlimit,
 				    _vp_tonemask_adj_otherblock);
   ret|=vorbis_encode_tonemask_setup(vi,hi->blocktype[3].tone_mask_quality,3,
-				    _psy_tone_masteratt,_psy_tone_0dB,_psy_ehmer_bandlimit,
+				    _psy_tone_masteratt_44,_psy_tone_0dB,
+				    _psy_ehmer_bandlimit,
 				    _vp_tonemask_adj_longblock);
   
   ret|=vorbis_encode_compand_setup(vi,hi->blocktype[0].noise_compand_quality,
@@ -658,38 +655,36 @@ int vorbis_encode_setup_init(vorbis_info *vi){
     /* setup specific to stereo coupling */
     
     ret|=vorbis_encode_residue_setup(vi,hi->base_quality_short,0,
-				    1, /* coupled */
-				    _residue_template_44_stereo,
-				    hi->stereo_point_dB,
-				    hi->stereo_point_kHz[0]);
+				     1, /* coupled */
+				     _residue_template_44_stereo,
+				     _psy_stereo_modes_44[hi->stereo_point_dB_q],
+				     hi->stereo_point_kHz[0]);
       
     ret|=vorbis_encode_residue_setup(vi,hi->base_quality_long,1,
-				    1, /* coupled */
-				    _residue_template_44_stereo,
-				    hi->stereo_point_dB,
-				    hi->stereo_point_kHz[1]);
+				     1, /* coupled */
+				     _residue_template_44_stereo,
+				     _psy_stereo_modes_44[hi->stereo_point_dB_q],
+				     hi->stereo_point_kHz[1]);
 
   }else{
     /* setup specific to non-stereo (mono or uncoupled polyphonic)
        coupling */
     ret|=vorbis_encode_residue_setup(vi,hi->base_quality_short,0,
-				    0, /* uncoupled */
-				    _residue_template_44_uncoupled,
-				    0,
-				    hi->stereo_point_kHz[0]); /* just
+				     0, /* uncoupled */
+				     _residue_template_44_uncoupled,
+				     NULL,
+				     hi->stereo_point_kHz[0]); /* just
 				    used as an encoding partitioning
 				    point */
       
     ret|=vorbis_encode_residue_setup(vi,hi->base_quality_long,1,
 				    0, /* uncoupled */
 				    _residue_template_44_uncoupled,
-				    0,
+				    NULL,
 				    hi->stereo_point_kHz[1]); /* just
 				    used as an encoding partitioning
 				    point */
   }
-  ret|=vorbis_encode_lowpass_setup(vi,hi->lowpass_kHz[0],0);
-  ret|=vorbis_encode_lowpass_setup(vi,hi->lowpass_kHz[1],1);
     
   if(ret)
     vorbis_info_clear(vi);
@@ -809,7 +804,7 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
 
   /* set stereo dB and Hz */
   /*iq=0;dq=0;*/
-  hi->stereo_point_dB=_psy_stereo_point_dB_44[iq];
+  hi->stereo_point_dB_q=iq;
   hi->stereo_point_kHz[0]=_psy_stereo_point_kHz_44[0][iq]*(1.-dq)+
     _psy_stereo_point_kHz_44[0][iq+1]*dq;
   hi->stereo_point_kHz[1]=_psy_stereo_point_kHz_44[1][iq]*(1.-dq)+
@@ -885,8 +880,6 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
     return ret; 
   }
 
-  /* adjust to make management's life easier.  Use the ctl() interface
-     once it's implemented */
   {
     codec_setup_info *ci=vi->codec_setup;
     highlevel_encode_setup *hi=&ci->hi;

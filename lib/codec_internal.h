@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.14.4.2 2002/05/14 07:06:40 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.14.4.3 2002/05/18 01:39:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,6 +27,8 @@
 #define BLOCKTYPE_LONG       1
 
 #define PACKETBLOBS 15
+
+static double stereo_threshholds[]={0.0, 2.5, 4.5, 8.5, 16.5};
 
 typedef struct vorbis_block_internal{
   float  **pcmdelay;  /* this is a pointer into local storage */ 
@@ -63,7 +65,7 @@ typedef struct backend_lookup_state {
   drft_lookup             fft_look[2];
 
   int                     modebits;
-  vorbis_look_floor     **floor;
+  vorbis_look_floor     **flr;
   vorbis_look_residue   **residue;
   vorbis_look_psy        *psy;
   vorbis_look_psy_global *psy_g_look;
@@ -104,7 +106,7 @@ typedef struct highlevel_encode_setup {
   int impulse_block_p;
   int stereo_couple_p;
 
-  int    stereo_point_dB;
+  int    stereo_point_dB_q;
   double stereo_point_kHz[2];
   double lowpass_kHz[2];
 
@@ -153,7 +155,6 @@ typedef struct codec_setup_info {
   static_codebook        *book_param[256];
   codebook               *fullbooks;
 
-  int                    block_to_psy_map[4];
   vorbis_info_psy        *psy_param[4]; /* encode only */
   vorbis_info_psy_global psy_g_param;
 

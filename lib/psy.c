@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.3 2002/05/14 07:06:41 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.4 2002/05/18 01:39:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,9 +30,6 @@
 #include "misc.h"
 
 #define NEGINF -9999.f
-
-/* Why Bark scale for encoding but not masking computation? Because
-   masking has a strong harmonic dependency */
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -272,11 +269,6 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     memcpy(p->tonecurves[16][i]+2,tone_16000[i<4?0:i/2-2],sizeof(***p->tonecurves)*EHMER_MAX);
 
   for(i=0;i<P_BANDS;i+=2)
-    for(j=0;j<P_LEVELS;j+=2)
-      for(k=2;k<EHMER_MAX+2;k++)
-	p->tonecurves[i][j][k]+=vi->tone_masteratt;
-
-  for(i=0;i<P_BANDS;i+=2)
     odd_decade_level_interpolate(p->tonecurves[i]);
 
   /* interpolate curves between */
@@ -325,6 +317,9 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("precurve_16kHz",i,p->tonecurves[16][i]+2,EHMER_MAX,0,0);
 
+  analysis_noisy=0;
+
+
   /* set up the final curves */
   for(i=0;i<P_BANDS;i++)
     setup_curve(p->tonecurves[i],i,vi->toneatt.block[i]);
@@ -364,6 +359,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     _analysis_output("curve_11.5kHz",i,p->tonecurves[15][i]+2,EHMER_MAX,0,0);
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("curve_16kHz",i,p->tonecurves[16][i]+2,EHMER_MAX,0,0);
+  analysis_noisy=0;
 
   if(vi->curvelimitp){
     /* value limit the tonal masking curves; the peakatt not only
@@ -379,6 +375,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
       }
   }
 
+  analysis_noisy=0;
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("licurve_63Hz",i,p->tonecurves[0][i]+2,EHMER_MAX,0,0);
   for(i=0;i<P_LEVELS;i++)
@@ -413,6 +410,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     _analysis_output("licurve_11.5kHz",i,p->tonecurves[15][i]+2,EHMER_MAX,0,0);
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("licurve_16kHz",i,p->tonecurves[16][i]+2,EHMER_MAX,0,0);
+  analysis_noisy=0;
 
   if(vi->peakattp) /* we limit maximum depth only optionally */
     for(i=0;i<P_BANDS;i++)
@@ -420,6 +418,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 	if(p->tonecurves[i][j][EHMER_OFFSET+2]< vi->peakatt.block[i][j])
 	  p->tonecurves[i][j][EHMER_OFFSET+2]=  vi->peakatt.block[i][j];
 
+  analysis_noisy=0;
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("pcurve_63Hz",i,p->tonecurves[0][i]+2,EHMER_MAX,0,0);
   for(i=0;i<P_LEVELS;i++)
@@ -454,6 +453,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     _analysis_output("pcurve_11.5kHz",i,p->tonecurves[15][i]+2,EHMER_MAX,0,0);
   for(i=0;i<P_LEVELS;i++)
     _analysis_output("pcurve_16kHz",i,p->tonecurves[16][i]+2,EHMER_MAX,0,0);
+  analysis_noisy=0;
 
   /* but guarding is mandatory */
   for(i=0;i<P_BANDS;i++)
@@ -518,13 +518,14 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 	p->vi->noiseoff[j][inthalfoc+1]*del;
     
   }
-
-  analysis_noisy=0;
-  //_analysis_output_always("noiseoff0",n,p->noiseoffset[0],n,1,0,0);
-  //_analysis_output_always("noiseoff1",n,p->noiseoffset[1],n,1,0,0);
-  //_analysis_output_always("noiseoff2",n,p->noiseoffset[2],n,1,0,0);
-  analysis_noisy=1;
-
+#if 0
+  {
+    static int ls=0;
+    _analysis_output_always("noiseoff0",ls,p->noiseoffset[0],n,1,0,0);
+    _analysis_output_always("noiseoff1",ls,p->noiseoffset[1],n,1,0,0);
+    _analysis_output_always("noiseoff2",ls++,p->noiseoffset[2],n,1,0,0);
+  }
+#endif
 }
 
 void _vp_psy_clear(vorbis_look_psy *p){
@@ -975,11 +976,12 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 			int offset_select,
 			float *logmask){
   int i,n=p->n;
+  float toneatt=p->vi->tone_masteratt[offset_select];
 
   for(i=0;i<n;i++){
     logmask[i]= noise[i]+p->noiseoffset[offset_select][i];
     if(logmask[i]>p->vi->noisemaxsupp)logmask[i]=p->vi->noisemaxsupp;
-    logmask[i]=max(logmask[i],tone[i]);
+    logmask[i]=max(logmask[i],tone[i]+toneatt);
   }
 }
 
@@ -1052,12 +1054,12 @@ float **_vp_quantize_couple_memo(vorbis_block *vb,
 				 float **mdct){
   
   int i,j,n=p->n;
-  vorbis_info_psy *info=p->vi;
   float **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
   
   for(i=0;i<vi->coupling_steps;i++){
-    float point=info->couple_pass.amppost_point;
-    int limit=info->couple_pass.limit;
+    float point=stereo_threshholds[vi->coupling_pointamp];
+    int limit=vi->coupling_pointlimit;
+
     ret[i]=0;
     if(point>0){
       float *mdctM=mdct[vi->coupling_mag[i]];
@@ -1078,7 +1080,6 @@ void _vp_quantize_couple(vorbis_look_psy *p,
 			 int   *nonzero){
 
   int i,j,n=p->n;
-  vorbis_info_psy *info=p->vi;
 
   /* perform any requested channel coupling */
   /* point stereo can only be used in a first stage (in this encoder)
@@ -1104,8 +1105,8 @@ void _vp_quantize_couple(vorbis_look_psy *p,
       int *floorA=ifloor[vi->coupling_ang[i]];
       float *outM=res[vi->coupling_mag[i]]+n;
       float *outA=res[vi->coupling_ang[i]]+n;
-      int limit=info->couple_pass.limit;
-      float point=info->couple_pass.amppost_point;
+      int limit=vi->coupling_pointlimit;
+      float point=stereo_threshholds[vi->coupling_pointamp];
  
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
