@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.27 2000/08/31 08:01:34 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.28 2000/09/07 13:23:44 msmith Exp $
 
  ********************************************************************/
 
@@ -623,6 +623,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
       acc-=prev*prev;
       prev=this;
     }
+	if(acc<0)acc=0; /* in case it happens on the final iteration */
     smooth[n-1]=sqrt(acc);
   }
 
