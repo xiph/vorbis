@@ -14,7 +14,7 @@
  function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 25 1999
+ last modification date: Jul 28 1999
 
  ********************************************************************/
 
@@ -29,6 +29,10 @@ typedef struct vorbis_info{
   char **user_comments;
   char *vendor;
 
+  int smallblock;
+  int largeblock;
+  int envelopesa;
+  int envelopech;
 } vorbis_info;
  
 typedef struct {
@@ -107,8 +111,8 @@ typedef struct vorbis_dsp_state{
   int      pcm_storage;
   int      pcm_channels;
   int      pcm_current;
+  int      pcm_returned;
 
-  double **deltas;
   int    **multipliers;
   int      envelope_storage;
   int      envelope_channels;
@@ -198,7 +202,8 @@ extern int      vorbis_analysis_reset(vorbis_dsp_state *vd);
 extern void     vorbis_analysis_free(vorbis_dsp_state *vd);
 extern double **vorbis_analysis_buffer(vorbis_dsp_state *vd,int vals);
 extern int      vorbis_analysis_wrote(vorbis_dsp_state *vd,int vals);
-extern int      vorbis_analysis_block(vorbis_dsp_state *vd,vorbis_block *vb);
+extern int      vorbis_analysis_blockout(vorbis_dsp_state *vd,
+					 vorbis_block *vb);
 extern int      vorbis_analysis_packetout(vorbis_dsp_state *vd,
 					  vorbis_block *vb,
 					  ogg_packet *op);
@@ -206,12 +211,13 @@ extern int      vorbis_analysis_packetout(vorbis_dsp_state *vd,
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
 
 extern void vorbis_synthesis_free(vorbis_dsp_state *vd);
-extern int  vorbis_synthesis_init(vorbis_dsp_state *vd);
-extern int  vorbis_synthesis_info(vorbis_dsp_state *vd,vorbis_info *vi);
-extern int  vorbis_synthesis_packetin(vorbis_dsp_state *vd,vorbis_block *vb,
-				      ogg_packet *op);
-extern int  vorbis_synthesis_pcmout(vorbis_dsp_state *vd,vorbis_block *vb,
-				      double **pcm);
+extern int  vorbis_synthesis_init(vorbis_dsp_state *vd,vorbis_info *vi);
+
+extern int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
+extern int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
+extern int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes);
+
+
 
 #endif
 

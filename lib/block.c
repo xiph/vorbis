@@ -14,7 +14,7 @@
  function: PCM data vector blocking, windowing and dis/reassembly
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jul 27 1999
+ last modification date: Jul 28 1999
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes (512 and 2048
@@ -31,6 +31,7 @@
 #include "codec.h"
 #include "window.h"
 #include "envelope.h"
+#include "mdct.h"
 
 /* pcm accumulator and multipliers 
    examples (not exhaustive):
@@ -74,12 +75,11 @@
                                  mult[n]
 */
 
-/* arbitrary settings and spec-mandated numbers get filled in here */
-int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
+static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   memset(v,0,sizeof(vorbis_dsp_state));
-  v->samples_per_envelope_step=64;
-  v->block_size[0]=512; 
-  v->block_size[1]=2048;
+  v->samples_per_envelope_step=vi->envelopesa;
+  v->block_size[0]=vi->smallblock;
+  v->block_size[1]=vi->largeblock;
   
   v->window[0][0][0]=_vorbis_window(v->block_size[0],
 				   v->block_size[0]/2,v->block_size[0]/2);
@@ -112,16 +112,16 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   }
 
   /* Initialize the envelope multiplier storage */
-  
-  v->envelope_storage=v->pcm_storage/v->samples_per_envelope_step;
-  v->envelope_channels=vi->channels;
-  v->deltas=calloc(v->envelope_channels,sizeof(double *));
-  v->multipliers=calloc(v->envelope_channels,sizeof(int *));
-  {
-    int i;
-    for(i=0;i<v->envelope_channels;i++){
-      v->deltas[i]=calloc(v->envelope_storage,sizeof(double));
-      v->multipliers[i]=calloc(v->envelope_storage,sizeof(int));
+
+  if(vi->envelopech){
+    v->envelope_storage=v->pcm_storage/v->samples_per_envelope_step;
+    v->envelope_channels=vi->envelopech;
+    v->multipliers=calloc(v->envelope_channels,sizeof(int *));
+    {
+      int i;
+      for(i=0;i<v->envelope_channels;i++){
+	v->multipliers[i]=calloc(v->envelope_storage,sizeof(int));
+      }
     }
   }
 
@@ -138,6 +138,18 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   return(0);
 }
 
+/* arbitrary settings and spec-mandated numbers get filled in here */
+int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
+  vi->smallblock=512;
+  vi->largeblock=2048;
+  vi->envelopesa=64;
+  vi->envelopech=vi->channels;
+
+  _vds_shared_init(v,vi);
+
+  return(0);
+}
+
 void vorbis_analysis_clear(vorbis_dsp_state *v){
   int i,j,k;
   if(v){
@@ -151,11 +163,6 @@ void vorbis_analysis_clear(vorbis_dsp_state *v){
 	if(v->pcm[i])free(v->pcm[i]);
       free(v->pcm);
       free(v->pcmret);
-    }
-    if(v->deltas){
-      for(i=0;i<v->envelope_channels;i++)
-	if(v->deltas[i])free(v->deltas[i]);
-      free(v->deltas);
     }
     if(v->multipliers){
       for(i=0;i<v->envelope_channels;i++)
@@ -178,10 +185,10 @@ double **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
    
     for(i=0;i<v->pcm_channels;i++){
       v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(double));
-      v->deltas[i]=realloc(v->deltas[i],v->envelope_storage*sizeof(double));
+    }
+    for(i=0;i<v->envelope_channels;i++){
       v->multipliers[i]=realloc(v->multipliers[i],
 				v->envelope_storage*sizeof(double));
-
     }
   }
 
@@ -250,7 +257,7 @@ int vorbis_block_clear(vorbis_block *vb){
 
 /* do the deltas, envelope shaping, pre-echo and determine the size of
    the next block on which to continue analysis */
-int vorbis_analysis_block(vorbis_dsp_state *v,vorbis_block *vb){
+int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   int i,j;
   long beginW=v->centerW-v->block_size[v->W]/2,centerNext;
   long beginM=beginW/v->samples_per_envelope_step;
@@ -262,8 +269,7 @@ int vorbis_analysis_block(vorbis_dsp_state *v,vorbis_block *vb){
      data, fill them up in before proceeding. */
 
   if(v->pcm_current/v->samples_per_envelope_step>v->envelope_current){
-    _va_envelope_deltas(v);
-    _va_envelope_multipliers(v);
+    _ve_envelope_multipliers(v);
   }
 
   /* By our invariant, we have lW, W and centerW set.  Search for
@@ -373,8 +379,6 @@ int vorbis_analysis_block(vorbis_dsp_state *v,vorbis_block *vb){
 	      (v->pcm_current-movementW)*sizeof(double));
     
     for(i=0;i<v->envelope_channels;i++){
-      memmove(v->deltas[i],v->deltas[i]+movementM,
-	      (v->envelope_current-movementM)*sizeof(double));
       memmove(v->multipliers[i],v->multipliers[i]+movementM,
 	      (v->envelope_current-movementM)*sizeof(int));
     }
@@ -397,45 +401,159 @@ int vorbis_analysis_block(vorbis_dsp_state *v,vorbis_block *vb){
   return(1);
 }
 
-
-
-
-
-
-
-
-
-
-int vorbis_analysis_packetout(vorbis_dsp_state *v, vorbis_block *vb,
-			      ogg_packet *op){
-
-  /* find block's envelope vector and apply it */
-
-
-  /* the real analysis begins; forward MDCT with window */
-
-  
-  /* Noise floor, resolution floor */
-
-  /* encode the floor into LSP; get the actual floor back for quant */
-
-  /* use noise floor, res floor for culling, actual floor for quant */
-
-  /* encode residue */
-
+int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
+  _vds_shared_init(v,vi);
+  /* Adjust centerW to allow an easier mechanism for determining output */
+  v->pcm_returned=v->centerW;
+  v->centerW-= v->block_size[v->W]/4+v->block_size[v->lW]/4;
+  return(0);
 }
 
+/* Unike in analysis, the window is only partially applied, and
+   envelope *not* applied. */
 
+int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
+
+  /* Shift out any PCM that we returned previously */
+
+  if(v->pcm_returned  && v->centerW>v->block_size[1]/2){
+
+    /* don't shift too much; we need to have a minimum PCM buffer of
+       1/2 long block */
+
+    int shift=v->centerW-v->block_size[1]/2;
+    shift=(v->pcm_returned<shift?v->pcm_returned:shift);
+
+    v->pcm_current-=shift;
+    v->centerW-=shift;
+    v->pcm_returned-=shift;
+    
+    if(shift){
+      int i;
+      for(i=0;i<v->pcm_channels;i++)
+	memmove(v->pcm[i],v->pcm[i]+shift,
+		v->pcm_current*sizeof(double));
+    }
+  }
+
+  {
+    int envperlong=v->block_size[1]/v->samples_per_envelope_step;
+    int envperW=v->block_size[v->W]/v->samples_per_envelope_step;
+    int sizeW=v->block_size[vb->W];
+    int centerW=v->centerW+v->block_size[vb->lW]/4+sizeW/4;
+    int beginW=centerW-sizeW/2;
+    int endW=beginW+sizeW;
+    int beginSl;
+    int endSl;
+    int i,j,k;
+    double *window;
+
+    /* Do we have enough PCM storage for the block? */
+    if(endW>v->pcm_storage){
+      /* expand the PCM storage */
+
+      v->pcm_storage=endW+v->block_size[1];
+   
+      for(i=0;i<v->pcm_channels;i++)
+	v->pcm[i]=realloc(v->pcm[i],v->pcm_storage*sizeof(double)); 
+    }
+
+    /* multiplier storage works differently in decode than it does in
+       encode; we only need to buffer the last 'half largeblock' and
+       we don't need to keep it aligned with the PCM. */
+
+    /* fill in the first half of the block's multipliers */
+    i=v->envelope_current-1;
+    j=envperW/2-1;
+    for(;j>=0;j--)
+      for(k=0;k<v->envelope_channels;k++)
+	vb->mult[k][j]=v->multipliers[k][i];
+      
+    /* shift out unneeded buffered multipliers */
+    {
+      int needed=(envperlong-envperW)/2;
+      if(needed){
+	/* We need to keep some of the buffered ones */
+	for(k=0;k<v->envelope_channels;k++)
+	  memmove(v->multipliers[k],
+		  v->multipliers[k]+v->envelope_current-needed,
+		  needed*sizeof(int));
+      }
+      v->envelope_current=needed;
+    }
+
+    /* add block's second half to the multiplier buffer */
+    /* init makes certain we have enough storage; we only buffer a
+       half longblock */
+    
+    for(i=envperW/2;i<envperW;i++){
+      j=v->envelope_current;
+      for(k=0;k<v->envelope_channels;k++)
+	v->multipliers[k][j++]=vb->mult[k][i];
+    }
+    v->envelope_current+=envperW/2;
+
+    /* manufacture/apply multiplier vector */
+
+    _ve_envelope_apply(vb);
+    
+    /* Overlap/add */
+    switch(vb->W){
+    case 0:
+      beginSl=0;
+      endSl=v->block_size[0]/2;
+      break;
+    case 1:
+      beginSl=v->block_size[1]/4-v->block_size[vb->lW]/4;
+      endSl=beginSl+v->block_size[vb->lW]/2;
+      break;
+    }
+
+    window=v->window[vb->W][0][vb->lW]+v->block_size[vb->W]/2;
+
+    for(j=0;j<v->pcm_channels;j++){
+      double *pcm=v->pcm[j]+beginW;
+
+      /* the add section */
+      for(i=beginSl;i<endSl;i++)
+	pcm[i]=pcm[i]*window[i]+vb->pcm[j][i];
+      /* the remaining section */
+      for(;i<sizeW;i++)
+	pcm[i]=vb->pcm[j][i];
+    }
+
+    /* Update, cleanup */
+
+    v->centerW=centerW;
+    v->pcm_current=endW;
+
+    if(vb->eofflag)v->eofflag=1;
+  }
+  return(0);
+}
+
+int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm){
+  if(v->pcm_returned<v->centerW){
+    int i;
+    for(i=0;i<v->pcm_channels;i++)
+      v->pcmret[i]=v->pcm[i]+v->pcm_returned;
+    *pcm=v->pcmret;
+    return(v->centerW-v->pcm_returned);
+  }
+  return(0);
+}
+
+int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes){
+  if(bytes && v->pcm_returned+bytes>v->centerW)return(-1);
+  v->pcm_returned+=bytes;
+  return(0);
+}
 
 #ifdef _V_SELFTEST
 #include <stdio.h>
 #include <math.h>
 
-void _va_envelope_deltas(vorbis_dsp_state *v){
-  /* do nothing... */
-}
-
-void _va_envelope_multipliers(vorbis_dsp_state *v){
+void _ve_envelope_multipliers(vorbis_dsp_state *v){
   /* set 'random' deltas... */
   int new_current=v->pcm_current/v->samples_per_envelope_step;
   int i,j;
@@ -451,6 +569,9 @@ void _va_envelope_multipliers(vorbis_dsp_state *v){
   v->envelope_current=i;
 }
 
+void _ve_envelope_apply(vorbis_block *vb){
+
+}
 
 /* basic test of PCM blocking:
 
@@ -460,14 +581,18 @@ void _va_envelope_multipliers(vorbis_dsp_state *v){
 
 int main(){
   int blocksize=1024;
-  int fini=5000*1024;
+  int fini=100*1024;
   vorbis_dsp_state encode,decode;
   vorbis_info vi;
   vorbis_block vb;
   long counterin=0;
+  long countermid=0;
   long counterout=0;
   int done=0;
   char *temp[]={ "Test" ,"the Test band", "test records",NULL };
+  int frame=0;
+
+  MDCT_lookup *ml[2];
 
   vi.channels=2;
   vi.rate=44100;
@@ -478,9 +603,13 @@ int main(){
   vi.vendor="Xiphophorus";
 
   vorbis_analysis_init(&encode,&vi);
+  vorbis_synthesis_init(&decode,&vi);
 
   memset(&vb,0,sizeof(vorbis_block));
   vorbis_block_init(&encode,&vb);
+
+  ml[0]=MDCT_init(encode.block_size[0]);
+  ml[1]=MDCT_init(encode.block_size[1]);
 
   /* Submit 100K samples of data reading out blocks... */
   
@@ -488,7 +617,7 @@ int main(){
     int i;
     double **buf=vorbis_analysis_buffer(&encode,blocksize);
     for(i=0;i<blocksize;i++){
-      buf[0][i]=1;
+      buf[0][i]=sin((counterin+i)%500/500.*M_PI*2)+2;
       buf[1][i]=-1;
 
       if((counterin+i)%15000>13000)buf[0][i]+=10;
@@ -498,20 +627,73 @@ int main(){
     vorbis_analysis_wrote(&encode,i);
     counterin+=i;
 
-    while(vorbis_analysis_block(&encode,&vb)){
+    while(vorbis_analysis_blockout(&encode,&vb)){
+      double **pcm;
+      int avail;
+
+      /* temp fixup */
+
       double *window=encode.window[vb.W][vb.lW][vb.nW];
-      FILE *out;
-      char path[80];
-      int begin=counterout-encode.block_size[vb.W]/2;
+
+      for(i=0;i<vb.pcm_channels;i++)
+	MDCT(vb.pcm[i],vb.pcm[i],ml[vb.W],window);
+
+      for(i=0;i<vb.pcm_channels;i++)
+	iMDCT(vb.pcm[i],vb.pcm[i],ml[vb.W],window);
+
+
+      {
+	FILE *out;
+	char path[80];
+	int i;
+
+	int avail=encode.block_size[vb.W];
+	int beginW=countermid-avail/2;
+	
+	sprintf(path,"ana%d",vb.frameno);
+	out=fopen(path,"w");
+
+	for(i=0;i<avail;i++)
+	  fprintf(out,"%ld %g\n",i+beginW,vb.pcm[0][i]);
+	fprintf(out,"\n");
+	for(i=0;i<avail;i++)
+	  fprintf(out,"%ld %g\n",i+beginW,window[i]);
+
+	fclose(out);
+	countermid+=encode.block_size[vb.W]/4+encode.block_size[vb.nW]/4;
+      }
+
+
+      vorbis_synthesis_blockin(&decode,&vb);
+      
+
+      while((avail=vorbis_synthesis_pcmout(&decode,&pcm))){
+	FILE *out;
+	char path[80];
+	int i;
+	
+	sprintf(path,"syn%d",frame);
+	out=fopen(path,"w");
+
+	for(i=0;i<avail;i++)
+	  fprintf(out,"%ld %g\n",i+counterout,pcm[0][i]);
+	fprintf(out,"\n");
+	for(i=0;i<avail;i++)
+	  fprintf(out,"%ld %g\n",i+counterout,pcm[1][i]);
+
+	fclose(out);
+
+	vorbis_synthesis_read(&decode,avail);
+
+	counterout+=avail;
+	frame++;
+      }
+      
 
       if(vb.eofflag){
 	done=1;
 	break;
       }
-
-      counterout=counterout+encode.block_size[vb.W]/4+
-	encode.block_size[vb.nW]/4;
-
     }
   }
   return 0;

@@ -16,7 +16,7 @@
 
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Jun 04 1999
+ last modification date: Jul 29 1999
 
  Algorithm adapted from _The use of multirate filter banks for coding
  of high quality digital audio_, by T. Sporer, K. Brandenburg and
@@ -35,6 +35,9 @@
  disagree.
 
  ********************************************************************/
+
+/* Undef the following if you want a normal MDCT */
+#define VORBIS_SPECIFIC_MODIFICATIONS
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -319,6 +322,14 @@ void iMDCT(double *in, double *out, MDCT_lookup *init, double *window){
     double scale=n/4.;
     
     for(i=0;i<n4;i++){
+#ifdef VORBIS_SPECIFIC_MODIFICATIONS
+      double temp1= (*x * *BO - *(x+2) * *BE)/ scale;
+      double temp2= (*x * *BE + *(x+2) * *BO)/ -scale;
+    
+      out[o1]=-temp1*window[o1];
+      out[o2]=temp1*window[o2];
+      out[o3]=out[o4]=temp2;
+#else
       double temp1= (*x * *BO - *(x+2) * *BE)* scale;
       double temp2= (*x * *BE + *(x+2) * *BO)* -scale;
     
@@ -326,6 +337,7 @@ void iMDCT(double *in, double *out, MDCT_lookup *init, double *window){
       out[o2]=temp1*window[o2];
       out[o3]=temp2*window[o3];
       out[o4]=temp2*window[o4];
+#endif
 
       o1++;
       o2--;

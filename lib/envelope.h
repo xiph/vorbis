@@ -21,8 +21,8 @@
 #ifndef _V_ENVELOPE_
 #define _V_ENVELOPE_
 
-extern void _va_envelope_deltas(vorbis_dsp_state *v);
-extern void _va_envelope_multipliers(vorbis_dsp_state *v);
+extern void _ve_envelope_multipliers(vorbis_dsp_state *v);
+extern void _ve_envelope_apply(vorbis_block *vb);
 
 #endif
 
