@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.10.2.1 2000/10/19 10:21:02 xiphmont Exp $
+ last mod: $Id: os.h,v 1.10.2.2 2000/10/19 21:56:41 jack Exp $
 
  ********************************************************************/
 
@@ -102,7 +102,7 @@ static int vorbis_ftoi(double f){
 }
 
 
-typedef vorbis_fpu_control int;
+typedef int vorbis_fpu_control;
 
 static inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
 }
