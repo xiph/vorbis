@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.30 2001/06/15 21:15:39 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.31 2001/06/15 23:31:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -270,6 +270,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
 
   float **pcmbundle=alloca(sizeof(float *)*vi->channels);
+  int    *zerobundle=alloca(sizeof(int)*vi->channels);
 
   int    *nonzero=alloca(sizeof(int)*vi->channels);
 
@@ -369,31 +370,36 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     for(j=n/2-1;j>=0;j--){
       float A=rint(pcmM[j]);
       float B=rint(pcmA[j]);
+      float mag;
+      float ang;
       
       if(fabs(A)>fabs(B)){
-	pcmM[j]=A;
+	mag=A;
 	if(A>0)
-	  pcmA[j]=A-B;
+	  ang=A-B;
 	else
-	  pcmA[j]=B-A;
+	  ang=B-A;
       }else{
-	pcmM[j]=B;
+	mag=B;
 	if(B>0)
-	  pcmA[j]=A-B;
+	  ang=A-B;
 	else
-	  pcmA[j]=B-A;
+	  ang=B-A;
       }
 
       /*if(fabs(mag)<3.5f)
 	ang=rint(ang/(mag*2.f))*mag*2.f;*/
       
-      /*if(fabs(mag)<1.5)
-	ang=0;*/
+      if(fabs(mag)<1.5)
+	ang=0;
+      
+      if(j>(n*3/16))
+	ang=0;
+      
+      if(ang>=fabs(mag*2))ang=-fabs(mag*2);
 
-      /*if(i>(n*3/16))
-	ang=0;*/
-            
-      /*if(ang>=fabs(mag*2))ang=-fabs(mag*2);*/
+      pcmM[j]=mag;
+      pcmA[j]=ang;
     }
   }
 
@@ -404,13 +410,17 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   for(i=0;i<info->submaps;i++){
     int ch_in_bundle=0;
     for(j=0;j<vi->channels;j++){
-      if(info->chmuxlist[j]==i && nonzero[j])
+      if(info->chmuxlist[j]==i){
+	if(nonzero[j])
+	  zerobundle[ch_in_bundle]=1;
+	else
+	  zerobundle[ch_in_bundle]=0;
 	pcmbundle[ch_in_bundle++]=vb->pcm[j];
-   
+      }
     }
     
     look->residue_func[i]->forward(vb,look->residue_look[i],
-				   pcmbundle,ch_in_bundle);
+				   pcmbundle,zerobundle,ch_in_bundle);
   }
   
   look->lastframe=vb->sequence;
@@ -430,6 +440,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 
   float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
   float **pcmbundle=alloca(sizeof(float *)*vi->channels);
+  int    *zerobundle=alloca(sizeof(int)*vi->channels);
   void **nonzero=alloca(sizeof(void *)*vi->channels);
   
   /* time domain information decode (note that applying the
@@ -450,11 +461,17 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   for(i=0;i<info->submaps;i++){
     int ch_in_bundle=0;
     for(j=0;j<vi->channels;j++){
-      if(info->chmuxlist[j]==i && nonzero[j])
+      if(info->chmuxlist[j]==i){
+	if(nonzero[j])
+	  zerobundle[ch_in_bundle]=1;
+	else
+	  zerobundle[ch_in_bundle]=0;
 	pcmbundle[ch_in_bundle++]=vb->pcm[j];
+      }
     }
-
-    look->residue_func[i]->inverse(vb,look->residue_look[i],pcmbundle,ch_in_bundle);
+    
+    look->residue_func[i]->inverse(vb,look->residue_look[i],
+				   pcmbundle,zerobundle,ch_in_bundle);
   }
 
   /* channel coupling */

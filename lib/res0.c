@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.31 2001/06/15 21:15:40 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.32 2001/06/15 23:31:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -532,43 +532,79 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
 /* residue 0 and 1 are just slight variants of one another. 0 is
    interleaved, 1 is not */
 int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
-	    float **in,int ch){
-  return(_01forward(vb,vl,in,ch,_interleaved_testhack,_interleaved_encodepart));
+	    float **in,int *nonzero,int ch){
+  /* we encode only the nonzero parts of a bundle */
+  int i,used=0;
+  for(i=0;i<ch;i++)
+    if(nonzero[i])
+      in[used++]=in[i];
+  if(used)
+    return(_01forward(vb,vl,in,used,_interleaved_testhack,_interleaved_encodepart));
+  else
+    return(0);
 }
 
-int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
-  return(_01inverse(vb,vl,in,ch,vorbis_book_decodevs_add));
+int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+		 float **in,int *nonzero,int ch){
+  int i,used=0;
+  for(i=0;i<ch;i++)
+    if(nonzero[i])
+      in[used++]=in[i];
+  if(used)
+    return(_01inverse(vb,vl,in,used,vorbis_book_decodevs_add));
+  else
+    return(0);
 }
 
 int res1_forward(vorbis_block *vb,vorbis_look_residue *vl,
-		 float **in,int ch){
-  return(_01forward(vb,vl,in,ch,_testhack,_encodepart));
+		 float **in,int *nonzero,int ch){
+  int i,used=0;
+  for(i=0;i<ch;i++)
+    if(nonzero[i])
+      in[used++]=in[i];
+  if(used)
+    return(_01forward(vb,vl,in,used,_testhack,_encodepart));
+  else
+    return(0);
 }
 
-int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
-  return(_01inverse(vb,vl,in,ch,vorbis_book_decodev_add));
+int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+		 float **in,int *nonzero,int ch){
+  int i,used=0;
+  for(i=0;i<ch;i++)
+    if(nonzero[i])
+      in[used++]=in[i];
+  if(used)
+    return(_01inverse(vb,vl,in,used,vorbis_book_decodev_add));
+  else
+    return(0);
 }
 
 /* res2 is slightly more different; all the channels are interleaved
    into a single vector and encoded. */
 int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
-	    float **in,int ch){
-  long i,j,k,n=vb->pcmend/2;
+	    float **in,int *nonzero,int ch){
+  long i,j,k,n=vb->pcmend/2,used=0;
 
   /* don't duplicate the code; use a working vector hack for now and
      reshape ourselves into a single channel res1 */
   float *work=_vorbis_block_alloc(vb,ch*n*sizeof(float));
   for(i=0;i<ch;i++){
     float *pcm=vb->pcm[i];
+    if(nonzero[i])used++;
     for(j=0,k=i;j<n;j++,k+=ch)
       work[k]=pcm[j];
   }
-
-  return(_01forward(vb,vl,&work,1,_testhack,_encodepart));
+  
+  if(used)
+    return(_01forward(vb,vl,&work,1,_testhack,_encodepart));
+  else
+    return(0);
 }
 
 /* duplicate code here as speed is somewhat more important */
-int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
+int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
+		 float **in,int *nonzero,int ch){
   long i,k,l,s;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
@@ -581,7 +617,11 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,float **in,int ch){
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   int **partword=_vorbis_block_alloc(vb,partwords*sizeof(int *));
+  int used;
   partvals=partwords*partitions_per_word;
+
+  for(i=0;i<ch;i++)if(nonzero[i])break;
+  if(i==ch)return(0); /* no nonzero vectors */
 
   for(s=0;s<look->stages;s++){
     for(i=info->begin,l=0;i<info->end;l++){

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.42 2001/06/15 21:15:39 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.43 2001/06/15 23:31:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -399,6 +399,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
 #endif
 
   memset(codedflr,0,sizeof(float)*look->n);
+  memset(residue,0,sizeof(float)*look->n);
   return(val);
 }
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.8 2001/06/15 22:07:06 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.9 2001/06/15 23:31:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1016,6 +1016,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
   }else{
     oggpack_write(&vb->opb,0,1);
     memset(codedflr,0,n*sizeof(float));
+    memset(residue,0,n*sizeof(float));
   }
   seq++;
   return(nonzero);
