@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17.2.4 2001/12/06 08:56:16 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.17.2.5 2001/12/06 09:58:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -400,21 +400,15 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
   r=ci->residue_param[block]=malloc(sizeof(*r));
   memcpy(r,in[iq].res,sizeof(*r));
 
-  n=r->end=ci->blocksizes[block?1:0]>>1; /* to be adjusted by lowpass later */
-
   if(block){
     r->grouping=32;
   }else{
     r->grouping=16;
   }
 
-  res_position=rint((double)c[iq]*1000/vi->rate*n);
-  partition_position=res_position/r->grouping;
-  for(i=0;i<r->partitions;i++)
-    if(r->blimit[i]<0)r->blimit[i]=partition_position;
-
   /* for uncoupled, we use type 1, else type 2 */
   if(coupled_p){
+    int k;
     vorbis_info_mapping0 *map=ci->map_param[block];
 
     map->coupling_steps=1;
@@ -435,6 +429,12 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
     psy->couple_pass[0].couple_pass[1].outofphase_requant_limit=9e10;
     psy->couple_pass[0].couple_pass[1].amppost_point=stereo_threshholds[a[iq]];
     amplitude_select=a[iq];
+
+    for(i=0;i<r->partitions;i++)
+      for(k=0;k<3;k++)
+	if(in[iq].books_base[a[iq]][i][k])
+	  r->secondstages[i]|=(1<<k);
+      
     ci->passlimit[0]=3;
     
     if(stereo_backfill_p && a[iq]){
@@ -520,7 +520,20 @@ static int vorbis_encode_residue_init(vorbis_info *vi,double q,int block,
       }
     }
   }
-      
+
+  switch(ci->residue_type[block]){
+  case 1:
+    n=r->end=ci->blocksizes[block?1:0]>>1; /* to be adjusted by lowpass later */
+    break;
+  case 2:
+    n=r->end=ci->blocksizes[block?1:0]; /* to be adjusted by lowpass later */
+    break;
+  }
+
+  partition_position=rint((double)c[iq]*1000/(vi->rate/2)*n/r->grouping);
+  for(i=0;i<r->partitions;i++)
+    if(r->blimit[i]<0)r->blimit[i]=partition_position;
+  
   return(0);
 }      
 
@@ -547,14 +560,14 @@ static int vorbis_encode_lowpass_init(vorbis_info *vi,double q,int block,...){
     dq=q*10.-iq;
   }
   
-  freq=x[iq]*(1.-dq)+x[iq+1]*dq;
+  freq=(x[iq]*(1.-dq)+x[iq+1]*dq)*1000.;
 
   /* lowpass needs to be set in the floor and the residue. */
 
   /* in the floor, the granularity can be very fine; it doesn't alter
      the encoding structure, only the samples used to fit the floor
      approximation */
-  f->n=freq*1000/nyq*blocksize;
+  f->n=freq/nyq*blocksize;
 
   /* in the residue, we're constrained, physically, by partition
      boundaries.  We still lowpass 'wherever', but we have to round up
