@@ -91,6 +91,10 @@ SOURCE=..\lib\vorbisenc.c
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
+# Begin Source File
+
+SOURCE=..\include\vorbis\vorbisenc.h
+# End Source File
 # End Group
 # End Target
 # End Project

@@ -98,10 +98,6 @@ SOURCE=..\lib\analysis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\barkmel.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\bitrate.c
 # End Source File
 # Begin Source File
@@ -127,6 +123,10 @@ SOURCE=..\lib\floor1.c
 # Begin Source File
 
 SOURCE=..\lib\info.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\lookup.c
 # End Source File
 # Begin Source File
 
@@ -191,7 +191,7 @@ SOURCE=..\lib\backends.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bitbuffer.h
+SOURCE=..\lib\bitrate.h
 # End Source File
 # Begin Source File
 
@@ -211,7 +211,7 @@ SOURCE=..\lib\envelope.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\iir.h
+SOURCE=..\lib\highlevel.h
 # End Source File
 # Begin Source File
 
