@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.27.4.2 2001/05/01 17:08:36 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.27.4.3 2001/05/02 22:14:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -227,13 +227,13 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     int submap=info->chmuxlist[i];
     float ret;
 
-    _analysis_output("pcm",seq,pcm,n,0,0);
+    /*_analysis_output("pcm",seq,pcm,n,0,0);*/
 
     /* window the PCM data */
     for(j=0;j<n;j++)
       additional[j]=pcm[j]*=window[j];
-	    
-    _analysis_output("windowed",seq,pcm,n,0,0);
+    
+    /*_analysis_output("windowed",seq,pcm,n,0,0);*/
 
     /* transform the PCM data */
     /* only MDCT right now.... */
@@ -256,15 +256,15 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
     _analysis_output("fft",seq,additional,n/2,0,1);
     _analysis_output("mdct",seq,additional+n/2,n/2,0,1);
-    _analysis_output("lfft",seq,additional,n/2,0,0);
-    _analysis_output("lmdct",seq,additional+n/2,n/2,0,0);
+    /*_analysis_output("lfft",seq,additional,n/2,0,0);
+      _analysis_output("lmdct",seq,additional+n/2,n/2,0,0);*/
 
     /* perform psychoacoustics; do masking */
     ret=_vp_compute_mask(look->psy_look+submap,additional,additional+n/2,
 			 floor[i],NULL,vbi->ampmax);
     if(ret>newmax)newmax=ret;
 
-    _analysis_output_always("mask",seq,floor[i],n/2,0,0);
+    _analysis_output("mask",seq,floor[i],n/2,0,0);
     
     /* perform floor encoding */
     nonzero[i]=look->floor_func[submap]->

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.44.4.1 2001/04/29 22:21:04 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.44.4.2 2001/05/02 22:14:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -630,8 +630,8 @@ float _vp_compute_mask(vorbis_look_psy *p,
     mdct[i]=todB(mdct[i]);
   }
 
-  _analysis_output("mdct",seq,mdct,n,0,0);
-  _analysis_output("fft",seq,fft,n,0,0);
+  /*_analysis_output("mdct",seq,mdct,n,0,0);
+    _analysis_output("fft",seq,fft,n,0,0);*/
 
   /* noise masking */
   if(p->vi->noisemaskp){
@@ -646,7 +646,7 @@ float _vp_compute_mask(vorbis_look_psy *p,
     for(i=0;i<n;i++)
       if(flr[i]>specmax+p->vi->noisemaxsupp)
 	flr[i]=specmax+p->vi->noisemaxsupp;
-    _analysis_output("noise",seq,flr,n,0,0);
+    /*_analysis_output("noise",seq,flr,n,0,0);*/
   }else{
     for(i=0;i<n;i++)flr[i]=NEGINF;
   }
@@ -663,7 +663,7 @@ float _vp_compute_mask(vorbis_look_psy *p,
     }
   }
 
-  _analysis_output("ath",seq,flr,n,0,0);
+  /*_analysis_output("ath",seq,flr,n,0,0);*/
 
   /* tone/peak masking */
 
@@ -671,10 +671,10 @@ float _vp_compute_mask(vorbis_look_psy *p,
 
   seed_loop(p,p->tonecurves,p->peakatt,fft,flr,minseed,maxseed,specmax);
   bound_loop(p,mdct,maxseed,flr,p->vi->bound_att_dB);
-  _analysis_output("minseed",seq,minseed,p->total_octave_lines,0,0);
-  _analysis_output("maxseed",seq,maxseed,p->total_octave_lines,0,0);
+  /*_analysis_output("minseed",seq,minseed,p->total_octave_lines,0,0);
+    _analysis_output("maxseed",seq,maxseed,p->total_octave_lines,0,0);*/
   max_seeds(p,minseed,maxseed,flr);
-  _analysis_output("final",seq,flr,n,0,0);
+  /*_analysis_output("final",seq,flr,n,0,0);*/
 
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.1.2.3 2001/05/01 17:08:36 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.1.2.4 2001/05/02 22:14:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -34,12 +34,12 @@
 
 
 typedef struct {
-  int sorted_index[VIF_POSIT+2];  /* en/de */
-  int forward_index[VIF_POSIT+2]; /* en/de */
-  int reverse_index[VIF_POSIT+2]; /* en */
+  int sorted_index[VIF_POSIT+2];
+  int forward_index[VIF_POSIT+2];
+  int reverse_index[VIF_POSIT+2];
   
-  int hineighbor[VIF_POSIT]; /* de */
-  int loneighbor[VIF_POSIT]; /* de */
+  int hineighbor[VIF_POSIT];
+  int loneighbor[VIF_POSIT];
   int posts;
 
   int n;
@@ -57,6 +57,8 @@ typedef struct lsfit_acc{
   long y2a;
   long xya;
   long n;
+  long edgey0;
+  long edgey1;
 } lsfit_acc;
 
 /***********************************************/
@@ -461,12 +463,13 @@ static void render_line(int x0,int x1,int y0,int y1,float *d){
 }
 
 /* the floor has already been filtered to only include relevant sections */
-static int accumulate_fit(float *floor,int x0, int x1,lsfit_acc *a){
+static int accumulate_fit(float *floor,int x0, int x1,lsfit_acc *a,int n){
   long i;
 
   memset(a,0,sizeof(lsfit_acc));
   a->x0=x0;
   a->x1=x1;
+  a->edgey0=-999;
 
   for(i=x0;i<x1;i++){
     int quantized=vorbis_floor1_dBquant(floor+i);
@@ -477,25 +480,17 @@ static int accumulate_fit(float *floor,int x0, int x1,lsfit_acc *a){
       a->y2a += quantized*quantized;
       a->xya += i*quantized;
       a->n++;
+      if(i==x0)
+	a->edgey0=quantized;
     }
   }
+  a->edgey1=-999;
+  if(x1<n){
+    int quantized=vorbis_floor1_dBquant(floor+i);
+    if(quantized)
+      a->edgey1=quantized;
+  }
   return(a->n);
-}
-
-static int add_fit_point(float *floor,int x,lsfit_acc *a){
-  long i;
-
-  int quantized=vorbis_floor1_dBquant(floor+x);
-  if(quantized){
-    a->xa  += x;
-    a->ya  += quantized;
-    a->x2a += (x*x);
-    a->y2a += quantized*quantized;
-    a->xya += x*quantized;
-    a->n++;
-    return(1);
-  } 
-  return(0);
 }
 
 /* returns < 0 on too few points to fit, >=0 (meansq error) on success */
@@ -503,6 +498,15 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
   long x=0,y=0,x2=0,y2=0,xy=0,n=0,i;
   long x0=a[0].x0;
   long x1=a[fits-1].x1;
+
+  for(i=0;i<fits;i++){
+    x+=a[i].xa;
+    y+=a[i].ya;
+    x2+=a[i].x2a;
+    y2+=a[i].y2a;
+    xy+=a[i].xya;
+    n+=a[i].n;
+  }
 
   if(*y0>=0){  /* hint used to break degenerate cases */
     x+=   x0;
@@ -522,15 +526,14 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     n++;
   }
 
-  for(i=0;i<fits;i++){
-    x+=a[i].xa;
-    y+=a[i].ya;
-    x2+=a[i].x2a;
-    y2+=a[i].y2a;
-    xy+=a[i].xya;
-    n+=a[i].n;
+
+  switch(n){
+  case 0:
+    return(-3);
+  case 1:
+    if(a[0].edgey0>=0)return(-1);
+    return(-2);
   }
-  if(n<2)return(-1);
   
   {
     /* need 64 bit multiplies, which C doesn't give portably as int */
@@ -547,6 +550,16 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     *y1=rint(a+b*x1);
     return(s);
   }
+}
+
+static void fit_line_point(lsfit_acc *a,int fits,int *y0,int *y1){
+  long y=0;
+  int i;
+
+  for(i=0;i<fits && y==0;i++)
+    y+=a[i].ya;
+  
+  *y0=*y1=y;
 }
 
 static int inspect_error(int x0,int x1,int y0,int y1,float *flr,
@@ -595,10 +608,10 @@ static int inspect_error(int x0,int x1,int y0,int y1,float *flr,
   return(0);
 }
 
-int post_Y(int *A,int *B,int pos){
-  if(A[pos]==-1)
+static int post_Y(int *A,int *B,int pos){
+  if(A[pos]<0)
     return B[pos];
-  if(B[pos]==-1)
+  if(B[pos]<0)
     return A[pos];
   return (A[pos]+B[pos])>>1;
 }
@@ -635,15 +648,11 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
   /* quantize the relevant floor points and collect them into line fit
      structures (one per minimal division) at the same time */
   if(posts==0){
-    nonzero+=accumulate_fit(flr,0,n,fits);
+    nonzero+=accumulate_fit(flr,0,n,fits,n);
   }else{
-    for(i=0;i<posts-2;i++){
+    for(i=0;i<posts-1;i++)
       nonzero+=accumulate_fit(flr,look->sorted_index[i],
-			      look->sorted_index[i+1],fits+i);
-      nonzero+=add_fit_point(flr,look->sorted_index[i+1],fits+i);
-    }
-    nonzero+=accumulate_fit(flr,look->sorted_index[i],
-			    look->sorted_index[i+1],fits+i);
+			      look->sorted_index[i+1],fits+i,n);
   }
   
   if(nonzero){
@@ -689,8 +698,13 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	  if(j==hsortpos){
 	    /* empty segment; important to note that this does not
                break 0/n post case */
-	    fit_valueB[ln]=-1;
-	    fit_valueA[hn]=-1;
+	    fit_valueB[ln]=-999;
+	    if(fit_valueA[ln]<0)
+	      fit_flag[ln]=0;
+	    fit_valueA[hn]=-999;
+	    if(fit_valueB[hn]<0)
+	      fit_flag[hn]=0;
+ 
 	  }else{
 	    /* A note: we want to bound/minimize *local*, not global, error */
 	    int lx=info->postlist[ln];
@@ -708,57 +722,117 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	      int lmse=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
 	      int hmse=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
 	      
-	      /* Handle degeneracy 
-	      if(lmse<0 && hmse<0){
-		ly0=fit_valueA[ln];
-		hy1=fit_valueB[hn];
-		lmse=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-		hmse=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
-		}*/
+	      /* the boundary/sparsity cases are the hard part.  Pay
+                 them detailed attention */
+	      /* cases for a segment:
+		 >=0) normal fit (>=2 unique points)
+		 -1) one point on x0;
+		 one point on x1; <-- disallowed by fit_line
+		 -2) one point in between x0 and x1
+		 -3) no points */
 
-	      if(lmse<0 && hmse<0) continue;
-	      
-	      if(lmse<0){
-		ly0=fit_valueA[ln];
-		ly1=hy0;
-		lmse=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
+	      switch(lmse){ 
+	      case -3:  
+		/* no points in the low segment */
+		break;
+	      case -1:
+		ly0=fits[lsortpos].edgey0;
+		break;
+	      case -2:
+		if(fit_valueA[ln]>=0){
+		  ly0=fit_valueA[ln];
+		  fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
+		}else{
+		  /* nothing preexisting to base lo on. look to hi */
+		  switch(hmse){
+		  case -3:
+		    /* nothing in hi either */
+		    fit_line_point(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
+		    break;
+		  case -2:case -1:
+		    /* one point in hi not on x1 */
+		    if(fit_valueB[hn]>=0){
+		      /* ah, something to base hi on */
+		      hy1=fit_valueB[hn];
+		      fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+		      ly1=hy0;
+		      fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
+		    }else{
+		      /* lo and hi are both in the midst of of
+                         emptiness.  We don't need to split, just
+                         refit */
+		      fit_line(fits+sortpos,hsortpos-lsortpos,&ly0,&hy1);
+		    }
+		    break;
+		  default:
+		    ly1=hy0;
+		    fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
+		    break;
+		  }
+		}
+		break;
+	      default:
 	      }
-	      if(hmse<0){
-		hy1=fit_valueB[hn];
-		hy0=ly1;
-		hmse=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+
+	      switch(hmse){ 
+	      case -3:  
+		/* no points in the hi segment */
+		break;
+	      case -1:
+		hy0=fits[sortpos].edgey0;
+		break;
+	      case -2: /* one point in middle */
+		if(fit_valueB[hn]>=0){
+		  hy1=fit_valueB[hn];
+		  fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+		}else{
+		  /* nothing preexisting to base hi on. look to lo */
+		  if(ly1>=0){
+		    hy0=ly1;
+		    fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+		  }else{
+		    /* nothing relevant in lo */
+		    fit_line_point(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+		  }
+		}
+		break;
+	      default:
 	      }
-	      
+
 	      /* store new edge values */
 	      fit_valueB[ln]=ly0;
-	      if(ln==0)fit_valueA[ln]=ly0;
+	      if(ln==0 && ly0>=0)fit_valueA[ln]=ly0;
 	      fit_valueA[i]=ly1;
 	      fit_valueB[i]=hy0;
 	      fit_valueA[hn]=hy1;
-	      if(hn==1)fit_valueB[hn]=hy1;
-	      
-	      /* store new neighbor values */
-	      for(j=sortpos-1;j>=0;j--)
-		if(hineighbor[j]==hn)
+	      if(hn==1 && hy1>=0)fit_valueB[hn]=hy1;
+
+	      if(ly0<0 && fit_valueA[ln]<0)
+		fit_flag[ln]=0;
+	      if(hy1<0 && fit_valueB[hn]<0)
+		fit_flag[hn]=0;
+
+	      if(ly1>=0 || hy0>=0){
+		/* store new neighbor values */
+		for(j=sortpos-1;j>=0;j--)
+		  if(hineighbor[j]==hn)
 		  hineighbor[j]=i;
-		else
-		  break;
-	      for(j=sortpos+1;j<posts;j++)
-		if(loneighbor[j]==ln)
-		  loneighbor[j]=i;
-		else
-		break;
-	      
-	      /* store flag (set) */
-	      fit_flag[i]=1;
-	      
+		  else
+		    break;
+		for(j=sortpos+1;j<posts;j++)
+		  if(loneighbor[j]==ln)
+		    loneighbor[j]=i;
+		  else
+		    break;
+		
+		/* store flag (set) */
+		fit_flag[i]=1;
+	      }
 	    }
 	  }
 	}
       }
     }
-
-
 
     /* generate quantized floor equivalent to what we'd unpack in decode */
     {
@@ -783,9 +857,6 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 
     }    
      
-
-
-    
     /* quantize values to multiplier spec */
     switch(info->mult){
     case 1: /* 1024 -> 256 */
@@ -811,25 +882,23 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
     }
 
     /* find prediction values for each post and subtract them */
-    /* work backward to avoid a copy; unwind the neighbor arrays */
-    for(i=posts-1;i>1;i--){
+    for(i=2;i<posts;i++){
       int sp=look->reverse_index[i];
-      int ln=loneighbor[sp];
-      int hn=hineighbor[sp];
-      
+      int ln=look->loneighbor[i-2];
+      int hn=look->hineighbor[i-2];
       int x0=info->postlist[ln];
       int x1=info->postlist[hn];
       int y0=fit_valueA[ln];
       int y1=fit_valueA[hn];
-      
+	
       int predicted=render_point(x0,x1,y0,y1,info->postlist[i]);
-
+	
       if(fit_flag[i]){
 	int headroom=(look->quant_q-predicted<predicted?
 		      look->quant_q-predicted:predicted);
-
+	
 	int val=fit_valueA[i]-predicted;
-
+	
 	/* at this point the 'deviation' value is in the range +/- max
 	   range, but the real, unique range can be mapped to only
 	   [0-maxrange).  So we want to wrap the deviation into this
@@ -846,9 +915,9 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 	    val= val+headroom;
 	  else
 	    val<<=1;
-
+	
 	fit_valueB[i]=val;
-
+	
 	/* unroll the neighbor arrays */
 	for(j=sp+1;j<posts;j++)
 	  if(loneighbor[j]==i)
