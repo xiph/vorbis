@@ -1,5 +1,5 @@
 ;
-; $Id: vorbis.def,v 1.14 2003/11/16 17:23:55 oddsock Exp $
+; $Id$
 ; 
 LIBRARY
 EXPORTS
