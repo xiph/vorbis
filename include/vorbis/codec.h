@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.27.2.2.2.1 2000/09/03 06:34:10 jack Exp $
+ last mod: $Id: codec.h,v 1.27.2.2.2.2 2000/09/03 08:34:51 jack Exp $
 
  ********************************************************************/
 
@@ -26,7 +26,7 @@ extern "C"
 
 #define MAX_BARK 27
 
-#include <ogg/os_types.h>
+#include <ogg/ogg.h>
 #include "vorbis/codebook.h"
 
 typedef void vorbis_look_transform;

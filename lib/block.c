@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.38.2.2 2000/09/02 05:19:24 xiphmont Exp $
+ last mod: $Id: block.c,v 1.38.2.2.2.1 2000/09/03 08:34:51 jack Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -26,13 +26,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
 
 #include "window.h"
 #include "envelope.h"
 #include "mdct.h"
 #include "lpc.h"
-#include "bitwise.h"
 #include "registry.h"
 #include "sharedbook.h"
 #include "bookinternal.h"
@@ -98,7 +98,7 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   vb->localalloc=0;
   vb->localstore=NULL;
   if(v->analysisp)
-    _oggpack_writeinit(&vb->opb);
+    oggpack_writeinit(&vb->opb);
 
   return(0);
 }
@@ -152,7 +152,7 @@ void _vorbis_block_ripcord(vorbis_block *vb){
 int vorbis_block_clear(vorbis_block *vb){
   if(vb->vd)
     if(vb->vd->analysisp)
-      _oggpack_writeclear(&vb->opb);
+      oggpack_writeclear(&vb->opb);
   _vorbis_block_ripcord(vb);
   if(vb->localstore)free(vb->localstore);
 

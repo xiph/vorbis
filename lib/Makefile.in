@@ -1,5 +1,5 @@
 # vorbis makefile configured for use with gcc on any platform
-# $Id: Makefile.in,v 1.33.4.1 2000/08/31 08:05:47 xiphmont Exp $
+# $Id: Makefile.in,v 1.33.4.1.2.1 2000/09/03 08:34:51 jack Exp $
 
 ###############################################################################
 #                                                                             #
@@ -24,25 +24,25 @@ LD=@CC@
 LDFLAGS=@LDFLAGS@ $(FLAGS)
 AR=@AR@
 RANLIB=@RANLIB@
-LIBS=@LIBS@ 
+LIBS=@LIBS@
 
 HFILES =	../include/vorbis/codec.h \
-		../include/vorbis/internal.h ../include/vorbis/backends.h \
+		../include/vorbis/backends.h \
 		../include/vorbis/codebook.h \
-		bitwise.h envelope.h lpc.h lsp.h bookinternal.h misc.h\
+		envelope.h lpc.h lsp.h bookinternal.h misc.h\
 		psy.h smallft.h window.h scales.h os.h mdct.h registry.h\
 		masking.h sharedbook.h iir.h
-LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
-		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
+LFILES = 	mdct.o smallft.o block.o envelope.o window.o\
+		lsp.o lpc.o analysis.o synthesis.o psy.o info.o\
 		time0.o floor0.o res0.o mapping0.o registry.o\
 		codebook.o sharedbook.o iir.o
 VF_HFILES = ../include/vorbis/vorbisfile.h ../include/vorbis/codec.h \
-		../include/vorbis/internal.h ../include/vorbis/codebook.h \
+		../include/vorbis/codebook.h \
 		os.h misc.h 
 VF_LFILES = vorbisfile.o
 
 PSY_FILES = mdct.o psy.o lpc.o smallft.o window.o psytune.o floor0.o \
-	bitwise.o lsp.o codebook.o sharedbook.o
+	lsp.o codebook.o sharedbook.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -60,18 +60,12 @@ target:	libvorbis.a vorbisfile.a psytune
 
 selftest:	
 	$(MAKE) clean
-	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
-	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
-		-o test_bitwise $(LIBS)
-	$(CC) $(DEBUG) $(LDFLAGS) -c bitwise.c
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST sharedbook.c\
 		-o test_sharedbook $(LIBS)
 	$(CC) $(DEBUG) $(LDFLAGS) -c sharedbook.c
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c \
-		sharedbook.o bitwise.o -o test_codebook $(LIBS)
+		sharedbook.o -o test_codebook $(LIBS)
 	@echo
-	@./test_framing
-	@./test_bitwise
 	@./test_sharedbook
 	@./test_codebook
 

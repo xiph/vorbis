@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.17.2.3 2000/09/02 09:39:20 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.17.2.3.2.1 2000/09/03 08:34:52 jack Exp $
 
  ********************************************************************/
 
@@ -25,8 +25,8 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
-#include "bitwise.h"
 #include "registry.h"
 #include "bookinternal.h"
 #include "sharedbook.h"
@@ -70,19 +70,19 @@ void res0_free_look(vorbis_look_residue *i){
 void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   int j,acc=0;
-  _oggpack_write(opb,info->begin,24);
-  _oggpack_write(opb,info->end,24);
+  oggpack_write(opb,info->begin,24);
+  oggpack_write(opb,info->end,24);
 
-  _oggpack_write(opb,info->grouping-1,24);  /* residue vectors to group and 
+  oggpack_write(opb,info->grouping-1,24);  /* residue vectors to group and 
 					     code with a partitioned book */
-  _oggpack_write(opb,info->partitions-1,6); /* possible partition choices */
-  _oggpack_write(opb,info->groupbook,8);  /* group huffman book */
+  oggpack_write(opb,info->partitions-1,6); /* possible partition choices */
+  oggpack_write(opb,info->groupbook,8);  /* group huffman book */
   for(j=0;j<info->partitions;j++){
-    _oggpack_write(opb,info->secondstages[j],4); /* zero *is* a valid choice */
+    oggpack_write(opb,info->secondstages[j],4); /* zero *is* a valid choice */
     acc+=info->secondstages[j];
   }
   for(j=0;j<acc;j++)
-    _oggpack_write(opb,info->booklist[j],8);
+    oggpack_write(opb,info->booklist[j],8);
 
 }
 
@@ -91,20 +91,20 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
   vorbis_info_residue0 *info=calloc(1,sizeof(vorbis_info_residue0));
 
-  info->begin=_oggpack_read(opb,24);
-  info->end=_oggpack_read(opb,24);
-  info->grouping=_oggpack_read(opb,24)+1;
-  info->partitions=_oggpack_read(opb,6)+1;
-  info->groupbook=_oggpack_read(opb,8);
+  info->begin=oggpack_read(opb,24);
+  info->end=oggpack_read(opb,24);
+  info->grouping=oggpack_read(opb,24)+1;
+  info->partitions=oggpack_read(opb,6)+1;
+  info->groupbook=oggpack_read(opb,8);
   for(j=0;j<info->partitions;j++){
-    int cascade=info->secondstages[j]=_oggpack_read(opb,4);
+    int cascade=info->secondstages[j]=oggpack_read(opb,4);
     if(cascade>1)goto errout; /* temporary!  when cascading gets
                                  reworked and actually used, we don't
                                  want old code to DTWT */
     acc+=cascade;
   }
   for(j=0;j<acc;j++)
-    info->booklist[j]=_oggpack_read(opb,8);
+    info->booklist[j]=oggpack_read(opb,8);
 
   if(info->groupbook>=vi->books)goto errout;
   for(j=0;j<acc;j++)

@@ -1,7 +1,9 @@
-# $Id: configure.in,v 1.20.2.3 2000/09/02 05:19:24 xiphmont Exp $
+# $Id: configure.in,v 1.20.2.3.2.1 2000/09/03 08:34:51 jack Exp $
 
 AC_INIT(lib/mdct.c)
-#AC_CONFIG_HEADER(config.h)
+
+dnl Do some additional argument setup
+AC_ARG_WITH(ogg, [  --with-ogg=DIR          Set where the Ogg library is located]) 
 
 cp configure.guess config.guess
 cp configure.sub config.sub
@@ -17,12 +19,6 @@ case $host in
 		fi
 		AC_CHECK_LIB(audio, ALwritesamps)
 	;;
-# BeOS does not use -lm
-#	*-*-beos)
-#		LIBS=""
-#	;;
-# added better check below
-
 esac
 
 cflags_save="$CFLAGS"
@@ -35,9 +31,6 @@ AC_PROG_RANLIB
 AC_CHECK_PROG(AR,ar,ar)
 AC_CHECK_PROG(INSTALL,install,install)
 
-#not everyone uses libm (eg, BeOS)
-#AC_CHECK_LIB(m, cos, LIBS="-lm"; AC_DEFINE(HAVE_LIBM), LIBS="")
-# We no longer use config.h
 AC_CHECK_LIB(m, cos, LIBS="-lm", LIBS="")
 
 dnl Set some target options
@@ -124,43 +117,7 @@ AC_HEADER_STDC
 dnl AC_PATH_X
 dnl AC_PATH_XTRA
 
-#AC_CHECK_LIB(pthread, pthread_create, 
-#	pthread_lib="-lpthread"; AC_DEFINE(HAVE_LIBPTHREAD), :)
-# We no longer use config.h
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
-
-#dnl Linuxthreads require you to define _REENTRANT in all threaded
-#dnl code.  Bogus, bogus...
-#
-#if test -n "$pthread_lib"; then
-#	case $host in 
-#	i?86-*-linux*)
-#		AC_DEFINE(_REENTRANT)
-#		;;
-#	esac
-#fi
-# We no longer use config.h
-
-#if test -n "$x_libraries"; then
-#	XOGG="yes"
-#
-#	dnl If we find libgtk installed, great; otherwise assume we have
-#	dnl to build it ourselves.
-#
-#	AC_CHECK_LIB(gtk, gtk_main, :, LIBGTKDIR="libgtk", $X_LIBS -lglib -lgdk -lX11 -lXext -lm)
-#
-#	dnl libpthread is required for xogg.
-#
-#	if test -z "$pthread_lib"; then XOGG=""; fi
-#
-#	dnl If we don't have libgtk installed, and we don't have a libgtk 
-#	dnl  subdirectory to build the library ourself, we can't build xogg.
-#
-#	if test -n "$LIBGTKDIR" -a ! -d "$LIBGTKDIR"; then
-#		XOGG=""
-#		LIBGTKDIR=""
-#	fi
-#fi
 
 dnl This seems to be the only way to make autoconf only *sometimes* configure
 dnl a subdirectory with AC_CONFIG_SUBDIRS.  "__noconf" is assumed to not 
@@ -170,15 +127,8 @@ dnl if clause.
 
 dummy="__noconf"
 
-#if test -d "$LIBGTKDIR"; then
-#	enable_shared="no"; export enable_shared
-#	dummy="libgtk"
-#	AC_CONFIG_SUBDIRS("$dummy")
-#	X_LIBS="-L${srcdir}/libgtk/gtk/.libs -L${srcdir}/libgtk/gdk/.libs -L${srcdir}/libgtk/glib/.libs $X_LIBS"
-#fi
-
-# check macro modified from Jon Shiring's to compensate for autoconf's lagging
-# behind the times on type madness
+dnl check macro modified from Jon Shiring's to compensate for autoconf's lagging
+dnl behind the times on type madness
 
 AC_MSG_CHECKING(for int16_t)
 AC_CACHE_VAL(has_int16_t,
@@ -322,9 +272,6 @@ if test -z "$SIZE64"; then
 	AC_MSG_WARN(No 64 bit type found on this platform!)
 fi
 	
-#AC_CHECK_HEADER(alloca.h,AC_DEFINE(USE_ALLOCA_H),:)
-#AC_CHECK_HEADER(memory.h,AC_DEFINE(USE_MEMORY_H),:)
-# We no longer use config.h
 AC_CHECK_HEADER(alloca.h,CFLAGS="$CFLAGS -DUSE_ALLOCA_H",:)
 AC_CHECK_HEADER(memory.h,CFLAGS="$CFLAGS -DUSE_MEMORY_H",:)
 
@@ -337,6 +284,13 @@ AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_CHECK_FUNCS(gettimeofday select strcspn strerror strspn sigaction)
 
+dnl Check for libogg
+if test -n $with_ogg; then
+	CFLAGS="$CFLAGS -I$with_ogg/include -L$with_ogg/lib"
+fi 
+AC_CHECK_LIB(ogg, oggpack_read, LIBS="$LIBS -logg", AC_MSG_ERROR([You must have libogg to compile vorbis!!!]))
+
+
 AC_SUBST(SIZE16)
 AC_SUBST(SIZE32)
 AC_SUBST(USIZE32)
@@ -347,13 +301,11 @@ AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(CC)
 AC_SUBST(RANLIB)
-#AC_SUBST(XOGG)
-#AC_SUBST(LIBGTKDIR)
 AC_SUBST(pthread_lib)
 
 AC_CONFIG_SUBDIRS(vorbis-tools/libao)
 
-AC_OUTPUT(Makefile lib/Makefile examples/Makefile include/vorbis/os_types.h\
+AC_OUTPUT(Makefile lib/Makefile examples/Makefile\
 	vorbis-tools/Makefile\
 	vq/Makefile huff/Makefile xmms/Makefile kmpg/Makefile)
 

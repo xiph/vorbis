@@ -12,17 +12,17 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.7.4.3 2000/09/02 05:19:25 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.7.4.3.2.1 2000/09/03 08:34:52 jack Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <ogg/ogg.h>
 #include "os.h"
 #include "vorbis/codec.h"
 #include "vorbis/codebook.h"
-#include "bitwise.h"
 #include "scales.h"
 #include "sharedbook.h"
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.21.2.2 2000/08/31 09:00:00 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.21.2.2.2.1 2000/09/03 08:34:52 jack Exp $
 
  Preecho calculation.
 
@@ -22,12 +22,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
 
 #include "os.h"
 #include "scales.h"
 #include "envelope.h"
-#include "bitwise.h"
 #include "misc.h"
 
 /* We use a Chebyshev bandbass for the preecho trigger bandpass; it's

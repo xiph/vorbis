@@ -12,16 +12,16 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.15.2.2 2000/09/02 05:19:25 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.15.2.2.2.1 2000/09/03 08:34:52 jack Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
 #include "vorbis/backends.h"
-#include "bitwise.h"
 #include "bookinternal.h"
 #include "registry.h"
 #include "psy.h"
@@ -147,16 +147,16 @@ static void mapping0_pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer
   int i;
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)vm;
 
-  _oggpack_write(opb,info->submaps-1,4);
+  oggpack_write(opb,info->submaps-1,4);
   /* we don't write the channel submappings if we only have one... */
   if(info->submaps>1){
     for(i=0;i<vi->channels;i++)
-      _oggpack_write(opb,info->chmuxlist[i],4);
+      oggpack_write(opb,info->chmuxlist[i],4);
   }
   for(i=0;i<info->submaps;i++){
-    _oggpack_write(opb,info->timesubmap[i],8);
-    _oggpack_write(opb,info->floorsubmap[i],8);
-    _oggpack_write(opb,info->residuesubmap[i],8);
+    oggpack_write(opb,info->timesubmap[i],8);
+    oggpack_write(opb,info->floorsubmap[i],8);
+    oggpack_write(opb,info->residuesubmap[i],8);
   }
 }
 
@@ -166,20 +166,20 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
   vorbis_info_mapping0 *info=calloc(1,sizeof(vorbis_info_mapping0));
   memset(info,0,sizeof(vorbis_info_mapping0));
 
-  info->submaps=_oggpack_read(opb,4)+1;
+  info->submaps=oggpack_read(opb,4)+1;
 
   if(info->submaps>1){
     for(i=0;i<vi->channels;i++){
-      info->chmuxlist[i]=_oggpack_read(opb,4);
+      info->chmuxlist[i]=oggpack_read(opb,4);
       if(info->chmuxlist[i]>=info->submaps)goto err_out;
     }
   }
   for(i=0;i<info->submaps;i++){
-    info->timesubmap[i]=_oggpack_read(opb,8);
+    info->timesubmap[i]=oggpack_read(opb,8);
     if(info->timesubmap[i]>=vi->times)goto err_out;
-    info->floorsubmap[i]=_oggpack_read(opb,8);
+    info->floorsubmap[i]=oggpack_read(opb,8);
     if(info->floorsubmap[i]>=vi->floors)goto err_out;
-    info->residuesubmap[i]=_oggpack_read(opb,8);
+    info->residuesubmap[i]=oggpack_read(opb,8);
     if(info->residuesubmap[i]>=vi->residues)goto err_out;
   }
 
@@ -196,7 +196,6 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "envelope.h"
 #include "mdct.h"
 #include "psy.h"
-#include "bitwise.h"
 #include "scales.h"
 
 /* no time mapping implementation for now */

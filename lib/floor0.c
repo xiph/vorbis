@@ -12,15 +12,15 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.23.2.3 2000/09/02 05:19:25 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.23.2.3.2.1 2000/09/03 08:34:52 jack Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ogg/ogg.h>
 #include "vorbis/codec.h"
-#include "bitwise.h"
 #include "registry.h"
 #include "lpc.h"
 #include "lsp.h"
@@ -91,25 +91,25 @@ static void floor0_free_look(vorbis_look_floor *i){
 static void floor0_pack (vorbis_info_floor *i,oggpack_buffer *opb){
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
   int j;
-  _oggpack_write(opb,info->order,8);
-  _oggpack_write(opb,info->rate,16);
-  _oggpack_write(opb,info->barkmap,16);
-  _oggpack_write(opb,info->ampbits,6);
-  _oggpack_write(opb,info->ampdB,8);
-  _oggpack_write(opb,info->numbooks-1,4);
+  oggpack_write(opb,info->order,8);
+  oggpack_write(opb,info->rate,16);
+  oggpack_write(opb,info->barkmap,16);
+  oggpack_write(opb,info->ampbits,6);
+  oggpack_write(opb,info->ampdB,8);
+  oggpack_write(opb,info->numbooks-1,4);
   for(j=0;j<info->numbooks;j++)
-    _oggpack_write(opb,info->books[j],8);
+    oggpack_write(opb,info->books[j],8);
 }
 
 static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
   int j;
   vorbis_info_floor0 *info=malloc(sizeof(vorbis_info_floor0));
-  info->order=_oggpack_read(opb,8);
-  info->rate=_oggpack_read(opb,16);
-  info->barkmap=_oggpack_read(opb,16);
-  info->ampbits=_oggpack_read(opb,6);
-  info->ampdB=_oggpack_read(opb,8);
-  info->numbooks=_oggpack_read(opb,4)+1;
+  info->order=oggpack_read(opb,8);
+  info->rate=oggpack_read(opb,16);
+  info->barkmap=oggpack_read(opb,16);
+  info->ampbits=oggpack_read(opb,6);
+  info->ampdB=oggpack_read(opb,8);
+  info->numbooks=oggpack_read(opb,4)+1;
   
   if(info->order<1)goto err_out;
   if(info->rate<1)goto err_out;
@@ -117,7 +117,7 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
   if(info->numbooks<1)goto err_out;
 
   for(j=0;j<info->numbooks;j++){
-    info->books[j]=_oggpack_read(opb,8);
+    info->books[j]=oggpack_read(opb,8);
     if(info->books[j]<0 || info->books[j]>=vi->books)goto err_out;
   }
   return(info);  
@@ -321,7 +321,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     if(val<0)val=0;           /* likely */
     if(val>maxval)val=maxval; /* not bloody likely */
 
-    _oggpack_write(&vb->opb,val,info->ampbits);
+    oggpack_write(&vb->opb,val,info->ampbits);
     if(val>0)
       amp=(float)val/maxval*info->ampdB;
     else
@@ -333,7 +333,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
     /* the spec supports using one of a number of codebooks.  Right
        now, encode using this lib supports only one */
     codebook *b=vb->vd->fullbooks+info->books[0];
-    _oggpack_write(&vb->opb,0,_ilog(info->numbooks));
+    oggpack_write(&vb->opb,0,_ilog(info->numbooks));
 
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
@@ -397,11 +397,11 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
   vorbis_info_floor0 *info=look->vi;
   int j,k;
   
-  int ampraw=_oggpack_read(&vb->opb,info->ampbits);
+  int ampraw=oggpack_read(&vb->opb,info->ampbits);
   if(ampraw>0){ /* also handles the -1 out of data case */
     long maxval=(1<<info->ampbits)-1;
     float amp=(float)ampraw/maxval*info->ampdB;
-    int booknum=_oggpack_read(&vb->opb,_ilog(info->numbooks));
+    int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
 
     if(booknum!=-1){
       codebook *b=vb->vd->fullbooks+info->books[booknum];

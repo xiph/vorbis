@@ -12,15 +12,15 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: bookinternal.h,v 1.8.6.2 2000/09/02 05:19:24 xiphmont Exp $
+ last mod: $Id: bookinternal.h,v 1.8.6.2.2.1 2000/09/03 08:34:52 jack Exp $
 
  ********************************************************************/
 
 #ifndef _V_INT_CODEBOOK_H_
 #define _V_INT_CODEBOOK_H_
 
+#include <ogg/ogg.h>
 #include "vorbis/codebook.h"
-#include "bitwise.h"
 
 extern int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *b);
 extern int vorbis_staticbook_unpack(oggpack_buffer *b,static_codebook *c);
