@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.9 2000/06/15 09:18:34 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.10 2000/08/14 22:33:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,6 +30,10 @@
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 #include <io.h>
 #include <fcntl.h>
+#endif
+
+#if defined(macintosh) && defined(__MWERKS__)
+#include <console.h>      /* CodeWarrior's Mac "command-line" support */
 #endif
 
 int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
@@ -58,6 +62,13 @@ int main(int argc, char **argv){
   _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
+#if defined(macintosh) && defined(__MWERKS__)
+  int argc = 0;
+  char **argv = NULL;
+
+  argc = ccommand(&argv); /* get a "command line" from the Mac user */
+                          /* this also lets the user set stdin and stdout */
+#endif
 
   /********** Decode setup ************/
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.8 2000/06/15 09:18:34 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.9 2000/08/14 22:33:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,6 +32,9 @@
 #include <fcntl.h>
 #endif
 
+#if defined(macintosh) && defined(__MWERKS__)
+#include <console.h>      /* CodeWarrior's Mac "command-line" support */
+#endif
 
 #define READ 1024
 signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
@@ -50,6 +53,13 @@ int main(){
   vorbis_block     vb; /* local working space for packet->PCM decode */
 
   int eos=0;
+
+#if defined(macintosh) && defined(__MWERKS__)
+  int argc = 0;
+  char **argv = NULL;
+  argc = ccommand(&argv); /* get a "command line" from the Mac user */
+                          /* this also lets the user set stdin and stdout */
+#endif
 
   /* we cheat on the WAV header; we just bypass 44 bytes and never
      verify that it matches 16bit/stereo/44.1kHz.  This is just an
