@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.1.2.2 2000/11/04 06:21:42 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.1.2.3 2000/11/04 07:13:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -38,7 +38,7 @@ typedef struct{
   vorbis_info_time *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_time *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 			      vorbis_info_time *);
-  vorbis_info_time *(*copy_info)(vorbis_info *);
+  vorbis_info_time *(*copy_info)(vorbis_info_time *);
 
   void (*free_info) (vorbis_info_time *);
   void (*free_look) (vorbis_look_time *);
@@ -58,7 +58,7 @@ typedef struct{
   vorbis_info_floor     *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_floor     *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 				   vorbis_info_floor *);
-  vorbis_info_floor     *(*copy_info)(vorbis_info *);
+  vorbis_info_floor     *(*copy_info)(vorbis_info_floor *);
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
@@ -85,7 +85,7 @@ typedef struct{
   vorbis_info_residue *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_residue *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 				 vorbis_info_residue *);
-  vorbis_info_residue *(*copy_info)(vorbis_info *);
+  vorbis_info_residue *(*copy_info)(vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
   int  (*forward)      (struct vorbis_block *,vorbis_look_residue *,
@@ -121,7 +121,7 @@ typedef struct{
   vorbis_info_mapping *(*unpack)(vorbis_info *,oggpack_buffer *);
   vorbis_look_mapping *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 				 vorbis_info_mapping *);
-  vorbis_info_mapping *(*copy_info)(vorbis_info *);
+  vorbis_info_mapping *(*copy_info)(vorbis_info_mapping *);
   void (*free_info)    (vorbis_info_mapping *);
   void (*free_look)    (vorbis_look_mapping *);
   int  (*forward)      (struct vorbis_block *vb,vorbis_look_mapping *);
