@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.38 2001/05/27 06:43:59 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.39 2001/12/12 09:45:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -164,6 +164,7 @@ typedef struct vorbis_comment{
 
 extern void     vorbis_info_init(vorbis_info *vi);
 extern void     vorbis_info_clear(vorbis_info *vi);
+extern int      vorbis_info_blocksize(vorbis_info *vi,int zo);
 extern void     vorbis_comment_init(vorbis_comment *vc);
 extern void     vorbis_comment_add(vorbis_comment *vc, char *comment); 
 extern void     vorbis_comment_add_tag(vorbis_comment *vc, 
@@ -189,6 +190,10 @@ extern float  **vorbis_analysis_buffer(vorbis_dsp_state *v,int vals);
 extern int      vorbis_analysis_wrote(vorbis_dsp_state *v,int vals);
 extern int      vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb);
 extern int      vorbis_analysis(vorbis_block *vb,ogg_packet *op);
+
+extern int      vorbis_bitrate_addblock(vorbis_block *vb);
+extern int      vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,
+					   ogg_packet *op);
 
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
 extern int      vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,

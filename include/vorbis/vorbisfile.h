@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.14 2001/05/27 06:43:59 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.15 2001/12/12 09:45:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -117,6 +117,8 @@ extern double ov_time_tell(OggVorbis_File *vf);
 extern vorbis_info *ov_info(OggVorbis_File *vf,int link);
 extern vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
 
+extern long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,
+			  int *bitstream);
 extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int bigendianp,int word,int sgned,int *bitstream);
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: masking curve data for psychoacoustics
- last mod: $Id: masking.h,v 1.18 2001/08/13 02:01:15 xiphmont Exp $
+ last mod: $Id: masking.h,v 1.19 2001/12/12 09:45:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,16 +22,6 @@ static float ATH_Bark_dB_lspconservative[]={
    15,   15,   15,    15,    11,    10,     8,    7,    7,    7,
     6,    2,    0,     0,    -3,    -5,    -6,   -6, -4.5f, 2.5f,
    10,   15,   15,    15,    15,    15,   15};
-
-static float ATH_Bark_dB_lineconservative[]={  
-   0,  15,  15,   15,   11,       10,   8,  7,  7, 7,
-   6,   2,   0,    0,   -2,       -5,  -6, -6, -4, 0,
-   2,   6,   5,    5,   15,       25,  35};
-
-static float ATH_Bark_dB_lineaggressive[]={  
-   0,  15,  15,   15,   11,       10,   8,  7,  7, 7,
-   6,   2,   0,    0,   -2,       -5,  -6, -6, -4, 4,
-  14,  20,  19,   17,   30,       60,  60};
 
 /* The below masking curves are straight from the R. Ehmer
    (J. Acoustical Society of America) papers ca 1958-59.  I modified

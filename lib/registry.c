@@ -11,13 +11,14 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.c,v 1.11 2001/10/18 17:35:36 cwolf Exp $
+ last mod: $Id: registry.c,v 1.12 2001/12/12 09:45:25 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "registry.h"
+#include "registry-api.h"
 #include "misc.h"
 
 
@@ -50,3 +51,10 @@ vorbis_func_residue   *_residue_P[]={
 vorbis_func_mapping   *_mapping_P[]={
   &mapping0_exportbundle,
 };
+
+/* make Windows happy; can't access the registry directly outside of
+   libvorbis, and vorbisenc needs a few functions */
+void residue_free_info(vorbis_info_residue *r,int type){
+  _residue_P[type]->free_info(r);
+}
+

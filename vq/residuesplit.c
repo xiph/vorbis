@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.11 2001/08/13 01:37:17 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.12 2001/12/12 09:45:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -64,7 +64,8 @@ static FILE **or;
 /* This is currently a bit specific to/hardwired for mapping 0; things
    will need to change in the future when we get real multichannel
    mappings */
-int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts, int subn){
+int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts, int subn, 
+	     int *class){
   long i,j,part=0;
   int aux;
 
@@ -82,17 +83,27 @@ int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts,
 	 max<=mbound[j] &&
 	 part<subgrp[j])
 	break;
-    aux=j;
+    class[part]=aux=j;
     
     fprintf(of,"%d, ",aux);
+  }    
+  fprintf(of,"\n");
+
+  return(0);
+}
+
+int quantwrite(float *res,int n,int subn, int *class,int offset){
+  long i,j,part=0;
+  int aux;
+
+  for(i=0;i<=n-subn;i+=subn,part++){
+    aux=class[part];
     
     for(j=0;j<subn;j++)
-      fprintf(or[aux],"%g, ",res[j+i]);
+      fprintf(or[aux+offset],"%g, ",res[j+i]);
     
-    fprintf(or[aux],"\n");
+    fprintf(or[aux+offset],"\n");
   }
-
-  fprintf(of,"\n");
 
   return(0);
 }
@@ -122,33 +133,45 @@ static int getline(FILE *in,float *vec,int begin,int n){
 static void usage(){
   fprintf(stderr,
 	  "usage:\n" 
-	  "residuesplit <res> <begin,n,group> <baseout> <ent,peak,sub> [<ent,peak,sub>]...\n"
+	  "residuesplit <res> [<res>] <begin,n,group> <baseout> <ent,peak,sub> [<ent,peak,sub>]...\n"
 	  "   where begin,n,group is first scalar, \n"
 	  "                          number of scalars of each in line,\n"
 	  "                          number of scalars in a group\n"
 	  "         ent is the maximum entropy value allowed for membership in a group\n"
 	  "         peak is the maximum amplitude value allowed for membership in a group\n"
-	  "         subn is the maximum subpartiton number allowed in the group\n"
-	           
-	  "eg: residuesplit mask.vqd floor.vqd 0,1024,16 res 0,.5,2 3,1.5,4 \n"
-	  "produces resaux.vqd and res_0...n.vqd\n\n");
+	  "         subn is the maximum subpartiton number allowed in the group\n\n");
   exit(1);
 }
 
 int main(int argc, char *argv[]){
   char *buffer;
   char *base;
-  int i,parts,begin,n,subn,*subgrp;
-  FILE *res;
+  int i,j,parts,begin,n,subn,*subgrp,*class;
+  FILE **res;
+  int resfiles=0;
   float *ebound,*mbound,*vec;
   long c=0;
   if(argc<5)usage();
 
-  base=strdup(argv[3]);
+  /* count the res file names, open the files */
+  while(!strcmp(argv[resfiles+1]+strlen(argv[resfiles+1])-4,".vqd"))
+    resfiles++;
+  if(resfiles<1)usage();
+
+  res=alloca(sizeof(*res)*resfiles);
+  for(i=0;i<resfiles;i++){
+    res[i]=fopen(argv[i+1],"r");
+    if(!(res+i)){
+      fprintf(stderr,"Could not open file %s\n",argv[1+i]);
+      exit(1);
+    }
+  }
+
+  base=strdup(argv[2+resfiles]);
   buffer=alloca(strlen(base)+20);
   {
-    char *pos=strchr(argv[2],',');
-    begin=atoi(argv[2]);
+    char *pos=strchr(argv[1+resfiles],',');
+    begin=atoi(argv[1+resfiles]);
     if(!pos)
       usage();
     else
@@ -165,19 +188,19 @@ int main(int argc, char *argv[]){
   }
 
   /* how many parts?... */
-  parts=argc-3;
+  parts=argc-resfiles-2;
   
   ebound=_ogg_malloc(sizeof(float)*parts);
   mbound=_ogg_malloc(sizeof(float)*parts);
   subgrp=_ogg_malloc(sizeof(int)*parts);
   
   for(i=0;i<parts-1;i++){
-    char *pos=strchr(argv[4+i],',');
+    char *pos=strchr(argv[3+i+resfiles],',');
     subgrp[i]=0;
-    if(*argv[4+i]==',')
+    if(*argv[3+i+resfiles]==',')
       ebound[i]=1e50f;
     else
-      ebound[i]=atof(argv[4+i]);
+      ebound[i]=atof(argv[3+i+resfiles]);
 
     if(!pos){
       mbound[i]=1e50f;
@@ -199,41 +222,56 @@ int main(int argc, char *argv[]){
   mbound[i]=1e50f;
   subgrp[i]=9999999;
 
-  res=fopen(argv[1],"r");
-  if(!res){
-    fprintf(stderr,"Could not open file %s\n",argv[1]);
-    exit(1);
-  }
-
-  or=alloca(parts*sizeof(FILE*));
+  or=alloca(parts*resfiles*sizeof(FILE*));
   sprintf(buffer,"%saux.vqd",base);
   of=fopen(buffer,"w");
   if(!of){
     fprintf(stderr,"Could not open file %s for writing\n",buffer);
     exit(1);
   }
-  for(i=0;i<parts;i++){
-    sprintf(buffer,"%s_%d.vqd",base,i);
-    or[i]=fopen(buffer,"w");
-    if(!or[i]){
-      fprintf(stderr,"Could not open file %s for writing\n",buffer);
-      exit(1);
+
+  for(j=0;j<resfiles;j++){
+    for(i=0;i<parts;i++){
+      sprintf(buffer,"%s_%d%c.vqd",base,i,j+65);
+      or[i+j*parts]=fopen(buffer,"w");
+      if(!or[i+j*parts]){
+	fprintf(stderr,"Could not open file %s for writing\n",buffer);
+	exit(1);
+      }
     }
   }
   
   vec=_ogg_malloc(sizeof(float)*n);
+  class=_ogg_malloc(sizeof(float)*n);
   /* get the input line by line and process it */
-  while(!feof(res)){
-    if(getline(res,vec,begin,n))
-      quantaux(vec,n,ebound,mbound,subgrp,parts,subn);
+  while(1){
+    if(getline(res[0],vec,begin,n)){
+      quantaux(vec,n,ebound,mbound,subgrp,parts,subn,class);
+      quantwrite(vec,n,subn,class,0);
+
+      for(i=1;i<resfiles;i++){
+	if(getline(res[i],vec,begin,n)){
+	  quantwrite(vec,n,subn,class,parts*i);
+	}else{
+	  fprintf(stderr,"Getline loss of sync (%d).\n\n",i);
+	  exit(1);
+	}
+      }
+    }else{
+      if(feof(res[0]))break;
+      fprintf(stderr,"Getline loss of sync (0).\n\n");
+      exit(1);
+    }
+    
     c++;
     if(!(c&0xf)){
-      spinnit("kB so far...",(int)(ftell(res)/1024));
+      spinnit("kB so far...",(int)(ftell(res[0])/1024));
     }
   }
-  fclose(res);
+  for(i=0;i<resfiles;i++)
+    fclose(res[i]);
   fclose(of);
-  for(i=0;i<parts;i++)
+  for(i=0;i<parts*resfiles;i++)
     fclose(or[i]);
   fprintf(stderr,"\rDone                         \n");
   return(0);

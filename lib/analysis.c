@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.46 2001/08/13 01:36:56 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.47 2001/12/12 09:45:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,7 +28,7 @@
 int analysis_noisy=1;
 
 /* decides between modes, dispatches to the appropriate mapping. */
-int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
+int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
   vorbis_dsp_state     *vd=vb->vd;
   backend_lookup_state *b=vd->backend_state;
   vorbis_info          *vi=vd->vi;
@@ -45,9 +45,9 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   oggpack_reset(&vb->opb);
   /* Encode the packet type */
   oggpack_write(&vb->opb,0,1);
-
+  
   /* currently lazy.  Short block dispatches to 0, long to 1. */
-
+  
   if(vb->W &&ci->modes>1)mode=1;
   type=ci->map_type[ci->mode_param[mode]->mapping];
   vb->mode=mode;
@@ -64,16 +64,15 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 
   if((ret=_mapping_P[type]->forward(vb,b->mode[mode])))
     return(ret);
-  
-  /* set up the packet wrapper */
-  
-  op->packet=oggpack_get_buffer(&vb->opb);
-  op->bytes=oggpack_bytes(&vb->opb);
-  op->b_o_s=0;
-  op->e_o_s=vb->eofflag;
-  op->granulepos=vb->granulepos;
-  op->packetno=vb->sequence; /* for sake of completeness */
-  
+
+  if(op){
+    op->packet=oggpack_get_buffer(&vb->opb);
+    op->bytes=oggpack_bytes(&vb->opb);
+    op->b_o_s=0;
+    op->e_o_s=vb->eofflag;
+    op->granulepos=vb->granulepos;
+    op->packetno=vb->sequence; /* for sake of completeness */
+  }
   return(0);
 }
 

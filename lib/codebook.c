@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.30 2001/10/02 00:14:30 segher Exp $
+ last mod: $Id: codebook.c,v 1.31 2001/12/12 09:45:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -418,7 +418,7 @@ long vorbis_book_decodev_set(codebook *book,float *a,oggpack_buffer *b,int n){
 
 long vorbis_book_decodevv_add(codebook *book,float **a,long offset,int ch,
 			      oggpack_buffer *b,int n){
-  long i,j,k,entry;
+  long i,j,entry;
   int chptr=0;
 
   for(i=offset/ch;i<(offset+n)/ch;){

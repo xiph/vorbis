@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.50 2001/10/02 00:14:30 segher Exp $
+ last mod: $Id: block.c,v 1.51 2001/12/12 09:45:24 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -26,14 +26,10 @@
 #include "codec_internal.h"
 
 #include "window.h"
-#include "envelope.h"
 #include "mdct.h"
 #include "lpc.h"
 #include "registry.h"
-#include "codebook.h"
 #include "misc.h"
-#include "os.h"
-#include "psy.h"
 
 static int ilog2(unsigned int v){
   int ret=0;
@@ -94,9 +90,12 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   vb->localalloc=0;
   vb->localstore=NULL;
   if(v->analysisp){
+    vorbis_block_internal *vbi=
+      vb->internal=_ogg_calloc(1,sizeof(vorbis_block_internal));
     oggpack_writeinit(&vb->opb);
-    vb->internal=_ogg_calloc(1,sizeof(vorbis_block_internal));
-    ((vorbis_block_internal *)vb->internal)->ampmax=-9999;
+    vbi->ampmax=-9999;
+    vbi->packet_markers=_ogg_malloc(vorbis_bitrate_maxmarkers()*
+			       sizeof(*vbi->packet_markers));
   }
   
   return(0);
@@ -154,7 +153,13 @@ int vorbis_block_clear(vorbis_block *vb){
       oggpack_writeclear(&vb->opb);
   _vorbis_block_ripcord(vb);
   if(vb->localstore)_ogg_free(vb->localstore);
-  if(vb->internal)_ogg_free(vb->internal);
+
+  if(vb->internal){
+    vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
+    if(vbi->packet_markers)_ogg_free(vbi->packet_markers);
+
+    _ogg_free(vb->internal);
+  }
 
   memset(vb,0,sizeof(*vb));
   return(0);
@@ -267,6 +272,9 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   /* Initialize the envelope state storage */
   b->ve=_ogg_calloc(1,sizeof(*b->ve));
   _ve_envelope_init(b->ve,vi);
+
+  vorbis_bitrate_init(vi,&b->bms);
+
   return(0);
 }
 
@@ -307,7 +315,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	_ogg_free(b->transform[1]);
       }
       if(b->psy_g_look)_vp_global_free(b->psy_g_look);
-      
+      vorbis_bitrate_clear(&b->bms);
     }
     
     if(v->pcm){
@@ -371,6 +379,7 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
   return(v->pcmret);
 }
 
+static int seq=0;
 static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
   int order=32;
@@ -381,21 +390,30 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
 
   if(v->pcm_current-v->centerW>order*2){ /* safety */
     for(i=0;i<v->vi->channels;i++){
-      
       /* need to run the extrapolation in reverse! */
       for(j=0;j<v->pcm_current;j++)
 	work[j]=v->pcm[i][v->pcm_current-j-1];
       
+      _analysis_output("preextrap",seq,v->pcm[i],v->pcm_current,0,0);
+      _analysis_output("workextrap",seq,work,v->pcm_current,0,0);
+
       /* prime as above */
       vorbis_lpc_from_data(work,lpc,v->pcm_current-v->centerW,order);
+      _analysis_output("lpc",seq,lpc,order,0,0);
       
       /* run the predictor filter */
       vorbis_lpc_predict(lpc,work+v->pcm_current-v->centerW-order,
 			 order,
 			 work+v->pcm_current-v->centerW,
 			 v->centerW);
+
+      _analysis_output("extrap",seq,work,v->pcm_current,0,0);
+
+
       for(j=0;j<v->pcm_current;j++)
 	v->pcm[i][v->pcm_current-j-1]=work[j];
+
+      _analysis_output("postextrap",seq++,v->pcm[i],v->pcm_current,0,0);
     }
   }
 }
@@ -474,8 +492,9 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   codec_setup_info *ci=vi->codec_setup;
   backend_lookup_state *b=v->backend_state;
   vorbis_look_psy_global *g=b->psy_g_look;
-  vorbis_info_psy_global *gi=ci->psy_g_param;
+  vorbis_info_psy_global *gi=&ci->psy_g_param;
   long beginW=v->centerW-ci->blocksizes[v->W]/2,centerNext;
+  vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
 
   /* check to see if we're started... */
   if(!v->preextrapolate)return(0);
@@ -488,20 +507,11 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      which lets us compute the shape of the current block's window */
   
   if(ci->blocksizes[0]<ci->blocksizes[1]){
-    long largebound;
-    long bp;
-
-    if(v->W)
-      /* min boundary; nW large, next small */
-      largebound=v->centerW+ci->blocksizes[1]*3/4+ci->blocksizes[0]/4;
-    else
-      /* min boundary; nW large, next small */
-      largebound=v->centerW+ci->blocksizes[1]/2+ci->blocksizes[0]/2;
-
-    bp=_ve_envelope_search(v,largebound);
+    long bp=_ve_envelope_search(v);
     if(bp==-1)return(0); /* not enough data currently to search for a
                             full long block */
     v->nW=bp;
+    //v->nW=0;
 
   }else
     v->nW=0;
@@ -519,6 +529,8 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
                                                the search is not run
                                                if we only use one
                                                block size */
+
+
   }
   
   /* fill in the block.  Note that for a short window, lW and nW are *short*
@@ -534,6 +546,19 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     vb->W=v->W;
     vb->nW=0;
   }
+
+  if(v->W){
+    if(!v->lW || !v->nW)
+      vbi->blocktype=BLOCKTYPE_TRANSITION;
+    else
+      vbi->blocktype=BLOCKTYPE_LONG;
+  }else{
+    if(_ve_envelope_mark(v))
+      vbi->blocktype=BLOCKTYPE_IMPULSE;
+    else
+      vbi->blocktype=BLOCKTYPE_PADDING;
+  }
+ 
   vb->vd=v;
   vb->sequence=v->sequence;
   vb->granulepos=v->granulepos;
@@ -721,8 +746,8 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       for(;i<sizeW;i++)
 	pcm[i]=p[i];
 
-      _analysis_output("lapped",seq,pcm,sizeW,0,0);
-      _analysis_output("buffered",seq++,v->pcm[j],sizeW+beginW,0,0);
+      //_analysis_output("lapped",seq,pcm,sizeW,0,0);
+      //_analysis_output("buffered",seq++,v->pcm[j],sizeW+beginW,0,0);
     
     }
 

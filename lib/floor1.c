@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.17 2001/11/13 06:04:31 msmith Exp $
+ last mod: $Id: floor1.c,v 1.18 2001/12/12 09:45:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -618,6 +618,7 @@ static int post_Y(int *A,int *B,int pos){
     return B[pos];
   if(B[pos]<0)
     return A[pos];
+
   return (A[pos]+B[pos])>>1;
 }
 
@@ -1025,7 +1026,6 @@ static void *floor1_inverse1(vorbis_block *vb,vorbis_look_floor *in){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
   vorbis_info_floor1 *info=look->vi;
   
-  codec_setup_info   *ci=vb->vd->vi->codec_setup;
   int i,j,k;
   codebook *books=((backend_lookup_state *)(vb->vd->backend_state))->
     fullbooks;   
@@ -1138,7 +1138,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
 	ly=hy;
       }
     }
-    for(j=hx;j<n;j++)out[j]*=out[j-1]; /* be certain */    
+    for(j=hx;j<n;j++)out[j]*=ly; /* be certain */    
     return(1);
   }
   memset(out,0,sizeof(*out)*n);

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.18 2001/10/02 00:14:32 segher Exp $
+ last mod: $Id: sharedbook.c,v 1.19 2001/12/12 09:45:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -379,7 +379,6 @@ static float _dist(int el,float *ref, float *b,int step){
   return(acc);
 }
 
-#include <stdio.h>
 int _best(codebook *book, float *a, int step){
   encode_aux_nearestmatch *nt=book->c->nearest_tree;
   encode_aux_threshmatch *tt=book->c->thresh_tree;

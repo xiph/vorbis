@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.51 2001/11/12 13:41:10 msmith Exp $
+ last mod: $Id: vorbisfile.c,v 1.52 2001/12/12 09:45:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -1125,7 +1125,6 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   int thisblock,lastblock=0;
   int ret=ov_pcm_seek_page(vf,pos);
-  codec_setup_info *ci=vf->vi->codec_setup;
   if(ret<0)return(ret);
 
   /* discard leading packets we don't need for the lapping of the
@@ -1140,7 +1139,8 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
       thisblock=vorbis_packet_blocksize(vf->vi+vf->current_link,&op);
       if(lastblock)vf->pcm_offset+=(lastblock+thisblock)>>2;
 
-      if(vf->pcm_offset+((thisblock+ci->blocksizes[1])>>2)>=pos)break;
+      if(vf->pcm_offset+((thisblock+
+			  vorbis_info_blocksize(vf->vi,1))>>2)>=pos)break;
 
       ogg_stream_packetout(&vf->os,NULL);
       
@@ -1374,10 +1374,7 @@ int host_is_big_endian() {
 
 	    *section) set to the logical bitstream number */
 
-long ov_read(OggVorbis_File *vf,char *buffer,int length,
-		    int bigendianp,int word,int sgned,int *bitstream){
-  int i,j;
-  int host_endian = host_is_big_endian();
+long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int *bitstream){
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
 
@@ -1386,100 +1383,12 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
       float **pcm;
       long samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
       if(samples){
-	/* yay! proceed to pack data into the byte buffer */
-
-	long channels=ov_info(vf,-1)->channels;
-	long bytespersample=word * channels;
-	vorbis_fpu_control fpu;
-	if(samples>length/bytespersample)samples=length/bytespersample;
-	
-	/* a tight loop to pack each size */
-	{
-	  int val;
-	  if(word==1){
-	    int off=(sgned?0:128);
-	    vorbis_fpu_setround(&fpu);
-	    for(j=0;j<samples;j++)
-	      for(i=0;i<channels;i++){
-		val=vorbis_ftoi(pcm[i][j]*128.f);
-		if(val>127)val=127;
-		else if(val<-128)val=-128;
-		*buffer++=val+off;
-	      }
-	    vorbis_fpu_restore(fpu);
-	  }else{
-	    int off=(sgned?0:32768);
-
-	    if(host_endian==bigendianp){
-	      if(sgned){
-
-		vorbis_fpu_setround(&fpu);
-		for(i=0;i<channels;i++) { /* It's faster in this order */
-		  float *src=pcm[i];
-		  short *dest=((short *)buffer)+i;
-		  for(j=0;j<samples;j++) {
-		    val=vorbis_ftoi(src[j]*32768.f);
-		    if(val>32767)val=32767;
-		    else if(val<-32768)val=-32768;
-		    *dest=val;
-		    dest+=channels;
-		  }
-		}
-		vorbis_fpu_restore(fpu);
-
-	      }else{
-
-		vorbis_fpu_setround(&fpu);
-		for(i=0;i<channels;i++) {
-		  float *src=pcm[i];
-		  short *dest=((short *)buffer)+i;
-		  for(j=0;j<samples;j++) {
-		    val=vorbis_ftoi(src[j]*32768.f);
-		    if(val>32767)val=32767;
-		    else if(val<-32768)val=-32768;
-		    *dest=val+off;
-		    dest+=channels;
-		  }
-		}
-		vorbis_fpu_restore(fpu);
-
-	      }
-	    }else if(bigendianp){
-
-	      vorbis_fpu_setround(&fpu);
-	      for(j=0;j<samples;j++)
-		for(i=0;i<channels;i++){
-		  val=vorbis_ftoi(pcm[i][j]*32768.f);
-		  if(val>32767)val=32767;
-		  else if(val<-32768)val=-32768;
-		  val+=off;
-		  *buffer++=(val>>8);
-		  *buffer++=(val&0xff);
-		}
-	      vorbis_fpu_restore(fpu);
-
-	    }else{
-	      int val;
-	      vorbis_fpu_setround(&fpu);
-	      for(j=0;j<samples;j++)
-	 	for(i=0;i<channels;i++){
-		  val=vorbis_ftoi(pcm[i][j]*32768.f);
-		  if(val>32767)val=32767;
-		  else if(val<-32768)val=-32768;
-		  val+=off;
-		  *buffer++=(val&0xff);
-		  *buffer++=(val>>8);
-	  	}
-	      vorbis_fpu_restore(fpu);  
-
-	    }
-	  }
-	}
-	
+	if(pcm_channels)*pcm_channels=pcm;
 	vorbis_synthesis_read(&vf->vd,samples);
 	vf->pcm_offset+=samples;
 	if(bitstream)*bitstream=vf->current_link;
-	return(samples*bytespersample);
+	return samples;
+
       }
     }
 
@@ -1490,6 +1399,114 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
       if(ret<=0)return(ret);
     }
 
+  }
+}
+
+long ov_read(OggVorbis_File *vf,char *buffer,int length,
+		    int bigendianp,int word,int sgned,int *bitstream){
+  int i,j;
+  int host_endian = host_is_big_endian();
+
+  float **pcm;
+  long samples=ov_read_float(vf,&pcm,bitstream);
+  if(samples>0){
+  
+    /* yay! proceed to pack data into the byte buffer */
+    
+    long channels=ov_info(vf,-1)->channels;
+    long bytespersample=word * channels;
+    vorbis_fpu_control fpu;
+    if(samples>length/bytespersample)samples=length/bytespersample;
+    
+    /* a tight loop to pack each size */
+    {
+      int val;
+      if(word==1){
+	int off=(sgned?0:128);
+	vorbis_fpu_setround(&fpu);
+	for(j=0;j<samples;j++)
+	  for(i=0;i<channels;i++){
+	    val=vorbis_ftoi(pcm[i][j]*128.f);
+	    if(val>127)val=127;
+	    else if(val<-128)val=-128;
+	    *buffer++=val+off;
+	  }
+	vorbis_fpu_restore(fpu);
+      }else{
+	int off=(sgned?0:32768);
+	
+	if(host_endian==bigendianp){
+	  if(sgned){
+	    
+	    vorbis_fpu_setround(&fpu);
+	    for(i=0;i<channels;i++) { /* It's faster in this order */
+	      float *src=pcm[i];
+	      short *dest=((short *)buffer)+i;
+	      for(j=0;j<samples;j++) {
+		val=vorbis_ftoi(src[j]*32768.f);
+		if(val>32767)val=32767;
+		else if(val<-32768)val=-32768;
+		*dest=val;
+		dest+=channels;
+	      }
+	    }
+	    vorbis_fpu_restore(fpu);
+	    
+	  }else{
+	    
+	    vorbis_fpu_setround(&fpu);
+	    for(i=0;i<channels;i++) {
+	      float *src=pcm[i];
+	      short *dest=((short *)buffer)+i;
+	      for(j=0;j<samples;j++) {
+		val=vorbis_ftoi(src[j]*32768.f);
+		if(val>32767)val=32767;
+		else if(val<-32768)val=-32768;
+		*dest=val+off;
+		dest+=channels;
+	      }
+	    }
+	    vorbis_fpu_restore(fpu);
+	    
+	  }
+	}else if(bigendianp){
+	  
+	  vorbis_fpu_setround(&fpu);
+	  for(j=0;j<samples;j++)
+	    for(i=0;i<channels;i++){
+	      val=vorbis_ftoi(pcm[i][j]*32768.f);
+	      if(val>32767)val=32767;
+	      else if(val<-32768)val=-32768;
+	      val+=off;
+	      *buffer++=(val>>8);
+	      *buffer++=(val&0xff);
+	    }
+	  vorbis_fpu_restore(fpu);
+	  
+	}else{
+	  int val;
+	  vorbis_fpu_setround(&fpu);
+	  for(j=0;j<samples;j++)
+	    for(i=0;i<channels;i++){
+	      val=vorbis_ftoi(pcm[i][j]*32768.f);
+	      if(val>32767)val=32767;
+	      else if(val<-32768)val=-32768;
+	      val+=off;
+	      *buffer++=(val&0xff);
+	      *buffer++=(val>>8);
+	  	}
+	  vorbis_fpu_restore(fpu);  
+	  
+	}
+      }
+    }
+    
+    vorbis_synthesis_read(&vf->vd,samples);
+    vf->pcm_offset+=samples;
+    if(bitstream)*bitstream=vf->current_link;
+    return(samples*bytespersample);
+  }else{
+    return(samples);
   }
 }
 

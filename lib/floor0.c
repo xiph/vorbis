@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.46 2001/10/02 00:14:30 segher Exp $
+ last mod: $Id: floor0.c,v 1.47 2001/12/12 09:45:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -266,7 +266,6 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)in;
   vorbis_info_floor0 *info=look->vi;
   float amp;
-  long bits=0;
   long val=0;
   static int seq=0;
 

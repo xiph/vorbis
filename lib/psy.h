@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.24 2001/09/11 05:06:57 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.25 2001/12/12 09:45:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,12 +20,6 @@
 #include "smallft.h"
 
 #include "backends.h"
-
-#define BLOCKTYPE_IMPULSE    0
-#define BLOCKTYPE_PADDING    1
-#define BLOCKTYPE_TRANSITION 0 
-#define BLOCKTYPE_LONG       1
-
 
 #ifndef EHMER_MAX
 #define EHMER_MAX 56
@@ -39,8 +33,9 @@
 typedef struct vp_couple{
   int limit;        /* sample post */
 
-  float amppost_8phase;
-  float amppost_6phase;
+  int outofphase_redundant_flip_p;
+  float outofphase_requant_limit;
+
   float amppost_point;
   
 } vp_couple;
@@ -58,7 +53,7 @@ typedef struct vp_attenblock{
 
 #define NOISE_COMPAND_LEVELS 40
 typedef struct vorbis_info_psy{
-  float  *ath;
+  float  ath[27];
 
   float  ath_adjatt;
   float  ath_maxatt;
@@ -66,11 +61,11 @@ typedef struct vorbis_info_psy{
   float tone_masteratt;
   float tone_guard;
   float tone_abs_limit;
-  vp_attenblock *toneatt;
+  vp_attenblock toneatt;
 
   int peakattp;
   int curvelimitp;
-  vp_attenblock *peakatt;
+  vp_attenblock peakatt;
 
   int noisemaskp;
   float noisemaxsupp;
@@ -80,21 +75,18 @@ typedef struct vorbis_info_psy{
   int   noisewindowhimin;
   int   noisewindowfixed;
   float noiseoff[P_BANDS];
-  float *noisecompand;
+  float noisecompand[NOISE_COMPAND_LEVELS];
 
   float max_curve_dB;
 
-  int coupling_passes;
-  vp_couple_pass *couple_pass;
+  vp_couple_pass couple_pass[8];
 
 } vorbis_info_psy;
 
 typedef struct{
-  float     decaydBpms;
   int       eighth_octave_lines;
 
   /* for block long/short tuning; encode only */
-  int       envelopesa;
   float     preecho_thresh[4];
   float     postecho_thresh[4];
   float     preecho_minenergy;
@@ -108,8 +100,6 @@ typedef struct{
 
 typedef struct {
   float   ampmax;
-  float **decay;
-  int     decaylines;
   int     channels;
 
   vorbis_info_psy_global *gi;
@@ -159,7 +149,8 @@ extern void   _vp_compute_mask(vorbis_look_psy *p,
 			       float *mask, 
 			       float global_specmax,
 			       float local_specmax,
-			       int lastsize);
+			       int lastsize,
+			       float bitrate_noise_offset);
 
 extern void _vp_quantize_couple(vorbis_look_psy *p,
 			 vorbis_info_mapping0 *vi,

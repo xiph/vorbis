@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.24 2001/05/27 06:44:07 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.25 2001/12/12 09:45:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -191,7 +191,7 @@ codebook *codebook_load(char *filename){
   }
 
   /* find the codebook struct */
-  find_seek_to(in,"static static_codebook _");
+  find_seek_to(in,"static static_codebook ");
 
   /* get the major important values */
   line=get_line(in);
@@ -538,12 +538,12 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
   "/********************************************************************\n"
   " *                                                                  *\n"
   " * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *\n"
-  " * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *\n"
-  " * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *\n"
-  " * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *\n"
+  " * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *\n"
+  " * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *\n"
+  " * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *\n"
   " *                                                                  *\n"
   " * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *\n"
-  " * by the XIPHOPHORUS Company, http://www.xiph.org/                 *\n"
+  " * by the XIPHOPHORUS Company http://www.xiph.org/                  *\n"
   " *                                                                  *\n"
   " ********************************************************************\n"
   "\n"
@@ -708,7 +708,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
 
   /* tie it all together */
   
-  fprintf(out,"static static_codebook _vq_book_%s = {\n",name);
+  fprintf(out,"static static_codebook %s = {\n",name);
   
   fprintf(out,"\t%ld, %ld,\n",c->dim,c->entries);
   fprintf(out,"\t_vq_lengthlist_%s,\n",name);

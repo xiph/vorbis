@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.27 2001/09/19 01:17:00 cwolf Exp $
+ last mod: $Id: encoder_example.c,v 1.28 2001/12/12 09:45:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,6 +22,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 #include <math.h>
 #include <vorbis/vorbisenc.h>
@@ -85,6 +86,7 @@ int main(){
     {
       founddata = 1;
       fread(readbuffer,1,6,stdin);
+      break;
     }
   }
 
@@ -93,7 +95,8 @@ int main(){
   /* choose an encoding mode */
   /* (mode 0: 44kHz stereo uncoupled, roughly 128kbps VBR) */
   vorbis_info_init(&vi);
-  vorbis_encode_init(&vi,2,44100, -1, 128000, -1);
+
+  vorbis_encode_init_vbr(&vi,2,44100,.4);
 
   /* add a comment */
   vorbis_comment_init(&vc);
@@ -174,24 +177,27 @@ int main(){
        block for encoding now */
     while(vorbis_analysis_blockout(&vd,&vb)==1){
 
-      /* analysis */
-      vorbis_analysis(&vb,&op);
-      
-      /* weld the packet into the bitstream */
-      ogg_stream_packetin(&os,&op);
+      /* analysis, assume we want to use bitrate management */
+      vorbis_analysis(&vb,NULL);
+      vorbis_bitrate_addblock(&vb);
 
-      /* write out pages (if any) */
-      while(!eos){
-	int result=ogg_stream_pageout(&os,&og);
-	if(result==0)break;
-	fwrite(og.header,1,og.header_len,stdout);
-	fwrite(og.body,1,og.body_len,stdout);
-
-	/* this could be set above, but for illustrative purposes, I do
-	   it here (to show that vorbis does know where the stream ends) */
+      while(vorbis_bitrate_flushpacket(&vd,&op)){
 	
-	if(ogg_page_eos(&og))eos=1;
-
+	/* weld the packet into the bitstream */
+	ogg_stream_packetin(&os,&op);
+	
+	/* write out pages (if any) */
+	while(!eos){
+	  int result=ogg_stream_pageout(&os,&og);
+	  if(result==0)break;
+	  fwrite(og.header,1,og.header_len,stdout);
+	  fwrite(og.body,1,og.body_len,stdout);
+	  
+	  /* this could be set above, but for illustrative purposes, I do
+	     it here (to show that vorbis does know where the stream ends) */
+	  
+	  if(ogg_page_eos(&og))eos=1;
+	}
       }
     }
   }
