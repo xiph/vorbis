@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.6 2001/10/22 09:09:29 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.7 2001/11/16 08:17:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,7 +23,6 @@
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "codebook.h"
-#include "bitbuffer.h"
 #include "registry.h"
 #include "psy.h"
 #include "misc.h"
@@ -282,39 +281,6 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "psy.h"
 #include "scales.h"
 
-static double floater_interpolate(backend_lookup_state *b,vorbis_info *vi,
-				  double desired_rate){
-  int bin=b->bitrate_avgfloat*BITTRACK_DIVISOR-1.;
-  double lobitrate;
-  double hibitrate;
-  
-  if(desired_rate<=0.)return(0.);
-  
-  lobitrate=(double)(bin==0?0.:
-		     b->bitrate_queue_binacc[bin-1])/b->bitrate_queue_sampleacc[0]*vi->rate;
-  while(lobitrate>desired_rate && bin>0){
-    bin--;
-    lobitrate=(double)(bin==0?0.:
-		       b->bitrate_queue_binacc[bin-1])/b->bitrate_queue_sampleacc[0]*vi->rate;
-  }
-
-  hibitrate=(bin>=b->bitrate_bins?b->bitrate_queue_binacc[b->bitrate_bins-1]:
-	     (double)b->bitrate_queue_binacc[bin])/b->bitrate_queue_sampleacc[0]*vi->rate;
-  while(hibitrate<desired_rate && bin<b->bitrate_bins){
-    bin++;
-    if(bin<b->bitrate_bins)
-      hibitrate=(double)b->bitrate_queue_binacc[bin]/b->bitrate_queue_sampleacc[0]*vi->rate;
-  }
-
-  /* interpolate */
-  if(bin==b->bitrate_bins){
-    return bin/(double)BITTRACK_DIVISOR;
-  }else{
-    double delta=(desired_rate-lobitrate)/(hibitrate-lobitrate);
-    return (bin+delta)/(double)BITTRACK_DIVISOR;
-  }
-}
-
 /* no time mapping implementation for now */
 static long seq=0;
 static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
@@ -425,7 +391,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		     logmask,
 		     global_ampmax,
 		     local_ampmax[i],
-		     ci->blocksizes[vb->lW]/2);
+		     ci->blocksizes[vb->lW]/2,
+		     b->bitrate_avgnoise);
 
     _analysis_output("mask",seq+i,logmask,n/2,1,0);
     /* perform floor encoding */
@@ -577,12 +544,16 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     {
       long maxbits_absolute=
 	(vb->W?
-	 ci->bitrate_absolute_max_long/vi->rate*ci->blocksizes[1]/2:
-	 ci->bitrate_absolute_max_short/vi->rate*ci->blocksizes[0]/2);
+	 (ci->bitrate_absolute_max_long>0?
+	  ci->bitrate_absolute_max_long/vi->rate*ci->blocksizes[1]/2:-1):
+	 (ci->bitrate_absolute_max_short>0?
+	  ci->bitrate_absolute_max_short/vi->rate*ci->blocksizes[0]/2:-1));
       long minbits_absolute=
 	(vb->W?
-	 ci->bitrate_absolute_min_long/vi->rate*ci->blocksizes[1]/2:
-	 ci->bitrate_absolute_min_short/vi->rate*ci->blocksizes[0]/2);
+	 (ci->bitrate_absolute_min_long>0?
+	  ci->bitrate_absolute_min_long/vi->rate*ci->blocksizes[1]/2:-1):
+	 (ci->bitrate_absolute_min_short>0?
+	  ci->bitrate_absolute_min_short/vi->rate*ci->blocksizes[0]/2:-1));
 
       long minbits_period=ci->bitrate_queue_hardmin/vi->rate*
 	(b->bitrate_queue_sampleacc[0]+ci->blocksizes[vb->W]/2)-
@@ -592,6 +563,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			      b->bitrate_queue_sampleacc[0]);
       long maxbits_period=-1;
 
+      maxbits=-1;
+      minbits=-1;
+      
       /* pessimistic checkahead */
       for(i=0;i<8;i++){
 	long ahead_samples=period_samples-b->bitrate_queue_sampleacc[i];
@@ -599,7 +573,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	  long maxbits_local=ci->bitrate_queue_hardmax/vi->rate*
 	    (period_samples+ci->blocksizes[vb->W]/2)-
 	    b->bitrate_queue_bitacc[i]-
-	    ci->bitrate_queue_hardmin/vi->rate*ahead_samples;
+	    ci->bitrate_queue_hardmax/vi->rate*ahead_samples;
 
 	  if(maxbits_period==-1 || maxbits_local<maxbits_period)
 	    maxbits_period=maxbits_local;
@@ -608,18 +582,19 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       }
 
 
-      if(maxbits_absolute){
-	if(ci->bitrate_queue_hardmax>0.){
+      fprintf(stderr,"maxbits_a %ld    maxbit_period %ld\n",maxbits_absolute,maxbits_period);
+
+      if(maxbits_absolute>=0.){
+	if(maxbits_period>=0.){
 	  maxbits=min(maxbits_period,maxbits_absolute);
 	}else{
 	  maxbits=maxbits_absolute;
 	}
       }else
-	maxbits=maxbits_period;
+	if(maxbits_period>=0)maxbits=maxbits_period;
       minbits=max(minbits_period,minbits_absolute);
 
-      if(maxbits<0)maxbits=0;
-      if(maxbits)minbits=min(minbits,maxbits);
+      if(maxbits>=0)minbits=min(minbits,maxbits);
     }
 
     /* actual encoding loop; if we have a desired stopping point, pack
@@ -663,7 +638,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	  
 	  long current_bytes=oggpack_bits(&vb->opb)/8;
 	  
-	  if(maxbits && current_bytes>maxbits/8){
+	  if(maxbits>=0 && current_bytes>maxbits/8){
 	    /* maxbits trumps all... */
 	    stoppos=maxbits/8;
 	    stopflag=1;
@@ -715,8 +690,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
      
     /* truncate the packet according to stoppos */
     if(!stoppos)stoppos=oggpack_bytes(&vb->opb);
-    if(minbits && stoppos*8<minbits)stoppos=(minbits+7)/8;
-    if(maxbits && stoppos*8>maxbits)stoppos=maxbits/8;
+    if(minbits>=0 && stoppos*8<minbits)stoppos=(minbits+7)/8;
+    if(maxbits>=0 && stoppos*8>maxbits)stoppos=maxbits/8;
     if(stoppos>oggpack_bytes(&vb->opb))stoppos=oggpack_bytes(&vb->opb);
     vb->opb.endbyte=stoppos;
     vb->opb.endbit=0;
@@ -772,6 +747,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	  for(j=0;j<b->bitrate_bins;j++)
 	    b->bitrate_queue_binacc[j]-=
 	      b->bitrate_queue_binned[b->bitrate_queue_tail[0]*b->bitrate_bins+j];
+
+	  /* watch the running noise offset trigger */
+	  if(b->bitrate_noisetrigger_postpone)--b->bitrate_noisetrigger_postpone;
 	}
 
 	b->bitrate_queue_tail[i]++;
@@ -803,6 +781,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       
       b->bitrate_queue_head++;
       if(b->bitrate_queue_head>=b->bitrate_queue_size)b->bitrate_queue_head=0;
+
     }
       
     /* adjust the floater to offset bitrate above/below desired average */
@@ -812,13 +791,12 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     
     if(b->bitrate_bins>0 &&
        (b->bitrate_queue_sampleacc[0]>ci->bitrate_queue_time*vi->rate/8 ||
-	b->bitrate_queue_sampleacc[0]>8192)){
+	b->bitrate_queue_sampleacc[0]>8192 || b->bitrate_queue_head>16)){
+
       double upper=floater_interpolate(b,vi,ci->bitrate_queue_avgmax);
       double lower=floater_interpolate(b,vi,ci->bitrate_queue_avgmin);
       double new=ci->bitrate_avgfloat_initial;
       double slew;
-      
-      fprintf(stderr,"\tupper:%g :: lower:%g\n",upper,lower);
       
       if(upper>0. && upper<new)new=upper;
       if(lower<ci->bitrate_avgfloat_minimum)
@@ -835,6 +813,52 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	
 	b->bitrate_avgfloat=new;
       }
+
+      {
+	long queueusage=b->bitrate_queue_head;
+	if(b->bitrate_queue_tail[0]>b->bitrate_queue_head)
+	  queueusage+=b->bitrate_queue_size;
+	queueusage-=b->bitrate_queue_tail[0];
+	
+	if(b->bitrate_avgfloat<ci->bitrate_avgfloat_noisetrigger_low)
+	  b->bitrate_noisetrigger_request+=1.f;
+	
+	if(b->bitrate_avgfloat>ci->bitrate_avgfloat_noisetrigger_high)
+	  b->bitrate_noisetrigger_request-=1.f;
+	
+	if(b->bitrate_noisetrigger_postpone==0){
+	  if(b->bitrate_noisetrigger_request<0.){
+	    b->bitrate_avgnoise-=1.f;
+	    if(b->bitrate_noisetrigger_request<10.)
+	    b->bitrate_avgnoise-=1.f;
+	    b->bitrate_noisetrigger_postpone=queueusage;
+	  }
+	  if(b->bitrate_noisetrigger_request>0.){
+	    b->bitrate_avgnoise+=1.f;
+	    if(b->bitrate_noisetrigger_request>10.)
+	      b->bitrate_avgnoise+=1.f;
+	    b->bitrate_noisetrigger_postpone=queueusage;
+	  }
+
+	  b->bitrate_noisetrigger_request=0.f;
+	  if(b->bitrate_avgnoise>0)
+	    b->bitrate_noisetrigger_request= -1.;
+	  if(b->bitrate_avgnoise<0)
+	    b->bitrate_noisetrigger_request= +1.;
+
+	  if(b->bitrate_avgnoise<ci->bitrate_avgfloat_noisetrigger_minoff)
+	    b->bitrate_avgnoise=ci->bitrate_avgfloat_noisetrigger_minoff;
+	  if(b->bitrate_avgnoise>ci->bitrate_avgfloat_noisetrigger_maxoff)
+	    b->bitrate_avgnoise=ci->bitrate_avgfloat_noisetrigger_maxoff;
+	}
+      }
+	      
+      fprintf(stderr,"\tupper:%g :: lower:%g (noise offset=%g, pending=%d, trigger=%d)\n",
+	      upper,lower,b->bitrate_avgnoise,b->bitrate_noisetrigger_request,
+	      b->bitrate_noisetrigger_postpone);
+      
+
+
     }
   } 
 

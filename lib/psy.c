@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.56.2.3 2001/10/20 01:03:59 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.56.2.4 2001/11/16 08:17:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -815,14 +815,15 @@ void _vp_remove_floor(vorbis_look_psy *p,
   
 
 void _vp_compute_mask(vorbis_look_psy *p,
-		       vorbis_look_psy_global *g,
-		       int channel,
-		       float *logfft, 
-		       float *logmdct, 
-		       float *logmask, 
-		       float global_specmax,
-		       float local_specmax,
-		       int lastsize){
+		      vorbis_look_psy_global *g,
+		      int channel,
+		      float *logfft, 
+		      float *logmdct, 
+		      float *logmask, 
+		      float global_specmax,
+		      float local_specmax,
+		      int lastsize,
+		      float bitrate_noise_offset){
   int i,n=p->n;
   static int seq=0;
 
@@ -849,7 +850,7 @@ void _vp_compute_mask(vorbis_look_psy *p,
     for(i=0;i<n;i++){
       int dB=logmask[i]+.5;
       if(dB>=NOISE_COMPAND_LEVELS)dB=NOISE_COMPAND_LEVELS-1;
-      logmask[i]= work[i]+p->vi->noisecompand[dB]+p->noiseoffset[i];
+      logmask[i]= work[i]+p->vi->noisecompand[dB]+p->noiseoffset[i]+bitrate_noise_offset;
       if(logmask[i]>p->vi->noisemaxsupp)logmask[i]=p->vi->noisemaxsupp;
     }
 

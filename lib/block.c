@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.50.2.4 2001/10/20 03:00:09 xiphmont Exp $
+ last mod: $Id: block.c,v 1.50.2.5 2001/11/16 08:17:05 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -26,14 +26,10 @@
 #include "codec_internal.h"
 
 #include "window.h"
-#include "envelope.h"
 #include "mdct.h"
 #include "lpc.h"
 #include "registry.h"
-#include "codebook.h"
 #include "misc.h"
-#include "os.h"
-#include "psy.h"
 
 static int ilog2(unsigned int v){
   int ret=0;
@@ -268,25 +264,7 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   b->ve=_ogg_calloc(1,sizeof(*b->ve));
   _ve_envelope_init(b->ve,vi);
 
-  /* compute bitrate tracking setup, allocate circular packet size queue */
-  {
-    codec_setup_info *ci=vi->codec_setup;
-    /* first find the max possible needed queue size */
-    long maxpackets=(ci->bitrate_queue_time*vi->rate+(ci->blocksizes[0]-1))/ci->blocksizes[0]+1;
-    long bins=BITTRACK_DIVISOR*ci->passlimit[ci->coupling_passes-1];
-    if(ci->bitrate_queue_avgmin<=0. && 
-       ci->bitrate_queue_avgmax<=0.)bins=0;
-
-    b->bitrate_queue_size=maxpackets;
-    b->bitrate_bins=bins;
-    b->bitrate_queue_actual=_ogg_malloc(maxpackets*sizeof(*b->bitrate_queue_actual));
-    if(bins){
-      b->bitrate_queue_binned=_ogg_malloc(maxpackets*bins*
-					  sizeof(*b->bitrate_queue_binned));
-      b->bitrate_queue_binacc=_ogg_malloc(bins*sizeof(*b->bitrate_queue_binacc));
-    }
-    b->bitrate_avgfloat=ci->bitrate_avgfloat_initial;
-  }
+  vorbis_bitrate_init(vi,&b->bms);
 
   return(0);
 }
@@ -328,10 +306,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	_ogg_free(b->transform[1]);
       }
       if(b->psy_g_look)_vp_global_free(b->psy_g_look);
-      if(b->bitrate_queue_actual)_ogg_free(b->bitrate_queue_actual);
-      if(b->bitrate_queue_binned)_ogg_free(b->bitrate_queue_binned);
-      if(b->bitrate_queue_binacc)_ogg_free(b->bitrate_queue_binacc);
-      
+      vorbis_bitrate_clear(&b->bms);
     }
     
     if(v->pcm){

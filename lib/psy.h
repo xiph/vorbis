@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.24.2.3 2001/10/20 01:03:59 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.24.2.4 2001/11/16 08:17:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -159,7 +159,8 @@ extern void   _vp_compute_mask(vorbis_look_psy *p,
 			       float *mask, 
 			       float global_specmax,
 			       float local_specmax,
-			       int lastsize);
+			       int lastsize,
+			       float bitrate_noise_offset);
 
 extern void _vp_quantize_couple(vorbis_look_psy *p,
 			 vorbis_info_mapping0 *vi,

@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.9.4.4 2001/10/20 03:00:09 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.9.4.5 2001/11/16 08:17:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,8 +45,8 @@ typedef void vorbis_info_residue;
 typedef void vorbis_info_mapping;
 
 #include "psy.h"
+#inclide "bitrate.h"
 
-#define BITTRACK_DIVISOR 16
 typedef struct backend_lookup_state {
   /* local lookup storage */
   envelope_lookup        *ve; /* envelope lookup */    
@@ -67,20 +67,7 @@ typedef struct backend_lookup_state {
   unsigned char *header1;
   unsigned char *header2;
 
-  /* encode side bitrate tracking */
-  ogg_uint32_t  *bitrate_queue_actual;
-  ogg_uint32_t  *bitrate_queue_binned;
-  int            bitrate_queue_size;
-  int            bitrate_queue_head;
-  int            bitrate_bins;
-
-  /* 0, -1, -4, -16, -n/16, -n/8, -n/4, -n/2 */
-  long    bitrate_queue_bitacc[8];
-  long    bitrate_queue_sampleacc[8];
-  long    bitrate_queue_tail[8]; 
-  long   *bitrate_queue_binacc;
-
-  double bitrate_avgfloat;
+  bitrate_manager_state bms;
 
 } backend_lookup_state;
 
@@ -123,26 +110,7 @@ typedef struct codec_setup_info {
 
   vorbis_info_psy        *psy_param[64]; /* encode only */
   vorbis_info_psy_global *psy_g_param;
-
-  /* detailed bitrate management setup */
-  double bitrate_absolute_min_short;
-  double bitrate_absolute_min_long;
-  double bitrate_absolute_max_short;
-  double bitrate_absolute_max_long;
-
-  double bitrate_queue_time;
-  double bitrate_queue_hardmin;
-  double bitrate_queue_hardmax;
-  double bitrate_queue_avgmin;
-  double bitrate_queue_avgmax;
-
-  double bitrate_avgfloat_initial; /* set by mode */
-  double bitrate_avgfloat_minimum; /* set by mode */
-  double bitrate_avgfloat_downslew_max;
-  double bitrate_avgfloat_upslew_max;
-  double bitrate_avgfloat_downhyst;
-  double bitrate_avgfloat_uphyst;
-
+  bitrate_manager_info   *bi;
 
   int    passlimit[32];     /* iteration limit per couple/quant pass */
   int    coupling_passes;
