@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.2.2.7 2000/05/02 00:28:58 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2.2.8 2000/05/04 06:13:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,29 +31,31 @@
 #include "lpc.h"
 
 static vorbis_info_psy _psy_set0={
-  1,1,1,
-
-  0,8,4.,
+  1,/*athp*/
+  1,/*decayp*/
+  1,/*smoothp*/
+  1,8,0.,
 
   -130.,
 
-  {-40.,-40.,-60.,-80.,-85.},
-  {-40.,-40.,-60.,-80.,-100.},
-  {-40.,-40.,-60.,-80.,-100.},
-  {-40.,-40.,-60.,-80.,-100.},
-  {-40.,-40.,-60.,-80.,-100.},
-  {-70.,-70.,-70.,-80.,-100.},
+  1,/* tonemaskp*/
+  {-35.,-40.,-60.,-80.,-80.}, /* remember that el 4 is an 80 dB curve, not 100 */
+  {-35.,-40.,-60.,-80.,-95.},
+  {-35.,-40.,-60.,-80.,-95.},
+  {-35.,-40.,-60.,-80.,-95.},
+  {-35.,-40.,-60.,-80.,-95.},
+  {-65.,-60.,-60.,-80.,-95.},  /* remember that el 1 is a 60 dB curve, not 40 */
 
-  1,
-  {{-6.,-8.,-12.,-16.,-18.},
-   {-6.,-8.,-12.,-16.,-18.},
-   {-6.,-8.,-12.,-16.,-18.},
-   {-6.,-8.,-12.,-16.,-20.},
-   {-6.,-8.,-12.,-16.,-20.},
-   {-6.,-8.,-12.,-16.,-18.},},
-  -80.,-40.,
+  1,/*noisemaskp*/
+  {-100.,-100.,-100.,-200.,-200.}, /* this is the 500 Hz curve, which
+                                      is too wrong to work */
+  {-60.,-60.,-60.,-80.,-80.},
+  {-60.,-60.,-60.,-80.,-80.},
+  {-60.,-60.,-60.,-80.,-80.},
+  {-60.,-60.,-60.,-80.,-80.},
+  {-50.,-55.,-60.,-80.,-80.},
 
-  100.,
+  110.,
 
   .9998, .9997  /* attack/decay control */
 };
@@ -132,7 +134,7 @@ int main(int argc,char *argv[]){
   int framesize=2048;
   int order=32;
 
-  double *pcm[2],*out[2],*window,*mask,*decay[2],*lpc,*floor;
+  double *pcm[2],*out[2],*window,*decay[2],*lpc,*floor;
   signed char *buffer,*buffer2;
   mdct_lookup m_look;
   vorbis_look_psy p_look;
@@ -187,7 +189,6 @@ int main(int argc,char *argv[]){
   out[1]=calloc(framesize/2,sizeof(double));
   decay[0]=calloc(framesize/2,sizeof(double));
   decay[1]=calloc(framesize/2,sizeof(double));
-  mask=malloc(framesize*sizeof(double));
   floor=malloc(framesize*sizeof(double));
   lpc=malloc(order*sizeof(double));
   buffer=malloc(framesize*4);
@@ -199,7 +200,10 @@ int main(int argc,char *argv[]){
 
   for(i=0;i<11;i++)
     for(j=0;j<9;j++)
-      analysis("Pcurve",i*10+j,p_look.curves[i][j],EHMER_MAX,0,1);
+      analysis("Ptonecurve",i*10+j,p_look.tonecurves[i][j],EHMER_MAX,0,1);
+  for(i=0;i<11;i++)
+    for(j=0;j<9;j++)
+      analysis("Pnoisecurve",i*10+j,p_look.noisecurves[i][j],EHMER_MAX,0,1);
 
   /* we cheat on the WAV header; we just bypass 44 bytes and never
      verify that it matches 16bit/stereo/44.1kHz. */
@@ -233,7 +237,6 @@ int main(int argc,char *argv[]){
 	analysis("pre",frameno,pcm[i],framesize,0,0);
 	
 	/* do the psychacoustics */
-	memset(mask,0,sizeof(double)*framesize/2);
 	for(j=0;j<framesize;j++)
 	  pcm[i][j]*=window[j];
 
@@ -241,9 +244,8 @@ int main(int argc,char *argv[]){
 
 	analysis("mdct",frameno,pcm[i],framesize/2,1,1);
 
-	_vp_tone_tone_mask(&p_look,pcm[i],floor,mask,decay[i]);
+	_vp_compute_mask(&p_look,pcm[i],floor,decay[i]);
 	
-	analysis("mask",frameno,mask,framesize/2,1,1);
 	analysis("prefloor",frameno,floor,framesize/2,1,1);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
 	
@@ -251,7 +253,7 @@ int main(int argc,char *argv[]){
 	_lpc_to_curve(floor,lpc,sqrt(amp),&floorlook,"Ffloor",frameno);
 	analysis("floor",frameno,floor,framesize/2,1,1);
 
-	_vp_apply_floor(&p_look,pcm[i],floor,mask);
+	_vp_apply_floor(&p_look,pcm[i],floor);
 
 	/* re-add floor */
 	for(j=0;j<framesize/2;j++){
