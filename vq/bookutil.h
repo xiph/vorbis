@@ -11,27 +11,31 @@
  *                                                                  *
  ********************************************************************
 
- function: basic shared codebook operations
- last mod: $Id: sharedbook.h,v 1.1.2.2 2000/04/04 07:08:44 xiphmont Exp $
+ function: utility functions for loading .vqh and .vqd files
+ last mod: $Id: bookutil.h,v 1.4.4.1 2000/04/04 07:08:45 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_INT_SHCODEBOOK_H_
-#define _V_INT_SHCODEBOOK_H_
+#ifndef _V_BOOKUTIL_H_
+#define _V_BOOKUTIL_H_
+
+#include <stdio.h>
+#include <sys/time.h>
 
 #include "vorbis/codebook.h"
 
-extern void vorbis_staticbook_clear(static_codebook *b);
-extern int vorbis_book_init_encode(codebook *dest,const static_codebook *source);
-extern int vorbis_book_init_decode(codebook *dest,const static_codebook *source);
-extern void vorbis_book_clear(codebook *b);
+extern char     *get_line(FILE *in);
+extern int       get_line_value(FILE *in,double *value);
+extern int       get_next_value(FILE *in,double *value);
+extern int       get_next_ivalue(FILE *in,long *ivalue);
+extern void      reset_next_value(void);
+extern int       get_vector(codebook *b,FILE *in,int start,int num,double *a);
+extern char     *find_seek_to(FILE *in,char *s);
 
-extern double *_book_unquantize(const static_codebook *b);
-extern double *_book_logdist(const static_codebook *b,double *vals);
-extern double _float24_unpack(long val);
-extern long   _float24_pack(double val);
-extern int  _best(codebook *book, double *a, int step);
-extern int  _logbest(codebook *book, double *a, int step);
-extern int _ilog(unsigned int v);
+extern codebook *codebook_load(char *filename);
+
+extern void spinnit(char *s,int n);
+extern void build_tree_from_lengths(int vals, long *hist, long *lengths);
 
 #endif
+

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.11.4.2 2000/04/02 01:21:22 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.11.4.3 2000/04/04 07:08:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -57,12 +57,12 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
       long last=c->lengthlist[i-1];
       if(this>last){
 	for(j=last;j<this;j++){
-	  _oggpack_write(opb,i-count,ilog(c->entries-count));
+	  _oggpack_write(opb,i-count,_ilog(c->entries-count));
 	  count=i;
 	}
       }
     }
-    _oggpack_write(opb,i-count,ilog(c->entries-count));
+    _oggpack_write(opb,i-count,_ilog(c->entries-count));
 
   }else{
     /* length random.  Again, we don't code the codeword itself, just
@@ -153,7 +153,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
       s->lengthlist=malloc(sizeof(long)*s->entries);
       
       for(i=0;i<s->entries;){
-	long num=_oggpack_read(opb,ilog(s->entries-i));
+	long num=_oggpack_read(opb,_ilog(s->entries-i));
 	if(num==-1)goto _eofout;
 	for(j=0;j<num;j++,i++)
 	  s->lengthlist[i]=length;

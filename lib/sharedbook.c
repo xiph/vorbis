@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.1.2.1 2000/04/02 01:21:22 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.1.2.2 2000/04/04 07:08:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include "sharedbook.h"
 
 /**** pack/unpack helpers ******************************************/
-static int ilog(unsigned int v){
+int _ilog(unsigned int v){
   int ret=0;
   while(v){
     ret++;
@@ -166,7 +166,7 @@ decode_aux *_make_decode_tree(codebook *c){
 }
 
 /* unpack the quantized list of values for encode/decode ***********/
-static double *_book_unquantize(const static_codebook *b){
+double *_book_unquantize(const static_codebook *b){
   long j,k;
   if(b->quantlist){
     double mindel=_float24_unpack(b->q_min);
@@ -194,7 +194,7 @@ static double *_book_unquantize(const static_codebook *b){
 /* on the encode side of a log scale, we need both the linear
    representation (done by unquantize above) but also a log version to
    speed error metric computation */
-static double *_book_logdist(const static_codebook *b,double *vals){
+double *_book_logdist(const static_codebook *b,double *vals){
   long j;
   if(b->quantlist && b->q_log){
     double *r=malloc(sizeof(double)*b->entries*b->dim);
