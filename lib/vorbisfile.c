@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.60 2002/03/19 17:49:59 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.61 2002/03/29 07:58:05 msmith Exp $
 
  ********************************************************************/
 
@@ -1025,8 +1025,8 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
    location, such that decoding past the returned point will quickly
    arrive at the requested position. */
 int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
-  int link=-1,ret=0;
-  ogg_int64_t result;
+  int link=-1;
+  ogg_int64_t result=0;
   ogg_int64_t total=ov_pcm_total(vf,-1);
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
@@ -1078,7 +1078,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	  if(bisect<=begin+1)
 	    end=begin; /* found it */
 	  else{
-	    if(bisect==0)goto seek_error;
+	    if(bisect==0) goto seek_error;
 	    bisect-=CHUNKSIZE;
 	    if(bisect<=begin)bisect=begin+1;
 	    _seek_helper(vf,bisect);
@@ -1145,7 +1145,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 
 	  while(1){
 	    result=_get_prev_page(vf,&og);
-	    if(result<0)goto seek_error;
+	    if(result<0) goto seek_error;
 	    if(ogg_page_granulepos(&og)>-1 ||
 	       !ogg_page_continued(&og)){
 	      return ov_raw_seek(vf,result);
@@ -1153,7 +1153,10 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	    vf->offset=result;
 	  }
 	}
-	if(result<0)goto seek_error;
+	if(result<0){
+      result = OV_EBADPACKET; 
+      goto seek_error;
+    }
 	if(op.granulepos!=-1){
 	  vf->pcm_offset=op.granulepos-vf->pcmlengths[vf->current_link*2];
 	  if(vf->pcm_offset<0)vf->pcm_offset=0;
@@ -1167,7 +1170,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
   
   /* verify result */
   if(vf->pcm_offset>pos || pos>ov_pcm_total(vf,-1)){
-    ret=OV_EFAULT;
+    result=OV_EFAULT;
     goto seek_error;
   }
   return(0);
@@ -1176,7 +1179,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
   /* dump machine so we're in a known state */
   vf->pcm_offset=-1;
   _decode_clear(vf);
-  return ret;
+  return (int)result;
 }
 
 /* seek to a sample offset relative to the decompressed pcm stream 
@@ -1474,6 +1477,9 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
     long bytespersample=word * channels;
     vorbis_fpu_control fpu;
     if(samples>length/bytespersample)samples=length/bytespersample;
+
+    if(samples <= 0)
+      return OV_EINVAL;
     
     /* a tight loop to pack each size */
     {
