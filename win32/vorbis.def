@@ -1,5 +1,5 @@
 ;
-; $Id: vorbis.def,v 1.8 2001/12/27 14:25:20 cwolf Exp $
+; $Id: vorbis.def,v 1.9 2002/03/18 04:46:40 segher Exp $
 ; 
 LIBRARY
 EXPORTS
@@ -37,3 +37,4 @@ vorbis_synthesis_headerin
 vorbis_synthesis_init
 vorbis_synthesis_pcmout
 vorbis_synthesis_read
+vorbis_synthesis_trackonly
