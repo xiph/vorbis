@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.16 2001/10/02 00:14:31 segher Exp $
+ last mod: $Id: floor1.c,v 1.17 2001/11/13 06:04:31 msmith Exp $
 
  ********************************************************************/
 
@@ -90,7 +90,7 @@ static void floor1_free_look(vorbis_look_floor *i){
 	    (float)(look->postbits+look->phrasebits)/look->frames);*/
 
     memset(look,0,sizeof(*look));
-    free(look);
+    _ogg_free(look);
   }
 }
 
