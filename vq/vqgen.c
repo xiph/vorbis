@@ -86,11 +86,11 @@ void _vqgen_seed(vqgen *v){
 
 void vqgen_init(vqgen *v,int elements,int entries,
 		double (*metric)(vqgen *,double *, double *),
-		double spread){
+		int quant){
   memset(v,0,sizeof(vqgen));
 
   v->elements=elements;
-  v->errspread=spread;
+  v->quantbits=quant;
   v->allocated=32768;
   v->pointlist=malloc(v->allocated*v->elements*sizeof(double));
 
@@ -113,54 +113,6 @@ void vqgen_addpoint(vqgen *v, double *p){
   memcpy(_point(v,v->points),p,sizeof(double)*v->elements);
   v->points++;
   if(v->points==v->entries)_vqgen_seed(v);
-}
-
-/* take the trained entries, look at the points that comprise the cell
-   and find midpoints (as the actual encoding process uses euclidian
-   distance rather than any more complex metric to find the closest
-   match */
-
-double *vqgen_midpoint(vqgen *v){
-  long i,j,k;
-  double *lo=malloc(v->entries*v->elements*sizeof(double));
-  double *hi=malloc(v->entries*v->elements*sizeof(double));
-
-  memset(v->assigned,0,sizeof(long)*v->entries);
-  for(i=0;i<v->points;i++){
-    double *ppt=_point(v,i);
-    double firstmetric=v->metric_func(v,_now(v,0),ppt)+v->bias[0];
-    long   firstentry=0;
-    for(j=1;j<v->entries;j++){
-      double thismetric=v->metric_func(v,_now(v,j),_point(v,i))+v->bias[j];
-      if(thismetric<firstmetric){
-	firstmetric=thismetric;
-	firstentry=j;
-      }
-    }
-    
-    j=firstentry;
-    if(v->assigned[j]++){
-      for(k=0;k<v->elements;k++){
-	if(ppt[k]<vN(lo,j)[k])vN(lo,j)[k]=ppt[k];
-	if(ppt[k]>vN(hi,j)[k])vN(hi,j)[k]=ppt[k];
-      }
-    }else{
-      for(k=0;k<v->elements;k++){
-	vN(lo,j)[k]=ppt[k];
-	vN(hi,j)[k]=ppt[k];
-      }
-    }
-  }
-
-  for(j=0;j<v->entries;j++)
-    if(v->assigned[j])
-      for(k=0;k<v->elements;k++)
-	vN(lo,j)[k]=(vN(lo,j)[k]+vN(hi,j)[k])/2.;
-    else
-      for(k=0;k<v->elements;k++)
-	vN(lo,j)[k]=_now(v,j)[k];
-  free(hi);
-  return(lo);
 }
 
 double vqgen_iterate(vqgen *v){
@@ -286,7 +238,8 @@ double vqgen_iterate(vqgen *v){
   for(i=0;i<v->entries;i++)
     v->bias[i]=nearbias[(i+1)*desired-1];
 
-  /* last, assign midpoints */
+  /* assign midpoints */
+
   for(j=0;j<v->entries;j++){
     asserror+=fabs(v->assigned[j]-fdesired);
     if(v->assigned[j])
@@ -296,6 +249,31 @@ double vqgen_iterate(vqgen *v){
     fprintf(assig,"%ld\n",v->assigned[j]);
     fprintf(bias,"%g\n",v->bias[j]);
 #endif
+  }
+
+  {
+    /* midpoints must be quantized.  but we need to know the range in
+       order to do so */
+    double *min=alloca(sizeof(double)*v->elements);
+    double *max=alloca(sizeof(double)*v->elements);
+   
+    for(k=0;k<v->elements;k++)
+      min[k]=max[k]=_now(v,0)[k];
+    for(j=1;j<v->entries;j++){
+      for(k=0;k<v->elements;k++){
+	double val=_now(v,0)[k];
+	if(val<min[k])min[k]=val;
+	if(val>max[k])max[k]=val;
+      }
+    }
+    for(k=0;k<v->elements;k++){
+      double base=min[k];
+      double delta=max[k]-min[k]/((1<<v->quantbits)-1);
+      for(j=0;j<v->entries;j++){
+	double val=_now(v,j)[k];
+	_now(v,j)[k]=rint((val-base)/delta);
+      }
+    }
   }
 
   asserror/=(v->entries*fdesired);

@@ -14,7 +14,7 @@
  function: utility main for training codebooks
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Dec 10 1999
+ last modification date: Dec 14 1999
 
  ********************************************************************/
 
@@ -75,7 +75,7 @@ static int rline(FILE *in,FILE *out,char *line,int max,int pass){
 }
 
 /* command line:
-   trainvq [vq=file | [entries=n] [dim=n]] met=n in=file,firstcol 
+   trainvq [vq=file | [entries=n] [dim=n] [quant=n]] met=n in=file,firstcol 
            [in=file,firstcol]
 */
 
@@ -87,7 +87,7 @@ void setexit(int dummy){
 
 int main(int argc,char *argv[]){
   vqgen v;
-  int entries=-1,dim=-1;
+  int entries=-1,dim=-1,quant=-1;
   FILE *out=NULL;
   int met=0;
   double (*metric)(vqgen *,double *, double *)=NULL;
@@ -131,13 +131,13 @@ int main(int argc,char *argv[]){
 	double a;
 	    
 	rline(in,out,line,160,1);
-	if(sscanf(line,"%d %d %d",&entries,&dim,&met)!=3){
+	if(sscanf(line,"%d %d %d %d",&entries,&dim,&met,&quant)!=3){
 	  fprintf(stderr,"Syntax error reading book file\n");
 	  exit(1);
 	}
 
 	metric=set_metric(met);
-	vqgen_init(&v,dim,entries,metric,0.);
+	vqgen_init(&v,dim,entries,metric,quant);
 	init=1;
 
 	/* entries, bias, points */
@@ -177,6 +177,9 @@ int main(int argc,char *argv[]){
     }
 
     /* set parameters if we're not loading a pre book */
+    if(!strncmp(*argv,"quant=",6)){
+      sscanf(*argv,"quant=%d",&quant);
+    }
     if(!strncmp(*argv,"entries=",8)){
       sscanf(*argv,"entries=%d",&entries);
     }
@@ -204,12 +207,12 @@ int main(int argc,char *argv[]){
 	exit(1);
       }
       if(!init){
-	if(dim==-1 || entries==-1){
-	  fprintf(stderr,"Must specify dimensionality and entries before"
+	if(dim==-1 || entries==-1 || quant==-1){
+	  fprintf(stderr,"Must specify dimensionality,entries,quant before"
 		  " first input file\n");
 	  exit(1);
 	}
-	vqgen_init(&v,dim,entries,metric,0.);
+	vqgen_init(&v,dim,entries,metric,quant);
 	init=1;
       }
 
@@ -248,7 +251,7 @@ int main(int argc,char *argv[]){
 
   /* save the book */
 
-  fprintf(out,"%d %d %d\n",entries,dim,met);
+  fprintf(out,"%d %d %d %d\n",entries,dim,met,quant);
 
   i=0;
   for(j=0;j<entries;j++)
