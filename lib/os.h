@@ -13,7 +13,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.28 2001/12/19 01:08:14 xiphmont Exp $
+ last mod: $Id: os.h,v 1.29 2002/03/18 03:30:23 segher Exp $
 
  ********************************************************************/
 
@@ -62,6 +62,9 @@
 #endif
 #ifdef HAVE_RINTF
 #  define rint rintf
+#endif
+#ifdef HAVE_FLOORF
+#  define floor floorf
 #endif
 
 #ifndef FAST_HYPOT
