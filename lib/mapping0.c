@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.5 2001/10/20 03:00:10 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.6 2001/10/22 09:09:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -651,15 +651,15 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		    qbundle[j],sobundle[j],zerobundle[j],chbundle[j],
 		    i,classifications[j],b->bitrate_avgfloat,queueptr);
 	}
-	i++;
-
       }
-
+      i++;
+	
+      
       /* bitrate management.... deciding when it's time to stop. */
       if(i<quant_passes){
 	if(b->bitrate_bins==0){ /* average bitrate always runs
-                                      encode to the bitter end in
-                                      order to collect statistics */
+				   encode to the bitter end in
+				   order to collect statistics */
 	  
 	  long current_bytes=oggpack_bits(&vb->opb)/8;
 	  

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.37.2.5 2001/10/20 01:03:59 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.37.2.6 2001/10/22 09:09:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -511,13 +511,8 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
   }
 #endif      
 
-  if((int)passlimit<ci->passlimit[pass]){
-    wholepasses=passlimit;
-    partialpass=rint((passlimit-wholepasses)*partvals);
-  }else{
-    wholepasses=ci->passlimit[pass];
-    partialpass=0;
-  }
+  wholepasses=passlimit;
+  partialpass=(passlimit-wholepasses)*partvals;
 
   memset(resbits,0,sizeof(resbits));
   memset(resvals,0,sizeof(resvals));
