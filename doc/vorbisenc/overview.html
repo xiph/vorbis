@@ -9,50 +9,249 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>libvorbisenc documentation</p></td>
-<td align=right><p class=tiny>libvorbisenc version 1.1.2.2 - 20001104</p></td>
+<td align=right><p class=tiny>libvorbisenc release 1.1 - 20040709</p></td>
 </tr>
 </table>
 
 <h1>Libvorbisenc API Overview</h1>
 
-<p>The current version of libvorbisenc is very simple.  It contains an initialization function to set up the encoding engine properly.
-It also contains a control function to be used in the future to tweak encoder settings.
-<p>
+<p>Libvorbisenc is an encoding convenience library intended to
+encapsulate the elaborate setup that libvorbis requires for encoding.
+Libvorbisenc gives easy access to all high-level adjustments an
+application may require when encoding and also exposes some low-level
+tuning parameters to allow applications to make detailed adjustments
+to the encoding process. <p>
+
 All the <b>libvorbisenc</b> routines are declared in "vorbis/vorbisenc.h".
+
+<em>Note: libvorbis and libvorbisenc always
+encode in a single pass. Thus, all possible encoding setups will work
+properly with live input and produce streams that decode properly when
+streamed.  See the subsection titled <a href="#BBR">"managed bitrate
+modes"</a> for details on setting limits on bitrate usage when Vorbis
+streams are used in a limited-bandwidth environment.</em>
+
+<h2>workflow</h2>
+
+<p>Libvorbisenc is used only during encoder setup; its function
+is to automate initialization of a multitude of settings in a
+<tt>vorbis_info</tt> structure which libvorbis then uses as a reference
+during the encoding process.  Libvorbisenc plays no part in the
+encoding process after setup.
+
+<p>Encode setup using libvorbisenc consists of three steps: 
+
+<ol>
+<li>high-level initialization of a <tt>vorbis_info</tt> structure by
+calling one of <a
+href="vorbis_encode_setup_vbr">vorbis_encode_setup_vbr()</a> or <a
+href="vorbis_encode_setup_managed">vorbis_encode_setup_managed()</a>
+with the basic input audio parameters (rate and channels) and the
+basic desired encoded audio output parameters (VBR quality or ABR/CBR
+bitrate)<p>
+
+<li>optional adjustment of the basic setup defaults using <a
+href="vorbis_encode_ctl">vorbis_encode_ctl()</a><p>
+
+<li>calling <a
+href="vorbis_encode_setup_init">vorbis_encode_setup_init()</a> to
+finalize the high-level setup into the detailed low-level reference
+values needed by libvorbis to encode audio. The <tt>vorbis_info</tt>
+structure is then ready to use for encoding by libvorbis.<p>
+
+</ol>
+
+These three steps can be collapsed into a single call by using <a
+href="vorbis_encode_init_vbr">vorbis_encode_init_vbr</a> to set up a
+quality-based VBR stream or <a
+href="vorbis_encode_init">vorbis_encode_init</a> to set up a managed
+bitrate (ABR or CBR) stream.<p>
+
+<h2>adjustable encoding parameters</h2>
+
+<h3>input audio parameters</h3>
 
 <p>
 <table border=1 color=black width=50% cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
-	<td><b>function</b></td>
-	<td><b>purpose</b></td>
+	<td><b>parameter</b></td>
+	<td><b>description</b></td>
 </tr>
 <tr valign=top>
-	<td><a href="vorbis_encode_init.html">vorbis_encode_init</a></td>
-	<td>This function takes a <a href="vorbis_info.html">vorbis_info</a> struct and encoding parameters and sets up a proper encoding environment.</tt></a>.</td>
+<td>sampling rate</td>
+<td>
+The sampling rate (in samples per second) of the input audio.  Common examples are 8000 for telephony, 44100 for CD audio and 48000 for DAT.  Note that a mono sample (one center value) and a stereo sample (one left value and one right value) both are a single sample.
+
+</td>
 </tr>
 <tr valign=top>
-<td><a href="vorbis_encode_init_vbr.html">vorbis_encode_init_vbr</a></td>
-<td>This function takes a <a href="vorbis_info.html">vorbis_info</a> struct
-and encoding parameters for VBR encoding.</td>
-</tr>
-<tr valign=top>
-	<td><a href="vorbis_encode_ctl.html">vorbis_encode_ctl</a></td>
-	<td>Function in progress, to be used in future versions of this API.</td>
+<td>channels</td>
+<td>
+
+The number of channels encoded in each input sample.  By default,
+stereo input modes (two channels) are 'coupled' by Vorbis 1.1 such
+that the stereo relationship between the samples is taken into account
+when encoding.  Stereo coupling my be disabled by using <a
+href="vorbis_encode_ctl">vorbis_encode_ctl()</a> with <a
+href="vorbis_encode_ctl#OV_ECTL_COUPLE_SET">OV_ECTL_COUPLE_SET</a>.
+
+</td>
 </tr>
 </table>
+
+<h3>quality and VBR modes</h3>
+
+Vorbis is natively a VBR codec; a user requests a given constant
+<em>quality</em> and the encoder keeps the encoding quality constant
+while allowing the bitrate to vary.  'Quality' modes (Variable BitRate)
+will always produce the most consistent encoding results as well as
+the highest quality for the amount of bits used.
+
+<p>
+<table border=1 color=black width=50% cellspacing=0 cellpadding=7>
+<tr bgcolor=#cccccc>
+	<td><b>parameter</b></td>
+	<td><b>description</b></td>
+</tr>
+<tr valign=top>
+<td>quality</td>
+<td>
+A decimal float value requesting a desired quality.  Libvorbisenc 1.1 allows quality requests in the range of -0.1 (lowest quality, smallest files) through +1.0 (highest-quality, largest files). Quality -0.1 is intended as an ultra-low setting in which low bitrate is much more important than quality consistency.  Quality settings 0.0 and above are intended to produce consistent results at all times.  
+
+</td>
+</tr>
+</table>
+
+<a name="BBR">
+<h3>managed bitrate modes</h3>
+
+Although the Vorbis codec is natively VBR, libvorbis includes
+infrastructure for 'managing' the bitrate of streams by setting
+minimum and maximum usage constraints, as well as functionality for
+nudging a stream toward a desired average value.  These features
+should <em>only</em> be used when there is a requirement to limit
+bitrate in some way.  Although the difference is usually slight,
+managed bitrate modes will always produce output inferior to VBR
+(given equal bitrate usage).<p>
+
+Beginning in libvorbis 1.1, bitrate management is implemented using a
+<em>bit-reservoir</em> algorithm. The encoder has a fixed-size
+reservoir used as a 'savings account' in encoding.  When a frame is
+smaller than the target rate, the unused bits go into the reservoir so
+that they may be used by future frames.  When a frame is larger than
+target bitrate, it draws 'banked' bits out of the reservoir.  Encoding
+is managed so that the reservoir never goes negative (when a maximum
+bitrate is specified) or fills beyond a fixed limit (when a minimum
+bitrate is specified).  An 'average bitrate' request is used as the
+set-point in a long-range bitrate tracker which adjusts the encoder's
+aggressiveness up or down depending on whether or not frames are coming
+in larger or smaller than the requested average point.
+
+<p>
+<table border=1 color=black width=50% cellspacing=0 cellpadding=7>
+<tr bgcolor=#cccccc>
+	<td><b>parameter</b></td>
+	<td><b>description</b></td>
+</tr>
+<tr valign=top>
+<td>minimum bitrate</td>
+<td> </td>
+</tr>
+
+<tr valign=top>
+<td>average bitrate</td>
+<td> 
+
+</td>
+</tr>
+
+<tr valign=top>
+<td>maximum bitrate</td>
+<td> 
+
+</td>
+</tr>
+
+<tr valign=top>
+<td>reservoir size</td>
+<td> 
+
+</td>
+</tr>
+
+<tr valign=top>
+<td>reservoir bias</td>
+<td> 
+
+</td>
+</tr>
+
+<tr valign=top>
+<td>average track damping</td>
+<td> 
+
+</td>
+</tr>
+
+</table>
+
+<h3>encoding model adjustments</h3>
+
+The <a href="vorbis_encode_ctl">vorbis_encode_ctl()</a> call provides
+a generalized interface for making encoding setup adjustments to the
+basic high-level setup provided by <a
+href="vorbis_encode_setup_vbr">vorbis_encode_setup_vbr()</a> or <a
+href="vorbis_encode_setup_managed">vorbis_encode_setup_managed()</a>.
+In reality, these two calls use <a
+href="vorbis_encode_ctl">vorbis_encode_ctl()</a> internally, and <a
+href="vorbis_encode_ctl">vorbis_encode_ctl()</a> can be used to adjust
+most of the parameters set by other calls.<p>
+
+In Vorbis 1.1, <a href="vorbis_encode_ctl">vorbis_encode_ctl()</a> can
+adjust the following additional parameters not described elsewhere:
+
+<p>
+<table border=1 color=black width=50% cellspacing=0 cellpadding=7>
+<tr bgcolor=#cccccc>
+	<td><b>parameter</b></td>
+	<td><b>description</b></td>
+</tr>
+<tr valign=top>
+<td>management mode</td>
+<td> </td>
+</tr>
+
+<tr valign=top>
+<td>coupling</td>
+<td> </td>
+</tr>
+
+<tr valign=top>
+<td>lowpass</td>
+<td> </td>
+</tr>
+
+<tr valign=top>
+<td>impulse coding aggressiveness</td>
+<td> </td>
+</tr>
+
+</table>
+
 
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2000 vorbis team</p></td>
+<td><p class=tiny>copyright &copy; 2004 Vorbis team</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
 </tr><tr>
-<td><p class=tiny>vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.25 - 20000615</p></td>
+<td><p class=tiny>libvorbisenc documentation</p></td>
+<td align=right><p class=tiny>libvorbisenc release 1.1 - 20040709</p></td>
 </tr>
 </table>
 
 </body>
 
 </html>
+
