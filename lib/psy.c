@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.55 2001/09/11 05:06:57 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.56 2001/10/02 00:14:32 segher Exp $
 
  ********************************************************************/
 
@@ -38,16 +38,16 @@ vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   int i,j;
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy_global *gi=ci->psy_g_param;
-  vorbis_look_psy_global *look=_ogg_calloc(1,sizeof(vorbis_look_psy_global));
+  vorbis_look_psy_global *look=_ogg_calloc(1,sizeof(*look));
 
   int shiftoc=rint(log(gi->eighth_octave_lines*8)/log(2))-1;
   look->decaylines=toOC(96000.f)*(1<<(shiftoc+1))+.5f; /* max sample
 							  rate of
 							  192000kHz
 							  for now */
-  look->decay=_ogg_calloc(vi->channels,sizeof(float *));
+  look->decay=_ogg_calloc(vi->channels,sizeof(*look->decay));
   for(i=0;i<vi->channels;i++){
-    look->decay[i]=_ogg_calloc(look->decaylines,sizeof(float));
+    look->decay[i]=_ogg_calloc(look->decaylines,sizeof(*look->decay[i]));
     for(j=0;j<look->decaylines;j++)
       look->decay[i][j]=-9999.;
   }
@@ -65,20 +65,20 @@ void _vp_global_free(vorbis_look_psy_global *look){
       _ogg_free(look->decay[i]);
     _ogg_free(look->decay);
   }
-  memset(look,0,sizeof(vorbis_look_psy_global));
+  memset(look,0,sizeof(*look));
   _ogg_free(look);
 }
 
 void _vi_psy_free(vorbis_info_psy *i){
   if(i){
-    memset(i,0,sizeof(vorbis_info_psy));
+    memset(i,0,sizeof(*i));
     _ogg_free(i);
   }
 }
 
 vorbis_info_psy *_vi_psy_copy(vorbis_info_psy *i){
-  vorbis_info_psy *ret=_ogg_malloc(sizeof(vorbis_info_psy));
-  memcpy(ret,i,sizeof(vorbis_info_psy));
+  vorbis_info_psy *ret=_ogg_malloc(sizeof(*ret));
+  memcpy(ret,i,sizeof(*ret));
   return(ret);
 }
 
@@ -133,8 +133,8 @@ static void setup_curve(float **c,
   float tempc[P_LEVELS][EHMER_MAX];
   float *ATH=ATH_Bark_dB_lspconservative; /* just for limiting here */
 
-  memcpy(c[0]+2,c[4]+2,sizeof(float)*EHMER_MAX);
-  memcpy(c[2]+2,c[4]+2,sizeof(float)*EHMER_MAX);
+  memcpy(c[0]+2,c[4]+2,sizeof(*c[0])*EHMER_MAX);
+  memcpy(c[2]+2,c[4]+2,sizeof(*c[2])*EHMER_MAX);
 
   /* we add back in the ATH to avoid low level curves falling off to
      -infinity and unnecessarily cutting off high level curves in the
@@ -177,7 +177,7 @@ static void setup_curve(float **c,
   /* make temp curves with the ATH overlayed */
   for(i=0;i<P_LEVELS;i++){
     attenuate_curve(c[i]+2,curveatt_dB[i]);
-    memcpy(tempc[i],ath,EHMER_MAX*sizeof(float));
+    memcpy(tempc[i],ath,EHMER_MAX*sizeof(*tempc[i]));
     attenuate_curve(tempc[i],-i*10.f);
     max_curve(tempc[i],c[i]+2);
   }
@@ -216,7 +216,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 		  vorbis_info_psy_global *gi,int n,long rate){
   long i,j,k,lo=-99,hi=0;
   long maxoc;
-  memset(p,0,sizeof(vorbis_look_psy));
+  memset(p,0,sizeof(*p));
 
 
   p->eighth_octave_lines=gi->eighth_octave_lines;
@@ -227,9 +227,9 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->total_octave_lines=maxoc-p->firstoc+1;
 
   if(vi->ath)
-    p->ath=_ogg_malloc(n*sizeof(float));
-  p->octave=_ogg_malloc(n*sizeof(long));
-  p->bark=_ogg_malloc(n*sizeof(unsigned long));
+    p->ath=_ogg_malloc(n*sizeof(*p->ath));
+  p->octave=_ogg_malloc(n*sizeof(*p->octave));
+  p->bark=_ogg_malloc(n*sizeof(*p->bark));
   p->vi=vi;
   p->n=n;
   p->rate=rate;
@@ -253,62 +253,62 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   for(i=0;i<n;i++)
     p->octave[i]=toOC((i*.5f+.25f)*rate/n)*(1<<(p->shiftoc+1))+.5f;
 
-  p->tonecurves=_ogg_malloc(P_BANDS*sizeof(float **));
-  p->noisethresh=_ogg_malloc(n*sizeof(float));
-  p->noiseoffset=_ogg_malloc(n*sizeof(float));
+  p->tonecurves=_ogg_malloc(P_BANDS*sizeof(*p->tonecurves));
+  p->noisethresh=_ogg_malloc(n*sizeof(*p->noisethresh));
+  p->noiseoffset=_ogg_malloc(n*sizeof(*p->noiseoffset));
   for(i=0;i<P_BANDS;i++)
-    p->tonecurves[i]=_ogg_malloc(P_LEVELS*sizeof(float *));
+    p->tonecurves[i]=_ogg_malloc(P_LEVELS*sizeof(*p->tonecurves[i]));
   
   for(i=0;i<P_BANDS;i++)
     for(j=0;j<P_LEVELS;j++)
-      p->tonecurves[i][j]=_ogg_malloc((EHMER_MAX+2)*sizeof(float));
+      p->tonecurves[i][j]=_ogg_malloc((EHMER_MAX+2)*sizeof(*p->tonecurves[i][j]));
   
 
   /* OK, yeah, this was a silly way to do it */
-  memcpy(p->tonecurves[0][4]+2,tone_125_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[0][6]+2,tone_125_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[0][8]+2,tone_125_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[0][10]+2,tone_125_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[0][4]+2,tone_125_40dB_SL,sizeof(*p->tonecurves[0][4])*EHMER_MAX);
+  memcpy(p->tonecurves[0][6]+2,tone_125_60dB_SL,sizeof(*p->tonecurves[0][6])*EHMER_MAX);
+  memcpy(p->tonecurves[0][8]+2,tone_125_80dB_SL,sizeof(*p->tonecurves[0][8])*EHMER_MAX);
+  memcpy(p->tonecurves[0][10]+2,tone_125_100dB_SL,sizeof(*p->tonecurves[0][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[2][4]+2,tone_125_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[2][6]+2,tone_125_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[2][8]+2,tone_125_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[2][10]+2,tone_125_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[2][4]+2,tone_125_40dB_SL,sizeof(*p->tonecurves[2][4])*EHMER_MAX);
+  memcpy(p->tonecurves[2][6]+2,tone_125_60dB_SL,sizeof(*p->tonecurves[2][6])*EHMER_MAX);
+  memcpy(p->tonecurves[2][8]+2,tone_125_80dB_SL,sizeof(*p->tonecurves[2][8])*EHMER_MAX);
+  memcpy(p->tonecurves[2][10]+2,tone_125_100dB_SL,sizeof(*p->tonecurves[2][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[4][4]+2,tone_250_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[4][6]+2,tone_250_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[4][8]+2,tone_250_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[4][10]+2,tone_250_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[4][4]+2,tone_250_40dB_SL,sizeof(*p->tonecurves[4][4])*EHMER_MAX);
+  memcpy(p->tonecurves[4][6]+2,tone_250_60dB_SL,sizeof(*p->tonecurves[4][6])*EHMER_MAX);
+  memcpy(p->tonecurves[4][8]+2,tone_250_80dB_SL,sizeof(*p->tonecurves[4][8])*EHMER_MAX);
+  memcpy(p->tonecurves[4][10]+2,tone_250_100dB_SL,sizeof(*p->tonecurves[4][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[6][4]+2,tone_500_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[6][6]+2,tone_500_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[6][8]+2,tone_500_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[6][10]+2,tone_500_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[6][4]+2,tone_500_40dB_SL,sizeof(*p->tonecurves[6][4])*EHMER_MAX);
+  memcpy(p->tonecurves[6][6]+2,tone_500_60dB_SL,sizeof(*p->tonecurves[6][6])*EHMER_MAX);
+  memcpy(p->tonecurves[6][8]+2,tone_500_80dB_SL,sizeof(*p->tonecurves[6][8])*EHMER_MAX);
+  memcpy(p->tonecurves[6][10]+2,tone_500_100dB_SL,sizeof(*p->tonecurves[6][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[8][4]+2,tone_1000_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[8][6]+2,tone_1000_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[8][8]+2,tone_1000_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[8][10]+2,tone_1000_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[8][4]+2,tone_1000_40dB_SL,sizeof(*p->tonecurves[8][4])*EHMER_MAX);
+  memcpy(p->tonecurves[8][6]+2,tone_1000_60dB_SL,sizeof(*p->tonecurves[8][6])*EHMER_MAX);
+  memcpy(p->tonecurves[8][8]+2,tone_1000_80dB_SL,sizeof(*p->tonecurves[8][8])*EHMER_MAX);
+  memcpy(p->tonecurves[8][10]+2,tone_1000_100dB_SL,sizeof(*p->tonecurves[8][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[10][4]+2,tone_2000_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[10][6]+2,tone_2000_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[10][8]+2,tone_2000_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[10][10]+2,tone_2000_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[10][4]+2,tone_2000_40dB_SL,sizeof(*p->tonecurves[10][4])*EHMER_MAX);
+  memcpy(p->tonecurves[10][6]+2,tone_2000_60dB_SL,sizeof(*p->tonecurves[10][6])*EHMER_MAX);
+  memcpy(p->tonecurves[10][8]+2,tone_2000_80dB_SL,sizeof(*p->tonecurves[10][8])*EHMER_MAX);
+  memcpy(p->tonecurves[10][10]+2,tone_2000_100dB_SL,sizeof(*p->tonecurves[10][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[12][4]+2,tone_4000_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[12][6]+2,tone_4000_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[12][8]+2,tone_4000_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[12][10]+2,tone_4000_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[12][4]+2,tone_4000_40dB_SL,sizeof(*p->tonecurves[12][4])*EHMER_MAX);
+  memcpy(p->tonecurves[12][6]+2,tone_4000_60dB_SL,sizeof(*p->tonecurves[12][6])*EHMER_MAX);
+  memcpy(p->tonecurves[12][8]+2,tone_4000_80dB_SL,sizeof(*p->tonecurves[12][8])*EHMER_MAX);
+  memcpy(p->tonecurves[12][10]+2,tone_4000_100dB_SL,sizeof(*p->tonecurves[12][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[14][4]+2,tone_8000_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[14][6]+2,tone_8000_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[14][8]+2,tone_8000_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[14][10]+2,tone_8000_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[14][4]+2,tone_8000_40dB_SL,sizeof(*p->tonecurves[14][4])*EHMER_MAX);
+  memcpy(p->tonecurves[14][6]+2,tone_8000_60dB_SL,sizeof(*p->tonecurves[14][6])*EHMER_MAX);
+  memcpy(p->tonecurves[14][8]+2,tone_8000_80dB_SL,sizeof(*p->tonecurves[14][8])*EHMER_MAX);
+  memcpy(p->tonecurves[14][10]+2,tone_8000_100dB_SL,sizeof(*p->tonecurves[14][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[16][4]+2,tone_8000_40dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[16][6]+2,tone_8000_60dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[16][8]+2,tone_8000_80dB_SL,sizeof(float)*EHMER_MAX);
-  memcpy(p->tonecurves[16][10]+2,tone_8000_100dB_SL,sizeof(float)*EHMER_MAX);
+  memcpy(p->tonecurves[16][4]+2,tone_8000_40dB_SL,sizeof(*p->tonecurves[16][4])*EHMER_MAX);
+  memcpy(p->tonecurves[16][6]+2,tone_8000_60dB_SL,sizeof(*p->tonecurves[16][6])*EHMER_MAX);
+  memcpy(p->tonecurves[16][8]+2,tone_8000_80dB_SL,sizeof(*p->tonecurves[16][8])*EHMER_MAX);
+  memcpy(p->tonecurves[16][10]+2,tone_8000_100dB_SL,sizeof(*p->tonecurves[16][10])*EHMER_MAX);
 
   /* value limit the tonal masking curves; the peakatt not only
      optionally specifies maximum dynamic depth, but also [always]
@@ -321,7 +321,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   /* interpolate curves between */
   for(i=1;i<P_BANDS;i+=2)
     for(j=4;j<P_LEVELS;j+=2){
-      memcpy(p->tonecurves[i][j]+2,p->tonecurves[i-1][j]+2,EHMER_MAX*sizeof(float));
+      memcpy(p->tonecurves[i][j]+2,p->tonecurves[i-1][j]+2,EHMER_MAX*sizeof(*p->tonecurves[i][j]));
       /*interp_curve(p->tonecurves[i][j],
 		   p->tonecurves[i-1][j],
 		   p->tonecurves[i+1][j],.5);*/
@@ -432,7 +432,7 @@ void _vp_psy_clear(vorbis_look_psy *p){
     }
     _ogg_free(p->noiseoffset);
     _ogg_free(p->noisethresh);
-    memset(p,0,sizeof(vorbis_look_psy));
+    memset(p,0,sizeof(*p));
   }
 }
 
@@ -500,8 +500,8 @@ static void seed_loop(vorbis_look_psy *p,
 }
 
 static void seed_chase(float *seeds, int linesper, long n){
-  long  *posstack=alloca(n*sizeof(long));
-  float *ampstack=alloca(n*sizeof(float));
+  long  *posstack=alloca(n*sizeof(*posstack));
+  float *ampstack=alloca(n*sizeof(*ampstack));
   long   stack=0;
   long   pos=0;
   long   i;
@@ -724,12 +724,12 @@ void _vp_compute_mask(vorbis_look_psy *p,
   int i,n=p->n;
   static int seq=0;
 
-  float *seed=alloca(sizeof(float)*p->total_octave_lines);
+  float *seed=alloca(sizeof(*seed)*p->total_octave_lines);
   for(i=0;i<p->total_octave_lines;i++)seed[i]=NEGINF;
 
   /* noise masking */
   if(p->vi->noisemaskp){
-    float *work=alloca(n*sizeof(float));
+    float *work=alloca(n*sizeof(*work));
 
     bark_noise_hybridmp(n,p->bark,logmdct,logmask,
 			140.,-1);

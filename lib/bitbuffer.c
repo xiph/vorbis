@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: flexible, delayed bitpacking abstraction
- last mod: $Id: bitbuffer.c,v 1.5 2001/02/26 03:50:41 xiphmont Exp $
+ last mod: $Id: bitbuffer.c,v 1.6 2001/10/02 00:14:30 segher Exp $
 
  ********************************************************************/
 
@@ -27,16 +27,16 @@
 */
 
 void bitbuf_init(vorbis_bitbuffer *vbb,vorbis_block *vb){
-  memset(vbb,0,sizeof(vorbis_bitbuffer));
+  memset(vbb,0,sizeof(*vbb));
   vbb->vb=vb;
-  vbb->first=vbb->last=_vorbis_block_alloc(vb,sizeof(vorbis_bitbuffer_chain));
+  vbb->first=vbb->last=_vorbis_block_alloc(vb,sizeof(*vbb->first));
   vbb->first->next=0; /* overengineering */
 }
 
 void bitbuf_write(vorbis_bitbuffer *vbb,unsigned long word,int length){
   vorbis_block *vb=vbb->vb;
   if(vbb->ptr>=_VBB_ALLOCSIZE){
-    vbb->last->next=_vorbis_block_alloc(vb,sizeof(vorbis_bitbuffer_chain));
+    vbb->last->next=_vorbis_block_alloc(vb,sizeof(*vbb->last->next));
     vbb->last=vbb->last->next;
     vbb->last->next=0; /* overengineering */
     vbb->ptr=0;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.49 2001/09/13 02:17:51 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.50 2001/10/02 00:14:32 segher Exp $
 
  ********************************************************************/
 
@@ -207,7 +207,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
   
   if(searched>=end || ret<0){
     vf->links=m+1;
-    vf->offsets=_ogg_malloc((m+2)*sizeof(ogg_int64_t));
+    vf->offsets=_ogg_malloc((m+2)*sizeof(*vf->offsets));
     vf->offsets[m+1]=searched;
   }else{
     ret=_bisect_forward_serialno(vf,next,vf->offset,
@@ -289,11 +289,11 @@ static void _prefetch_all_headers(OggVorbis_File *vf, long dataoffset){
   ogg_page og;
   int i,ret;
   
-  vf->vi=_ogg_realloc(vf->vi,vf->links*sizeof(vorbis_info));
-  vf->vc=_ogg_realloc(vf->vc,vf->links*sizeof(vorbis_info));
-  vf->dataoffsets=_ogg_malloc(vf->links*sizeof(ogg_int64_t));
-  vf->pcmlengths=_ogg_malloc(vf->links*sizeof(ogg_int64_t));
-  vf->serialnos=_ogg_malloc(vf->links*sizeof(long));
+  vf->vi=_ogg_realloc(vf->vi,vf->links*sizeof(*vf->vi));
+  vf->vc=_ogg_realloc(vf->vc,vf->links*sizeof(*vf->vc));
+  vf->dataoffsets=_ogg_malloc(vf->links*sizeof(*vf->dataoffsets));
+  vf->pcmlengths=_ogg_malloc(vf->links*sizeof(*vf->pcmlengths));
+  vf->serialnos=_ogg_malloc(vf->links*sizeof(*vf->serialnos));
   
   for(i=0;i<vf->links;i++){
     if(i==0){
@@ -562,7 +562,7 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
   long offset=(f?callbacks.seek_func(f,0,SEEK_CUR):-1);
   int ret;
 
-  memset(vf,0,sizeof(OggVorbis_File));
+  memset(vf,0,sizeof(*vf));
   vf->datasource=f;
   vf->callbacks = callbacks;
 
@@ -585,8 +585,8 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
   /* No seeking yet; Set up a 'single' (current) logical bitstream
      entry for partial open */
   vf->links=1;
-  vf->vi=_ogg_calloc(vf->links,sizeof(vorbis_info));
-  vf->vc=_ogg_calloc(vf->links,sizeof(vorbis_info));
+  vf->vi=_ogg_calloc(vf->links,sizeof(*vf->vi));
+  vf->vc=_ogg_calloc(vf->links,sizeof(*vf->vc));
   
   /* Try to fetch the headers, maintaining all the storage */
   if((ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,NULL))<0){
@@ -634,7 +634,7 @@ int ov_clear(OggVorbis_File *vf){
     if(vf->offsets)_ogg_free(vf->offsets);
     ogg_sync_clear(&vf->oy);
     if(vf->datasource)(vf->callbacks.close_func)(vf->datasource);
-    memset(vf,0,sizeof(OggVorbis_File));
+    memset(vf,0,sizeof(*vf));
   }
 #ifdef DEBUG_LEAKS
   _VDBG_dump();

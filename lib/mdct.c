@@ -12,7 +12,7 @@
 
  function: normalized modified discrete cosine transform
            power of two length transform only [64 <= n ]
- last mod: $Id: mdct.c,v 1.25 2001/02/26 03:50:42 xiphmont Exp $
+ last mod: $Id: mdct.c,v 1.26 2001/10/02 00:14:31 segher Exp $
 
  Original algorithm adapted long ago from _The use of multirate filter
  banks for coding of high quality digital audio_, by T. Sporer,
@@ -49,8 +49,8 @@
    some window function algebra. */
 
 void mdct_init(mdct_lookup *lookup,int n){
-  int   *bitrev=_ogg_malloc(sizeof(int)*(n/4));
-  DATA_TYPE *T=_ogg_malloc(sizeof(DATA_TYPE)*(n+n/4));
+  int   *bitrev=_ogg_malloc(sizeof(*bitrev)*(n/4));
+  DATA_TYPE *T=_ogg_malloc(sizeof(*T)*(n+n/4));
   
   int i;
   int n2=n>>1;
@@ -344,7 +344,7 @@ void mdct_clear(mdct_lookup *l){
   if(l){
     if(l->trig)_ogg_free(l->trig);
     if(l->bitrev)_ogg_free(l->bitrev);
-    memset(l,0,sizeof(mdct_lookup));
+    memset(l,0,sizeof(*l));
   }
 }
 
@@ -499,7 +499,7 @@ void mdct_forward(mdct_lookup *init, DATA_TYPE *in, DATA_TYPE *out){
   int n2=n>>1;
   int n4=n>>2;
   int n8=n>>3;
-  DATA_TYPE *w=alloca(n*sizeof(DATA_TYPE)); /* forward needs working space */
+  DATA_TYPE *w=alloca(n*sizeof(*w)); /* forward needs working space */
   DATA_TYPE *w2=w+n2;
 
   /* rotate */

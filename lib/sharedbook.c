@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.17 2001/08/13 01:36:57 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.18 2001/10/02 00:14:32 segher Exp $
 
  ********************************************************************/
 
@@ -72,7 +72,7 @@ float _float32_unpack(long val){
 long *_make_words(long *l,long n){
   long i,j;
   long marker[33];
-  long *r=_ogg_malloc(n*sizeof(long));
+  long *r=_ogg_malloc(n*sizeof(*r));
   memset(marker,0,sizeof(marker));
 
   for(i=0;i<n;i++){
@@ -141,9 +141,9 @@ long *_make_words(long *l,long n){
 decode_aux *_make_decode_tree(codebook *c){
   const static_codebook *s=c->c;
   long top=0,i,j,n;
-  decode_aux *t=_ogg_malloc(sizeof(decode_aux));
-  long *ptr0=t->ptr0=_ogg_calloc(c->entries*2,sizeof(long));
-  long *ptr1=t->ptr1=_ogg_calloc(c->entries*2,sizeof(long));
+  decode_aux *t=_ogg_malloc(sizeof(*t));
+  long *ptr0=t->ptr0=_ogg_calloc(c->entries*2,sizeof(*ptr0));
+  long *ptr1=t->ptr1=_ogg_calloc(c->entries*2,sizeof(*ptr1));
   long *codelist=_make_words(s->lengthlist,s->entries);
 
   if(codelist==NULL)return(NULL);
@@ -175,8 +175,8 @@ decode_aux *_make_decode_tree(codebook *c){
   t->tabn = _ilog(c->entries)-4; /* this is magic */
   if(t->tabn<5)t->tabn=5;
   n = 1<<t->tabn;
-  t->tab = _ogg_malloc(n*sizeof(long));
-  t->tabl = _ogg_malloc(n*sizeof(int));
+  t->tab = _ogg_malloc(n*sizeof(*t->tab));
+  t->tabl = _ogg_malloc(n*sizeof(*t->tabl));
   for (i = 0; i < n; i++) {
     long p = 0;
     for (j = 0; j < t->tabn && (p > 0 || j == 0); j++) {
@@ -235,7 +235,7 @@ float *_book_unquantize(const static_codebook *b){
     int quantvals;
     float mindel=_float32_unpack(b->q_min);
     float delta=_float32_unpack(b->q_delta);
-    float *r=_ogg_calloc(b->entries*b->dim,sizeof(float));
+    float *r=_ogg_calloc(b->entries*b->dim,sizeof(*r));
 
     /* maptype 1 and 2 both use a quantized value vector, but
        different sizes */
@@ -289,17 +289,17 @@ void vorbis_staticbook_clear(static_codebook *b){
       _ogg_free(b->nearest_tree->ptr1);
       _ogg_free(b->nearest_tree->p);
       _ogg_free(b->nearest_tree->q);
-      memset(b->nearest_tree,0,sizeof(encode_aux_nearestmatch));
+      memset(b->nearest_tree,0,sizeof(*b->nearest_tree));
       _ogg_free(b->nearest_tree);
     }
     if(b->thresh_tree){
       _ogg_free(b->thresh_tree->quantthresh);
       _ogg_free(b->thresh_tree->quantmap);
-      memset(b->thresh_tree,0,sizeof(encode_aux_threshmatch));
+      memset(b->thresh_tree,0,sizeof(*b->thresh_tree));
       _ogg_free(b->thresh_tree);
     }
 
-    memset(b,0,sizeof(static_codebook));
+    memset(b,0,sizeof(*b));
   }
 }
 
@@ -319,17 +319,17 @@ void vorbis_book_clear(codebook *b){
 
     _ogg_free(b->decode_tree->ptr0);
     _ogg_free(b->decode_tree->ptr1);
-    memset(b->decode_tree,0,sizeof(decode_aux));
+    memset(b->decode_tree,0,sizeof(*b->decode_tree));
     _ogg_free(b->decode_tree);
   }
   if(b->valuelist)_ogg_free(b->valuelist);
   if(b->codelist)_ogg_free(b->codelist);
-  memset(b,0,sizeof(codebook));
+  memset(b,0,sizeof(*b));
 }
 
 int vorbis_book_init_encode(codebook *c,const static_codebook *s){
   long j,k;
-  memset(c,0,sizeof(codebook));
+  memset(c,0,sizeof(*c));
   c->c=s;
   c->entries=s->entries;
   c->dim=s->dim;
@@ -356,7 +356,7 @@ int vorbis_book_init_encode(codebook *c,const static_codebook *s){
 }
 
 int vorbis_book_init_decode(codebook *c,const static_codebook *s){
-  memset(c,0,sizeof(codebook));
+  memset(c,0,sizeof(*c));
   c->c=s;
   c->entries=s->entries;
   c->dim=s->dim;

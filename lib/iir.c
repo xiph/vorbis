@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: Direct Form II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.10 2001/02/26 03:50:41 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.11 2001/10/02 00:14:31 segher Exp $
 
  ********************************************************************/
 
@@ -25,15 +25,15 @@
 #include "iir.h"
 
 void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
-  memset(s,0,sizeof(IIR_state));
+  memset(s,0,sizeof(*s));
   s->stages=stages;
   s->gain=1.f/gain;
-  s->coeff_A=_ogg_malloc(stages*sizeof(float));
-  s->coeff_B=_ogg_malloc((stages+1)*sizeof(float));
-  s->z_A=_ogg_calloc(stages*2,sizeof(float));
+  s->coeff_A=_ogg_malloc(stages*sizeof(*s->coeff_A));
+  s->coeff_B=_ogg_malloc((stages+1)*sizeof(*s->coeff_B));
+  s->z_A=_ogg_calloc(stages*2,sizeof(*s->z_A));
 
-  memcpy(s->coeff_A,A,stages*sizeof(float));
-  memcpy(s->coeff_B,B,(stages+1)*sizeof(float));
+  memcpy(s->coeff_A,A,stages*sizeof(*s->coeff_A));
+  memcpy(s->coeff_B,B,(stages+1)*sizeof(*s->coeff_B));
 }
 
 void IIR_clear(IIR_state *s){
@@ -41,12 +41,12 @@ void IIR_clear(IIR_state *s){
     _ogg_free(s->coeff_A);
     _ogg_free(s->coeff_B);
     _ogg_free(s->z_A);
-    memset(s,0,sizeof(IIR_state));
+    memset(s,0,sizeof(*s));
   }
 }
 
 void IIR_reset(IIR_state *s){
-  memset(s->z_A,0,sizeof(float)*s->stages*2);
+  memset(s->z_A,0,sizeof(*s->z_A)*s->stages*2);
 }
 
 float IIR_filter(IIR_state *s,float in){
@@ -265,7 +265,7 @@ int main(){
 
   /* run the pregenerated Chebyshev filter, then our own distillation
      through the generic and specialized code */
-  float *work=_ogg_malloc(128*sizeof(float));
+  float *work=_ogg_malloc(128*sizeof(*work));
   IIR_state iir;
   int i;
 

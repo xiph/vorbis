@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.16 2001/09/13 21:38:45 cwolf Exp $
+ last mod: $Id: vorbisenc.c,v 1.17 2001/10/02 00:14:32 segher Exp $
 
  ********************************************************************/
 
@@ -58,7 +58,7 @@ static void codec_setup_partialcopy(codec_setup_info *ci,
   ; /* some error handling for memory exhaustion */
 #endif
 
-  memcpy(ci,cs,sizeof(codec_setup_info)); /* to get the flat numbers */
+  memcpy(ci,cs,sizeof(*ci)); /* to get the flat numbers */
 
   /* codebooks */
   for(i=0;i<ci->books;i++){
@@ -91,7 +91,7 @@ static void codec_setup_partialcopy(codec_setup_info *ci,
   
   /* mode settings */
   for(i=0;i<ci->modes;i++){
-    ci->mode_param[i]=_ogg_calloc(1,sizeof(vorbis_info_mode));
+    ci->mode_param[i]=_ogg_calloc(1,sizeof(*ci->mode_param[i]));
     ci->mode_param[i]->blockflag=cs->mode_param[i]->blockflag;
     ci->mode_param[i]->windowtype=cs->mode_param[i]->windowtype;
     ci->mode_param[i]->transformtype=cs->mode_param[i]->transformtype;

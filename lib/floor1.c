@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.15 2001/09/01 06:14:50 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.16 2001/10/02 00:14:31 segher Exp $
 
  ********************************************************************/
 
@@ -68,28 +68,29 @@ typedef struct lsfit_acc{
  
 static vorbis_info_floor *floor1_copy_info (vorbis_info_floor *i){
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)i;
-  vorbis_info_floor1 *ret=_ogg_malloc(sizeof(vorbis_info_floor1));
-  memcpy(ret,info,sizeof(vorbis_info_floor1));
+  vorbis_info_floor1 *ret=_ogg_malloc(sizeof(*ret));
+  memcpy(ret,info,sizeof(*ret));
   return(ret);
 }
 
 static void floor1_free_info(vorbis_info_floor *i){
-  if(i){
-    memset(i,0,sizeof(vorbis_info_floor1));
-    _ogg_free(i);
+  vorbis_info_floor1 *info=(vorbis_info_floor1 *)i;
+  if(info){
+    memset(info,0,sizeof(*info));
+    _ogg_free(info);
   }
 }
 
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
-  if(i){
+  if(look){
     /*fprintf(stderr,"floor 1 bit usage %f:%f (%f total)\n",
 	    (float)look->phrasebits/look->frames,
 	    (float)look->postbits/look->frames,
 	    (float)(look->postbits+look->phrasebits)/look->frames);*/
 
-    memset(look,0,sizeof(vorbis_look_floor1));
-    free(i);
+    memset(look,0,sizeof(*look));
+    free(look);
   }
 }
 
@@ -152,7 +153,7 @@ static vorbis_info_floor *floor1_unpack (vorbis_info *vi,oggpack_buffer *opb){
   codec_setup_info     *ci=vi->codec_setup;
   int j,k,count=0,maxclass=-1,rangebits;
 
-  vorbis_info_floor1 *info=_ogg_calloc(1,sizeof(vorbis_info_floor1));
+  vorbis_info_floor1 *info=_ogg_calloc(1,sizeof(*info));
   /* read partitions */
   info->partitions=oggpack_read(opb,5); /* only 0 to 31 legal */
   for(j=0;j<info->partitions;j++){
@@ -207,7 +208,7 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,vorbis_info_mode *mi,
 
   int *sortpointer[VIF_POSIT+2];
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)in;
-  vorbis_look_floor1 *look=_ogg_calloc(1,sizeof(vorbis_look_floor1));
+  vorbis_look_floor1 *look=_ogg_calloc(1,sizeof(*look));
   int i,j,n=0;
 
   look->vi=info;
@@ -226,7 +227,7 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,vorbis_info_mode *mi,
 
   /* also store a sorted position index */
   for(i=0;i<n;i++)sortpointer[i]=info->postlist+i;
-  qsort(sortpointer,n,sizeof(int *),icomp);
+  qsort(sortpointer,n,sizeof(*sortpointer),icomp);
 
   /* points from sort order back to range number */
   for(i=0;i<n;i++)look->forward_index[i]=sortpointer[i]-info->postlist;
@@ -426,7 +427,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
 
   long xa=0,ya=0,x2a=0,y2a=0,xya=0,na=0, xb=0,yb=0,x2b=0,y2b=0,xyb=0,nb=0;
 
-  memset(a,0,sizeof(lsfit_acc));
+  memset(a,0,sizeof(*a));
   a->x0=x0;
   a->x1=x1;
   a->edgey0=quantized;
@@ -1013,8 +1014,8 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 
   }else{
     if(writeflag)oggpack_write(&vb->opb,0,1);
-    memset(codedflr,0,n*sizeof(float));
-    memset(mdct,0,n*sizeof(float));
+    memset(codedflr,0,n*sizeof(*codedflr));
+    memset(mdct,0,n*sizeof(*mdct));
   }
   seq++;
   return(nonzero);
@@ -1031,7 +1032,7 @@ static void *floor1_inverse1(vorbis_block *vb,vorbis_look_floor *in){
 
   /* unpack wrapped/predicted values from stream */
   if(oggpack_read(&vb->opb,1)==1){
-    int *fit_value=_vorbis_block_alloc(vb,(look->posts)*sizeof(int));
+    int *fit_value=_vorbis_block_alloc(vb,(look->posts)*sizeof(*fit_value));
 
     fit_value[0]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
     fit_value[1]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
@@ -1140,7 +1141,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
     for(j=hx;j<n;j++)out[j]*=out[j-1]; /* be certain */    
     return(1);
   }
-  memset(out,0,sizeof(float)*n);
+  memset(out,0,sizeof(*out)*n);
   return(0);
 }
 

@@ -15,8 +15,8 @@ int main (int argc,char *argv[]){
   
   if(argc<2)usage();
 
-  f=alloca(sizeof(float)*(argc-1));
-  amp=alloca(sizeof(float)*(argc-1));
+  f=alloca(sizeof(*f)*(argc-1));
+  amp=alloca(sizeof(*amp)*(argc-1));
 
   i=0;
   while(argv[i+1]){

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: *unnormalized* fft transform
- last mod: $Id: smallft.c,v 1.14 2001/02/26 03:50:43 xiphmont Exp $
+ last mod: $Id: smallft.c,v 1.15 2001/10/02 00:14:32 segher Exp $
 
 ********************************************************************/
 
@@ -1240,8 +1240,8 @@ void drft_backward(drft_lookup *l,float *data){
 
 void drft_init(drft_lookup *l,int n){
   l->n=n;
-  l->trigcache=_ogg_calloc(3*n,sizeof(float));
-  l->splitcache=_ogg_calloc(32,sizeof(int));
+  l->trigcache=_ogg_calloc(3*n,sizeof(*l->trigcache));
+  l->splitcache=_ogg_calloc(32,sizeof(*l->splitcache));
   fdrffti(n, l->trigcache, l->splitcache);
 }
 
@@ -1249,6 +1249,6 @@ void drft_clear(drft_lookup *l){
   if(l){
     if(l->trigcache)_ogg_free(l->trigcache);
     if(l->splitcache)_ogg_free(l->splitcache);
-    memset(l,0,sizeof(drft_lookup));
+    memset(l,0,sizeof(*l));
   }
 }

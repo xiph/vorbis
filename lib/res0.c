@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.36 2001/09/01 06:14:50 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.37 2001/10/02 00:14:32 segher Exp $
 
  ********************************************************************/
 
@@ -53,15 +53,16 @@ typedef struct {
 
 vorbis_info_residue *res0_copy_info(vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
-  vorbis_info_residue0 *ret=_ogg_malloc(sizeof(vorbis_info_residue0));
-  memcpy(ret,info,sizeof(vorbis_info_residue0));
+  vorbis_info_residue0 *ret=_ogg_malloc(sizeof(*ret));
+  memcpy(ret,info,sizeof(*ret));
   return(ret);
 }
 
 void res0_free_info(vorbis_info_residue *i){
-  if(i){
-    memset(i,0,sizeof(vorbis_info_residue0));
-    _ogg_free(i);
+  vorbis_info_residue0 *info=(vorbis_info_residue0 *)i;
+  if(info){
+    memset(info,0,sizeof(*info));
+    _ogg_free(info);
   }
 }
 
@@ -104,8 +105,8 @@ void res0_free_look(vorbis_look_residue *i){
     for(j=0;j<look->partvals;j++)
       _ogg_free(look->decodemap[j]);
     _ogg_free(look->decodemap);
-    memset(i,0,sizeof(vorbis_look_residue0));
-    _ogg_free(i);
+    memset(look,0,sizeof(*look));
+    _ogg_free(look);
   }
 }
 
@@ -160,7 +161,7 @@ void res0_pack(vorbis_info_residue *vr,oggpack_buffer *opb){
 /* vorbis_info is for range checking */
 vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
   int j,acc=0;
-  vorbis_info_residue0 *info=_ogg_calloc(1,sizeof(vorbis_info_residue0));
+  vorbis_info_residue0 *info=_ogg_calloc(1,sizeof(*info));
   codec_setup_info     *ci=vi->codec_setup;
 
   info->begin=oggpack_read(opb,24);
@@ -193,7 +194,7 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
 vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
-  vorbis_look_residue0 *look=_ogg_calloc(1,sizeof(vorbis_look_residue0));
+  vorbis_look_residue0 *look=_ogg_calloc(1,sizeof(*look));
   backend_lookup_state *be=vd->backend_state;
 
   int j,k,acc=0;
@@ -207,13 +208,13 @@ vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   look->phrasebook=be->fullbooks+info->groupbook;
   dim=look->phrasebook->dim;
 
-  look->partbooks=_ogg_calloc(look->parts,sizeof(codebook **));
+  look->partbooks=_ogg_calloc(look->parts,sizeof(*look->partbooks));
 
   for(j=0;j<look->parts;j++){
     int stages=ilog(info->secondstages[j]);
     if(stages){
       if(stages>maxstage)maxstage=stages;
-      look->partbooks[j]=_ogg_calloc(stages,sizeof(codebook *));
+      look->partbooks[j]=_ogg_calloc(stages,sizeof(*look->partbooks[j]));
       for(k=0;k<stages;k++)
 	if(info->secondstages[j]&(1<<k))
 	  look->partbooks[j][k]=be->fullbooks+info->booklist[acc++];
@@ -222,11 +223,11 @@ vorbis_look_residue *res0_look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 
   look->partvals=rint(pow(look->parts,dim));
   look->stages=maxstage;
-  look->decodemap=_ogg_malloc(look->partvals*sizeof(int *));
+  look->decodemap=_ogg_malloc(look->partvals*sizeof(*look->decodemap));
   for(j=0;j<look->partvals;j++){
     long val=j;
     long mult=look->partvals/look->parts;
-    look->decodemap[j]=_ogg_malloc(dim*sizeof(int));
+    look->decodemap[j]=_ogg_malloc(dim*sizeof(*look->decodemap[j]));
     for(k=0;k<dim;k++){
       long deco=val/mult;
       val-=deco*mult;
@@ -380,15 +381,15 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   int n=info->end-info->begin;
 
   int partvals=n/samples_per_partition;
-  long **partword=_vorbis_block_alloc(vb,ch*sizeof(long *));
+  long **partword=_vorbis_block_alloc(vb,ch*sizeof(*partword));
 
   /* we find the partition type for each partition of each
      channel.  We'll go back and do the interleaved encoding in a
      bit.  For now, clarity */
  
   for(i=0;i<ch;i++){
-    partword[i]=_vorbis_block_alloc(vb,n/samples_per_partition*sizeof(long));
-    memset(partword[i],0,n/samples_per_partition*sizeof(long));
+    partword[i]=_vorbis_block_alloc(vb,n/samples_per_partition*sizeof(*partword[i]));
+    memset(partword[i],0,n/samples_per_partition*sizeof(*partword[i]));
   }
 
   for(i=0;i<partvals;i++){
@@ -435,11 +436,11 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,
   int n=info->end-info->begin;
 
   int partvals=n/samples_per_partition;
-  long **partword=_vorbis_block_alloc(vb,sizeof(long *));
-  float *work=alloca(sizeof(float)*samples_per_partition);
+  long **partword=_vorbis_block_alloc(vb,sizeof(*partword));
+  float *work=alloca(sizeof(*work)*samples_per_partition);
   
-  partword[0]=_vorbis_block_alloc(vb,n*ch/samples_per_partition*sizeof(long));
-  memset(partword[0],0,n*ch/samples_per_partition*sizeof(long));
+  partword[0]=_vorbis_block_alloc(vb,n*ch/samples_per_partition*sizeof(*partword[0]));
+  memset(partword[0],0,n*ch/samples_per_partition*sizeof(*partword[0]));
 
   for(i=0,j=0,k=0,l=info->begin;i<partvals;i++){
     for(k=0;k<samples_per_partition;k++){
@@ -591,10 +592,10 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
   
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
-  int ***partword=alloca(ch*sizeof(int **));
+  int ***partword=alloca(ch*sizeof(*partword));
 
   for(j=0;j<ch;j++)
-    partword[j]=_vorbis_block_alloc(vb,partwords*sizeof(int *));
+    partword[j]=_vorbis_block_alloc(vb,partwords*sizeof(*partword[j]));
 
   for(s=0;s<look->stages;s++){
 
@@ -757,7 +758,7 @@ int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
   /* don't duplicate the code; use a working vector hack for now and
      reshape ourselves into a single channel res1 */
   /* ugly; reallocs for each coupling pass :-( */
-  float *work=_vorbis_block_alloc(vb,ch*n*sizeof(float));
+  float *work=_vorbis_block_alloc(vb,ch*n*sizeof(*work));
   for(i=0;i<ch;i++){
     float *pcm=in[i];
     if(nonzero[i])used++;
@@ -794,7 +795,7 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
-  int **partword=_vorbis_block_alloc(vb,partwords*sizeof(int *));
+  int **partword=_vorbis_block_alloc(vb,partwords*sizeof(*partword));
 
   for(i=0;i<ch;i++)if(nonzero[i])break;
   if(i==ch)return(0); /* no nonzero vectors */

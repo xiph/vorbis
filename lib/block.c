@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.49 2001/08/13 01:36:56 xiphmont Exp $
+ last mod: $Id: block.c,v 1.50 2001/10/02 00:14:30 segher Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -89,7 +89,7 @@ static int ilog2(unsigned int v){
 #endif
 
 int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
-  memset(vb,0,sizeof(vorbis_block));
+  memset(vb,0,sizeof(*vb));
   vb->vd=v;
   vb->localalloc=0;
   vb->localstore=NULL;
@@ -107,7 +107,7 @@ void *_vorbis_block_alloc(vorbis_block *vb,long bytes){
   if(bytes+vb->localtop>vb->localalloc){
     /* can't just _ogg_realloc... there are outstanding pointers */
     if(vb->localstore){
-      struct alloc_chain *link=_ogg_malloc(sizeof(struct alloc_chain));
+      struct alloc_chain *link=_ogg_malloc(sizeof(*link));
       vb->totaluse+=vb->localtop;
       link->next=vb->reap;
       link->ptr=vb->localstore;
@@ -132,7 +132,7 @@ void _vorbis_block_ripcord(vorbis_block *vb){
   while(reap){
     struct alloc_chain *next=reap->next;
     _ogg_free(reap->ptr);
-    memset(reap,0,sizeof(struct alloc_chain));
+    memset(reap,0,sizeof(*reap));
     _ogg_free(reap);
     reap=next;
   }
@@ -156,7 +156,7 @@ int vorbis_block_clear(vorbis_block *vb){
   if(vb->localstore)_ogg_free(vb->localstore);
   if(vb->internal)_ogg_free(vb->internal);
 
-  memset(vb,0,sizeof(vorbis_block));
+  memset(vb,0,sizeof(*vb));
   return(0);
 }
 
@@ -169,14 +169,14 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   codec_setup_info *ci=vi->codec_setup;
   backend_lookup_state *b=NULL;
 
-  memset(v,0,sizeof(vorbis_dsp_state));
-  b=v->backend_state=_ogg_calloc(1,sizeof(backend_lookup_state));
+  memset(v,0,sizeof(*v));
+  b=v->backend_state=_ogg_calloc(1,sizeof(*b));
 
   v->vi=vi;
   b->modebits=ilog2(ci->modes);
 
-  b->transform[0]=_ogg_calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
-  b->transform[1]=_ogg_calloc(VI_TRANSFORMB,sizeof(vorbis_look_transform *));
+  b->transform[0]=_ogg_calloc(VI_TRANSFORMB,sizeof(*b->transform[0]));
+  b->transform[1]=_ogg_calloc(VI_TRANSFORMB,sizeof(*b->transform[1]));
 
   /* MDCT is tranform 0 */
 
@@ -185,14 +185,14 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   mdct_init(b->transform[0][0],ci->blocksizes[0]);
   mdct_init(b->transform[1][0],ci->blocksizes[1]);
 
-  b->window[0][0][0]=_ogg_calloc(VI_WINDOWB,sizeof(float *));
+  b->window[0][0][0]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[0][0][0]));
   b->window[0][0][1]=b->window[0][0][0];
   b->window[0][1][0]=b->window[0][0][0];
   b->window[0][1][1]=b->window[0][0][0];
-  b->window[1][0][0]=_ogg_calloc(VI_WINDOWB,sizeof(float *));
-  b->window[1][0][1]=_ogg_calloc(VI_WINDOWB,sizeof(float *));
-  b->window[1][1][0]=_ogg_calloc(VI_WINDOWB,sizeof(float *));
-  b->window[1][1][1]=_ogg_calloc(VI_WINDOWB,sizeof(float *));
+  b->window[1][0][0]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][0][0]));
+  b->window[1][0][1]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][0][1]));
+  b->window[1][1][0]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][1][0]));
+  b->window[1][1][1]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][1][1]));
 
   for(i=0;i<VI_WINDOWB;i++){
     b->window[0][0][0][i]=
@@ -209,13 +209,13 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
   if(encp){ /* encode/decode differ here */
     /* finish the codebooks */
-    b->fullbooks=_ogg_calloc(ci->books,sizeof(codebook));
+    b->fullbooks=_ogg_calloc(ci->books,sizeof(*b->fullbooks));
     for(i=0;i<ci->books;i++)
       vorbis_book_init_encode(b->fullbooks+i,ci->book_param[i]);
     v->analysisp=1;
   }else{
     /* finish the codebooks */
-    b->fullbooks=_ogg_calloc(ci->books,sizeof(codebook));
+    b->fullbooks=_ogg_calloc(ci->books,sizeof(*b->fullbooks));
     for(i=0;i<ci->books;i++)
       vorbis_book_init_decode(b->fullbooks+i,ci->book_param[i]);
   }
@@ -226,12 +226,12 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   v->pcm_storage=8192; /* we'll assume later that we have
 			  a minimum of twice the blocksize of
 			  accumulated samples in analysis */
-  v->pcm=_ogg_malloc(vi->channels*sizeof(float *));
-  v->pcmret=_ogg_malloc(vi->channels*sizeof(float *));
+  v->pcm=_ogg_malloc(vi->channels*sizeof(*v->pcm));
+  v->pcmret=_ogg_malloc(vi->channels*sizeof(*v->pcmret));
   {
     int i;
     for(i=0;i<vi->channels;i++)
-      v->pcm[i]=_ogg_calloc(v->pcm_storage,sizeof(float));
+      v->pcm[i]=_ogg_calloc(v->pcm_storage,sizeof(*v->pcm[i]));
   }
 
   /* all 1 (large block) or 0 (small block) */
@@ -245,7 +245,7 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   v->pcm_current=v->centerW;
 
   /* initialize all the mapping/backend lookups */
-  b->mode=_ogg_calloc(ci->modes,sizeof(vorbis_look_mapping *));
+  b->mode=_ogg_calloc(ci->modes,sizeof(*b->mode));
   for(i=0;i<ci->modes;i++){
     int mapnum=ci->mode_param[i]->mapping;
     int maptype=ci->map_type[mapnum];
@@ -265,7 +265,7 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   b->psy_g_look=_vp_global_look(vi);
 
   /* Initialize the envelope state storage */
-  b->ve=_ogg_calloc(1,sizeof(envelope_lookup));
+  b->ve=_ogg_calloc(1,sizeof(*b->ve));
   _ve_envelope_init(b->ve,vi);
   return(0);
 }
@@ -340,7 +340,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       _ogg_free(b);
     }
     
-    memset(v,0,sizeof(vorbis_dsp_state));
+    memset(v,0,sizeof(*v));
   }
 }
 
@@ -361,7 +361,7 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
     v->pcm_storage=v->pcm_current+vals*2;
    
     for(i=0;i<vi->channels;i++){
-      v->pcm[i]=_ogg_realloc(v->pcm[i],v->pcm_storage*sizeof(float));
+      v->pcm[i]=_ogg_realloc(v->pcm[i],v->pcm_storage*sizeof(*v->pcm[i]));
     }
   }
 
@@ -374,8 +374,8 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
 static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
   int order=32;
-  float *lpc=alloca(order*sizeof(float));
-  float *work=alloca(v->pcm_current*sizeof(float));
+  float *lpc=alloca(order*sizeof(*lpc));
+  float *work=alloca(v->pcm_current*sizeof(*work));
   long j;
   v->preextrapolate=1;
 
@@ -411,7 +411,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
   if(vals<=0){
     int order=32;
     int i;
-    float *lpc=alloca(order*sizeof(float));
+    float *lpc=alloca(order*sizeof(*lpc));
 
     /* if it wasn't done earlier (very short sample) */
     if(!v->preextrapolate)
@@ -445,7 +445,7 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
            guarding the overlap, but bulletproof in case that
            assumtion goes away). zeroes will do. */
 	memset(v->pcm[i]+v->eofflag,0,
-	       (v->pcm_current-v->eofflag)*sizeof(float));
+	       (v->pcm_current-v->eofflag)*sizeof(*v->pcm[i]));
 
       }
     }
@@ -550,17 +550,17 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     g->ampmax=_vp_ampmax_decay(g->ampmax,v);
     vbi->ampmax=g->ampmax;
 
-    vb->pcm=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
-    vbi->pcmdelay=_vorbis_block_alloc(vb,sizeof(float *)*vi->channels);
+    vb->pcm=_vorbis_block_alloc(vb,sizeof(*vb->pcm)*vi->channels);
+    vbi->pcmdelay=_vorbis_block_alloc(vb,sizeof(*vbi->pcmdelay)*vi->channels);
     for(i=0;i<vi->channels;i++){
       vbi->pcmdelay[i]=
-	_vorbis_block_alloc(vb,(vb->pcmend+beginW)*sizeof(float));
-      memcpy(vbi->pcmdelay[i],v->pcm[i],(vb->pcmend+beginW)*sizeof(float));
+	_vorbis_block_alloc(vb,(vb->pcmend+beginW)*sizeof(*vbi->pcmdelay[i]));
+      memcpy(vbi->pcmdelay[i],v->pcm[i],(vb->pcmend+beginW)*sizeof(*vbi->pcmdelay[i]));
       vb->pcm[i]=vbi->pcmdelay[i]+beginW;
       
       /* before we added the delay 
-      vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(float));
-      memcpy(vb->pcm[i],v->pcm[i]+beginW,ci->blocksizes[v->W]*sizeof(float));
+      vb->pcm[i]=_vorbis_block_alloc(vb,vb->pcmend*sizeof(*vb->pcm[i]));
+      memcpy(vb->pcm[i],v->pcm[i]+beginW,ci->blocksizes[v->W]*sizeof(*vb->pcm[i]));
       */
 
     }
@@ -590,7 +590,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       
       for(i=0;i<vi->channels;i++)
 	memmove(v->pcm[i],v->pcm[i]+movementW,
-		v->pcm_current*sizeof(float));
+		v->pcm_current*sizeof(*v->pcm[i]));
       
       
       v->lW=v->W;
@@ -658,7 +658,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       int i;
       for(i=0;i<vi->channels;i++)
 	memmove(v->pcm[i],v->pcm[i]+shiftPCM,
-		v->pcm_current*sizeof(float));
+		v->pcm_current*sizeof(*v->pcm[i]));
     }
   }
 
@@ -691,7 +691,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
       v->pcm_storage=endW+ci->blocksizes[1];
    
       for(i=0;i<vi->channels;i++)
-	v->pcm[i]=_ogg_realloc(v->pcm[i],v->pcm_storage*sizeof(float)); 
+	v->pcm[i]=_ogg_realloc(v->pcm[i],v->pcm_storage*sizeof(*v->pcm[i])); 
     }
 
     /* overlap/add PCM */
