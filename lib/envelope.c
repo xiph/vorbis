@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.48 2002/04/01 00:49:41 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.49 2002/04/06 03:07:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,12 +51,12 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
 
   /* magic follows */
   e->band[0].begin=2;  e->band[0].end=4;
-  e->band[1].begin=4;  e->band[1].end=8;
-  e->band[2].begin=6;  e->band[2].end=10;
-  e->band[3].begin=12; e->band[3].end=12;
-  e->band[4].begin=18; e->band[4].end=16;
-  e->band[5].begin=26; e->band[5].end=20;
-  e->band[6].begin=36; e->band[6].end=24;
+  e->band[1].begin=4;  e->band[1].end=5;
+  e->band[2].begin=6;  e->band[2].end=6;
+  e->band[3].begin=9;  e->band[3].end=8;
+  e->band[4].begin=13;  e->band[4].end=8;
+  e->band[5].begin=17;  e->band[5].end=8;
+  e->band[6].begin=22;  e->band[6].end=8;
 
   for(j=0;j<VE_BANDS;j++){
     n=e->band[j].end;
@@ -192,6 +192,7 @@ static int _ve_amp(envelope_lookup *ve,
       valmin=postmin-premin;
       valmax=postmax-premax;
 
+      /*filters[j].markers[pos]=valmax;*/
       filters[j].ampbuf[this]=acc;
       filters[j].ampptr++;
       if(filters[j].ampptr>=VE_AMP)filters[j].ampptr=0;
@@ -208,6 +209,11 @@ static int _ve_amp(envelope_lookup *ve,
   return(ret);
 }
 
+#if 0
+static int seq=0;
+static ogg_int64_t totalshift=-1024;
+#endif
+
 long _ve_envelope_search(vorbis_dsp_state *v){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
@@ -221,7 +227,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 
   /* make sure we have enough storage to match the PCM */
   if(last>ve->storage){
-    ve->storage=last+VE_WIN;
+    ve->storage=last+VE_WIN+VE_POST; /* be sure */
     ve->mark=_ogg_realloc(ve->mark,ve->storage*sizeof(*ve->mark));
   }
 
@@ -239,6 +245,7 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 
     ve->mark[j+VE_POST]=0;
     if(ret&1){
+      //ve->mark[j-1]=1;
       ve->mark[j]=1;
       ve->mark[j+1]=1;
     }
@@ -301,14 +308,14 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 	      _analysis_output_always(buf,seq,marker,v->pcm_current,0,0,totalshift);
 	    }
 
-
-	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->stretchm[l]*.1;
-	    _analysis_output_always("stretch",seq,marker,v->pcm_current,0,0,totalshift);
+	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->mark[l]*.4;
+	    _analysis_output_always("mark",seq,marker,v->pcm_current,0,0,totalshift);
+	   
 	    
 	    seq++;
 	    
 	  }
-	  #endif
+#endif
 
 	  ve->curmark=j;
 	  if(j>=testW)return(1);
@@ -349,20 +356,20 @@ int _ve_envelope_mark(vorbis_dsp_state *v){
 }
 
 void _ve_envelope_shift(envelope_lookup *e,long shift){
-  int smallsize=e->current/e->searchstep; 
+  int smallsize=e->current/e->searchstep+VE_POST; /* adjust for placing marks
+						     ahead of ve->current */
   int smallshift=shift/e->searchstep;
   int i;
 
   memmove(e->mark,e->mark+smallshift,(smallsize-smallshift)*sizeof(*e->mark));
   
-#if 0
+  #if 0
   for(i=0;i<VE_BANDS*e->ch;i++)
     memmove(e->filter[i].markers,
 	    e->filter[i].markers+smallshift,
 	    (1024-smallshift)*sizeof(*(*e->filter).markers));
-  memmove(e->stretchm,e->stretchm+smallshift,(smallsize-smallshift)*sizeof(*e->stretchm));
   totalshift+=shift;
-#endif 
+  #endif 
 
   e->current-=shift;
   if(e->curmark>=0)

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.48 2002/03/29 07:10:39 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.49 2002/04/06 03:07:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -340,7 +340,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
     memcpy(fft,pcm,sizeof(*fft)*n);
     
-    //_analysis_output_always("windowed",seq+i,pcm,n,0,0,total-n/2);
+    /*_analysis_output_always("windowed",seq+i,pcm,n,0,0,total-n/2);*/
 
     /* transform the PCM data */
     /* only MDCT right now.... */
