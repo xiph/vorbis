@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.4 2000/01/28 14:31:25 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.5 2000/01/28 14:34:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,7 +37,7 @@ static void pack (vorbis_info_floor *i,oggpack_buffer *opb){
   _oggpack_write(opb,d->order,8);
   _oggpack_write(opb,d->rate,16);
   _oggpack_write(opb,d->barkmap,16);
-  _oggpack_write(opb,d->stages,4);
+  _oggpack_write(opb,d->stages-1,4);
   for(j=0;j<d->stages;j++)
     _oggpack_write(opb,d->books[j],8);
 }
@@ -48,7 +48,7 @@ static vorbis_info_floor *unpack (vorbis_info *vi,oggpack_buffer *opb){
   d->order=_oggpack_read(opb,8);
   d->rate=_oggpack_read(opb,16);
   d->barkmap=_oggpack_read(opb,16);
-  d->stages=_oggpack_read(opb,4);
+  d->stages=_oggpack_read(opb,4)+1;
   
   if(d->order<1)goto err_out;
   if(d->rate<1)goto err_out;

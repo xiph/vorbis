@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.4 2000/01/28 14:31:27 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.5 2000/01/28 14:34:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -125,7 +125,7 @@ void pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer *opb){
   int i;
   vorbis_info_mapping0 *d=(vorbis_info_mapping0 *)vm;
 
-  _oggpack_write(opb,d->submaps,4);
+  _oggpack_write(opb,d->submaps-1,4);
   /* we don't write the channel submappings if we only have one... */
   if(d->submaps>1){
     for(i=0;i<vi->channels;i++)
@@ -144,7 +144,7 @@ vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
   vorbis_info_mapping0 *d=calloc(1,sizeof(vorbis_info_mapping0));
   memset(d,0,sizeof(vorbis_info_mapping0));
 
-  d->submaps=_oggpack_read(opb,4);
+  d->submaps=_oggpack_read(opb,4)+1;
 
   if(d->submaps>1){
     for(i=0;i<vi->channels;i++){
