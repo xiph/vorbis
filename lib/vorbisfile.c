@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.16 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.17 2000/03/10 16:23:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -529,7 +529,9 @@ int ov_clear(OggVorbis_File *vf){
     if(vf->f)fclose(vf->f);
     memset(vf,0,sizeof(OggVorbis_File));
   }
+#ifdef DEBUG_LEAKS
   _VDBG_dump();
+#endif
   return(0);
 }
 
