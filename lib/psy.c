@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.7 2000/04/06 15:59:37 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.8 2000/04/12 08:47:53 xiphmont Exp $
 
  ********************************************************************/
 
@@ -252,7 +252,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
 	      vi->peakpre,vi->peakpost);
 
   for(i=1;i<11;i+=2)
-    for(j=0;j<9;j+=2)
+    for(j=0;j<9;j++)
       interp_curve_dB(p->curves[i][j],p->curves[i-1][j],p->curves[i+1][j],.5);
 
 }
