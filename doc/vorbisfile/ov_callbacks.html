@@ -23,6 +23,12 @@ The ov_callbacks structure contains file manipulation function prototypes necess
 The ov_callbacks structure does not need to be user-defined if you are working with a standard file.  The typical <a href="ov_open.html">ov_open()</a> call will fill ov_callbacks for you.  However, ov_callbacks should be defined if you are using other data sources.  In this situation, use <a href="ov_open_callbacks.html">ov_open_callbacks()</a> instead of <a href="ov_open.html">ov_open()</a>.
 <p>
 
+<p>
+The callbacks are designed following the stdio functions fread, fseek, fclose,
+and ftell. Except where otherwise noted below, they should work the same as
+these functions do.
+</p>
+
 <table border=0 width=100% color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
 	<td>
@@ -39,13 +45,19 @@ The ov_callbacks structure does not need to be user-defined if you are working w
 <h3>Relevant Struct Members</h3>
 <dl>
 <dt><i>read_func</i></dt>
-<dd>Pointer to custom data reading function.</dd>
+<dd>Pointer to custom data reading function. Read up to size*nmemb bytes from
+the source into the buffer at ptr. Return the number of bytes read successfully.
+Must return 0 if nothing can be read. Should also set errno if an error occurs,
+in order to distinguish between error and EOF.</dd>
 <dt><i>seek_func</i></dt>
-<dd>Pointer to custom data seeking function.</dd>
+<dd>Pointer to custom data seeking function. If your data source does not support
+seeking, you <em>must</em> return -1. Returns 0 on success. Seeks to a position <em>offset</em> bytes from a position defined by <em>whence</em>. If whence is SEEK_SET, seek relative to the file start. If SEEK_CUR, seek is relative to current file position. If SEEK_END, relative to end of file.</dd>
 <dt><i>close_func</i></dt>
-<dd>Pointer to custom data source closure function.</dd>
+<dd>Pointer to custom data source closure function. This should clear any
+resources used by the data source, such as open files or network sockets. Returns 0.</dd>
 <dt><i>tell_func</i></dt>
-<dd>Pointer to custom data location function.</dd>
+<dd>Pointer to custom data location function. Returns the current offset (from the start) of the data stream. If your source is non-seekable, this need not be
+implemented.</dd>
 </dl>
 
 
