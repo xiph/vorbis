@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.71 2002/07/01 05:29:41 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.72 2002/07/11 06:40:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -759,7 +759,7 @@ void _vp_noisemask(vorbis_look_psy *p,
 
   int i,n=p->n;
   float *work=alloca(n*sizeof(*work));
-  
+
   bark_noise_hybridmp(n,p->bark,logmdct,logmask,
 		      140.,-1);
 
@@ -769,15 +769,35 @@ void _vp_noisemask(vorbis_look_psy *p,
 		      p->vi->noisewindowfixed);
 
   for(i=0;i<n;i++)work[i]=logmdct[i]-work[i];
-
-  /* work[i] holds the median line (.5), logmask holds the upper
-     envelope line (1.) */
   
+#if 0
+  {
+    static int seq=0;
+
+    float work2[n];
+    for(i=0;i<n;i++){
+      work2[i]=logmask[i]+work[i];
+    }
+    
+    if(seq&1)
+      _analysis_output("medianR",seq/2,work,n,1,0,0);
+    else
+      _analysis_output("medianL",seq/2,work,n,1,0,0);
+    
+    if(seq&1)
+      _analysis_output("envelopeR",seq/2,work2,n,1,0,0);
+    else
+      _analysis_output("enveloperL",seq/2,work2,n,1,0,0);
+    seq++;
+  }
+#endif
+
   for(i=0;i<n;i++){
     int dB=logmask[i]+.5;
     if(dB>=NOISE_COMPAND_LEVELS)dB=NOISE_COMPAND_LEVELS-1;
     logmask[i]= work[i]+p->vi->noisecompand[dB];
   }
+
 }
 
 void _vp_tonemask(vorbis_look_psy *p,

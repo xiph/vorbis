@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.46 2002/07/02 04:25:16 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.47 2002/07/11 06:40:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -140,9 +140,24 @@ typedef struct {
   vorbis_mapping_template *maps;
 } ve_setup_data_template;
 
+/* a few static coder conventions */
+static vorbis_info_mode _mode_template[2]={
+  {0,0,0,0},
+  {1,0,0,1}
+};
+
+static vorbis_info_mapping0 _map_nominal[2]={
+  {1, {0,0}, {0}, {0}, 1,{0},{1}},
+  {1, {0,0}, {1}, {1}, 1,{0},{1}}
+};
+
 #include "modes/setup_44.h"
 #include "modes/setup_44u.h"
 #include "modes/setup_32.h"
+#include "modes/setup_8.h"
+#include "modes/setup_11.h"
+#include "modes/setup_16.h"
+#include "modes/setup_22.h"
 #include "modes/setup_X.h"
 
 static ve_setup_data_template *setup_list[]={
@@ -156,20 +171,24 @@ static ve_setup_data_template *setup_list[]={
   &ve_setup_32_uncoupled,
   &ve_setup_32_uncoupled_low,
 
+  &ve_setup_22_stereo,
+  &ve_setup_22_uncoupled,
+  &ve_setup_16_stereo,
+  &ve_setup_16_uncoupled,
+
+  &ve_setup_11_stereo,
+  &ve_setup_11_uncoupled,
+  &ve_setup_8_stereo,
+  &ve_setup_8_uncoupled,
+
   &ve_setup_X_stereo,
   &ve_setup_X_uncoupled,
   &ve_setup_X_stereo_low,
   &ve_setup_X_uncoupled_low,
+  &ve_setup_XX_stereo,
+  &ve_setup_XX_uncoupled,
   0
 };
-
-
-/* a few static coder conventions */
-static vorbis_info_mode _mode_template[2]={
-  {0,0,0,0},
-  {1,0,0,1}
-};
-
 
 static int vorbis_encode_toplevel_setup(vorbis_info *vi,int ch,long rate){
   if(vi && vi->codec_setup){
@@ -183,11 +202,11 @@ static int vorbis_encode_toplevel_setup(vorbis_info *vi,int ch,long rate){
   return(OV_EINVAL);
 }
 
-static int vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
+static void vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
 				     static_codebook    ***books, 
 				     vorbis_info_floor1 *in, 
 				     int *x){
-  int i,k,is=rint(s);
+  int i,k,is=s;
   vorbis_info_floor1 *f=_ogg_calloc(1,sizeof(*f));
   codec_setup_info *ci=vi->codec_setup;
 
@@ -220,10 +239,10 @@ static int vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
   ci->floor_param[ci->floors]=f;
   ci->floors++;
 
-  return(0);
+  return;
 }
 
-static int vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
+static void vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
 					    vorbis_info_psy_global *in, 
 					    double *x){
   int i,is=s;
@@ -247,10 +266,10 @@ static int vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
     g->postecho_thresh[i]=in[is].postecho_thresh[i]*(1.-ds)+in[is+1].postecho_thresh[i]*ds;
   }
   g->ampmax_att_per_sec=ci->hi.amplitude_track_dBpersec;
-  return(0);
+  return;
 }
 
-static int vorbis_encode_global_stereo(vorbis_info *vi,
+static void vorbis_encode_global_stereo(vorbis_info *vi,
 				       highlevel_encode_setup *hi,
 				       adj_stereo *p){
   float s=hi->stereo_point_setting;
@@ -296,10 +315,10 @@ static int vorbis_encode_global_stereo(vorbis_info *vi,
       g->sliding_lowpass[1][i]=ci->blocksizes[1];
     }
   }
-  return(0);
+  return;
 }
 
-static int vorbis_encode_psyset_setup(vorbis_info *vi,double s,
+static void vorbis_encode_psyset_setup(vorbis_info *vi,double s,
 				      int *nn_start,
 				      int *nn_partition,
 				      double *nn_thresh,
@@ -327,13 +346,13 @@ static int vorbis_encode_psyset_setup(vorbis_info *vi,double s,
     p->normal_thresh=nn_thresh[is];
   }
     
-  return 0;
+  return;
 }
 
-static int vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
-					att3 *att,
-					int  *max,
-					vp_adjblock *in){
+static void vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
+					 att3 *att,
+					 int  *max,
+					 vp_adjblock *in){
   int i,is=s;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
@@ -351,11 +370,11 @@ static int vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
 
   for(i=0;i<P_BANDS;i++)
     p->toneatt[i]=in[is].block[i]*(1.-ds)+in[is+1].block[i]*ds;
-  return(0);
+  return;
 }
 
 
-static int vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
+static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
 				       compandblock *in, double *x){
   int i,is=s;
   double ds=s-is;
@@ -373,10 +392,10 @@ static int vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
   /* interpolate the compander settings */
   for(i=0;i<NOISE_COMPAND_LEVELS;i++)
     p->noisecompand[i]=in[is].data[i]*(1.-ds)+in[is+1].data[i]*ds;
-  return(0);
+  return;
 }
 
-static int vorbis_encode_peak_setup(vorbis_info *vi,double s,int block,
+static void vorbis_encode_peak_setup(vorbis_info *vi,double s,int block,
 				    int *suppress){
   int is=s;
   double ds=s-is;
@@ -385,10 +404,10 @@ static int vorbis_encode_peak_setup(vorbis_info *vi,double s,int block,
 
   p->tone_abs_limit=suppress[is]*(1.-ds)+suppress[is+1]*ds;
 
-  return(0);
+  return;
 }
 
-static int vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
+static void vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
 					 int *suppress,
 					 noise3 *in,
 					 noiseguard *guard,
@@ -417,16 +436,16 @@ static int vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
     }
   }
 
-  return(0);
+  return;
 }
 
-static int vorbis_encode_ath_setup(vorbis_info *vi,int block){
+static void vorbis_encode_ath_setup(vorbis_info *vi,int block){
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
 
   p->ath_adjatt=ci->hi.ath_floating_dB;
   p->ath_maxatt=ci->hi.ath_absolute_dB;
-  return(0);
+  return;
 }
 
 
@@ -465,7 +484,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
   if(ci->residues<=number)ci->residues=number+1;
 
   switch(ci->blocksizes[block]){
-  case 64:case 128:case 256:case 512:
+  case 64:case 128:case 256:
     r->grouping=16;
     break;
   default:
@@ -566,12 +585,14 @@ static void vorbis_encode_map_n_res_setup(vorbis_info *vi,double s,
 					  vorbis_mapping_template *maps){
 
   codec_setup_info *ci=vi->codec_setup;
-  int i,j,is=s;
+  int i,j,is=s,modes=2;
   vorbis_info_mapping0 *map=maps[is].map;
   vorbis_info_mode *mode=_mode_template;
   vorbis_residue_template *res=maps[is].res;
 
-  for(i=0;i<2;i++){
+  if(ci->blocksizes[0]==ci->blocksizes[1])modes=1;
+
+  for(i=0;i<modes;i++){
 
     ci->map_param[i]=_ogg_calloc(1,sizeof(*map));
     ci->mode_param[i]=_ogg_calloc(1,sizeof(*mode));
@@ -655,7 +676,7 @@ static void get_setup_template(vorbis_info *vi,
 
 /* the final setup call */
 int vorbis_encode_setup_init(vorbis_info *vi){
-  int ret=0,i0=0;
+  int i0=0,singleblock=0;
   codec_setup_info *ci=vi->codec_setup;
   ve_setup_data_template *setup=NULL;
   highlevel_encode_setup *hi=&ci->hi;
@@ -685,115 +706,124 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   vorbis_encode_blocksize_setup(vi,hi->base_setting,
 				setup->blocksize_short,
 				setup->blocksize_long);
+  if(ci->blocksizes[0]==ci->blocksizes[1])singleblock=1;
   
   /* floor setup; choose proper floor params.  Allocated on the floor
      stack in order; if we alloc only long floor, it's 0 */
-  ret|=vorbis_encode_floor_setup(vi,hi->short_setting,0,
-				 setup->floor_books,
-				 setup->floor_params,
-				 setup->floor_short_mapping);
-  ret|=vorbis_encode_floor_setup(vi,hi->long_setting,1,
-				 setup->floor_books,
-				 setup->floor_params,
-				 setup->floor_long_mapping);
+  vorbis_encode_floor_setup(vi,hi->short_setting,0,
+			    setup->floor_books,
+			    setup->floor_params,
+			    setup->floor_short_mapping);
+  if(!singleblock)
+    vorbis_encode_floor_setup(vi,hi->long_setting,1,
+			      setup->floor_books,
+			      setup->floor_params,
+			      setup->floor_long_mapping);
   
   /* setup of [mostly] short block detection and stereo*/
-  ret|=vorbis_encode_global_psych_setup(vi,hi->trigger_setting,
-					setup->global_params,
-					setup->global_mapping);
-  ret|=vorbis_encode_global_stereo(vi,hi,setup->stereo_modes);
+  vorbis_encode_global_psych_setup(vi,hi->trigger_setting,
+				   setup->global_params,
+				   setup->global_mapping);
+  vorbis_encode_global_stereo(vi,hi,setup->stereo_modes);
 
   /* basic psych setup and noise normalization */
-  ret|=vorbis_encode_psyset_setup(vi,hi->short_setting,
-				  setup->psy_noise_normal_start[0],
-				  setup->psy_noise_normal_partition[0],  
-				  setup->psy_noise_normal_thresh,  
-				  0);
-  ret|=vorbis_encode_psyset_setup(vi,hi->short_setting,
-				  setup->psy_noise_normal_start[0],
-				  setup->psy_noise_normal_partition[0],  
-				  setup->psy_noise_normal_thresh,  
-				  1);
-  ret|=vorbis_encode_psyset_setup(vi,hi->long_setting,
-				  setup->psy_noise_normal_start[1],
-				  setup->psy_noise_normal_partition[1],  
-				  setup->psy_noise_normal_thresh,  
-				  2);
-  ret|=vorbis_encode_psyset_setup(vi,hi->long_setting,
-				  setup->psy_noise_normal_start[1],
-				  setup->psy_noise_normal_partition[1],  
-				  setup->psy_noise_normal_thresh,  
-				  3);
+  vorbis_encode_psyset_setup(vi,hi->short_setting,
+			     setup->psy_noise_normal_start[0],
+			     setup->psy_noise_normal_partition[0],  
+			     setup->psy_noise_normal_thresh,  
+			     0);
+  vorbis_encode_psyset_setup(vi,hi->short_setting,
+			     setup->psy_noise_normal_start[0],
+			     setup->psy_noise_normal_partition[0],  
+			     setup->psy_noise_normal_thresh,  
+			     1);
+  if(!singleblock){
+    vorbis_encode_psyset_setup(vi,hi->long_setting,
+			       setup->psy_noise_normal_start[1],
+			       setup->psy_noise_normal_partition[1],  
+				    setup->psy_noise_normal_thresh,  
+			       2);
+    vorbis_encode_psyset_setup(vi,hi->long_setting,
+			       setup->psy_noise_normal_start[1],
+			       setup->psy_noise_normal_partition[1],  
+			       setup->psy_noise_normal_thresh,  
+			       3);
+  }
 
   /* tone masking setup */
-  ret|=vorbis_encode_tonemask_setup(vi,hi->block[i0].tone_mask_setting,0,
-				    setup->psy_tone_masteratt,
-				    setup->psy_tone_0dB,
-				    setup->psy_tone_adj_impulse);
-  ret|=vorbis_encode_tonemask_setup(vi,hi->block[1].tone_mask_setting,1,
-				    setup->psy_tone_masteratt,
-				    setup->psy_tone_0dB,
-				    setup->psy_tone_adj_other);
-  ret|=vorbis_encode_tonemask_setup(vi,hi->block[2].tone_mask_setting,2,
-				    setup->psy_tone_masteratt,
-				    setup->psy_tone_0dB,
-				    setup->psy_tone_adj_other);
-  ret|=vorbis_encode_tonemask_setup(vi,hi->block[3].tone_mask_setting,3,
-				    setup->psy_tone_masteratt,
-				    setup->psy_tone_0dB,
-				    setup->psy_tone_adj_long);
+  vorbis_encode_tonemask_setup(vi,hi->block[i0].tone_mask_setting,0,
+			       setup->psy_tone_masteratt,
+			       setup->psy_tone_0dB,
+			       setup->psy_tone_adj_impulse);
+  vorbis_encode_tonemask_setup(vi,hi->block[1].tone_mask_setting,1,
+			       setup->psy_tone_masteratt,
+			       setup->psy_tone_0dB,
+			       setup->psy_tone_adj_other);
+  if(!singleblock){
+    vorbis_encode_tonemask_setup(vi,hi->block[2].tone_mask_setting,2,
+				 setup->psy_tone_masteratt,
+				 setup->psy_tone_0dB,
+				 setup->psy_tone_adj_other);
+    vorbis_encode_tonemask_setup(vi,hi->block[3].tone_mask_setting,3,
+				 setup->psy_tone_masteratt,
+				 setup->psy_tone_0dB,
+				 setup->psy_tone_adj_long);
+  }
 
   /* noise companding setup */
-  ret|=vorbis_encode_compand_setup(vi,hi->block[i0].noise_compand_setting,0,
-				   setup->psy_noise_compand,
-				   setup->psy_noise_compand_short_mapping);
-  ret|=vorbis_encode_compand_setup(vi,hi->block[1].noise_compand_setting,1,
-				   setup->psy_noise_compand,
-				   setup->psy_noise_compand_short_mapping);
-  ret|=vorbis_encode_compand_setup(vi,hi->block[2].noise_compand_setting,2,
-				   setup->psy_noise_compand,
-				   setup->psy_noise_compand_long_mapping);
-  ret|=vorbis_encode_compand_setup(vi,hi->block[3].noise_compand_setting,3,
-				   setup->psy_noise_compand,
-				   setup->psy_noise_compand_long_mapping);
+  vorbis_encode_compand_setup(vi,hi->block[i0].noise_compand_setting,0,
+			      setup->psy_noise_compand,
+			      setup->psy_noise_compand_short_mapping);
+  vorbis_encode_compand_setup(vi,hi->block[1].noise_compand_setting,1,
+			      setup->psy_noise_compand,
+			      setup->psy_noise_compand_short_mapping);
+  if(!singleblock){
+    vorbis_encode_compand_setup(vi,hi->block[2].noise_compand_setting,2,
+				setup->psy_noise_compand,
+				setup->psy_noise_compand_long_mapping);
+    vorbis_encode_compand_setup(vi,hi->block[3].noise_compand_setting,3,
+				setup->psy_noise_compand,
+				setup->psy_noise_compand_long_mapping);
+  }
 
   /* peak guarding setup  */
-  ret|=vorbis_encode_peak_setup(vi,hi->block[i0].tone_peaklimit_setting,0,
-				setup->psy_tone_dBsuppress);
-  ret|=vorbis_encode_peak_setup(vi,hi->block[1].tone_peaklimit_setting,1,
-				setup->psy_tone_dBsuppress);
-  ret|=vorbis_encode_peak_setup(vi,hi->block[2].tone_peaklimit_setting,2,
-				setup->psy_tone_dBsuppress);
-  ret|=vorbis_encode_peak_setup(vi,hi->block[3].tone_peaklimit_setting,3,
-				setup->psy_tone_dBsuppress);
+  vorbis_encode_peak_setup(vi,hi->block[i0].tone_peaklimit_setting,0,
+			   setup->psy_tone_dBsuppress);
+  vorbis_encode_peak_setup(vi,hi->block[1].tone_peaklimit_setting,1,
+			   setup->psy_tone_dBsuppress);
+  if(!singleblock){
+    vorbis_encode_peak_setup(vi,hi->block[2].tone_peaklimit_setting,2,
+			     setup->psy_tone_dBsuppress);
+    vorbis_encode_peak_setup(vi,hi->block[3].tone_peaklimit_setting,3,
+			     setup->psy_tone_dBsuppress);
+  }
 
   /* noise bias setup */
-  ret|=vorbis_encode_noisebias_setup(vi,hi->block[i0].noise_bias_setting,0,
-				     setup->psy_noise_dBsuppress,
-				     setup->psy_noise_bias_impulse,
-				     setup->psy_noiseguards,
-				     (i0==0?hi->impulse_noisetune:0.));
-  ret|=vorbis_encode_noisebias_setup(vi,hi->block[1].noise_bias_setting,1,
-				     setup->psy_noise_dBsuppress,
-				     setup->psy_noise_bias_padding,
-				     setup->psy_noiseguards,0.);
-  ret|=vorbis_encode_noisebias_setup(vi,hi->block[2].noise_bias_setting,2,
-				     setup->psy_noise_dBsuppress,
-				     setup->psy_noise_bias_trans,
-				     setup->psy_noiseguards,0.);
-  ret|=vorbis_encode_noisebias_setup(vi,hi->block[3].noise_bias_setting,3,
-				     setup->psy_noise_dBsuppress,
-				     setup->psy_noise_bias_long,
-				     setup->psy_noiseguards,0.);
+  vorbis_encode_noisebias_setup(vi,hi->block[i0].noise_bias_setting,0,
+				setup->psy_noise_dBsuppress,
+				setup->psy_noise_bias_impulse,
+				setup->psy_noiseguards,
+				(i0==0?hi->impulse_noisetune:0.));
+  vorbis_encode_noisebias_setup(vi,hi->block[1].noise_bias_setting,1,
+				setup->psy_noise_dBsuppress,
+				setup->psy_noise_bias_padding,
+				setup->psy_noiseguards,0.);
+  if(!singleblock){
+    vorbis_encode_noisebias_setup(vi,hi->block[2].noise_bias_setting,2,
+				  setup->psy_noise_dBsuppress,
+				  setup->psy_noise_bias_trans,
+				  setup->psy_noiseguards,0.);
+    vorbis_encode_noisebias_setup(vi,hi->block[3].noise_bias_setting,3,
+				  setup->psy_noise_dBsuppress,
+				  setup->psy_noise_bias_long,
+				  setup->psy_noiseguards,0.);
+  }
 
-  ret|=vorbis_encode_ath_setup(vi,0);
-  ret|=vorbis_encode_ath_setup(vi,1);
-  ret|=vorbis_encode_ath_setup(vi,2);
-  ret|=vorbis_encode_ath_setup(vi,3);
-
-  if(ret){
-    vorbis_info_clear(vi);
-    return ret; 
+  vorbis_encode_ath_setup(vi,0);
+  vorbis_encode_ath_setup(vi,1);
+  if(!singleblock){
+    vorbis_encode_ath_setup(vi,2);
+    vorbis_encode_ath_setup(vi,3);
   }
 
   vorbis_encode_map_n_res_setup(vi,hi->base_setting,setup->maps);
@@ -816,7 +846,7 @@ int vorbis_encode_setup_init(vorbis_info *vi){
     ci->bi.avgfloat_upslew_max=999999.f;
   }
 
-  return(ret);
+  return(0);
   
 }
 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: 8kHz settings 
- last mod: $Id: setup_8.h,v 1.1 2002/07/10 03:04:22 xiphmont Exp $
+ last mod: $Id: setup_8.h,v 1.2 2002/07/11 06:41:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -85,8 +85,8 @@ ve_setup_data_template ve_setup_8_stereo={
   _global_mapping_8,
   _psy_stereo_modes_8,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_mapping_8,
   NULL,
 
@@ -136,8 +136,8 @@ ve_setup_data_template ve_setup_8_uncoupled={
   _global_mapping_8,
   _psy_stereo_modes_8,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_mapping_8,
   NULL,
 

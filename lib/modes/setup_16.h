@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: 16kHz settings 
- last mod: $Id: setup_16.h,v 1.1 2002/07/10 03:04:22 xiphmont Exp $
+ last mod: $Id: setup_16.h,v 1.2 2002/07/11 06:41:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,10 +26,10 @@ static int blocksize_16_long[3]={
 };
 
 static int _floor_mapping_16_short[3]={
-  11,3,3
+  9,3,3
 };
 static int _floor_mapping_16[3]={
-  11,11,11
+  9,9,9
 };
 
 static double rate_mapping_16[4]={
@@ -89,8 +89,8 @@ ve_setup_data_template ve_setup_16_stereo={
   _global_mapping_16,
   _psy_stereo_modes_16,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_mapping_16_short,
   _floor_mapping_16,
 
@@ -140,8 +140,8 @@ ve_setup_data_template ve_setup_16_uncoupled={
   _global_mapping_16,
   _psy_stereo_modes_16,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_mapping_16_short,
   _floor_mapping_16,
 

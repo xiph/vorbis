@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: catch-all toplevel settings for q modes only
- last mod: $Id: setup_X.h,v 1.2 2002/07/10 03:04:22 xiphmont Exp $
+ last mod: $Id: setup_X.h,v 1.3 2002/07/11 06:41:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -63,8 +63,8 @@ ve_setup_data_template ve_setup_X_stereo={
   _global_mapping_44,
   _psy_stereo_modes_44,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_short_mapping_44,
   _floor_long_mapping_44,
 
@@ -114,8 +114,8 @@ ve_setup_data_template ve_setup_X_uncoupled={
   _global_mapping_44,
   NULL,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_short_mapping_44,
   _floor_long_mapping_44,
 
@@ -165,8 +165,8 @@ ve_setup_data_template ve_setup_X_stereo_low={
   _global_mapping_44,
   _psy_stereo_modes_44_low,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_short_mapping_44_low,
   _floor_long_mapping_44_low,
 
@@ -217,8 +217,8 @@ ve_setup_data_template ve_setup_X_uncoupled_low={
   _global_mapping_44,
   NULL,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_short_mapping_44_low,
   _floor_long_mapping_44_low,
 
@@ -268,8 +268,8 @@ ve_setup_data_template ve_setup_XX_stereo={
   _global_mapping_8,
   _psy_stereo_modes_8,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_mapping_8,
   NULL,
 
@@ -319,8 +319,8 @@ ve_setup_data_template ve_setup_XX_uncoupled={
   _global_mapping_8,
   _psy_stereo_modes_8,
 
-  _floor_44_books,
-  _floor_44,
+  _floor_books,
+  _floor,
   _floor_mapping_8,
   NULL,
 

@@ -121,8 +121,8 @@ else
   		fi;;
 	powerpc-*-linux*)
 		DEBUG="-g -Wall -W -D_REENTRANT -D__NO_MATH_INLINES"
-		CFLAGS="-O3 -ffast-math -mfused-madd -D_REENTRANT"
-		PROFILE="-pg -g -O3 -ffast-math -mfused-madd -D_REENTRANT";;
+		CFLAGS="-O3 -ffast-math -mfused-madd -mcpu=750 -D_REENTRANT"
+		PROFILE="-pg -g -O3 -ffast-math -mfused-madd -mcpu=750 -D_REENTRANT";;
 	*-*-linux*)
 		DEBUG="-g -Wall -W -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
 		CFLAGS="-O20 -ffast-math -D_REENTRANT -fsigned-char"

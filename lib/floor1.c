@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.22 2002/07/01 11:20:11 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.23 2002/07/11 06:40:48 xiphmont Exp $
 
  ********************************************************************/
 
@@ -452,7 +452,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
 
   /* weight toward the actually used frequencies if we meet the threshhold */
   {
-    int weight=nb*info->twofitweight/na;
+    int weight=nb*info->twofitweight/(na+1);
 
     a->xa=xa*weight+xb;
     a->ya=ya*weight+yb;

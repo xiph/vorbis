@@ -11,13 +11,13 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.15 2002/07/10 03:04:22 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.16 2002/07/11 06:41:04 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "backends.h"
-#include "books/coupled/res_books_44c.h"
+#include "books/coupled/res_books_stereo.h"
 
 /***** residue backends *********************************************/
 
@@ -169,74 +169,74 @@ static vorbis_residue_template _res_44s_1[]={
 };
 static vorbis_residue_template _res_44s_2[]={
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c2_s_short,&_huff_book__44c2_sm_short,
+   &_huff_book__44c2_s_short,&_huff_book__44c2_s_short,
    &_resbook_44s_2,&_resbook_44s_2},
 
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c2_s_long,&_huff_book__44c2_sm_long,
+   &_huff_book__44c2_s_long,&_huff_book__44c2_s_long,
    &_resbook_44s_2,&_resbook_44s_2}
 };
 static vorbis_residue_template _res_44s_3[]={
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c3_s_short,&_huff_book__44c3_sm_short,
+   &_huff_book__44c3_s_short,&_huff_book__44c3_s_short,
    &_resbook_44s_3,&_resbook_44s_3},
 
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c3_s_long,&_huff_book__44c3_sm_long,
+   &_huff_book__44c3_s_long,&_huff_book__44c3_s_long,
    &_resbook_44s_3,&_resbook_44s_3}
 };
 static vorbis_residue_template _res_44s_4[]={
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c4_s_short,&_huff_book__44c4_sm_short,
+   &_huff_book__44c4_s_short,&_huff_book__44c4_s_short,
    &_resbook_44s_4,&_resbook_44s_4},
 
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c4_s_long,&_huff_book__44c4_sm_long,
+   &_huff_book__44c4_s_long,&_huff_book__44c4_s_long,
    &_resbook_44s_4,&_resbook_44s_4}
 };
 static vorbis_residue_template _res_44s_5[]={
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c5_s_short,&_huff_book__44c5_sm_short,
+   &_huff_book__44c5_s_short,&_huff_book__44c5_s_short,
    &_resbook_44s_5,&_resbook_44s_5},
 
   {2,0,  &_residue_44_mid,
-   &_huff_book__44c5_s_long,&_huff_book__44c5_sm_long,
+   &_huff_book__44c5_s_long,&_huff_book__44c5_s_long,
    &_resbook_44s_5,&_resbook_44s_5}
 };
 static vorbis_residue_template _res_44s_6[]={
   {2,0,  &_residue_44_high,
-   &_huff_book__44c6_s_short,&_huff_book__44c6_sm_short,
+   &_huff_book__44c6_s_short,&_huff_book__44c6_s_short,
    &_resbook_44s_6,&_resbook_44s_6},
 
   {2,0,  &_residue_44_high,
-   &_huff_book__44c6_s_long,&_huff_book__44c6_sm_long,
+   &_huff_book__44c6_s_long,&_huff_book__44c6_s_long,
    &_resbook_44s_6,&_resbook_44s_6}
 };
 static vorbis_residue_template _res_44s_7[]={
   {2,0,  &_residue_44_high,
-   &_huff_book__44c7_s_short,&_huff_book__44c7_sm_short,
+   &_huff_book__44c7_s_short,&_huff_book__44c7_s_short,
    &_resbook_44s_7,&_resbook_44s_7},
 
   {2,0,  &_residue_44_high,
-   &_huff_book__44c7_s_long,&_huff_book__44c7_sm_long,
+   &_huff_book__44c7_s_long,&_huff_book__44c7_s_long,
    &_resbook_44s_7,&_resbook_44s_7}
 };
 static vorbis_residue_template _res_44s_8[]={
   {2,0,  &_residue_44_high,
-   &_huff_book__44c8_s_short,&_huff_book__44c8_sm_short,
+   &_huff_book__44c8_s_short,&_huff_book__44c8_s_short,
    &_resbook_44s_8,&_resbook_44s_8},
 
   {2,0,  &_residue_44_high,
-   &_huff_book__44c8_s_long,&_huff_book__44c8_sm_long,
+   &_huff_book__44c8_s_long,&_huff_book__44c8_s_long,
    &_resbook_44s_8,&_resbook_44s_8}
 };
 static vorbis_residue_template _res_44s_9[]={
   {2,0,  &_residue_44_high,
-   &_huff_book__44c9_s_short,&_huff_book__44c9_sm_short,
+   &_huff_book__44c9_s_short,&_huff_book__44c9_s_short,
    &_resbook_44s_9,&_resbook_44s_9},
 
   {2,0,  &_residue_44_high,
-   &_huff_book__44c9_s_long,&_huff_book__44c9_sm_long,
+   &_huff_book__44c9_s_long,&_huff_book__44c9_s_long,
    &_resbook_44s_9,&_resbook_44s_9}
 };
 

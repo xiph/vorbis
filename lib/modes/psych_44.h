@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: key psychoacoustic settings for 44.1/48kHz
- last mod: $Id: psych_44.h,v 1.23 2002/07/10 03:04:22 xiphmont Exp $
+ last mod: $Id: psych_44.h,v 1.24 2002/07/11 06:41:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -478,7 +478,7 @@ static adj_stereo _psy_stereo_modes_44[11]={
 
 static att3 _psy_tone_masteratt_44_low[2]={
   {{ 34,  24,   8}, -6, 1.25}, /* 0 */
-  {{ 34,  20,   8}, -6, 1.25}, /* 1 */
+  {{ 34,  20,   8}, -2, 1.25}, /* 1 */
 };
 static att3 _psy_tone_masteratt_44[11]={
   {{ 30,  20,   8}, -2, 1.25}, /* 0 */

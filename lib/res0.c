@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.47 2002/07/01 11:20:11 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.48 2002/07/11 06:40:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -541,7 +541,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	  /* training hack */
 	  if(val<look->phrasebook->entries)
 	    look->phrasebits+=vorbis_book_encode(look->phrasebook,val,&vb->opb);
-#ifdef TRAIN_RES
+#if 0 /*def TRAIN_RES*/
 	  else
 	    fprintf(stderr,"!");
 #endif

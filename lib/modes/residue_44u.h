@@ -11,13 +11,13 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz uncoupled
- last mod: $Id: residue_44u.h,v 1.2 2002/07/10 03:04:22 xiphmont Exp $
+ last mod: $Id: residue_44u.h,v 1.3 2002/07/11 06:41:04 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "backends.h"
-#include "books/uncoupled/res_books_44u.h"
+#include "books/uncoupled/res_books_uncoupled.h"
 
 /***** residue backends *********************************************/
 

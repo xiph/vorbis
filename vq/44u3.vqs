@@ -1,10 +1,5 @@
-touch _44u3_m_short.vqd
-touch _44u3_m_long.vqd
-
 cp 44u3/resaux_0.vqd _44u3__short.vqd
 cp 44u3/resaux_1.vqd _44u3__long.vqd
-#cp 44u3_m/resaux_0.vqd _44u3_m_short.vqd
-#cp 44u3_m/resaux_1.vqd _44u3_m_long.vqd
 
 GO
 
@@ -38,9 +33,3 @@ haux _44u3__long.vqd 0,64,2
 :_p7_0 44u3/res_part7_pass0.vqd, 2, nonseq, 0 +- 255 510 765 1020
 :_p7_1 44u3/res_part7_pass1.vqd, 2, nonseq, 0 +- 17 34 51 68 85 102 119
 :_p7_2 44u3/res_part7_pass2.vqd, 2, nonseq, 0 +- 1 2 3 4 5 6 7 8
-
->_44u3_m noninterleaved
-haux _44u3_m_short.vqd 0,16,2
-
->_44u3_m noninterleaved
-haux _44u3_m_long.vqd 0,64,2

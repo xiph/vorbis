@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.45 2002/07/02 04:25:15 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.46 2002/07/11 06:40:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -52,7 +52,7 @@ int main(){
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
 
-  int eos=0;
+  int eos=0,ret;
   int i, founddata;
 
 #if defined(macintosh) && defined(__MWERKS__)
@@ -67,6 +67,8 @@ int main(){
      example, after all. */
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
+  /* if we were reading/writing a file, it would also need to in
+     binary mode, eg, 'fopen("file.wav","rb"); */
   /* Beware the evil ifdef. We avoid these where we can, but this one we 
      cannot. Don't add any more, you'll probably go to hell if you do. */
   _setmode( _fileno( stdin ), _O_BINARY );
@@ -93,16 +95,46 @@ int main(){
 
   /********** Encode setup ************/
 
-  /* choose an encoding mode */
-  /* (quality mode .4: 44kHz stereo coupled, roughly 128kbps VBR) */
   vorbis_info_init(&vi);
-  
-  vorbis_encode_init(&vi,2,32000,-1,48000,-1);
-  //vorbis_encode_init_vbr(&vi,2,32000,1.);
 
-  //vorbis_encode_setup_managed(&vi,2,44100,-1,128000,-1);
-  //vorbis_encode_ctl(&vi,OV_ECTL_RATEMANAGE_AVG,NULL);
-  //vorbis_encode_setup_init(&vi);
+  /* choose an encoding mode.  A few possibilities commented out, one
+     actually used: */
+
+  /*********************************************************************
+   Encoding using a VBR quality mode.  The usable range is -.1
+   (lowest quality, smallest file) to 1. (highest quality, largest file).
+   Example quality mode .4: 44kHz stereo coupled, roughly 128kbps VBR 
+  
+   ret = vorbis_encode_init_vbr(&vi,2,44100,-.4);
+
+   ---------------------------------------------------------------------
+
+   Encoding using an average bitrate mode (ABR).
+   example: 44kHz stereo coupled, average 128kbps VBR 
+  
+   ret = vorbis_encode_init(&vi,2,44100,-1,128000,-1);
+
+   ---------------------------------------------------------------------
+
+   Encode using a qulity mode, but select that quality mode by asking for
+   an approximate bitrate.  This is not ABR, it is true VBR, but selected
+   using the bitrate interface, and then turning bitrate management off:
+
+   ret = ( vorbis_encode_setup_managed(&vi,2,44100,-1,128000,-1) ||
+           vorbis_encode_ctl(&vi,OV_ECTL_RATEMANAGE_AVG,NULL) ||
+           vorbis_encode_setup_init(&vi));
+
+   *********************************************************************/
+
+  
+  //ret=vorbis_encode_init(&vi,2,44100,-1,64000,-1);
+  ret=vorbis_encode_init_vbr(&vi,2,16000,.5);
+
+  /* do not continue if setup failed; this can happen if we ask for a
+     mode that libVorbis does not support (eg, too low a bitrate, etc,
+     will return 'OV_EIMPL') */
+
+  if(ret)exit(1);
 
   /* add a comment */
   vorbis_comment_init(&vc);
