@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.12 2000/06/14 08:19:22 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.13 2000/06/18 12:33:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -197,7 +197,7 @@ vorbis_info info_A={
   /* psy */
   {&_psy_set0},
   /* thresh sample period, preecho clamp trigger threshhold, range */
-  128, 4, 2 
+  128, 20, 2 
 };
 
 #define PREDEF_INFO_MAX 0

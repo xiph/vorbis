@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.4 2000/06/14 01:38:32 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.5 2000/06/18 12:33:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -319,6 +319,16 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   return(-1);
 }
 
+static double _dist(int el,double *ref, double *b,int step){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(ref[i]-b[i*step]);
+    acc+=val*val;
+  }
+  return(acc);
+}
+
 int _best(codebook *book, double *a, int step){
   encode_aux_nearestmatch *nt=book->c->nearest_tree;
   encode_aux_threshmatch *tt=book->c->thresh_tree;
@@ -365,17 +375,24 @@ int _best(codebook *book, double *a, int step){
     return(-ptr);
   }
 
-  return(-1);
-}
-
-static double _dist(int el,double *a, double *b){
-  int i;
-  double acc=0.;
-  for(i=0;i<el;i++){
-    double val=(a[i]-b[i]);
-    acc+=val*val;
+  /* brute force it! */
+  {
+    const static_codebook *c=book->c;
+    int i,besti=-1;
+    double best;
+    double *e=book->valuelist;
+    for(i=0;i<book->entries;i++){
+      if(c->lengthlist[i]>0){
+	double this=_dist(dim,e,a,step);
+	if(besti==-1 || this<best){
+	  best=this;
+	  besti=i;
+	}
+      }
+      e+=dim;
+    }
+    return(besti);
   }
-  return(acc);
 }
 
 /* returns the entry number and *modifies a* to the remainder value ********/

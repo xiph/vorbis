@@ -7,8 +7,6 @@ Meaningful error code returns
 Option for brute-forcing vq search on maptype 2 (helps on undertrained
 sets).
 
-vorbisfile instantaneous bitrate info
-
 encoder switch interface for binary compat through changes; ioctl()-like?
 
 API changes: 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.32 2000/06/15 12:17:03 xiphmont Exp $
+ last mod: $Id: block.c,v 1.33 2000/06/18 12:33:47 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -404,30 +404,12 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      which lets us compute the shape of the current block's window */
   
   if(vi->blocksizes[0]<vi->blocksizes[1]){
-    
-    if(v->W)
-      /* this is a long window; we start the search forward of centerW
-	 because that's the fastest we could react anyway */
-      i=v->centerW+vi->blocksizes[1]/4-vi->blocksizes[0]/4;
-    else
-      /* short window.  Search from centerW */
-      i=v->centerW;
-    i/=vi->envelopesa;
-    
+    long i=v->centerW/vi->envelopesa;
+
     for(;i<v->envelope_current-1;i++){
       /* Compare last with current; do we have an abrupt energy change? */
-      
-      if(v->multipliers[i-1]*vi->preecho_thresh<  
-	 v->multipliers[i])break;
-      
-      /* because the overlapping nature of the delta finding
-	 'smears' the energy cliffs, also compare completely
-	 unoverlapped areas just in case the plosive happened in an
-	 unlucky place */
-      
-      if(v->multipliers[i-1]*vi->preecho_thresh<  
-	 v->multipliers[i+1])break;
-	
+      if(v->multipliers[i]>vi->preecho_thresh)break;
+      if(v->multipliers[i]+v->multipliers[i+1]>vi->preecho_thresh)break;
     }
     
     if(i<v->envelope_current-1){
@@ -439,10 +421,10 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 	largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]/4;
       else
 	/* min boundary; nW large, next small */
-	largebound=v->centerW+vi->blocksizes[0]/2+vi->blocksizes[1]/2;
+	largebound=v->centerW+vi->blocksizes[1]*3/4+vi->blocksizes[0]*3/4;
       largebound/=vi->envelopesa;
       
-      if(i>=largebound)
+      if(i>largebound)
 	v->nW=1;
       else
 	v->nW=0;
@@ -517,7 +499,6 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
     int new_centerNext=vi->blocksizes[1]/2;
     int movementW=centerNext-new_centerNext;
     int movementM=movementW/vi->envelopesa;
-
 
 
     /* the multipliers and pcm stay synced up because the blocksize

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.18 2000/06/14 22:41:53 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.19 2000/06/18 12:33:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -270,7 +270,7 @@ typedef struct vorbis_dsp_state{
   int64_t res_bits;
 
   /* local lookup storage */
-  envelope_lookup         ve;    
+  envelope_lookup         ve; /* envelope */    
   double                **window[2][2][2]; /* block, leadin, leadout, type */
   vorbis_look_transform **transform[2];    /* block, type */
   codebook               *fullbooks;

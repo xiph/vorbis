@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.21 2000/06/14 01:38:31 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.22 2000/06/18 12:33:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -509,16 +509,16 @@ static void max_seeds(vorbis_look_psy *p,double *flr){
      had in Grad Skool... I didn't solve it at the time ;-) */
 }
 
-#define noiseBIAS 5
-static void quarter_octave_noise(vorbis_look_psy *p,double *f,double *noise){
-  long i,n=p->n;
+#define noiseBIAS 2
+static void quarter_octave_noise(long n,double *f,double *noise){
+  long i;
   long lo=0,hi=0;
   double acc=0.;
 
   for(i=0;i<n;i++){
     /* not exactly correct, (the center frequency should be centered
        on a *log* scale), but not worth quibbling */
-    long newhi=i*_eights[18]+noiseBIAS;
+    long newhi=i*_eights[17]+noiseBIAS;
     long newlo=i*_eights[15]-noiseBIAS;
     if(newhi>n)newhi=n;
 
@@ -562,7 +562,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
   
   /* don't use the smoothed data for noise */
   if(p->vi->noisemaskp){
-    quarter_octave_noise(p,f,work2);
+    quarter_octave_noise(p->n,f,work2);
     seed_generic(p,p->noisecurves,work2,flr,specmax);
   }
   

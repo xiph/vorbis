@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: modified discrete cosine transform prototypes
- last mod: $Id: mdct.h,v 1.10 2000/01/22 13:28:26 xiphmont Exp $
+ last mod: $Id: mdct.h,v 1.11 2000/06/18 12:33:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,15 @@
 #define _OGG_mdct_H_
 
 #include "vorbis/codec.h"
+
+typedef struct {
+  int n;
+  int log2n;
+  
+  double *trig;
+  int    *bitrev;
+
+} mdct_lookup;
 
 extern void mdct_init(mdct_lookup *lookup,int n);
 extern void mdct_clear(mdct_lookup *l);

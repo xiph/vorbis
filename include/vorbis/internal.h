@@ -13,7 +13,7 @@
 
  function: libvorbis codec internal types.  These structures are 
            'visible', but generally uninteresting to the developer
- last mod: $Id: internal.h,v 1.5 2000/05/08 20:49:43 xiphmont Exp $
+ last mod: $Id: internal.h,v 1.6 2000/06/18 12:33:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,18 +23,9 @@
 /* lookup structures for various simple transforms *****************/
 
 typedef struct {
-  int n;
-  int log2n;
-  
-  double *trig;
-  int    *bitrev;
-
-} mdct_lookup;
-
-typedef struct {
-  int winlen;
   double *window;
-  mdct_lookup mdct;
+  long winlen;
+  void *fft;
 } envelope_lookup;
 
 /* structures for various internal data abstractions ********************/
