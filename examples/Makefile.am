@@ -7,8 +7,8 @@ INCLUDES = -I$(top_srcdir)/include @OGG_CFLAGS@
 noinst_PROGRAMS = decoder_example encoder_example chaining_example\
 		vorbisfile_example seeking_example
 
-LDFLAGS = -all-static
-LDADD = ../lib/libvorbis.la
+LDFLAGS = -all-static 
+LDADD = ../lib/libvorbis.la 
 
 decoder_example_SOURCES = decoder_example.c
 encoder_example_SOURCES = encoder_example.c

@@ -7,7 +7,7 @@
 #eg:
 
 # >res0_128_128 interleaved
-# haux res0_96_128aux.vqd 0,4,2
+# haux 44c0_s/resaux_0.vqd res0_96_128aux 0,4,2 9
 # :1 res0_128_128_1.vqd, 4, nonseq cull, 0 +- 1
 # :2 res0_128_128_2.vqd, 4, nonseq, 0 +- 1(.7) 2
 # :3 res0_128_128_3.vqd, 4, nonseq, 0 +- 1(.7) 3 5
@@ -44,15 +44,34 @@ while($line=<F>){
 	next;
     }
 
-    # haux res0_96_128aux.vqd 0,4,2
+    # haux 44c0_s/resaux_0.vqd res0_96_128aux 0,4,2 9
     if($line=~m/^h(.*)/){
 	# build a huffman book (no mapping) 
-	my($name,$datafile,$arg)=split(' ',$1);
+	my($name,$datafile,$bookname,$interval,$range)=split(' ',$1);
  
-	my $command="huffbuild $datafile $arg";
-	print ">>> $command\n";
-	die "Couldn't build huffbook.\n\tcommand:$command\n" 
-	    if syst($command);
+	# check the desired subdir to see if the data file exists
+	if(-e $datafile){
+	    my $command="cp $datafile $bookname.tmp";
+	    print ">>> $command\n";
+	    die "Couldn't access partition data file.\n\tcommand:$command\n" 
+		if syst($command);
+
+	    my $command="huffbuild $bookname.tmp $interval";
+	    print ">>> $command\n";
+	    die "Couldn't build huffbook.\n\tcommand:$command\n" 
+		if syst($command);
+
+	    my $command="rm $bookname.tmp";
+	    print ">>> $command\n";
+	    die "Couldn't remove temporary file.\n\tcommand:$command\n" 
+		if syst($command);
+	}else{
+	    my $command="huffbuild $bookname.tmp 0-$range";
+	    print ">>> $command\n";
+	    die "Couldn't build huffbook.\n\tcommand:$command\n" 
+		if syst($command);
+
+	}
 	next;
     }
 

@@ -31,7 +31,7 @@
 #include "misc.h"
 #include "os.h"
 
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined (TRAIN_RESAUX)
 #include <stdio.h>
 #endif 
 
@@ -51,7 +51,7 @@ typedef struct {
   long      phrasebits;
   long      frames;
 
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined(TRAIN_RESAUX)
   int        train_seq;
   long      *training_data[8][64];
   float      training_max[8][64];
@@ -100,6 +100,7 @@ void res0_free_look(vorbis_look_residue *i){
 	      look->training_min[k][j],look->training_max[k][j]);*/
 
 	    _ogg_free(look->training_data[k][j]);
+	    look->training_data[k][j]=NULL;
 	  }
 	/*fprintf(stderr,"\n");*/
       }
@@ -255,7 +256,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
 	if(info->secondstages[j]&(1<<k)){
 	  look->partbooks[j][k]=ci->fullbooks+info->booklist[acc++];
 #ifdef TRAIN_RES
-	  look->training_data[k][j]=calloc(look->partbooks[j][k]->entries,
+	  look->training_data[k][j]=_ogg_calloc(look->partbooks[j][k]->entries,
 					   sizeof(***look->training_data));
 #endif
 	}
@@ -276,7 +277,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
       look->decodemap[j][k]=deco;
     }
   }
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined (TRAIN_RESAUX)
   {
     static int train_seq=0;
     look->train_seq=train_seq++;
@@ -308,7 +309,7 @@ static int local_book_besterror(codebook *book,float *a){
 	if(val<tt->quantthresh[i])break;
       
     }
-    
+
     best=(best*tt->quantvals)+tt->quantmap[i];
   }
   /* regular lattices are easy :-) */
@@ -446,7 +447,7 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
   int partvals=n/samples_per_partition;
   long **partword=_vorbis_block_alloc(vb,sizeof(*partword));
 
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined (TRAIN_RESAUX)
   FILE *of;
   char buffer[80];
 #endif

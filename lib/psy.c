@@ -31,6 +31,7 @@
 
 #define NEGINF -9999.f
 static double stereo_threshholds[]={0.0, .5, 1.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
+static double stereo_threshholds_limited[]={0.0, .5, 1.0, 1.5, 2.0, 2.5, 4.5, 8.5, 9e10};
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -283,6 +284,12 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->n=n;
   p->rate=rate;
 
+  /* AoTuV HF weighting */
+  p->m_val = 1.;
+  if(rate < 26000) p->m_val = 0;
+  else if(rate < 38000) p->m_val = .94;   /* 32kHz */
+  else if(rate > 46000) p->m_val = 1.275; /* 48kHz */
+  
   /* set up the lookups for a given blocksize and sample rate */
 
   for(i=0,j=0;i<MAX_ATH-1;i++){
@@ -845,14 +852,57 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 			float *noise,
 			float *tone,
 			int offset_select,
-			float *logmask){
+			float *logmask,
+			float *mdct,
+			float *logmdct){
   int i,n=p->n;
+  float de, coeffi, cx;/* AoTuV */
   float toneatt=p->vi->tone_masteratt[offset_select];
+
+  cx = p->m_val;
   
   for(i=0;i<n;i++){
     float val= noise[i]+p->noiseoffset[offset_select][i];
     if(val>p->vi->noisemaxsupp)val=p->vi->noisemaxsupp;
     logmask[i]=max(val,tone[i]+toneatt);
+
+
+    /* AoTuV */
+    /** @ M1 **
+	The following codes improve a noise problem.  
+	A fundamental idea uses the value of masking and carries out
+	the relative compensation of the MDCT. 
+	However, this code is not perfect and all noise problems cannot be solved. 
+	by Aoyumi @ 2004/04/18
+    */
+
+    if(offset_select == 1) {
+      coeffi = -17.2;       /* coeffi is a -17.2dB threshold */
+      val = val - logmdct[i];  /* val == mdct line value relative to floor in dB */
+      
+      if(val > coeffi){
+	/* mdct value is > -17.2 dB below floor */
+	
+	de = 1.0-((val-coeffi)*0.005*cx);
+	/* pro-rated attenuation:
+	   -0.00 dB boost if mdct value is -17.2dB (relative to floor) 
+	   -0.77 dB boost if mdct value is 0dB (relative to floor) 
+	   -1.64 dB boost if mdct value is +17.2dB (relative to floor) 
+	   etc... */
+	
+	if(de < 0) de = 0.0001;
+      }else
+	/* mdct value is <= -17.2 dB below floor */
+	
+	de = 1.0-((val-coeffi)*0.0003*cx);
+      /* pro-rated attenuation:
+	 +0.00 dB atten if mdct value is -17.2dB (relative to floor) 
+	 +0.45 dB atten if mdct value is -34.4dB (relative to floor) 
+	 etc... */
+      
+      mdct[i] *= de;
+      
+    }
   }
 }
 
@@ -1107,6 +1157,10 @@ void _vp_couple(int blobno,
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
 
+       /* The threshold of a stereo is changed with the size of n */
+       if(n > 1000)
+         postpoint=stereo_threshholds_limited[g->coupling_postpointamp[blobno]]; 
+ 
       for(j=0;j<p->n;j+=partition){
 	float acc=0.f;
 
@@ -1146,3 +1200,25 @@ void _vp_couple(int blobno,
   }
 }
 
+/* AoTuV */
+/** @ M2 **
+   The boost problem by the combination of noise normalization and point stereo is eased. 
+   However, this is a temporary patch. 
+   by Aoyumi @ 2004/04/18
+*/
+
+void hf_reduction(vorbis_info_psy_global *g,
+                      vorbis_look_psy *p, 
+                      vorbis_info_mapping0 *vi,
+                      float **mdct){
+ 
+  int i,j,n=p->n, de=0.3*p->m_val;
+  int limit=g->coupling_pointlimit[p->vi->blockflag][PACKETBLOBS/2];
+  int start=p->vi->normal_start;
+  
+  for(i=0; i<vi->coupling_steps; i++){
+    /* for(j=start; j<limit; j++){} // ???*/
+    for(j=limit; j<n; j++) 
+      mdct[i][j] *= (1.0 - de*((float)(j-limit) / (float)(n-limit)));
+  }
+}

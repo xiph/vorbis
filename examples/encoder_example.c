@@ -121,12 +121,12 @@ int main(){
    using the bitrate interface, and then turning bitrate management off:
 
    ret = ( vorbis_encode_setup_managed(&vi,2,44100,-1,128000,-1) ||
-           vorbis_encode_ctl(&vi,OV_ECTL_RATEMANAGE_AVG,NULL) ||
+           vorbis_encode_ctl(&vi,OV_ECTL_RATEMANAGE2_SET,NULL) ||
            vorbis_encode_setup_init(&vi));
 
    *********************************************************************/
 
-  ret=vorbis_encode_init_vbr(&vi,2,44100,.5);
+  ret=vorbis_encode_init_vbr(&vi,2,44100,0.1);
 
   /* do not continue if setup failed; this can happen if we ask for a
      mode that libVorbis does not support (eg, too low a bitrate, etc,

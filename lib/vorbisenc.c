@@ -162,14 +162,10 @@ static vorbis_info_mapping0 _map_nominal[2]={
 
 static ve_setup_data_template *setup_list[]={
   &ve_setup_44_stereo,
-  &ve_setup_44_stereo_low,
   &ve_setup_44_uncoupled,
-  &ve_setup_44_uncoupled_low,
 
   &ve_setup_32_stereo,
-  &ve_setup_32_stereo_low,
   &ve_setup_32_uncoupled,
-  &ve_setup_32_uncoupled_low,
 
   &ve_setup_22_stereo,
   &ve_setup_22_uncoupled,
@@ -183,8 +179,6 @@ static ve_setup_data_template *setup_list[]={
 
   &ve_setup_X_stereo,
   &ve_setup_X_uncoupled,
-  &ve_setup_X_stereo_low,
-  &ve_setup_X_uncoupled_low,
   &ve_setup_XX_stereo,
   &ve_setup_XX_uncoupled,
   0
@@ -659,6 +653,7 @@ static void get_setup_template(vorbis_info *vi,
 	  float del=(req-low)/(high-low);
 	  hi->base_setting=j+del;
 	}
+
 	return;
       }
     }
@@ -903,7 +898,7 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
 
-  quality+=.00001;
+  quality+=.0000001;
   if(quality>=1.)quality=.9999;
 
   get_setup_template(vi,channels,rate,quality,0);
@@ -974,9 +969,9 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
   hi->bitrate_min=min_bitrate;
   hi->bitrate_max=max_bitrate;
   hi->bitrate_av=tnominal;
-  hi->bitrate_av_damp=.75f; /* full range in no less than 3/4 second */
-  hi->bitrate_reservoir=nominal_bitrate;
-  hi->bitrate_reservoir_bias=.2; /* bias toward hoarding bits */
+  hi->bitrate_av_damp=1.5f; /* full range in no less than 1.5 second */
+  hi->bitrate_reservoir=nominal_bitrate*2;
+  hi->bitrate_reservoir_bias=.1; /* bias toward hoarding bits */
 
   return(ret);
 

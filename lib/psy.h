@@ -109,6 +109,9 @@ typedef struct {
   int   eighth_octave_lines; /* power of two, please */
   int   total_octave_lines;  
   long  rate; /* cache it */
+
+  float m_val; /* Masking compensation value */
+
 } vorbis_look_psy;
 
 extern void   _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
@@ -139,7 +142,9 @@ extern void _vp_offset_and_mix(vorbis_look_psy *p,
 			       float *noise,
 			       float *tone,
 			       int offset_select,
-			       float *logmask);
+			       float *logmask,
+			       float *mdct,
+			       float *logmdct);
 
 extern float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd);
 
@@ -170,6 +175,12 @@ extern int **_vp_quantize_couple_sort(vorbis_block *vb,
 				      vorbis_look_psy *p,
 				      vorbis_info_mapping0 *vi,
 				      float **mags);
+
+extern void hf_reduction(vorbis_info_psy_global *g,
+			 vorbis_look_psy *p,
+			 vorbis_info_mapping0 *vi,
+			 float **mdct);
+
 
 #endif
 

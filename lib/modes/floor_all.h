@@ -85,20 +85,12 @@ static static_codebook *_floor_128x17_books[]={
   &_huff_book_line_128x17_3sub2,
   &_huff_book_line_128x17_3sub3, 
 };
-static static_codebook *_floor_512x17_books[]={
-  &_huff_book_line_512x17_class1,
-  &_huff_book_line_512x17_class2,
-  &_huff_book_line_512x17_class3,
-  
-  &_huff_book_line_512x17_0sub0,
-  &_huff_book_line_512x17_1sub0,
-  &_huff_book_line_512x17_1sub1,
-  &_huff_book_line_512x17_2sub1,
-  &_huff_book_line_512x17_2sub2,
-  &_huff_book_line_512x17_2sub3, 
-  &_huff_book_line_512x17_3sub1,
-  &_huff_book_line_512x17_3sub2,
-  &_huff_book_line_512x17_3sub3, 
+static static_codebook *_floor_256x4low_books[]={
+  &_huff_book_line_256x4low_class0,
+  &_huff_book_line_256x4low_0sub0,
+  &_huff_book_line_256x4low_0sub1,
+  &_huff_book_line_256x4low_0sub2,
+  &_huff_book_line_256x4low_0sub3,
 };
 static static_codebook *_floor_1024x27_books[]={
   &_huff_book_line_1024x27_class1,
@@ -118,6 +110,40 @@ static static_codebook *_floor_1024x27_books[]={
   &_huff_book_line_1024x27_4sub2,
   &_huff_book_line_1024x27_4sub3,
 };
+static static_codebook *_floor_2048x27_books[]={
+  &_huff_book_line_2048x27_class1,
+  &_huff_book_line_2048x27_class2,
+  &_huff_book_line_2048x27_class3,
+  &_huff_book_line_2048x27_class4,
+  
+  &_huff_book_line_2048x27_0sub0,
+  &_huff_book_line_2048x27_1sub0,
+  &_huff_book_line_2048x27_1sub1,
+  &_huff_book_line_2048x27_2sub0,
+  &_huff_book_line_2048x27_2sub1,
+  &_huff_book_line_2048x27_3sub1,
+  &_huff_book_line_2048x27_3sub2,
+  &_huff_book_line_2048x27_3sub3,
+  &_huff_book_line_2048x27_4sub1,
+  &_huff_book_line_2048x27_4sub2,
+  &_huff_book_line_2048x27_4sub3,
+};
+
+static static_codebook *_floor_512x17_books[]={
+  &_huff_book_line_512x17_class1,
+  &_huff_book_line_512x17_class2,
+  &_huff_book_line_512x17_class3,
+  
+  &_huff_book_line_512x17_0sub0,
+  &_huff_book_line_512x17_1sub0,
+  &_huff_book_line_512x17_1sub1,
+  &_huff_book_line_512x17_2sub1,
+  &_huff_book_line_512x17_2sub2,
+  &_huff_book_line_512x17_2sub3, 
+  &_huff_book_line_512x17_3sub1,
+  &_huff_book_line_512x17_3sub2,
+  &_huff_book_line_512x17_3sub3, 
+};
 
 static static_codebook **_floor_books[10]={
   _floor_128x4_books,
@@ -126,9 +152,9 @@ static static_codebook **_floor_books[10]={
   _floor_256x7_books,
   _floor_128x11_books,
   _floor_128x17_books,
-  _floor_128x17_books,
+  _floor_256x4low_books,
   _floor_1024x27_books,
-  _floor_1024x27_books,
+  _floor_2048x27_books,
   _floor_512x17_books,
 };
 
@@ -165,7 +191,6 @@ static vorbis_info_floor1 _floor[10]={
     
     60,30,500,   1.,18.,  -1
   },
-
   /* 128 x 11 */
   {
     4,{0,1,2,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
@@ -175,24 +200,21 @@ static vorbis_info_floor1 _floor[10]={
     
      60,30,500,   1,18.,  -1
   },
-    
   /* 128 x 17 */
   {
     6,{0,1,1,2,3,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
     {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
     2,{0,128,  12,46,  4,8,16,  23,33,70,  2,6,10,  14,19,28,  39,58,90},
-
+    
     60,30,500,    1,18.,  -1 
   },
-  
-  /* 1024 x 17 */
+  /* 256 x 4 (low bitrate version) */
   {
-    6,{0,1,1,2,3,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
-    {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
-    2,{0,1024,  93,372,  33,65,130,  186,260,556,  
-       14,46,79,  111,158,220,  312,464,720},
-    
-    60,30,500,    1,18.,  -1 /* lowpass! */
+    1,{0},{4},{2},{0},
+    {{1,2,3,4}},
+    4,{0,256, 66,16,32,140},
+
+    60,30,500,   1.,18.,  -1
   },
   /* 1024 x 27 */
   {

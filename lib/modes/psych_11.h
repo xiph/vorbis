@@ -20,7 +20,7 @@ static double _psy_lowpass_11[3]={4.5,5.5,30.,};
 static att3 _psy_tone_masteratt_11[3]={
   {{ 30,  25,  12},  0,   0},  /* 0 */
   {{ 30,  25,  12},  0,   0},  /* 0 */
-  {{ 20,   0, -14},  0,  1.}, /* 0 */
+  {{ 20,   0, -14},  0,   0}, /* 0 */
 };
 
 static vp_adjblock _vp_tonemask_adj_11[3]={

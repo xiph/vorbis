@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include "codebook.h"
+#include "localcodebook.h"
 
 extern char     *get_line(FILE *in);
 extern char     *setup_line(FILE *in);

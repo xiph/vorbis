@@ -274,7 +274,20 @@ static int mapping0_forward(vorbis_block *vb){
 
     gmdct[i]=_vorbis_block_alloc(vb,n/2*sizeof(**gmdct));
 
-    scale_dB=todB(&scale);
+    scale_dB=todB(&scale) + .345; /* + .345 is a hack; the original
+                                     todB estimation used on IEEE 754
+                                     compliant machines had a bug that
+                                     returned dB values about a third
+                                     of a decibel too high.  The bug
+                                     was harmless because tunings
+                                     implicitly took that into
+                                     account.  However, fixing the bug
+                                     in the estimator requires
+                                     changing all the tunings as well.
+                                     For now, it's easier to sync
+                                     things back up here, and
+                                     recalibrate the tunings in the
+                                     next major model upgrade. */
 
 #if 0
     if(vi->channels==2)
@@ -301,11 +314,38 @@ static int mapping0_forward(vorbis_block *vb){
     
     /* FFT yields more accurate tonal estimation (not phase sensitive) */
     drft_forward(&b->fft_look[vb->W],pcm);
-    logfft[0]=scale_dB+todB(pcm);
+    logfft[0]=scale_dB+todB(pcm)  + .345; /* + .345 is a hack; the
+                                     original todB estimation used on
+                                     IEEE 754 compliant machines had a
+                                     bug that returned dB values about
+                                     a third of a decibel too high.
+                                     The bug was harmless because
+                                     tunings implicitly took that into
+                                     account.  However, fixing the bug
+                                     in the estimator requires
+                                     changing all the tunings as well.
+                                     For now, it's easier to sync
+                                     things back up here, and
+                                     recalibrate the tunings in the
+                                     next major model upgrade. */
     local_ampmax[i]=logfft[0];
     for(j=1;j<n-1;j+=2){
       float temp=pcm[j]*pcm[j]+pcm[j+1]*pcm[j+1];
-      temp=logfft[(j+1)>>1]=scale_dB+.5f*todB(&temp);
+      temp=logfft[(j+1)>>1]=scale_dB+.5f*todB(&temp)  + .345; /* +
+                                     .345 is a hack; the original todB
+                                     estimation used on IEEE 754
+                                     compliant machines had a bug that
+                                     returned dB values about a third
+                                     of a decibel too high.  The bug
+                                     was harmless because tunings
+                                     implicitly took that into
+                                     account.  However, fixing the bug
+                                     in the estimator requires
+                                     changing all the tunings as well.
+                                     For now, it's easier to sync
+                                     things back up here, and
+                                     recalibrate the tunings in the
+                                     next major model upgrade. */
       if(temp>local_ampmax[i])local_ampmax[i]=temp;
     }
 
@@ -313,11 +353,13 @@ static int mapping0_forward(vorbis_block *vb){
     if(local_ampmax[i]>global_ampmax)global_ampmax=local_ampmax[i];
 
 #if 0
-    if(vi->channels==2)
-      if(i==0)
+    if(vi->channels==2){
+      if(i==0){
 	_analysis_output("fftL",seq,logfft,n/2,1,0,0);
-      else
+      }else{
 	_analysis_output("fftR",seq,logfft,n/2,1,0,0);
+      }
+    }
 #endif
 
   }
@@ -345,7 +387,20 @@ static int mapping0_forward(vorbis_block *vb){
       memset(floor_posts[i],0,sizeof(**floor_posts)*PACKETBLOBS);
       
       for(j=0;j<n/2;j++)
-	logmdct[j]=todB(mdct+j);
+	logmdct[j]=todB(mdct+j)  + .345; /* + .345 is a hack; the original
+                                     todB estimation used on IEEE 754
+                                     compliant machines had a bug that
+                                     returned dB values about a third
+                                     of a decibel too high.  The bug
+                                     was harmless because tunings
+                                     implicitly took that into
+                                     account.  However, fixing the bug
+                                     in the estimator requires
+                                     changing all the tunings as well.
+                                     For now, it's easier to sync
+                                     things back up here, and
+                                     recalibrate the tunings in the
+                                     next major model upgrade. */
 
 #if 0
       if(vi->channels==2){
@@ -400,12 +455,30 @@ static int mapping0_forward(vorbis_block *vb){
 	 masking.  We then do a floor1-specific line fit.  If we're
 	 performing bitrate management, the line fit is performed
 	 multiple times for up/down tweakage on demand. */
-      
-      _vp_offset_and_mix(psy_look,
-			 noise,
-			 tone,
-			 1,
-			 logmask);
+
+#if 0
+      {
+      float aotuv[psy_look->n];
+#endif
+
+	_vp_offset_and_mix(psy_look,
+			   noise,
+			   tone,
+			   1,
+			   logmask,
+			   mdct,
+			   logmdct);
+	
+#if 0
+	if(vi->channels==2){
+	  if(i==0)
+	    _analysis_output("aotuvM1_L",seq,aotuv,psy_look->n,1,1,0);
+	  else
+	    _analysis_output("aotuvM1_R",seq,aotuv,psy_look->n,1,1,0);
+	}
+      }
+#endif
+
 
 #if 0
       if(vi->channels==2){
@@ -435,7 +508,9 @@ static int mapping0_forward(vorbis_block *vb){
 			   noise,
 			   tone,
 			   2,
-			   logmask);
+			   logmask,
+			   mdct,
+			   logmdct);
 
 #if 0
 	if(vi->channels==2){
@@ -456,7 +531,9 @@ static int mapping0_forward(vorbis_block *vb){
 			   noise,
 			   tone,
 			   0,
-			   logmask);
+			   logmask,
+			   mdct,
+			   logmdct);
 
 #if 0
 	if(vi->channels==2)
@@ -523,6 +600,11 @@ static int mapping0_forward(vorbis_block *vb){
 					psy_look,
 					info,
 					mag_memo);    
+
+      hf_reduction(&ci->psy_g_param,
+		   psy_look,
+		   info,
+		   mag_memo);
     }
 
     memset(sortindex,0,sizeof(*sortindex)*vi->channels);

@@ -223,7 +223,7 @@ int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
     
     if(vorbis_bitrate_managed(vb))
       choice=bm->choice;
-    
+
     op->packet=oggpack_get_buffer(vbi->packetblob[choice]);
     op->bytes=oggpack_bytes(vbi->packetblob[choice]);
     op->b_o_s=0;
