@@ -1,7 +1,7 @@
 <section id="vorbis-spec-floor0">
 <sectioninfo>
 <releaseinfo>
-  $Id: 06-floor0.xml,v 1.4 2002/10/14 18:20:30 giles Exp $
+  $Id: 06-floor0.xml,v 1.5 2002/10/26 15:43:57 giles Exp $
   <emphasis>Last update to this document: July 19, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>  
@@ -137,8 +137,9 @@ assuming the following definitions for the given vector to be
 synthesized:</para>
 
 <informalequation>
- <alt>
-   [lsp map equation]
+ <mediaobject>
+  <textobject><phrase>[lsp map equation]</phrase></textobject>
+  <textobject role="tex"><phrase>
    <![CDATA[
    \begin{math}
      \mathrm{map}_i = \left\{
@@ -167,8 +168,9 @@ synthesized:</para>
       \mathrm{bark}(x) = 13.1 \arctan (.00074x) + 2.24 \arctan (.0000000158x^2)+.0001x
     \end{math}
     ]]>
- </alt>
- <graphic fileref="lspmap.png"/>
+   </phrase></textobject>
+  <imageobject><imagedata  fileref="lspmap.png"/></imageobject>
+ </mediaobject>
 </informalequation>
 
 <para>
@@ -183,16 +185,18 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
   <orderedlist>
    <listitem><para>calculate <varname>[p]</varname> and <varname>[q]</varname> according to:
         <informalequation>
-         <alt>
-           [equation for odd lsp]
+         <mediaobject>
+          <textobject><phrase>[equation for odd lsp]</phrase></textobject>
+	  <textobject role="tex"><phrase>
 	   <![CDATA[
            \begin{eqnarray*}
              p & = & (1 - \cos^2\omega)\prod_{j=0}^{(\mathtt{order}-3)/2} 4 (\cos c_{2j+1} - \cos \omega)^2 \\
              q & = & \frac{1}{4} \prod_{j=0}^{(\mathtt{order}-1)/2} 4 (\cos c_{2j+1} - \cos \omega)^2
            \end{eqnarray*}
 	   ]]>
-         </alt>
-         <graphic fileref="oddlsp.png"/>
+          </phrase></textobject>
+	  <imageobject><imagedata fileref="oddlsp.png"/></imageobject>
+	 </mediaobject>
         </informalequation>
    </para></listitem>
   </orderedlist>
@@ -200,16 +204,18 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
   <orderedlist>
    <listitem><para>calculate <varname>[p]</varname> and <varname>[q]</varname> according to:
         <informalequation>
-         <alt>
-           [equation for even lsp]
+         <mediaobject>
+	  <textobject><phrase>[equation for even lsp]</phrase></textobject>
+	  <textobject role="tex"><phrase>
 	   <![CDATA[
            \begin{eqnarray*}
              p & = & \frac{(1 - \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2 \\
              q & = & \frac{(1 + \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2
            \end{eqnarray*}
 	   ]]>
-         </alt>
-         <graphic fileref="evenlsp.png"/>
+          </phrase></textobject>
+	  <imageobject><imagedata fileref="evenlsp.png"/></imageobject>
+	 </mediaobject>
         </informalequation>
    </para></listitem>
   </orderedlist> 
@@ -217,16 +223,18 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
  </para></listitem>
  <listitem><para>calculate <varname>[linear_floor_value]</varname> according to:
      <informalequation>
-       <alt>
-         [expression for floorval]
+      <mediaobject>
+       <textobject><phrase>[expression for floorval]</phrase></textobject>
+       <textobject role="tex"><phrase>
 	 <![CDATA[
          \begin{math}
            \exp \left( .11512925 \left(\frac{\mathtt{amplitude} \cdot \mathtt{floor0\_amplitute\_offset}}{(2^{\mathtt{floor0\_amplitude\_bits}}-1)\sqrt{p+q}}
                   - \mathtt{floor0\_amplitude\_offset} \right) \right)
          \end{math}
 	 ]]>
-       </alt>
-       <graphic fileref="floorval.png"/>
+       </phrase></textobject>
+       <imageobject><imagedata fileref="floorval.png"/></imageobject>
+      </mediaobject>
      </informalequation>
  </para></listitem>
  <listitem><simpara><varname>[iteration_condition]</varname> = map element <varname>[i]</varname></simpara></listitem>
