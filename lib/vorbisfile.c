@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.25 2000/06/15 12:17:03 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.26 2000/08/04 23:14:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -362,9 +362,8 @@ static int _open_seekable(OggVorbis_File *vf){
   }
 
   _prefetch_all_headers(vf,&initial_i,&initial_c,dataoffset);
-  ov_raw_seek(vf,0);
+  return(ov_raw_seek(vf,0));
 
-  return(0);
 }
 
 static int _open_nonseekable(OggVorbis_File *vf){
@@ -416,7 +415,9 @@ static int _process_packet(OggVorbis_File *vf,int readp){
       int result=ogg_stream_packetout(&vf->os,&op);
       int64_t frameno;
       
-      if(result==-1)return(-1); /* hole in the data. alert the toplevel */
+      /* if(result==-1)return(-1); hole in the data. For now, swallow
+                                   and go. We'll need to add a real
+                                   error code in a bit. */
       if(result>0){
 	/* got a packet.  process it */
 	frameno=op.frameno;
