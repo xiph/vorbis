@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.19 2001/03/26 23:27:42 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.20 2001/05/27 20:33:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -253,7 +253,7 @@ int main(int argc, char **argv){
 		      clipflag=1;
 		    }
 		    *ptr=val;
-		    ptr+=2;
+		    ptr+=vi.channels;
 		  }
 		}
 		

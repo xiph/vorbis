@@ -9,11 +9,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.24 2001/02/26 03:50:42 xiphmont Exp $
+ last mod: $Id: os.h,v 1.25 2001/05/27 20:33:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -50,17 +50,30 @@
 #  define NO_FLOAT_MATH_LIB
 #endif
 
-#ifndef NO_FLOAT_MATH_LIB
+#ifdef HAVE_SQRTF
 #  define sqrt sqrtf
+#endif
+#ifdef HAVE_LOGF
 #  define log logf
+#endif
+#ifdef HAVE_EXPF
 #  define exp expf
+#endif
+#ifdef HAVE_POWF
 #  define pow powf
+#endif
+#ifdef HAVE_ACOSF
 #  define acos acosf
+#endif
+#ifdef HAVE_ATANF
 #  define atan atanf
+#endif
+#ifdef HAVE_FREXPF
 #  define frexp frexpf
+#endif
+#ifdef HAVE_RINTF
 #  define rint rintf
 #endif
-
 
 #ifndef FAST_HYPOT
 #  define FAST_HYPOT hypot
