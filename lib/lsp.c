@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.5 2000/03/10 13:21:18 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.6 2000/04/06 15:01:20 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -100,7 +100,10 @@ static void kw(double *r,int n) {
 
 
 static int comp(const void *a,const void *b){
-  return(*(double *)a<*(double *)b);
+  if(*(double *)a<*(double *)b)
+    return(-1);
+  else
+    return(1);
 }
 
 /* CACM algorithm 283. */
