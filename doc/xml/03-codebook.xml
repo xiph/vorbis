@@ -1,7 +1,7 @@
 <section id="vorbis-spec-codebook">
 <sectioninfo>
 <releaseinfo>
- $Id: 03-codebook.xml,v 1.2 2002/10/14 23:47:54 giles Exp $
+ $Id: 03-codebook.xml,v 1.3 2002/10/21 23:37:00 giles Exp $
  <emphasis>Last update to this document: August 8, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -35,7 +35,7 @@ stream according to <xref linkend="vorbis-spec-bitpacking"/>.</para>
 <title>Packed Codebook Format</title>
 
 <para>
-For purposes of the below examples, we assume that the storage
+For purposes of the examples below, we assume that the storage
 system's native byte width is eight bits.  This is not universally
 true; see <xref linkend="vorbis-spec-bitpacking"/> for discussion 
 relating to non-eight-bit bytes.</para>
@@ -98,7 +98,7 @@ byte 8: [             X 1 ] [sparse] flag (1 bit)
 
 <para>
   The decoder now performs for each of the <varname>[codebook_entries]</varname>
-  code book entries:
+  codebook entries:
 
 <screen>
   
@@ -134,15 +134,13 @@ byte 8: [             X 1 ] [sparse] flag (1 bit)
 <screen>
   1) [current_entry] = 0;
   2) [current_length] = read a five bit unsigned integer and add 1;
-  3) [number] = read <link linkend="vorbis-spec-ilog">ilog</link>([codebook_entries] -
-[current_entry])
-bits as an unsigned integer
+  3) [number] = read <link linkend="vorbis-spec-ilog">ilog</link>([codebook_entries] - [current_entry]) bits as an unsigned integer
   4) set the entries [current_entry] through [current_entry]+[number]-1, inclusive, 
-     of the [codebook_codeword_lengths] array to [current_length]
+    of the [codebook_codeword_lengths] array to [current_length]
   5) set [current_entry] to [number] + [current_entry]
   6) increment [current_length] by 1
-  7) if [current_entry] is greater than [codebook_entries] ERROR CONDITION; the decoder will
-     not be able to read this stream.
+  7) if [current_entry] is greater than [codebook_entries] ERROR CONDITION; 
+    the decoder will not be able to read this stream.
   8) if [current_entry] is less than [codebook_entries], repeat process starting at 3)
   9) done.
 </screen></para>
@@ -202,12 +200,10 @@ possible scalar values.  Lookup decode proceeds as follows:
 
   7) read a total of [codebook_lookup_values] unsigned integers of [codebook_value_bits] each; 
      store these in order in the array [codebook_multiplicands]
-
 </screen></para>
 </listitem><listitem>
 <para>A <varname>[codebook_lookup_type]</varname> of greater than two is reserved
-and indicates
-a stream that's not decodable by the specification in this
+and indicates a stream that is not decodable by the specification in this
 document.</para>
 </listitem>
 </itemizedlist>
@@ -340,10 +336,10 @@ decode in a VQ context.</para>
 
 <para>
 Lookup type one specifies a lattice VQ lookup table built
-algorithmically from a list of scalar values.  Calculate [unpack] the
+algorithmically from a list of scalar values.  Calculate (unpack) the
 final values of a codebook entry vector from the entries in
 <varname>[codebook_multiplicands]</varname> as follows (<varname>[value_vector]</varname>
-is the output vector representing the vctor of values for entry number
+is the output vector representing the vector of values for entry number
 <varname>[lookup_offset]</varname> in this codebook):
 
 <screen>
@@ -377,7 +373,7 @@ each vector is explicitly set by the <varname>[codebook_multiplicands]</varname>
 array in a one-to-one mapping.  Calculate [unpack] the
 final values of a codebook entry vector from the entries in
 <varname>[codebook_multiplicands]</varname> as follows (<varname>[value_vector]</varname>
-is the output vector representing the vctor of values for entry number
+is the output vector representing the vector of values for entry number
 <varname>[lookup_offset]</varname> in this codebook):
 
 <screen>

@@ -2,6 +2,7 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
 		"http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
 [
+%isogrk3;
 <!ENTITY intro SYSTEM "01-introduction.xml">
 <!ENTITY bitpacking SYSTEM "02-bitpacking.xml">
 <!ENTITY codebook SYSTEM "03-codebook.xml">
@@ -15,7 +16,8 @@
 <!ENTITY oggvorbis SYSTEM "a1-encapsulation_ogg.xml">
 <!ENTITY rtpvorbis SYSTEM "a2-encapsulation_rtp.xml">
 <!ENTITY footer SYSTEM "footer.xml">
-<!ENTITY draft-rtp SYSTEM "../draft-moffitt-vorbis-rtp-00.txt">
+<!NOTATION TEXT SYSTEM "text/plain">
+<!ENTITY draft-rtp SYSTEM "../draft-moffitt-vorbis-rtp-00.txt" NDATA TEXT>
 ]>
 
 <article>

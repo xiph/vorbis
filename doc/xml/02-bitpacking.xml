@@ -1,7 +1,7 @@
 <section id="vorbis-spec-bitpacking">
 <sectioninfo>
 <releaseinfo>
- $Id: 02-bitpacking.xml,v 1.3 2002/10/14 18:20:30 giles Exp $
+ $Id: 02-bitpacking.xml,v 1.4 2002/10/21 23:37:00 giles Exp $
  <emphasis>Last update to this document: July 14, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -40,7 +40,7 @@ size that is a grouped multiple of this smallest size.</para>
 <para>
 The most ubiquitous architectures today consider a 'byte' to be an
 octet (eight bits) and a word to be a group of two, four or eight
-bytes (16,32 or 64 bits).  Note however that the Vorbis bitpacking
+bytes (16, 32 or 64 bits).  Note however that the Vorbis bitpacking
 convention is still well defined for any native byte size; Vorbis uses
 the native bit-width of a given storage system. This document assumes
 that a byte is one octet for purposes of example.</para>
@@ -83,10 +83,10 @@ through byte <emphasis>n</emphasis>.</para>
 The Vorbis codec has need to code arbitrary bit-width integers, from
 zero to 32 bits wide, into packets.  These integer fields are not
 aligned to the boundaries of the byte representation; the next field
-is written at the bit position that the previous field ends.</para>
+is written at the bit position at which the previous field ends.</para>
 
 <para>
-The encoder logically packs integers by writing the LSb of an binary
+The encoder logically packs integers by writing the LSb of a binary
 integer to the logical bitstream first, followed by next least
 significant bit, etc, until the requested number of bits have been
 coded.  When packing the bits into bytes, the encoder begins by

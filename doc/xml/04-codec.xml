@@ -1,7 +1,7 @@
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.3 2002/10/18 00:43:00 giles Exp $
+ $Id: 04-codec.xml,v 1.4 2002/10/21 23:37:00 giles Exp $
  <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -207,20 +207,20 @@ uses a single mapping type (0), with implicit PCM channel mappings.</para>
 
 <orderedlist>
  <listitem><simpara><varname>[vorbis_mapping_count]</varname> = read 6 bits as unsigned integer and add one</simpara></listitem>
- <listitem><simpara>For each <varname>[i]</varname>
-of <varname>[vorbis_mapping_count]</varname> mapping numbers:</simpara>
+ <listitem><para>For each <varname>[i]</varname> of <varname>[vorbis_mapping_count]</varname> mapping numbers:
   <orderedlist>
    <listitem><simpara>read the mapping type: 16 bits as unsigned integer.  There's no reason to save the mapping type in Vorbis I.</simpara></listitem>
    <listitem><simpara>If the mapping type is nonzero, the stream is undecodable</simpara></listitem>
    <listitem><para>If the mapping type is zero:
     <orderedlist>
-     <listitem><simpara>read 1 bit as a boolean flag</simpara>
+     <listitem><para>read 1 bit as a boolean flag
       <orderedlist>
        <listitem><simpara>if set, <varname>[vorbis_mapping_submaps]</varname> = read 4 bits as unsigned integer and add one</simpara></listitem>
        <listitem><simpara>if unset, <varname>[vorbis_mapping_submaps]</varname> = 1</simpara></listitem>
       </orderedlist>
+      </para>
      </listitem>
-     <listitem><simpara>read 1 bit as a boolean flag</simpara>
+     <listitem><para>read 1 bit as a boolean flag
        <orderedlist>
          <listitem><para>if set, square polar channel mapping is in use:
            <orderedlist>
@@ -231,11 +231,14 @@ of <varname>[vorbis_mapping_count]</varname> mapping numbers:</simpara>
                  <listitem><simpara>vector <varname>[vorbis_mapping_angle]</varname> element <varname>[j]</varname>= read <link linkend="vorbis-spec-ilog">ilog</link>(<varname>[audio_channels]</varname> - 1) bits as unsigned integer</simpara></listitem>
                  <listitem><simpara>the numbers read in the above two steps are channel numbers representing the channel to treat as magnitude and the channel to treat as angle, respectively.  If for any coupling step the angle channel number equals the magnitude channel number, the magnitude channel number is greater than <varname>[audio_channels]</varname>-1, or the angle channel is greater than <varname>[audio_channels]</varname>-1, the stream is undecodable.</simpara></listitem>
                </orderedlist>
-             </para></listitem>
+               </para>
+             </listitem>
            </orderedlist>
-         </para></listitem>
+           </para>
+         </listitem>
          <listitem><simpara>if unset, <varname>[vorbis_mapping_coupling_steps]</varname> = 0</simpara></listitem>
        </orderedlist>
+       </para>
      </listitem>
      <listitem><simpara>read 2 bits (reserved field); if the value is nonzero, the stream is undecodable</simpara></listitem>
      <listitem><simpara>if <varname>[vorbis_mapping_submaps]</varname> is greater than one, we read channel multiplex settings. For each <varname>[j]</varname> of <varname>[audio_channels]</varname> channels:</simpara>
@@ -257,7 +260,7 @@ of <varname>[vorbis_mapping_count]</varname> mapping numbers:</simpara>
     </orderedlist></para>
    </listitem>
   </orderedlist>
- </listitem>
+ </para></listitem>
 </orderedlist>
 
 </section>
@@ -299,7 +302,7 @@ After reading mode descriptions, setup header decode is complete.
 <para>
 Following the three header packets, all packets in a Vorbis I stream
 are audio.  The first step of audio packet decode is to read and
-verify the packet type; <emphasis>a non-audio packet when audio is expected
+verify the packet type. <emphasis>A non-audio packet when audio is expected
 indicates stream corruption or a non-compliant stream. The decoder
 must ignore the packet and not attempt decoding it to audio</emphasis>.
 </para>
@@ -341,7 +344,7 @@ illustration of overlapping dissimilar
 </orderedlist>
 
 <para>
-Vorbis windows all use the slope function y=sin(0.5 * &pi; * sin^2((x+.5)/n * &pi;)),
+Vorbis windows all use the slope function y=sin(0.5 * \pi * sin^2((x+.5)/n * \pi)),
 where n is window size and x ranges 0...n-1, but dissimilar
 lapping requirements can affect overall shape.  Window generation
 proceeds as follows:</para>
@@ -382,9 +385,9 @@ set) then
  </listitem>
  <listitem><simpara> window from range 0 ... <varname>[left_window_start]</varname>-1 inclusive is zero</simpara></listitem>
  <listitem><simpara> for <varname>[i]</varname> in range <varname>[left_window_start]</varname> ...
-<varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5) / <varname>[left_n]</varname> * .5 * &pi;) )</simpara></listitem>
+<varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * \pi * sin^2( (<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5) / <varname>[left_n]</varname> * .5 * \pi) )</simpara></listitem>
  <listitem><simpara> window from range <varname>[left_window_end]</varname> ... <varname>[right_window_start]</varname>-1
-inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * &pi;/2. + .5 * &pi;) )</simpara></listitem>
+inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * \pi * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * \pi/2. + .5 * \pi) )</simpara></listitem>
 <listitem><simpara> window from range <varname>[rigth_window_start]</varname> ... <varname>[n]</varname>-1 is
 zero</simpara></listitem>
 </orderedlist>
@@ -420,12 +423,10 @@ For each floor <varname>[i]</varname> of <varname>[audio_channels]</varname>
 floor (vector <varname>[vorbis_floor_types]</varname> element
 <varname>[floor_number]</varname>) is zero then decode the floor for
 channel <varname>[i]</varname> according to the
-<xref linkend="vorbis-spec-floor0-decode"/>floor 0 decode
-algorithm</simpara></listitem>
+<xref linkend="vorbis-spec-floor0-decode"/></simpara></listitem>
   <listitem><simpara>if the type of this floor
 is one then decode the floor for channel <varname>[i]</varname> according
-to the <xref linkend="vorbis-spec-floor1-decode"/>floor 1 decode
-algorithm</simpara></listitem>
+to the <xref linkend="vorbis-spec-floor1-decode"/></simpara></listitem>
   <listitem><simpara>save the needed decoded floor information for channel for later synthesis</simpara></listitem>
   <listitem><simpara>if the decoded floor returned 'unused', set vector <varname>[no_residue]</varname> element
 <varname>[i]</varname> to true, else set vector <varname>[no_residue]</varname> element <varname>[i]</varname> to
@@ -571,7 +572,7 @@ length for floor computation is <varname>[n]</varname>/2.</para>
 <para>
 For each channel, multiply each element of the floor curve by each
 element of that channel's residue vector.  The result is the dot
-product the floor and residue vectors for each channel; the produced
+product of the floor and residue vectors for each channel; the produced
 vectors are the length <varname>[n]</varname>/2 audio spectrum for each
 channel.</para>
 
@@ -607,11 +608,10 @@ representation.</para>
 Convert the audio spectrum vector of each channel back into time
 domain PCM audio via an inverse Modified Discrete Cosine Transform
 (MDCT).  A detailed description of the MDCT is available in the paper
-<citetitle pubwork="article"><ulink
-url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps">The
+<ulink url="http://www.iocon.com/resource/docs/ps/eusipco_corrected.ps"><citetitle pubwork="article">The
 use of multirate filter banks for coding of high quality digital
-audio</ulink></citetitle>, by T. Sporer, K. Brandenburg and B. Edler.  The window
-function used for the MDCT is the window determined earlier.</para>
+audio</citetitle></ulink>, by T. Sporer, K. Brandenburg and B. Edler.  The window
+function used for the MDCT is the function described earlier.</para>
 
 </section>
 
@@ -621,18 +621,20 @@ function used for the MDCT is the window determined earlier.</para>
 Windowed MDCT output is overlapped and added with the right hand data
 of the previous window such that the 3/4 point of the previous window
 is aligned with the 1/4 point of the current window (as illustrated in
-<xref linkend="vorbis-spec-window"/>.  The overlapped portion
+<xref linkend="vorbis-spec-window"/>).  The overlapped portion
 produced from overlapping the previous and current frame data is
 finished data to be returned by the decoder.  This data spans from the
 center of the previous window to the center of the current window.  In
 the case of same-sized windows, the amount of data to return is
 one-half block consisting of and only of the overlapped portions. When
-overlapping a short and long window, much of the returned range is not
+overlapping a short and long window, much of the returned range does not
 actually overlap.  This does not damage transform orthogonality.  Pay
 attention however to returning the correct data range; the amount of
 data to be returned is:
 
-<programlisting>window_blocksize(previous_window)/4+window_blocksize(current_window)/4</programlisting>
+<programlisting>
+window_blocksize(previous_window)/4+window_blocksize(current_window)/4
+</programlisting>
 
 from the center (element windowsize/2) of the previous window to the
 center (element windowsize/2-1, inclusive) of the current window.</para>
@@ -679,7 +681,7 @@ front center, front right, rear left, rear right</simpara>
   </listitem>
  </varlistentry><varlistentry>
   <term>six channels</term><listitem>
-   <simpara>the stream is 5,1 surround.  channel order: front left, front
+   <simpara>the stream is 5.1 surround.  channel order: front left, front
 center, front right, rear left, rear right, LFE</simpara>
   </listitem>
  </varlistentry><varlistentry>
