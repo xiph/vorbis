@@ -1,13 +1,12 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
- * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
- * PLEASE READ THESE TERMS DISTRIBUTING.                            *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
+ * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
+ * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
- * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
- * http://www.xiph.org/                                             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -33,6 +32,7 @@ static static_codebook _huff_book__44c4_long = {
 	2, 100,
 	_huff_lengthlist__44c4_long,
 	0, 0, 0, 0, 0,
+	NULL,
 	NULL,
 	NULL,
 	NULL,
