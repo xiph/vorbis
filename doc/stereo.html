@@ -1,0 +1,490 @@
+<HTML><HEAD><TITLE>xiph.org: Ogg Vorbis documentation</TITLE>
+<BODY bgcolor="#ffffff" text="#202020" link="#006666" vlink="#000000">
+<nobr><img src="white-ogg.png"><img src="vorbisword2.png"></nobr><p>
+
+
+<h1><font color=#000070>
+Stereo Channel Coupling in the Vorbis CODEC
+</font></h1>
+
+<em>Last update to this document: June 27, 2001</em><br> 
+
+<h2>Abstract</h2> The Vorbis audio CODEC provides a channel coupling
+mechanisms designed to reduce effective bitrate by both eliminating
+interchannel redundancy and eliminating stereo image information
+labelled inaudible or undesireable according to spatial psychoacoustic
+models.  This document describes both the mechanical coupling
+mechanisms available within the Vorbis specification, as well as the
+specific stereo coupling models used by the reference
+<tt>libvorbis</tt> CODEC provided by xiph.org.
+
+<h2>Terminology</h2> Terminology as used in this document is based on
+common terminology associated with contemporary CODECs such as MPEG I
+audio layer 3 (mp3).  However, some differences in terminology are
+useful in the context of Vorbis as Vorbis functions somewhat
+differently than most current formats.  For clarity, a few terms are
+defined beforehand here, and others will be defined where they first
+appear in context.<p>
+
+<h3>Subjective and Objective</h3>
+
+<em>Objective</em> fidelity is a measure, based on a computable,
+mechanical metric, of how carefully an output matches an input.  For
+example, a stereo amplifier may claim to intorduce less that .01%
+total harmonic distortion when amplifying an input signal; this claim
+is easy to verify given proper equiment, and any number of testers are
+likely to arrive at the same, exact results.  One need not listen to
+the equipment to make this measurement.<p>
+
+However, given two amplifiers with identical, verifiable objective
+specifications, listeners may strongly prefer the sound quality of one
+over the other.  This is actually the case in the decades old debate
+[some would say jihad] among audiophiles involving vacuum tube versus
+solid state amplifiers.  There are people who can tell the difference,
+and strongly prefer one over the other despite seemingly identical,
+measurable quality.  This preference is <em>subjective</em> and
+difficult to measure but nonetheless real.
+
+Individual elements of subjective differences often can be qualified,
+but overall subjective quality generally is not measurable.  Different
+observers are likely to disagree on the exact results of a subjective
+test as each observer's perspective differs.  When measuring
+subjective qualities, the best one can hope for is average, empirical
+results that show statistical significance across a group.<p>
+
+Perceptual codecs are most concerned with subjective, not objective,
+quality.  This is why evaluating a perceptual codec via distortion
+measures and sonograms alone is useless; these objective measures may
+provide insight into the quality or functioning of a codec, but cannot
+answer the much squishier subjective question, "Does it sound
+good?". The tube amplifier example is perhaps not the best as very few
+people can hear, or care to hear, the minute differences between tubes
+and transistors, whereas the subjective differences in perceptual
+codecs tend to be quite large even when objective differences are
+not.<p>
+
+<h3>Fidelity, Artifacts and Differences</h3> Audio <em>artifacts</em>
+and loss of fidelity or more simply put, audio <em>differences</em>
+are not the same thing.<p>
+
+A loss of fidelity implies differences between the perceived input and
+output signal; it does not necessarily imply that the differences in
+output are displeasing or that the output sounds poor (although this
+is often the case).  Tube amplifiers are <em>not</em> higher fidelity
+than modern solid state and digital systems.  They simply produce a
+form of distortion and coloring that is either unnoticable or actually
+pleasing to many ears.<p>
+
+As compared to an original signal using hard metrics, all perceptual
+codecs [ASPEC, ATRAC, MP3, WMA, AAC, TwinVQ, AC3 and Vorbis included]
+lose objective fidelity in order to reduce bitrate.  This is fact. The
+idea is to lose fidelity in ways that cannot be perceived.  However,
+most current streaming applications demand bitrates lower than what
+can be acheived by sacrificing only objective fidelity; this is also
+fact, despite whatever various company press releases might claim.
+Subjective fidelity eventually must suffer in one way or another.<p>
+
+The goal is to choose the best possible tradeoff such that the
+fidelity loss is graceful and not obviously noticable.  Most listeners
+of FM radio do not realize how much lower fidelity that medium is as
+compared to compact discs or DAT.  However, when compared directly to
+source material, the difference is obvious.  A cassette tape is lower
+fidelity still, and yet the degredation, relatively speaking, is
+graceful and generally easy not to notice.  Compare this graceful loss
+of quality to an average 44.1kHz stereo mp3 encoded at 80 or 96kbps.
+The mp3 might actually be higher objective fidelity but subjectively
+sounds much worse.<p>
+
+Thus, when a CODEC <em>must</em> sacrifice subjective quality in order
+to satisfy a user's requirements, the result should be a
+<em>difference</em> that is generally either difficult to notice
+without comparison, or easy to ignore.  An <em>artifact</em>, on the
+other hand, is an element introduced into the output that is
+immediately noticable, obviously foreign, and undesired.  The famous
+'underwater' or 'twinkling' effect synonymous with low bitrate (or
+poorly encoded) mp3 is an example of an <em>artifact</em>.  This
+working definition differs slightly from common usage, but the coined
+distinction between differences and artifacts is useful for our
+discussion.<p>
+
+The goal, when it is absolutely necessary to sacrifice subjective
+fidelity, is obviously to strive for differences and not artifacts.
+The vast majority of CODECs today fail at this task miserably,
+predictably, and regularly in one way or another.  Avoiding such
+failures when it is necessary to sacrifice subjective quality is a
+fundamental design objective of Vorbis and that objective is reflected
+in Vorbis's channel coupling design.<p>
+
+<h2>Mechanisms</h2>
+
+In encoder release beta 4 and earlier, Vorbis supported multiple
+channel encoding, but the channels were encoded entirely seperately
+with no cross-analysis or redundancy elimination between channels.
+This multichannel strategy is very similar to the mp3's <em>dual
+stereo</em> mode and Vorbis uses the same name for it's analagous
+uncoupled multichannel modes.
+
+However, the Vorbis spec provides for, and Vorbis release 1.0 rc1 and
+later implement a coupled channel strategy.  Vorbis has two specific
+mechanisms that may be used alone or in conjunction to implement
+channel coupling.  The first is <em>channel interleaving</em> via
+residue backend #2, and the second is <em>square polar mapping</em>.
+These two general mechanisms are particularly well suited to coupling
+due to the structure of Vorbis encoding, as we'll explore below, and
+using both we can implement both totally <em>lossless stereo image
+coupling</em>, as well as various lossy models that seek to eliminate
+inaudible or unimportant aspects of the stereo image in order to
+enhance bitrate. The exact coupling implementation is generalized to
+allow the encoder a great deal of flexibility in implementation of a
+stereo model without requiring any significant complexity increase
+over the combinatorically simpler mid/side joint stereo of mp3 and
+other current audio codecs.<p>
+
+Channel interleaving may be applied directly to more than a single
+channel and polar mapping is hierarchical such that polar coupling may be
+extrapolated to an arbitrary number of channels and is not restricted
+to only stereo, quadriphonics, ambisonics or 5.1 surround.  However,
+the scope of this document restricts itself to the stereo coupling
+case.<p>
+
+<h3>Square Polar Mapping</h3>
+
+<h4>maximal correlation</h4>
+ 
+Recall that the basic structure of a a Vorbis I stream first generates
+from input audio a spectral 'floor' function that serves as an
+MDCT-domain whitening filter.  This floor is meant to represent the
+rough envelope of the frequency spectrum, using whatever metric the
+encoder cares to define.  This floor is subtracted from the log
+frequency spectrum, effectively normalizing the spectrum by frequency.
+Each input channel is associated with a unique floor function.<p>
+
+The basic idea behind any stereo coupling is that the left and right
+channels usually correlate.  This correlation is even stronger if one
+first accounts for energy differences in any given frequency band
+across left and right; think for example of individual instruments
+mixed into different portions of the stereo image, or a stereo
+recording with a dominant feature not perfectly in the center.  The
+floor functions, each specific to a channel, provide the perfect means
+of normaizing left and right energies across the spectrum to maximize
+correlation before coupling. This feature of the Vorbis format is not
+a convenient accident.<p>
+
+Because we strive to maximally correlate the left and right channels
+and generally succeed in doing so, left and right residue is typically
+nearly identical.  We could use channel interleaving (discussed below)
+alone to efficiently remove the redundancy between the left and right
+channels as a side effect of entropy encoding, but a polar
+representation gives benefits when left/right correlation is
+strong. <p>
+
+<h4>point and diffuse imaging</h4>
+
+The first advantage of a polar representation is that it effectively
+seperates the spatial audio information into a 'point image'
+(magnitude) at a given frequency and located somewhere in the sound
+field, and a 'diffuse image' (angle) that fills a large amount of
+space silmultaneously.  Even if we preserve only the magnitude (point)
+data, a detailed and carefully chosen floor function in each channel
+provides us with a free, fine-grained, frequency relative intensity
+stereo*.  Angle information represents diffuse sound fields, such as
+reverberation that fills the entre space silmultaneously.<p>
+
+*<em>Because the Vorbis model supports a number of different possible
+stereo models and these models may be mixed, we do not use the term
+'intensity stereo' talking about Vorbis; instead we use the terms
+'point stereo', 'phase stereo' and subcategories of each.</em><p>
+
+The majority of a stereo image is representable by polar magnitude
+alone, as strong sounds tend to be produced at near-point sources;
+even non-diffuse, fast, sharp echoes track very accurately using
+magnitude representation almost alone (for those experimenting with
+Vorbis tuning, this strategy works much better with the precise,
+piecewise control of floor 1; the continuous approximation of floor 0
+results in unstable imaging).  Reverberation and diffuse sounds tend
+to contain less energy and be psychoacoustically dominated by the
+point sources embedded in them.  Thus, we again tend to concentrate
+more represented energy into a predictably smaller number of numbers.
+Seperating representation of point and diffuse imaging also allows us
+to model and manipulate point and diffuse qualities seperately.<p>
+
+<h4>controlling bit leakage and symbol crosstalk</h4> Because polar
+representation concentrates represented energy into fewer large
+values, we reduce bit 'leakage' during cascading (multistage VQ
+encoding) as a secondary benefit.  A single large, monolithic VQ
+codebook is more efficient than a cascaded book due to entropy
+'crosstalk' among symbols between different stages of a multistage cascade.
+Polar representation is a way of further concentrating entropy into
+predictable locations so that codebook design can take steps to
+improve multistage codebook efficiency.  It also allows us to cascade
+various elements of the stereo image independently.<p>
+
+<h4>eliminating trigonometry and rounding</h4>
+
+Rounding and computational complexity are potential problems with a
+polar representation. As our encoding process involves quantization,
+mixing a polar representation and quantization makes it potentially
+impossible, depending on implementation, to construct a coupled stereo
+mechanism that results in bit-identical decompressed output compared
+to an uncoupled encoding should the encoder desire it.<p>
+
+Vorbis uses a mapping that preserves the most useful qualities of
+polar representation, relies only on addition/subtraction, and makes
+it trivial before or after quantization to represent an
+angle/magnitude through a one-to-one mapping from possible left/right
+value permutations.  We do this by basing our polar representation on
+the unit square rather than the unit-circle.<p>
+
+Given a magnitude and angle, we recover left and right using the
+following function (note that A/B may be left/right or right/left
+depending on the coupling definition used by the encoder):<p>
+
+<pre>
+      if(magnitude>0)
+        if(angle>0){
+          A=magnitude;
+          B=magnitude-angle;
+        }else{
+          B=magnitude;
+          A=magnitude+angle;
+        }
+      else
+        if(angle>0){
+          A=magnitude;
+          B=magnitude+angle;
+        }else{
+          B=magnitude;
+          A=magnitude-angle;
+        }
+    }
+</pre>
+
+The function is antisymmetric for positive and negative magnitudes in
+order to eliminate a redundant value when quantizing.  For example, if
+we're quantizing to integer values, we can visualize a magnitude of 5
+and an angle of -2 as follows:<p>
+
+<img src="squarepolar.png">
+
+<p>
+This representation loses or replicates no values; if the range of A
+and B are integral -5 through 5, the number of possible Cartesian
+permutations is 121.  Represented in square polar notation, the
+possible values are:
+
+<pre>
+ 0, 0
+
+-1,-2  -1,-1  -1, 0  -1, 1
+
+ 1,-2   1,-1   1, 0   1, 1
+
+-2,-4  -2,-3  -2,-2  -2,-1  -2, 0  -2, 1  -2, 2  -2, 3  
+
+ 2,-4   2,-3   ... following the pattern ...
+
+ ...    5, 1   5, 2   5, 3   5, 4   5, 5   5, 6   5, 7   5, 8   5, 9
+
+</pre>
+
+...for a grand total of 121 possible values, the same number as in
+Cartesian representation (note that, for example, <tt>5,-10</tt> is
+the same as <tt>-5,10</tt>, so there's no reason to represent
+both. 2,10 cannot happen, and there's no reason to account for it.)
+It's also obvious that this mapping is exactly reversable.<p>
+
+<h3>Channel interleaving</h3>
+
+We can remap and A/B vector using polar mapping into a magnitude/angle
+vector, and it's clear that, in general, this concentrates energy in
+the magnitude vector and reduces the amount of information to encode
+in the angle vector.  Encoding these vectors independently with
+residue backend #0 or residue backend #1 will result in substantial
+bitrate savings.  However, there are still implicit correlations
+between the magnitude and angle vectors.  The most obvious is that the
+amplitude of the angle is bounded by its corresponding magnitude
+value.<p>
+
+Entropy coding the results, then, further benefits from the entropy
+model being able to compress magnitude and angle silmultaneously.  For
+this reason, Vorbis implements residuebackend #2 which preinterleaves
+a number of input vectors (in the stereo case, two, A and B) into a
+single output vector (with the elements in the order of
+A_0, B_0, A_1, B_1, A_2 ... A_n-1, B_n-1) before entropy encoding.  Thus
+each vector to be coded by the vector quantization backend consists of
+matching magnitude and angle values.<p>
+
+The astute reader, at this point, will notice that in the theoretical
+case in which we can use monolithic codebooks of arbitrarily large
+size, we can directly interleave and encode left and right without
+polar mapping; in fact, the polar mapping does not appear to lend any
+benefit whatsoever to the efficiency of the entropy coding.  In fact,
+it is perfectly possible and reasonable to build a Vorbis encoder that
+dispenses with polar mapping entirely and merely interleaves the
+channel.  Libvorbis based encoders may configure such an encoding and
+it will work as intended.<p>
+
+However, when we leave the ideal/theoretical domain, we notice that
+polar mapping does give additional practical benefits, as discussed in
+the above section on polar mapping and summarised again here:<p>
+<ul>
+<li>Polar mapping aids in controlling entropy 'leakage' between stages
+of a cascaded codebook.  <li>Polar mapping seperates the stereo image
+into point and diffuse components which may be analyzed and handled
+differently.
+</ul>
+
+<h2>Stereo Models</h2>
+
+<h3>Dual Stereo</h3>
+
+Dual stereo referrs to stereo encoding where the channels are entirely
+seperate; they are analyzed and encoded as entirely distinct entities.
+This terminology is familiar from mp3.<p>
+
+<h3>Lossless Stereo</h3>
+
+Using polar mapping and/or channel interleaving, it's possible to
+couple Vorbis channels losslessly, that is, construct a stereo
+coupling encoding that both saves space but also decodes
+bit-identically to dual stereo.  OggEnc 1.0 and later offers this
+mode.<p>
+
+Overall, this stereo mode is overkill; however, it offers a safe
+alternative to users concerned about the slightest possible
+degredation to the stereo image or archival quality audio.<p>
+
+<h3>Phase Stereo</h3>
+
+Phase stereo is the least aggressive means of gracefully dropping
+resolution from the stereo image; it affects only diffuse imaging.<p>
+
+It's often quoted that the human ear is nearly entirely deaf to signal
+phase above about 4kHz; this is nearly true and a passable rule of
+thumb, but it can be demonstrated that even an average user can tell
+the difference between high frequency in-phase and out-of-phase noise.
+Obviously then, the statement is not entirely true.  However, it's
+also the case that one must resort to nearly such an extreme
+demostration before finding the counterexample.<p>
+
+'Phase stereo' is simply a more aggressive quantization of the polar
+angle vector; above 4kHz it's generally quite safe to quantize noise
+and noisy elements to only a handful of allowed phases.  The phases of
+high ampliude pure tones may or may not be preserved more carefully
+(they are relatively rare and L/R tend to be in phase, so there is
+generally little reason not to spend a few more bits on them) <p>
+
+<h4>eight phase stereo</h4>
+
+Vorbis implements phase stereo coupling by preserving the entirety of the magnitude vector (essential to fine amlitdude and energy resolution overall) and quantizing the angle vector to one of only four possible values. Given that the magnitude vector may be positive or negative, this results in left and right phase having eight possible permutation, thus 'eight phase stereo':<p>
+
+<img src="eightphase.png"><p>
+
+Left and right may be in phase (positive or negative), the most common
+case by far, or out of phase by 90 or 180 degrees.<p>
+
+<h4>four phase stereo</h4>
+
+Four phase stereo takes the quantization one step further; it allows
+only in-phase and 180 degree out-out-phase signals:<p>
+
+<img src="fourphase.png"><p>
+
+<h3>Point Stereo</h3>
+
+Point stero eliminates the possibility of out-of-phase signal
+entirely.  Any diffuse quality to a sound source tends to collapse
+inward to a point somewhere within the stereo image.  A practical
+example would be balanced reverberations within a large, live space;
+normally the sound is diffuse and soft, giving a sonic impression of
+volume.  In point-stereo, the reverberations would still exist, but
+sound fairly firmly centered within the image (assuming the
+reverberation was centered overall; if the reverberation is stronger
+to the left, then the point of localization in point stereo would be
+to the left).  This effect is most noticable at low and mid
+frequencies and using headphones (which grant perfect stereo
+seperation). Point stereo is is a graceful but generally easy to
+detect degrdation to the sound quality and is thus used in frequency
+ranges where it is least noticable.<p>
+
+<h3>Mixed Stereo</h3>
+
+Mixed stereo is the silmultaneous use of more than one of the above
+stereo encoding models, generally using more aggressive modes in
+higher frequencies, lower amplitudes or 'nearly' in-phase sound.<p>
+
+It is also the case that near-DC frequencies should be encoded using
+lossless coupling to avoid frame blocking artifacts.<p>
+
+<h3>Vorbis Stereo Modes</h3>
+
+Vorbis, for the most part, uses lossless stereo and a number of mixed
+modes constructed out of the above models.  As of the current pre-1.0
+testing version of the encoder, oggenc supports the following modes.
+Oggenc's default choice varies by bitrate and each mode is selectable
+by the user:<p>
+
+<dl>
+<dt>dual stereo
+<dd>uncoupled stereo encoding<p>
+
+<dt>lossless stereo
+<dd>lossless stereo coupling; produces exactly equivalent output to dual stereo<p>
+
+<dt>eight phase stereo
+<dd>a mixed mode combining lossless stereo for frequencies to approximately 4 kHz (and all strong pure tones) and eight phase stereo above<p>
+
+<dt>aggressive eight phase stereo
+<dd>a mixed mode combining lossless stereo for frequencies to approximately 2 kHz (and for all strong pure tones) and eight phase stereo above<p>
+
+<dt>eight phase/point stero <dd>A mixed mode combining lossless stereo
+for bass, eight phase stereo for noisy content and lossless stereo for
+tones to approximately 4kHz and point stereo above 4kHz.<p>
+
+<dt>aggressive eight phase/point stero
+<dd>A mixed mode combining lossless stereo
+for bass, eight phase stereo to approximately 2kHz and point stereo above 2kHz.<p>
+
+<dt>point stereo
+<dd>A mixed mode combining lossless stereo to approximately 4kHz and point stereo above 4kHz.<p>
+
+<dt>aggressive point stereo
+<dd>A mixed mode combining lossless stereo to approximately 1-2kHz and point stereo above.<p>
+
+</dl>
+
+<hr>
+<a href="http://www.xiph.org/">
+<img src="white-xifish.png" align=left border=0>
+</a>
+<font size=-2 color=#505050>
+
+Ogg is a <a href="http://www.xiph.org">Xiphophorus</a> effort to
+protect essential tenets of Internet multimedia from corporate
+hostage-taking; Open Source is the net's greatest tool to keep
+everyone honest. See <a href="http://www.xiph.org/about.html">About
+Xiphophorus</a> for details.
+<p>
+
+Ogg Vorbis is the first Ogg audio CODEC.  Anyone may
+freely use and distribute the Ogg and Vorbis specification,
+whether in a private, public or corporate capacity.  However,
+Xiphophorus and the Ogg project (xiph.org) reserve the right to set
+the Ogg/Vorbis specification and certify specification compliance.<p>
+
+Xiphophorus's Vorbis software CODEC implementation is distributed
+under a BSD-like License.  This does not restrict third parties from
+distributing independent implementations of Vorbis software under
+other licenses.<p>
+
+OggSquish, Vorbis, Xiphophorus and their logos are trademarks (tm) of
+<a href="http://www.xiph.org/">Xiphophorus</a>.  These pages are
+copyright (C) 1994-2001 Xiphophorus. All rights reserved.<p>
+
+</body>
+
+
+
+
+
+
