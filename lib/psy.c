@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.54 2001/09/11 02:42:34 segher Exp $
+ last mod: $Id: psy.c,v 1.55 2001/09/11 05:06:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -346,7 +346,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
       }
   }
 
-  if(vi->peakattp) /* we limit depth only optionally */
+  if(vi->tone_guard) /* we limit depth only optionally */
     for(i=0;i<P_BANDS;i++)
       for(j=0;j<P_LEVELS;j++)
 	if(p->tonecurves[i][j][EHMER_OFFSET+2]< vi->peakatt->block[i][j])
@@ -355,8 +355,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   /* but guarding is mandatory */
   for(i=0;i<P_BANDS;i++)
     for(j=0;j<P_LEVELS;j++)
-      if(p->tonecurves[i][j][EHMER_OFFSET+2]< vi->tone_maxatt)
-	  p->tonecurves[i][j][EHMER_OFFSET+2]=  vi->tone_maxatt;
+      if(p->tonecurves[i][j][EHMER_OFFSET+2]< vi->tone_guard)
+	  p->tonecurves[i][j][EHMER_OFFSET+2]=  vi->tone_guard;
 
   /* set up rolling noise median */
   for(i=0;i<n;i++){
@@ -572,6 +572,7 @@ static void max_seeds(vorbis_look_psy *p,
   while(linpos+1<p->n){
     float minV=seed[pos];
     long end=((p->octave[linpos]+p->octave[linpos+1])>>1)-p->firstoc;
+    if(minV>p->vi->tone_abs_limit)minV=p->vi->tone_abs_limit;
     while(pos+1<=end){
       pos++;
       if((seed[pos]>NEGINF && seed[pos]<minV) || minV==NEGINF)
@@ -597,7 +598,7 @@ static void bark_noise_hybridmp(int n,const long *b,
 				float *noise,
 				const float offset,
 				const int fixed){
-  long i,hi=b[0]>>16,lo=b[0]>>16,hif=-fixed/2,lof=-fixed/2;
+  long i,hi=b[0]>>16,lo=b[0]>>16,hif=0,lof=0;
   double xa=0,xb=0;
   double ya=0,yb=0;
   double x2a=0,x2b=0;
@@ -755,6 +756,7 @@ void _vp_compute_mask(vorbis_look_psy *p,
       int dB=logmask[i]+.5;
       if(dB>=NOISE_COMPAND_LEVELS)dB=NOISE_COMPAND_LEVELS-1;
       logmask[i]= work[i]+p->vi->noisecompand[dB]+p->noiseoffset[i];
+      if(logmask[i]>p->vi->noisemaxsupp)logmask[i]=p->vi->noisemaxsupp;
     }
 
     _analysis_output("noise",seq,logmask,n,1,0);
@@ -778,13 +780,6 @@ void _vp_compute_mask(vorbis_look_psy *p,
   /* tone/peak masking */
   seed_loop(p,(const float ***)p->tonecurves,logfft,logmask,seed,global_specmax);
   max_seeds(p,g,channel,seed,logmask);
-
-  /* suppress any curve > p->vi->noisemaxsupp */
-  if(p->vi->noisemaxsupp<0.f)
-    for(i=0;i<n;i++)
-      if(logmask[i]>p->vi->noisemaxsupp)
-	logmask[i]=p->vi->noisemaxsupp;
-  
 
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */
@@ -852,19 +847,22 @@ static void couple_8phase(float A, float B, float fA, float fB,
       *ang=0.f;
       break;
     case 1:
-      corr=origmag/(fmag*fA);
-      *mag=rint(A*corr*igranule)*granule; 
+      *mag=rint(*mag*igranule)*granule; 
       *ang=fabs(*mag);
       break;
     case -1:
-      corr=origmag/(fmag*fB);
-      *mag=rint(B*corr*igranule)*granule; 
-      *ang=-fabs(*mag);
+      *mag=rint(*mag*igranule)*granule; 
+      *ang= -fabs(*mag);
       break;
-    default:
+    case -2:
       corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
       *mag=rint(*mag*corr*igranule)*granule; 
-      *ang=-2.f*fabs(*mag);
+      *ang= -2.f*fabs(*mag);
+      break;
+    case 2:
+      corr=origmag/FAST_HYPOT(fmag*fA,fmag*fB);
+      *mag= -rint(*mag*corr*igranule)*granule; 
+      *ang= -2.f*fabs(*mag);
       break;
     }
   }else{
@@ -895,15 +893,17 @@ static void couple_6phase(float A, float B, float fA, float fB,
       *ang=0.f;
       break;
     case 1:case 2:
-      corr=origmag/(fmag*fA);
-      *mag=rint(A*corr*igranule)*granule; 
-      *ang=fabs(*mag);
+      *mag=rint(*mag*igranule)*granule; 
+      *ang= fabs(*mag);
       break;
     case -1:case -2:
-      corr=origmag/(fmag*fB);
-      *mag=rint(B*corr*igranule)*granule; 
-      *ang=-fabs(*mag);
+      *mag=rint(*mag*igranule)*granule; 
+      *ang= -fabs(*mag);
       break;
+    default:
+      *mag=0.f;
+      *ang=0.f;
+
     }
   }else{
     *mag=0.f;
@@ -932,7 +932,11 @@ static void couple_4phase(float A, float B, float fA, float fB,
     case 0:
       *ang=0.f;
       break;
+    case -1:
+      *ang=-2.f*fabs(*mag);
+      break;
     default:
+      *mag=-*mag;
       *ang=-2.f*fabs(*mag);
       break;
     }
@@ -949,12 +953,12 @@ static void couple_point(float A, float B, float fA, float fB,
   float origmag=FAST_HYPOT(A*fA,B*fB),corr;
 
   if(fmag!=0.f){
-    float phase=rint((A-B)*.5/fmag);
+    //float phase=rint((A-B)*.5/fmag);
     
     if(fabs(A)>fabs(B)){
-      *mag=A;phase=(A>0?phase:-phase);
+      *mag=A;//phase=(A>0?phase:-phase);
     }else{
-      *mag=B;phase=(B>0?phase:-phase);
+      *mag=B;//phase=(B>0?phase:-phase);
     }
     
     //switch((int)phase){

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.35 2001/08/13 11:33:39 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.36 2001/09/11 05:06:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -377,6 +377,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     for(j=0;j<n/2;j++)
       logmdct[j]=todB(mdct+j);
     _analysis_output("mdct",seq+i,logmdct,n/2,1,0);
+    _analysis_output("lmdct",seq+i,mdct,n/2,0,0);
 
 
     /* perform psychoacoustics; do masking */
@@ -391,7 +392,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 		     ci->blocksizes[vb->lW]/2);
 
     _analysis_output("mask",seq+i,logmask,n/2,1,0);
-    
     /* perform floor encoding */
     nonzero[i]=look->floor_func[submap]->
       forward(vb,look->floor_look[submap],
@@ -676,6 +676,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
     _analysis_output("out",seq+i,pcm,n/2,1,1);
+    _analysis_output("lout",seq+i,pcm,n/2,0,0);
     mdct_backward(b->transform[vb->W][0],pcm,pcm);
   }
 

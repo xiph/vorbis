@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.23 2001/09/01 06:14:50 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.24 2001/09/11 05:06:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -40,13 +40,8 @@ typedef struct vp_couple{
   int limit;        /* sample post */
 
   float amppost_8phase;
-  float thresh_8phase;
-
   float amppost_6phase;
-  float thresh_6phase;
-
   float amppost_point;
-  float thresh_point;
   
 } vp_couple;
 
@@ -69,7 +64,8 @@ typedef struct vorbis_info_psy{
   float  ath_maxatt;
 
   float tone_masteratt;
-  float tone_maxatt;
+  float tone_guard;
+  float tone_abs_limit;
   vp_attenblock *toneatt;
 
   int peakattp;
