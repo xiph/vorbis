@@ -1,18 +1,18 @@
-<HTML><HEAD><TITLE>xiph.org: OggSquish Vorbis documentation</TITLE>
+<HTML><HEAD><TITLE>xiph.org: Ogg Vorbis documentation</TITLE>
 <BODY bgcolor="#ffffff" text="#202020" link="#006666" vlink="#000000">
-<nobr><a href="vorbis.html"><img src="white-ogg.gif" border=0><img 
-src="vorbisword2.gif" border=0></a></nobr><p>
+<nobr><a href="vorbis.html"><img src="white-ogg.png" border=0><img 
+src="vorbisword2.png" border=0></a></nobr><p>
 
 
 <h1><font color=#000070>
-OggSquish logical and physical bitstream overview
+Ogg logical and physical bitstream overview
 </font></h1>
 
 <em>Last update to this document: July 18, 1999</em><br> 
 
-<h2>OggSquish bitstreams</h2>
+<h2>Ogg bitstreams</h2>
 
-OggSquish codecs use octet vectors of raw, compressed data
+Ogg codecs use octet vectors of raw, compressed data
 (<em>packets</em>). These compressed packets do not have any
 high-level structure or boundary information; strung together, they
 appear to be streams of random bytes with no landmarks.<p>
@@ -21,7 +21,7 @@ Raw packets may be used directly by transport mechanisms that provide
 their own framing and packet-seperation mechanisms (such as UDP
 datagrams).  For stream based storage (such as files) and transport
 (such as TCP streams or pipes), Vorbis and other future Ogg codecs use
-the OggSquish bitstream format to provide framing/sync, sync recapture
+the Ogg bitstream format to provide framing/sync, sync recapture
 after error, landmarks during seeking, and enough information to
 properly seperate data back into packets at the original packet
 boundaries without relying on decoding to find packet boundaries.<p>
@@ -46,17 +46,17 @@ pages in order fromt he physical bitstream and redirecting them into
 the appropriate logical decoding entitiy. The simplest physical
 bitstream is a single, unmultiplexed logical bitstream.  <p>
 
-<a href=framing.html>OggSquish Logical Bitstream Framing</a> discusses
-the page format of an OggSquish bitstream, the packet coding process
+<a href=framing.html>Ogg Logical Bitstream Framing</a> discusses
+the page format of an Ogg bitstream, the packet coding process
 and logical bitstreams in detail.  The remainder of this document
-specifies requirements for constructing finished, physical OggSquish
+specifies requirements for constructing finished, physical Ogg
 bitstreams.<p>
 
 <h2>Mapping Restrictions</h2>
 
 Logical bitstreams may not be mapped/multiplexed into physical
 bitstreams without restriction.  Here we discuss design restrictions
-on OggSquish physical bitstreams in general, mostly to introduce
+on Ogg physical bitstreams in general, mostly to introduce
 design rationale. Each 'media' format defines its own (generally more
 restrictive) mapping.  An '<a href="vorbis-stream.html">Ogg Vorbis
 Audio Bitstream</a>', for example, has a <a
@@ -73,16 +73,16 @@ stream always consists of an integer number of pages, an easy
 requirement given the variable size nature of pages.<p>
 
 In addition to the header flag marking the first and last pages of a
-logical bitstream, the first page of an OggSquish bitstream obeys
+logical bitstream, the first page of an Ogg bitstream obeys
 additional restrictions.  Each individual media mapping specifies its
 own implementation details regarding these restrictions.<p>
 
-The first page of a logical OggSquish bitstream consists of a single,
+The first page of a logical Ogg bitstream consists of a single,
 small 'initial header' packet that includes sufficient information to
 identify the exact CODEC type and media requirements of the logical
 bitstream.  The intent of this restriction is to simplify identifying
 the bitstream type and content; for a given media type (or across all
-OggSquish media types) we can know that we only need a small, fixed
+Ogg media types) we can know that we only need a small, fixed
 amount of data to uniquely identify the bitstream type.<p>
 
 As an example, Ogg Vorbis places the name and revision of the Vorbis
@@ -112,13 +112,13 @@ Whole pages from multiple logical bitstreams are mixed together.<p>
 
 The initial pages of each logical bitstream must appear first; the
 media mapping specifies the order of the initial pages.  For example,
-Ogg A/V will eventually specify an OggSquish video bitstream with
+Ogg A/V will eventually specify an Ogg video bitstream with
 audio.  The mapping may specify that the physical bitstream must begin
 with the initial page of a logical video bitstream, followed by the
 initial page of an audio stream.  Unlike initial pages, terminal pages
 for the logical bitstreams need not all occur contiguously (although a
 specific media mapping may require this; it is not mandated by the
-generic OggSquish stream spec).  Terminal pages may be 'nil' pages,
+generic Ogg stream spec).  Terminal pages may be 'nil' pages,
 that is, pages containing no content but simply a page header with
 position information and the 'last page of bitstream' flag set in the
 page header.<p>
@@ -138,7 +138,7 @@ bitstream.<p>
 
 Below, we present an example of a grouped and chained bitstream:<p>
 
-<img src=stream.gif><p>
+<img src=stream.png><p>
 
 In this example, we see pages from five total logical bitstreams
 multiplexed into a physical bitstream.  Note the following
@@ -161,32 +161,31 @@ where decode requires more information).
 
 <hr>
 <a href="http://www.xiph.org/">
-<img src="white-xifish.gif" align=left border=0>
+<img src="white-xifish.png" align=left border=0>
 </a>
 <font size=-2 color=#505050>
 
-OggSquish is a <a href="http://www.xiph.org">Xiphophorus</a> effort to
+Ogg is a <a href="http://www.xiph.org">Xiphophorus</a> effort to
 protect essential tenets of Internet multimedia from corporate
 hostage-taking; Open Source is the net's greatest tool to keep
 everyone honest. See <a href="http://www.xiph.org/about.html">About
 Xiphophorus</a> for details.
 <p>
 
-Ogg Vorbis is the first OggSquish audio CODEC.  Anyone may
-freely use and distribute the OggSquish and Vorbis specification,
+Ogg Vorbis is the first Ogg audio CODEC.  Anyone may
+freely use and distribute the Ogg and Vorbis specification,
 whether in a private, public or corporate capacity.  However,
 Xiphophorus and the Ogg project (xiph.org) reserve the right to set
 the Ogg/Vorbis specification and certify specification compliance.<p>
 
-Xiphophorus's Vorbis software CODEC implementation (libvorbis and the
-vorbis encode/decode/playback utility) are distributed under the GNU
-Public License.  This does not restrict third parties from
-distributing independent implementations of Vorbis software under
-other licenses.<p>
+Xiphophorus's Vorbis software CODEC implementation is distributed
+under the Lesser/Library GNU Public License.  This does not restrict
+third parties from distributing independent implementations of Vorbis
+software under other licenses.<p>
 
 OggSquish, Vorbis, Xiphophorus and their logos are trademarks (tm) of
 <a href="http://www.xiph.org/">Xiphophorus</a>.  These pages are
-copyright (C) 1994-1999 Xiphophorus. All rights reserved.<p>
+copyright (C) 1994-2000 Xiphophorus. All rights reserved.<p>
 
 </body>
 

@@ -1,6 +1,6 @@
-<HTML><HEAD><TITLE>xiph.org: OggSquish Vorbis documentation</TITLE>
+<HTML><HEAD><TITLE>xiph.org: Ogg Vorbis documentation</TITLE>
 <BODY bgcolor="#ffffff" text="#202020" link="#006666" vlink="#000000">
-<nobr><img src="white-ogg.gif"><img src="vorbisword2.gif"></nobr><p>
+<nobr><img src="white-ogg.png"><img src="vorbisword2.png"></nobr><p>
 
 
 <h1><font color=#000070>
@@ -13,7 +13,7 @@ Programming with Xiphophorus <tt>libvorbis</tt>
 
 Libvorbis is Xiphophorus's portable Ogg Vorbis CODEC implemented as a
 programmatic library.  Libvorbis provides primitives to handle framing
-and manipulation of OggSquish bitstreams (used by the Vorbis for
+and manipulation of Ogg bitstreams (used by the Vorbis for
 streaming), a full analysis (encoding) interface as well as packet
 decoding and synthesis for playback. <p>
 
@@ -41,7 +41,7 @@ steps:
 
 <h3>Framing</h3>
 
-An OggSquish bitstream is logically arranged into pages, but to decode
+An Ogg bitstream is logically arranged into pages, but to decode
 the pages, we have to find them first.  The raw bitstream is first fed
 into an <tt>ogg_sync_state</tt> buffer using <tt>ogg_sync_buffer()</tt>
 and <tt>ogg_sync_wrote()</tt>.  After each block we submit to the sync
@@ -84,9 +84,9 @@ using <tt>ogg_stream_packetout</tt>.
 <h3>Reassembling data segments</h3>
 
 
-<h2>OggSquish Bitstream Manipulation Structures</h3>
+<h2>Ogg Bitstream Manipulation Structures</h3>
 
-Two of the OggSquish bitstream data structures are intended to be
+Two of the Ogg bitstream data structures are intended to be
 transparent to the developer; the fields should be used directly.<p>
 
 <h3>ogg_packet</h3>
@@ -151,7 +151,7 @@ Note that although the <tt>header</tt> and <tt>body</tt> pointers do
 not necessarily point into a single contiguous page vector, the page
 body must immediately follow the header in the bitstream.<p>
 
-<h2>OggSquish Bitstream Manipulation Functions</h3>
+<h2>Ogg Bitstream Manipulation Functions</h3>
 
 <h3>
 int    ogg_page_bos(ogg_page *og);
@@ -224,7 +224,7 @@ int    ogg_page_serialno(ogg_page *og);
 
 Returns the serial number of the given Ogg page.  The serial number is
 used as a handle to distinguish various logical bitstreams in a
-physical OggSquish bitstresm. Every logical bitstream within a
+physical Ogg bitstresm. Every logical bitstream within a
 physical bitstream must use a unique (within the scope of the physical
 bitstream) serial number, which is stamped on all bitstream pages.<p>
 
@@ -472,32 +472,31 @@ when the number of bytes written were larger than the buffer.<p>
 
 <hr>
 <a href="http://www.xiph.org/">
-<img src="white-xifish.gif" align=left border=0>
+<img src="white-xifish.png" align=left border=0>
 </a>
 <font size=-2 color=#505050>
 
-OggSquish is a <a href="http://www.xiph.org">Xiphophorus</a> effort to
+Ogg is a <a href="http://www.xiph.org">Xiphophorus</a> effort to
 protect essential tenets of Internet multimedia from corporate
 hostage-taking; Open Source is the net's greatest tool to keep
 everyone honest. See <a href="http://www.xiph.org/about.html">About
 Xiphophorus</a> for details.
 <p>
 
-Ogg Vorbis is the first OggSquish audio CODEC.  Anyone may
-freely use and distribute the OggSquish and Vorbis specification,
+Ogg Vorbis is the first Ogg audio CODEC.  Anyone may
+freely use and distribute the Ogg and Vorbis specification,
 whether in a private, public or corporate capacity.  However,
 Xiphophorus and the Ogg project (xiph.org) reserve the right to set
 the Ogg/Vorbis specification and certify specification compliance.<p>
 
-Xiphophorus's Vorbis software CODEC implementation (libvorbis and the
-vorbis encode/decode/playback utility) are distributed under the GNU
-Public License.  This does not restrict third parties from
-distributing independent implementations of Vorbis software under
-other licenses.<p>
+Xiphophorus's Vorbis software CODEC implementation is distributed
+under the Lesser/Library GNU Public License.  This does not restrict
+third parties from distributing independent implementations of Vorbis
+software under other licenses.<p>
 
 OggSquish, Vorbis, Xiphophorus and their logos are trademarks (tm) of
 <a href="http://www.xiph.org/">Xiphophorus</a>.  These pages are
-copyright (C) 1994-1999 Xiphophorus. All rights reserved.<p>
+copyright (C) 1994-2000 Xiphophorus. All rights reserved.<p>
 
 </body>
 

@@ -1,27 +1,27 @@
-<HTML><HEAD><TITLE>xiph.org: OggSquish Vorbis documentation</TITLE>
+<HTML><HEAD><TITLE>xiph.org: Ogg Vorbis documentation</TITLE>
 <BODY bgcolor="#ffffff" text="#202020" link="#006666" vlink="#000000">
-<nobr><a href="vorbis.html"><img src="white-ogg.gif" border=0><img 
-src="vorbisword2.gif" border=0></a></nobr><p>
+<nobr><a href="vorbis.html"><img src="white-ogg.png" border=0><img 
+src="vorbisword2.png" border=0></a></nobr><p>
 
 <h1><font color=#000070>
-OggSquish logical bitstream framing
+Ogg logical bitstream framing
 </font></h1>
 
 <em>Last update to this document: July 15, 1999</em><br> 
 
-<h2>OggSquish bitstreams</h2>
+<h2>Ogg bitstreams</h2>
 
 Vorbis encodes short-time blocks of PCM data into raw packets of
 bit-packed data.  These raw packets may be used directly by transport
 mechanisms that provide their own framing and packet-seperation
 mechanisms (such as UDP datagrams).  For stream based storage (such as
 files) and transport (such as TCP streams or pipes), Vorbis uses the
-OggSquish bitstream format to provide framing/sync, sync recapture
+Ogg bitstream format to provide framing/sync, sync recapture
 after error, landmarks during seeking, and enough information to
 properly seperate data back into packets at the original packet
 boundaries without relying on decoding to find packet boundaries.<p>
 
-<h2>Design constraints for OggSquish bitstreams</h2>
+<h2>Design constraints for Ogg bitstreams</h2>
 
 <ol><li>True streaming; we must not need to seek to build a 100%
    complete bitstream.
@@ -41,21 +41,21 @@ boundaries without relying on decoding to find packet boundaries.<p>
 
 <h2>Logical and Physical Bitstreams</h2>
 
-A <em>logical</em> OggSquish bitstream is a contiguous stream of
+A <em>logical</em> Ogg bitstream is a contiguous stream of
 sequential pages belonging only to the logical bitstream.  A
-<em>physical</em> OggSquish bitstream is constructed from one or more
-than one logical OggSquish bitstream (the simplest physical bitstream
+<em>physical</em> Ogg bitstream is constructed from one or more
+than one logical Ogg bitstream (the simplest physical bitstream
 is simply a single logical bitstream).  We describe below the exact
-formatting of an OggSquish logical bitstream.  Combining logical
+formatting of an Ogg logical bitstream.  Combining logical
 bitstreams into more complex physical bitstreams is described in the
-<a href="oggstream.html">OggSquish bitstream overview</a>.  The exact
+<a href="oggstream.html">Ogg bitstream overview</a>.  The exact
 mapping of raw Vorbis packets into a valid Ogg Vorbis physical
 bitstream is described in <a href="vorbis-stream.html">Vorbis
 bitstream mapping</a>.
 
 <h2>Bitstream structure</h2>
 
-An OggSquish stream is structured by dividing incoming packets into
+An Ogg stream is structured by dividing incoming packets into
 segments of up to 255 bytes and then wrapping a group of contiguous
 packet segments into a variable length page preceeded by a page
 header.  Both the header size and page size are variable; the page
@@ -126,7 +126,7 @@ consists of nothing more than a lacing value of zero in the header.<p>
 Packets are not resticted to beginning and ending within a page,
 although individual segments are, by definition, required to do so.
 Packets are not restricted to a maximum size, although excessively
-large packets in the data stream are discouraged; the OggSquish
+large packets in the data stream are discouraged; the Ogg
 bitstream specification strongly recommends nominal page size of
 approximately 4-8kB (large packets are forseen as being useful for
 initialization data at the beginning of a logical bitstream).<p>
@@ -230,7 +230,7 @@ buffered packet segments.<p>
 
 <h4>PCM absolute position</h4>
 
- (This is packed in the same way the rest of OggSquish data is packed;
+ (This is packed in the same way the rest of Ogg data is packed;
  LSb of LSB first.  Note that the 'position' data specifies a 'sample'
  number (eg, in a CD quality sample is four octets, 16 bits for left
  and 16 bits for right; in video it would be the frame number).  The
@@ -257,7 +257,7 @@ buffered packet segments.<p>
 
 <h4>stream serial number</h4>
  
- OggSquish allows for seperate logical bitstreams to be mixed at page
+ Ogg allows for seperate logical bitstreams to be mixed at page
  granularity in a physical bitstream.  The most common case would be
  sequential arrangement, but it is possible to interleave pages for
  two seperate bitstreams to be decoded concurrently.  The serial
@@ -353,32 +353,31 @@ stereo encodings.<p>
 
 <hr>
 <a href="http://www.xiph.org/">
-<img src="white-xifish.gif" align=left border=0>
+<img src="white-xifish.png" align=left border=0>
 </a>
 <font size=-2 color=#505050>
 
-OggSquish is a <a href="http://www.xiph.org">Xiphophorus</a> effort to
+Ogg is a <a href="http://www.xiph.org">Xiphophorus</a> effort to
 protect essential tenets of Internet multimedia from corporate
 hostage-taking; Open Source is the net's greatest tool to keep
 everyone honest. See <a href="http://www.xiph.org/about.html">About
 Xiphophorus</a> for details.
 <p>
 
-Ogg Vorbis is the first OggSquish audio CODEC.  Anyone may
-freely use and distribute the OggSquish and Vorbis specification,
+Ogg Vorbis is the first Ogg audio CODEC.  Anyone may
+freely use and distribute the Ogg and Vorbis specification,
 whether in a private, public or corporate capacity.  However,
 Xiphophorus and the Ogg project (xiph.org) reserve the right to set
 the Ogg/Vorbis specification and certify specification compliance.<p>
 
-Xiphophorus's Vorbis software CODEC implementation (libvorbis and the
-vorbis encode/decode/playback utility) are distributed under the GNU
-Public License.  This does not restrict third parties from
-distributing independent implementations of Vorbis software under
-other licenses.<p>
+Xiphophorus's Vorbis software CODEC implementation is distributed
+under the Lessr/Library GNU Public License.  This does not restrict
+third parties from distributing independent implementations of Vorbis
+software under other licenses.<p>
 
 OggSquish, Vorbis, Xiphophorus and their logos are trademarks (tm) of
 <a href="http://www.xiph.org/">Xiphophorus</a>.  These pages are
-copyright (C) 1994-1999 Xiphophorus. All rights reserved.<p>
+copyright (C) 1994-2000 Xiphophorus. All rights reserved.<p>
 
 </body>
 
