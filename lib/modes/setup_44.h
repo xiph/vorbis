@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: toplevel settings for 44.1/48kHz
- last mod: $Id: setup_44.h,v 1.6 2002/07/01 11:20:19 xiphmont Exp $
+ last mod: $Id: setup_44.h,v 1.7 2002/07/10 03:04:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -54,19 +54,22 @@ static double _psy_compand_long_mapping[11]={
   4., 4., 4.3, 4.6, 5., 5., 5., 5., 5., 5., 5.
 };
 static double _global_mapping_44[11]={
-  0., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4.
+  1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4.
 };
-static int _floor_short_mapping_44_low[2]={
-  1,1,
+static double _global_mapping_44_low[11]={
+  1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4.
 };
-static int _floor_short_mapping_44[11]={
-  0,0,2,2,4,5,5,5,5,5,5
+static int _floor_short_mapping_44_low[1]={
+  1,
 };
-static int _floor_long_mapping_44[11]={
-  7,7,7,7,7,7,7,7,7,7,7
+static int _floor_long_mapping_44_low[1]={
+  8
 };
-static int _floor_long_mapping_44_low[11]={
-  8,8
+static int _floor_short_mapping_44[10]={
+  0,0,2,2,4,5,5,5,5,5
+};
+static int _floor_long_mapping_44[10]={
+  7,7,7,7,7,7,7,7,7,7
 };
 
 ve_setup_data_template ve_setup_44_stereo={
@@ -160,7 +163,7 @@ ve_setup_data_template ve_setup_44_stereo_low={
   _psy_lowpass_44_low,
 
   _psy_global_44,
-  _global_mapping_44,
+  _global_mapping_44_low,
   _psy_stereo_modes_44_low,
 
   _floor_44_books,

@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.14 2002/07/02 04:25:21 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.15 2002/07/10 03:04:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,14 +37,6 @@ static vorbis_info_residue0 _residue_44_high={
   {-1},
   {  .5,  1.5,  2.5,  4.5,  8.5, 16.5, 32.5, 71.5,157.5},
   {  .5,  1.5,  2.5,  3.5,  4.5,  8.5, 16.5, 71.5,157.5},
-};
-
-/* mapping conventions:
-   only one submap (this would change for efficient 5.1 support for example)*/
-/* Four psychoacoustic profiles are used, one for each blocktype */
-static vorbis_info_mapping0 _map_nominal[2]={
-  {1, {0,0}, {0}, {0}, 1,{0},{1}},
-  {1, {0,0}, {1}, {1}, 1,{0},{1}}
 };
 
 static static_bookblock _resbook_44s_0={

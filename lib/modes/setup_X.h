@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: catch-all toplevel settings for q modes only
- last mod: $Id: setup_X.h,v 1.1 2002/07/02 04:25:21 xiphmont Exp $
+ last mod: $Id: setup_X.h,v 1.2 2002/07/10 03:04:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@ ve_setup_data_template ve_setup_X_stereo={
   rate_mapping_X,
   quality_mapping_44,
   2,
-  4000,
+  50000,
   200000,
   
   blocksize_short_44,
@@ -76,7 +76,7 @@ ve_setup_data_template ve_setup_X_uncoupled={
   rate_mapping_X,
   quality_mapping_44,
   -1,
-  4000,
+  50000,
   200000,
   
   blocksize_short_44,
@@ -127,7 +127,7 @@ ve_setup_data_template ve_setup_X_stereo_low={
   rate_mapping_X,
   quality_mapping_44_stereo_low,
   2,
-  4000,
+  50000,
   200000,
   
   blocksize_short_44_low,
@@ -179,7 +179,7 @@ ve_setup_data_template ve_setup_X_uncoupled_low={
   rate_mapping_X,
   quality_mapping_44_stereo_low,
   -1,
-  4000,
+  50000,
   200000,
   
   blocksize_short_44_low,
@@ -224,3 +224,106 @@ ve_setup_data_template ve_setup_X_uncoupled_low={
 
   _mapres_template_44_uncoupled
 };
+
+ve_setup_data_template ve_setup_XX_stereo={
+  2,
+  rate_mapping_X,
+  quality_mapping_8,
+  2,
+  0,
+  8000,
+  
+  blocksize_8,
+  blocksize_8,
+
+  _psy_tone_masteratt_8,
+  _psy_tone_0dB,
+  _psy_tone_suppress,
+
+  _vp_tonemask_adj_8,
+  NULL,
+  _vp_tonemask_adj_8,
+
+  _psy_noiseguards_8,
+  _psy_noisebias_8,
+  _psy_noisebias_8,
+  NULL,
+  NULL,
+  _psy_noise_suppress,
+  
+  _psy_compand_8,
+  _psy_compand_8_mapping,
+  NULL,
+
+  {_noise_start_8,_noise_start_8},
+  {_noise_part_8,_noise_part_8},
+  _noise_thresh_44_2,
+
+  _psy_ath_floater_8,
+  _psy_ath_abs_8,
+  
+  _psy_lowpass_8,
+
+  _psy_global_44,
+  _global_mapping_8,
+  _psy_stereo_modes_8,
+
+  _floor_44_books,
+  _floor_44,
+  _floor_mapping_8,
+  NULL,
+
+  _mapres_template_8_stereo
+};
+
+ve_setup_data_template ve_setup_XX_uncoupled={
+  2,
+  rate_mapping_X,
+  quality_mapping_8,
+  -1,
+  0,
+  8000,
+  
+  blocksize_8,
+  blocksize_8,
+
+  _psy_tone_masteratt_8,
+  _psy_tone_0dB,
+  _psy_tone_suppress,
+
+  _vp_tonemask_adj_8,
+  NULL,
+  _vp_tonemask_adj_8,
+
+  _psy_noiseguards_8,
+  _psy_noisebias_8,
+  _psy_noisebias_8,
+  NULL,
+  NULL,
+  _psy_noise_suppress,
+  
+  _psy_compand_8,
+  _psy_compand_8_mapping,
+  NULL,
+
+  {_noise_start_8,_noise_start_8},
+  {_noise_part_8,_noise_part_8},
+  _noise_thresh_44_2,
+
+  _psy_ath_floater_8,
+  _psy_ath_abs_8,
+  
+  _psy_lowpass_8,
+
+  _psy_global_44,
+  _global_mapping_8,
+  _psy_stereo_modes_8,
+
+  _floor_44_books,
+  _floor_44,
+  _floor_mapping_8,
+  NULL,
+
+  _mapres_template_8_uncoupled
+};
+
