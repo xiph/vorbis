@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.21 2000/08/19 11:46:28 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.22 2000/08/23 06:38:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -142,7 +142,7 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
   double scale;
   vorbis_info        *vi=vd->vi;
   vorbis_info_floor0 *info=(vorbis_info_floor0 *)i;
-  vorbis_look_floor0 *look=malloc(sizeof(vorbis_look_floor0));
+  vorbis_look_floor0 *look=calloc(1,sizeof(vorbis_look_floor0));
   look->m=info->order;
   look->n=vi->blocksizes[mi->blockflag]/2;
   look->ln=info->barkmap;

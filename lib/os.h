@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.8 2000/07/07 00:48:19 xiphmont Exp $
+ last mod: $Id: os.h,v 1.9 2000/08/23 06:38:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,7 +28,7 @@
 
 #ifndef __GNUC__
 #ifdef _WIN32
-#  define alloca(x) (_alloca(x))
+#  include <malloc.h>
 #  define rint(x)   (floor((x)+0.5)) 
 #endif
 #endif
