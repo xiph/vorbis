@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.39 2001/12/16 04:15:46 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.40 2001/12/18 00:55:53 segher Exp $
 
  ********************************************************************/
 
@@ -317,6 +317,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   for(i=0;i<vi->channels;i++){
     float scale=4.f/n;
+    float scale_dB;
 
     /* the following makes things clearer to *me* anyway */
     float *pcm     =vb->pcm[i]; 
@@ -329,6 +330,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     float *logmax  =work;
     float *logmask =work+n/2;*/
 
+    scale_dB=todB(&scale);
     _analysis_output("pcm",seq+i,pcm,n,0,0);
 
     /* window the PCM data */
@@ -347,8 +349,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     logfft[0]=todB(fft);
     local_ampmax[i]=logfft[0];
     for(j=1;j<n-1;j+=2){
-      float temp=scale*FAST_HYPOT(fft[j],fft[j+1]);
-      temp=logfft[(j+1)>>1]=todB(&temp);
+      float temp=fft[j]*fft[j]+fft[j+1]*fft[j+1];
+      temp=logfft[(j+1)>>1]=scale_dB+.5f*todB(&temp);
       if(temp>local_ampmax[i])local_ampmax[i]=temp;
     }
 
