@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.37 2001/02/02 03:51:58 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.38 2001/02/14 13:12:15 msmith Exp $
 
  ********************************************************************/
 
@@ -847,6 +847,42 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
   return OV_EBADLINK;
 }
 
+int ov_raw_seek2(OggVorbis_File *vf,long pos, int offset, int link){
+  int flag=0;
+  if(!vf->seekable)return(OV_ENOSEEK); /* don't dump machine if we can't seek */
+  if(pos<0 || pos>vf->offsets[vf->links])return(OV_EINVAL);
+
+  /* clear out decoding machine state */
+  vf->pcm_offset=-1;
+  _decode_clear(vf);
+//  ogg_stream_clear(&vf->os);
+//  vf->decode_ready=0;
+
+//  vf->bittrack=0.f;
+//  vf->samptrack=0.f;
+  
+  /* seek */
+  _seek_helper(vf,pos);
+
+  /* we need to make sure the pcm_offset is set.  We use the
+     _fetch_packet helper to process one packet with readp set, then
+     call it until it returns '0' with readp not set (the last packet
+     from a page has the 'granulepos' field set, and that's how the
+     helper updates the offset */
+
+  {
+    int ret;
+    ogg_page og;
+    ret=_get_next_page(vf,&og,vf->offsets[link+1]-vf->offset);
+    if( ret < 0 )
+      return ret;
+    vf->pcm_offset = offset;
+  }
+
+  return 0;
+
+}
+
 /* Page granularity seek (faster than sample granularity because we
    don't do the last bit of decode to find a specific sample).
 
@@ -872,6 +908,85 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
      missing pages or incorrect frame number information in the
      bitstream could make our task impossible.  Account for that (it
      would be an error condition) */
+
+#if 1
+  // HB (Nicholas Vinen)
+  // I think this should be much faster.
+  {
+    ogg_int64_t target=pos-total;
+    long end=vf->offsets[link+1];
+    long begin=vf->offsets[link];
+    ogg_int64_t endtime = vf->pcmlengths[link];
+    ogg_int64_t begintime = 0;
+    long best=begin;
+
+    ogg_page og;
+    while(begin<end){
+      long bisect;
+
+      if(end-begin<CHUNKSIZE){
+	bisect=begin;
+      }else{
+	//take a (pretty decent) guess.
+	bisect=begin + (target-begintime)*(end-begin)/(endtime-begintime) - CHUNKSIZE;
+	if(bisect<=begin)
+	  bisect=begin+1;
+      }
+    
+     TryAgain:
+      _seek_helper(vf,bisect);
+      ret=_get_next_page(vf,&og,end-bisect);
+      switch(ret){
+      case OV_FALSE: case OV_EOF:
+	if(bisect==begin+1)
+          goto found_it;
+	if(bisect==0)
+	  goto seek_error;
+	bisect-=CHUNKSIZE;
+	if(bisect<=begin)
+	  bisect=begin+1;
+	goto TryAgain;
+      case OV_EREAD:
+	goto seek_error;
+      default:
+	{
+	  ogg_int64_t granulepos=ogg_page_granulepos(&og);
+	  if(granulepos<target){
+	    best=ret;  /* raw offset of packet with granulepos */ 
+	    begin=vf->offset; /* raw offset of next packet */
+	    begintime=granulepos;
+
+	    if(target-begintime<2000) {	//less than 1s before we hit the right page.
+	      bisect=begin+1;
+	      goto TryAgain;
+	    }
+
+	  }else{
+	    if(bisect<=begin+1)
+	      goto found_it;
+
+	    if(end==vf->offset){
+	      //we're pretty close - we'd be stuck in an endless loop otherwise...
+	      bisect-=CHUNKSIZE;
+	      goto TryAgain;	//sorry, I like gotos :)
+	    }
+	    end=vf->offset;
+	    endtime=granulepos;
+	  }
+	}
+      }
+    }
+
+    /* found our page. seek to it (call raw_seek). */
+   found_it:
+    if(link!=vf->current_link){
+      if((ret=ov_raw_seek(vf,best)))goto seek_error;
+    } else {
+      if((ret=ov_raw_seek2(vf,best,begintime,link)))goto seek_error;
+    }
+  }
+
+#else
   {
     ogg_int64_t target=pos-total;
     long end=vf->offsets[link+1];
@@ -913,7 +1028,8 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
     
     if((ret=ov_raw_seek(vf,best)))goto seek_error;
   }
-  
+#endif
+
   /* verify result */
   if(vf->pcm_offset>=pos || pos>ov_pcm_total(vf,-1)){
     ret=OV_EFAULT;
@@ -941,6 +1057,8 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
     float **pcm;
     long target=pos-vf->pcm_offset;
     long samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
+    if( samples == 0 )
+       break;
 
     if(samples>target)samples=target;
     vorbis_synthesis_read(&vf->vd,samples);
