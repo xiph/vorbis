@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I../include
 
 lib_LTLIBRARIES = libvorbis.la libvorbisfile.la
 
