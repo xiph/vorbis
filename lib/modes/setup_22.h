@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: 22kHz settings 
- last mod: $Id: setup_22.h,v 1.2 2002/07/11 06:41:04 xiphmont Exp $
+ last mod: $Id: setup_22.h,v 1.3 2002/07/11 10:02:29 xiphmont Exp $
 
  ********************************************************************/
 
@@ -80,7 +80,7 @@ ve_setup_data_template ve_setup_22_uncoupled={
   3,
   rate_mapping_22_uncoupled,
   quality_mapping_16,
-  2,
+  -1,
   19000,
   26000,
   
