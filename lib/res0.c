@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.32.2.1 2001/07/08 08:48:02 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.32.2.2 2001/08/02 06:14:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -366,13 +366,11 @@ static int _encodepart(oggpack_buffer *opb,float *vec, int n,
   return(bits);
 }
 
-static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
-		      float **in,int ch,
-		      int (*classify)(float *,int,vorbis_look_residue0 *,
-				      int,int),
-		      int (*encode)(oggpack_buffer *,float *,int,
-				    codebook *,vorbis_look_residue0 *)){
-  long i,j,k,l,s;
+static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
+		       float **in,int ch,
+		       int (*classify)(float *,int,vorbis_look_residue0 *,
+				       int,int)){
+  long i,j,s;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
 
@@ -386,25 +384,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(long *));
 
-#ifdef TRAIN_RES
-  FILE *of;
-  char buffer[80];
-  int m;
-  
-  for(i=0;i<ch;i++){
-    sprintf(buffer,"residue_%d.vqd",vb->mode);
-    of=fopen(buffer,"a");
-    for(m=0;m<info->end;m++)
-      fprintf(of,"%.2f, ",in[i][m]);
-    fprintf(of,"\n");
-    fclose(of);
-  }
- 
-#endif      
-
-  partvals=partwords*partitions_per_word;
-
-  /* we find the patition type for each partition of each
+  /* we find the partition type for each partition of each
      channel.  We'll go back and do the interleaved encoding in a
      bit.  For now, clarity */
  
@@ -413,12 +393,13 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     memset(partword[i],0,n/samples_per_partition*sizeof(long));
   }
 
-  for(i=info->begin,l=0;i<info->end;i+=samples_per_partition,l++){
+  for(i=0;i<partvals;i++){
     for(j=0;j<ch;j++)
       /* do the partition decision based on the 'entropy'
          int the block */
-      partword[j][l]=
-	classify(in[j]+i,samples_per_partition,look,possible_partitions,l);
+      partword[j][i]=
+	classify(in[j]+i*samples_per_partition+info->begin,
+		 samples_per_partition,look,possible_partitions,i);
   
   }
 
@@ -430,55 +411,147 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
     for(i=0;i<ch;i++){
       sprintf(buffer,"resaux_%d.vqd",vb->mode);
       of=fopen(buffer,"a");
-      for(j=info->begin,l=0;j<info->end;j+=samples_per_partition,l++)
-	fprintf(of,"%d, ",partword[i][l]);
+      for(j=0;j<partvals;j++)
+	fprintf(of,"%d, ",partword[i][j]);
       fprintf(of,"\n");
       fclose(of);
     }
   }
 #endif
-      
+  look->frames++;
+
+  return(partword);
+}
+
+static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,
+		       float **in,int ch,
+		       int (*classify)(float *,int,vorbis_look_residue0 *,
+				       int,int)){
+  long i,j,k,l,s;
+  vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
+  vorbis_info_residue0 *info=look->info;
+
+  /* move all this setup out later */
+  int samples_per_partition=info->grouping;
+  int possible_partitions=info->partitions;
+  int partitions_per_word=look->phrasebook->dim;
+  int n=info->end-info->begin;
+
+  int partvals=n/samples_per_partition;
+  int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
+  long **partword=_vorbis_block_alloc(vb,sizeof(long *));
+  float *work=alloca(sizeof(float)*samples_per_partition);
+  
+  partword[0]=_vorbis_block_alloc(vb,n*ch/samples_per_partition*sizeof(long));
+  memset(partword[0],0,n*ch/samples_per_partition*sizeof(long));
+
+  for(i=0,j=0,k=0,l=info->begin;i<partvals;i++){
+    for(k=0;k<samples_per_partition;k++){
+      work[k]=vb->pcm[j][l];
+      j++;
+      if(j>=ch){
+	j=0;
+	l++;
+      }
+    }
+    partword[0][i]=
+      classify(work,samples_per_partition,look,possible_partitions,i);
+  }  
+
+#ifdef TRAIN_RES
+  {
+    FILE *of;
+    char buffer[80];
+  
+    sprintf(buffer,"resaux_%d.vqd",vb->mode);
+    of=fopen(buffer,"a");
+    for(i=0;i<partvals;i++)
+      fprintf(of,"%d, ",partword[0][i]);
+    fprintf(of,"\n");
+    fclose(of);
+  }
+#endif
+  look->frames++;
+
+  return(partword);
+}
+
+static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
+		      float **in,int ch,
+		      int pass,long **partword,
+		      int (*encode)(oggpack_buffer *,float *,int,
+				    codebook *,vorbis_look_residue0 *)){
+  long i,j,k,s;
+  vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
+  vorbis_info_residue0 *info=look->info;
+
+  /* move all this setup out later */
+  int samples_per_partition=info->grouping;
+  int possible_partitions=info->partitions;
+  int partitions_per_word=look->phrasebook->dim;
+  int n=info->end-info->begin;
+
+  int partvals=n/samples_per_partition;
+  int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
+
+#ifdef TRAIN_RES
+  FILE *of;
+  char buffer[80];
+  int m;
+  
+  for(i=0;i<ch;i++){
+    sprintf(buffer,"residue_%d#%d.vqd",vb->mode,pass);
+    of=fopen(buffer,"a");
+    for(m=0;m<info->end;m++)
+      fprintf(of,"%.2f, ",in[i][m]);
+    fprintf(of,"\n");
+    fclose(of);
+  }
+#endif      
+  
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
      residual words for that partition word.  Then write the next
      partition channel words... */
 
-  look->frames++;
-  for(s=0;s<look->stages;s++){
-    for(i=info->begin,l=0;i<info->end;){
+  for(s=(pass==0?0:info->passlimit[pass-1]);s<info->passlimit[pass];s++){
+    for(i=0;i<partvals;){
       
       /* first we encode a partition codeword for each channel */
       if(s==0){
 	for(j=0;j<ch;j++){
-	  long val=partword[j][l];
+	  long val=partword[j][i];
 	  long ret;
-	  for(k=1;k<partitions_per_word;k++)
-	    val= val*possible_partitions+partword[j][l+k];
+	  for(k=1;k<partitions_per_word;k++){
+	    val*=possible_partitions;
+	    if(i+k<partvals)
+	      val+=partword[j][i+k];
+	  
 	  ret=vorbis_book_encode(look->phrasebook,val,&vb->opb);
 	  look->phrasebits+=ret;
 	}
       }
       
       /* now we encode interleaved residual values for the partitions */
-      for(k=0;k<partitions_per_word;k++,l++,i+=samples_per_partition){
+      for(k=0;k<partitions_per_word && i<partvals;k++,i++){
 	
 	for(j=0;j<ch;j++){
-	  /*if(s==0)look->resvals[partword[j][l]]++;*/
-	  if(info->secondstages[partword[j][l]]&(1<<s)){
-	    codebook *statebook=look->partbooks[partword[j][l]][s];
+	  long offset=i*partvals+info->begin;
+	  /*if(s==0)look->resvals[partword[j][i]]++;*/
+	  if(info->secondstages[partword[j][i]]&(1<<s)){
+	    codebook *statebook=look->partbooks[partword[j][i]][s];
 	    if(statebook){
-	      int ret=encode(&vb->opb,in[j]+i,samples_per_partition,
+	      int ret=encode(&vb->opb,in[j]+offset,samples_per_partition,
 			     statebook,look);
-	      /*look->resbits[partword[j][l]][s]+=ret;*/
+	      /*look->resbits[partword[j][i]][s]+=ret;*/
 	      look->postbits+=ret;
-
+	      
 	    }
 	  }
 	}
       }
     }
   }
-  
   return(0);
 }
 
@@ -496,18 +569,19 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
   int samples_per_partition=info->grouping;
   int partitions_per_word=look->phrasebook->dim;
   int n=info->end-info->begin;
-
+  
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   int ***partword=alloca(ch*sizeof(int **));
-  partvals=partwords*partitions_per_word;
 
   for(j=0;j<ch;j++)
     partword[j]=_vorbis_block_alloc(vb,partwords*sizeof(int *));
 
   for(s=0;s<look->stages;s++){
-    for(i=info->begin,l=0;i<info->end;l++){
 
+    /* each loop decodes on partition codeword containing 
+       partitions_pre_word partitions */
+    for(i=0,l=0;i<partvals;l++){
       if(s==0){
 	/* fetch the partition word for each channel */
 	for(j=0;j<ch;j++){
@@ -519,12 +593,13 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
       }
       
       /* now we decode residual values for the partitions */
-      for(k=0;k<partitions_per_word;k++,i+=samples_per_partition)
+      for(k=0;k<partitions_per_word && i<partvals;k++,i++)
 	for(j=0;j<ch;j++){
+	  long offset=info->begin+i*samples_per_partition;
 	  if(info->secondstages[partword[j][l][k]]&(1<<s)){
 	    codebook *stagebook=look->partbooks[partword[j][l][k]][s];
 	    if(stagebook){
-	      if(decodepart(stagebook,in[j]+i,&vb->opb,
+	      if(decodepart(stagebook,in[j]+offset,&vb->opb,
 			    samples_per_partition)==-1)goto eopbreak;
 	    }
 	  }
@@ -539,16 +614,42 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
 
 /* residue 0 and 1 are just slight variants of one another. 0 is
    interleaved, 1 is not */
-int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
-	    float **in,int *nonzero,int ch){
+long **res0_class(vorbis_block *vb,vorbis_look_residue *vl,
+		  float **in,int *nonzero,int ch){
   /* we encode only the nonzero parts of a bundle */
   int i,used=0;
   for(i=0;i<ch;i++)
     if(nonzero[i])
       in[used++]=in[i];
   if(used)
-    return(_01forward(vb,vl,in,used,_interleaved_testhack,_interleaved_encodepart));
+    return(_01class(vb,vl,in,used,_interleaved_testhack));
   else
+    return(0);
+}
+
+int res0_forward(vorbis_block *vb,vorbis_look_residue *vl,
+		 float **in,float **out,int *nonzero,int ch,
+		 int pass, long **partword){
+  /* we encode only the nonzero parts of a bundle */
+  int i,used=0,n=vb->pcmend/2;
+  for(i=0;i<ch;i++)
+    if(nonzero[i]){
+      for(j=0;j<n;j++)
+	out[i][j]+=in[i][j];
+      in[used++]=in[i];
+    }
+  if(used){
+    int ret=_01forward(vb,vl,in,used,pass,partword,
+		      _interleaved_encodepart);
+    used=0;
+    for(i=0;i<ch;i++)
+      if(nonzero[i]){
+	for(j=0;j<n;j++)
+	  out[i][j]-=in[used][j];
+	used++;
+      }
+    return(ret);
+  }else
     return(0);
 }
 
@@ -565,13 +666,38 @@ int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 int res1_forward(vorbis_block *vb,vorbis_look_residue *vl,
-		 float **in,int *nonzero,int ch){
+		 float **in,float **out,int *nonzero,int ch,
+		 int pass, long **partword){
+  int i,used=0,n=vb->pcmend/2;
+  for(i=0;i<ch;i++)
+    if(nonzero[i]){
+      for(j=0;j<n;j++)
+	out[i][j]+=in[i][j];
+      in[used++]=in[i];
+    }
+
+  if(used){
+    int ret=_01forward(vb,vl,work,used,pass,partword,_encodepart);
+    used=0;
+    for(i=0;i<ch;i++)
+      if(nonzero[i]){
+	for(j=0;j<n;j++)
+	  out[i][j]-=in[used][j];
+	used++;
+      }
+    return(ret);
+  }else
+    return(0);
+}
+
+long **res1_class(vorbis_block *vb,vorbis_look_residue *vl,
+		  float **in,int *nonzero,int ch{
   int i,used=0;
   for(i=0;i<ch;i++)
     if(nonzero[i])
       in[used++]=in[i];
   if(used)
-    return(_01forward(vb,vl,in,used,_testhack,_encodepart));
+    return(_01class(vb,vl,in,used,_testhack));
   else
     return(0);
 }
@@ -588,25 +714,49 @@ int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
     return(0);
 }
 
+long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
+		  float **in,int *nonzero,int ch{
+  int i,used=0;
+  for(i=0;i<ch;i++)
+    if(nonzero[i])
+      in[used++]=in[i];
+  if(used)
+    return(_2class(vb,vl,in,used,_testhack));
+  else
+    return(0);
+}
+
 /* res2 is slightly more different; all the channels are interleaved
    into a single vector and encoded. */
+
 int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
-	    float **in,int *nonzero,int ch){
+		 float **in,float **out,int *nonzero,int ch,
+		 int pass,long **partword){
   long i,j,k,n=vb->pcmend/2,used=0;
 
   /* don't duplicate the code; use a working vector hack for now and
      reshape ourselves into a single channel res1 */
+  /* ugly; reallocs for each coupling pass :-( */
   float *work=_vorbis_block_alloc(vb,ch*n*sizeof(float));
   for(i=0;i<ch;i++){
-    float *pcm=vb->pcm[i];
+    float *pcm=in[i];
     if(nonzero[i])used++;
     for(j=0,k=i;j<n;j++,k+=ch)
       work[k]=pcm[j];
   }
   
-  if(used)
-    return(_01forward(vb,vl,&work,1,_testhack,_encodepart));
-  else
+  if(used){
+    int ret=_01forward(vb,vl,&work,1,pass,partword,_encodepart);
+    /* update the sofar vector */
+    for(i=0;i<ch;i++){
+      float *pcm=in[i];
+      float *sofar=out[i];
+      for(j=0,k=i;j<n;j++,k+=ch)
+	sofar[j]+=pcm[j]-work[k];
+    }
+
+    return(ret);
+  }else
     return(0);
 }
 
@@ -625,13 +775,12 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   int **partword=_vorbis_block_alloc(vb,partwords*sizeof(int *));
-  partvals=partwords*partitions_per_word;
 
   for(i=0;i<ch;i++)if(nonzero[i])break;
   if(i==ch)return(0); /* no nonzero vectors */
 
   for(s=0;s<look->stages;s++){
-    for(i=info->begin,l=0;i<info->end;l++){
+    for(i=0,l=0;i<partvals;l++){
 
       if(s==0){
 	/* fetch the partition word */
@@ -642,12 +791,13 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
       }
 
       /* now we decode residual values for the partitions */
-      for(k=0;k<partitions_per_word;k++,i+=samples_per_partition)
+      for(k=0;k<partitions_per_word && i<partvals;k++,i++)
 	if(info->secondstages[partword[l][k]]&(1<<s)){
 	  codebook *stagebook=look->partbooks[partword[l][k]][s];
-
+	  
 	  if(stagebook){
-	    if(vorbis_book_decodevv_add(stagebook,in,i,ch,
+	    if(vorbis_book_decodevv_add(stagebook,in,
+					i*samples_per_partition+info->begin,ch,
 					&vb->opb,samples_per_partition)==-1)
 	      goto eopbreak;
 	  }
@@ -668,6 +818,7 @@ vorbis_func_residue residue0_exportbundle={
   &res0_copy_info,
   &res0_free_info,
   &res0_free_look,
+  &res0_class,
   &res0_forward,
   &res0_inverse
 };
@@ -679,6 +830,7 @@ vorbis_func_residue residue1_exportbundle={
   &res0_copy_info,
   &res0_free_info,
   &res0_free_look,
+  &res1_class,
   &res1_forward,
   &res1_inverse
 };
@@ -690,6 +842,7 @@ vorbis_func_residue residue2_exportbundle={
   &res0_copy_info,
   &res0_free_info,
   &res0_free_look,
+  &res2_class,
   &res2_forward,
   &res2_inverse
 };

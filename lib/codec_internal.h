@@ -10,7 +10,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.8.6.1 2001/07/08 08:48:01 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.8.6.2 2001/08/02 06:14:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -19,8 +19,6 @@
 
 #include "envelope.h"
 #include "codebook.h"
-#include "psy.h"
-#include "bitbuffer.h"
 
 typedef struct vorbis_block_internal{
   float  **pcmdelay;  /* this is a pointer into local storage */ 
@@ -32,6 +30,21 @@ typedef void vorbis_look_mapping;
 typedef void vorbis_look_floor;
 typedef void vorbis_look_residue;
 typedef void vorbis_look_transform;
+
+/* mode ************************************************************/
+typedef struct {
+  int blockflag;
+  int windowtype;
+  int transformtype;
+  int mapping;
+} vorbis_info_mode;
+
+typedef void vorbis_info_time;
+typedef void vorbis_info_floor;
+typedef void vorbis_info_residue;
+typedef void vorbis_info_mapping;
+
+#include "psy.h"
 
 typedef struct backend_lookup_state {
   /* local lookup storage */
@@ -54,19 +67,6 @@ typedef struct backend_lookup_state {
   unsigned char *header2;
   
 } backend_lookup_state;
-
-/* mode ************************************************************/
-typedef struct {
-  int blockflag;
-  int windowtype;
-  int transformtype;
-  int mapping;
-} vorbis_info_mode;
-
-typedef void vorbis_info_time;
-typedef void vorbis_info_floor;
-typedef void vorbis_info_residue;
-typedef void vorbis_info_mapping;
 
 /* vorbis_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,

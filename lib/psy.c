@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.48.2.2 2001/07/11 00:41:51 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.48.2.3 2001/08/02 06:14:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -213,7 +213,7 @@ static void setup_curve(float **c,
 
 void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 		  vorbis_info_psy_global *gi,int n,long rate){
-  long i,j,lo=0,hi=0;
+  long i,j,k,lo=0,hi=0;
   long maxoc;
   memset(p,0,sizeof(vorbis_look_psy));
 
@@ -311,6 +311,25 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   memcpy(p->tonecurves[16][6]+2,tone_8000_60dB_SL,sizeof(float)*EHMER_MAX);
   memcpy(p->tonecurves[16][8]+2,tone_8000_80dB_SL,sizeof(float)*EHMER_MAX);
   memcpy(p->tonecurves[16][10]+2,tone_8000_100dB_SL,sizeof(float)*EHMER_MAX);
+
+  /* value limit the tonal masking curves; the peakatt not only
+     optionally specifies maximum dynamic depth, but also [always]
+     limits the masking curves to a minimum depth */
+  for(i=0;i<P_BANDS;i+=2)
+    for(j=4;j<P_LEVELS;j+=2){
+      float neutraldB=-vi->toneatt[i][j];
+      for(k=2;k<EHMER_MAX+2;k++)
+	if(p->tonecurves[i][j][k]-neutraldB>vi->peakatt[i][j])
+	  p->tonecurves[i][j][k]=neutraldB+vi->peakatt[i][j];
+    }
+
+  if(vi->peakattp) /* we limit depth only optionally */
+    for(j=4;j<P_LEVELS;j+=2){
+      float neutraldB=-vi->toneatt[i][j];
+      if(p->tonecurves[i][j][EHMER_OFFSET]-neutraldB<vi->peakatt[i][j])
+	p->tonecurves[i][j][EHMER_OFFSET]=neutraldB+vi->peakatt[i][j];
+    }
+
 
   /* interpolate curves between */
   for(i=1;i<P_BANDS;i+=2)
@@ -428,8 +447,7 @@ static void seed_loop(vorbis_look_psy *p,
 		      const float **att,
 		      const float *f, 
 		      const float *flr,
-		      float *minseed,
-		      float *maxseed,
+		      float *seed,
 		      float specmax){
   vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
@@ -450,15 +468,18 @@ static void seed_loop(vorbis_look_psy *p,
 	if(oc>=P_BANDS)oc=P_BANDS-1;
 	if(oc<0)oc=0;
 	if(vi->tonemaskp)
-	  seed_curve(minseed,
+	  seed_curve(seed,
 		     curves[oc],
-		     max,
+		     max+vi->tone_masteratt,
 		     p->octave[i]-p->firstoc,
 		     p->total_octave_lines,
 		     p->eighth_octave_lines,
 		     dBoffset);
-	if(vi->peakattp)
-	  seed_peak(maxseed,
+
+	if(vi->peakattp && !vi->tonemaskp) /* if tonemaskp is set,
+					      it's built into the
+					      masking curve */
+	  seed_peak(seed,
 		    att[oc],
 		    max,
 		    p->octave[i]-p->firstoc,
@@ -541,85 +562,39 @@ static void seed_chase(float *seeds, int linesper, long n){
 
 }
 
-static int seq=0;
-static void _vp_compute_mask_decay(vorbis_look_psy *p,
-				   vorbis_look_psy_global *g,
-				   float *seed,int channel){
-  if(g->gi->decaydBpms<0){
-    int i;
-
-    /* first decay the entire cached buffer */
-    float *decay=g->decay[channel];
-    float ms=p->n*1000.f/p->rate;
-    float decaydB=g->gi->decaydBpms*ms;
-
-    for(i=0;i<g->decaylines;i++){
-      decay[i]+=decaydB;
-      if(decay[i]<-9999.f)decay[i]=-9999.f;
-    }
-    _analysis_output("decay",seq,decay+200,g->decaylines-200,0,0);
-    _analysis_output("seed",seq++,seed-p->firstoc+200,p->total_octave_lines+p->firstoc-200,0,0);
-
-    /* now, apply decayed buffer to the valid range of the seeds,
-       copy back larger seeds into cache */
-    {
-      float end=p->total_octave_lines+p->firstoc-1;
-      int begin=-p->firstoc;
-
-      if(end>g->decaylines)end=g->decaylines;
-      if(begin<260)begin=260;
-      for(i=begin;i<end;i++){
-	if(decay[i]>seed[i-p->firstoc])
-	  seed[i-p->firstoc]=decay[i];
-	else
-	  decay[i]=seed[i-p->firstoc];
-      }
-    }
-  }
-}
-
-
 /* bleaugh, this is more complicated than it needs to be */
 static void max_seeds(vorbis_look_psy *p,
 		      vorbis_look_psy_global *g,
 		      int channel,
-		      float *minseed,float *maxseed,
+		      float *seed,
 		      float *flr){
   long   n=p->total_octave_lines;
   int    linesper=p->eighth_octave_lines;
   long   linpos=0;
   long   pos;
 
-  seed_chase(minseed,linesper,n); /* for masking */
-  _vp_compute_mask_decay(p,g,minseed,channel);
-
-  seed_chase(maxseed,linesper,n); /* for peak att */
+  seed_chase(seed,linesper,n); /* for masking */
  
   pos=p->octave[0]-p->firstoc-(linesper>>1);
   while(linpos+1<p->n){
-    float min=minseed[pos];
-    float max=maxseed[pos];
+    float min=seed[pos];
     long end=((p->octave[linpos]+p->octave[linpos+1])>>1)-p->firstoc;
     while(pos+1<=end){
       pos++;
-      if((minseed[pos]>NEGINF && minseed[pos]<min) || min==NEGINF)
-	min=minseed[pos];
-      if(maxseed[pos]>max)max=maxseed[pos];
+      if((seed[pos]>NEGINF && seed[pos]<min) || min==NEGINF)
+	min=seed[pos];
     }
-    if(max<min)max=min;
     
     /* seed scale is log.  Floor is linear.  Map back to it */
     end=pos+p->firstoc;
     for(;linpos<p->n && p->octave[linpos]<=end;linpos++)
-      if(flr[linpos]<max)flr[linpos]=max;
+      if(flr[linpos]<min)flr[linpos]=min;
   }
   
   {
-    float min=minseed[p->total_octave_lines-1];
-    float max=maxseed[p->total_octave_lines-1];
-    if(max<min)max=min;
+    float min=seed[p->total_octave_lines-1];
     for(;linpos<p->n;linpos++)
-      if(flr[linpos]<max)flr[linpos]=max;
+      if(flr[linpos]<min)flr[linpos]=min;
   }
   
 }
@@ -706,17 +681,9 @@ static void bark_noise_median(int n,const long *b,const float *f,
     /* move the median if needed */
     {
       int bark_th = (thresh[i]*(hi-lo)+512)/1024;
-      
+
       if(fixed>0){
 	int fixed_th = (thresh[i]*(fixedc)+512)/1024;
-	
-	while(bark_th>=barkcountbelow && 
-	      fixed_th>=fixedcountbelow /* && median<LASTBIN by rep invariant */
-	      ){
-	  median++;
-	  barkcountbelow+=barkradix[median];
-	  fixedcountbelow+=fixedradix[median];
-	}
 	
 	while(bark_th<barkcountbelow ||
 	      fixed_th<fixedcountbelow /* && median>=0 by rep invariant */
@@ -725,16 +692,25 @@ static void bark_noise_median(int n,const long *b,const float *f,
 	  fixedcountbelow-=fixedradix[median];
 	  median--;
 	}
+
+	while(bark_th>=barkcountbelow && 
+	      fixed_th>=fixedcountbelow /* && median<LASTBIN by rep invariant */
+	      ){
+	  median++;
+	  barkcountbelow+=barkradix[median];
+	  fixedcountbelow+=fixedradix[median];
+	}
+	
       }else{
+	while(bark_th<barkcountbelow){
+	  barkcountbelow-=barkradix[median];
+	  median--;
+	}
 	while(bark_th>=barkcountbelow){
 	  median++;
 	  barkcountbelow+=barkradix[median];
 	}
 	
-	while(bark_th<barkcountbelow){
-	  barkcountbelow-=barkradix[median];
-	  median--;
-	}
       }
     }
 
@@ -743,26 +719,38 @@ static void bark_noise_median(int n,const long *b,const float *f,
 
 }
 
-float _vp_compute_mask(vorbis_look_psy *p,
+
+void _vp_remove_floor(vorbis_look_psy *p,
+		      vorbis_look_psy_global *g,
+		      float *logmdct, 
+		      float *mdct,
+		      float *codedflr,
+		      float *residue,
+		      float local_specmax){ 
+  int i,n=p->n;
+  
+  for(i=0;i<n;i++)
+    if(mdct[i]!=0.f)
+      residue[i]=mdct[i]/codedflr[i];
+    else
+      residue[i]=0.f;
+}
+  
+
+void _vp_compute_mask(vorbis_look_psy *p,
 		       vorbis_look_psy_global *g,
 		       int channel,
 		       float *fft, 
 		       float *mdct, 
 		       float *mask, 
-		       float specmax,
+		       float global_specmax,
+		       float local_specmax,
 		       int lastsize){
   int i,n=p->n;
-  float localmax=NEGINF;
   static int seq=0;
 
-  float *minseed=alloca(sizeof(float)*p->total_octave_lines);
-  float *maxseed=alloca(sizeof(float)*p->total_octave_lines);
-  for(i=0;i<p->total_octave_lines;i++)minseed[i]=maxseed[i]=NEGINF;
-
-  /* Find the highest peak so we know the limits */
-  for(i=0;i<n;i++)
-    if(fft[i]>localmax)localmax=fft[i];
-  if(specmax<localmax)specmax=localmax;
+  float *seed=alloca(sizeof(float)*p->total_octave_lines);
+  for(i=0;i<p->total_octave_lines;i++)seed[i]=NEGINF;
 
   /* noise masking */
   if(p->vi->noisemaskp){
@@ -774,11 +762,11 @@ float _vp_compute_mask(vorbis_look_psy *p,
 		      p->noisemedian,
 		      p->noiseoffset,
 		      p->vi->noisewindowfixed);
-    /* suppress any noise curve > specmax+p->vi->noisemaxsupp */
+    /* suppress any noise curve > global_specmax+p->vi->noisemaxsupp */
     for(i=0;i<n;i++)
-      if(mask[i]>specmax+p->vi->noisemaxsupp)
-	mask[i]=specmax+p->vi->noisemaxsupp;
-    _analysis_output("noise",seq,mask,n,0,0);
+      if(mask[i]>global_specmax+p->vi->noisemaxsupp)
+	mask[i]=global_specmax+p->vi->noisemaxsupp;
+    _analysis_output("noise",seq,mask,n,1,0);
   }else{
     for(i=0;i<n;i++)mask[i]=NEGINF;
   }
@@ -786,7 +774,7 @@ float _vp_compute_mask(vorbis_look_psy *p,
   /* set the ATH (floating below localmax, not global max by a
      specified att) */
   if(p->vi->ath){
-    float att=localmax+p->vi->ath_adjatt;
+    float att=local_specmax+p->vi->ath_adjatt;
     if(att<p->vi->ath_maxatt)att=p->vi->ath_maxatt;
 
     for(i=0;i<n;i++){
@@ -797,13 +785,9 @@ float _vp_compute_mask(vorbis_look_psy *p,
 
 
   /* tone/peak masking */
-
-  seed_loop(p,
-	    (const float ***)p->tonecurves,
-	    (const float **)p->peakatt,fft,mask,minseed,maxseed,specmax);
-
-  bound_loop(p,mdct,maxseed,mask,p->vi->bound_att_dB);
-  max_seeds(p,g,channel,minseed,maxseed,mask);
+  seed_loop(p,(const float ***)p->tonecurves,
+	    (const float **)p->peakatt,fft,mask,seed,global_specmax);
+  max_seeds(p,g,channel,seed,mask);
 
   /* doing this here is clean, but we need to find a faster way to do
      it than to just tack it on */
@@ -812,10 +796,12 @@ float _vp_compute_mask(vorbis_look_psy *p,
   if(i==n)
     for(i=0;i<n;i++)mask[i]=NEGINF;
   else
-    for(i=0;i<n;i++)fft[i]=max(mdct[i],fft[i]);
+    for(i=0;i<n;i++){
+      mask[i]+=p->vi->floor_masteratt;
+      fft[i]=max(mdct[i],fft[i]);
+    }
   seq++;
 
-  return(specmax);
 }
 
 float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
@@ -831,5 +817,174 @@ float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
   return(amp);
 }
 
+static void couple_lossless(float A, float B, float *mag, float *ang,float t){
+  float fmag;
+  
+  if(fabs(A)>fabs(B)){
+    fmag=fabs(*mag=A); *ang=(A>0.f?A-B:B-A);
+  }else{
+    fmag=fabs(*mag=B); *ang=(B>0.f?A-B:B-A);
+  }
 
+  if(*ang>fmag*1.9999f)*ang=-fmag*2.f;
 
+}
+
+static void couple_8phase(float A, float B, float *mag, float *ang,float t){
+  float fmag;
+
+  if(fabs(A)>fabs(B)){
+    fmag=fabs(*mag=A); *ang=(A>0?A-B:B-A);
+  }else{
+    fmag=fabs(*mag=B); *ang=(B>0?A-B:B-A);
+  }
+
+  if(fmag>0.f)
+    switch((int)(rint(*ang/fmag))){
+    case 0:
+      if(fmag>t){
+	if(*ang>fmag-t)*ang=fmag-t;
+	if(*ang<t-fmag)*ang=t-fmag;
+      }else{
+	*ang=0;
+      }
+      break;
+    case 2:case -2:
+      *ang=-2*fmag;
+      break;
+    case 1:
+      *ang=fmag;
+      break;
+    case -1:
+      *ang=-fmag;
+      break;
+    }
+}
+
+static void couple_6phase(float A, float B, float *mag, float *ang,float t){
+  float fmag;
+  
+  if(fabs(A)>fabs(B)){
+    fmag=fabs(*mag=A); *ang=(A>0?A-B:B-A);
+  }else{
+    fmag=fabs(*mag=B); *ang=(B>0?A-B:B-A);
+  }
+
+  if(fmag>0.f)
+    switch((int)(rint(*ang/fmag))){
+    case -2:case 2:
+      *ang=0;
+      *mag=0;
+      break;
+    case 0:
+      if(fmag>t){
+	if(*ang>fmag-t)*ang=fmag-t;
+	if(*ang<t-fmag)*ang=t-fmag;
+      }else{
+	*ang=0;
+      }
+      break;
+    case 1:
+      *ang=fmag;
+      break;
+    case -1:
+      *ang=-fmag;
+      break;
+    }
+}
+
+static void couple_point(float A, float B, float *mag, float *ang,float t){
+  float fmag;
+  
+  if(fabs(A)>fabs(B)){
+    fmag=fabs(*mag=A); *ang=(A>0?A-B:B-A);
+  }else{
+    fmag=fabs(*mag=B); *ang=(B>0?A-B:B-A);
+  }
+
+  if(fmag>0.f)
+    switch((int)(rint(*ang/fmag))){
+    case 0:
+      if(fmag>t){
+	if(*ang>fmag-t)*ang=fmag-t;
+	if(*ang<t-fmag)*ang=t-fmag;
+      }else{
+	*ang=0;
+      }
+      break;
+
+    case 1:
+    case -1:
+      *ang=0;
+      break;
+
+    case -2:
+    case 2:
+      *mag=0;
+      *ang=0;
+      break;
+    }
+}
+
+void _vp_quantize_couple(vorbis_look_psy *p,
+			 vorbis_info_mapping0 *vi,
+			 float **pcm,
+			 float **sofar,
+			 float **quantized,
+			 int   *nonzero
+			 int   passno){
+
+  int i,j,k,l,n=p->n;
+  vorbis_info_psy *info=p->vi;
+  float granule=info->couple_pass[passno]->granule;
+  float igranule=info->couple_pass[passno]->igranule;
+
+  /* perform any requested channel coupling */
+  for(i=0;i<vi->coupling_steps;i++){
+    
+    /* make sure coupling a zero and a nonzero channel results in two
+       nonzero channels. */
+    if(nonzero[vi->coupling_mag[i]] ||
+       nonzero[vi->coupling_ang[i]]){
+      
+      float *pcmM=pcm[vi->coupling_mag[i]];
+      float *pcmA=pcm[vi->coupling_ang[i]];
+      float *sofarM=sofar[vi->coupling_mag[i]];
+      float *sofarA=sofar[vi->coupling_ang[i]];
+      float *qM=quantized[vi->coupling_mag[i]];
+      float *qA=quantized[vi->coupling_ang[i]];
+
+      nonzero[vi->coupling_mag[i]]=1; 
+      nonzero[vi->coupling_ang[i]]=1; 
+
+      for(j=0,k=0;j<n;k++){
+	vp_couple *part=info->couple_pass[passno]->couple+k;
+
+	for(;j<info->partition*part->partition_limit && j<p->n;j++){
+	  /* partition by partition; k is our by-location partition
+	     class counter */
+	  float ang,mag=max(fabs(pcmM[j]),fabs(pcmA[j]));
+	  float M=rint(pcmM[j]*igranule)*granule;
+	  float A=rint(pcmA[j]*igranule)*granule;
+	  
+	  if(mag<part->couple_point.amppost){
+	    couple_point(M,A,&mag,&ang,part->couple_point.threshhold);
+	  }else{
+	    if(mag<part->couple_sixphase.amppost){
+	      couple_6phase(M,A,&mag,&ang,part->couple_point.threshhold);
+	    }else{ 
+	      if(mag<part->couple_eightphase.amppost){
+		couple_8phase(M,A,&mag,&ang,part->couple_point.threshhold);
+	      }else{
+		couple_lossless(M,A,&mag,&ang,part->couple_point.threshhold);
+	      }
+	    }
+	  }
+	  
+	  qM[j]=mag-sofarM[j];
+	  qA[j]=ang-sofarA[j];
+	}
+      }
+    }
+  }
+}

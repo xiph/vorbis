@@ -11,13 +11,14 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.22.2.1 2001/07/08 08:48:02 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.22.2.2 2001/08/02 06:14:44 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdio.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
+#include "codec_internal.h"
 #include "registry.h"
 #include "misc.h"
 #include "os.h"

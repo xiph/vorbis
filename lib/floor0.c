@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.43.2.1 2001/07/08 08:48:01 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.43.2.2 2001/08/02 06:14:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -258,9 +258,9 @@ float _curve_to_lpc(float *curve,float *lpc,
 }
 
 static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
-			  const float *mdct, const float *logmdct,   /* in */
+			  float *mdct, const float *logmdct,   /* in */
 			  const float *logmask, const float *logmax, /* in */
-			  float *residue, float *codedflr){          /* out */
+			  float *codedflr){          /* out */
   long j;
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)in;
   vorbis_info_floor0 *info=look->vi;
@@ -397,10 +397,6 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
     _analysis_output("barklsp",seq-1,codedflr,look->n,1,1);
     _analysis_output("lsp3",seq-1,codedflr,look->n,0,1);
 
-    /* generate residue output */
-    for(j=0;j<look->n;j++)
-      residue[j]=mdct[j]/codedflr[j];
-    
     return(val);
   }
 
@@ -409,7 +405,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
 #endif
 
   memset(codedflr,0,sizeof(float)*look->n);
-  memset(residue,0,sizeof(float)*look->n);
+  memset(mdct,0,sizeof(float)*look->n);
   return(val);
 }
 
