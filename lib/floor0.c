@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.11.2.1.2.5 2000/04/21 16:35:38 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.11.2.1.2.6 2000/05/08 08:25:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,6 +27,7 @@
 #include "bookinternal.h"
 #include "sharedbook.h"
 #include "scales.h"
+#include "misc.h"
 
 typedef struct {
   long n;
@@ -227,6 +228,7 @@ void _lpc_to_curve(double *curve,double *lpc,double amp,
 
 }
 
+static long seq=0;
 static int forward(vorbis_block *vb,vorbis_look_floor *i,
 		    double *in,double *out){
   long j,k;
@@ -266,7 +268,9 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
 
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
-
+#ifdef ANALYSIS
+    if(vb->mode==0)_analysis_output("lsp",seq++,out,look->m,0,0);
+#endif
 #ifdef TRAIN
     {
       int j;

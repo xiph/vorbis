@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.12.4.7 2000/05/06 05:41:14 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.12.4.8 2000/05/08 08:25:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -377,6 +377,8 @@ void spinnit(char *s,int n){
 void build_tree_from_lengths(int vals, long *hist, long *lengths){
   int i,j;
   long *membership=malloc(vals*sizeof(long));
+  long *histsave=alloca(vals*sizeof(long));
+  memcpy(histsave,hist,vals*sizeof(long));
 
   for(i=0;i<vals;i++)membership[i]=i;
 
@@ -419,6 +421,20 @@ void build_tree_from_lengths(int vals, long *hist, long *lengths){
       fprintf(stderr,"huffman fault; failed to build single tree\n");
       exit(1);
     }
+
+  /* for sanity check purposes: how many bits would it have taken to
+     encode the training set? */
+  {
+    long bitsum=0;
+    long samples=0;
+    for(i=0;i<vals;i++){
+      bitsum+=(histsave[i]-1)*lengths[i];
+      samples+=histsave[i]-1;
+    }
+    fprintf(stderr,"\rTotal samples in training set: %ld      \n",samples);
+    fprintf(stderr,"\rTotal bits used to represent training set: %ld\n",
+	    bitsum);
+  }
 
   free(membership);
 }

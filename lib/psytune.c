@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.2.2.8 2000/05/04 06:13:28 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2.2.9 2000/05/08 08:25:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -44,7 +44,7 @@ static vorbis_info_psy _psy_set0={
   {-35.,-40.,-60.,-80.,-95.},
   {-35.,-40.,-60.,-80.,-95.},
   {-35.,-40.,-60.,-80.,-95.},
-  {-65.,-60.,-60.,-80.,-95.},  /* remember that el 1 is a 60 dB curve, not 40 */
+  {-65.,-60.,-60.,-80.,-90.},  /* remember that el 1 is a 60 dB curve, not 40 */
 
   1,/*noisemaskp*/
   {-100.,-100.,-100.,-200.,-200.}, /* this is the 500 Hz curve, which
@@ -134,7 +134,7 @@ int main(int argc,char *argv[]){
   int framesize=2048;
   int order=32;
 
-  double *pcm[2],*out[2],*window,*decay[2],*lpc,*floor;
+  double *pcm[2],*out[2],*window,*decay[2],*lpc,*floor,*mask;
   signed char *buffer,*buffer2;
   mdct_lookup m_look;
   vorbis_look_psy p_look;
@@ -190,6 +190,7 @@ int main(int argc,char *argv[]){
   decay[0]=calloc(framesize/2,sizeof(double));
   decay[1]=calloc(framesize/2,sizeof(double));
   floor=malloc(framesize*sizeof(double));
+  mask=malloc(framesize*sizeof(double));
   lpc=malloc(order*sizeof(double));
   buffer=malloc(framesize*4);
   buffer2=buffer+framesize*2;
@@ -244,25 +245,29 @@ int main(int argc,char *argv[]){
 
 	analysis("mdct",frameno,pcm[i],framesize/2,1,1);
 
-	_vp_compute_mask(&p_look,pcm[i],floor,decay[i]);
+	_vp_compute_mask(&p_look,pcm[i],floor,mask,decay[i]);
 	
 	analysis("prefloor",frameno,floor,framesize/2,1,1);
+	analysis("mask",frameno,mask,framesize/2,1,1);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
 	
 	amp=_curve_to_lpc(floor,lpc,&floorlook,frameno);
 	_lpc_to_curve(floor,lpc,sqrt(amp),&floorlook,"Ffloor",frameno);
 	analysis("floor",frameno,floor,framesize/2,1,1);
 
-	_vp_apply_floor(&p_look,pcm[i],floor);
+	_vp_apply_floor(&p_look,pcm[i],floor,mask);
+	analysis("quant",frameno,pcm[i],framesize/2,1,1);
 
 	/* re-add floor */
 	for(j=0;j<framesize/2;j++){
-	  double val=pcm[i][j];
+	  double val=rint(pcm[i][j]);
 	  tot++;
 	  if(val){
 	    nonz++;
-	    acc+=log(fabs(todB(val))*2.+1.)/log(2);
+	    acc+=log(fabs(val)*2.+1.)/log(2);
 	    pcm[i][j]=val*floor[j];
+	  }else{
+	    pcm[i][j]=0;
 	  }
 	}
 	

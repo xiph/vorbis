@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.6.4.4 2000/05/04 23:08:10 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.6.4.5 2000/05/08 08:25:44 xiphmont Exp $
 
  ********************************************************************/
 
@@ -95,28 +95,34 @@ static double _dist(int el,double *a, double *b){
 
 void cell_spacing(codebook *c){
   int j,k;
-  double min,max,mean=0.,meansq=0.;
-  
+  double min=-1,max=-1,mean=0.,meansq=0.;
+  long total=0;
+
   /* minimum, maximum, mean, ms cell spacing */
   for(j=0;j<c->c->entries;j++){
-    double localmin=-1.;
-    for(k=0;k<c->c->entries;k++){
-      double this=_dist(c->c->dim,_now(c,j),_now(c,k));
-      if(j!=k &&
-	 (localmin==-1 || this<localmin))
-	localmin=this;
+    if(c->c->lengthlist[j]>0){
+      double localmin=-1.;
+      for(k=0;k<c->c->entries;k++){
+	if(c->c->lengthlist[k]>0){
+	  double this=_dist(c->c->dim,_now(c,j),_now(c,k));
+	  if(j!=k &&
+	     (localmin==-1 || this<localmin))
+	    localmin=this;
+	}
+      }
+      
+      if(min==-1 || localmin<min)min=localmin;
+      if(max==-1 || localmin>max)max=localmin;
+      mean+=sqrt(localmin);
+      meansq+=localmin;
+      total++;
     }
-    
-    if(j==0 || localmin<min)min=localmin;
-    if(j==0 || localmin>max)max=localmin;
-    mean+=sqrt(localmin);
-    meansq+=localmin;
   }
   
   fprintf(stderr,"\tminimum cell spacing (closest side): %g\n",sqrt(min));
   fprintf(stderr,"\tmaximum cell spacing (closest side): %g\n",sqrt(max));
-  fprintf(stderr,"\tmean closest side spacing: %g\n",mean/c->c->entries);
-  fprintf(stderr,"\tmean sq closest side spacing: %g\n",sqrt(meansq/c->c->entries));
+  fprintf(stderr,"\tmean closest side spacing: %g\n",mean/total);
+  fprintf(stderr,"\tmean sq closest side spacing: %g\n",sqrt(meansq/total));
 }
 
 void process_postprocess(codebook **bs,char *basename){

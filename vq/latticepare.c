@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.1.2.2 2000/04/27 09:22:40 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.1.2.3 2000/05/08 08:25:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -57,12 +57,6 @@
    produces a new output book on stdout 
 */
 
-void usage(){
-  fprintf(stderr,"latticepare latticebook.vqh input_data.vqd <target_cells>\n"
-	  "produces a new output book on stdout \n");
-  exit(1);
-}
-
 static double _dist(int el,double *a, double *b){
   int i;
   double acc=0.;
@@ -75,24 +69,13 @@ static double _dist(int el,double *a, double *b){
 
 static double *pointlist;
 static long points=0;
-static long allocated=0;
 
 void add_vector(codebook *b,double *vec,long n){
   int dim=b->dim,i,j;
-  for(i=0;i<n/dim;i++){
-    for(j=i;j<n;j+=dim){
-      if(points>=allocated){
-	if(allocated){
-	  allocated*=2;
-	  pointlist=realloc(pointlist,allocated*sizeof(double));
-	}else{
-	  allocated=1024*1024;
-	  pointlist=malloc(allocated*sizeof(double));
-	}
-      }
-
+  int step=n/dim;
+  for(i=0;i<step;i++){
+    for(j=i;j<n;j+=step){
       pointlist[points++]=vec[j];
-      if(!(points&0xff))spinnit("loading... ",points);
     }
   }
 }
@@ -118,6 +101,8 @@ static int secondbest(codebook *b,double *vec,int best){
 
   /* hit one off on all sides of it; most likely we'll find a possible
      match */
+  /* suboptimal for unaligned entries */
+#if 0
   for(i=0;i<dim;i++){
     /* one up */
     if(index[i]+1<tt->quantvals){
@@ -145,7 +130,8 @@ static int secondbest(codebook *b,double *vec,int best){
       }
     }
   }
-      
+     
+#endif 
   /* no match?  search all cells, binary count, that are one away on
      one or more axes.  Then continue out until there's a match.
      We'll find one eventually, it's relatively OK to be inefficient
@@ -194,15 +180,29 @@ static int secondbest(codebook *b,double *vec,int best){
   return(bestentry);
 }
 
+void usage(void){
+  fprintf(stderr,"Ogg/Vorbis lattice codebook paring utility\n\n"
+	  "usage: latticepare book.vqh data.vqd <target_cells>\n"
+	  "                   -<n_0,n_1,...> [-<n_0,n_1,...>]\n\n"
+	  "where <target_cells> is the desired number of final cells (or -1\n"
+	  "for no change) and n,n,n,n...n  are explicit entries to cull\n\n"
+	  "produces new book on stdout\n\n");
+  exit(1);
+}
 
 int main(int argc,char *argv[]){
   char *basename;
   codebook *b=NULL;
-  int input=0;
-  int entries;
-  int dim;
+  int entries=0;
+  int dim=0;
   long i,j,target=-1;
+  int *cvec=NULL;
+
+  long *cullist=malloc(sizeof(int));
+  long culls=0;
+
   argv++;
+
 
   if(*argv==NULL){
     usage();
@@ -214,7 +214,37 @@ int main(int argc,char *argv[]){
 
   while(*argv){
     if(*argv[0]=='-'){
-      /* option */
+      char *ptr=argv[0];
+      long index=0;
+      /* explicit cull */
+      if(!b)usage();
+      if(!cvec)cvec=malloc(dim*sizeof(int)); /* lazy ;-) */
+      
+      for(i=0;i<dim;i++){
+	if(!ptr){
+	  fprintf(stderr,"too few values in cull argument %s\n",argv[0]);
+	  exit(1);
+	}
+	cvec[i]=atoi(ptr+1);
+	if(cvec[i]<0 || cvec[i]>=b->c->thresh_tree->quantvals){
+	  fprintf(stderr,"value too large in cull argument %s\n",argv[0]);
+	  exit(1);
+	}
+
+	ptr=strchr(ptr+1,',');
+      }
+      if(ptr){
+	fprintf(stderr,"too many values in cull argument %s\n",argv[0]);
+	exit(1);
+      }
+      for(i=dim;i>0;i--)
+	index=index*b->c->thresh_tree->quantvals+cvec[i-1];
+	
+      cullist=realloc(cullist,++culls*sizeof(long));
+      cullist[culls-1]=index;
+      fprintf(stderr,"\rExplicitly culling index %ld\n",index);
+      argv++;
+	
     }else{
       /* input file.  What kind? */
       char *dot;
@@ -226,16 +256,12 @@ int main(int argc,char *argv[]){
       else{
 	ext="";
 	target=atol(name);
+	if(target==0)target=entries;
       }
       
 
       /* codebook */
       if(!strcmp(ext,"vqh")){
-        if(input){
-          fprintf(stderr,"specify all input data (.vqd) files following\n"
-                  "codebook header (.vqh) files\n");
-          exit(1);
-        }
 
         basename=strrchr(name,'/');
         if(basename)
@@ -246,11 +272,13 @@ int main(int argc,char *argv[]){
         if(dot)*dot='\0';
 
         b=codebook_load(name);
+	dim=b->dim;
+	entries=b->entries;
       }
 
       /* data file; we do actually need to suck it into memory */
       /* we're dealing with just one book, so we can de-interleave */ 
-      if(!strcmp(ext,"vqd")){
+      if(!strcmp(ext,"vqd") && !points){
         int cols;
         long lines=0;
         char *line;
@@ -273,6 +301,8 @@ int main(int argc,char *argv[]){
           }
         }
         vec=alloca(cols*sizeof(double));
+	/* count, then load, to avoid fragmenting the hell out of
+           memory */
         while(line){
           lines++;
           for(j=0;j<cols;j++)
@@ -280,8 +310,23 @@ int main(int argc,char *argv[]){
               fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
               exit(1);
             }
+	  if((lines&0xff)==0)spinnit("counting samples...",lines*cols);
+          line=setup_line(in);
+        }
+	pointlist=malloc(cols*lines*sizeof(double));
+
+	rewind(in);
+	line=setup_line(in);
+        while(line){
+          lines--;
+          for(j=0;j<cols;j++)
+            if(get_line_value(in,vec+j)){
+              fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
+              exit(1);
+            }
 	  /* deinterleave, add to heap */
 	  add_vector(b,vec,cols);
+	  if((lines&0xff)==0)spinnit("loading samples...",lines*cols);
 
           line=setup_line(in);
         }
@@ -289,14 +334,11 @@ int main(int argc,char *argv[]){
       }
     }
   }
-  dim=b->dim;
-  entries=b->entries;
+  if(!entries || !points)usage();
+  if(target==-1)usage();
+
   points/=dim;
 
-  if(target==-1){
-    fprintf(stderr,"Target number of cells required on command line\n");
-    exit(1);
-  }
 
   /* set up auxiliary vectors for error tracking */
   {
@@ -308,6 +350,7 @@ int main(int argc,char *argv[]){
     long *reventry;
     long *membership=malloc(points*sizeof(long));
     long *cellhead=malloc(entries*sizeof(long));
+    long *cellcount=calloc(entries,sizeof(long));
     double *cellerror1=calloc(entries,sizeof(double)); /* error for
                                                           firstentries */
     double *cellerror2=calloc(entries,sizeof(double)); /* error for
@@ -333,11 +376,47 @@ int main(int argc,char *argv[]){
       cellhead[firstentry]=i;
 
       cellerror1[firstentry]+=firstmetric;
+      cellcount[firstentry]++;
       globalerror+=firstmetric;
       cellerror2[firstentry]+=secondmetric;
 
     }
 
+    /* handle the explicit cull list */
+    for(i=0;i<culls;i++){
+      long bestcell=cullist[i];
+      char buf[80];
+      sprintf(buf,"explicit culls (%d left)... ",(int)culls-i);
+      
+      /* disperse cell.  move each point out, adding it (properly) to
+         the second best */
+      if(b->c->lengthlist[bestcell]>0){
+	long head=cellhead[bestcell];
+	b->c->lengthlist[bestcell]=0;
+	cellhead[bestcell]=-1;
+	while(head!=-1){
+	  /* head is a point number */
+	  double *ppt=pointlist+head*dim;
+	  int newentry=secondbest(b,ppt,bestcell);
+	  int secondentry=secondbest(b,pointlist+head*dim,newentry);
+	  double firstmetric=_dist(dim,b->valuelist+dim*newentry,ppt);
+	  double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
+	  long next=membership[head];
+	  cellcount[newentry]++;
+	  cellcount[bestcell]--;
+	  cellerror1[newentry]+=firstmetric;
+	  cellerror2[newentry]+=secondmetric;
+	  spinnit(buf,cellcount[bestcell]);
+	  
+	  membership[head]=cellhead[newentry];
+	  cellhead[newentry]=head;
+	  head=next;
+	}
+	cellsleft--;
+      }
+    }
+    
+    /* do the automatic cull request */
     while(cellsleft>target){
       int bestcell=-1;
       double besterror=0;
@@ -385,6 +464,7 @@ int main(int argc,char *argv[]){
 
     for(i=0;i<entries;i++){
       long head=cellhead[i];
+      spinnit("rearranging membership cache... ",entries-i);
       while(head!=-1){
 	long next=membership[head];
 	membership[head]=i;
@@ -402,6 +482,7 @@ int main(int argc,char *argv[]){
       int best=_best(b,pointlist+i*dim,1);
       if(best==-1)
 	pointindex[indexedpoints++]=i;
+      spinnit("finding orphaned points... ",points-i);
     }
 
     /* make an entry index */

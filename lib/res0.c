@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.8.4.5 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.8.4.6 2000/05/08 08:25:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,7 +28,6 @@
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "registry.h"
-#include "scales.h"
 #include "bookinternal.h"
 #include "sharedbook.h"
 #include "misc.h"
@@ -78,9 +77,6 @@ void pack(vorbis_info_residue *vr,oggpack_buffer *opb){
   _oggpack_write(opb,info->groupbook,8);  /* group huffman book */
   for(j=0;j<info->partitions;j++){
     _oggpack_write(opb,info->secondstages[j],4); /* zero *is* a valid choice */
-    /* bit of 0 == additive, 1 == multiplicative cascade */
-    if(info->secondstages[j]>1)
-      _oggpack_write(opb,info->addmullist[j],info->secondstages[j]-1);      
     acc+=info->secondstages[j];
   }
   for(j=0;j<acc;j++)
@@ -100,10 +96,6 @@ vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
   info->groupbook=_oggpack_read(opb,8);
   for(j=0;j<info->partitions;j++){
     acc+=info->secondstages[j]=_oggpack_read(opb,4);
-    if(info->secondstages[j]>1)
-      info->addmullist[j]=_oggpack_read(opb,info->secondstages[j]-1);
-    else
-      info->addmullist[j]=0;
   }
   for(j=0;j<acc;j++)
     info->booklist[j]=_oggpack_read(opb,8);
@@ -174,58 +166,30 @@ static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
 }
 
 static int _encodepart(oggpack_buffer *opb,double *vec, int n,
-		       int stages, int addmul, codebook **books){
+		       int stages, codebook **books){
   int i,j,bits=0;
 
-  double *work=alloca(n*sizeof(double));
-
-  /* pessimistic, but safe */
-  long *stackword=alloca(n*stages*sizeof(long));
-  int *stacklen=alloca(n*stages*sizeof(int));
-  int stack=0;
-
-  memcpy(work,vec,n*sizeof(double));
-
-  /* The stages are listed in *decode* order; although the stages have
-     to decode this way, if the encode process is to use the same
-     setup data as the decode process we need to run encode backwards
-     into a stack, then write the entries out */
-
-  /* If we have n samples, but book dim in m (<n), we interlace the
-     samples we actually encode */
-  for(j=stages-1;j>=0;j--){
+  for(j=0;j<stages;j++){
     int dim=books[j]->dim;
     int step=n/dim;
-    for(i=step-1;i>=0;i--){
-      int entry=vorbis_book_besterror(books[j],work+i,step,(addmul>>j)&1);
-      stackword[stack]=vorbis_book_codeword(books[j],entry);
-      bits+=stacklen[stack++]=vorbis_book_codelen(books[j],entry);
-    }
-  }
-
-  while(stack){
-    stack--;
-    _oggpack_write(opb,stackword[stack],stacklen[stack]);
+    for(i=0;i<step;i++)
+      bits+=vorbis_book_encodevs(books[j],vec+i,opb,step,0);
+ 
   }
 
   return(bits);
 }
 
 static int _decodepart(oggpack_buffer *opb,double *work,double *vec, int n,
-		       int stages, int addmul,codebook **books){
-  int i,j,o;
-
-  memset(work,0,n*sizeof(double));
+		       int stages, codebook **books){
+  int i,j;
+  
+  memset(work,0,sizeof(double)*n);
   for(j=0;j<stages;j++){
     int dim=books[j]->dim;
     int step=n/dim;
-    if(j)
-      for(i=0,o=0;i<n;i+=dim,o++)
-	vorbis_book_decodevs(books[j],work+o,opb,step,(addmul>>(j-1))&1);
-    else
-      for(i=0,o=0;i<n;i+=dim,o++)
-	vorbis_book_decodevs(books[j],work+o,opb,step,-1);
-    
+    for(i=0;i<step;i++)
+      vorbis_book_decodevs(books[j],work+i,opb,step,0);
   }
   
   for(i=0;i<n;i++)
@@ -291,7 +255,6 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
 	resbits[partword[j][l]]+=
 	  _encodepart(&vb->opb,in[j]+i,samples_per_partition,
 		      info->secondstages[partword[j][l]],
-		      info->addmullist[partword[j][l]],
 		      look->partbooks[partword[j][l]]);
 	resvals[partword[j][l]]+=samples_per_partition;
       }
@@ -339,7 +302,6 @@ int inverse(vorbis_block *vb,vorbis_look_residue *vl,double **in,int ch){
 	int part=partword[j][k];
 	_decodepart(&vb->opb,work,in[j]+i,samples_per_partition,
 		    info->secondstages[part],
-		    info->addmullist[partword[j][l]],
 		    look->partbooks[part]);
       }
   }

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.12 2000/05/04 23:08:10 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.13 2000/05/08 08:25:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -480,6 +480,7 @@ static int comp(const void *a,const void *b){
 static int frameno=-1;
 void _vp_compute_mask(vorbis_look_psy *p,double *f, 
 		      double *flr, 
+		      double *mask,
 		      double *decay){
   double *noise=alloca(sizeof(double)*p->n);
   double *work=alloca(sizeof(double)*p->n);
@@ -519,14 +520,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
   }
   specmax=todB(specmax);
 
-  /* mask off the ATH */
-  if(p->vi->athp)
-    for(i=0;i<n;i++)
-      flr[i]=p->ath[i];
-  else
-    for(i=0;i<n;i++)
-      flr[i]=0.;
-    
+  memset(flr,0,n*sizeof(double));
   /* seed the tone masking */
   if(p->vi->tonemaskp)
     seed_generic(p,p->tonecurves,work,flr,specmax);
@@ -538,6 +532,13 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
   /* chase the seeds */
   max_seeds(p,flr);
 
+  /* mask off the ATH */
+  if(p->vi->athp)
+    for(i=0;i<n;i++)
+      mask[i]=max(p->ath[i],flr[i]*.5);
+  else
+    for(i=0;i<n;i++)
+      mask[i]=flr[i]*.5;
 }
 
 
@@ -545,7 +546,7 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
    energy in low resolution portions of the spectrum */
 /* f and flr are *linear* scale, not dB */
 void _vp_apply_floor(vorbis_look_psy *p,double *f, 
-		      double *flr){
+		      double *flr,double *mask){
   double *work=alloca(p->n*sizeof(double));
   double thresh=fromdB(p->vi->noisefit_threshdB);
   int i,j,addcount=0;
@@ -553,10 +554,10 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 
   /* subtract the floor */
   for(j=0;j<p->n;j++){
-    if(flr[j]<=0)
+    if(flr[j]<=0 || fabs(f[j])<mask[j])
       work[j]=0.;
     else
-      work[j]=rint(f[j]/flr[j]);
+      work[j]=f[j]/flr[j];
   }
 
   /* look at spectral energy levels.  Noise is noise; sensation level
@@ -580,8 +581,7 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 	double y=(f[i]*f[i]);
 	original_SL+=y;
 	if(work[i]){
-	  double qy=(work[i]*flr[i]);
-	  current_SL+=qy*qy;
+	  current_SL+=y;
 	}else{
 	  index[z++]=f+i;
 	}	
@@ -595,15 +595,14 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 	
 	for(j=0;j<z;j++){
 	  int p=index[j]-f;
-
 	  double val=flr[p]*flr[p]+current_SL;
 	  
-	  if(val<original_SL){
+	  if(val<original_SL && mask[p]<flr[p]){
 	    addcount++;
 	    if(f[p]>0)
-	      work[p]=flr[p];
+	      work[p]=1;
 	    else
-	      work[p]=-flr[p];
+	      work[p]=-1;
 	    current_SL=val;
 	  }else
 	    break;

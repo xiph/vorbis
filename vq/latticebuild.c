@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.1.2.2 2000/04/26 07:10:16 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.1.2.3 2000/05/08 08:25:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,6 +41,15 @@
 
    vqlattice sends residual data (for the next stage) to stdout, and
    produces description.vqh */
+
+static int ilog(unsigned int v){
+  int ret=0;
+  while(v){
+    ret++;
+    v>>=1;
+  }
+  return(ret);
+}
 
 int main(int argc,char *argv[]){
   codebook b;
@@ -102,7 +111,7 @@ int main(int argc,char *argv[]){
   c.thresh_tree=&t;
   c.dim=dim;
   c.entries=entries;
-  c.lengthlist=calloc(entries,sizeof(long));
+  c.lengthlist=malloc(entries*sizeof(long));
   c.maptype=1;
   c.q_sequencep=0;
   c.quantlist=calloc(quantvals,sizeof(long));
@@ -110,6 +119,7 @@ int main(int argc,char *argv[]){
   quantlist=malloc(sizeof(long)*c.dim*c.entries);
   hits=malloc(c.entries*sizeof(long));
   for(j=0;j<entries;j++)hits[j]=1;
+  for(j=0;j<entries;j++)c.lengthlist[j]=1;
 
   reset_next_value();
   setup_line(in);
@@ -162,11 +172,14 @@ int main(int argc,char *argv[]){
     }
     c.q_min=_float32_pack(min);
     c.q_delta=_float32_pack(mindel);
+    c.q_quant=0;
 
     min=_float32_unpack(c.q_min);
     mindel=_float32_unpack(c.q_delta);
-    for(j=0;j<quantvals;j++)
+    for(j=0;j<quantvals;j++){
       c.quantlist[j]=rint((quantlist[j]-min)/mindel);
+      if(ilog(c.quantlist[j])>c.q_quant)c.q_quant=ilog(c.quantlist[j]);
+    }
   }
   
   vorbis_book_init_encode(&b,&c);
@@ -232,7 +245,7 @@ int main(int argc,char *argv[]){
   fclose(in);
 
   /* build the codeword lengths */
-
+  memset(c.lengthlist,0,sizeof(long)*entries);
   build_tree_from_lengths(entries,hits,c.lengthlist);
 
   /* save the book in C header form */

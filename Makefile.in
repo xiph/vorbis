@@ -1,0 +1,27 @@
+# vorbis makefile configured for use with gcc on any platform
+
+# $Id: Makefile.in,v 1.5.4.1 2000/05/08 08:25:39 xiphmont Exp $
+
+###############################################################################
+#                                                                             #
+# To build a production vorbis (preferrably using gmake), just type 'make'.   #
+# To build with debugging or profiling information, use 'make debug' or       #
+# 'make profile' respectively.  'make clean' is a good idea between builds    #
+# with different target names, or before a final build.                       #
+#                                                                             #
+###############################################################################
+
+
+# DO NOT EDIT BELOW! ##########################################################
+# (unless, of course, you know what you are doing :) ##########################
+
+@SET_MAKE@
+
+SUBDIRS =	lib examples # cmdline xmms vq huff 
+
+all debug profile selftest target clean:
+	@for dir in $(SUBDIRS); do (cd $$dir && $(MAKE) $(MFLAGS) $@) || exit 1; done
+	-rm -f *~
+
+distclean:	clean
+	-rm -f Makefile config.* 

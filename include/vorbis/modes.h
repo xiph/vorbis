@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.9.2.8 2000/05/04 23:08:08 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.9.2.9 2000/05/08 08:25:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,8 +25,24 @@
 
 #include "vorbis/book/lsp20_0.vqh"
 #include "vorbis/book/lsp32_0.vqh"
-#include "vorbis/book/resaux0_short.vqh"
-#include "vorbis/book/resaux0_long.vqh"
+#include "vorbis/book/res0a0aux.vqh"
+#include "vorbis/book/res0a1aux.vqh"
+
+#include "vorbis/book/res0a_0.vqh"
+#include "vorbis/book/res0a_1.vqh"
+#include "vorbis/book/res0a_2.vqh"
+#include "vorbis/book/res0a_3.vqh"
+#include "vorbis/book/res0a_4.vqh"
+#include "vorbis/book/res0a_5.vqh"
+#include "vorbis/book/res0a_6.vqh"
+
+#include "vorbis/book/res0b_0.vqh"
+#include "vorbis/book/res0b_1.vqh"
+#include "vorbis/book/res0b_2.vqh"
+#include "vorbis/book/res0b_3.vqh"
+#include "vorbis/book/res0b_4.vqh"
+#include "vorbis/book/res0b_5.vqh"
+#include "vorbis/book/res0b_6.vqh"
 
 /* A farily high quality setting mix */
 static vorbis_info_psy _psy_set0={
@@ -43,7 +59,7 @@ static vorbis_info_psy _psy_set0={
   {-35.,-40.,-60.,-80.,-95.},
   {-35.,-40.,-60.,-80.,-95.},
   {-35.,-40.,-60.,-80.,-95.},
-  {-65.,-60.,-60.,-80.,-95.},  /* remember that el 1 is a 60 dB curve, not 40 */
+  {-65.,-60.,-60.,-80.,-90.},  /* remember that el 1 is a 60 dB curve, not 40 */
 
   1,/*noisemaskp*/
   {-100.,-100.,-100.,-200.,-200.}, /* this is the 500 Hz curve, which
@@ -63,16 +79,14 @@ static vorbis_info_psy _psy_set0={
 static vorbis_info_time0 _time_set0={0};
 static vorbis_info_floor0 _floor_set0={20, 44100,  64, 12,150, 1, {0} };
 static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,150, 1, {1} };
-static vorbis_info_residue0 _residue_set0={0, 128, 16,1,2,
-					   {0},
-					   {0},
-					   {0},
-					   {}};
+static vorbis_info_residue0 _residue_set0={0, 128, 16,8,2,
+					   {16.5,10.5,6.5,3.5,2.5,1.5,.5},
+					   {1,1,1,1,1,1,1,0},
+					   {4,5,6,7,8,9,10}};
 static vorbis_info_residue0 _residue_set1={0,1024, 16,8,3,
-					   {0},
-					   {0},
-					   {0},
-					   {}};
+					   {16.5,10.5,6.5,3.5,2.5,1.5,.5},
+					   {1,1,1,1,1,1,1,0},
+					   {4,5,6,7,8,9,10}};
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {1}, {0}};
 static vorbis_info_mode _mode_set0={0,0,0,0};
@@ -85,7 +99,7 @@ vorbis_info info_A={
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,    4,   1,
+  2,          2,    1,     2,       2,   11,   1,
   /* modes */
   {&_mode_set0,&_mode_set1},
   /* maps */
@@ -100,16 +114,16 @@ vorbis_info info_A={
   {&_vq_book_lsp20_0,      /* 0 */
    &_vq_book_lsp32_0,      /* 1 */
 
-   &_huff_book_resaux0_short,
-   &_huff_book_resaux0_long,
+   &_huff_book_res0a0aux,
+   &_huff_book_res0a1aux,
 
-   /*vq_book_res0_0a,
-   &_vq_book_res0_1a,
-   &_vq_book_res0_1a,
-   &_vq_book_res0_1a,
-   &_vq_book_res0_1a,
-   &_vq_book_res0_1a,
-   &_vq_book_res0_1a,*/
+   &_vq_book_res0a_0,
+   &_vq_book_res0a_1,
+   &_vq_book_res0a_2,
+   &_vq_book_res0a_3,
+   &_vq_book_res0a_4,
+   &_vq_book_res0b_5,
+   &_vq_book_res0b_6,
   },
   /* psy */
   {&_psy_set0},
