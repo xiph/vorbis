@@ -11,4 +11,4 @@ EXTRA_DIST = vorbis.def vorbis_dynamic.dsp vorbis_static.dsp\
 	build_vorbisenc_dynamic.bat build_vorbisenc_dynamic_debug.bat\
 	build_vorbisenc_static.bat build_vorbisenc_static_debug.bat\
 	build_vorbisfile_dynamic.bat build_vorbisfile_dynamic_debug.bat\
-	build_vorbisfile_static.bat build_vorbisfile_static_debug.bat
+	build_vorbisfile_static.bat build_vorbisfile_static_debug.bat vorbis.dsw
