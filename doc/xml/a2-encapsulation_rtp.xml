@@ -1,14 +1,19 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+]>
+
 <appendix id="vorbis-over-rtp">
 <appendixinfo>
  <releaseinfo>
-  <emphasis>$Id: a2-encapsulation_rtp.xml,v 1.2 2002/10/26 13:21:35 giles Exp $</emphasis>
+  <emphasis>$Id: a2-encapsulation_rtp.xml,v 1.3 2002/10/27 14:55:31 giles Exp $</emphasis>
  </releaseinfo>
 </appendixinfo>
 <title>Vorbis encapsulation in RTP</title>
 
 <literallayout class="monospaced">
-<!-- this works with extensions implemented in Saxon and Xalan 
+<!-- this works with extensions implemented in Saxon and Xalan
 <textobject><textdata fileref="../draft-moffitt-vorbis-rtp-00.txt"/></textobject> -->
 <!-- this works with xinclude, implemented in xsltproc -->
 <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"

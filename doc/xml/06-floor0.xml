@@ -1,7 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+]>
+
 <section id="vorbis-spec-floor0">
 <sectioninfo>
 <releaseinfo>
-  $Id: 06-floor0.xml,v 1.5 2002/10/26 15:43:57 giles Exp $
+  $Id: 06-floor0.xml,v 1.6 2002/10/27 14:55:31 giles Exp $
   <emphasis>Last update to this document: July 19, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>  

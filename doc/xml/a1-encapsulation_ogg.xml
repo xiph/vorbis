@@ -1,9 +1,14 @@
-<?xml version="1.0" ?>
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+]>
+
 <appendix id="vorbis-over-ogg">
 <appendixinfo>
  <releaseinfo>
   <emphasis>Last update to this document: July 14, 2002</emphasis>
-  $Id: a1-encapsulation_ogg.xml,v 1.1 2002/10/16 22:46:44 giles Exp $
+  $Id: a1-encapsulation_ogg.xml,v 1.2 2002/10/27 14:55:31 giles Exp $
  </releaseinfo>
 </appendixinfo>
 <title>Embedding Vorbis into an Ogg stream</title>

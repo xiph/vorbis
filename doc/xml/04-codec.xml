@@ -1,7 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+<!ENTITY pi     "&#x03C0;"> <!-- GREEK SMALL LETTER PI -->
+]>
+
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.5 2002/10/25 14:41:13 giles Exp $
+ $Id: 04-codec.xml,v 1.6 2002/10/27 14:55:31 giles Exp $
  <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>

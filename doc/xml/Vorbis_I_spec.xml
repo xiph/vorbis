@@ -6,18 +6,6 @@
 <!ENTITY uuml "&#x00FC;"> <!-- Latin small letter u with diaeresis -->
 <!-- parser isn't finding %isogrk3; -->
 <!ENTITY pi	"&#x03C0;"> <!-- GREEK SMALL LETTER PI -->
-<!ENTITY intro SYSTEM "01-introduction.xml">
-<!ENTITY bitpacking SYSTEM "02-bitpacking.xml">
-<!ENTITY codebook SYSTEM "03-codebook.xml">
-<!ENTITY codec SYSTEM "04-codec.xml">
-<!ENTITY comment SYSTEM "05-comment.xml">
-<!ENTITY floor0 SYSTEM "06-floor0.xml">
-<!ENTITY floor1 SYSTEM "07-floor1.xml">
-<!ENTITY residue SYSTEM "08-residue.xml">
-<!ENTITY helpers SYSTEM "09-helper.xml">
-<!ENTITY tables SYSTEM "10-tables.xml">
-<!ENTITY oggvorbis SYSTEM "a1-encapsulation_ogg.xml">
-<!ENTITY rtpvorbis SYSTEM "a2-encapsulation_rtp.xml">
 <!ENTITY colophon SYSTEM "footer.xml">
 ]>
 
@@ -27,18 +15,20 @@
   <corpauthor>Xiph.org Foundation</corpauthor>
 </articleinfo>
 
-&intro;
-&bitpacking;
-&codebook;
-&codec;
-&comment;
-&floor0;
-&floor1;
-&residue;
-&helpers;
-&tables;
-&oggvorbis;
-&rtpvorbis;
-&colophon;
+ <xi:include href="01-introduction.xml"  xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="02-bitpacking.xml"    xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="03-codebook.xml"      xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="04-codec.xml"         xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="05-comment.xml"       xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="06-floor0.xml"        xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="07-floor1.xml"        xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="08-residue.xml"       xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="09-helper.xml"        xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="10-tables.xml"        xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+
+ <xi:include href="a1-encapsulation_ogg.xml"  xmlns:xi="http://www.w3.org/2001/XInclude"/> 
+ <xi:include href="a2-encapsulation_rtp.xml"  xmlns:xi="http://www.w3.org/2001/XInclude"/>
+
+ <xi:include href="footer.xml"           xmlns:xi="http://www.w3.org/2001/XInclude"/>
 
 </article>

@@ -1,4 +1,11 @@
-<!-- articles can't have an explicit colophon -->
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+]>
+<!-- footer or colophon for xiph.org documents -->
+
+<!-- articles aren't permitted an explicit colophon -->
 <appendix id="footer">
 <title>Colophon</title>
 
@@ -19,7 +26,7 @@
 </mediaobject>
 
 <para>
-Ogg is a <ulink url="http://www.xiph.org">Xiph.org Foundation</ulink> effort
+Ogg is a <ulink url="http://www.xiph.org/">Xiph.org Foundation</ulink> effort
 to protect essential tenets of Internet multimedia from corporate
 hostage-taking; Open Source is the net's greatest tool to keep
 everyone honest. See <ulink url="http://www.xiph.org/about.html">About
@@ -50,3 +57,4 @@ This document is set in DocBook XML.
 </para>
 
 </appendix>
+<!-- end of colophon -->

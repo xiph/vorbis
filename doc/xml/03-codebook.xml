@@ -1,7 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+]>
+
 <section id="vorbis-spec-codebook">
 <sectioninfo>
 <releaseinfo>
- $Id: 03-codebook.xml,v 1.3 2002/10/21 23:37:00 giles Exp $
+ $Id: 03-codebook.xml,v 1.4 2002/10/27 14:55:31 giles Exp $
  <emphasis>Last update to this document: August 8, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>

@@ -1,7 +1,13 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE section PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+]>
+
 <section id="vorbis-spec-intro">
 <sectioninfo>
 <releaseinfo>
- $Id: 01-introduction.xml,v 1.4 2002/10/21 23:36:59 giles Exp $
+ $Id: 01-introduction.xml,v 1.5 2002/10/27 14:55:31 giles Exp $
 <emphasis>Last update to this document: July 18, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
@@ -12,8 +18,8 @@
 
 <para>
 This document provides a high level description of the Vorbis codec's
-construction.  A bit-by-bit specification appears beginning in <xref
-linkend="vorbis-spec-codec"/>. The later sections assume a high-level
+construction.  A bit-by-bit specification appears beginning in <xref linkend="vorbis-spec-codec"/>.
+The later sections assume a high-level
 understanding of the Vorbis decode process, which is 
 provided here.</para>
 
