@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.57 2002/02/28 07:12:20 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.58 2002/03/04 01:02:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -365,28 +365,19 @@ static int _open_seekable2(OggVorbis_File *vf){
   /* We get the offset for the last page of the physical bitstream.
      Most OggVorbis files will contain a single logical bitstream */
   end=_get_prev_page(vf,&og);
-  if(end<0){
-    ov_clear(vf);
-    return(end);
-  }
+  if(end<0)return(end);
 
   /* more than one logical bitstream? */
   if(ogg_page_serialno(&og)!=serialno){
 
     /* Chained bitstream. Bisect-search each logical bitstream
        section.  Do so based on serial number only */
-    if(_bisect_forward_serialno(vf,0,0,end+1,serialno,0)<0){
-      ov_clear(vf);
-      return(OV_EREAD);
-    }
+    if(_bisect_forward_serialno(vf,0,0,end+1,serialno,0)<0)return(OV_EREAD);
 
   }else{
 
     /* Only one logical bitstream */
-    if(_bisect_forward_serialno(vf,0,end,end+1,serialno,0)){
-      ov_clear(vf);
-      return(OV_EREAD);
-    }
+    if(_bisect_forward_serialno(vf,0,end,end+1,serialno,0))return(OV_EREAD);
 
   }
 
