@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.16 2000/11/08 22:45:58 jack Exp $
+ last mod: $Id: os.h,v 1.17 2000/12/13 18:12:34 giles Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #define _V_IFDEFJAIL_H_
 
 #ifndef M_PI
-#define M_PI (3.1415926539)
+#define M_PI (3.14159265358979323846)
 #endif
 
 #ifndef __GNUC__
