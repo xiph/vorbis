@@ -60,7 +60,8 @@ else
 doc_DATA = $(static_docs) $(SPEC_PNG)
 endif
 
-EXTRA_DIST = $(static_docs) $(doc_sources) $(SPEC_PNG) $(SPEC_PDF)
+EXTRA_DIST = $(static_docs) $(doc_sources) \
+	$(SPEC_PNG) $(SPEC_PDF) $(built_docs)
 
 doc_sources = xml/Vorbis_I_spec.xml \
 	xml/01-introduction.xml \
