@@ -36,6 +36,7 @@
 
  ********************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -48,14 +49,14 @@ void mdct_init(mdct_lookup *lookup,int n){
   int    *bitrev=malloc(sizeof(int)*(n/4));
   double *trig=malloc(sizeof(double)*(n+n/4));
   double *AE=trig;
-  double *AO=AE+n/4;
-  double *BE=AO+n/4;
-  double *BO=BE+n/4;
-  double *CE=BO+n/4;
-  double *CO=CE+n/8;
+  double *AO=trig+1;
+  double *BE=AE+n/2;
+  double *BO=BE+1;
+  double *CE=BE+n/2;
+  double *CO=CE+1;
   
   int *bitA=bitrev;
-  int *bitB=bitrev+n/8;
+  int *bitB=bitrev+1;
 
   int i;
   int log2n=lookup->log2n=rint(log(n)/log(2));
@@ -66,14 +67,14 @@ void mdct_init(mdct_lookup *lookup,int n){
   /* trig lookups... */
 
   for(i=0;i<n/4;i++){
-    AE[i]=cos((M_PI/n)*(4*i));
-    AO[i]=-sin((M_PI/n)*(4*i));
-    BE[i]=cos((M_PI/(2*n))*(2*i+1));
-    BO[i]=sin((M_PI/(2*n))*(2*i+1));
+    AE[i*2]=cos((M_PI/n)*(4*i));
+    AO[i*2]=-sin((M_PI/n)*(4*i));
+    BE[i*2]=cos((M_PI/(2*n))*(2*i+1));
+    BO[i*2]=sin((M_PI/(2*n))*(2*i+1));
   }
   for(i=0;i<n/8;i++){
-    CE[i]=cos((M_PI/n)*(4*i+2));
-    CO[i]=-sin((M_PI/n)*(4*i+2));
+    CE[i*2]=cos((M_PI/n)*(4*i+2));
+    CO[i*2]=-sin((M_PI/n)*(4*i+2));
   }
 
   /* bitreverse lookup... */
@@ -85,8 +86,8 @@ void mdct_init(mdct_lookup *lookup,int n){
       int acc=0;
       for(j=0;msb>>j;j++)
 	if((msb>>j)&i)acc|=1<<j;
-      bitA[i]=((~acc)&mask)*2;
-      bitB[i]=acc*2;
+      bitA[i*2]=((~acc)&mask);
+      bitB[i*2+1]=acc;
     }
   }
 }
@@ -99,31 +100,32 @@ void mdct_clear(mdct_lookup *l){
   }
 }
 
-static inline void _mdct_kernel(double *x, 
+static inline double *_mdct_kernel(double *x, double *w,
 				int n, int n2, int n4, int n8,
 				mdct_lookup *init){
-  double *w=x+1; /* interleaved access improves cache locality */ 
   int i;
   /* step 2 */
 
   {
-    double *xA=x+n2;
+    double *xA=x+n4;
     double *xB=x;
-    double *w2=w+n2;
-    double *AE=init->trig+n4;
-    double *AO=AE+n4;
+    double *w2=w+n4;
+    double *A=init->trig+n2;
 
-    for(i=0;i<n2;){
-      double x0=xA[i]-xB[i];
-      double x1=xA[i+2]-xB[i+2];
-      AE-=2;AO-=2;
+    for(i=0;i<n4;){
+      double x0=*xA - *xB;
+      double x1;
+      w2[i]=    *xA++ + *xB++;
 
-      w[i] =x0 * *AE + x1 * *AO;
-      w2[i]=xA[i]+xB[i];
-      i+=2;
-      w[i] =x1 * *AE - x0 * *AO;
-      w2[i]=xA[i]+xB[i];
-      i+=2;
+
+      x1=       *xA - *xB;
+      A-=4;
+
+      w[i++]=   x0 * A[0] + x1 * A[1];
+      w[i]=     x1 * A[0] - x0 * A[1];
+
+      w2[i++]=  *xA++ + *xB++;
+
     }
   }
 
@@ -132,32 +134,36 @@ static inline void _mdct_kernel(double *x,
   {
     int r,s;
     for(i=0;i<init->log2n-3;i++){
-      int k0=n>>(i+1);
-      int k1=1<<(i+2);
-      int wbase=n-4;
-      double *AE=init->trig;
-      double *AO=AE+n4;
+      int k0=n>>(i+2);
+      int k1=1<<(i+3);
+      int wbase=n2-2;
+      double *A=init->trig;
       double *temp;
 
-      for(r=0;r<(n4>>i);r+=4){
-	int w1=wbase;
-	int w2=wbase-(k0>>1);
-	double AEv= *AE,wA;
-	double AOv= *AO,wB;
-	wbase-=4;
+      for(r=0;r<(k0>>2);r++){
+        int w1=wbase;
+	int w2=w1-(k0>>1);
+	double AEv= A[0],wA;
+	double AOv= A[1],wB;
+	wbase-=2;
 
+	k0++;
 	for(s=0;s<(2<<i);s++){
-	  x[w1+2]=w[w1+2]+w[w2+2];
-	  x[w1]  =w[w1]+w[w2];
-	  wA     =w[w1+2]-w[w2+2];
-	  wB     =w[w1]-w[w2];
-	  x[w2+2]=wA*AEv - wB*AOv;
-	  x[w2]  =wB*AEv + wA*AOv;
+	  wB     =w[w1]   -w[w2];
+	  x[w1]  =w[w1]   +w[w2];
+
+	  wA     =w[++w1] -w[++w2];
+	  x[w1]  =w[w1]   +w[w2];
+
+	  x[w2]  =wA*AEv  - wB*AOv;
+	  x[w2-1]=wB*AEv  + wA*AOv;
+
 	  w1-=k0;
 	  w2-=k0;
 	}
-	AE+=k1;
-	AO+=k1;
+	k0--;
+
+	A+=k1;
       }
 
       temp=w;
@@ -166,44 +172,40 @@ static inline void _mdct_kernel(double *x,
     }
   }
 
-
   /* step 4, 5, 6, 7 */
   {
-    double *CE=init->trig+n;
-    double *CO=CE+n8;
-    int *bitA=init->bitrev;
-    int *bitB=bitA+n8;
+    double *C=init->trig+n;
+    int *bit=init->bitrev;
     double *x1=x;
-    double *x2=x+n-2;
+    double *x2=x+n2-1;
     for(i=0;i<n8;i++){
-      int t1=bitA[i];
-      int t4=bitB[i];
-      int t2=t4+2;
-      int t3=t1-2;
+      int t1=*bit++;
+      int t2=*bit++;
 
-      double wA=w[t1]-w[t2];
-      double wB=w[t3]+w[t4];
-      double wC=w[t1]+w[t2];
-      double wD=w[t3]-w[t4];
+      double wA=w[t1]-w[t2+1];
+      double wB=w[t1-1]+w[t2];
+      double wC=w[t1]+w[t2+1];
+      double wD=w[t1-1]-w[t2];
 
-      double wACO=wA* *CO;
-      double wBCO=wB* *(CO++);
-      double wACE=wA* *CE;
-      double wBCE=wB* *(CE++);
-
-      *x1    =( wC+wACO+wBCE)*.5;
-      *(x2-2)=( wC-wACO-wBCE)*.5;
-      *(x1+2)=( wD+wBCO-wACE)*.5; 
-      *x2    =(-wD+wBCO-wACE)*.5;
-      x1+=4;
-      x2-=4;
+      double wACE=wA* *C;
+      double wBCE=wB* *C++;
+      double wACO=wA* *C;
+      double wBCO=wB* *C++;
+      
+      *x1++=( wC+wACO+wBCE)*.5;
+      *x2--=(-wD+wBCO-wACE)*.5;
+      *x1++=( wD+wBCO-wACE)*.5; 
+      *x2--=( wC-wACO-wBCE)*.5;
     }
   }
+  return(x);
 }
 
 void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
   int n=init->n;
-  double *x=alloca(n*sizeof(double));
+  double x[n/2];
+  double w[n/2];
+  double *xx;
   int n2=n>>1;
   int n4=n>>2;
   int n8=n>>3;
@@ -214,65 +216,65 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
     double tempA,tempB;
     int in1=n2+n4-4;
     int in2=in1+5;
-    double *AE=init->trig+n4;
-    double *AO=AE+n4;
+    double *A=init->trig+n2;
 
     i=0;
-
-    for(i=0;i<n4;i+=4){
+    
+    for(i=0;i<n8;i+=2){
+      A-=2;
       tempA= in[in1+2]*window[in1+2] + in[in2]*window[in2];
       tempB= in[in1]*window[in1] + in[in2+2]*window[in2+2];       
       in1 -=4;in2 +=4;
-      AE--;AO--;
-      x[i]=   tempB* *AO + tempA* *AE;
-      x[i+2]= tempB* *AE - tempA* *AO;
+      x[i]=   tempB*A[1] + tempA*A[0];
+      x[i+1]= tempB*A[0] - tempA*A[1];
     }
 
     in2=1;
 
-    for(;i<n-n4;i+=4){
+    for(;i<n2-n8;i+=2){
+      A-=2;
       tempA= in[in1+2]*window[in1+2] - in[in2]*window[in2];
       tempB= in[in1]*window[in1] - in[in2+2]*window[in2+2];       
       in1 -=4;in2 +=4;
-      AE--;AO--;
-      x[i]=   tempB* *AO + tempA* *AE;
-      x[i+2]= tempB* *AE - tempA* *AO;
+      x[i]=   tempB*A[1] + tempA*A[0];
+      x[i+1]= tempB*A[0] - tempA*A[1];
     }
-
+    
     in1=n-4;
 
-    for(;i<n;i+=4){
+    for(;i<n2;i+=2){
+      A-=2;
       tempA= -in[in1+2]*window[in1+2] - in[in2]*window[in2];
       tempB= -in[in1]*window[in1] - in[in2+2]*window[in2+2];       
       in1 -=4;in2 +=4;
-      AE--;AO--;
-      x[i]=   tempB* *AO + tempA* *AE;
-      x[i+2]= tempB* *AE - tempA* *AO;
+      x[i]=   tempB*A[1] + tempA*A[0];
+      x[i+1]= tempB*A[0] - tempA*A[1];
     }
   }
 
-  _mdct_kernel(x,n,n2,n4,n8,init);
+  xx=_mdct_kernel(x,w,n,n2,n4,n8,init);
 
   /* step 8 */
 
   {
-    double *BE=init->trig+n2;
-    double *BO=BE+n4;
+    double *B=init->trig+n2;
     double *out2=out+n2;
     double scale=4./n;
     for(i=0;i<n4;i++){
-      out[i]   =(x[0]* *BE+x[2]* *BO)*scale;
-      *(--out2)=(x[0]* *BO-x[2]* *BE)*scale;
-      x+=4;
-      BO++;
-      BE++;
+      out[i]   =(xx[0]*B[0]+xx[1]*B[1])*scale;
+      *(--out2)=(xx[0]*B[1]-xx[1]*B[0])*scale;
+
+      xx+=2;
+      B+=2;
     }
   }
 }
 
-void mdct_backward(mdct_lookup *init, double *in, double *out, double *w){
+void mdct_backward(mdct_lookup *init, double *in, double *out, double *window){
   int n=init->n;
-  double *x=alloca(n*sizeof(double));
+  double x[n/2];
+  double w[n/2];
+  double *xx;
   int n2=n>>1;
   int n4=n>>2;
   int n8=n>>3;
@@ -282,56 +284,50 @@ void mdct_backward(mdct_lookup *init, double *in, double *out, double *w){
   {
     double *inO=in+1;
     double  *xO= x;
-    double  *AE=init->trig+n4;
-    double  *AO=AE+n4;
+    double  *A=init->trig+n2;
 
     for(i=0;i<n8;i++){
-      AE--;AO--;
-      *xO=-*(inO+2)* *AO - *inO * *AE;
-      xO+=2;
-      *xO= *inO * *AO - *(inO+2)* *AE;
-      xO+=2;
+      A-=2;
+      *xO++=-*(inO+2)*A[1] - *inO*A[0];
+      *xO++= *inO*A[1] - *(inO+2)*A[0];
       inO+=4;
     }
 
     inO=in+n2-4;
 
     for(i=0;i<n8;i++){
-      AE--;AO--;
-      *xO=*inO * *AO + *(inO+2) * *AE;
-      xO+=2;
-      *xO=*inO * *AE - *(inO+2) * *AO;
-      xO+=2;
+      A-=2;
+      *xO++=*inO*A[1] + *(inO+2)*A[0];
+      *xO++=*inO*A[0] - *(inO+2)*A[1];
       inO-=4;
     }
 
   }
 
-  _mdct_kernel(x,n,n2,n4,n8,init);
+  xx=_mdct_kernel(x,w,n,n2,n4,n8,init);
 
   /* step 8 */
 
   {
-    double *BE=init->trig+n2;
-    double *BO=BE+n4;
+    double *B=init->trig+n2;
     int o1=n4,o2=o1-1;
     int o3=n4+n2,o4=o3-1;
     
     for(i=0;i<n4;i++){
-      double temp1= (*x * *BO - *(x+2) * *BE);
-      double temp2=-(*x * *BE + *(x+2) * *BO);
+      double temp1= (*xx * B[1] - *(xx+1) * B[0]);
+      double temp2=-(*xx * B[0] + *(xx+1) * B[1]);
     
-      out[o1]=-temp1*w[o1];
-      out[o2]= temp1*w[o2];
-      out[o3]= temp2*w[o3];
-      out[o4]= temp2*w[o4];
+      out[o1]=-temp1*window[o1];
+      out[o2]= temp1*window[o2];
+      out[o3]= temp2*window[o3];
+      out[o4]= temp2*window[o4];
 
       o1++;
       o2--;
       o3++;
       o4--;
-      x+=4;
-      BE++;BO++;
+      xx+=2;
+      B+=2;
     }
   }
 }

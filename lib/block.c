@@ -376,7 +376,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   
   /* fill in the block.  Note that for a short window, lW and nW are *short*
      regardless of actual settings in the stream */
-  fprintf(stderr,"%d",v->W);
+
   if(v->W){
     vb->lW=v->lW;
     vb->W=v->W;
@@ -499,6 +499,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   v->time_envelope_bits+=vb->time_envelope_bits;
   v->spectral_envelope_bits+=vb->spectral_envelope_bits;
   v->spectral_residue_bits+=vb->spectral_residue_bits;
+  v->sequence=vb->sequence;
 
   {
     int sizeW=vi->blocksize[v->W];

@@ -35,11 +35,11 @@ vorbis_info predef_modes[]={
     /* channels, sample rate,  dummy, dummy, dummy, dummy */
   { 2, 44100,     0, NULL, 0, NULL, 
     /* smallblock, largeblock, LPC order (small, large) */
-    {512, 2048}, {16,16}, 
+    {512, 4096}, {16,16}, 
     /* spectral octaves (small, large), spectral channels */
     {5,5}, 2,
     /* thresh sample period, preecho clamp trigger threshhold, range, dummy */
-    128, 4, 2, NULL,
+    64, 4, 2, NULL,
     /* noise masking curve dB attenuation levels [20] */
     {-12,-12,-18,-18,-18,-18,-18,-18,-18,-12,
       -8,-4,0,0,1,2,3,3,4,5},
