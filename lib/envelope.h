@@ -11,42 +11,39 @@
  *                                                                  *
  ********************************************************************
 
- function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.13.4.2 2000/07/29 13:27:58 xiphmont Exp $
+ function: PCM data envelope analysis and manipulation
+ last mod: $Id: envelope.h,v 1.8.2.1 2000/07/29 13:27:57 xiphmont Exp $
 
  ********************************************************************/
 
-#ifndef _V_PSY_H_
-#define _V_PSY_H_
+#ifndef _V_ENVELOPE_
+#define _V_ENVELOPE_
+
+#include "iir.h"
 #include "smallft.h"
 
-#ifndef EHMER_MAX
-#define EHMER_MAX 56
-#endif
+#define EORDER 16
 
 typedef struct {
-  int n;
-  struct vorbis_info_psy *vi;
+  int ch;
+  int winlength;
+  int searchstep;
+  double minenergy;
 
-  double ***tonecurves;
-  double **peakatt;
-  double **noiseatt;
+  IIR_state *iir;
+  double    **filtered;
+  long storage;
+  long current;
 
-  double *ath;
-  int    *octave;
-  double *bark;
+  drft_lookup drft;
+  double *window;
+} envelope_lookup;
 
-} vorbis_look_psy;
+extern void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi);
+extern void _ve_envelope_clear(envelope_lookup *e);
+extern long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint);
+extern void _ve_envelope_shift(envelope_lookup *e,long shift);
 
-extern void   _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate);
-extern void   _vp_psy_clear(vorbis_look_psy *p);
-extern void  *_vi_psy_dup(void *source);
-extern void   _vi_psy_free(vorbis_info_psy *i);
-extern void   _vp_compute_mask(vorbis_look_psy *p,double *f, 
-			       double *floor,
-			       double *decay);
-extern void _vp_apply_floor(vorbis_look_psy *p,double *f,double *flr);
 
 #endif
-
 
