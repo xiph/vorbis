@@ -21,6 +21,16 @@
 #ifndef _vorbis_codec_h_
 #define _vorbis_codec_h_
 
+typedef struct {
+  long endbyte;     
+  int  endbit;      
+
+  unsigned char *buffer;
+  unsigned char *ptr;
+  long storage;
+  
+} oggpack_buffer;
+
 typedef struct vorbis_info{
   int channels;
   int rate;

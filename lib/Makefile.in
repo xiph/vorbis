@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.4 1999/07/29 10:09:25 xiphmont Exp $
+# $Id: Makefile.in,v 1.5 1999/08/04 09:18:28 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -42,12 +42,11 @@ profile:
 selftest:
 	$(MAKE) clean
 	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
-	$(CC) $(DEBUG) -c window.c mdct.c
-	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST block.c window.o mdct.o\
-		-o test_blocking -lm
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
+		-o test_bitwise -lm
 	@echo
 	@./test_framing
-	@./test_blocking
+	@./test_bitwise
 
 target:	$(TARGETFILES)
 
