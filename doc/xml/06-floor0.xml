@@ -1,7 +1,7 @@
 <section id="vorbis-spec-floor0">
 <sectioninfo>
 <releaseinfo>
-  $Id: 06-floor0.xml,v 1.1 2002/10/12 20:37:11 giles Exp $
+  $Id: 06-floor0.xml,v 1.2 2002/10/13 14:32:16 giles Exp $
   <emphasis>Last update to this document: July 19, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>  
@@ -137,7 +137,35 @@ assuming the following definitions for the given vector to be
 synthesized:</para>
 
 <informalequation>
- <alt>[latex for lspmap goes here]</alt>
+ <alt>
+   [lsp map equation]
+   \begin{math}
+     \mathrm{map}_i = \left\{
+       \begin{array}{ll}
+          \min (  
+            \mathtt{floor0\_bark\_map\_size} - 1,
+            foobar
+          ) & \textrm{for } i \in [0,n-1] \\
+          -1 & \textrm{for } i = n
+        \end{array}
+      \right.
+    \end {math}
+    
+    where
+    
+    \begin{math}
+    foobar = 
+      \left\lfloor
+        \mathrm{bark}\left(\frac{\mathtt{floor0\_rate} \cdot i}{2n}\right) \cdot \frac{\mathtt{floor0\_bark\_map\_size}} {\mathrm{bark}(.5 \cdot \mathtt{floor0\_rate})} 
+      \right\rfloor
+    \end{math}
+                  
+    and
+                
+    \begin{math}
+      \mathrm{bark}(x) = 13.1 \arctan (.00074x) + 2.24 \arctan (.0000000158x^2)+.0001x
+    \end{math}
+ </alt>
  <graphic fileref="lspmap.png"/>
 </informalequation>
 
@@ -153,7 +181,13 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
   <orderedlist>
    <listitem><para>calculate <varname>[p]</varname> and <varname>[q]</varname> according to:
         <informalequation>
-         <alt>[latex for oddlsp here]</alt>
+         <alt>
+           [equation for odd lsp]
+           \begin{eqnarray*}
+             p & = & (1 - \cos^2\omega)\prod_{j=0}^{(\mathtt{order}-3)/2} 4 (\cos c_{2j+1} - \cos \omega)^2 \\
+             q & = & \frac{1}{4} \prod_{j=0}^{(\mathtt{order}-1)/2} 4 (\cos c_{2j+1} - \cos \omega)^2
+           \end{eqnarray*}
+         </alt>
          <graphic fileref="oddlsp.png"/>
         </informalequation>
    </para></listitem>
@@ -162,7 +196,13 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
   <orderedlist>
    <listitem><para>calculate <varname>[p]</varname> and <varname>[q]</varname> according to:
         <informalequation>
-         <alt>[latex for evenlsp here]</alt>
+         <alt>
+           [equation for even lsp]
+           \begin{eqnarray*}
+             p & = & \frac{(1 - \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2 \\
+             q & = & \frac{(1 + \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2
+           \end{eqnarray*}
+         </alt>
          <graphic fileref="evenlsp.png"/>
         </informalequation>
    </para></listitem>
@@ -171,7 +211,13 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
  </para></listitem>
  <listitem><para>calculate <varname>[linear_floor_value]</varname> according to:
      <informalequation>
-       <alt>[latex for floorval here]</alt>
+       <alt>
+         [expression for floorval]
+         \begin{math}
+           \exp \left( .11512925 \left(\frac{\mathtt{amplitude} \cdot \mathtt{floor0\_amplitute\_offset}}{(2^{\mathtt{floor0\_amplitude\_bits}}-1)\sqrt{p+q}}
+                  - \mathtt{floor0\_amplitude\_offset} \right) \right)
+         \end{math}
+       </alt>
        <graphic fileref="floorval.png"/>
      </informalequation>
  </para></listitem>
