@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.25 2000/02/06 13:39:38 xiphmont Exp $
+ last mod: $Id: block.c,v 1.26 2000/02/23 09:24:23 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -161,7 +161,7 @@ int vorbis_block_clear(vorbis_block *vb){
    here and not in analysis.c (which is for analysis transforms only).
    The init is here because some of it is shared */
 
-static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
+static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   int i;
   memset(v,0,sizeof(vorbis_dsp_state));
 
@@ -200,13 +200,17 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
       _vorbis_window(i,vi->blocksizes[1],vi->blocksizes[1]/2,vi->blocksizes[1]/2);
   }
 
-  /* initialize all the mapping/backend lookups */
-  v->mode=calloc(vi->modes,sizeof(vorbis_look_mapping *));
-  for(i=0;i<vi->modes;i++){
-    int mapnum=vi->mode_param[i]->mapping;
-    int maptype=vi->map_type[mapnum];
-    v->mode[i]=_mapping_P[maptype]->look(vi,vi->mode_param[i],
-					 vi->map_param[mapnum]);
+  if(encp){ /* encode/decode differ here */
+    /* finish the codebooks */
+    v->fullbooks=calloc(vi->books,sizeof(codebook));
+    for(i=0;i<vi->books;i++)
+      vorbis_book_init_encode(v->fullbooks+i,vi->book_param[i]);
+    v->analysisp=1;
+  }else{
+    /* finish the codebooks */
+    v->fullbooks=calloc(vi->books,sizeof(codebook));
+    for(i=0;i<vi->books;i++)
+      vorbis_book_init_decode(v->fullbooks+i,vi->book_param[i]);
   }
 
   /* initialize the storage vectors to a decent size greater than the
@@ -232,27 +236,28 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
   v->centerW=vi->blocksizes[1]/2;
 
   v->pcm_current=v->centerW;
+
+  /* initialize all the mapping/backend lookups */
+  v->mode=calloc(vi->modes,sizeof(vorbis_look_mapping *));
+  for(i=0;i<vi->modes;i++){
+    int mapnum=vi->mode_param[i]->mapping;
+    int maptype=vi->map_type[mapnum];
+    v->mode[i]=_mapping_P[maptype]->look(v,vi->mode_param[i],
+					 vi->map_param[mapnum]);
+  }
+
   return(0);
 }
 
 /* arbitrary settings and spec-mandated numbers get filled in here */
 int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
-  int i;
-  _vds_shared_init(v,vi);
-
-  /* finish the codebooks */
-  v->fullbooks=calloc(vi->books,sizeof(codebook));
-  for(i=0;i<vi->books;i++)
-    vorbis_book_init_encode(v->fullbooks+i,vi->book_param[i]);
+  _vds_shared_init(v,vi,1);
 
   /* Initialize the envelope multiplier storage */
 
   v->envelope_storage=v->pcm_storage/vi->envelopesa;
   v->multipliers=calloc(v->envelope_storage,sizeof(double));
   _ve_envelope_init(&v->ve,vi->envelopesa);
-
-  /* the coder init is different for read/write */
-  v->analysisp=1;
 
   v->envelope_current=v->centerW/vi->envelopesa;
   return(0);
@@ -528,13 +533,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 }
 
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
-  int i;
-  _vds_shared_init(v,vi);
-
-  /* finish the codebooks */
-  v->fullbooks=calloc(vi->books,sizeof(codebook));
-  for(i=0;i<vi->books;i++)
-    vorbis_book_init_decode(v->fullbooks+i,vi->book_param[i]);
+  _vds_shared_init(v,vi,0);
 
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.1 2000/02/21 01:14:02 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.2 2000/02/23 09:23:51 xiphmont Exp $
 
  ********************************************************************/
 
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]){
     
     /* first, the static vectors, then the book structure to tie it together. */
     /* lengthlist */
-    fprintf(file,"static long _vq_lengthlist_%s[] = {\n",base);
+    fprintf(file,"static long _huff_lengthlist_%s[] = {\n",base);
     for(j=0;j<vals;){
       fprintf(file,"\t");
       for(k=0;k<16 && j<vals;k++,j++)
@@ -175,11 +175,11 @@ int main(int argc, char *argv[]){
     fprintf(file,"};\n\n");
     
     /* the toplevel book */
-    fprintf(file,"static static_codebook _vq_book_%s = {\n",base);
+    fprintf(file,"static static_codebook _huff_book_%s = {\n",base);
     fprintf(file,"\t%d, %ld, %d, %d, %d, %d,\n",
 	    subn,vals,0,0,0,0);
     fprintf(file,"\tNULL,\n");
-    fprintf(file,"\t_vq_lengthlist_%s,\n",base);
+    fprintf(file,"\t_huff_lengthlist_%s,\n",base);
     fprintf(file,"\tNULL,\n");
     fprintf(file,"};\n\n");
     

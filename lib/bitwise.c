@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.c,v 1.8 2000/02/05 23:31:49 xiphmont Exp $
+  last mod: $Id: bitwise.c,v 1.9 2000/02/23 09:24:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -228,7 +228,7 @@ oggpack_buffer o;
 oggpack_buffer r;
 
 void report(char *in){
-  fprintf(stderr,in);
+  fprintf(stderr,"%s",in);
   exit(1);
 }
 

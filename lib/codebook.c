@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.10 2000/02/21 13:09:34 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.11 2000/02/23 09:24:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -371,42 +371,23 @@ int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b){
 static int  _best(codebook *book, double *a){
   encode_aux *t=book->c->encode_tree;
   int dim=book->dim;
-  int trees=t->ptr0[0];
-  double bestmetric;
-  long best=-1;
-
-  while(trees-->0){
-    int ptr=t->ptr0[trees],k;
-    /* optimized, using the decision tree */
-    while(1){
-      double c=0.;
-      double *p=book->valuelist+t->p[ptr];
-      double *q=book->valuelist+t->q[ptr];
-      
-      for(k=0;k<dim;k++)
-	c+=(p[k]-q[k])*(a[k]-(p[k]+q[k])*.5);
-      
-      if(c>0.) /* in A */
-	ptr= -t->ptr0[ptr];
-      else     /* in B */
-	ptr= -t->ptr1[ptr];
-      if(ptr<=0)break;
-    }
+  int ptr=0,k;
+  /* optimized, using the decision tree */
+  while(1){
+    double c=0.;
+    double *p=book->valuelist+t->p[ptr];
+    double *q=book->valuelist+t->q[ptr];
     
-    {
-      double dist=0.;
-      double *v=book->valuelist-ptr*dim;
-      for(k=0;k<book->dim;k++){
-        double one=a[k]-v[k];
-        dist+=one*one;
-      }
-      if(best==-1 || dist<bestmetric){
-        best=-ptr;
-        bestmetric=dist;
-      }
-    } 
+    for(k=0;k<dim;k++)
+      c+=(p[k]-q[k])*(a[k]-(p[k]+q[k])*.5);
+    
+    if(c>0.) /* in A */
+      ptr= -t->ptr0[ptr];
+    else     /* in B */
+      ptr= -t->ptr1[ptr];
+    if(ptr<=0)break;
   }
-  return(best);
+  return(-ptr);
 }
 
 /* returns the number of bits and *modifies a* to the quantization value *****/

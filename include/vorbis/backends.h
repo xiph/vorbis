@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.6 2000/02/12 08:33:01 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.7 2000/02/23 09:24:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -34,7 +34,7 @@
 typedef struct{
   void              (*pack)  (vorbis_info_time *,oggpack_buffer *);
   vorbis_info_time *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_time *(*look)  (vorbis_info *,vorbis_info_mode *,
+  vorbis_look_time *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 			      vorbis_info_time *);
   void (*free_info) (vorbis_info_time *);
   void (*free_look) (vorbis_look_time *);
@@ -52,7 +52,7 @@ typedef struct{
 typedef struct{
   void               (*pack)  (vorbis_info_floor *,oggpack_buffer *);
   vorbis_info_floor *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_floor *(*look)  (vorbis_info *,vorbis_info_mode *,
+  vorbis_look_floor *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 			       vorbis_info_floor *);
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
@@ -78,7 +78,7 @@ typedef struct{
 typedef struct{
   void                 (*pack)  (vorbis_info_residue *,oggpack_buffer *);
   vorbis_info_residue *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_residue *(*look)  (vorbis_info *,vorbis_info_mode *,
+  vorbis_look_residue *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 				 vorbis_info_residue *);
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
@@ -94,9 +94,8 @@ typedef struct vorbis_info_residue0{
   long  end;
 
   /* first stage (lossless partitioning) */
-  int grouping;         /* group n vectors */
-  int partitions;       /* partition entries (per group) */
-  int groupspercode;    /* groups per codeword */
+  int grouping;         /* group n vectors per partition */
+  int partitions;       /* possible codebooks ofr a partition */
   int groupbook;        /* huffbook for partitioning */
   int secondstages[64]; /* expanded out to pointers in lookup */
   int booklist[256];    /* list of second stage books */
@@ -108,7 +107,7 @@ typedef struct{
   void                 (*pack)  (vorbis_info *,vorbis_info_mapping *,
 				 oggpack_buffer *);
   vorbis_info_mapping *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_mapping *(*look)  (vorbis_info *,vorbis_info_mode *,
+  vorbis_look_mapping *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
 				 vorbis_info_mapping *);
   void (*free_info)    (vorbis_info_mapping *);
   void (*free_look)    (vorbis_look_mapping *);

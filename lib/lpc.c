@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.17 2000/02/09 22:04:13 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.18 2000/02/23 09:24:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,7 @@ Carsten Bormann
 #include "smallft.h"
 #include "lpc.h"
 #include "scales.h"
-
+#include "misc.h"
 
 /* Autocorrelation LPC coeff generation algorithm invented by
    N. Levinson in 1947, modified by J. Durbin in 1959. */
@@ -219,6 +219,7 @@ void lpc_clear(lpc_lookup *l){
 
 /* less efficient than the decode side (written for clarity).  We're
    not bottlenecked here anyway */
+static int frameno=-1;
 
 double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
   /* map the input curve to a bark-scale curve for encoding */
@@ -226,6 +227,9 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
   int mapped=l->ln;
   double *work=alloca(sizeof(double)*mapped);
   int i,j,last=0;
+
+  frameno++;
+  _analysis_output("lpc_pre",frameno,curve,l->n);
 
   memset(work,0,sizeof(double)*mapped);
 
@@ -257,7 +261,9 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
     }
     last=bark;
   }
+  _analysis_output("lpc_prelog",frameno,work,l->ln);
   for(i=0;i<mapped;i++)work[i]*=l->barknorm[i];
+  _analysis_output("lpc_prelognorm",frameno,work,l->ln);
 
   return vorbis_lpc_from_spectrum(work,lpc,l);
 }
@@ -306,34 +312,13 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
     return;
   }
   _vlpc_de_helper(lcurve,lpc,amp,l);
-
-#ifdef ANALYSIS
-  {
-    static int frameno=0;
-    int j;
-    FILE *out;
-    char buffer[80];
-    
-    sprintf(buffer,"loglpc%d.m",frameno++);
-    out=fopen(buffer,"w+");
-    for(j=0;j<l->ln;j++)
-      fprintf(out,"%g\n",lcurve[j]);
-    fclose(out);
-  
-#endif
+  _analysis_output("lpc_lognorm",frameno,lcurve,l->ln);
 
   for(i=0;i<l->ln;i++)lcurve[i]/=l->barknorm[i];
+  _analysis_output("lpc_log",frameno,lcurve,l->ln);
   for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
+  _analysis_output("lpc",frameno,curve,l->n);
 
-#ifdef ANALYSIS
-    
-    sprintf(buffer,"lpc%d.m",frameno-1);
-    out=fopen(buffer,"w+");
-    for(j=0;j<l->n;j++)
-      fprintf(out,"%g\n",curve[j]);
-    fclose(out);
-  }
-#endif
 }
 
 /* subtract or add an lpc filter to data.  Vorbis doesn't actually use this. */
