@@ -33,7 +33,7 @@ psytune_SOURCES = psytune.c
 psytune_LDFLAGS = -static
 psytune_LDADD = libvorbis.la
 
-EXTRA_DIST = lookups.pl
+EXTRA_DIST = lookups.pl iir.c
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"
