@@ -5,7 +5,7 @@
 * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
 * PLEASE READ THESE TERMS DISTRIBUTING.                            *
 *                                                                  *
-* THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
+* THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-2000             *
 * by Monty <monty@xiph.org> and The XIPHOPHORUS Company            *
 * http://www.xiph.org/                                             *
 *                                                                  *
@@ -19,7 +19,7 @@ the Ogg Vorbis audio coding format.
 
 Directory:
 
-./lib  		The source for libvorbis, a GPLed inplementation of 
+./lib  		The source for libvorbis, an LGPLed inplementation of 
 		the public domain OggSquish Vorbis audio encoding
 		format.
 
@@ -40,8 +40,11 @@ All the technical details are published and documented, and any
 software entity may make full use of the format without royalty or
 patent concerns.
 
-This package contains libvorbis, a GPLed software implementation of
-the Vorbis specification by the Xiphophorus company (http://www.xiph.org/).
+This package contains libvorbis, an LGPLed software implementation of
+the Vorbis specification by the Xiphophorus company
+(http://www.xiph.org/), vorbisfile, an LGPLed convenience library
+built on Vorbis designed to simplify common uses and a number of GPL
+example programs, utilities and player plugins.
 
 CONTACT:
 
@@ -67,4 +70,4 @@ into /usr/local/bin, the ogg player and libvorbis manpages into
 
 Monty <monty@xiph.org>, <xiphmont@mit.edu>
 
-$Id: README,v 1.3 2000/05/10 23:05:57 xiphmont Exp $
+$Id: README,v 1.4 2000/05/12 21:42:04 xiphmont Exp $
