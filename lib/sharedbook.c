@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.26 2002/01/22 02:16:40 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.27 2002/01/22 08:06:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,7 @@
 #include <string.h>
 #include <ogg/ogg.h>
 #include "os.h"
+#include "misc.h"
 #include "vorbis/codec.h"
 #include "codebook.h"
 #include "scales.h"

@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
   function: Direct Form II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.12 2001/12/20 01:00:26 segher Exp $
+  last mod: $Id: iir.c,v 1.13 2002/01/22 08:06:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include "iir.h"
+#include "misc.h"
 
 void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
   memset(s,0,sizeof(*s));

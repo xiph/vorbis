@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.44 2001/12/21 15:05:30 segher Exp $
+ last mod: $Id: res0.c,v 1.45 2002/01/22 08:06:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -241,7 +241,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
 			  vorbis_info_residue *vr){
   vorbis_info_residue0 *info=(vorbis_info_residue0 *)vr;
   vorbis_look_residue0 *look=_ogg_calloc(1,sizeof(*look));
-  backend_lookup_state *be=vd->backend_state;
+  codec_setup_info     *ci=vd->vi->codec_setup;
 
   int j,k,acc=0;
   int dim;
@@ -250,8 +250,8 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
   look->map=vm->mapping;
 
   look->parts=info->partitions;
-  look->fullbooks=be->fullbooks;
-  look->phrasebook=be->fullbooks+info->groupbook;
+  look->fullbooks=ci->fullbooks;
+  look->phrasebook=ci->fullbooks+info->groupbook;
   dim=look->phrasebook->dim;
 
   look->partbooks=_ogg_calloc(look->parts,sizeof(*look->partbooks));
@@ -263,7 +263,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,vorbis_info_mode *vm,
       look->partbooks[j]=_ogg_calloc(stages,sizeof(*look->partbooks[j]));
       for(k=0;k<stages;k++)
 	if(info->secondstages[j]&(1<<k)){
-	  look->partbooks[j][k]=be->fullbooks+info->booklist[acc++];
+	  look->partbooks[j][k]=ci->fullbooks+info->booklist[acc++];
 #ifdef TRAIN_RES
 	  look->training_data[k][j]=calloc(look->partbooks[j][k]->entries,
 					   sizeof(***look->training_data));

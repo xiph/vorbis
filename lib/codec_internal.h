@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.12 2001/12/20 01:00:26 segher Exp $
+ last mod: $Id: codec_internal.h,v 1.13 2002/01/22 08:06:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -61,7 +61,6 @@ typedef struct backend_lookup_state {
   envelope_lookup        *ve; /* envelope lookup */    
   float                 **window[2][2][2]; /* block, leadin, leadout, type */
   vorbis_look_transform **transform[2];    /* block, type */
-  codebook               *fullbooks;
   vorbis_look_psy_global *psy_g_look;
 
   /* backend lookups are tied to the mode, not the backend or naked mapping */
@@ -157,6 +156,7 @@ typedef struct codec_setup_info {
   int                     residue_type[64];
   vorbis_info_residue    *residue_param[64];
   static_codebook        *book_param[256];
+  codebook               *fullbooks;
 
   vorbis_info_psy        *psy_param[64]; /* encode only */
   vorbis_info_psy_global psy_g_param;

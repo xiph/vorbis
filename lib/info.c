@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.52 2002/01/01 00:00:32 xiphmont Exp $
+ last mod: $Id: info.c,v 1.53 2002/01/22 08:06:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -177,7 +177,11 @@ void vorbis_info_clear(vorbis_info *vi){
 	/* knows if the book was not alloced */
 	vorbis_staticbook_destroy(ci->book_param[i]);
       }
+      if(ci->fullbooks)
+	vorbis_book_clear(ci->fullbooks+i);
     }
+    if(ci->fullbooks)
+	_ogg_free(ci->fullbooks);
     
     for(i=0;i<ci->psys;i++)
       _vi_psy_free(ci->psy_param[i]);

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.56 2002/01/19 04:52:39 xiphmont Exp $
+ last mod: $Id: block.c,v 1.57 2002/01/22 08:06:06 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -214,27 +214,28 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
 
   if(encp){ /* encode/decode differ here */
     /* finish the codebooks */
-    b->fullbooks=_ogg_calloc(ci->books,sizeof(*b->fullbooks));
-    for(i=0;i<ci->books;i++)
-      vorbis_book_init_encode(b->fullbooks+i,ci->book_param[i]);
+    if(!ci->fullbooks){
+      ci->fullbooks=_ogg_calloc(ci->books,sizeof(*ci->fullbooks));
+      for(i=0;i<ci->books;i++)
+	vorbis_book_init_encode(ci->fullbooks+i,ci->book_param[i]);
+    }
     v->analysisp=1;
   }else{
     /* finish the codebooks */
-    b->fullbooks=_ogg_calloc(ci->books,sizeof(*b->fullbooks));
-    for(i=0;i<ci->books;i++){
-      vorbis_book_init_decode(b->fullbooks+i,ci->book_param[i]);
-      /* decode codebooks are now standalone after init */
-      vorbis_staticbook_destroy(ci->book_param[i]);
-      ci->book_param[i]=NULL;
+    if(!ci->fullbooks){
+      ci->fullbooks=_ogg_calloc(ci->books,sizeof(*ci->fullbooks));
+      for(i=0;i<ci->books;i++){
+	vorbis_book_init_decode(ci->fullbooks+i,ci->book_param[i]);
+	/* decode codebooks are now standalone after init */
+	vorbis_staticbook_destroy(ci->book_param[i]);
+	ci->book_param[i]=NULL;
+      }
     }
   }
 
-  /* initialize the storage vectors to a decent size greater than the
-     minimum */
-  
-  v->pcm_storage=8192; /* we'll assume later that we have
-			  a minimum of twice the blocksize of
-			  accumulated samples in analysis */
+  /* initialize the storage vectors. blocksize[1] is small for encode,
+     but the correct size for decode */
+  v->pcm_storage=ci->blocksizes[1];
   v->pcm=_ogg_malloc(vi->channels*sizeof(*v->pcm));
   v->pcmret=_ogg_malloc(vi->channels*sizeof(*v->pcmret));
   {
@@ -336,14 +337,10 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 	int maptype=ci->map_type[mapnum];
 	if(b && b->mode)_mapping_P[maptype]->free_look(b->mode[i]);
       }
-      /* free codebooks */
-      for(i=0;i<ci->books;i++)
-	if(b && b->fullbooks)vorbis_book_clear(b->fullbooks+i);
     }
 
     if(b){
       if(b->mode)_ogg_free(b->mode);    
-      if(b->fullbooks)_ogg_free(b->fullbooks);
       
       /* free header, header1, header2 */
       if(b->header)_ogg_free(b->header);
@@ -647,33 +644,9 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
 int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
+  int i,j;
 
-  /* Shift out any PCM that we returned previously */
-  /* centerW is currently the center of the last block added */
-
-  if(v->centerW>ci->blocksizes[1]/2 &&
-  /* Quick additional hack; to avoid *alot* of shifts, use an
-     oversized buffer.  This increases memory usage, but doesn't make
-     much difference wrt L1/L2 cache pressure. */
-     v->pcm_returned>8192){
-
-    /* don't shift too much; we need to have a minimum PCM buffer of
-       1/2 long block */
-
-    int shiftPCM=v->centerW-ci->blocksizes[1]/2;
-    shiftPCM=(v->pcm_returned<shiftPCM?v->pcm_returned:shiftPCM);
-
-    v->pcm_current-=shiftPCM;
-    v->centerW-=shiftPCM;
-    v->pcm_returned-=shiftPCM;
-    
-    if(shiftPCM){
-      int i;
-      for(i=0;i<vi->channels;i++)
-	memmove(v->pcm[i],v->pcm[i]+shiftPCM,
-		v->pcm_current*sizeof(*v->pcm[i]));
-    }
-  }
+  if(v->pcm_current>v->pcm_returned  && v->pcm_returned!=-1)return(OV_EINVAL);
 
   v->lW=v->W;
   v->W=vb->W;
@@ -688,59 +661,90 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
                                                      lose count */
 
   v->sequence=vb->sequence;
-
+  
   {
-    int sizeW=ci->blocksizes[v->W];
-    int centerW=v->centerW+ci->blocksizes[v->lW]/4+sizeW/4;
-    int beginW=centerW-sizeW/2;
-    int endW=beginW+sizeW;
-    int beginSl;
-    int endSl;
-    int i,j;
-
-    /* Do we have enough PCM/mult storage for the block? */
-    if(endW>v->pcm_storage){
-      /* expand the storage */
-      v->pcm_storage=endW+ci->blocksizes[1];
-   
-      for(i=0;i<vi->channels;i++)
-	v->pcm[i]=_ogg_realloc(v->pcm[i],v->pcm_storage*sizeof(*v->pcm[i])); 
+    int n=ci->blocksizes[v->W]/2;
+    int n0=ci->blocksizes[0]/2;
+    int n1=ci->blocksizes[1]/2;
+    
+    int thisCenter;
+    int prevCenter;
+    
+    if(v->centerW){
+      thisCenter=n1;
+      prevCenter=0;
+    }else{
+      thisCenter=0;
+      prevCenter=n1;
     }
-
+    
+    /* v->pcm is now used like a two-stage double buffer.  We don't want
+       to have to constantly shift *or* adjust memory usage.  Don't
+       accept a new block until the old is shifted out */
+    
     /* overlap/add PCM */
-
-    switch((int)v->W){
-    case 0:
-      beginSl=0;
-      endSl=ci->blocksizes[0]/2;
-      break;
-    case 1:
-      beginSl=ci->blocksizes[1]/4-ci->blocksizes[v->lW]/4;
-      endSl=beginSl+ci->blocksizes[v->lW]/2;
-      break;
-    default:
-      return(-1);
-    }
-
+    
     for(j=0;j<vi->channels;j++){
-      float *pcm=v->pcm[j]+beginW;
-      float *p=vb->pcm[j];
-
       /* the overlap/add section */
-      for(i=beginSl;i<endSl;i++)
-	pcm[i]+=p[i];
-      /* the remaining section */
-      for(;i<sizeW;i++)
-	pcm[i]=p[i];
-
+      if(v->lW){
+	if(v->W){
+	  /* large/large */
+	  float *pcm=v->pcm[j]+prevCenter;
+	  float *p=vb->pcm[j];
+	  for(i=0;i<n1;i++)
+	    pcm[i]+=p[i];
+	}else{
+	  /* large/small */
+	  float *pcm=v->pcm[j]+prevCenter+n1/2-n0/2;
+	  float *p=vb->pcm[j];
+	  for(i=0;i<n0;i++)
+	    pcm[i]+=p[i];
+	}
+      }else{
+	if(v->W){
+	  /* small/large */
+	  float *pcm=v->pcm[j]+prevCenter;
+	  float *p=vb->pcm[j]+n1/2-n0/2;
+	  for(i=0;i<n0;i++)
+	    pcm[i]+=p[i];
+	  for(;i<n1/2+n0/2;i++)
+	    pcm[i]=p[i];
+	}else{
+	  /* small/small */
+	  float *pcm=v->pcm[j]+prevCenter;
+	  float *p=vb->pcm[j];
+	  for(i=0;i<n0;i++)
+	    pcm[i]+=p[i];
+	}
+      }
+      
+      /* the copy section */
+      {
+	float *pcm=v->pcm[j]+thisCenter;
+	float *p=vb->pcm[j]+n;
+	for(i=0;i<n;i++)
+	  pcm[i]=p[i];
+      }
     }
-
+    
+    if(v->centerW)
+      v->centerW=0;
+    else
+      v->centerW=n1;
+    
     /* deal with initial packet state; we do this using the explicit
        pcm_returned==-1 flag otherwise we're sensitive to first block
        being short or long */
 
-    if(v->pcm_returned==-1)
-      v->pcm_returned=centerW;
+    if(v->pcm_returned==-1){
+      v->pcm_returned=thisCenter;
+      v->pcm_current=thisCenter;
+    }else{
+      v->pcm_returned=prevCenter;
+      v->pcm_current=prevCenter+
+	ci->blocksizes[v->lW]/4+
+	ci->blocksizes[v->W]/4;
+    }
 
     /* track the frame number... This is for convenience, but also
        making sure our last packet doesn't end with added padding.  If
@@ -760,7 +764,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 	v->granulepos=vb->granulepos;
       }
     else{
-      v->granulepos+=(centerW-v->centerW);
+      v->granulepos+=ci->blocksizes[v->lW]/4+ci->blocksizes[v->W]/4;
       if(vb->granulepos!=-1 && v->granulepos!=vb->granulepos){
 
 	if(v->granulepos>vb->granulepos){
@@ -768,14 +772,15 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 
 	  if(vb->eofflag){
 	    /* partial last frame.  Strip the extra samples off */
-	    centerW-=extra;
+	    v->pcm_current-=extra;
 	  }else if(vb->sequence == 1){
 	    /* ^^^ argh, this can be 1 from seeking! */
 
 
 	    /* partial first frame.  Discard extra leading samples */
 	    v->pcm_returned+=extra;
-	    if(v->pcm_returned>centerW)v->pcm_returned=centerW;
+	    if(v->pcm_returned>v->pcm_current)
+	      v->pcm_returned=v->pcm_current;
 	    
 	  }
 	  
@@ -784,35 +789,32 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
 	v->granulepos=vb->granulepos;
       }
     }
-
+    
     /* Update, cleanup */
-
-    v->centerW=centerW;
-    v->pcm_current=endW;
-
+    
     if(vb->eofflag)v->eofflag=1;
   }
-
+  
   return(0);
 }
 
 /* pcm==NULL indicates we just want the pending samples, no more */
 int vorbis_synthesis_pcmout(vorbis_dsp_state *v,float ***pcm){
   vorbis_info *vi=v->vi;
-  if(v->pcm_returned>-1 && v->pcm_returned<v->centerW){
+  if(v->pcm_returned>-1 && v->pcm_returned<v->pcm_current){
     if(pcm){
       int i;
       for(i=0;i<vi->channels;i++)
 	v->pcmret[i]=v->pcm[i]+v->pcm_returned;
       *pcm=v->pcmret;
     }
-    return(v->centerW-v->pcm_returned);
+    return(v->pcm_current-v->pcm_returned);
   }
   return(0);
 }
 
 int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes){
-  if(bytes && v->pcm_returned+bytes>v->centerW)return(OV_EINVAL);
+  if(bytes && v->pcm_returned+bytes>v->pcm_current)return(OV_EINVAL);
   v->pcm_returned+=bytes;
   return(0);
 }

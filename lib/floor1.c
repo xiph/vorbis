@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.19 2001/12/19 23:13:33 segher Exp $
+ last mod: $Id: floor1.c,v 1.20 2002/01/22 08:06:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -647,8 +647,7 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
   int writeflag=0;
 
   if(vb->vd->backend_state){
-    books=((backend_lookup_state *)(vb->vd->backend_state))->
-      fullbooks;   
+    books=ci->fullbooks;   
     writeflag=1;
   }
 
@@ -1025,10 +1024,10 @@ static int floor1_forward(vorbis_block *vb,vorbis_look_floor *in,
 static void *floor1_inverse1(vorbis_block *vb,vorbis_look_floor *in){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)in;
   vorbis_info_floor1 *info=look->vi;
+  codec_setup_info   *ci=vb->vd->vi->codec_setup;
   
   int i,j,k;
-  codebook *books=((backend_lookup_state *)(vb->vd->backend_state))->
-    fullbooks;   
+  codebook *books=ci->fullbooks;   
 
   /* unpack wrapped/predicted values from stream */
   if(oggpack_read(&vb->opb,1)==1){

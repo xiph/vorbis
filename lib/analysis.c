@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.47 2001/12/12 09:45:24 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.48 2002/01/22 08:06:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,7 @@
 #include "registry.h"
 #include "scales.h"
 #include "os.h"
+#include "misc.h"
 
 int analysis_noisy=1;
 

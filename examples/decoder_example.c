@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.24 2001/12/19 23:13:32 segher Exp $
+ last mod: $Id: decoder_example.c,v 1.25 2002/01/22 08:06:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,6 +37,8 @@
 
 ogg_int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
 int convsize=4096;
+
+extern void _VDBG_dump(void);
 
 int main(){
   ogg_sync_state   oy; /* sync and verify incoming physical bitstream */

@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.49 2001/12/21 14:52:35 segher Exp $
+ last mod: $Id: floor0.c,v 1.50 2002/01/22 08:06:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -327,7 +327,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
 
     /* the spec supports using one of a number of codebooks.  Right
        now, encode using this lib supports only one */
-    backend_lookup_state *be=vb->vd->backend_state;
+    codec_setup_info  *ci=vb->vd->vi->codec_setup;
     codebook *b;
     int booknum;
 
@@ -348,7 +348,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
     }else
       booknum=0;
 
-    b=be->fullbooks+info->books[booknum];
+    b=ci->fullbooks+info->books[booknum];
     oggpack_write(&vb->opb,booknum,_ilog(info->numbooks));
     look->bits+=_ilog(info->numbooks);
 
@@ -421,8 +421,8 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
     int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
     
     if(booknum!=-1 && booknum<info->numbooks){ /* be paranoid */
-      backend_lookup_state *be=vb->vd->backend_state;
-      codebook *b=be->fullbooks+info->books[booknum];
+      codec_setup_info  *ci=vb->vd->vi->codec_setup;
+      codebook *b=ci->fullbooks+info->books[booknum];
       float last=0.f;
       float *lsp=_vorbis_block_alloc(vb,sizeof(*lsp)*(look->m+1));
             
