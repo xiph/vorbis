@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.47 2001/10/14 06:52:07 msmith Exp $
+ last mod: $Id: info.c,v 1.48 2001/10/20 04:57:57 msmith Exp $
 
  ********************************************************************/
 
@@ -63,8 +63,9 @@ void vorbis_comment_add(vorbis_comment *vc,char *comment){
 			    (vc->comments+2)*sizeof(*vc->user_comments));
   vc->comment_lengths=_ogg_realloc(vc->comment_lengths,
       			    (vc->comments+2)*sizeof(*vc->comment_lengths));
-  vc->user_comments[vc->comments]=strdup(comment);
   vc->comment_lengths[vc->comments]=strlen(comment);
+  vc->user_comments[vc->comments]=_ogg_malloc(vc->comment_lengths[vc->comments]+1);
+  strcpy(vc->user_comments[vc->comments], comment);
   vc->comments++;
   vc->user_comments[vc->comments]=NULL;
 }
