@@ -7,9 +7,9 @@ use Tk qw(exit);
 my $version="Analyzer 20020429";
 
 my %bases;
-my $first_file;
-my $last_file;
-my $fileno;
+my $first_file=undef;
+my $last_file=undef;
+my $fileno=0;
 
 my @panel_labels;
 my @panel_ones;
@@ -236,7 +236,7 @@ $graphy-=$temp->reqheight()+5;
 my$onecrop;
 my$twocrop;
 
-$temp=$graph_shell->Checkbutton(text=>"rescale",-variable=>\$onecrop,
+my$oneresize=$temp=$graph_shell->Checkbutton(text=>"rescale",-variable=>\$onecrop,
 				-command=>[sub{draw_graph();}])->
     place(-x=>5,-y=>5,-anchor=>'nw');
 
@@ -245,7 +245,7 @@ my$one=$graph_shell->Canvas()->
 				     -x=>5,-y=>5+$temp->reqheight,-anchor=>'nw');
 
 
-$temp=$graph_shell->Checkbutton(text=>"rescale",-variable=>\$twocrop,
+my$tworesize=$temp=$graph_shell->Checkbutton(text=>"rescale",-variable=>\$twocrop,
 				-command=>[sub{draw_graph();}])->
     place(-rely=>1.,-y=>5,-anchor=>'nw',-in=>$one);
 my$two=$graph_shell->Canvas()->
@@ -264,7 +264,8 @@ $twostate{"vars"}=\@panel_twovars;
 
 $graph_slider->configure(-command=>[sub{load_graph()}]);
 load_graph();
-$toplevel->bind('MainWindow','<Configure>',[sub{$toplevel->update();draw_graph()}]);
+$toplevel->bind('MainWindow','<Configure>',[sub{$toplevel->update();
+						draw_graph()}]);
 
 Tk::MainLoop();
 
@@ -303,7 +304,7 @@ sub graphhelper{
 	if($graph->{"vars"}->[$i]){
 	    if(defined($data[$i])){
 		if(!defined($graph->{"minx"})){
-		    $data[$i]->[0]=~m/(-?\d*)[ ,]+(-?\d*)/;
+		    $data[$i]->[0]=~m/^\s*(-?[0-9\.]*)[ ,]+(-?[0-9\.]*)/;
 		    $graph->{"maxx"}=$1;
 		    $graph->{"minx"}=$1;
 		    $graph->{"maxy"}=$2;
@@ -312,7 +313,7 @@ sub graphhelper{
 		}
 		
 		for(my$j=0;$j<=$#{$data[$i]};$j++){
-		    $data[$i]->[$j]=~m/(-?\d*)[ ,]+(-?\d*)/;
+		    $data[$i]->[$j]=~m/^\s*(-?[0-9\.]*)[ ,]+(-?[0-9\.]*)/;
 		    $rescale=1 if($1>$graph->{"maxx"});
 		    $rescale=1 if($1<$graph->{"minx"});
 		    $rescale=1 if($2>$graph->{"maxy"});
@@ -330,6 +331,13 @@ sub graphhelper{
     my$width=$w->width();
     my$height=$w->height();
 
+    $rescale=1 if(!defined($graph->{"width"}) || 
+		  $width!=$graph->{"width"} || 
+		  $height!=$graph->{"height"});
+    
+    $graph->{"width"}=$width; 
+    $graph->{"height"}=$height; 
+
     if(defined($graph->{"maxx"})){
 	# draw axes, labels
 	# look for appropriate axis scales
@@ -342,11 +350,13 @@ sub graphhelper{
 	    
 	    my$yscale=1.;
 	    my$xscale=1.;
-	    while(($graph->{"maxx"}-$graph->{"minx"})*$xscale>15){$xscale*=.1;}
-	    while(($graph->{"maxy"}-$graph->{"miny"})*$yscale>15){$yscale*=.1;}
+	    my$iyscale=1.;
+	    my$ixscale=1.;
+	    while(($graph->{"maxx"}-$graph->{"minx"})*$xscale>15){$xscale*=.1;$ixscale*=10.;}
+	    while(($graph->{"maxy"}-$graph->{"miny"})*$yscale>15){$yscale*=.1;$iyscale*=10.;}
 	    
-	    while(($graph->{"maxx"}-$graph->{"minx"})*$xscale<3){$xscale*=10.;}
-	    while(($graph->{"maxy"}-$graph->{"miny"})*$yscale<3){$yscale*=10.;}
+	    while(($graph->{"maxx"}-$graph->{"minx"})*$xscale<3){$xscale*=10.;$ixscale*=.1;}
+	    while(($graph->{"maxy"}-$graph->{"miny"})*$yscale<3){$yscale*=10.;$iyscale*=.1;}
 	    
 	    # how tall are the x axis labels?
 	    $w->createText(-1,-1,-anchor=>'se',-tags=>['foo'],-text=>"0123456789.");
@@ -358,10 +368,10 @@ sub graphhelper{
 	    
 	    # place y axis labels at proper spacing/height
 	    my$lasty=-$maxlabelheight/2;
-	    my$topyval=int($graph->{"maxy"}*$yscale+1.)/$yscale;
+	    my$topyval=int($graph->{"maxy"}*$yscale+1.)*$iyscale;
 	    
 	    for(my$i=0;;$i++){
-		my$yval= $topyval-$i/$yscale;
+		my$yval= $topyval-$i*$iyscale;
 		my$y= ($graph->{"maxy"}-$yval)*$pixelpery;
 		last if($y>$useabley);
 		if($y-$maxlabelheight>=$lasty){
@@ -384,7 +394,7 @@ sub graphhelper{
 	    # draw y tix
 	    $lasty=-$maxlabelheight/2;
 	    for(my$i=0;;$i++){
-		my$yval= $topyval-$i/$yscale;
+		my$yval= $topyval-$i*$iyscale;
 		my$y= ($graph->{"maxy"}-$yval)*$pixelpery;
 		last if($y>$useabley);
 		if($yval==0){
@@ -402,11 +412,11 @@ sub graphhelper{
 	    }
 	    
 	    # place x axis labels at proper spacing
-	    my$topxval=int($graph->{"maxx"}*$xscale+1.)/$xscale;
+	    my$topxval=int($graph->{"maxx"}*$xscale+1.)*$ixscale;
 	    my$pixelperx=$useablex/($graph->{"maxx"}-$graph->{"minx"});
 	    
 	    for(my$i=0;;$i++){
-		my$xval= $topxval-$i/$xscale;
+		my$xval= $topxval-$i*$ixscale;
 		my$x= $width-($graph->{"maxx"}-$xval)*$pixelperx;
 		
 		last if($x<$beginx);
@@ -420,10 +430,10 @@ sub graphhelper{
 	    my$lastx=$width;
 	    
 	    for(my$i=0;;$i++){
-		my$xval= $topxval-$i/$xscale;
+		my$xval= $topxval-$i*$ixscale;
 		my$x= $width-($graph->{"maxx"}-$xval)*$pixelperx;
 		
-		last if($x-$maxxlabelwidth/2<0);
+		last if($x-$maxxlabelwidth/2<0 || $x<$beginx);
 		if($xval==0 && $x<$width){
 		    $w->createLine($x,0,$x,$useabley,-tags=>['axes'],-width=>1);
 		}
@@ -454,23 +464,11 @@ sub graphhelper{
 		    $legendy+=$graph->{"labelheight"};
 
 		    # plot the lines
-		    my$d=$data[$i];
-		    my$pair;
-		    my$lastx=undef;
-		    my$lasty=undef;
-		    foreach $pair (@{$data[$i]}){
-			if($pair=~m/(-?\d*)[ ,]+(-?\d*)/){
-			    my$x=($1-$graph->{"minx"})*$graph->{"ppx"}+$graph->{"xo"};
-			    my$y=(-$2+$graph->{"maxy"})*$graph->{"ppy"};
-			    
-			    if(defined($lastx)){				
-				$w->createLine($x,$y,$lastx,$lasty,-fill=>$color,
-					       -tags=>['lines']);
-			    }
-			    $lastx=$x;
-			    $lasty=$y;
-			}
-		    }
+		    my@pairs=map{if(/^\s*(-?[0-9\.]*)[ ,]+(-?[0-9\.]*)/){
+			(($1-$graph->{"minx"})*$graph->{"ppx"}+$graph->{"xo"},
+			 (-$2+$graph->{"maxy"})*$graph->{"ppy"})}} (@{$data[$i]});
+		    
+		    $w->createLine((@pairs),-fill=>$color,-tags=>['lines']);
 		}
 	    }
 	}
@@ -492,9 +490,37 @@ sub draw_graph{
 	$twostate{"maxy"}=undef;
     }
 
-    graphhelper(\%onestate);
-    graphhelper(\%twostate);
+    for(my$i=0;$i<$panel_count;$i++){
+	if($twostate{"vars"}->[$i]){
+	    
+	    #re-place the canvases
+	    
+	    $oneresize->place(-x=>5,-y=>5,-anchor=>'nw');
 
+	    $one->place(-relwidth=>1.,-width=>-10,-relheight=>.5,
+			 -height=>($graphy/2)-5-$oneresize->reqheight(),
+			 -x=>5,-y=>5+$oneresize->reqheight,-anchor=>'nw');
+	    
+	    $tworesize->place(-rely=>1.,-y=>5,-anchor=>'nw',-in=>$one);
+	    $two->place(-relwidth=>1.,-relheight=>1.,-rely=>1.,
+			-y=>5+$tworesize->reqheight(),-anchor=>'nw',-in=>$one);
+
+	    graphhelper(\%onestate);
+	    graphhelper(\%twostate);
+	    return;
+	}
+    }
+
+    $oneresize->place(-x=>5,-y=>5,-anchor=>'nw');
+    
+    $one->place(-relwidth=>1.,-width=>-10,-relheight=>1.,
+		 -height=>$graphy-5-$oneresize->reqheight(),
+		 -x=>5,-y=>5+$oneresize->reqheight,-anchor=>'nw');
+    
+    $tworesize->placeForget();
+    $two->placeForget();
+
+    graphhelper(\%onestate);
 }
 
 sub depopulate_panel{
@@ -520,8 +546,10 @@ sub populate_panel{
     my $i=0;
     foreach $key (sort (keys %bases)){
 	$panel_keys[$i]=$key;
-	$panel_onevars[$i]=0;
-	$panel_twovars[$i]=0;
+	if(!defined($panel_onevars[$i])){
+	    $panel_onevars[$i]=0;
+	    $panel_twovars[$i]=0;
+	}
 
 	my $temp=$panel_twos[$i]=$panel_shell->
 	    Checkbutton(-variable=>\$panel_twovars[$i],-command=>['main::draw_graph'],text=>'2')->
@@ -588,7 +616,9 @@ sub scan_directory{
     Status("Done Reading: $count files");
     depopulate_panel();
     populate_panel();
-    $fileno=$first_file;
+    
+    $fileno=$first_file if($fileno<$first_file);
+    $fileno=$last_file if($fileno>$last_file);
 
     $graph_slider->configure(-from=>$first_file,-to=>$last_file);
 
