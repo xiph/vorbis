@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: codebook.h,v 1.7 2001/06/04 05:50:10 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.8 2001/06/15 21:15:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -149,10 +149,15 @@ extern int vorbis_book_encodevs(codebook *book, float *a, oggpack_buffer *b,
 				int step,int stagetype);
 
 extern long vorbis_book_decode(codebook *book, oggpack_buffer *b);
-extern long vorbis_book_decodevs(codebook *book, float *a, oggpack_buffer *b,
-				   int n,int stagetype);
-extern long vorbis_book_decodev(codebook *book, float *a, oggpack_buffer *b,
-				   int n,int stagetype);
+extern long vorbis_book_decodevs_add(codebook *book, float *a, 
+				     oggpack_buffer *b,int n);
+extern long vorbis_book_decodev_set(codebook *book, float *a, 
+				    oggpack_buffer *b,int n);
+extern long vorbis_book_decodev_add(codebook *book, float *a, 
+				    oggpack_buffer *b,int n);
+extern long vorbis_book_decodevv_add(codebook *book, float **a,
+				     long off,int ch, 
+				    oggpack_buffer *b,int n);
 
 
 

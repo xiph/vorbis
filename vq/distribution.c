@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.5 2001/05/27 06:44:07 xiphmont Exp $
+ last mod: $Id: distribution.c,v 1.6 2001/06/15 21:15:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -102,7 +102,24 @@ int main(int argc,char *argv[]){
 
 	for(i=0;i<b->entries;i++)
 	  if(c->lengthlist[i]>base)base=c->lengthlist[i];
-	
+
+	/* dump a full, correlated count */
+	for(j=0;j<b->entries;j++){
+	  if(c->lengthlist[j]){
+	    int indexdiv=1;
+	    printf("%4ld: ",j);
+	    for(k=0;k<b->dim;k++){	
+	      int index= (j/indexdiv)%bins;
+	      printf("%+3.1f,", c->quantlist[index]*_float32_unpack(c->q_delta)+
+		     _float32_unpack(c->q_min));
+	      indexdiv*=bins;
+	    }
+	    printf("\t|",(1<<(base-c->lengthlist[j])));
+	    for(k=0;k<base-c->lengthlist[j];k++)printf("*");
+	    printf("\n");
+	  }
+	}
+
 	/* do a rough count */
 	for(j=0;j<b->entries;j++){
 	  int indexdiv=1;

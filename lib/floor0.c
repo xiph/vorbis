@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.41 2001/06/04 05:50:10 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.42 2001/06/15 21:15:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -402,7 +402,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *in,
   return(val);
 }
 
-static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
+static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
   vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
   vorbis_info_floor0 *info=look->vi;
   int j,k;
@@ -412,30 +412,42 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
     long maxval=(1<<info->ampbits)-1;
     float amp=(float)ampraw/maxval*info->ampdB;
     int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
-    float *lsp=alloca(sizeof(float)*look->m);
-
+    
     if(booknum!=-1 && booknum<info->numbooks){ /* be paranoid */
       backend_lookup_state *be=vb->vd->backend_state;
       codebook *b=be->fullbooks+info->books[booknum];
       float last=0.f;
-      
-      memset(out,0,sizeof(float)*look->m);    
-      
+      float *lsp=_vorbis_block_alloc(vb,sizeof(float)*(look->m+1));
+            
       for(j=0;j<look->m;j+=b->dim)
-	if(vorbis_book_decodev(b,lsp+j,&vb->opb,b->dim,-1)==-1)goto eop;
+	if(vorbis_book_decodev_set(b,lsp+j,&vb->opb,b->dim)==-1)goto eop;
       for(j=0;j<look->m;){
 	for(k=0;k<b->dim;k++,j++)lsp[j]+=last;
 	last=lsp[j-1];
       }
       
-      /* take the coefficients back to a spectral envelope curve */
-      vorbis_lsp_to_curve(out,look->linearmap,look->n,look->ln,
-			  lsp,look->m,amp,info->ampdB);
-      return(1);
+      lsp[look->m]=amp;
+      return(lsp);
     }
   }
-
  eop:
+  return(NULL);
+}
+
+static int floor0_inverse2(vorbis_block *vb,vorbis_look_floor *i,
+			   void *memo,float *out){
+  vorbis_look_floor0 *look=(vorbis_look_floor0 *)i;
+  vorbis_info_floor0 *info=look->vi;
+  
+  if(memo){
+    float *lsp=(float *)memo;
+    float amp=lsp[look->m];
+
+    /* take the coefficients back to a spectral envelope curve */
+    vorbis_lsp_to_curve(out,look->linearmap,look->n,look->ln,
+			lsp,look->m,amp,info->ampdB);
+    return(1);
+  }
   memset(out,0,sizeof(float)*look->n);
   return(0);
 }
@@ -443,7 +455,7 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
 /* export hooks */
 vorbis_func_floor floor0_exportbundle={
   &floor0_pack,&floor0_unpack,&floor0_look,&floor0_copy_info,&floor0_free_info,
-  &floor0_free_look,&floor0_forward,&floor0_inverse
+  &floor0_free_look,&floor0_forward,&floor0_inverse1,&floor0_inverse2
 };
 
 

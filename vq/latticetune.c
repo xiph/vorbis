@@ -12,7 +12,7 @@
 
  function: utility main for setting entropy encoding parameters
            for lattice codebooks
- last mod: $Id: latticetune.c,v 1.8 2001/06/04 05:50:12 xiphmont Exp $
+ last mod: $Id: latticetune.c,v 1.9 2001/06/15 21:15:43 xiphmont Exp $
 
  ********************************************************************/
 
@@ -162,6 +162,29 @@ int main(int argc,char *argv[]){
 
   c->lengthlist=lengths;
   write_codebook(stdout,name,c); 
+
+  {
+    long bins=_book_maptype1_quantvals(c);
+    long i,k,base=c->lengthlist[0];
+    for(i=0;i<entries;i++)
+      if(c->lengthlist[i]>base)base=c->lengthlist[i];
+    
+    for(j=0;j<entries;j++){
+      if(c->lengthlist[j]){
+	int indexdiv=1;
+	fprintf(stderr,"%4ld: ",j);
+	for(k=0;k<c->dim;k++){      
+	  int index= (j/indexdiv)%bins;
+	  fprintf(stderr,"%+3.1f,", c->quantlist[index]*_float32_unpack(c->q_delta)+
+		 _float32_unpack(c->q_min));
+	  indexdiv*=bins;
+	}
+	fprintf(stderr,"\t|",(1<<(base-c->lengthlist[j])));
+	for(k=0;k<base-c->lengthlist[j];k++)fprintf(stderr,"*");
+	fprintf(stderr,"\n");
+      }
+    }
+  }
   
   fprintf(stderr,"\r                                                     "
 	  "\nDone.\n");

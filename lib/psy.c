@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.45 2001/05/27 06:44:00 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.46 2001/06/15 21:15:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -97,6 +97,7 @@ static void setup_curve(float **c,
   int i,j;
   float ath[EHMER_MAX];
   float tempc[P_LEVELS][EHMER_MAX];
+  float *ATH=ATH_Bark_dB_lineconservative; /* just for limiting here */
 
   memcpy(c[0]+2,c[4]+2,sizeof(float)*EHMER_MAX);
   memcpy(c[2]+2,c[4]+2,sizeof(float)*EHMER_MAX);
@@ -116,18 +117,18 @@ static void setup_curve(float **c,
     float ath_min,ath_max;
 
     if(ibark<26)
-      ath_min=ATH_Bark_dB[ibark]*(1.f-del)+ATH_Bark_dB[ibark+1]*del;
+      ath_min=ATH[ibark]*(1.f-del)+ATH[ibark+1]*del;
     else
-      ath_min=ATH_Bark_dB[25];
+      ath_min=ATH[25];
 
     bark=toBARK(fromOC(oc_max));
     ibark=floor(bark);
     del=bark-ibark;
 
     if(ibark<26)
-      ath_max=ATH_Bark_dB[ibark]*(1.f-del)+ATH_Bark_dB[ibark+1]*del;
+      ath_max=ATH[ibark]*(1.f-del)+ATH[ibark+1]*del;
     else
-      ath_max=ATH_Bark_dB[25];
+      ath_max=ATH[25];
 
     ath[i]=min(ath_min,ath_max);
   }
@@ -190,7 +191,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   maxoc=toOC((n*.5f-.25f)*rate/n)*(1<<(p->shiftoc+1))+.5f;
   p->total_octave_lines=maxoc-p->firstoc+1;
 
-  p->ath=_ogg_malloc(n*sizeof(float));
+  if(vi->ath)
+    p->ath=_ogg_malloc(n*sizeof(float));
   p->octave=_ogg_malloc(n*sizeof(long));
   p->bark=_ogg_malloc(n*sizeof(unsigned long));
   p->vi=vi;
@@ -198,17 +200,18 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
 
   /* set up the lookups for a given blocksize and sample rate */
   /* Vorbis max sample rate is currently limited by 26 Bark (54kHz) */
-  set_curve(ATH_Bark_dB, p->ath,n,rate);
+  if(vi->ath)
+    set_curve(vi->ath, p->ath,n,rate);
   for(i=0;i<n;i++){
     float bark=toBARK(rate/(2*n)*i); 
 
     for(;lo+vi->noisewindowlomin<i && 
-	  toBARK(rate/(2*n)*lo)<=(bark-vi->noisewindowlo);lo++);
+	  toBARK(rate/(2*n)*lo)<(bark-vi->noisewindowlo);lo++);
     
     for(;hi<n && (hi<i+vi->noisewindowhimin ||
-	  toBARK(rate/(2*n)*hi)<=(bark+vi->noisewindowhi));hi++);
+	  toBARK(rate/(2*n)*hi)<(bark+vi->noisewindowhi));hi++);
     
-    p->bark[i]=((hi+1)<<16)+(lo+1);
+    p->bark[i]=(hi<<16)+lo;
 
   }
 
@@ -572,15 +575,18 @@ static void bark_noise_median(int n,const long *b,const float *f,
   int fixedcountbelow=0;
 
   memset(barkradix,0,sizeof(barkradix));
-  memset(fixedradix,0,sizeof(fixedradix));
 
-  /* bootstrap the fixed window case seperately */
-  for(i=0;i<(fixed>>1);i++){
-    int bin=psy_dBquant(f+i);
-    fixedradix[bin]++;
-    fixedc++;
-    if(bin<=median)
-      fixedcountbelow++;
+  if(fixed>0){
+    memset(fixedradix,0,sizeof(fixedradix));
+
+    /* bootstrap the fixed window case seperately */
+    for(i=0;i<(fixed>>1);i++){
+      int bin=psy_dBquant(f+i);
+      fixedradix[bin]++;
+      fixedc++;
+      if(bin<=median)
+	fixedcountbelow++;
+    }
   }
 
   for(i=0;i<n;i++){
@@ -600,43 +606,58 @@ static void bark_noise_median(int n,const long *b,const float *f,
 	barkcountbelow--;
     }
 
-    bi=i+(fixed>>1);
-    if(bi<n){
-      int bin=psy_dBquant(f+bi);
-      fixedradix[bin]++;
-      fixedc++;
-      if(bin<=median)
-	fixedcountbelow++;
-    }
-
-    bi-=fixed;
-    if(bi>=0){
-      int bin=psy_dBquant(f+bi);
-      fixedradix[bin]--;
-      fixedc--;
-      if(bin<=median)
-	fixedcountbelow--;
+    if(fixed>0){
+      bi=i+(fixed>>1);
+      if(bi<n){
+	int bin=psy_dBquant(f+bi);
+	fixedradix[bin]++;
+	fixedc++;
+	if(bin<=median)
+	  fixedcountbelow++;
+      }
+      
+      bi-=fixed;
+      if(bi>=0){
+	int bin=psy_dBquant(f+bi);
+	fixedradix[bin]--;
+	fixedc--;
+	if(bin<=median)
+	  fixedcountbelow--;
+      }
     }
 
     /* move the median if needed */
     {
       int bark_th = (thresh[i]*(hi-lo)+512)/1024;
-      int fixed_th = (thresh[i]*(fixedc)+512)/1024;
-
-      while(bark_th>=barkcountbelow && 
-	    fixed_th>=fixedcountbelow /* && median<LASTBIN by rep invariant */
-	    ){
-	median++;
-	barkcountbelow+=barkradix[median];
-	fixedcountbelow+=fixedradix[median];
-      }
-
-      while(bark_th<barkcountbelow ||
-	    fixed_th<fixedcountbelow /* && median>=0 by rep invariant */
-	    ){
-	barkcountbelow-=barkradix[median];
-	fixedcountbelow-=fixedradix[median];
-	median--;
+      
+      if(fixed>0){
+	int fixed_th = (thresh[i]*(fixedc)+512)/1024;
+	
+	while(bark_th>=barkcountbelow && 
+	      fixed_th>=fixedcountbelow /* && median<LASTBIN by rep invariant */
+	      ){
+	  median++;
+	  barkcountbelow+=barkradix[median];
+	  fixedcountbelow+=fixedradix[median];
+	}
+	
+	while(bark_th<barkcountbelow ||
+	      fixed_th<fixedcountbelow /* && median>=0 by rep invariant */
+	      ){
+	  barkcountbelow-=barkradix[median];
+	  fixedcountbelow-=fixedradix[median];
+	  median--;
+	}
+      }else{
+	while(bark_th>=barkcountbelow){
+	  median++;
+	  barkcountbelow+=barkradix[median];
+	}
+	
+	while(bark_th<barkcountbelow){
+	  barkcountbelow-=barkradix[median];
+	  median--;
+	}
       }
     }
 
@@ -684,7 +705,7 @@ float _vp_compute_mask(vorbis_look_psy *p,
 
   /* set the ATH (floating below localmax, not global max by a
      specified att) */
-  if(p->vi->athp){
+  if(p->vi->ath){
     float att=localmax+p->vi->ath_adjatt;
     if(att<p->vi->ath_maxatt)att=p->vi->ath_maxatt;
 

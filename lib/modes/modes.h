@@ -11,13 +11,14 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.7 2001/02/26 03:51:10 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.8 2001/06/15 21:15:43 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_MODES_H_
 #define _V_MODES_H_
 
+#include "masking.h"
 #include "modes/mode_AA.h"
 #include "modes/mode_A.h"
 #include "modes/mode_B.h"

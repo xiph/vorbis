@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.20 2001/05/27 06:44:00 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.21 2001/06/15 21:15:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,7 +28,7 @@
 #define P_BANDS 17
 #define P_LEVELS 11
 typedef struct vorbis_info_psy{
-  int    athp;
+  float  *ath;
   int    decayp;
 
   float  ath_adjatt;

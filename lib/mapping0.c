@@ -7,11 +7,11 @@
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
-
+ *                                                                  *
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.29 2001/06/04 05:50:10 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.30 2001/06/15 21:15:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -143,12 +143,45 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
   return(look);
 }
 
+static int ilog2(unsigned int v){
+  int ret=0;
+  while(v>1){
+    ret++;
+    v>>=1;
+  }
+  return(ret);
+}
+
 static void mapping0_pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer *opb){
   int i;
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)vm;
 
-  /* leave submaps as a hook to be filled in later */
-  oggpack_write(opb,info->submaps-1,4);
+  /* another 'we meant to do it this way' hack...  up to beta 4, we
+     packed 4 binary zeros here to signify one submapping in use.  We
+     now redefine that to mean four bitflags that indicate use of
+     deeper features; bit0:submappings, bit1:coupling,
+     bit2,3:reserved. This is backward compatable with all actual uses
+     of the beta code. */
+
+  if(info->submaps>1){
+    oggpack_write(opb,1,1);
+    oggpack_write(opb,info->submaps-1,4);
+  }else
+    oggpack_write(opb,0,1);
+
+  if(info->coupling_steps>0){
+    oggpack_write(opb,1,1);
+    oggpack_write(opb,info->coupling_steps-1,8);
+    
+    for(i=0;i<info->coupling_steps;i++){
+      oggpack_write(opb,info->coupling_mag[i],ilog2(vi->channels));
+      oggpack_write(opb,info->coupling_ang[i],ilog2(vi->channels));
+    }
+  }else
+    oggpack_write(opb,0,1);
+  
+  oggpack_write(opb,0,2); /* 2,3:reserved */
+
   /* we don't write the channel submappings if we only have one... */
   if(info->submaps>1){
     for(i=0;i<vi->channels;i++)
@@ -168,8 +201,29 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
   codec_setup_info     *ci=vi->codec_setup;
   memset(info,0,sizeof(vorbis_info_mapping0));
 
-  info->submaps=oggpack_read(opb,4)+1;
+  if(oggpack_read(opb,1))
+    info->submaps=oggpack_read(opb,4)+1;
+  else
+    info->submaps=1;
 
+  if(oggpack_read(opb,1)){
+    info->coupling_steps=oggpack_read(opb,8)+1;
+
+    for(i=0;i<info->coupling_steps;i++){
+      int testM=info->coupling_mag[i]=oggpack_read(opb,ilog2(vi->channels));
+      int testA=info->coupling_ang[i]=oggpack_read(opb,ilog2(vi->channels));
+
+      if(testM<0 || 
+	 testA<0 || 
+	 testM==testA || 
+	 testM>=vi->channels ||
+	 testA>=vi->channels) goto err_out;
+    }
+
+  }
+
+  if(oggpack_read(opb,2)>0)goto err_out; /* 2,3:reserved */
+    
   if(info->submaps>1){
     for(i=0;i<vi->channels;i++){
       info->chmuxlist[i]=oggpack_read(opb,4);
@@ -280,29 +334,68 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	      res,
 	      codedflr);
 
-    _analysis_output("codedflr",seq,codedflr,n/2,0,1);
-    _analysis_output("res",seq++,res,n/2,0,0);
+    for(j=0;j<n/2;j++)
+      if(fabs(vb->pcm[i][j]>1000))
+	fprintf(stderr,"%ld ",seq);
+    
+    _analysis_output("res",seq-vi->channels+j,vb->pcm[i],n,0,0);
+    _analysis_output("codedflr",seq++,codedflr,n/2,0,1);
       
-#ifdef TRAIN_RES
-    if(nonzero[i]){
-      FILE *of;
-      char buffer[80];
-      
-      sprintf(buffer,"residue_%d.vqd",vb->mode);
-      of=fopen(buffer,"a");
-      for(j=0;j<n/2;j++){
-	fprintf(of,"%.2f, ",res[j]);
-	if(fabs(res[j])>1000){
-	  fprintf(stderr," %d ",seq-1);
-	}
-      }
-      fprintf(of,"\n");
-      fclose(of);
-    }
-#endif      
   }
 
   vbi->ampmax=newmax;
+
+  /* channel coupling */
+  for(i=0;i<info->coupling_steps;i++){
+    float *pcmM=vb->pcm[info->coupling_mag[i]];
+    float *pcmA=vb->pcm[info->coupling_ang[i]];
+
+    /*     +- 
+            B
+            |       A-B
+     -4 -3 -2 -1  0                    
+            |
+      3     |     1
+            |
+  -+  2-----+-----2----A ++  
+            |
+      1     |     3
+            |
+      0 -1 -2 -3 -4
+  B-A       |
+           --
+
+    */
+    for(j=n/2-1;j>=0;j--){
+      float A=rint(pcmM[j]);
+      float B=rint(pcmA[j]);
+      
+      if(fabs(A)>fabs(B)){
+	pcmM[j]=A;
+	if(A>0)
+	  pcmA[j]=A-B;
+	else
+	  pcmA[j]=B-A;
+      }else{
+	pcmM[j]=B;
+	if(B>0)
+	  pcmA[j]=A-B;
+	else
+	  pcmA[j]=B-A;
+      }
+
+      /*if(fabs(mag)<3.5f)
+	ang=rint(ang/(mag*2.f))*mag*2.f;*/
+      
+      /*if(fabs(mag)<1.5)
+	ang=0;*/
+
+      /*if(i>(n*3/16))
+	ang=0;*/
+            
+      /*if(ang>=fabs(mag*2))ang=-fabs(mag*2);*/
+    }
+  }
 
   /* perform residue encoding with residue mapping; this is
      multiplexed.  All the channels belonging to one submap are
@@ -311,17 +404,13 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   for(i=0;i<info->submaps;i++){
     int ch_in_bundle=0;
     for(j=0;j<vi->channels;j++){
-      if(info->chmuxlist[j]==i && nonzero[j]>0){
+      if(info->chmuxlist[j]==i && nonzero[j])
 	pcmbundle[ch_in_bundle++]=vb->pcm[j];
-      }
+   
     }
     
     look->residue_func[i]->forward(vb,look->residue_look[i],
 				   pcmbundle,ch_in_bundle);
-  }
-
-  for(j=0;j<vi->channels;j++){
-    _analysis_output("resres",seq-vi->channels+j,vb->pcm[j],n/2,0,0);
   }
   
   look->lastframe=vb->sequence;
@@ -341,7 +430,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 
   float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
   float **pcmbundle=alloca(sizeof(float *)*vi->channels);
-  int *nonzero=alloca(sizeof(int)*vi->channels);
+  void **nonzero=alloca(sizeof(void *)*vi->channels);
   
   /* time domain information decode (note that applying the
      information would have to happen later; we'll probably add a
@@ -350,14 +439,13 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
 
   /* recover the spectral envelope; store it in the PCM vector for now */
   for(i=0;i<vi->channels;i++){
-    float *pcm=vb->pcm[i];
     int submap=info->chmuxlist[i];
     nonzero[i]=look->floor_func[submap]->
-      inverse(vb,look->floor_look[submap],pcm);
-    _analysis_output("ifloor",seq+i,pcm,n/2,0,1);
+      inverse1(vb,look->floor_look[submap]);
+    memset(vb->pcm[i],0,sizeof(float)*n/2);
   }
 
-  /* recover the residue, apply directly to the spectral envelope */
+  /* recover the residue into our working vectors */
 
   for(i=0;i<info->submaps;i++){
     int ch_in_bundle=0;
@@ -369,6 +457,42 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
     look->residue_func[i]->inverse(vb,look->residue_look[i],pcmbundle,ch_in_bundle);
   }
 
+  /* channel coupling */
+  for(i=info->coupling_steps-1;i>=0;i--){
+    float *pcmM=vb->pcm[info->coupling_mag[i]];
+    float *pcmA=vb->pcm[info->coupling_ang[i]];
+
+    for(j=0;j<n/2;j++){
+      float mag=pcmM[j];
+      float ang=pcmA[j];
+
+      if(mag>0)
+	if(ang>0){
+	  pcmM[j]=mag;
+	  pcmA[j]=mag-ang;
+	}else{
+	  pcmA[j]=mag;
+	  pcmM[j]=mag+ang;
+	}
+      else
+	if(ang>0){
+	  pcmM[j]=mag;
+	  pcmA[j]=mag+ang;
+	}else{
+	  pcmA[j]=mag;
+	  pcmM[j]=mag-ang;
+	}
+    }
+  }
+
+  /* compute and apply spectral envelope */
+  for(i=0;i<vi->channels;i++){
+    float *pcm=vb->pcm[i];
+    int submap=info->chmuxlist[i];
+    look->floor_func[submap]->
+      inverse2(vb,look->floor_look[submap],nonzero[i],pcm);
+  }
+
   /* transform the PCM data; takes PCM vector, vb; modifies PCM vector */
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
@@ -377,9 +501,6 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
     mdct_backward(b->transform[vb->W][0],pcm,pcm);
   }
 
-  /* now apply the decoded pre-window time information */
-  /* NOT IMPLEMENTED */
-  
   /* window the data */
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
@@ -404,6 +525,3 @@ vorbis_func_mapping mapping0_exportbundle={
   &mapping0_pack,&mapping0_unpack,&mapping0_look,&mapping0_copy_info,
   &mapping0_free_info,&mapping0_free_look,&mapping0_forward,&mapping0_inverse
 };
-
-
-

@@ -19,9 +19,24 @@
 
 die "Could not open $ARGV[0]: $!" unless open (F,$ARGV[0]);
 
+$goflag=0;
 while($line=<F>){
 
     print "\n#### $line\n\n";
+    if($line=~m/^GO/){
+	$goflag=1;
+	next;
+    }
+
+    if($goflag==0){
+	if($line=~m/\S+/ && !($line=~m/^\#/) ){
+	    my $command=$line;
+	    print ">>> $command\n";
+	    die "Couldn't shell command.\n\tcommand:$command\n" 
+		if syst($command);
+	}
+	next;
+    }
 
     # >res0_128_128
     if($line=~m/^>(\S+)\s+(\S*)/){

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.25 2001/06/04 05:50:10 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.26 2001/06/15 21:15:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -342,8 +342,7 @@ long vorbis_book_decode(codebook *book, oggpack_buffer *b){
 }
 
 /* returns 0 on OK or -1 on eof *************************************/
-long vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
-                         int n,int addmul){
+long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
   int step=n/book->dim;
   long *entry = alloca(sizeof(long)*step);
   float **t = alloca(sizeof(float *)*step);
@@ -354,42 +353,17 @@ long vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
     if(entry[i]==-1)return(-1);
     t[i] = book->valuelist+entry[i]*book->dim;
   }
-  switch(addmul){
-  case -1:
-    for(i=0,o=0;i<book->dim;i++,o+=step)
-      for (j=0;j<step;j++)
-       a[o+j]=t[j][i];
-    break;
-  case 0:
-    for(i=0,o=0;i<book->dim;i++,o+=step)
-      for (j=0;j<step;j++)
-       a[o+j]+=t[j][i];
-    break;
-  case 1:
-    for(i=0,o=0;i<book->dim;i++,o+=step)
-      for (j=0;j<step;j++)
-       a[o+j]*=t[j][i];
-    break;
-  }
+  for(i=0,o=0;i<book->dim;i++,o+=step)
+    for (j=0;j<step;j++)
+      a[o+j]+=t[j][i];
   return(0);
 }
 
-long vorbis_book_decodev(codebook *book,float *a,oggpack_buffer *b,
-			 int n,int addmul){
+long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
   int i,j,entry;
   float *t;
 
-  switch(addmul){
-  case -1:
-    for(i=0;i<n;){
-      entry = vorbis_book_decode(book,b);
-      if(entry==-1)return(-1);
-      t     = book->valuelist+entry*book->dim;
-      for (j=0;j<book->dim;)
-	a[i++]=t[j++];
-    }
-    break;
-  case 0:
+  if(book->dim>8){
     for(i=0;i<n;){
       entry = vorbis_book_decode(book,b);
       if(entry==-1)return(-1);
@@ -397,22 +371,73 @@ long vorbis_book_decodev(codebook *book,float *a,oggpack_buffer *b,
       for (j=0;j<book->dim;)
 	a[i++]+=t[j++];
     }
-    break;
-  case 1:
+  }else{
     for(i=0;i<n;){
       entry = vorbis_book_decode(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
-      for (j=0;j<book->dim;)
-	a[i++]*=t[j++];
+      switch(book->dim){
+      case 8:
+	a[i++]+=t[j++];
+      case 7:
+	a[i++]+=t[j++];
+      case 6:
+	a[i++]+=t[j++];
+      case 5:
+	a[i++]+=t[j++];
+      case 4:
+	a[i++]+=t[j++];
+      case 3:
+	a[i++]+=t[j++];
+      case 2:
+	a[i++]+=t[j++];
+      case 1:
+	a[i++]+=t[j++];
+      case 0:
+	break;
+      }
     }
-    break;
+  }    
+  return(0);
+}
+
+long vorbis_book_decodev_set(codebook *book,float *a,oggpack_buffer *b,int n){
+  int i,j,entry;
+  float *t;
+
+  for(i=0;i<n;){
+    entry = vorbis_book_decode(book,b);
+    if(entry==-1)return(-1);
+    t     = book->valuelist+entry*book->dim;
+    for (j=0;j<book->dim;)
+      a[i++]=t[j++];
+  }
+  return(0);
+}
+
+long vorbis_book_decodevv_add(codebook *book,float **a,long offset,int ch,
+			      oggpack_buffer *b,int n){
+  long i,j,k,entry;
+  int chptr=0;
+
+  for(i=offset/ch;i<(offset+n)/ch;){
+    entry = vorbis_book_decode(book,b);
+    if(entry==-1)return(-1);
+    {
+      const float *t     = book->valuelist+entry*book->dim;
+      for (j=0;j<book->dim;j++){
+	a[chptr++][i]+=t[j];
+	if(chptr==ch){
+	  chptr=0;
+	  i++;
+	}
+      }
+    }
   }
   return(0);
 }
 
 #ifdef _V_SELFTEST
-
 /* Simple enough; pack a few candidate codebooks, unpack them.  Code a
    number of vectors through (keeping track of the quantized values),
    and decode using the unpacked book.  quantized version of in should
@@ -531,7 +556,7 @@ int main(){
     }
 
     for(i=0;i<TESTSIZE;i+=c.dim)
-      if(vorbis_book_decodevs(&c,iv+i,&read,1,-1)==-1){
+      if(vorbis_book_decodev_set(&c,iv+i,&read,c.dim)==-1){
 	fprintf(stderr,"Error reading codebook test data (EOP).\n");
 	exit(1);
       }

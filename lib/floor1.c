@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.6 2001/06/12 02:44:27 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.7 2001/06/15 21:15:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -86,10 +86,10 @@ static void floor1_free_info(vorbis_info_floor *i){
 static void floor1_free_look(vorbis_look_floor *i){
   vorbis_look_floor1 *look=(vorbis_look_floor1 *)i;
   if(i){
-    fprintf(stderr,"floor 1 bit usage: %ld:%ld:%ld (%ld/frame), mse:%gdB\n",
+    /*fprintf(stderr,"floor 1 bit usage: %ld:%ld:%ld (%ld/frame), mse:%gdB\n",
 	    look->postbits/look->seq,look->classbits/look->seq,look->subbits/look->seq,
 	    (look->postbits+look->subbits+look->classbits)/look->seq,
-	    sqrt(look->mse/look->seq));
+	    sqrt(look->mse/look->seq));*/
 
     memset(look,0,sizeof(vorbis_look_floor1));
     free(i);

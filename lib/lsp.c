@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.17 2001/02/26 03:50:42 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.18 2001/06/15 21:15:39 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification and a
   few bugfixes) from "On the Computation of the LSP Frequencies" by
@@ -104,7 +104,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 			ampoffset);
 
     do{
-      curve[i++]=q;
+      curve[i++]*=q;
     }while(map[i]==k);
   }
   vorbis_fpu_restore(fpu);
@@ -231,8 +231,8 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 			                              /*  m.8, m+n<=8 */
 			    ampoffseti);              /*  8.12[0]     */
 
-    curve[i]=amp;
-    while(map[++i]==k)curve[i]=amp;
+    curve[i]*=amp;
+    while(map[++i]==k)curve[i]*=amp;
   }
 }
 
@@ -273,8 +273,8 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 
     q=fromdB(amp/sqrt(p+q)-ampoffset);
 
-    curve[i]=q;
-    while(map[++i]==k)curve[i]=q;
+    curve[i]*=q;
+    while(map[++i]==k)curve[i]*=q;
   }
 }
 
