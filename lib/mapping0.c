@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.49.2.5 2002/06/11 04:44:45 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.49.2.6 2002/06/20 03:55:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -194,10 +194,11 @@ static int mapping0_forward(vorbis_block *vb){
 
   int modenumber=vb->W;
   vorbis_info_mapping0 *info=ci->map_param[modenumber];
-  vb->mode=modenumber;
-
   vorbis_look_psy *psy_look=
     b->psy+blocktype+(vb->W?2:0);
+
+  vb->mode=modenumber;
+
 
   for(i=0;i<vi->channels;i++){
     float scale=4.f/n;

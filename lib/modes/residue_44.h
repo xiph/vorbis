@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.11.6.5 2002/06/11 04:44:49 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.11.6.6 2002/06/20 03:55:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,8 +39,8 @@ static vorbis_info_residue0 _residue_44_low={
   0,-1, -1, 8,-1,
   {0},
   {-1},
-  {  .5, 1.5,   4.5,  1.5,  2.5,  4.5, 26.5},
-  {  .5,   .5,   .5, 999., 999., 999., 999.},
+  {  .5,  1.0,  1.5,   2.5,  4.5,  1.5,  4.5, 26.5},
+  {  .5,   .5,   .5,   .5,   .5, 999., 999., 999.},
 };
 /* 26 doesn't cascade well; use 28 instead */
 static vorbis_info_residue0 _residue_44_low_un={
@@ -288,15 +288,18 @@ static vorbis_info_residue0 _residue_44_high_un={
    appropriate index adjustment */
 static vorbis_residue_template _residue_template_44_stereo[10]={
   /* mode 0; 64-ish */
-  {{&_residue_44_low, &_residue_44_low},  
-   {&_huff_book__44c0_short,&_huff_book__44c0_long},
-   {&_huff_book__44c0_short,&_huff_book__44c0_long},
-   { 
-     {0},{0,0,&_44c0_s0_p1_0},{0,0,&_44c0_s0_p2_0},{0,0,&_44c0_s0_p3_0},
-     {&_44c0_s0_p4_0,&_44c0_s0_p4_1},{0,0,&_44c0_s0_p5_0},{0,0,&_44c0_s0_p6_0},
-     {&_44c0_s0_p7_0,&_44c0_s0_p7_1,&_44c0_s0_p7_2}
+  /* XXXXX mode 4; 128-ish */
+  {{&_residue_44_mid, &_residue_44_mid},  
+   {&_huff_book__44c4_s_short,&_huff_book__44c4_s_long},
+   {&_huff_book__44c4_sm_short,&_huff_book__44c4_sm_long},
+   {
+     {0},{0,0,&_44c4_s_p1_0},{0,0,&_44c4_s_p2_0},{0,0,&_44c4_s_p3_0},
+     {0,0,&_44c4_s_p4_0},{0,0,&_44c4_s_p5_0},{0,0,&_44c4_s_p6_0},
+     {&_44c4_s_p7_0,&_44c4_s_p7_1},{&_44c4_s_p8_0,&_44c4_s_p8_1},
+     {&_44c4_s_p9_0,&_44c4_s_p9_1,&_44c4_s_p9_2}
    },
   },
+
   /* mode 1; 80-ish */
   {{&_residue_44_low, &_residue_44_low},  
    {&_huff_book__44c1_short,&_huff_book__44c1_long},
