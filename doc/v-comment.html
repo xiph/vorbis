@@ -7,7 +7,7 @@
 Ogg Vorbis comment field specification
 </font></h1>
 
-<em>Last update to this document: June 16, 2000</em><p>
+<em>Last update to this document: January 19, 2001</em><p>
 
 The text comment header is the second (of three) header packets that
 begin a Vorbis bitstream. It is meant for short, text comments,
@@ -15,7 +15,6 @@ not arbitrary metadata; arbitrary metadata belongs in a
 metadata stream (usually an XML stream type).<p>
 
 <h2>Comment use rationale</h2>
-
 
 The comment field is meant to be used much like someone jotting a
 quick note on the bottom of a CDR. It should be a little information to
@@ -37,7 +36,7 @@ is limited to 2^32-1 bytes. The vector length is encoded; the vector
 is not null terminated. In addition to the vector list, there is a
 single vector for vendor name (also 8 bit clean, length encoded in 32
 bits). Libvorbis currently sets the vendor string to "Xiphophorus
-libVorbis I 20000508".<p>
+libVorbis I 20010119".<p>
 
 The comment vectors are structured similarly to a UNIX environment.
 That is, comment fields consist of a field name and a field value and
@@ -72,7 +71,8 @@ in this list.
 <dl>
 <dt>TITLE<dd>Track name
 
-<dt>VERSION<dd>The version field may be used to differentiate multiple version of the same track title in a single collection.
+<dt>VERSION<dd>The version field may be used to differentiate multiple
+version of the same track title in a single collection. (e.g. remix info)
 
 <dt>ALBUM<dd>The collection name to which this track belongs
 
@@ -80,7 +80,7 @@ in this list.
 
 <dt>ARTIST<dd>Track performer
 
-<dt>ORGANIZATION<dd>Name of the organization producing the track (ie,
+<dt>ORGANIZATION<dd>Name of the organization producing the track (i.e.
 the 'record label')
 
 <dt>DESCRIPTION<dd>A short text description of the contents
@@ -116,7 +116,7 @@ common namespace.
 <li>
 Field names are not required to be unique (occur once) within a
 comment header.  As an example, assume a track was recorded by three
-well know artists; the following is permissible:
+well know artists; the following is permissible, and encouraged:
 <pre>
               ARTIST=Dizzy Gillespie 
               ARTIST=Sonny Rollins 
@@ -188,9 +188,4 @@ OggSquish, Vorbis, Xiphophorus and their logos are trademarks (tm) of
 copyright (C) 1994-2000 Xiphophorus. All rights reserved.<p>
 
 </body>
-
-
-
-
-
 
