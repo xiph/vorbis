@@ -68,8 +68,8 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Dynamic_Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /YX /FD /GZ  /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /D "_WIN32" /YX /FD /GZ  /c
+# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /YX /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /D "_WIN32" /YX /FD /GZ /c
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
@@ -176,19 +176,19 @@ SOURCE=..\lib\window.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\include\vorbis\backends.h
+SOURCE=..\lib\backends.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bookinternal.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\codebook.h
+SOURCE=..\lib\codebook.h
 # End Source File
 # Begin Source File
 
 SOURCE=..\include\vorbis\codec.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\lib\codec_internal.h
 # End Source File
 # Begin Source File
 
@@ -216,14 +216,6 @@ SOURCE=..\lib\lsp.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\vorbis\book\lsp12_0.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\lsp30_0.vqh
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\masking.h
 # End Source File
 # Begin Source File
@@ -233,30 +225,6 @@ SOURCE=..\lib\mdct.h
 # Begin Source File
 
 SOURCE=..\lib\misc.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\mode_A.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\mode_B.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\mode_C.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\mode_D.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\mode_E.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\modes.h
 # End Source File
 # Begin Source File
 
@@ -272,283 +240,7 @@ SOURCE=..\lib\registry.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\vorbis\book\res0_1024a_128_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_6.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_7.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_8.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_128_9.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_6.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_7.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_8.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_160_9.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_192_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_192_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_192_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_192_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_192_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_256_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_256_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_256_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_256_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_256_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_350_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_350_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_350_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_350_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_1024a_350_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_128_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_128_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_128_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_128_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_128_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_160_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_160_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_160_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_160_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_160_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_192_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_192_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_192_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_192_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_192_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_256_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_256_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_256_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_256_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_256_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_350_1.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_350_2.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_350_3.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_350_4.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\res0_128a_350_5.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_1024a_128.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_1024a_160.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_1024a_192.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_1024a_256.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_1024a_350.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_128a_128.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_128a_160.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_128a_192.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_128a_256.vqh
-# End Source File
-# Begin Source File
-
-SOURCE=..\include\vorbis\book\resaux0_128a_350.vqh
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\scales.h
-# End Source File
-# Begin Source File
-
-SOURCE=..\lib\sharedbook.h
 # End Source File
 # Begin Source File
 
@@ -566,6 +258,10 @@ SOURCE=..\lib\window.h
 # Begin Group "Other Files"
 
 # PROP Default_Filter ".def"
+# Begin Source File
+
+SOURCE=.\vorbis.def
+# End Source File
 # End Group
 # End Target
 # End Project
