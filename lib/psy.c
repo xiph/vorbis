@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.1 2000/03/29 03:49:28 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2 2000/03/29 20:08:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,6 +25,9 @@
 #include "masking.h"
 #include "psy.h"
 #include "scales.h"
+
+/* the beginnings of real psychoacoustic infrastructure.  This is
+   still not tightly tuned */
 
 void _vi_psy_free(vorbis_info_psy *i){
   if(i){
@@ -74,25 +77,26 @@ static void linear_curve(double *c){
       c[i]=fromdB(c[i]);
 }
 
+static void interp_curve_dB(double *c,double *c1,double *c2,double del){
+  int i;
+  for(i=0;i<EHMER_MAX;i++)
+    c[i]=fromdB(todB(c2[i])*del+todB(c1[i])*(1.-del));
+}
+
 static void interp_curve(double *c,double *c1,double *c2,double del){
   int i;
   for(i=0;i<EHMER_MAX;i++)
     c[i]=c2[i]*del+c1[i]*(1.-del);
 }
 
-extern void analysis(char *base,int i,double *v,int n,int bark,int dB);
-
-static double c0[EHMER_MAX]; /* initialized to zero */
 static void setup_curve(double **c,
 			int oc,
-			double dB20,
-			double dB40, 
-			double dB60, 
-			double dB80,
-			double dB100,
-			double dB120){
+			double *curveatt_dB,
+			double *peakatt_dB,
+			double peaklowrolloff,
+			double peakhighrolloff){
   int i,j;
-  double tempc[11][EHMER_MAX];
+  double tempc[9][EHMER_MAX];
   double ath[EHMER_MAX];
 
   for(i=0;i<EHMER_MAX;i++){
@@ -103,70 +107,66 @@ static void setup_curve(double **c,
       ath[i]=ATH_Bark_dB[ibark]*(1.-del)+ATH_Bark_dB[ibark+1]*del;
     else
       ath[i]=200;
-    fprintf(stderr,"%d.%g ",ibark,del);
   }
-  fprintf(stderr,"\n");
-  analysis("Cath",oc*100,ath,EHMER_MAX,0,0);
 
-  memcpy(c[10],c[8],sizeof(double)*EHMER_MAX);
   memcpy(c[0],c[2],sizeof(double)*EHMER_MAX);
 
-  for(i=0;i<11;i+=2)
-    analysis("Cpre",oc*100+i,c[i],EHMER_MAX,0,0);
+  /* the temp curves are a bit roundabout, but this is only in
+     init. */
 
-  for(i=0;i<11;i++){
-    analysis("Cpre",oc*100+i,c[i],EHMER_MAX,0,0);
+  for(i=0;i<9;i++){
     memcpy(tempc[i],c[i],sizeof(double)*EHMER_MAX);
     max_curve(tempc[i],ath);
   }
 
-  attenuate_curve(c[0],dB20);
-  attenuate_curve(c[2],dB40);
-  attenuate_curve(c[4],dB60);
-  attenuate_curve(c[6],dB80);
-  attenuate_curve(c[8],dB100);
-  attenuate_curve(c[10],dB120);
-  attenuate_curve(tempc[0],dB20);
-  attenuate_curve(tempc[2],dB40);
-  attenuate_curve(tempc[4],dB60);
-  attenuate_curve(tempc[6],dB80);
-  attenuate_curve(tempc[8],dB100);
-  attenuate_curve(tempc[10],dB120);
+  /* normalize them so the driving amplitude is 0dB */
+  for(i=0;i<5;i++){
+    attenuate_curve(c[i*2],curveatt_dB[i]);
+    attenuate_curve(tempc[i*2],curveatt_dB[i]);
+  }
 
-  /* The c array is comes in as dB curves at 20, 40, 60 80 100 120 dB.
+  /* add in the additional peak attenuation hack */
+  for(i=0;i<5;i++){
+    double att=peakatt_dB[i];
+    for(j=EHMER_OFFSET;j<EHMER_MAX && att>tempc[i*2][j];j++){
+      c[i*2][j]=att;
+      tempc[i*2][j]=att;
+      att+=peakhighrolloff;
+    }
+    att=peakatt_dB[i]+peaklowrolloff;
+    for(j=EHMER_OFFSET-1;j>=0 && att>tempc[i*2][j];j--){
+      c[i*2][j]=att;
+      tempc[i*2][j]=att;
+      att+=peaklowrolloff;
+    }
+  }
+
+  /* The c array is comes in as dB curves at 20 40 60 80 100 dB.
      interpolate intermediate dB curves */
-  interp_curve(c[1],c[0],c[2],.5);
-  interp_curve(c[3],c[2],c[4],.5);
-  interp_curve(c[5],c[4],c[6],.5);
-  interp_curve(c[7],c[6],c[8],.5);
-  interp_curve(c[9],c[8],c[10],.5);
-  interp_curve(tempc[1],tempc[0],tempc[2],.5);
-  interp_curve(tempc[3],tempc[2],tempc[4],.5);
-  interp_curve(tempc[5],tempc[4],tempc[6],.5);
-  interp_curve(tempc[7],tempc[6],tempc[8],.5);
-  interp_curve(tempc[9],tempc[8],tempc[10],.5);
+  for(i=0;i<7;i+=2){
+  interp_curve(c[i+1],c[i],c[i+2],.5);
+  interp_curve(tempc[i+1],tempc[i],tempc[i+2],.5);
+  }
 
   /* take things out of dB domain into linear amplitude */
-  for(i=0;i<11;i++)
+  for(i=0;i<9;i++)
     linear_curve(c[i]);
-  for(i=0;i<11;i++)
+  for(i=0;i<9;i++)
     linear_curve(tempc[i]);
       
   /* Now limit the louder curves.
 
      the idea is this: We don't know what the playback attenuation
-     will be; 0dB moves every time the user twiddles the volume
+     will be; 0dB SL moves every time the user twiddles the volume
      knob. So that means we have to use a single 'most pessimal' curve
      for all masking amplitudes, right?  Wrong.  The *loudest* sound
-     can be in (we assume) a range of 0-120dB SL.  However, sounds
-     20dB down will be in a range of 0-100, 40dB down is from 0-80,
+     can be in (we assume) a range of ...+100dB] SL.  However, sounds
+     20dB down will be in a range ...+80], 40dB down is from ...+60],
      etc... */
-  for(i=10;i>=0;i--){
-    analysis("Craw",oc*100+i,c[i],EHMER_MAX,0,1);
-    analysis("Ctemp",oc*100+i,tempc[i],EHMER_MAX,0,1);
+
+  for(i=8;i>=0;i--){
     for(j=0;j<i;j++)
       min_curve(c[i],tempc[j]);
-    analysis("C",oc*100+i,c[i],EHMER_MAX,0,1);
   }
 }
 
@@ -185,23 +185,23 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
 
   /* set up the lookups for a given blocksize and sample rate */
   /* Vorbis max sample rate is limited by 26 Bark (54kHz) */
-  set_curve(vi->ath, p->ath,n,rate);
+  set_curve(ATH_Bark_dB, p->ath,n,rate);
 
   for(i=0;i<n;i++){
     double oc=toOC((i+.5)*rate2/n);
     int pre=fromOC(oc-.0625)/rate2*n;
-    int post=fromOC(oc+.0625)/rate2*n+1;
+    int post=fromOC(oc+.0625)/rate2*n;
     p->pre[i]=(pre<0?0:pre);
     p->octave[i]=oc;
-    p->post[i]=(post<n?post:n-1);
+    p->post[i]=(post<0?0:post);
   }  
 
   p->curves=malloc(11*sizeof(double **));
   for(i=0;i<11;i++)
-    p->curves[i]=malloc(11*sizeof(double *));
+    p->curves[i]=malloc(9*sizeof(double *));
 
   for(i=0;i<11;i++)
-    for(j=0;j<11;j++)
+    for(j=0;j<9;j++)
       p->curves[i][j]=malloc(EHMER_MAX*sizeof(double));
 
   memcpy(p->curves[0][2],tone_250_40dB_SL,sizeof(double)*EHMER_MAX);
@@ -234,12 +234,22 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   memcpy(p->curves[10][6],tone_4000_80dB_SL,sizeof(double)*EHMER_MAX);
   memcpy(p->curves[10][8],tone_8000_100dB_SL,sizeof(double)*EHMER_MAX);
 
+  setup_curve(p->curves[0],0,vi->curveatt_250Hz,vi->peakatt_250Hz,
+	      vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[2],2,vi->curveatt_500Hz,vi->peakatt_500Hz,
+	      vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[4],4,vi->curveatt_1000Hz,vi->peakatt_1000Hz,
+	      vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[6],6,vi->curveatt_2000Hz,vi->peakatt_2000Hz,
+	      vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[8],8,vi->curveatt_4000Hz,vi->peakatt_4000Hz,
+	      vi->peakpre,vi->peakpost);
+  setup_curve(p->curves[10],10,vi->curveatt_8000Hz,vi->peakatt_8000Hz,
+	      vi->peakpre,vi->peakpost);
+
   for(i=1;i<11;i+=2)
-    for(j=0;j<11;j+=2)
-      interp_curve(p->curves[i][j],p->curves[i-1][j],p->curves[i+1][j],.5);
-  
-  for(i=0;i<11;i++)
-    setup_curve(p->curves[i],i,-35.,-40.,-60.,-80.,-100.,-105.);
+    for(j=0;j<9;j+=2)
+      interp_curve_dB(p->curves[i][j],p->curves[i-1][j],p->curves[i+1][j],.5);
 
 }
 
@@ -252,7 +262,7 @@ void _vp_psy_clear(vorbis_look_psy *p){
     if(p->post)free(p->post);
     if(p->curves){
       for(i=0;i<11;i++){
-	for(j=0;j<11;j++)
+	for(j=0;j<9;j++)
 	  free(p->curves[i][j]);
 	free(p->curves[i]);
       }
@@ -295,40 +305,41 @@ static double _eights[EHMER_MAX]={
 static double seed_peaks(double *floor,int *len,double **curve,
 		       double amp,double specmax,
 		       int *pre,int *post,
-		       int x,int n,int addp){
+		       int x,int n,double specatt){
   int i;
   int ix=x*_eights[0];
-  int prevx=(ix<0?-1:pre[ix]);
+  int prevx=pre[ix];
   int nextx;
   double ret=0.;
 
   /* make this attenuation adjustable */
-  int choice=rint((amp-specmax+100.)/10.)-2;
+  int choice=rint((amp-specmax+specatt)/10.)-2;
   if(choice<0)choice=0;
   if(choice>8)choice=8;
   amp=fromdB(amp);
 
-  for(i=0;i<EHMER_MAX;i++){ 
-    ix=x*_eights[i];
-    nextx=(ix<n?post[ix]:n-1);
-    if(addp){
-      double lin=curve[choice][i]*amp;
-      /* Currently uses a n+n = +3dB additivity; 
-	 6dB may be more correct in most cases */
-      lin*=lin;
-      
-      floor[prevx]+=lin;
-      floor[nextx]-=lin;
-      if(i==EHMER_OFFSET || prevx==x)ret+=lin;
-      if(nextx==x)ret-=lin;
-    }else{
-      if(floor[prevx]<curve[choice][i]*amp){
-	floor[prevx]=curve[choice][i]*amp;
-	len[prevx]=nextx;
+  for(i=0;i<EHMER_MAX;i++){
+    if(prevx<n){
+      double lin=curve[choice][i];
+      ix=x*_eights[i];
+      nextx=(ix<n?post[ix]:n);
+      if(lin){
+	
+	/* Currently uses a n+n = +3dB additivity */
+	lin*=amp;
+	lin*=lin;
+	
+	floor[prevx]+=lin;
+	if(nextx==prevx){
+	  if(nextx+1<n)floor[nextx+1]-=lin;
+	}else{
+	  if(nextx<n)floor[nextx]-=lin;
+	}
+	if(i==EHMER_OFFSET || prevx==x)ret+=lin;
+	if(nextx==x)ret-=lin;
       }
-      if(len[prevx]<nextx+1)len[prevx]=nextx;
+      prevx=nextx;
     }
-    prevx=nextx;
   }
   return(ret);
 }
@@ -342,64 +353,21 @@ static void add_seeds(double *floor,int n){
   }
 }
 
-static void arbitrate_peak(double *floor,int *len,int to,
-			   double val,int end,int n){
-  if(to<end){
-    if(len[to]==to || val>floor[to]){
-      /* new maximum */
-      arbitrate_peak(floor,len,end,floor[to],len[to],n);
-      floor[to]=val;
-      len[to]=end;
-    }else
-      arbitrate_peak(floor,len,len[to],val,end,n);
-  }
-}
-
-static void max_seeds(double *floor,int *len,int n){
-  int i;
-  double acc=0.;
-  int end=0;
-  for(i=0;i<n;i++){
-    if(i==end){
-      acc=0.;
-      end=0;
-    }
-    if(floor[i]>acc){
-      /* new maximum */
-      arbitrate_peak(floor,len,len[i],acc,end,n);
-      acc=floor[i];
-      end=len[i];
-    }else{
-      /* nope, but see if we're maximum later */
-      arbitrate_peak(floor,len,end,floor[i],len[i],n);
-    }
-    floor[i]=(acc>0?todB(acc):-DYNAMIC_RANGE_dB);
-  }
-}
-
 /* octave/dB SL scale for masking curves, Bark/dB SPL scale for ATH.
    Why Bark scale for encoding but not masking? Because masking has a
    strong harmonic dependancy */
-
-extern int frameno;
 void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr, 
-			int athp, int addp, int decayp, double *decay){
+			int athp, int decayp, double *decay){
   vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
   double *acctemp=alloca(n*sizeof(double));
   double *work=alloca(n*sizeof(double));
   double *workdB=alloca(n*sizeof(double));
-  /*double *max=alloca(n*sizeof(double));
-    int    *maxlen=alloca(n*sizeof(int));*/
   double specmax=-DYNAMIC_RANGE_dB;
   double acc=0.;
-  /*memset(maxlen,0,n*sizeof(int));*/
   
   for(i=0;i<n;i++)work[i]=fabs(f[i]);
   
-  /* slight smoothing; remember that 1 + 1 = sqrt(2) :-) 
-     for(i=n-1;i>0;i--)work[i]=hypot(work[i],work[i-1]);*/
-
   /* handle decay */
   if(decayp){
     double decscale=1.-pow(vi->decay_coeff,n); 
@@ -421,13 +389,6 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr,
     if(workdB[i]>specmax)specmax=workdB[i];
   }
 
-  /* subtract the absolute threshhold of hearing curve so the Ehmer
-     curves can be used on the data directly */
-  for(i=0;i<n;i++){
-    /*work[i]-=p->ath[i]; clearly incorrect; ehmer's early data is not
-      on an ATH relative scale */
-    /*max[i]= -DYNAMIC_RANGE_dB;*/
-  }
   memset(flr,0,sizeof(double)*n);
 
   /* prime the working vector with peak values */
@@ -438,26 +399,21 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr,
       int o=rint(p->octave[i]*2.);
       if(o<0)o=0;
       if(o>10)o=10;
+
       acc+=seed_peaks(flr,NULL,p->curves[o],workdB[i],
-		      specmax,p->pre,p->post,i,n,1);
-      /*seed_peaks(max,maxlen,p->curves[o],workdB[i],
-	specmax,p->pre,p->post,i,n,0);*/
+		      specmax,p->pre,p->post,i,n,vi->max_curve_dB);
     }
     acctemp[i]=acc;
   }
 
   /* now, chase curves down from the peak seeds */
   add_seeds(flr,n);
-  /*max_seeds(max,maxlen,n);*/
-  
 
-  analysis("Pwork",frameno,workdB,n,1,0);
-  analysis("Padd",frameno,flr,n,1,0);
-  analysis("Pacc",frameno,acctemp,n,1,1);
-  /*  analysis("Pmax",frameno,max,n,1,0);*/
-
-  for(i=0;i<n;i++)if(flr[i]<p->ath[i]-vi->master_att)flr[i]=p->ath[i]-vi->master_att; 
-  for(i=0;i<n;i++)flr[i]+=6.;
+  /* mask off the ATH */
+  if(athp)
+    for(i=0;i<n;i++)
+      if(flr[i]<p->ath[i]+vi->ath_att)
+	flr[i]=p->ath[i]+vi->ath_att; 
 
 }
 
