@@ -14,10 +14,28 @@ Description: The Vorbis General Audio Compression Codec
  general-purpose compressed audio format for audio and music at fixed 
  and variable bitrates from 16 to 128 kbps/channel.
 
+Package: libvorbisenc2
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}
+Description: The Vorbis General Audio Compression Codec
+ Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
+ general-purpose compressed audio format for audio and music at fixed 
+ and variable bitrates from 16 to 128 kbps/channel.
+
+Package: libvorbisfile3
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}
+Description: The Vorbis General Audio Compression Codec
+ Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
+ general-purpose compressed audio format for audio and music at fixed 
+ and variable bitrates from 16 to 128 kbps/channel.
+
 Package: libvorbis-dev
 Architecture: any
 Section: devel
-Depends: libvorbis0 (= ${Source-Version}), libogg-dev, libc6-dev
+Depends: libogg-dev, libvorbis0 (= ${Source-Version}), libvorbisenc2 (= ${Source-Version}), libvorbisfile3 (= ${Source-Version})
 Description: Vorbis Library Development
  The libvorbis-dev package contains the header files and documentation
  needed to develop applications with libvorbis.
