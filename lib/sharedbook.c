@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.24 2002/01/19 05:01:44 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.25 2002/01/21 20:51:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -312,7 +312,6 @@ static int sort32a(const void *a,const void *b){
   return ( (**(ogg_uint32_t **)a>**(ogg_uint32_t **)b)<<1)-1;
 }
 
-
 /* decode codebook arrangement is more heavily optimized than encode */
 int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   int i,j,n=0,tabn;
@@ -382,8 +381,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   if(c->dec_firsttablen>8)c->dec_firsttablen=8;
 
   tabn=1<<c->dec_firsttablen;
-  c->dec_firsttable=_ogg_malloc(tabn*sizeof(*c->dec_firsttable));
-  for(i=0;i<tabn;i++)c->dec_firsttable[i]=-1;
+  c->dec_firsttable=_ogg_calloc(tabn,sizeof(*c->dec_firsttable));
   c->dec_maxlength=0;
 
   for(i=0;i<n;i++){
@@ -392,9 +390,37 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     if(c->dec_codelengths[i]<=c->dec_firsttablen){
       ogg_uint32_t orig=bitreverse(c->codelist[i]);
       for(j=0;j<(1<<(c->dec_firsttablen-c->dec_codelengths[i]));j++)
-	c->dec_firsttable[orig|(j<<c->dec_codelengths[i])]=i;
+	c->dec_firsttable[orig|(j<<c->dec_codelengths[i])]=i+1;
     }
   }
+
+  /* now fill in 'unused' entries in the firsttable with hi/lo search
+     hints for the non-direct-hits */
+  {
+    ogg_uint32_t mask=0xfffffffeUL<<(31-c->dec_firsttablen);
+
+    for(i=0;i<tabn;i++){
+      if(c->dec_firsttable[i]==0){
+	ogg_uint32_t testword=bitreverse(i);
+	long lo=0,hi=0;
+	while((lo+1)<n && c->codelist[lo+1]<=testword)lo++;
+	while(    hi<n && testword>=(c->codelist[hi]&mask))hi++;
+
+	/* we only actually have 15 bits per hint to play with here.
+           In order to overflow gracefully (nothing breaks, efficiency
+           just drops), encode as the difference from the extremes. */
+	{
+	  unsigned long loval=lo;
+	  unsigned long hival=n-hi;
+
+	  if(loval>0x7fff)loval=0x7fff;
+	  if(hival>0x7fff)hival=0x7fff;
+	  c->dec_firsttable[i]=0x80000000UL | (loval<<15) | hival;
+	}
+      }
+    }
+  }
+  
 
   return(0);
  err_out:

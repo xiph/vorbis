@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: codebook.h,v 1.11 2002/01/19 04:52:40 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.12 2002/01/21 20:51:28 xiphmont Exp $
 
  ********************************************************************/
 
@@ -110,7 +110,7 @@ typedef struct codebook{
 
   int          *dec_index;  /* only used if sparseness collapsed */
   char         *dec_codelengths;
-  int          *dec_firsttable;
+  ogg_uint32_t *dec_firsttable;
   int           dec_firsttablen;
   int           dec_maxlength;
 
