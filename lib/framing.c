@@ -13,7 +13,7 @@
 
  function: code raw [Vorbis] packets into framed OggSquish stream and
            decode Ogg streams back into raw packets
- last mod: $Id: framing.c,v 1.22 2000/08/04 01:05:45 xiphmont Exp $
+ last mod: $Id: framing.c,v 1.23 2000/08/04 02:24:10 xiphmont Exp $
 
  note: The CRC code is directly derived from public domain code by
  Ross Williams (ross@guest.adelaide.edu.au).  See docs/framing.html
@@ -188,6 +188,18 @@ static void _os_checksum(ogg_page *og){
 int ogg_stream_packetin(ogg_stream_state *os,ogg_packet *op){
   int lacing_vals=op->bytes/255+1,i;
 
+  if(os->body_returned){
+    /* advance packet data according to the body_returned pointer. We
+       had to keep it around to return a pointer into the buffer last
+       call */
+    
+    os->body_fill-=os->body_returned;
+    if(os->body_fill)
+      memmove(os->body_data,os->body_data+os->body_returned,
+	      os->body_fill*sizeof(char));
+    os->body_returned=0;
+  }
+ 
   /* make sure we have the buffer storage */
   _os_body_expand(os,op->bytes);
   _os_lacing_expand(os,lacing_vals);
@@ -322,18 +334,18 @@ int ogg_stream_flush(ogg_stream_state *os,ogg_page *og){
   for(i=0;i<vals;i++)
     bytes+=os->header[i+27]=(os->lacing_vals[i]&0xff);
   
+  /* set pointers in the ogg_page struct */
+  og->header=os->header;
+  og->header_len=os->header_fill=vals+27;
+  og->body=os->body_data+os->body_returned;
+  og->body_len=bytes;
+  
   /* advance the lacing data and set the body_returned pointer */
   
   os->lacing_fill-=vals;
   memmove(os->lacing_vals,os->lacing_vals+vals,os->lacing_fill*sizeof(int));
   memmove(os->pcm_vals,os->pcm_vals+vals,os->lacing_fill*sizeof(int64_t));
-  os->body_returned=bytes;
-  
-  /* set pointers in the ogg_page struct */
-  og->header=os->header;
-  og->header_len=os->header_fill=vals+27;
-  og->body=os->body_data;
-  og->body_len=bytes;
+  os->body_returned+=bytes;
   
   /* calculate the checksum */
   
@@ -350,22 +362,10 @@ good only until the next call (using the same ogg_stream_state) */
 
 int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
 
-  if(os->body_returned){
-    /* advance packet data according to the body_returned pointer. We
-       had to keep it around to return a pointer into the buffer last
-       call */
-
-    os->body_fill-=os->body_returned;
-    if(os->body_fill)
-      memmove(os->body_data,os->body_data+os->body_returned,
-	      os->body_fill*sizeof(char));
-    os->body_returned=0;
-  }
-
-  if((os->e_o_s&&os->lacing_fill) ||  /* 'were done, now flush' case */
-     os->body_fill > 4096 ||          /* 'page nominal size' case */
-     os->lacing_fill>=255 ||          /* 'segment table full' case */
-     (os->lacing_fill&&!os->b_o_s)){  /* 'initial header page' case */
+  if((os->e_o_s&&os->lacing_fill) ||          /* 'were done, now flush' case */
+     os->body_fill-os->body_returned > 4096 ||/* 'page nominal size' case */
+     os->lacing_fill>=255 ||                  /* 'segment table full' case */
+     (os->lacing_fill&&!os->b_o_s)){          /* 'initial header page' case */
         
     return(ogg_stream_flush(os,og));
   }
@@ -820,7 +820,7 @@ void checkpacket(ogg_packet *op,int len, int no, int pos){
   /* Test data */
   for(j=0;j<op->bytes;j++)
     if(op->packet[j]!=((j+no)&0xff)){
-      fprintf(stderr,"body data mismatch at pos %ld: %x!=%lx!\n\n",
+      fprintf(stderr,"body data mismatch (1) at pos %ld: %x!=%lx!\n\n",
 	      j,op->packet[j],(j+no)&0xff);
       exit(1);
     }
@@ -831,7 +831,7 @@ void check_page(unsigned char *data,const int *header,ogg_page *og){
   /* Test data */
   for(j=0;j<og->body_len;j++)
     if(og->body[j]!=data[j]){
-      fprintf(stderr,"body data mismatch at pos %ld: %x!=%x!\n\n",
+      fprintf(stderr,"body data mismatch (2) at pos %ld: %x!=%x!\n\n",
 	      j,data[j],og->body[j]);
       exit(1);
     }
