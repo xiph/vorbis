@@ -116,7 +116,7 @@ int main(){
 
    ---------------------------------------------------------------------
 
-   Encode using a qulity mode, but select that quality mode by asking for
+   Encode using a quality mode, but select that quality mode by asking for
    an approximate bitrate.  This is not ABR, it is true VBR, but selected
    using the bitrate interface, and then turning bitrate management off:
 
