@@ -1,12 +1,13 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
+ * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
  * USE, DISTRIBUTION AND REPRODUCTION OF THIS SOURCE IS GOVERNED BY *
- * THE GNU LESSER/LIBRARY PUBLIC LICENSE, WHICH IS INCLUDED WITH    *
- * THIS SOURCE. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.        *
+ * THE GNU PUBLIC LICENSE 2, WHICH IS INCLUDED WITH THIS SOURCE.    *
+ * PLEASE READ THESE TERMS DISTRIBUTING.                            *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggSQUISH SOURCE CODE IS (C) COPYRIGHT 1994-1999             *
+ * by 1999 Monty <monty@xiph.org> and The XIPHOPHORUS Company       *
+ * http://www.xiph.org/                                             *
  *                                                                  *
  ********************************************************************
 
@@ -19,13 +20,13 @@
 #include "codebook.h"
 
 static long _huff_lengthlist_res0_160_1024aux[] = {
-	 2, 7,12,11,13,10,13,12,15,18, 5, 4, 7, 7, 9, 7,
-	 9,11,12,15,10, 6, 5, 6, 6, 8, 8,12,14,17, 9, 6,
-	 5, 5, 5, 5, 7, 9,12,16,13, 8, 6, 5, 5, 6, 7,12,
-	14,18, 9, 7, 7, 5, 6, 5, 7, 8,11,16,13, 9, 8, 7,
-	 6, 7, 6, 9,11,16,10, 9,10, 8, 9, 7, 7, 7, 9,13,
-	10,10,12,10,11, 8, 7, 7, 7,11,12,12,13,11,12,10,
-	 7, 6, 6,10,
+	 3, 7,12,11,15,10,14,11,14,19, 5, 4, 7, 7, 8, 8,
+	 9,10,12,19,10, 6, 5, 5, 6, 7, 8,12,14,18, 9, 6,
+	 5, 4, 5, 6, 6, 9,12,17,13, 8, 5, 5, 5, 6, 7,11,
+	14,18, 9, 7, 7, 5, 6, 5, 6, 7,11,18,13, 8, 7, 6,
+	 6, 6, 6, 8,10,17,10, 9,10, 8, 9, 6, 6, 6, 8,14,
+	10,10,12,10,11, 8, 7, 6, 7,12,13,12,13,11,13,10,
+	 7, 6, 6,12,
 };
 
 static static_codebook _huff_book_res0_160_1024aux = {

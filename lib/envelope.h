@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.14 2001/02/17 10:13:47 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.15 2001/02/18 09:53:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,8 +20,6 @@
 
 #include "iir.h"
 #include "smallft.h"
-
-#define EORDER 16
 
 typedef struct {
   int ch;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.33 2001/02/17 10:13:47 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.34 2001/02/18 09:53:01 xiphmont Exp $
 
  Preecho calculation.
 
@@ -29,6 +29,7 @@
 #include "scales.h"
 #include "envelope.h"
 #include "misc.h"
+#include "iir.c" /* Yes, ugly, but needed for inlining */
 
 /* Digital filter designed by mkfilter/mkshape/gencode A.J. Fisher */
 
@@ -173,12 +174,11 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
     IIR_state *iir2=ve->iir+i*4+2;
     IIR_state *iir3=ve->iir+i*4+3;
     int flag=1;
-    
     for(j=ve->current;j<v->pcm_current;j++){
       filtered0[j]=IIR_filter(iir0,pcm[j]);
-      filtered1[j]=IIR_filter(iir1,pcm[j]);
-      filtered2[j]=IIR_filter(iir2,pcm[j]);
-      filtered3[j]=IIR_filter(iir3,pcm[j]);
+      filtered1[j]=IIR_filter_Band(iir1,pcm[j]);
+      filtered2[j]=IIR_filter_Band(iir2,pcm[j]);
+      filtered3[j]=IIR_filter_Band(iir3,pcm[j]);
       if(pcm[j])flag=0;
     }
     if(flag && ve->current+64<v->pcm_current){
@@ -202,31 +202,24 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   if(j<ve->lastmark)j=ve->lastmark;
   
   while(j+ve->winlength<=v->pcm_current){
+    if(j>=searchpoint)return(1);
+
+    ve->lastmark=j;
     for(i=0;i<ve->ch;i++){
       for(k=0;k<4;k++){
 	float *filtered=ve->filtered[i*4+k]+j;
 	float m=_ve_deltai(ve,filtered-ve->winlength,filtered);
       
-	if(m>ci->preecho_thresh[k]){
-	  /*granulepos++;*/
-	  ve->lastmark=j;
-	  return(0);
-	}
-	if(m<ci->postecho_thresh[k]){
-	  /*granulepos++;*/
-	  ve->lastmark=j;
-	  return(0);
-	}
-	/*granulepos++;*/
+	if(m>ci->preecho_thresh[k])return(0);
+	if(m<ci->postecho_thresh[k])return(0);
+
       }
     }
 
     j+=min(ci->blocksizes[0],ve->winlength)/2;
-
-    if(j>=searchpoint){
-      return(1);
-    }
+   
   }
+  if(j>=searchpoint)return(1);
  
   return(-1);
 }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.12 2001/02/02 03:51:57 xiphmont Exp $
+ last mod: $Id: scales.h,v 1.13 2001/02/18 09:53:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -19,6 +19,7 @@
 #define _V_SCALES_H_
 
 #include <math.h>
+#include <os.h>
 
 /* 20log10(x) */
 #define DYNAMIC_RANGE_dB 200.f

@@ -11,7 +11,7 @@ lib_LTLIBRARIES = libvorbis.la libvorbisfile.la libvorbisenc.la
 libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c lpc.c\
 			analysis.c synthesis.c psy.c info.c time0.c floor0.c\
 			res0.c mapping0.c registry.c codebook.c sharedbook.c\
-			iir.c lookup.c bitbuffer.c\
+			lookup.c bitbuffer.c\
 			envelope.h lpc.h lsp.h codebook.h misc.h psy.h\
 			masking.h iir.h os.h mdct.h smallft.h\
 			registry.h scales.h window.h lookup.h lookup_data.h\

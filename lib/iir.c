@@ -10,8 +10,8 @@
  *                                                                  *
  ********************************************************************
 
-  function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.8 2001/02/15 19:05:45 xiphmont Exp $
+  function: Direct Form II IIR filters, plus some specializations
+  last mod: $Id: iir.c,v 1.9 2001/02/18 09:53:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,7 +27,7 @@
 void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
   memset(s,0,sizeof(IIR_state));
   s->stages=stages;
-  s->gain=gain;
+  s->gain=1.f/gain;
   s->coeff_A=_ogg_malloc(stages*sizeof(float));
   s->coeff_B=_ogg_malloc((stages+1)*sizeof(float));
   s->z_A=_ogg_calloc(stages*2,sizeof(float));
@@ -51,11 +51,10 @@ void IIR_reset(IIR_state *s){
 
 float IIR_filter(IIR_state *s,float in){
   int stages=s->stages,i;
-  float newA;
+  float newA= in*s->gain;
   float newB=0;
   float *zA=s->z_A+s->ring;
 
-  newA=in/=s->gain;
   for(i=0;i<stages;i++){
     newA+= s->coeff_A[i] * zA[i];
     newB+= s->coeff_B[i] * zA[i];
@@ -64,7 +63,6 @@ float IIR_filter(IIR_state *s,float in){
 
   zA[0]=zA[stages]=newA;
   if(++s->ring>=stages)s->ring=0;
-
   return(newB);
 }
 
@@ -72,14 +70,13 @@ float IIR_filter(IIR_state *s,float in){
    a typical bandpass to save multiplies */
 float IIR_filter_Band(IIR_state *s,float in){
   int stages=s->stages,i;
-  float newA;
+  int stages2=stages>>1;
+  float newA= in*s->gain;
   float newB=0;
   float *zA=s->z_A+s->ring;
 
-  newA=in/=s->gain;
-
   newA+= s->coeff_A[0] * zA[0];
-  for(i=1;i<(stages>>1);i++){
+  for(i=1;i<stages2;i++){
     newA+= s->coeff_A[i] * zA[i];
     newB+= s->coeff_B[i] * (zA[i]-zA[stages-i]);
   }
@@ -87,11 +84,10 @@ float IIR_filter_Band(IIR_state *s,float in){
   for(;i<stages;i++)
     newA+= s->coeff_A[i] * zA[i];
 
-  newB+= newA-zA[0];
+  newB+=newA-zA[0];
 
   zA[0]=zA[stages]=newA;
   if(++s->ring>=stages)s->ring=0;
-
   return(newB);
 }
 
