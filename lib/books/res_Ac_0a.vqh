@@ -27,12 +27,12 @@ static long _vq_quantlist_res_Ac_0a[] = {
 };
 
 static long _vq_lengthlist_res_Ac_0a[] = {
-	 2, 3, 3, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 0, 0, 0,
-	 5, 5, 0, 0, 0, 5, 5, 0, 0,
+	 1, 2, 3, 0, 0, 7, 6, 6, 0, 0, 7, 5, 5, 0, 0, 0,
+	 8, 8, 0, 0, 0, 8, 8, 0, 0,
 };
 
 static float _vq_quantthresh_res_Ac_0a[] = {
-	-0.5, -0.16667, 0.16667, 0.5, 
+	-0.16667, -0.055555, 0.055555, 0.16667, 
 };
 
 static long _vq_quantmap_res_Ac_0a[] = {
@@ -49,7 +49,7 @@ static encode_aux_threshmatch _vq_auxt_res_Ac_0a = {
 static static_codebook _vq_book_res_Ac_0a = {
 	2, 25,
 	_vq_lengthlist_res_Ac_0a,
-	1, -537569962, 1607816532, 3, 0,
+	1, -541298235, 1604088261, 3, 0,
 	_vq_quantlist_res_Ac_0a,
 	NULL,
 	&_vq_auxt_res_Ac_0a,

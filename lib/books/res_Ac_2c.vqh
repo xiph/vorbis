@@ -27,7 +27,7 @@ static long _vq_quantlist_res_Ac_2c[] = {
 };
 
 static long _vq_lengthlist_res_Ac_2c[] = {
-	 2, 4, 4, 0, 0, 4, 4, 3, 0, 0, 4, 4, 3, 0, 0, 0,
+	 2, 3, 3, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 0, 0, 0,
 	 5, 5, 0, 0, 0, 5, 5, 0, 0,
 };
 

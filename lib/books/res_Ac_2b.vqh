@@ -27,8 +27,8 @@ static long _vq_quantlist_res_Ac_2b[] = {
 };
 
 static long _vq_lengthlist_res_Ac_2b[] = {
-	 2, 3, 3, 0, 0, 5, 4, 4, 0, 0, 5, 4, 4, 0, 0, 0,
-	 5, 4, 0, 0, 0, 5, 4, 0, 0,
+	 3, 3, 3, 0, 0, 4, 4, 4, 0, 0, 4, 4, 4, 0, 0, 0,
+	 4, 4, 0, 0, 0, 4, 4, 0, 0,
 };
 
 static float _vq_quantthresh_res_Ac_2b[] = {
