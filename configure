@@ -995,13 +995,13 @@ fi
 if test -z "$GCC"; then
 	case $host in 
 	*-*-irix*)
-		DEBUG="-g" 
-		OPT="-O2 -w"
-		PROFILE="-p -g3 -O2" ;;
+		DEBUG="-g -signed" 
+		OPT="-O2 -w -signed"
+		PROFILE="-p -g3 -O2 -signed" ;;
 	sparc-sun-solaris*)
 		DEBUG="-v -g"
-		OPT="-xO4 -fast -w -fsingle -fsimple -native -xcg92"
-		PROFILE="-v -xpg -g -xO4 -fast -fsingle -native -fsimple -xcg92 -Dsuncc" ;;
+		OPT="-xO4 -fast -w -fsimple -native -xcg92"
+		PROFILE="-v -xpg -g -xO4 -fast -native -fsimple -xcg92 -Dsuncc" ;;
 	*)
 		DEBUG="-g"
 		OPT="-O"
