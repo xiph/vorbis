@@ -37,9 +37,9 @@ static char *rline(FILE *in,FILE *out,int pass){
     int gotline=0;
 
     while(!gotline){
-      if(sofar>=lbufsize){
+      if(sofar+1>=lbufsize){
 	if(!lbufsize){	
-	  lbufsize=1024;
+	  lbufsize=16;
 	  linebuffer=malloc(lbufsize);
 	}else{
 	  lbufsize*=2;
@@ -71,9 +71,31 @@ static char *rline(FILE *in,FILE *out,int pass){
 }
 
 /* command line:
-   trainvq [vq=file | [entries=n] [dim=n] [quant=n]] in=file,firstcol 
-           [in=file,firstcol]
+   trainvq  vqfile [options] trainfile [trainfile]
+
+   options: -params     entries,dim,quant
+            -subvector  start[,num]
+	    -error      desired_error
+	    -iterations iterations
 */
+
+static void usage(void){
+  fprintf(stderr, "\nOggVorbis %s VQ codebook trainer\n\n"
+	  "<foo>vqtrain vqfile [options] [datasetfile] [datasetfile]\n"
+	  "options: -p[arams]     <entries,dim,quant>\n"
+	  "         -s[ubvector]  <start[,num]>\n"
+	  "         -e[rror]      <desired_error>\n"
+	  "         -i[terations] <maxiterations>\n\n"
+	  "examples:\n"
+	  "   train a new codebook to 1%% tolerance on datafile 'foo':\n"
+	  "      xxxvqtrain book -p 256,6,8 -e .01 foo\n"
+	  "      (produces a trained set in book-0.vqi)\n\n"
+	  "   continue training 'book-0.vqi' (produces book-1.vqi):\n"
+	  "      xxxvqtrain book-0.vqi\n\n"
+	  "   add subvector from element 1 to <dimension> from files\n"
+	  "      data*.m to the training in progress, prodicing book-1.vqi:\n"
+	  "      xxxvqtrain book-0.vqi -s 1,1 data*.m\n\n",vqext_booktype);
+}
 
 int exiting=0;
 void setexit(int dummy){
@@ -86,144 +108,156 @@ int main(int argc,char *argv[]){
   quant_return q;
 
   int entries=-1,dim=-1,quant=-1;
-  FILE *out=NULL;
-  char *line;
-  long i,j,k;
-
+  int start=0,num=-1;
   double desired=.05;
   int iter=1000;
 
+  FILE *out=NULL;
+  char *line;
+  long i,j,k;
   int init=0;
-  while(*argv){
 
-    /* continue training an existing book */
-    if(!strncmp(*argv,"vq=",3)){
-      FILE *in=NULL;
-      char filename[80],*ptr;
-      if(sscanf(*argv,"vq=%70s",filename)!=1){
-	fprintf(stderr,"Syntax error in argument '%s'\n",*argv);
-	exit(1);
-      }
+  argv++;
+  if(!*argv){
+    usage();
+    exit(0);
+  }
 
-      in=fopen(filename,"r");
-      ptr=strrchr(filename,'-');
-      if(ptr){
-	int num;
-	ptr++;
-	num=atoi(ptr);
-	sprintf(ptr,"%d.vqi",num+1);
-      }else
-	strcat(filename,"-0.vqi");
+  /* get the book name, a preexisting book to continue training */
+  {
+    FILE *in=NULL;
+    char *filename=alloca(strlen(*argv)+30),*ptr;
+
+    strcpy(filename,*argv);
+    in=fopen(filename,"r");
+    ptr=strrchr(filename,'-');
+    if(ptr){
+      int num;
+      ptr++;
+      num=atoi(ptr);
+      sprintf(ptr,"%d.vqi",num+1);
+    }else
+      strcat(filename,"-0.vqi");
+    
+    out=fopen(filename,"w");
+    if(out==NULL){
+      fprintf(stderr,"Unable to open %s for writing\n",filename);
+      exit(1);
+    }
+    
+    if(in){
+      /* we wish to suck in a preexisting book and continue to train it */
+      double a;
       
-      out=fopen(filename,"w");
-      if(out==NULL){
-	fprintf(stderr,"Unable to open %s for writing\n",filename);
+      line=rline(in,out,1);
+      if(strcmp(line,vqext_booktype)){
+	fprintf(stderr,"wrong book type; %s!=%s\n",line,vqext_booktype);
+	exit(1);
+      } 
+      
+      line=rline(in,out,1);
+      if(sscanf(line,"%d %d",&entries,&dim)!=2){
+	fprintf(stderr,"Syntax error reading book file\n");
 	exit(1);
       }
-
-      if(in){
-	/* we wish to suck in a preexisting book and continue to train it */
-	double a;
-
-	line=rline(in,out,1);
-	if(strcmp(line,vqext_booktype)){
-	  fprintf(stderr,"wrong book type; %s!=%s\n",line,vqext_booktype);
-	  exit(1);
-	} 
-	    
-	line=rline(in,out,1);
-	if(sscanf(line,"%d %d",&entries,&dim)!=2){
-	  fprintf(stderr,"Syntax error reading book file\n");
-	  exit(1);
-	}
-	
-
-	vqgen_init(&v,dim,entries,vqext_metric);
-	init=1;
-
-	/* quant setup */
-	line=rline(in,out,1);
-	if(sscanf(line,"%lf %lf %d %d",&q.minval,&q.delt,
-		  &q.addtoquant,&quant)!=4){
-	  fprintf(stderr,"Syntax error reading book file\n");
-	  exit(1);
-	}
-
-	/* quantized entries */
-	for(j=0;j<entries;j++)
-	  for(k=0;k<dim;k++)
-	    line=rline(in,out,0);
-
-	/* unquantized entries */
-	i=0;
-	for(j=0;j<entries;j++){
-	  for(k=0;k<dim;k++){
-	    line=rline(in,out,0);
-	    sscanf(line,"%lf",&a);
-	    v.entrylist[i++]=a;
-	  }
-	}
-	
-	/* bias, points */
-	i=0;
-	for(j=0;j<entries;j++){
+      
+      vqgen_init(&v,dim,entries,vqext_metric);
+      init=1;
+      
+      /* quant setup */
+      line=rline(in,out,1);
+      if(sscanf(line,"%lf %lf %d %d",&q.minval,&q.delt,
+		&q.addtoquant,&quant)!=4){
+	fprintf(stderr,"Syntax error reading book file\n");
+	exit(1);
+      }
+      
+      /* quantized entries */
+      for(j=0;j<entries;j++)
+	for(k=0;k<dim;k++)
+	  line=rline(in,out,0);
+      
+      /* unquantized entries */
+      i=0;
+      for(j=0;j<entries;j++){
+	for(k=0;k<dim;k++){
 	  line=rline(in,out,0);
 	  sscanf(line,"%lf",&a);
-	  v.bias[i++]=a;
+	  v.entrylist[i++]=a;
 	}
-
-	{
-	  double b[80];
-	  i=0;
-	  v.entries=0; /* hack to avoid reseeding */
-	  while(1){
-	    for(k=0;k<dim && k<80;k++){
-	      line=rline(in,out,0);
-	      if(!line)break;
-	      sscanf(line,"%lf",b+k);
-	    }
-	    if(feof(in))break;
-	    vqgen_addpoint(&v,b);
-	  }
-	  v.entries=entries;
-	}
-
-	fclose(in);
       }
+      
+	/* bias, points */
+      i=0;
+      for(j=0;j<entries;j++){
+	line=rline(in,out,0);
+	sscanf(line,"%lf",&a);
+	v.bias[i++]=a;
+      }
+      
+      {
+	double b[80];
+	i=0;
+	v.entries=0; /* hack to avoid reseeding */
+	while(1){
+	  for(k=0;k<dim && k<80;k++){
+	    line=rline(in,out,0);
+	    if(!line)break;
+	    sscanf(line,"%lf",b+k);
+	  }
+	  if(feof(in))break;
+	  vqgen_addpoint(&v,b);
+	}
+	v.entries=entries;
+      }
+      
+      fclose(in);
     }
-
-    /* set parameters if we're not loading a pre book */
-    if(!strncmp(*argv,"quant=",6)){
-      sscanf(*argv,"quant=%d",&quant);
-    }
-    if(!strncmp(*argv,"entries=",8)){
-      sscanf(*argv,"entries=%d",&entries);
-    }
-    if(!strncmp(*argv,"dim=",4)){
-      sscanf(*argv,"dim=%d",&dim);
-    }
-    if(!strncmp(*argv,"desired=",8)){
-      sscanf(*argv,"desired=%lf",&desired);
-    }
-    if(!strncmp(*argv,"iter=",5)){
-      sscanf(*argv,"iter=%d",&iter);
-    }
-
-    if(!strncmp(*argv,"in=",3)){
-      int start;
-      char file[80];
+  }
+  
+  /* get the rest... */
+  argv=argv++;
+  while(*argv){
+    if(argv[0][0]=='-'){
+      /* it's an option */
+      if(!argv[1]){
+	fprintf(stderr,"Option %s missing argument.\n",argv[0]);
+	exit(1);
+      }
+      switch(argv[0][1]){
+      case 'p':
+	if(sscanf(argv[1],"%d,%d,%d",&entries,&dim,&quant)!=3)
+	  goto syner;
+	break;
+      case 's':
+	if(sscanf(argv[1],"%d,%d",&start,&num)!=2){
+	  num= -1;
+	  if(sscanf(argv[1],"%d",&start)!=1)
+	    goto syner;
+	}
+	break;
+      case 'e':
+	if(sscanf(argv[1],"%lf",&desired)!=1)
+	  goto syner;
+	break;
+      case 'i':
+	if(sscanf(argv[1],"%d",&iter)!=1)
+	  goto syner;
+	break;
+      default:
+	fprintf(stderr,"Unknown option %s\n",argv[0]);
+	exit(1);
+      }
+      argv+=2;
+    }else{
+      /* it's an input file */
+      char *file=strdup(*argv++);
       FILE *in;
       int cols=-1;
 
-      if(sscanf(*argv,"in=%79[^,],%d",file,&start)!=2)goto syner;
-      if(!out){
-	fprintf(stderr,"vq= must preceed in= arguments\n");
-	exit(1);
-      }
       if(!init){
 	if(dim==-1 || entries==-1 || quant==-1){
-	  fprintf(stderr,"Must specify dimensionality,entries,quant before"
-		  " first input file\n");
+	  fprintf(stderr,"-p required when training a new set\n");
 	  exit(1);
 	}
 	vqgen_init(&v,dim,entries,vqext_metric);
@@ -237,7 +271,7 @@ int main(int argc,char *argv[]){
       }
       fprintf(out,"# training file entry: %s\n",file);
 
-      while((line=rline(in,out,1))){
+      while((line=rline(in,out,0))){
 	if(cols==-1){
 	  char *temp=line;
 	  while(*temp==' ')temp++;
@@ -249,30 +283,41 @@ int main(int argc,char *argv[]){
 	{
 	  int i;
 	  double *b=alloca(cols*sizeof(double));
-	  if(start+dim>cols){
+	  if(start*num+dim>cols){
 	    fprintf(stderr,"ran out of columns reading %s\n",file);
 	    exit(1);
 	  }
 	  while(*line==' ')line++;
 	  for(i=0;i<cols;i++){
+
+	    /* static length buffer bug workaround */
+	    char *temp=line;
+	    char old;
+	    while(*temp>32)temp++;
+
+	    old=temp[0];
+	    temp[0]='\0';
 	    b[i]=atof(line);
+	    temp[0]=old;
+	    
 	    while(*line>32)line++;
 	    while(*line==' ')line++;
 	  }
-	  vqext_adjdata(b,start,dim);
-	  vqgen_addpoint(&v,b+start);
+	  if(num<=0)num=(cols-start)/dim;
+	  for(i=0;i<num;i++){
+	    vqext_adjdata(b,start+i*dim,dim);
+	    vqgen_addpoint(&v,b+start+i*dim);
+	  }
 	}
       }
       fclose(in);
     }
-    argv++;
   }
 
   if(!init){
     fprintf(stderr,"No input files!\n");
     exit(1);
   }
-
 
   /* train the book */
   signal(SIGTERM,setexit);
