@@ -179,10 +179,6 @@ SOURCE=..\lib\synthesis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\vorbisenc.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\lib\window.c
 # End Source File
 # End Group
