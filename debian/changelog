@@ -1,3 +1,9 @@
+libvorbis (1.0rc2-1) unstable; urgency=low
+
+  * New upstream.
+
+ -- Christopher L Cheney <ccheney@debian.org>  Sun, 12 Aug 2001 22:00:00 -0500
+
 libvorbis (1.0rc1-1) unstable; urgency=low
 
   * New upstream. (Closes: #84977, #95330)

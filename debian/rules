@@ -55,10 +55,9 @@ binary-indep: build install
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-
 	dh_movefiles
 
-	dh_installdocs debian/tmp/usr/share/doc/libvorbis-1.0rc1/*
+	dh_installdocs debian/tmp/usr/share/doc/libvorbis-1.0rc2/*
 	dh_installexamples
 	dh_installmanpages
 	dh_installchangelogs 
