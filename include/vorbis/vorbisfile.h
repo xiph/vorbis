@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.5 2000/06/14 10:13:35 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.6 2000/06/15 12:17:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -68,6 +68,9 @@ typedef struct {
   long             current_serialno;
   int              current_link;
 
+  double           bittrack;
+  double           samptrack;
+
   ogg_stream_state os; /* take physical pages, weld into a logical
                           stream of packets */
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
@@ -83,6 +86,7 @@ extern int ov_open_callbacks(void *datasource, OggVorbis_File *vf,
 		char *initial, long ibytes, ov_callbacks callbacks);
 
 extern long ov_bitrate(OggVorbis_File *vf,int i);
+extern long ov_bitrate_instant(OggVorbis_File *vf);
 extern long ov_streams(OggVorbis_File *vf);
 extern long ov_seekable(OggVorbis_File *vf);
 extern long ov_serialnumber(OggVorbis_File *vf,int i);

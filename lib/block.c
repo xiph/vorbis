@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.31 2000/06/14 10:13:35 xiphmont Exp $
+ last mod: $Id: block.c,v 1.32 2000/06/15 12:17:03 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -689,13 +689,16 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   return(0);
 }
 
+/* pcm==NULL indicates we just want the pending samples, no more */
 int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm){
   vorbis_info *vi=v->vi;
   if(v->pcm_returned<v->centerW){
-    int i;
-    for(i=0;i<vi->channels;i++)
-      v->pcmret[i]=v->pcm[i]+v->pcm_returned;
-    *pcm=v->pcmret;
+    if(pcm){
+      int i;
+      for(i=0;i<vi->channels;i++)
+	v->pcmret[i]=v->pcm[i]+v->pcm_returned;
+      *pcm=v->pcmret;
+    }
     return(v->centerW-v->pcm_returned);
   }
   return(0);

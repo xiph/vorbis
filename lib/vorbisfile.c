@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.24 2000/06/14 10:13:35 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.25 2000/06/15 12:17:03 xiphmont Exp $
 
  ********************************************************************/
 
@@ -385,8 +385,10 @@ static void _decode_clear(OggVorbis_File *vf){
   ogg_stream_clear(&vf->os);
   vorbis_dsp_clear(&vf->vd);
   vorbis_block_clear(&vf->vb);
-  vf->pcm_offset=-1;
   vf->decode_ready=0;
+
+  vf->bittrack=0.;
+  vf->samptrack=0.;
 }
 
 /* fetch and process a packet.  Handles the case where we're at a
@@ -425,12 +427,18 @@ static int _process_packet(OggVorbis_File *vf,int readp){
                                                submit them,
                                                vorbis_synthesis will
                                                reject them */
-	  vorbis_synthesis_blockin(&vf->vd,&vf->vb);
+
+	  /* suck in the synthesis data and track bitrate */
+	  {
+	    int oldsamples=vorbis_synthesis_pcmout(&vf->vd,NULL);
+	    vorbis_synthesis_blockin(&vf->vd,&vf->vb);
+	    vf->samptrack+=vorbis_synthesis_pcmout(&vf->vd,NULL)-oldsamples;
+	    vf->bittrack+=op.bytes*8;
+	  }
 	  
 	  /* update the pcm offset. */
 	  if(frameno!=-1 && !op.e_o_s){
 	    int link=(vf->seekable?vf->current_link:0);
-	    double **dummy;
 	    int i,samples;
 	    
 	    /* this packet has a pcm_offset on it (the last packet
@@ -446,7 +454,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	       to have a reference point.  Thus the !op.e_o_s clause
 	       above */
 	    
-	    samples=vorbis_synthesis_pcmout(&vf->vd,&dummy);
+	    samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
 	    
 	    frameno-=samples;
 	    for(i=0;i<link;i++)
@@ -460,6 +468,10 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 
     if(!readp)return(0);
     if(_get_next_page(vf,&og,-1)<0)return(0); /* eof. leave unitialized */
+
+    /* bitrate tracking; add the header's bytes here, the body bytes
+       are done by packet above */
+    vf->bittrack+=og.header_len*8;
 
     /* has our decoding just traversed a bitstream boundary? */
     if(vf->decode_ready){
@@ -656,6 +668,18 @@ long ov_bitrate(OggVorbis_File *vf,int i){
   }
 }
 
+/* returns the actual bitrate since last call.  returns -1 if no
+   additional data to offer since last call (or at beginning of stream) */
+long ov_bitrate_instant(OggVorbis_File *vf){
+  int link=(vf->seekable?vf->current_link:0);
+  long ret;
+  if(vf->samptrack==0)return(-1);
+  ret=vf->bittrack/vf->samptrack*vf->vi[link].rate+.5;
+  vf->bittrack=0.;
+  vf->samptrack=0.;
+  return(ret);
+}
+
 /* Guess */
 long ov_serialnumber(OggVorbis_File *vf,int i){
   if(i>=vf->links)return(-1);
@@ -732,6 +756,7 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
   if(pos<0 || pos>vf->offsets[vf->links])goto seek_error;
 
   /* clear out decoding machine state */
+  vf->pcm_offset=-1;
   _decode_clear(vf);
 
   /* seek */
@@ -775,6 +800,7 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
   
  seek_error:
   /* dump the machine so we're in a known state */
+  vf->pcm_offset=-1;
   _decode_clear(vf);
   return -1;
 }
@@ -862,6 +888,7 @@ int ov_pcm_seek(OggVorbis_File *vf,int64_t pos){
   
  seek_error:
   /* dump machine so we're in a known state */
+  vf->pcm_offset=-1;
   _decode_clear(vf);
   return -1;
 }
@@ -893,6 +920,7 @@ int ov_time_seek(OggVorbis_File *vf,double seconds){
 
  seek_error:
   /* dump machine so we're in a known state */
+  vf->pcm_offset=-1;
   _decode_clear(vf);
   return -1;
 }
@@ -924,7 +952,7 @@ double ov_time_tell(OggVorbis_File *vf){
     for(link=vf->links-1;link>=0;link--){
       pcm_total-=vf->pcmlengths[link];
       time_total-=ov_time_total(vf,link);
-      if(vf->pcm_offset>pcm_total)break;
+      if(vf->pcm_offset>=pcm_total)break;
     }
   }
 

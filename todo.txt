@@ -2,10 +2,6 @@ Development hit list for 1.0:
 
 libvorbis:
 
-Implement correct truncated packet handling; this is mostly a case of
-'intiialize vectors and check return values' in res0.c:inverse (but
-not entirely)
-
 Meaningful error code returns
 
 Option for brute-forcing vq search on maptype 2 (helps on undertrained
