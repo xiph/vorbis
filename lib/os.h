@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.9.4.1 2000/09/07 07:42:57 jack Exp $
+ last mod: $Id: os.h,v 1.9.4.2 2000/09/12 22:48:56 jack Exp $
 
  ********************************************************************/
 
@@ -41,7 +41,7 @@
 
 #endif
 
-#ifdef USE_ALLOCA_H
+#ifdef HAVE_ALLOCA_H
 #include <alloca.h>
 #endif
 

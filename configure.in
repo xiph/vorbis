@@ -119,7 +119,6 @@ dnl --------------------------------------------------
 dnl Check for headers
 dnl --------------------------------------------------
 
-AC_CHECK_HEADER(alloca.h,CFLAGS="$CFLAGS -DUSE_ALLOCA_H",:)
 AC_CHECK_HEADER(memory.h,CFLAGS="$CFLAGS -DUSE_MEMORY_H",:)
 
 dnl --------------------------------------------------
@@ -145,6 +144,7 @@ dnl --------------------------------------------------
 dnl Check for library functions
 dnl --------------------------------------------------
 
+AC_FUNC_ALLOCA
 AC_FUNC_MEMCMP
 
 dnl --------------------------------------------------
