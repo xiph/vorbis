@@ -4,7 +4,7 @@ vorbis (1.0beta3-1) unstable; urgency=low
   * Upstream source was reorganized.
   * Package split according to the upstream reorganization.
 
- -- Chris Cheney <ccheney@debian.org>  Tue, 31 Oct 2000 15:08:22 -0600
+ -- Christopher L Cheney <ccheney@debian.org>  Tue, 31 Oct 2000 15:08:22 -0600
 
 vorbis (1.0beta2-1) unstable; urgency=low
 
