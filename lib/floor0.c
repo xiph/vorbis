@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.31 2000/12/07 07:26:20 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.32 2000/12/12 04:18:54 xiphmont Exp $
 
  ********************************************************************/
 
@@ -177,9 +177,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
 		   *scale); /* bark numbers represent band edges */
     if(val>=look->ln)val=look->ln; /* guard against the approximation */
     look->linearmap[j]=val;
-    fprintf(stderr,"%ld:%ld ",val,j);
   }
-  fprintf(stderr,"\n");
   look->linearmap[j]=-1;
 
   look->lsp_look=_ogg_malloc(look->ln*sizeof(float));
