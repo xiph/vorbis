@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.17 2002/03/07 03:41:03 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.18 2003/03/03 19:52:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -123,6 +123,7 @@ extern long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int samples,
 			  int *bitstream);
 extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int bigendianp,int word,int sgned,int *bitstream);
+extern int ov_crosslap(OggVorbis_File *vf1,OggVorbis_File *vf2);
 
 #ifdef __cplusplus
 }
