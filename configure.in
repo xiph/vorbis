@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.6 1999/12/17 07:04:11 xiphmont Exp $
+# $Id: configure.in,v 1.7 1999/12/30 03:46:18 xiphmont Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -47,10 +47,10 @@ else
 # glibc 2.0/2.1
 
 	case $host in 
-	i?86-*-linux*)
-		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char"
-		OPT="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char"
-		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char";;
+	*-*-linux*)
+		DEBUG="-g -Wall -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
+		OPT="-O20 -ffast-math -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
+		PROFILE="-pg -g -O20 -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char";;
 	sparc-sun-*)
 		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char -mv8"
 		OPT="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char -mv8"
@@ -184,4 +184,4 @@ AC_SUBST(RANLIB)
 #AC_SUBST(LIBGTKDIR)
 AC_SUBST(pthread_lib)
 
-AC_OUTPUT(Makefile lib/Makefile cmdline/Makefile vq/Makefile)
+AC_OUTPUT(Makefile lib/Makefile examples/Makefile vq/Makefile cmdline/Makefile)

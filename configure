@@ -933,10 +933,10 @@ else
 # glibc 2.0/2.1
 
 	case $host in 
-	i?86-*-linux*)
-		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char"
-		OPT="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char"
-		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char";;
+	*-*-linux*)
+		DEBUG="-g -Wall -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
+		OPT="-O20 -ffast-math -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
+		PROFILE="-pg -g -O20 -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char";;
 	sparc-sun-*)
 		DEBUG="-g -Wall -D__NO_MATH_INLINES -fsigned-char -mv8"
 		OPT="-O20 -ffast-math -D__NO_MATH_INLINES -fsigned-char -mv8"
@@ -1929,7 +1929,7 @@ done
 
 ac_given_srcdir=$srcdir
 
-trap 'rm -fr `echo "Makefile lib/Makefile cmdline/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
+trap 'rm -fr `echo "Makefile lib/Makefile examples/Makefile vq/Makefile cmdline/Makefile" | sed "s/:[^ ]*//g"` conftest*; exit 1' 1 2 15
 EOF
 cat >> $CONFIG_STATUS <<EOF
 
@@ -2018,7 +2018,7 @@ EOF
 
 cat >> $CONFIG_STATUS <<EOF
 
-CONFIG_FILES=\${CONFIG_FILES-"Makefile lib/Makefile cmdline/Makefile"}
+CONFIG_FILES=\${CONFIG_FILES-"Makefile lib/Makefile examples/Makefile vq/Makefile cmdline/Makefile"}
 EOF
 cat >> $CONFIG_STATUS <<\EOF
 for ac_file in .. $CONFIG_FILES; do if test "x$ac_file" != x..; then

@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.15 1999/11/17 03:52:56 xiphmont Exp $
+# $Id: Makefile.in,v 1.16 1999/12/30 03:46:19 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -16,7 +16,7 @@
 # (unless, of course, you know what you are doing :) ##########################
 
 @SET_MAKE@
-FLAGS=-I. @TYPESIZES@ @CFLAGS@ 
+FLAGS=-I. -I../include @TYPESIZES@ @CFLAGS@ 
 OPT=@OPT@ $(FLAGS)
 DEBUG=@DEBUG@ $(FLAGS)
 PROFILE=@PROFILE@ $(FLAGS)
@@ -27,14 +27,12 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-HFILES =	mdct.h codec.h bitwise.h envelope.h lpc.h lsp.h \
-		psy.h smallft.h window.h xlogmap.h os.h
+HFILES =	../include/codec.h ../include/vorbisfile.h \
+		bitwise.h envelope.h lpc.h lsp.h \
+		psy.h smallft.h window.h xlogmap.h os.h mdct.h
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
-		spectrum.o
-FFILES = 	vorbisfile.o
-EFILES =	encoder_example.o decoder_example.o chaining_example.o
-BINFILES =      encoder_example decoder_example chaining_example
+		spectrum.o vorbisfile.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -48,7 +46,7 @@ analysis:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-target:	libvorbis.a vorbisfile.a $(BINFILES)
+target:	libvorbis.a vorbisfile.a
 
 selftest:	
 	$(MAKE) clean
@@ -59,38 +57,22 @@ selftest:
 	@./test_framing
 	@./test_bitwise
 
-encoder_example:	$(EFILES) libvorbis.a
-	$(CC) $(CFLAGS) $(LDFLAGS) encoder_example.o libvorbis.a -o \
-			encoder_example -lm
-
-decoder_example:	$(EFILES) libvorbis.a
-	$(CC) $(CFLAGS) $(LDFLAGS) decoder_example.o libvorbis.a -o \
-			decoder_example -lm
-
-chaining_example:	$(EFILES) libvorbis.a vorbisfile.a
-	$(CC) $(CFLAGS) $(LDFLAGS) chaining_example.o \
-			vorbisfile.a libvorbis.a -o chaining_example -lm
-
 libvorbis.a: 	$(LFILES)	
 		$(AR) -r libvorbis.a $^
 		$(RANLIB) libvorbis.a
 
-vorbisfile.a:	$(FFILES)
+vorbisfile.a:	$(LFILES)
 		$(AR) -r vorbisfile.a $^
 		$(RANLIB) vorbisfile.a
 
 
 $(LFILES): 	$(HFILES)
-$(FFILES): 	$(HFILES) vorbisfile.h
-$(EFILES): 	$(HFILES) vorbisfile.h
-
-info.o:		modes.h
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
 
 clean:
-	-rm -f *.o *.a test* *~ *.out ogg config.* $(BINFILES) tone 
+	-rm -f *.o *.a test* *~ *.out ogg config.* tone 
 
 distclean:	clean
 	-rf -f Makefile

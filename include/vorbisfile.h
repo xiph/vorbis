@@ -37,11 +37,11 @@ typedef struct {
   long             *offsets;
   long             *dataoffsets;
   long             *serialnos;
-  size64           *pcmlengths;
+  int64_t           *pcmlengths;
   vorbis_info      *vi;
 
   /* Decoding working state local storage */
-  size64           pcm_offset;
+  int64_t          pcm_offset;
   int              decode_ready;
   long             current_serialno;
   int              current_link;
@@ -62,15 +62,15 @@ extern long ov_seekable(OggVorbis_File *vf);
 extern long ov_serialnumber(OggVorbis_File *vf,int i);
 
 extern long ov_raw_total(OggVorbis_File *vf,int i);
-extern size64 ov_pcm_total(OggVorbis_File *vf,int i);
+extern int64_t ov_pcm_total(OggVorbis_File *vf,int i);
 extern double ov_time_total(OggVorbis_File *vf,int i);
 
 extern int ov_raw_seek(OggVorbis_File *vf,long pos);
-extern int ov_pcm_seek(OggVorbis_File *vf,size64 pos);
+extern int ov_pcm_seek(OggVorbis_File *vf,int64_t pos);
 extern int ov_time_seek(OggVorbis_File *vf,double pos);
 
 extern long ov_raw_tell(OggVorbis_File *vf);
-extern size64 ov_pcm_tell(OggVorbis_File *vf);
+extern int64_t ov_pcm_tell(OggVorbis_File *vf);
 extern double ov_time_tell(OggVorbis_File *vf);
 
 extern vorbis_info *ov_info(OggVorbis_File *vf,int link);

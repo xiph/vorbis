@@ -46,6 +46,18 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
   
   int bits=rint(log(n)/log(2));
   int i;
+
+#if 0
+  if(amp>0){
+    {
+      FILE *out=fopen("lspdiff.vqd","a");
+      for(i=0;i<m;i++)
+	fprintf(out,"%lf ",lsp[i]);
+      fprintf(out,"\n");
+      fclose(out);
+    }
+  }
+#endif
  
   _oggpack_write(&vb->opb,amp*327680,18);
   

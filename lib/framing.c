@@ -45,9 +45,9 @@ int ogg_page_eos(ogg_page *og){
   return((int)(og->header[5]&0x04));
 }
 
-size64 ogg_page_frameno(ogg_page *og){
+int64_t ogg_page_frameno(ogg_page *og){
   unsigned char *page=og->header;
-  size64 pcmpos=page[13]&(0xff);
+  int64_t pcmpos=page[13]&(0xff);
   pcmpos= (pcmpos<<8)|(page[12]&0xff);
   pcmpos= (pcmpos<<8)|(page[11]&0xff);
   pcmpos= (pcmpos<<8)|(page[10]&0xff);
@@ -74,10 +74,10 @@ int ogg_page_pageno(ogg_page *og){
 
 /* helper to initialize lookup for direct-table CRC */
 
-static unsigned size32 crc_lookup[256];
+static unsigned int32_t crc_lookup[256];
 static int crc_ready=0;
 
-static unsigned size32 _ogg_crc_entry(unsigned long index){
+static unsigned int32_t _ogg_crc_entry(unsigned long index){
   int           i;
   unsigned long r;
 
@@ -116,7 +116,7 @@ int ogg_stream_init(ogg_stream_state *os,int serialno){
 
     os->lacing_storage=1024;
     os->lacing_vals=malloc(os->lacing_storage*sizeof(int));
-    os->pcm_vals=malloc(os->lacing_storage*sizeof(size64));
+    os->pcm_vals=malloc(os->lacing_storage*sizeof(int64_t));
 
     /* initialize the crc_lookup table if not done */
     _ogg_crc_init();
@@ -162,7 +162,7 @@ static void _os_lacing_expand(ogg_stream_state *os,int needed){
   if(os->lacing_storage<=os->lacing_fill+needed){
     os->lacing_storage+=(needed+32);
     os->lacing_vals=realloc(os->lacing_vals,os->lacing_storage*sizeof(int));
-    os->pcm_vals=realloc(os->pcm_vals,os->lacing_storage*sizeof(size64));
+    os->pcm_vals=realloc(os->pcm_vals,os->lacing_storage*sizeof(int64_t));
   }
 }
 
@@ -171,7 +171,7 @@ static void _os_lacing_expand(ogg_stream_state *os,int needed){
    perform the checksum silmultaneously with other copies */
 
 static void _os_checksum(ogg_page *og){
-  unsigned size32 crc_reg=0;
+  unsigned int32_t crc_reg=0;
   int i;
 
   for(i=0;i<og->header_len;i++)
@@ -249,7 +249,7 @@ int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
     int vals=0,bytes=0;
     int maxvals=(os->lacing_fill>255?255:os->lacing_fill);
     long acc=0;
-    size64 pcm_pos=os->pcm_vals[0];
+    int64_t pcm_pos=os->pcm_vals[0];
 
     /* construct a page */
     /* decide how many segments to include */
@@ -327,7 +327,7 @@ int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
 
     os->lacing_fill-=vals;
     memmove(os->lacing_vals,os->lacing_vals+vals,os->lacing_fill*sizeof(int));
-    memmove(os->pcm_vals,os->pcm_vals+vals,os->lacing_fill*sizeof(size64));
+    memmove(os->pcm_vals,os->pcm_vals+vals,os->lacing_fill*sizeof(int64_t));
     os->body_returned=bytes;
 
     /* set pointers in the ogg_page struct */
@@ -564,7 +564,7 @@ int ogg_stream_pagein(ogg_stream_state *os, ogg_page *og){
   int continued=ogg_page_continued(og);
   int bos=ogg_page_bos(og);
   int eos=ogg_page_eos(og);
-  size64 pcmpos=ogg_page_frameno(og);
+  int64_t pcmpos=ogg_page_frameno(og);
   int serialno=ogg_page_serialno(og);
   int pageno=ogg_page_pageno(og);
   int segments=header[26];
@@ -588,7 +588,7 @@ int ogg_stream_pagein(ogg_stream_state *os, ogg_page *og){
 	memmove(os->lacing_vals,os->lacing_vals+lr,
 		(os->lacing_fill-lr)*sizeof(int));
 	memmove(os->pcm_vals,os->pcm_vals+lr,
-		(os->lacing_fill-lr)*sizeof(size64));
+		(os->lacing_fill-lr)*sizeof(int64_t));
       }
       os->lacing_fill-=lr;
       os->lacing_packet-=lr;
