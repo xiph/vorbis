@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: time backend 0 (dummy)
- last mod: $Id: time0.c,v 1.13 2002/03/30 14:11:53 msmith Exp $
+ last mod: $Id: time0.c,v 1.14 2002/06/09 14:27:01 msmith Exp $
 
  ********************************************************************/
 
@@ -25,17 +25,19 @@
 static void time0_pack (vorbis_info_time *i,oggpack_buffer *opb){
 }
 static vorbis_info_time *time0_unpack (vorbis_info *vi,oggpack_buffer *opb){
-  return "";
-
+  /* We have to return non-NULL here, so this will do. */
+  return malloc(4);
 }
 static vorbis_info_time *time0_copy_info (vorbis_info_time *vi){
-  return "";
+  return NULL;
 }
 static vorbis_look_time *time0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
                               vorbis_info_time *i){
-  return "";
+  return NULL;
 }
 static void time0_free_info(vorbis_info_time *i){
+  if(i)  
+    free(i);
 }
 static void time0_free_look(vorbis_look_time *i){
 }
