@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.9 2001/11/24 05:26:10 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.10 2001/11/24 07:16:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -287,7 +287,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state      *vd=vb->vd;
   vorbis_info           *vi=vd->vi;
   codec_setup_info      *ci=vi->codec_setup;
-  bitrate_manager_info  *bi=ci->bi;
   backend_lookup_state  *b=vb->vd->backend_state;
   bitrate_manager_state *bm=&b->bms;
   vorbis_look_mapping0  *look=(vorbis_look_mapping0 *)l;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.38.6.1 2001/11/22 06:21:06 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.38.6.2 2001/11/24 07:16:37 xiphmont Exp $
 
  ********************************************************************/
 
@@ -164,6 +164,7 @@ typedef struct vorbis_comment{
 
 extern void     vorbis_info_init(vorbis_info *vi);
 extern void     vorbis_info_clear(vorbis_info *vi);
+extern int      vorbis_info_blocksize(vorbis_info *vi,int zo);
 extern void     vorbis_comment_init(vorbis_comment *vc);
 extern void     vorbis_comment_add(vorbis_comment *vc, char *comment); 
 extern void     vorbis_comment_add_tag(vorbis_comment *vc, 

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.46.2.1 2001/10/11 15:41:44 xiphmont Exp $
+ last mod: $Id: info.c,v 1.46.2.2 2001/11/24 07:16:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -134,6 +134,13 @@ void vorbis_comment_clear(vorbis_comment *vc){
     if(vc->vendor)_ogg_free(vc->vendor);
   }
   memset(vc,0,sizeof(*vc));
+}
+
+/* blocksize 0 is guaranteed to be short, 1 is guarantted to be long.
+   They may be equal, but short will never ge greater than long */
+int vorbis_info_blocksize(vorbis_info *vi,int zo){
+  codec_setup_info *ci = vi->codec_setup;
+  return ci ? ci->blocksizes[zo] : -1;
 }
 
 /* used by synthesis, which has a full, alloced vi */
