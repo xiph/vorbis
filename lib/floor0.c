@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.16 2000/06/15 09:18:34 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.17 2000/06/19 10:05:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -141,6 +141,7 @@ static vorbis_look_floor *look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
     if(val>look->ln)val=look->ln; /* guard against the approximation */
     look->linearmap[j]=val;
   }
+
   return look;
 }
 
@@ -439,7 +440,7 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
       vorbis_lsp_to_lpc(out,out,look->m); 
       _lpc_to_curve(out,out,amp,look,"",0);
       
-      for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
+      for(j=0;j<look->n;j++)out[j]=fromdB(out[j]-info->ampdB);
       return(1);
     }
   }

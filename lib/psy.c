@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.22 2000/06/18 12:33:47 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23 2000/06/19 10:05:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -346,62 +346,59 @@ static void compute_decay(vorbis_look_psy *p,double *f, double *decay, int n){
   }
 }
 
-static double _eights[EHMER_MAX+1]={
-  .2394004745,.2610680627,.2846967347,.3104639837,
-  .3385633673,.3692059617,.4026219471,.4390623367,
-  .4788008625,.5221360312,.5693933667,.6209278553,
-  .6771266124,.7384117901,.8052437489,.8781245150,
-  .9576015522,1.0442718740,1.1387865279,1.2418554865,
-  1.3542529803,1.4768233137,1.6104872070,1.7562487129,
-  1.9152027587,2.0885433709,2.2775726445,2.4837105245,
-  2.7085054716,2.9536460940,3.2209738324,3.5124967917,
-  3.8304048259,4.1770859876,4.5551444666,4.9674201522,
-  5.4170099651,5.9072911215,6.4419465017,7.0249923150,
-  7.6608082685,8.3541704668,9.1102872884,9.9348385106,
-  10.8340179740,11.8145801099,12.8838906772,14.0499820932,
-  15.3216137706,16.7083379167,18.2205712869,19.8696734335,
-  21.6680320357,23.6291559533,25.7677767018,28.0999591127,
-  30.6432220084};
+static long _eights[EHMER_MAX+1]={
+  981,1069,1166,1272,
+  1387,1512,1649,1798,
+  1961,2139,2332,2543,
+  2774,3025,3298,3597,
+  3922,4277,4664,5087,
+  5547,6049,6597,7194,
+  7845,8555,9329,10173,
+  11094,12098,13193,14387,
+  15689,17109,18658,20347,
+  22188,24196,26386,28774,
+  31379,34219,37316,40693,
+  44376,48393,52772,57549,
+  62757,68437,74631,81386,
+  88752,96785,105545,115097,
+  125515};
 
-static void seed_curve(double *flr,
-			 double **curves,
-			 double amp,double specmax,
-			 int x,int n,double specatt){
+static int seed_curve(double *flr,
+		       double **curves,
+		       double amp,double specmax,
+		       int x,int n,double specatt,
+		       int maxEH){
   int i;
-  int prevx=x*_eights[0]+.5;
-  int nextx;
 
   /* make this attenuation adjustable */
   int choice=(int)((todB(amp)-specmax+specatt)/10.-1.5);
   choice=max(choice,0);
   choice=min(choice,8);
 
-  for(i=0;i<EHMER_MAX;i++){
-    if(prevx<n){
-      double lin=curves[choice][i];
-      nextx=x*_eights[i+1]+.5;
-      nextx=(nextx<n?nextx:n);
-      if(lin){
-	lin*=amp;	
-	if(prevx<0){
-	  if(nextx>=0){
-	    flr[0]=max(flr[0],lin);
-	  }
-	}else{
-	  flr[prevx]=max(flr[prevx],lin);
-	}
-      }
-      prevx=nextx;
-    }
-  }
+  for(i=maxEH;i>=0;i--)
+    if(((x*_eights[i])>>12)<n)break;
+  maxEH=i;
+
+  for(;i>=0;i--)
+    if(curves[choice][i]>0.)break;
+  
+  for(;i>=0;i--){
+    double lin=curves[choice][i];
+    if(lin>0.){
+      double *fp=flr+((x*_eights[i])>>12);
+      lin*=amp;	
+      if(*fp<lin)*fp=lin;
+    }else break;
+  }    
+  return(maxEH);
 }
 
 static void seed_peak(double *flr,
 		      double *att,
 		      double amp,double specmax,
 		      int x,int n,double specatt){
-  int prevx=x*_eights[16];
-  int nextx=x*_eights[17];
+  int prevx=(x*_eights[16])>>12;
+  int nextx=(x*_eights[17])>>12;
 
   /* make this attenuation adjustable */
   int choice=rint((todB(amp)-specmax+specatt)/20.)-1;
@@ -430,13 +427,14 @@ static void seed_generic(vorbis_look_psy *p,
 			 double specmax){
   vorbis_info_psy *vi=p->vi;
   long n=p->n,i;
-  
+  int maxEH=EHMER_MAX-1;
+
   /* prime the working vector with peak values */
   /* Use the 125 Hz curve up to 125 Hz and 8kHz curve after 8kHz. */
   for(i=0;i<n;i++)
     if(f[i]>flr[i])
-      seed_curve(flr,curves[p->octave[i]],f[i],
-		 specmax,i,n,vi->max_curve_dB);
+      maxEH=seed_curve(flr,curves[p->octave[i]],f[i],
+		       specmax,i,n,vi->max_curve_dB,maxEH);
 }
 
 static void seed_att(vorbis_look_psy *p,
@@ -518,8 +516,8 @@ static void quarter_octave_noise(long n,double *f,double *noise){
   for(i=0;i<n;i++){
     /* not exactly correct, (the center frequency should be centered
        on a *log* scale), but not worth quibbling */
-    long newhi=i*_eights[17]+noiseBIAS;
-    long newlo=i*_eights[15]-noiseBIAS;
+    long newhi=((i*_eights[17])>>12)+noiseBIAS;
+    long newlo=((i*_eights[15])>>12)-noiseBIAS;
     if(newhi>n)newhi=n;
 
     for(;lo<newlo;lo++)

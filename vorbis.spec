@@ -64,7 +64,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files devel
 %defattr(-,root,root)
-%doc README docs/*.{gif,html}
+%doc README docs/*.{png,html}
 /usr/include/vorbis/*
 /usr/lib/*
 

@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.7 2000/05/08 20:49:42 xiphmont Exp $
+# $Id: Makefile.in,v 1.8 2000/06/19 10:05:57 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -31,9 +31,9 @@ HFILES =	../include/vorbis/codec.h ../include/vorbis/vorbisfile.h \
 		../include/vorbis/internal.h ../include/vorbis/backends.h \
 		../include/vorbis/codebook.h
 OFILES =	encoder_example.o decoder_example.o chaining_example.o \
-		seeking_test.o
+		vorbisfile_example.o seeking_test.o
 BINFILES =      encoder_example decoder_example chaining_example \
-		seeking_test
+		vorbisfile_example seeking_test
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -60,6 +60,10 @@ chaining_example:	$(OFILES) ../lib/libvorbis.a ../lib/vorbisfile.a
 	$(CC) $(CFLAGS) $(LDFLAGS) chaining_example.o \
 			../lib/vorbisfile.a ../lib/libvorbis.a \
 			-o chaining_example $(LIBS)
+vorbisfile_example:	$(OFILES) ../lib/libvorbis.a ../lib/vorbisfile.a
+	$(CC) $(CFLAGS) $(LDFLAGS) vorbisfile_example.o \
+			../lib/vorbisfile.a ../lib/libvorbis.a \
+			-o vorbisfile_example $(LIBS)
 
 seeking_test:	$(OFILES) ../lib/libvorbis.a ../lib/vorbisfile.a
 	$(CC) $(CFLAGS) $(LDFLAGS) seeking_test.o \
