@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id: latticebuild.c,v 1.7 2000/11/06 00:07:25 xiphmont Exp $
+ last mod: $Id: latticebuild.c,v 1.8 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,8 +21,6 @@
 #include <math.h>
 #include <string.h>
 #include <errno.h>
-#include "vorbis/codebook.h"
-#include "../lib/sharedbook.h"
 #include "bookutil.h"
 
 /* The purpose of this util is just to finish packaging the

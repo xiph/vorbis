@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.8 2000/11/06 00:07:25 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.9 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,8 +21,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
-#include "vorbis/codebook.h"
-#include "../lib/sharedbook.h"
 #include "bookutil.h"
 
 /* set up metrics */

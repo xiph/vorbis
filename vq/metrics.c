@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.10 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.11 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,8 +20,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <math.h>
-#include "vorbis/codebook.h"
-#include "../lib/sharedbook.h"
 #include "bookutil.h"
 
 /* collect the following metrics:

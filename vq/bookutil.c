@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.18 2000/11/06 00:07:25 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.19 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,8 +21,6 @@
 #include <math.h>
 #include <string.h>
 #include <errno.h>
-#include "vorbis/codebook.h"
-#include "../lib/sharedbook.h"
 #include "bookutil.h"
 
 /* A few little utils for reading files */

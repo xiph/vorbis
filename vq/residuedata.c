@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.5 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: residuedata.c,v 1.6 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,6 @@
 #include <string.h>
 #include "vqgen.h"
 #include "bookutil.h"
-#include "../lib/sharedbook.h"
 #include "../lib/scales.h"
 #include "vqext.h"
 

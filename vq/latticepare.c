@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.6 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.7 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,8 +21,6 @@
 #include <math.h>
 #include <string.h>
 #include <errno.h>
-#include "vorbis/codebook.h"
-#include "../lib/sharedbook.h"
 #include "../lib/scales.h"
 #include "bookutil.h"
 #include "vqgen.h"

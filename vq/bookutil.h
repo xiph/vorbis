@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.h,v 1.8 2000/11/06 00:07:25 xiphmont Exp $
+ last mod: $Id: bookutil.h,v 1.9 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include "vorbis/codebook.h"
+#include "codebook.h"
 
 extern char     *get_line(FILE *in);
 extern char     *setup_line(FILE *in);

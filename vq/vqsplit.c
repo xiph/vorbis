@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.21 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.22 2000/11/08 03:23:24 xiphmont Exp $
 
  ********************************************************************/
 
@@ -34,7 +34,6 @@
 #include "vqgen.h"
 #include "vqsplit.h"
 #include "bookutil.h"
-#include "../lib/sharedbook.h"
 
 /* Codebook generation happens in two steps: 
 

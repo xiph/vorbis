@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.14 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.15 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include "vqgen.h"
 #include "vqext.h"
-#include "../lib/sharedbook.h"
+#include "codebook.h"
 
 char *vqext_booktype="LSPdata";  
 quant_meta q={0,0,0,1};          /* set sequence data */

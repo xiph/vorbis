@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.6 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.7 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,8 +20,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdio.h>
-#include "../vq/bookutil.h"
-#include "../lib/sharedbook.h"
+#include "bookutil.h"
 
 /* does not guard against invalid settings; eg, a subn of 16 and a
    subgroup request of 32.  Max subn of 128 */

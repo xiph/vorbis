@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2000/11/06 00:07:25 xiphmont Exp $
+# $Id: Makefile,v 1.3 2000/11/08 03:23:23 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -9,7 +9,7 @@
 #                                                                             #
 ###############################################################################
 
-FLAGS=-I. -I../include 
+FLAGS=-I. -I../lib -I../include 
 OPT=-O20 $(FLAGS)
 DEBUG=-g -Wall $(FLAGS)
 PROFILE=-g -pg -O20 $(FLAGS)
@@ -18,7 +18,7 @@ LD=gcc
 LDFLAGS=$(FLAGS)
 LIBS=-lm 
 
-HFILES =	../include/vorbis/codebook.h vqgen.h vqext.h bookutil.h
+HFILES =	../lib/codebook.h vqgen.h vqext.h bookutil.h
 
 OFILES = 	vqgen.o vqsplit.o bookutil.o ../lib/sharedbook.o
 ALLOFILES = 	$(OFILES) lspdata.o genericdata.o train.o build.o run.o\

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.35 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.36 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,7 +32,6 @@
 
 #include "vqgen.h"
 #include "bookutil.h"
-#include "../lib/sharedbook.h"
 
 /* Codebook generation happens in two steps: 
 

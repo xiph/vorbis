@@ -13,7 +13,7 @@
 
  function: utility main for setting entropy encoding parameters
            for lattice codebooks
- last mod: $Id: latticetune.c,v 1.4 2000/11/06 00:07:26 xiphmont Exp $
+ last mod: $Id: latticetune.c,v 1.5 2000/11/08 03:23:23 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,9 +22,11 @@
 #include <math.h>
 #include <string.h>
 #include <errno.h>
-#include "vorbis/codebook.h"
-#include "../lib/sharedbook.h"
 #include "bookutil.h"
+
+static char *strrcmp_i(char *s,char *cmp){
+  return(strncmp(s+strlen(s)-strlen(cmp),cmp,strlen(cmp)));
+}
 
 /* This util takes a training-collected file listing codewords used in
    LSP fitting, then generates new codeword lengths for maximally
@@ -90,7 +92,7 @@ int main(int argc,char *argv[]){
     exit(1);
   }
 
-  if(!strcmp(argv[0],"latticetune")){
+  if(!strrcmp_i(argv[0],"latticetune")){
     long lines=0;
     line=setup_line(in);
     while(line){      
@@ -105,7 +107,7 @@ int main(int argc,char *argv[]){
     }
   }
 
-  if(!strcmp(argv[0],"restune")){
+  if(!strrcmp_i(argv[0],"restune")){
     long step;
     long lines=0;
     long cols=-1;
