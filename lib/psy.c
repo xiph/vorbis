@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.70 2002/06/30 08:31:00 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.71 2002/07/01 05:29:41 xiphmont Exp $
 
  ********************************************************************/
 
@@ -272,8 +272,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->eighth_octave_lines=gi->eighth_octave_lines;
   p->shiftoc=rint(log(gi->eighth_octave_lines*8.f)/log(2.f))-1;
 
-  p->firstoc=toOC(.25f*rate/n)*(1<<(p->shiftoc+1))-gi->eighth_octave_lines;
-  maxoc=toOC((n*.5f-.25f)*rate/n)*(1<<(p->shiftoc+1))+.5f;
+  p->firstoc=toOC(.25f*rate*.5/n)*(1<<(p->shiftoc+1))-gi->eighth_octave_lines;
+  maxoc=toOC((n+.25f)*rate*.5/n)*(1<<(p->shiftoc+1))+.5f;
   p->total_octave_lines=maxoc-p->firstoc+1;
   p->ath=_ogg_malloc(n*sizeof(*p->ath));
 
@@ -311,7 +311,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   }
 
   for(i=0;i<n;i++)
-    p->octave[i]=toOC(((i+.25f)*.5)*rate/n)*(1<<(p->shiftoc+1))+.5f;
+    p->octave[i]=toOC((i+.25f)*.5*rate/n)*(1<<(p->shiftoc+1))+.5f;
 
   p->tonecurves=setup_tone_curves(vi->toneatt,rate*.5/n,n,
 				  vi->tone_centerboost,vi->tone_decay);
@@ -494,6 +494,7 @@ static void seed_chase(float *seeds, int linesper, long n){
 }
 
 /* bleaugh, this is more complicated than it needs to be */
+#include<stdio.h>
 static void max_seeds(vorbis_look_psy *p,
 		      float *seed,
 		      float *flr){
@@ -505,6 +506,7 @@ static void max_seeds(vorbis_look_psy *p,
   seed_chase(seed,linesper,n); /* for masking */
  
   pos=p->octave[0]-p->firstoc-(linesper>>1);
+
   while(linpos+1<p->n){
     float minV=seed[pos];
     long end=((p->octave[linpos]+p->octave[linpos+1])>>1)-p->firstoc;
@@ -515,7 +517,6 @@ static void max_seeds(vorbis_look_psy *p,
 	minV=seed[pos];
     }
     
-    /* seed scale is log.  Floor is linear.  Map back to it */
     end=pos+p->firstoc;
     for(;linpos<p->n && p->octave[linpos]<=end;linpos++)
       if(flr[linpos]<minV)flr[linpos]=minV;
@@ -962,7 +963,6 @@ void _vp_noise_normalize_sort(vorbis_look_psy *p,
   }
 }
 
-#include <stdio.h>
 void _vp_noise_normalize(vorbis_look_psy *p,
 			 float *in,float *out,int *sortedindex){
   int flag=0,i,j=0,n=p->n;
