@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id: chaining_example.c,v 1.12 2001/09/15 04:47:47 cwolf Exp $
+ last mod: $Id: chaining_example.c,v 1.13 2001/09/17 01:06:18 cwolf Exp $
 
  ********************************************************************/
 
@@ -23,10 +23,8 @@
 #include <fcntl.h>
 #endif
 
-int main(int argc, char *argv[]){
+int main(){
   OggVorbis_File ov;
-  char msg[256];
-  FILE *fpin=NULL;
   int i;
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
@@ -36,22 +34,8 @@ int main(int argc, char *argv[]){
   _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
-  /* If command line args were supplied, open the named file(s)
-     for i/o, else maintain use of stdin/stdout.*/
-  if (argc == 2)
-  {
-    if ((fpin = fopen(argv[1], "rb")) == (FILE*)NULL)
-    {
-      (void)sprintf(msg, "Can't open \"%s\" for input", argv[1]);
-      perror(msg);
-      return 1;
-    }
-  }
-  else
-    fpin = stdin;
-
   /* open the file/pipe on stdin */
-  if(ov_open(fpin,&ov,NULL,-1)<0){
+  if(ov_open(stdin,&ov,NULL,-1)<0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }
@@ -59,33 +43,27 @@ int main(int argc, char *argv[]){
   /* print details about each logical bitstream in the input */
   if(ov_seekable(&ov)){
     printf("Input bitstream contained %ld logical bitstream section(s).\n",
-     ov_streams(&ov));
+	   ov_streams(&ov));
     printf("Total bitstream playing time: %ld seconds\n\n",
-    (long)ov_time_total(&ov,-1));
+	   (long)ov_time_total(&ov,-1));
 
   }else{
     printf("Standard input was not seekable.\n"
-    "First logical bitstream information:\n\n");
+	   "First logical bitstream information:\n\n");
   }
 
   for(i=0;i<ov_streams(&ov);i++){
     vorbis_info *vi=ov_info(&ov,i);
     printf("\tlogical bitstream section %d information:\n",i+1);
     printf("\t\t%ldHz %d channels bitrate %ldkbps serial number=%ld\n",
-    vi->rate,vi->channels,ov_bitrate(&ov,i)/1000,
-    ov_serialnumber(&ov,i));
+	   vi->rate,vi->channels,ov_bitrate(&ov,i)/1000,
+	   ov_serialnumber(&ov,i));
     printf("\t\theader length: %ld bytes\n",(long)
-    (ov.dataoffsets[i]-ov.offsets[i]));
+	   (ov.dataoffsets[i]-ov.offsets[i]));
     printf("\t\tcompressed length: %ld bytes ",(long)(ov_raw_total(&ov,i)));
     printf(" play time: %lds\n",(long)ov_time_total(&ov,i));
   }
 
   ov_clear(&ov);
-
-  if (argc == 2)
-  {
-    (void)fclose(fpin);
-  }
-
   return 0;
 }

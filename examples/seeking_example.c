@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.9 2001/09/15 04:47:48 cwolf Exp $
+ last mod: $Id: seeking_example.c,v 1.10 2001/09/17 01:06:18 cwolf Exp $
 
  ********************************************************************/
 
@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"
-//#include "../lib/misc.h"
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
 # include <io.h>
@@ -66,30 +65,15 @@ int main(int argc, char *argv[]){
   ogg_int64_t pcmlength;
   char *bigassbuffer;
   int dummy;
-  char msg[256];
-  FILE *fpin=NULL;
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
   _setmode( _fileno( stdin ), _O_BINARY );
   _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
-  /* If command line args were supplied, open the named file(s)
-     for i/o, else maintain use of stdin/stdout.*/
-  if (argc == 2)
-  {
-    if ((fpin = fopen(argv[1], "rb")) == (FILE*)NULL)
-    {
-      (void)sprintf(msg, "Can't open \"%s\" for input", argv[1]);
-      perror(msg);
-      return 1;
-    }
-  }
-  else
-    fpin = stdin;
 
   /* open the file/pipe on stdin */
-  if(ov_open(fpin,&ov,NULL,-1)<0){
+  if(ov_open(stdin,&ov,NULL,-1)<0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }

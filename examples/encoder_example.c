@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.24 2001/09/15 04:47:48 cwolf Exp $
+ last mod: $Id: encoder_example.c,v 1.25 2001/09/17 01:06:18 cwolf Exp $
 
  ********************************************************************/
 
@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <string.h>
 #include <vorbis/vorbisenc.h>
 
 #ifdef _WIN32 /* We need the following two to set stdin/stdout to binary */
@@ -39,7 +38,7 @@
 #define READ 1024
 signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 
-int main(int argc, char *argv[]){
+int main(){
   ogg_stream_state os; /* take physical pages, weld into a logical
 			  stream of packets */
   ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
@@ -53,17 +52,18 @@ int main(int argc, char *argv[]){
   vorbis_block     vb; /* local working space for packet->PCM decode */
 
   int eos=0;
-  FILE *fpin=NULL;
-  FILE *fpout=NULL;
-  char msg[512];
   int i, founddata;
 
 #if defined(macintosh) && defined(__MWERKS__)
-  int ac = 0;
-  char **av = NULL;
-  ac = ccommand(&av); /* get a "command line" from the Mac user */
-                      /* this also lets the user set stdin and stdout */
+  int argc = 0;
+  char **argv = NULL;
+  argc = ccommand(&argv); /* get a "command line" from the Mac user */
+                          /* this also lets the user set stdin and stdout */
 #endif
+
+  /* we cheat on the WAV header; we just bypass 44 bytes and never
+     verify that it matches 16bit/stereo/44.1kHz.  This is just an
+     example, after all. */
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
   /* Beware the evil ifdef. We avoid these where we can, but this one we 
@@ -71,30 +71,6 @@ int main(int argc, char *argv[]){
   _setmode( _fileno( stdin ), _O_BINARY );
   _setmode( _fileno( stdout ), _O_BINARY );
 #endif
-
-  /* If command line args were supplied, open the named file(s)
-     for i/o, else maintain use of stdin/stdout.*/
-  if (argc == 3)
-  {
-    if ((fpin = fopen(argv[1], "rb")) == (FILE*)NULL)
-    {
-      (void)sprintf(msg, "Can't open %s for reading.", argv[1]);
-      perror(msg);
-      return 1;
-    }
-
-    if ((fpout = fopen(argv[2], "wb")) == (FILE*)NULL)
-    {
-      (void)sprintf(msg, "Can't open %s for writing.", argv[2]);
-      perror(msg);
-      return 1;
-    }
-  }
-  else
-  {
-    fpin = stdin;
-    fpout = stdout;
-  }
 
   /* we cheat on the WAV header; we just bypass the header and never
      verify that it matches 16bit/stereo/44.1kHz.  This is just an
@@ -170,15 +146,15 @@ int main(int argc, char *argv[]){
 	while(!eos){
 		int result=ogg_stream_flush(&os,&og);
 		if(result==0)break;
-		fwrite(og.header,1,og.header_len,fpout);
-		fwrite(og.body,1,og.body_len,fpout);
+		fwrite(og.header,1,og.header_len,stdout);
+		fwrite(og.body,1,og.body_len,stdout);
 	}
 
   }
   
   while(!eos){
     long i;
-    long bytes=fread(readbuffer,1,READ*4,fpin); /* stereo hardwired here */
+    long bytes=fread(readbuffer,1,READ*4,stdin); /* stereo hardwired here */
 
     if(bytes==0){
       /* end of file.  this can be done implicitly in the mainline,
@@ -220,8 +196,8 @@ int main(int argc, char *argv[]){
       while(!eos){
 	int result=ogg_stream_pageout(&os,&og);
 	if(result==0)break;
-	fwrite(og.header,1,og.header_len,fpout);
-	fwrite(og.body,1,og.body_len,fpout);
+	fwrite(og.header,1,og.header_len,stdout);
+	fwrite(og.body,1,og.body_len,stdout);
 
 	/* this could be set above, but for illustrative purposes, I do
 	   it here (to show that vorbis does know where the stream ends) */
@@ -246,4 +222,3 @@ int main(int argc, char *argv[]){
   fprintf(stderr,"Done.\n");
   return(0);
 }
-
