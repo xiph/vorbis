@@ -12,7 +12,11 @@ pkgconfig_DATA = vorbis.pc vorbisenc.pc vorbisfile.pc
 
 EXTRA_DIST = HACKING todo.txt macos macosx autogen.sh \
 	libvorbis.spec libvorbis.spec.in \
-	vorbis.m4 vorbis.pc.in vorbisenc.pc.in vorbisfile.pc.in
+	vorbis.m4 vorbis.pc.in vorbisenc.pc.in vorbisfile.pc.in \
+       vorbis-uninstalled.pc.in \
+       vorbisenc-uninstalled.pc.in \
+       vorbisfile-uninstalled.pc.in
+
 
 dist-hook:
 	rm -rf `find $(distdir)/macos -name CVS`

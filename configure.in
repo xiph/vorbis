@@ -239,4 +239,7 @@ libvorbis.spec
 vorbis.pc
 vorbisenc.pc
 vorbisfile.pc
+vorbis-uninstalled.pc
+vorbisenc-uninstalled.pc
+vorbisfile-uninstalled.pc
 ])
