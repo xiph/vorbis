@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.25 2002/10/11 08:22:18 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.26 2003/02/15 07:10:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -57,7 +57,6 @@ typedef struct lsfit_acc{
   long x2a;
   long y2a;
   long xya; 
-  long n;
   long an;
 } lsfit_acc;
 
@@ -461,14 +460,13 @@ static int accumulate_fit(const float *flr,const float *mdct,
     a->y2a=y2a*weight+y2b;
     a->xya=xya*weight+xyb;
     a->an=na*weight+nb;
-    a->n=nb;
   }
 
   return(na);
 }
 
 static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
-  long x=0,y=0,x2=0,y2=0,xy=0,n=0,an=0,i;
+  long x=0,y=0,x2=0,y2=0,xy=0,an=0,i;
   long x0=a[0].x0;
   long x1=a[fits-1].x1;
 
@@ -478,7 +476,6 @@ static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     x2+=a[i].x2a;
     y2+=a[i].y2a;
     xy+=a[i].xya;
-    n+=a[i].n;
     an+=a[i].an;
   }
 
@@ -488,7 +485,6 @@ static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     x2+=  x0 *  x0;
     y2+= *y0 * *y0;
     xy+= *y0 *  x0;
-    n++;
     an++;
   }
 
@@ -498,11 +494,10 @@ static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     x2+=  x1 *  x1;
     y2+= *y1 * *y1;
     xy+= *y1 *  x1;
-    n++;
     an++;
   }
   
-  {
+  if(an){
     /* need 64 bit multiplies, which C doesn't give portably as int */
     double fx=x;
     double fy=y;
@@ -513,13 +508,16 @@ static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     double b=(an*fxy-fx*fy)*denom;
     *y0=rint(a+b*x0);
     *y1=rint(a+b*x1);
-
+    
     /* limit to our range! */
     if(*y0>1023)*y0=1023;
     if(*y1>1023)*y1=1023;
     if(*y0<0)*y0=0;
     if(*y1<0)*y1=0;
-
+    
+  }else{
+    *y0=0;
+    *y1=0;
   }
 }
 
