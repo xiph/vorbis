@@ -214,6 +214,9 @@ int ogg_stream_packetin(ogg_stream_state *os,ogg_packet *op){
 
   os->lacing_fill+=lacing_vals;
 
+  /* for the sake of completeness */
+  os->packetno++;
+
   if(op->e_o_s)os->e_o_s=1;
 
   return(0);
@@ -660,6 +663,7 @@ int ogg_stream_reset(ogg_stream_state *os){
   os->e_o_s=0;
   os->b_o_s=0;
   os->pageno=0;
+  os->packetno=0;
   os->pcmpos=0;
 
   return(0);
@@ -674,9 +678,14 @@ int ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op){
   int ptr=os->lacing_returned;
 
   if(os->lacing_packet<=ptr)return(0);
+
   if(os->lacing_vals[ptr]&0x400){
     /* We lost sync here; let the app know */
     os->lacing_returned++;
+
+    /* we need to tell the codec there's a gap; it might need to
+       handle previous packet dependencies. */
+    os->packetno++;
     return(-1);
   }
 
@@ -696,12 +705,15 @@ int ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op){
       if(val&0x200)op->e_o_s=0x200;
       bytes+=size;
     }
+
+    op->packetno=os->packetno;
     op->frameno=os->pcm_vals[ptr];
     op->bytes=bytes;
 
     os->body_returned+=bytes;
     os->lacing_returned=ptr+1;
   }
+  os->packetno++;
   return(1);
 }
 
@@ -713,12 +725,30 @@ ogg_sync_state oy;
 
 void checkpacket(ogg_packet *op,int len, int no, int pos){
   long j;
+  static int sequence=0;
+  static int lastno=0;
+
   if(op->bytes!=len){
     fprintf(stderr,"incorrect packet length!\n");
     exit(1);
   }
   if(op->frameno!=pos){
     fprintf(stderr,"incorrect packet position!\n");
+    exit(1);
+  }
+
+  /* packet number just follows sequence/gap; adjust the input number
+     for that */
+  if(no==0){
+    sequence=0;
+  }else{
+    sequence++;
+    if(no>lastno+1)
+      sequence++;
+  }
+  lastno=no;
+  if(op->packetno!=sequence){
+    fprintf(stderr,"incorrect packet sequence %ld != %d\n",op->packetno,sequence);
     exit(1);
   }
 

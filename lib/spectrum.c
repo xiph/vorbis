@@ -38,7 +38,7 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
 
   int scale=vb->W;
   int m=vb->vd->vi->floororder[scale];
-  int n=vb->pcmend/2;
+  int n=vb->pcmend*4;
   int last=0;
   double dlast=0.;
   double min=M_PI/n/2.;
@@ -63,7 +63,7 @@ int _vs_spectrum_encode(vorbis_block *vb,double amp,double *lsp){
 int _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp){
   int scale=vb->W;
   int m=vb->vd->vi->floororder[scale];
-  int n=vb->pcmend/2;
+  int n=vb->pcmend*4;
   int last=0;
   double dlast=0.;
   int bits=rint(log(n)/log(2));
@@ -75,6 +75,7 @@ int _vs_spectrum_decode(vorbis_block *vb,double *amp,double *lsp){
   for(i=0;i<m;i++){
     int val=_oggpack_read(&vb->opb,bits);
     lsp[i]=(last+=val)*M_PI/n;
+
     /* Underpowered but sufficient */
     if(lsp[i]<dlast+min)lsp[i]=dlast+min;
     dlast=lsp[i];
@@ -95,13 +96,13 @@ void _vs_residue_quantize(double *data,double *curve,
     if(val>16)val=16;
     if(val<-16)val=-16;
 
-    if(val==0 || val==2 || val==-2){
+    /*if(val==0 || val==2 || val==-2){
       if(data[i]<0){
 	val=-1;
       }else{
 	val=1;
       }
-    }
+      }*/
     
     data[i]=val;
     /*if(val<0){

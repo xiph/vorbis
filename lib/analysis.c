@@ -14,7 +14,7 @@
  function: single-block PCM analysis
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 15 1999
+ last modification date: Oct 21 1999
 
  ********************************************************************/
 
@@ -58,15 +58,16 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   _oggpack_reset(opb);
   /* Encode the packet type */
   _oggpack_write(opb,0,1);
+
   /* Encode the block size */
   _oggpack_write(opb,vb->W,1);
+  if(vb->W){
+    _oggpack_write(opb,vb->lW,1);
+    _oggpack_write(opb,vb->nW,1);
+  }
 
-  /* we have the preecho metrics; decide what to do with them */
-  _ve_envelope_sparsify(vb);
-  _ve_envelope_apply(vb,0);
-
-  /* Encode the envelope */
-  if(_ve_envelope_encode(vb))return(-1);
+  /* No envelope encoding yet */
+  _oggpack_write(opb,0,1);
   
   /* time domain PCM -> MDCT domain */
   for(i=0;i<vi->channels;i++)
@@ -94,13 +95,13 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 	FILE *out;
 	char buffer[80];
 	
-	sprintf(buffer,"spectrum.m");
+	sprintf(buffer,"Aspectrum%d.m",vb->sequence);
 	out=fopen(buffer,"w+");
 	for(j=0;j<n/2;j++)
 	  fprintf(out,"%g\n",vb->pcm[i][j]);
 	fclose(out);
 
-	sprintf(buffer,"noise.m");
+	sprintf(buffer,"Anoise%d.m",vb->sequence);
 	out=fopen(buffer,"w+");
 	for(j=0;j<n/2;j++)
 	  fprintf(out,"%g\n",floor[j]);
@@ -115,7 +116,7 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 	FILE *out;
 	char buffer[80];
 	
-	sprintf(buffer,"premask.m");
+	sprintf(buffer,"Apremask%d.m",vb->sequence);
 	out=fopen(buffer,"w+");
 	for(j=0;j<n/2;j++)
 	  fprintf(out,"%g\n",floor[j]);
@@ -148,13 +149,25 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 	FILE *out;
 	char buffer[80];
 	
-	sprintf(buffer,"mask.m");
+	sprintf(buffer,"Alpc%d.m",vb->sequence);
+	out=fopen(buffer,"w+");
+	for(j=0;j<vl->m;j++)
+	  fprintf(out,"%g\n",lpc[j]);
+	fclose(out);
+
+	sprintf(buffer,"Alsp%d.m",vb->sequence);
+	out=fopen(buffer,"w+");
+	for(j=0;j<vl->m;j++)
+	  fprintf(out,"%g\n",lsp[j]);
+	fclose(out);
+
+	sprintf(buffer,"Amask%d.m",vb->sequence);
 	out=fopen(buffer,"w+");
 	for(j=0;j<n/2;j++)
 	  fprintf(out,"%g\n",curve[j]);
 	fclose(out);
 
-	sprintf(buffer,"res.m");
+	sprintf(buffer,"Ares%d.m",vb->sequence);
 	out=fopen(buffer,"w+");
 	for(j=0;j<n/2;j++)
 	  fprintf(out,"%g\n",vb->pcm[i][j]);
@@ -175,6 +188,7 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   op->b_o_s=0;
   op->e_o_s=vb->eofflag;
   op->frameno=vb->frameno;
+  op->packetno=vb->sequence; /* for sake of completeness */
 
   return(0);
 }

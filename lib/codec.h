@@ -14,7 +14,7 @@
  function: codec headers
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 12 1999
+ last modification date: Oct 22 1999
 
  ********************************************************************/
 
@@ -63,16 +63,18 @@ typedef struct {
 typedef struct {
   int winlen;
   double *window;
+  mdct_lookup mdct;
 } envelope_lookup;
 
 typedef struct lpclook{
   /* encode lookups */
-  int *bscale;
+  int *uscale;
   double *escale;
   drft_lookup fft;
 
   /* en/decode lookups */
   int *iscale;
+  double *ifrac;
   double *norm;
   int n;
   int ln;
@@ -111,8 +113,6 @@ typedef struct vorbis_info{
   int floororder[2];
   int flooroctaves[2];
 
-  int envelopesa;
-  int envelopech;
   int floorch;
 
   /*  int smallblock;
@@ -129,6 +129,7 @@ typedef struct vorbis_info{
 
   /* Encode-side settings for analysis */
 
+  int envelopesa;
   double preecho_thresh;
   double preecho_clamp;
 
@@ -186,8 +187,13 @@ typedef struct {
 			     logical bitstream */
   int     b_o_s;          /* set after we've written the initial page
 			     of a logical bitstream */
-  long    serialno;
-  long    pageno;
+  long     serialno;
+  long     pageno;
+  long     packetno;      /* sequence number for decode; the framing
+                             knows where there's a hole in the data,
+                             but we need coupling so that the codec
+                             (which is in a seperate abstraction
+                             layer) also knows about the gap */
   int64_t  pcmpos;
 
 } ogg_stream_state;
@@ -202,6 +208,11 @@ typedef struct {
   long  e_o_s;
 
   int64_t frameno;
+  long    packetno;       /* sequence number for decode; the framing
+                             knows where there's a hole in the data,
+                             but we need coupling so that the codec
+                             (which is in a seperate abstraction
+                             layer) also knows about the gap */
 
 } ogg_packet;
 
@@ -237,7 +248,7 @@ typedef struct vorbis_dsp_state{
   int      pcm_current;
   int      pcm_returned;
 
-  double **multipliers;
+  double  *multipliers;
   int      envelope_storage;
   int      envelope_current;
 
@@ -265,7 +276,6 @@ that logical bitstream. *************************************************/
 
 typedef struct vorbis_block{
   double **pcm;
-  double **mult;
   double **lpc;
   double **lsp;
   double *amp;
@@ -273,8 +283,6 @@ typedef struct vorbis_block{
   
   int    pcm_channels;  /* allocated, not used */
   int    pcm_storage;   /* allocated, not used */
-  int    mult_channels; /* allocated, not used */
-  int    mult_storage;  /* allocated, not used */
   int    floor_channels;
   int    floor_storage;
 
@@ -282,7 +290,6 @@ typedef struct vorbis_block{
   long  W;
   long  nW;
   int   pcmend;
-  int   multend;
 
   int eofflag;
   int frameno;

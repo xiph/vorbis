@@ -14,7 +14,7 @@
  function: maintain the info structure, info <-> header packets
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 06 1999
+ last modification date: Oct 22 1999
 
  ********************************************************************/
 
@@ -39,7 +39,7 @@ int vorbis_info_modeset(vorbis_info *vi, int mode){
   memcpy(vi,&(predef_modes[mode]),sizeof(vorbis_info));
   vi->threshhold_points=threshhold_points;
   vi->user_comments=calloc(1,sizeof(char *));
-  vi->vendor=strdup("Xiphophorus libVorbis I 19991018");
+  vi->vendor=strdup("Xiphophorus libVorbis I 19991022");
 
   return(0);
 }
@@ -112,9 +112,6 @@ int vorbis_info_headerin(vorbis_info *vi,ogg_packet *op){
 	vi->floororder[1]=_oggpack_read(&opb,8);
 	vi->flooroctaves[0]=_oggpack_read(&opb,8);
 	vi->flooroctaves[1]=_oggpack_read(&opb,8);
-
-	vi->envelopesa=_oggpack_read(&opb,32);
-	vi->envelopech=_oggpack_read(&opb,16);
 	vi->floorch=_oggpack_read(&opb,16);
 
 	return(0);
@@ -180,9 +177,6 @@ int vorbis_info_headerout(vorbis_info *vi,
      floor order for large block (octet)
      floor octaves for small block (octet)
      floor octaves for large block (octet)
-
-     envelopesa   (4 octets, lsb first)
-     envelopech   (4 octets, lsb first)
      floorch      (4 octets, lsb first)
    */
 
@@ -200,8 +194,6 @@ int vorbis_info_headerout(vorbis_info *vi,
   _oggpack_write(&opb,vi->floororder[1],8);
   _oggpack_write(&opb,vi->flooroctaves[0],8);
   _oggpack_write(&opb,vi->flooroctaves[1],8);
-  _oggpack_write(&opb,vi->envelopesa,32);
-  _oggpack_write(&opb,vi->envelopech,16);
   _oggpack_write(&opb,vi->floorch,16);
 
   /* build the packet */

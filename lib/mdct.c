@@ -270,7 +270,7 @@ void mdct_forward(mdct_lookup *init, double *in, double *out, double *window){
   }
 }
 
-void mdct_backward(mdct_lookup *init, double *in, double *out){
+void mdct_backward(mdct_lookup *init, double *in, double *out, double *w){
   int n=init->n;
   double *x=alloca(n*sizeof(double));
   int n2=n>>1;
@@ -318,9 +318,13 @@ void mdct_backward(mdct_lookup *init, double *in, double *out){
     int o3=n4+n2,o4=o3-1;
     
     for(i=0;i<n4;i++){
-      out[o1]=-(out[o2]=(*x * *BO - *(x+2) * *BE));
-      out[o3]=out[o4]= -(*x * *BE + *(x+2) * *BO);
-
+      double temp1= (*x * *BO - *(x+2) * *BE);
+      double temp2=-(*x * *BE + *(x+2) * *BO);
+    
+      out[o1]=-temp1*w[o1];
+      out[o2]= temp1*w[o2];
+      out[o3]= temp2*w[o3];
+      out[o4]= temp2*w[o4];
 
       o1++;
       o2--;

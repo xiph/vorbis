@@ -14,7 +14,7 @@
  function: predefined encoding modes
  author: Monty <xiphmont@mit.edu>
  modifications by: Monty
- last modification date: Oct 15 1999
+ last modification date: Oct 22 1999
 
  ********************************************************************/
 
@@ -36,20 +36,20 @@ vorbis_info predef_modes[]={
   { 2, 44100,     0, NULL, 0, NULL, 
     /* smallblock, largeblock, LPC order (small, large) */
     {512, 2048}, {16,16}, 
-    /* spectral octaves (small, large), envelope segment size */
-    {5,5}, 64,
-    /* envelope channels, spectrum channels */
-    1,2, 
-    /* preecho clamp trigger threshhold, clamp range, dummy */
-    4, 2, NULL,
+    /* spectral octaves (small, large), spectral channels */
+    {5,5}, 2,
+    /* thresh sample period, preecho clamp trigger threshhold, range, dummy */
+    128, 4, 2, NULL,
     /* noise masking curve dB attenuation levels [20] */
-    {-12,-12,-18,-18,-18,-18,-18,-10,-5,-2,
-     0,0,0,0,1,2,3,3,4,5},
+    {-12,-12,-18,-18,-18,-18,-18,-18,-18,-12,
+      -8,-4,0,0,1,2,3,3,4,5},
+    /*{-100,-100,-100,-100,-100,-100,-100,-24,-24,-24,
+      -24,-24,-24,-24,-24,-24,-24,-24,-24,-24}*/
     /* noise masking scale biases */
-    .95,1.01,.001,
+    .95,1.01,.01,
     /* tone masking curve dB attenuation levels [20] */
-    {-24,-24,-24,-24,-24,-24,-24,-24,-24,-24,
-     -24,-24,-24,-24,-24,-24,-24,-24,-24,-24},
+    {-20,-20,-20,-20,-20,-20,-20,-20,-20,-20,
+     -20,-20,-20,-20,-20,-20,-20,-20,-20,-20},
     /* tone masking rolloff settings (dB per octave), octave bias */
     90,60,.001,
     NULL,NULL,NULL},

@@ -14,7 +14,7 @@
   function: LPC low level routines
   author: Monty <monty@xiph.org>
   modifications by: Monty
-  last modification date: Oct 11 1999
+  last modification date: Oct 18 1999
 
  ********************************************************************/
 
@@ -54,50 +54,27 @@ Carsten Bormann
 #include "lpc.h"
 #include "xlogmap.h"
 
-/* This is pared down for Vorbis where we only use LPC to encode
-   spectral envelope curves.  Thus we only are interested in
-   generating the coefficients and recovering the curve from the
-   coefficients.  Autocorrelation LPC coeff generation algorithm
-   invented by N. Levinson in 1947, modified by J. Durbin in 1959. */
+/* This is pared down for Vorbis. Autocorrelation LPC coeff generation
+   algorithm invented by N. Levinson in 1947, modified by J. Durbin in
+   1959. */
 
-/* Input : n element envelope curve
+/* Input : n elements of time doamin data
    Output: m lpc coefficients, excitation energy */
 
-double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l){
-  int n=l->ln;
-  int m=l->m;
-  double aut[m+1],work[n+n],error;
-  double fscale=.5/n;
+
+double vorbis_lpc_from_data(double *data,double *lpc,int n,int m){
+  double aut[m+1],error;
   int i,j;
-  
-  /* input is a real curve. make it complex-real */
-  /* This mixes phase, but the LPC generation doesn't care. */
-  for(i=0;i<n;i++){
-    work[i*2]=curve[i]*fscale;
-    work[i*2+1]=0;
-  }
 
-  n*=2;
-  drft_backward(&l->fft,work);
-
-  /* The autocorrelation will not be circular.  Shift, else we lose
-     most of the power in the edges. */
-  
-  for(i=0,j=n/2;i<n/2;){
-    double temp=work[i];
-    work[i++]=work[j];
-    work[j++]=temp;
-  }
-  
   /* autocorrelation, p+1 lag coefficients */
 
   j=m+1;
   while(j--){
     double d=0;
-    for(i=j;i<n;i++)d+=work[i]*work[i-j];
+    for(i=j;i<n;i++)d+=data[i]*data[i-j];
     aut[j]=d;
   }
-
+  
   /* Generate lpc coefficients from autocorr values */
 
   error=aut[0];
@@ -118,7 +95,7 @@ double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l){
     r/=error; 
 
     /* Update LPC coefficients and total error */
-
+    
     lpc[i]=r;
     for(j=0;j<i/2;j++){
       double tmp=lpc[j];
@@ -129,11 +106,43 @@ double vorbis_gen_lpc(double *curve,double *lpc,lpc_lookup *l){
     
     error*=1.0-r*r;
   }
-
+  
   /* we need the error value to know how big an impulse to hit the
      filter with later */
   
   return error;
+}
+
+/* Input : n element envelope spectral curve
+   Output: m lpc coefficients, excitation energy */
+
+double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l){
+  int n=l->ln;
+  int m=l->m;
+  double work[n+n];
+  double fscale=.5/n;
+  int i,j;
+  
+  /* input is a real curve. make it complex-real */
+  /* This mixes phase, but the LPC generation doesn't care. */
+  for(i=0;i<n;i++){
+    work[i*2]=curve[i]*fscale;
+    work[i*2+1]=0;
+  }
+  
+  n*=2;
+  drft_backward(&l->fft,work);
+  
+  /* The autocorrelation will not be circular.  Shift, else we lose
+     most of the power in the edges. */
+  
+  for(i=0,j=n/2;i<n/2;){
+    double temp=work[i];
+    work[i++]=work[j];
+    work[j++]=temp;
+  }
+  
+  return(vorbis_lpc_from_data(work,lpc,n,m));
 }
 
 /* On top of this basic LPC infrastructure we introduce two modifications:
@@ -176,6 +185,7 @@ void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
   l->ln=mapped;
   l->m=m;
   l->iscale=malloc(n*sizeof(int));
+  l->ifrac=malloc(n*sizeof(double));
   l->norm=malloc(n*sizeof(double));
 
   for(i=0;i<n;i++){
@@ -190,30 +200,44 @@ void lpc_init(lpc_lookup *l,int n, int mapped, int m, int oct, int encode_p){
 
   if(encode_p){
     /* encode */
-    l->bscale=malloc(n*sizeof(int));
-    l->escale=malloc(n*sizeof(double));
-
+    l->escale=malloc(mapped*sizeof(double));
+    l->uscale=malloc(n*sizeof(int));
+    
+    /* undersample guard */
     for(i=0;i<n;i++){
-      l->escale[i]=LINEAR_X(i/scale,bias);
-      l->bscale[i]=rint(LOG_X(i,bias)*scale);
+      l->uscale[i]=rint(LOG_X(i,bias)/oct*mapped);
     }   
+
+    for(i=0;i<mapped;i++){
+      l->escale[i]=LINEAR_X(i/scale,bias);
+      l->uscale[(int)(floor(l->escale[i]))]=-1;
+      l->uscale[(int)(ceil(l->escale[i]))]=-1;
+    }   
+
 
   }
   /* decode; encode may use this too */
   
   drft_init(&l->fft,mapped*2);
   for(i=0;i<n;i++){
-    l->iscale[i]=rint(LOG_X(i,bias)/oct*mapped);
-    if(l->iscale[i]>=l->ln)l->iscale[i]=l->ln-1;
+    double is=LOG_X(i,bias)/oct*mapped;
+    if(is<0.)is=0.;
+
+    l->iscale[i]=floor(is);
+    if(l->iscale[i]>=l->ln-1)l->iscale[i]=l->ln-2;
+
+    l->ifrac[i]=is-floor(is);
+    if(l->ifrac[i]>1.)l->ifrac[i]=1.;
+    
   }
 }
 
 void lpc_clear(lpc_lookup *l){
   if(l){
-    if(l->bscale)free(l->bscale);
     if(l->escale)free(l->escale);
     drft_clear(&l->fft);
     free(l->iscale);
+    free(l->ifrac);
     free(l->norm);
   }
 }
@@ -246,7 +270,26 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
 
   }
 
-  return vorbis_gen_lpc(work,lpc,l);
+  /*  for(i=0;i<l->n;i++)
+    if(l->uscale[i]>0)
+    if(work[l->uscale[i]]<curve[i])work[l->uscale[i]]=curve[i];*/
+
+#ifdef ANALYSIS
+  {
+    int j;
+    FILE *out;
+    char buffer[80];
+    static int frameno=0;
+    
+    sprintf(buffer,"preloglpc%d.m",frameno++);
+    out=fopen(buffer,"w+");
+    for(j=0;j<l->ln;j++)
+      fprintf(out,"%g\n",work[j]);
+    fclose(out);
+  }
+#endif
+
+  return vorbis_lpc_from_spectrum(work,lpc,l);
 }
 
 
@@ -294,10 +337,30 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
   int i;
 
   _vlpc_de_helper(lcurve,lpc,amp,l);
+
+#ifdef ANALYSIS
+  {
+    int j;
+    FILE *out;
+    char buffer[80];
+    static int frameno=0;
+    
+    sprintf(buffer,"loglpc%d.m",frameno++);
+    out=fopen(buffer,"w+");
+    for(j=0;j<l->ln;j++)
+      fprintf(out,"%g\n",lcurve[j]);
+    fclose(out);
+  }
+#endif
+
   if(amp==0)return;
 
-  for(i=0;i<l->n;i++)
-    curve[i]=lcurve[l->iscale[i]]*l->norm[i];
+  for(i=0;i<l->n;i++){
+    int ii=l->iscale[i];
+    curve[i]=((1.-l->ifrac[i])*lcurve[ii]+
+	      l->ifrac[i]*lcurve[ii+1])*l->norm[i];
+  }
+
 }
 
 void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
@@ -310,8 +373,74 @@ void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
     
     _vlpc_de_helper(lcurve,lpc,amp,l);
 
-    for(i=0;i<l->n;i++)
-      residue[i]*=lcurve[l->iscale[i]]*l->norm[i];
+    for(i=0;i<l->n;i++){
+      if(residue[i]!=0){
+	int ii=l->iscale[i];
+	residue[i]*=((1.-l->ifrac[i])*lcurve[ii]+
+		     l->ifrac[i]*lcurve[ii+1])*l->norm[i];
+      }
+    }
+  }
+}
+
+/* subtract or add an lpc filter to data */
+
+void vorbis_lpc_residue(double *coeff,double *prime,int m,
+			double *data,long n){
+
+  /* in: coeff[0...m-1] LPC coefficients 
+         prime[0...m-1] initial values 
+         data[0...n-1] data samples 
+    out: data[0...n-1] residuals from LPC prediction */
+
+  long i,j;
+  double work[m+n],y;
+
+  if(!prime)
+    for(i=0;i<m;i++)
+      work[i]=0;
+  else
+    for(i=0;i<m;i++)
+      work[i]=prime[i];
+
+  for(i=0;i<n;i++){
+    y=0;
+    for(j=0;j<m;j++)
+      y-=work[i+j]*coeff[m-j-1];
+    
+    work[i+m]=data[i];
+    data[i]-=y;
+  }
+}
+
+
+void vorbis_lpc_predict(double *coeff,double *prime,int m,
+                     double *data,long n){
+
+  /* in: coeff[0...m-1] LPC coefficients 
+         prime[0...m-1] initial values (allocated size of n+m-1)
+         data[0...n-1] residuals from LPC prediction   
+    out: data[0...n-1] data samples */
+
+  long i,j,o,p;
+  double y;
+  double work[n+m];
+
+  if(!prime)
+    for(i=0;i<m;i++)
+      work[i]=0.;
+  else
+    for(i=0;i<m;i++)
+      work[i]=prime[i];
+
+  for(i=0;i<n;i++){
+    y=data[i];
+    o=i;
+    p=m;
+    for(j=0;j<m;j++)
+      y-=work[o++]*coeff[--p];
+    
+    data[i]=work[o]=y;
   }
 }
 

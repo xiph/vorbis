@@ -24,7 +24,8 @@ extern void mdct_init(mdct_lookup *lookup,int n);
 extern void mdct_clear(mdct_lookup *l);
 extern void mdct_forward(mdct_lookup *init, double *in, 
 			 double *out, double *window);
-extern void mdct_backward(mdct_lookup *init, double *in, double *out);
+extern void mdct_backward(mdct_lookup *init, double *in, 
+			  double *out, double *window);
 
 #endif
 
