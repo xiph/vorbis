@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.68 2003/03/06 22:05:26 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.69 2003/03/11 23:52:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -969,26 +969,29 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
 	    thisblock=vorbis_packet_blocksize(vf->vi+vf->current_link,&op);
 	    if(thisblock<0){
 	      ogg_stream_packetout(&vf->os,NULL);
-	      continue;
-	    }
-	  }
-	  if(eosflag)
-	    ogg_stream_packetout(&vf->os,NULL);
-	  else
-	    if(lastblock)accblock+=(lastblock+thisblock)>>2;
+	      thisblock=0;
+	    }else{
+	      
+	      if(eosflag)
+	      ogg_stream_packetout(&vf->os,NULL);
+	      else
+		if(lastblock)accblock+=(lastblock+thisblock)>>2;
+	    }	    
 
-	  if(op.granulepos!=-1){
-	    int i,link=vf->current_link;
-	    ogg_int64_t granulepos=op.granulepos-vf->pcmlengths[link*2];
-	    if(granulepos<0)granulepos=0;
-	    
-	    for(i=0;i<link;i++)
-	      granulepos+=vf->pcmlengths[i*2+1];
-	    vf->pcm_offset=granulepos-accblock;
-	    break;
-	  }
-	  lastblock=thisblock;
-	  continue;
+	    if(op.granulepos!=-1){
+	      int i,link=vf->current_link;
+	      ogg_int64_t granulepos=op.granulepos-vf->pcmlengths[link*2];
+	      if(granulepos<0)granulepos=0;
+	      
+	      for(i=0;i<link;i++)
+		granulepos+=vf->pcmlengths[i*2+1];
+	      vf->pcm_offset=granulepos-accblock;
+	      break;
+	    }
+	    lastblock=thisblock;
+	    continue;
+	  }else
+	    ogg_stream_packetout(&vf->os,NULL);
 	}
       }
       
