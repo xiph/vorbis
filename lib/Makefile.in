@@ -1,0 +1,100 @@
+# vorbis makefile configured for use with gcc on any platform
+# $Id: Makefile.in,v 1.33.4.1 2000/08/31 08:05:47 xiphmont Exp $
+
+###############################################################################
+#                                                                             #
+# To build a production vorbis (preferrably using gmake), just type 'make'.   #
+# To build with debugging or profiling information, use 'make debug' or       #
+# 'make profile' respectively.  'make clean' is a good idea between builds    #
+# with different target names, or before a final build.                       #
+#                                                                             #
+###############################################################################
+
+
+# DO NOT EDIT BELOW! ##########################################################
+# (unless, of course, you know what you are doing :) ##########################
+
+@SET_MAKE@
+FLAGS=-I. -I../include @CFLAGS@
+OPT=@OPT@ $(FLAGS)
+DEBUG=@DEBUG@ $(FLAGS)
+PROFILE=@PROFILE@ $(FLAGS)
+CC=@CC@
+LD=@CC@
+LDFLAGS=@LDFLAGS@ $(FLAGS)
+AR=@AR@
+RANLIB=@RANLIB@
+LIBS=@LIBS@ 
+
+HFILES =	../include/vorbis/codec.h \
+		../include/vorbis/internal.h ../include/vorbis/backends.h \
+		../include/vorbis/codebook.h \
+		bitwise.h envelope.h lpc.h lsp.h bookinternal.h misc.h\
+		psy.h smallft.h window.h scales.h os.h mdct.h registry.h\
+		masking.h sharedbook.h iir.h
+LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
+		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
+		time0.o floor0.o res0.o mapping0.o registry.o\
+		codebook.o sharedbook.o iir.o
+VF_HFILES = ../include/vorbis/vorbisfile.h ../include/vorbis/codec.h \
+		../include/vorbis/internal.h ../include/vorbis/codebook.h \
+		os.h misc.h 
+VF_LFILES = vorbisfile.o
+
+PSY_FILES = mdct.o psy.o lpc.o smallft.o window.o psytune.o floor0.o \
+	bitwise.o lsp.o codebook.o sharedbook.o
+
+all:
+	$(MAKE) target CFLAGS="$(OPT)"
+
+debug:	
+	$(MAKE) target CFLAGS="$(DEBUG)"
+
+analysis:	
+	$(MAKE) target CFLAGS="$(DEBUG) -DANALYSIS"
+
+profile: 
+	$(MAKE) target CFLAGS="$(PROFILE)"
+
+target:	libvorbis.a vorbisfile.a psytune
+
+selftest:	
+	$(MAKE) clean
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST framing.c -o test_framing 
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST bitwise.c\
+		-o test_bitwise $(LIBS)
+	$(CC) $(DEBUG) $(LDFLAGS) -c bitwise.c
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST sharedbook.c\
+		-o test_sharedbook $(LIBS)
+	$(CC) $(DEBUG) $(LDFLAGS) -c sharedbook.c
+	$(CC) $(DEBUG) $(LDFLAGS) -D_V_SELFTEST codebook.c \
+		sharedbook.o bitwise.o -o test_codebook $(LIBS)
+	@echo
+	@./test_framing
+	@./test_bitwise
+	@./test_sharedbook
+	@./test_codebook
+
+libvorbis.a: 	$(LFILES)	
+		$(AR) -r libvorbis.a $(LFILES)
+		$(RANLIB) libvorbis.a
+
+vorbisfile.a:	$(VF_LFILES)
+		$(AR) -r vorbisfile.a $(VF_LFILES)
+		$(RANLIB) vorbisfile.a
+
+psytune:	$(PSY_FILES)
+	        $(CC) $(CFLAGS) $(LDFLAGS) $(PSY_FILES) -o $@ $(LIBS)
+
+$(LFILES): 	$(HFILES)
+$(VF_LFILES): 	$(VF_HFILES)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	-rm -f *.o *.a test* *~ *.out ogg config.* tone psytune
+
+distclean:	clean
+	-rm -f Makefile
+
