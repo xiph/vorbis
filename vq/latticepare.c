@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for paring low hit count cells from lattice codebook
- last mod: $Id: latticepare.c,v 1.2.2.2 2000/05/25 09:55:16 xiphmont Exp $
+ last mod: $Id: latticepare.c,v 1.2.2.3 2000/06/01 12:03:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include <errno.h>
 #include "vorbis/codebook.h"
 #include "../lib/sharedbook.h"
+#include "../lib/scales.h"
 #include "bookutil.h"
 #include "vqgen.h"
 #include "vqsplit.h"
@@ -80,101 +81,35 @@ void add_vector(codebook *b,double *vec,long n){
   }
 }
 
-/* search neighboring [non-culled] cells for lowest distance.  Spiral
-   out in the event culling is deep */
-static int secondbest(codebook *b,double *vec,int best){
+static int closest(codebook *b,double *vec,int current){
   encode_aux_threshmatch *tt=b->c->thresh_tree;
   int dim=b->dim;
-  int i,j,spiral=1;
-  int *index=alloca(dim*sizeof(int)*2);
-  int *mod=index+dim;
-  int entry=best;
+  int i,k,o;
 
   double bestmetric=0;
   int bestentry=-1;
+  int best=0;
 
-  /* decompose index */
-  for(i=0;i<dim;i++){
-    index[i]=best%tt->quantvals;
-    best/=tt->quantvals;
+  /* what would be the closest match if the codebook was fully
+     populated? */
+
+  for(k=0,o=dim-1;k<dim;k++,o--){
+    int i;
+    for(i=0;i<tt->threshvals-1;i++)
+      if(vec[o]<tt->quantthresh[i])break;
+    best=(best*tt->quantvals)+tt->quantmap[i];
   }
 
-  /* hit one off on all sides of it; most likely we'll find a possible
-     match */
-  /* suboptimal for unaligned entries */
-#if 0
-  for(i=0;i<dim;i++){
-    /* one up */
-    if(index[i]+1<tt->quantvals){
-      int newentry=entry+rint(pow(tt->quantvals,i));
-      if(b->c->lengthlist[newentry]>0){
-	double thismetric=_dist(dim, vec, b->valuelist+newentry*dim);
+  if(current<0 && b->c->lengthlist[best]>0)return best;
 
-	if(bestentry==-1 || bestmetric>thismetric){
-	  bestmetric=thismetric;
-	  bestentry=newentry;
-	}
+  for(i=0;i<b->entries;i++){
+    if(b->c->lengthlist[i]>0 && i!=best && i!=current){
+      double thismetric=_dist(dim, vec, b->valuelist+i*dim);
+      if(bestentry==-1 || thismetric<bestmetric){
+	bestentry=i;
+	bestmetric=thismetric;
       }
     }
-      
-    /* one down */
-    if(index[i]-1>=0){
-      int newentry=entry-rint(pow(tt->quantvals,i));
-      if(b->c->lengthlist[newentry]>0){
-	double thismetric=_dist(dim, vec, b->valuelist+newentry*dim);
-
-	if(bestentry==-1 || bestmetric>thismetric){
-	  bestmetric=thismetric;
-	  bestentry=newentry;
-	}
-      }
-    }
-  }
-     
-#endif 
-  /* no match?  search all cells, binary count, that are one away on
-     one or more axes.  Then continue out until there's a match.
-     We'll find one eventually, it's relatively OK to be inefficient
-     as the attempt above will almost always succeed */
-  while(bestentry==-1){
-    for(i=0;i<dim;i++)mod[i]= -spiral;
-    while(1){
-      int newentry=entry;
-
-      /* update the mod */
-      for(j=0;j<dim;j++){
-	if(mod[j]<=spiral)
-	  break;
-	else{
-	  if(j+1<dim){
-	    mod[j]= -spiral;
-	    mod[j+1]++;
-	  }
-	}
-      }
-      if(j==dim)break;
-
-      /* reconstitute the entry */
-      for(j=0;j<dim;j++){
-	if(index[j]+mod[j]<0 || index[j]+mod[j]>=tt->quantvals){
-	  newentry=-1;
-	  break;
-	}
-	newentry+=mod[j]*rint(pow(tt->quantvals,j));
-      }
-
-      if(newentry!=-1 && newentry!=entry)
-	if(b->c->lengthlist[newentry]>0){
-	  double thismetric=_dist(dim, vec, b->valuelist+newentry*dim);
-
-	  if(bestentry==-1 || bestmetric>thismetric){
-	    bestmetric=thismetric;
-	    bestentry=newentry;
-	  }
-	}
-      mod[0]++;
-    }
-    spiral++;
   }
 
   return(bestentry);
@@ -183,9 +118,8 @@ static int secondbest(codebook *b,double *vec,int best){
 void usage(void){
   fprintf(stderr,"Ogg/Vorbis lattice codebook paring utility\n\n"
 	  "usage: latticepare book.vqh data.vqd <target_cells>\n"
-	  "                   -<n_0,n_1,...> [-<n_0,n_1,...>]\n\n"
 	  "where <target_cells> is the desired number of final cells (or -1\n"
-	  "for no change) and n,n,n,n...n  are explicit entries to cull\n\n"
+	  "for no change)\n\n"
 	  "produces new book on stdout\n\n");
   exit(1);
 }
@@ -196,14 +130,8 @@ int main(int argc,char *argv[]){
   int entries=0;
   int dim=0;
   long i,j,target=-1;
-  int *cvec=NULL;
-
-  long *cullist=malloc(sizeof(int));
-  long culls=0;
 
   argv++;
-
-
   if(*argv==NULL){
     usage();
     exit(1);
@@ -214,35 +142,7 @@ int main(int argc,char *argv[]){
 
   while(*argv){
     if(*argv[0]=='-'){
-      char *ptr=argv[0];
-      long index=0;
-      /* explicit cull */
-      if(!b)usage();
-      if(!cvec)cvec=malloc(dim*sizeof(int)); /* lazy ;-) */
-      
-      for(i=0;i<dim;i++){
-	if(!ptr){
-	  fprintf(stderr,"too few values in cull argument %s\n",argv[0]);
-	  exit(1);
-	}
-	cvec[i]=atoi(ptr+1);
-	if(cvec[i]<0 || cvec[i]>=b->c->thresh_tree->quantvals){
-	  fprintf(stderr,"value too large in cull argument %s\n",argv[0]);
-	  exit(1);
-	}
 
-	ptr=strchr(ptr+1,',');
-      }
-      if(ptr){
-	fprintf(stderr,"too many values in cull argument %s\n",argv[0]);
-	exit(1);
-      }
-      for(i=dim;i>0;i--)
-	index=index*b->c->thresh_tree->quantvals+cvec[i-1];
-	
-      cullist=realloc(cullist,++culls*sizeof(long));
-      cullist[culls-1]=index;
-      fprintf(stderr,"\rExplicitly culling index %ld\n",index);
       argv++;
 	
     }else{
@@ -353,37 +253,42 @@ int main(int argc,char *argv[]){
     long *entryindex;
     long *reventry;
     long *membership=malloc(points*sizeof(long));
-    long *cellhead=malloc(entries*sizeof(long));
+    long *firsthead=malloc(entries*sizeof(long));
+    long *secondary=malloc(points*sizeof(long));
+    long *secondhead=malloc(entries*sizeof(long));
+
     long *cellcount=calloc(entries,sizeof(long));
-    double *cellerror1=calloc(entries,sizeof(double)); /* error for
-                                                          firstentries */
-    double *cellerror2=calloc(entries,sizeof(double)); /* error for
-                                                          secondentry */
-    double globalerror=0.;
+    long *cellcount2=calloc(entries,sizeof(long));
+    double *cellerror=calloc(entries,sizeof(double));
+    double *cellerrormax=calloc(entries,sizeof(double));
     long cellsleft=entries;
     for(i=0;i<points;i++)membership[i]=-1;
-    for(i=0;i<entries;i++)cellhead[i]=-1;
+    for(i=0;i<entries;i++)firsthead[i]=-1;
+    for(i=0;i<points;i++)secondary[i]=-1;
+    for(i=0;i<entries;i++)secondhead[i]=-1;
 
     for(i=0;i<points;i++){
       /* assign vectors to the nearest cell.  Also keep track of second
 	 nearest for error statistics */
       double *ppt=pointlist+i*dim;
-      int    firstentry=_best(b,ppt,1);
-      int    secondentry=secondbest(b,ppt,firstentry);
-
+      int    firstentry=closest(b,ppt,-1);
+      int    secondentry=closest(b,ppt,firstentry);
       double firstmetric=_dist(dim,b->valuelist+dim*firstentry,ppt);
       double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
       
       if(!(i&0xff))spinnit("initializing... ",points-i);
     
-      membership[i]=cellhead[firstentry];
-      cellhead[firstentry]=i;
+      membership[i]=firsthead[firstentry];
+      firsthead[firstentry]=i;
+      secondary[i]=secondhead[secondentry];
+      secondhead[secondentry]=i;
 
       if(i<points-entries){
-	cellerror1[firstentry]+=firstmetric;
+	cellerror[firstentry]+=secondmetric-firstmetric;
+	cellerrormax[firstentry]=max(cellerrormax[firstentry],
+				     rint(secondmetric));
 	cellcount[firstentry]++;
-	globalerror+=firstmetric;
-	cellerror2[firstentry]+=secondmetric;
+	cellcount2[secondentry]++;
       }
     }
 
@@ -397,97 +302,98 @@ int main(int argc,char *argv[]){
 	  entry/=b->c->thresh_tree->quantvals;
 	}
 	
-	fprintf(stderr,":%ld, ",cellcount[i]);
+	fprintf(stderr,":%ld/%ld, ",cellcount[i],cellcount2[i]);
       }
       fprintf(stderr,"\n");
     }
 
-    /* handle the explicit cull list */
-    for(i=0;i<culls;i++){
-      long bestcell=cullist[i];
-      char buf[80];
-      sprintf(buf,"explicit culls (%ld left)... ",(int)culls-i);
-      
-      /* disperse cell.  move each point out, adding it (properly) to
-         the second best */
-      if(b->c->lengthlist[bestcell]>0){
-	long head=cellhead[bestcell];
-
-	fprintf(stderr,"\reliminating cell %ld with a hit count of %ld\n",
-		bestcell,cellcount[bestcell]);
-
-	b->c->lengthlist[bestcell]=0;
-	cellhead[bestcell]=-1;
-	while(head!=-1){
-	  /* head is a point number */
-	  double *ppt=pointlist+head*dim;
-	  int newentry=secondbest(b,ppt,bestcell);
-	  int secondentry=secondbest(b,pointlist+head*dim,newentry);
-	  double firstmetric=_dist(dim,b->valuelist+dim*newentry,ppt);
-	  double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
-	  long next=membership[head];
-
-	  if(head<points-entries){
-	    cellcount[newentry]++;
-	    cellcount[bestcell]--;
-	    cellerror1[newentry]+=firstmetric;
-	    cellerror2[newentry]+=secondmetric;
-	  }
-
-	  spinnit(buf,cellcount[bestcell]);	  
-	  membership[head]=cellhead[newentry];
-	  cellhead[newentry]=head;
-	  head=next;
-	}
-	cellsleft--;
-      }
-    }
-    
     /* do the automatic cull request */
     while(cellsleft>target){
       int bestcell=-1;
       double besterror=0;
+      double besterror2=0;
       long head=-1;
-      spinnit("cells left to eliminate... ",cellsleft-target);
+      char spinbuf[80];
+      sprintf(spinbuf,"cells left to eliminate: %ld : ",cellsleft-target);
 
       /* find the cell with lowest removal impact */
       for(i=0;i<entries;i++){
 	if(b->c->lengthlist[i]>0){
-	  double thiserror=globalerror-cellerror1[i]+cellerror2[i];
-	  if(bestcell==-1 || besterror>thiserror){
-	    besterror=thiserror;
-	    bestcell=i;
+	  if(bestcell==-1 || cellerrormax[i]<=besterror2){
+	    if(bestcell==-1 || cellerrormax[i]<besterror2 || 
+	       besterror>cellerror[i]){
+	      besterror=cellerror[i];
+	      besterror2=cellerrormax[i];
+	      bestcell=i;
+	    }
 	  }
 	}
       }
 
-      fprintf(stderr,"\reliminating cell %d with a dispersal error of %g\n"
-	      "     (%ld hits)\n",bestcell,besterror,cellcount[bestcell]);
+      fprintf(stderr,"\reliminating cell %d                              \n"
+	      "     dispersal error of %g max/%g total (%ld hits)\n",
+	      bestcell,besterror2,besterror,cellcount[bestcell]);
 
       /* disperse it.  move each point out, adding it (properly) to
          the second best */
       b->c->lengthlist[bestcell]=0;
-      head=cellhead[bestcell];
-      cellhead[bestcell]=-1;
+      head=firsthead[bestcell];
+      firsthead[bestcell]=-1;
       while(head!=-1){
 	/* head is a point number */
 	double *ppt=pointlist+head*dim;
-	int newentry=secondbest(b,ppt,bestcell);
-	int secondentry=secondbest(b,pointlist+head*dim,newentry);
-	double firstmetric=_dist(dim,b->valuelist+dim*newentry,ppt);
+	int firstentry=closest(b,ppt,-1);
+	int secondentry=closest(b,ppt,firstentry);
+	double firstmetric=_dist(dim,b->valuelist+dim*firstentry,ppt);
 	double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
 	long next=membership[head];
 
 	if(head<points-entries){
-	  cellcount[newentry]++;
+	  cellcount[firstentry]++;
 	  cellcount[bestcell]--;
-	  cellerror1[newentry]+=firstmetric;
-	  cellerror2[newentry]+=secondmetric;
+	  cellerror[firstentry]+=secondmetric-firstmetric;
+	  cellerrormax[firstentry]=max(cellerrormax[firstentry],
+				       rint(secondmetric));
 	}
 
-	membership[head]=cellhead[newentry];
-	cellhead[newentry]=head;
+	membership[head]=firsthead[firstentry];
+	firsthead[firstentry]=head;
 	head=next;
+	if(cellcount[bestcell]%128==0)
+	  spinnit(spinbuf,cellcount[bestcell]+cellcount2[bestcell]);
+
+      }
+
+      /* now see that all points that had the dispersed cell as second
+         choice have second choice reassigned */
+      head=secondhead[bestcell];
+      secondhead[bestcell]=-1;
+      while(head!=-1){
+	double *ppt=pointlist+head*dim;
+	/* who are we assigned to now? */
+	int firstentry=closest(b,ppt,-1);
+	/* what is the new second closest match? */
+	int secondentry=closest(b,ppt,firstentry);
+	/* old second closest is the cell being disbanded */
+	double oldsecondmetric=_dist(dim,b->valuelist+dim*bestcell,ppt);
+	/* new second closest error */
+	double secondmetric=_dist(dim,b->valuelist+dim*secondentry,ppt);
+	long next=secondary[head];
+
+	if(head<points-entries){
+	  cellcount2[secondentry]++;
+	  cellcount2[bestcell]--;
+	  cellerror[firstentry]+=secondmetric-oldsecondmetric;
+	  cellerrormax[firstentry]=max(cellerrormax[firstentry],
+				       rint(secondmetric));
+	}
+	
+	secondary[head]=secondhead[secondentry];
+	secondhead[secondentry]=head;
+	head=next;
+
+	if(cellcount2[bestcell]%128==0)
+	  spinnit(spinbuf,cellcount2[bestcell]);
       }
 
       cellsleft--;
@@ -498,7 +404,7 @@ int main(int argc,char *argv[]){
     /* we don't free membership; we flatten it in order to use in lp_split */
 
     for(i=0;i<entries;i++){
-      long head=cellhead[i];
+      long head=firsthead[i];
       spinnit("rearranging membership cache... ",entries-i);
       while(head!=-1){
 	long next=membership[head];
@@ -507,9 +413,11 @@ int main(int argc,char *argv[]){
       }
     }
 
-    free(cellhead);
-    free(cellerror1);
-    free(cellerror2);
+    free(secondhead);
+    free(firsthead);
+    free(cellerror);
+    free(cellerrormax);
+    free(secondary);
 
     pointindex=malloc(points*sizeof(long));
     /* make a point index of fall-through points */
@@ -551,11 +459,17 @@ int main(int argc,char *argv[]){
     free(membership);
     free(reventry);
     free(pointindex);
+
+    /* hack alert.  I should just change the damned splitter and
+       codebook writer */
+    for(i=0;i<nt->aux;i++)nt->p[i]*=dim;
+    for(i=0;i<nt->aux;i++)nt->q[i]*=dim;
     
     /* recount hits.  Build new lengthlist. reuse entryindex storage */
     for(i=0;i<entries;i++)entryindex[i]=1;
     for(i=0;i<points-entries;i++){
       int best=_best(b,pointlist+i*dim,1);
+      double *a=pointlist+i*dim;
       if(!(i&0xff))spinnit("counting hits...",i);
       if(best==-1){
 	fprintf(stderr,"\nINTERNAL ERROR; a point count not be matched to a\n"
@@ -564,6 +478,8 @@ int main(int argc,char *argv[]){
       }
       entryindex[best]++;
     }
+    for(i=0;i<nt->aux;i++)nt->p[i]/=dim;
+    for(i=0;i<nt->aux;i++)nt->q[i]/=dim;
     
     /* the lengthlist builder doesn't actually deal with 0 hit entries.
        So, we pack the 'sparse' hit list into a dense list, then unpack
@@ -571,9 +487,16 @@ int main(int argc,char *argv[]){
     {
       int upper=0;
       long *lengthlist=calloc(entries,sizeof(long));
-      for(i=0;i<entries;i++)
+      for(i=0;i<entries;i++){
 	if(b->c->lengthlist[i]>0)
 	  entryindex[upper++]=entryindex[i];
+	else{
+	  if(entryindex[i]>1){
+	    fprintf(stderr,"\nINTERNAL ERROR; _best matched to unused entry\n");
+	    exit(1);
+	  }
+	}
+      }
       
       /* sanity check */
       if(upper != target){
@@ -581,13 +504,14 @@ int main(int argc,char *argv[]){
 	exit(1);
       }
     
-
       build_tree_from_lengths(upper,entryindex,lengthlist);
       
       upper=0;
-      for(i=0;i<entries;i++)
+      for(i=0;i<entries;i++){
 	if(b->c->lengthlist[i]>0)
 	  b->c->lengthlist[i]=lengthlist[upper++];
+      }
+
     }
   }
   /* we're done.  write it out. */
