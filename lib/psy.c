@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.37 2001/01/30 23:40:33 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.38 2001/02/01 01:29:17 xiphmont Exp $
 
  ********************************************************************/
 
@@ -590,8 +590,8 @@ static void bark_noise_median(long n,float *b,float *f,float *noise,
 	countbelow+=radix[median];
       }
 
-      while((countabove+countbelow)*thresh[i]<(countbelow-radix[median])
-	    && median+1<BINCOUNT){
+      while(median<LASTBIN && 
+	    (countabove+countbelow)*thresh[i]<(countbelow-radix[median])){
 	countabove+=radix[median];
 	countbelow-=radix[median];
 	median++;
