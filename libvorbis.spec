@@ -49,6 +49,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc README
 /usr/lib/libvorbis.so.*
 /usr/lib/libvorbisfile.so.*
+/usr/lib/libvorbisenc.so.*
 
 %files devel
 %doc doc/*.html
@@ -57,22 +58,14 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc doc/vorbisfile/*.html
 %doc doc/vorbisfile/*.css
 /usr/include/vorbis/codec.h
-/usr/include/vorbis/backends.h
-/usr/include/vorbis/codebook.h
-/usr/include/vorbis/mode_A.h
-/usr/include/vorbis/mode_B.h
-/usr/include/vorbis/mode_C.h
-/usr/include/vorbis/mode_D.h
-/usr/include/vorbis/mode_E.h
-/usr/include/vorbis/modes.h
 /usr/include/vorbis/vorbisfile.h
-/usr/include/vorbis/book/lsp*.vqh
-/usr/include/vorbis/book/res0_*.vqh
-/usr/include/vorbis/book/resaux0_*.vqh
+/usr/include/vorbis/vorbisenc.h
 /usr/lib/libvorbis.a
 /usr/lib/libvorbis.so
 /usr/lib/libvorbisfile.a
 /usr/lib/libvorbisfile.so
+/usr/lib/libvorbisenc.a
+/usr/lib/libvorbisenc.so
 
 %clean 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
