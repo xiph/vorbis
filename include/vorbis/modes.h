@@ -12,7 +12,11 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.10.2.3 2000/06/02 23:48:36 xiphmont Exp $
+<<<<<<< modes.h
+ last mod: $Id: modes.h,v 1.10.2.4 2000/06/03 03:15:26 xiphmont Exp $
+=======
+ last mod: $Id: modes.h,v 1.10.2.4 2000/06/03 03:15:26 xiphmont Exp $
+>>>>>>> 1.10.2.3
 
  ********************************************************************/
 
@@ -23,10 +27,10 @@
 #include "vorbis/codec.h"
 #include "vorbis/backends.h"
 
-#include "vorbis/book/lsp16_0.vqh"
-#include "vorbis/book/lsp32_0.vqh"
-#include "vorbis/book/resaux0_short.vqh"
-#include "vorbis/book/resaux0_long.vqh"
+#include "vorbis/book/lsp16_1.vqh"
+#include "vorbis/book/lsp32_1.vqh"
+#include "vorbis/book/resaux0b_short.vqh"
+#include "vorbis/book/resaux0b_long.vqh"
 
 #include "vorbis/book/res0b_1.vqh"
 #include "vorbis/book/res0b_2.vqh"
@@ -80,8 +84,8 @@ static vorbis_info_psy _psy_set0={
   {-12.,-12.,-12.,-16.,-18.},
   {-12.,-12.,-12.,-16.,-18.},
   {-12.,-12.,-12.,-16.,-18.},
-  {-8.,-10.,-12.,-16.,-18.},
-  {-6.,-8.,-10.,-12.,-12.},
+  {-10.,-10.,-12.,-16.,-18.},
+  {-10.,-12.,-12.,-12.,-12.},
 
   1,/*noisemaskp */
   {-100.,-100.,-100.,-200.,-200.},
@@ -90,29 +94,39 @@ static vorbis_info_psy _psy_set0={
   {-60.,-60.,-60.,-80.,-80.},
   {-60.,-60.,-60.,-80.,-80.},
   {-60.,-60.,-60.,-80.,-80.},
-  {-55.,-55.,-60.,-80.,-80.},
+  {-60.,-60.,-60.,-80.,-80.},
 
   100.,
 
-  .9998, .9999  /* attack/decay control */
+  .9998, .9998  /* attack/decay control */
 };
 
 /* with GNUisms, this could be short and readable. Oh well */
 static vorbis_info_time0 _time_set0={0};
 static vorbis_info_floor0 _floor_set0={16, 44100,  64, 12,150, 1, {0} };
 static vorbis_info_floor0 _floor_set1={32, 44100, 256, 12,150, 1, {1} };
-static vorbis_info_residue0 _residue_set0={0,128, 64,14,2,
+static vorbis_info_residue0 _residue_set0={0,128, 64,28,2,
+					   {0,1,1,1,1,1,1,1,1,1,1,1,1,1,
+					    0,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					   {4,5,6,7,8,9,10,11,12,13,14,15,16,
+					    17,18,19,20,21,22,23,24,25,26,27,28,29},
+
 					   {0,16,9999,30,9999,41,9999,47,9999,60,9999,128,9999},
 					   {1.5,1.5,1.5,2.5,2.5,3.5,3.5,5,5,9,9,18,18},
 					   {6,6,6,6,6,6,6,6,6,6,6,6,6},
-					   {0,1,1,1,1,1,1,1,1,1,1,1,1,1},
-					   {4,5,6,7,8,9,10,11,12,13,14,15,16}};
-static vorbis_info_residue0 _residue_set1={0,1024, 64,14,3,
+					   1,-1};
+
+static vorbis_info_residue0 _residue_set1={0,1024, 64,28,3,
+					   {0,1,1,1,1,1,1,1,1,1,1,1,1,1,
+					    0,1,1,1,1,1,1,1,1,1,1,1,1,1},
+					   {4,5,6,7,8,9,10,11,12,13,14,15,16,
+					    17,18,19,20,21,22,23,24,25,26,27,28,29},
+					   
 					   {0,16,9999,30,9999,41,9999,47,9999,60,9999,128,9999},
 					   {1.5,1.5,1.5,2.5,2.5,3.5,3.5,5,5,9,9,18,18},
 					   {6,6,6,6,6,6,6,6,6,6,6,6,6},/*6==64*/
-					   {0,1,1,1,1,1,1,1,1,1,1,1,1,1},
-					   {4,5,6,7,8,9,10,11,12,13,14,15,16}};
+					   4,-1};
+
 static vorbis_info_mapping0 _mapping_set0={1, {0,0}, {0}, {0}, {0}, {0}};
 static vorbis_info_mapping0 _mapping_set1={1, {0,0}, {0}, {1}, {1}, {0}};
 static vorbis_info_mode _mode_set0={0,0,0,0};
@@ -125,7 +139,7 @@ vorbis_info info_A={
   /* smallblock, largeblock */
   {256, 2048}, 
   /* modes,maps,times,floors,residues,books,psys */
-  2,          2,    1,     2,       2,   17,   1,
+  2,          2,    1,     2,       2,   30,   1,
   /* modes */
   {&_mode_set0,&_mode_set1},
   /* maps */
@@ -137,11 +151,11 @@ vorbis_info info_A={
   /* residue */
   {0,0},{&_residue_set0,&_residue_set1},
   /* books */
-  {&_vq_book_lsp16_0,      /* 0 */
-   &_vq_book_lsp32_0,      /* 1 */
+  {&_vq_book_lsp16_1,      /* 0 */
+   &_vq_book_lsp32_1,      /* 1 */
 
-   &_huff_book_resaux0_short,
-   &_huff_book_resaux0_long,
+   &_huff_book_resaux0b_short,
+   &_huff_book_resaux0b_long,
 
    &_vq_book_res0a_1,
    &_vq_book_res0a_2,
@@ -156,6 +170,19 @@ vorbis_info info_A={
    &_vq_book_res0a_11,
    &_vq_book_res0a_12,
    &_vq_book_res0a_13,
+   &_vq_book_res0b_1,
+   &_vq_book_res0b_2,
+   &_vq_book_res0b_3,
+   &_vq_book_res0b_4,
+   &_vq_book_res0b_5,
+   &_vq_book_res0b_6,
+   &_vq_book_res0b_7,
+   &_vq_book_res0b_8,
+   &_vq_book_res0b_9,
+   &_vq_book_res0b_10,
+   &_vq_book_res0b_11,
+   &_vq_book_res0b_12,
+   &_vq_book_res0b_13,
   },
   /* psy */
   {&_psy_set0},

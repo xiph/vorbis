@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.12.2.2 2000/05/25 09:55:16 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.12.2.3 2000/06/03 03:15:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -154,7 +154,7 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
 
 /* does not guard against invalid settings; eg, a subn of 16 and a
    subgroup request of 32.  Max subn of 128 */
-static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
+static int _testhack(double *vec,int n,vorbis_look_residue0 *look,int auxparts){
   vorbis_info_residue0 *info=look->info;
   int i,j=0;
   double max,localmax=0.;
@@ -183,7 +183,7 @@ static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
       if(temp[i]>localmax)localmax=temp[i];
   }
 
-  for(i=0;i<look->parts-1;i++)
+  for(i=0;i<auxparts-1;i++)
     if(entropy[info->subgrp[i]]<=info->entmax[i] &&
        max<=info->ampmax[i])
       break;
@@ -242,6 +242,9 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(long *));
+  long auxperpart=(info->Bpoint==-1?look->parts:
+		   (info->Cpoint==-1?look->parts/2:look->parts/3));
+
   partvals=partwords*partitions_per_word;
 
   /* we find the patition type for each partition of each
@@ -256,12 +259,18 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
     memset(partword[i],0,n/samples_per_partition*sizeof(long));
   }
 
-  for(i=info->begin,l=0;i<info->end;i+=samples_per_partition,l++)
+  for(i=info->begin,l=0;i<info->end;i+=samples_per_partition,l++){
+    int offset=((info->Bpoint==-1 || l<info->Bpoint)?0:
+		((info->Cpoint==-1 || l<info->Cpoint)?auxperpart:
+		 auxperpart*2));
+    
     for(j=0;j<ch;j++)
       /* do the partition decision based on the number of 'bits'
          needed to encode the block */
-      partword[j][l]=_testhack(in[j]+i,samples_per_partition,look);
+      partword[j][l]=
+	_testhack(in[j]+i,samples_per_partition,look,auxperpart)+offset;
   
+  }
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
      residual words for that partition word.  Then write the next
