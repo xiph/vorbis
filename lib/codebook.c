@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.37 2002/01/21 20:51:28 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.38 2002/01/22 02:16:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -315,12 +315,11 @@ static ogg_uint32_t bitreverse(ogg_uint32_t x){
   return((x>> 1)&0x55555555) | ((x<< 1)&0xaaaaaaaa);
 }
 
-
-static long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
+STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
   int  read=book->dec_maxlength;
   long lo,hi;
-  long lok = oggpack_look(b, book->dec_firsttablen);
-
+  long lok = oggpack_look(b,book->dec_firsttablen);
+ 
   if (lok >= 0) {
     long entry = book->dec_firsttable[lok];
     if(entry&0x80000000UL){
@@ -336,6 +335,7 @@ static long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
   }
 
   lok = oggpack_look(b, read);
+
   while(lok<0 && read>1)
     lok = oggpack_look(b, --read);
   if(lok<0)return -1;
@@ -343,18 +343,17 @@ static long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
   /* bisect search for the codeword in the ordered list */
   {
     ogg_uint32_t testword=bitreverse((ogg_uint32_t)lok);
-    long p=(lo+hi)>>1;
 
     while(hi-lo>1){
-      long test=(book->codelist[p]<=testword)-1;
-      lo+=(p-lo)&(~test);
-      hi-=(hi-p)&test;
-      p=(lo+hi)>>1;
+      long p=(hi-lo)>>1;
+      long test=book->codelist[lo+p]>testword;    
+      lo+=p&(test-1);
+      hi-=p&(-test);
     }
 
-    if(book->dec_codelengths[p]<=read){
-      oggpack_adv(b, book->dec_codelengths[p]);
-      return(p);
+    if(book->dec_codelengths[lo]<=read){
+      oggpack_adv(b, book->dec_codelengths[lo]);
+      return(lo);
     }
   }
   

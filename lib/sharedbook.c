@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.25 2002/01/21 20:51:28 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.26 2002/01/22 02:16:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -398,14 +398,14 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
      hints for the non-direct-hits */
   {
     ogg_uint32_t mask=0xfffffffeUL<<(31-c->dec_firsttablen);
+    long lo=0,hi=0;
 
     for(i=0;i<tabn;i++){
-      if(c->dec_firsttable[i]==0){
-	ogg_uint32_t testword=bitreverse(i);
-	long lo=0,hi=0;
-	while((lo+1)<n && c->codelist[lo+1]<=testword)lo++;
-	while(    hi<n && testword>=(c->codelist[hi]&mask))hi++;
-
+      ogg_uint32_t word=i<<(32-c->dec_firsttablen);
+      if(c->dec_firsttable[bitreverse(word)]==0){
+	while((lo+1)<n && c->codelist[lo+1]<=word)lo++;
+	while(    hi<n && word>=(c->codelist[hi]&mask))hi++;
+	
 	/* we only actually have 15 bits per hint to play with here.
            In order to overflow gracefully (nothing breaks, efficiency
            just drops), encode as the difference from the extremes. */
@@ -415,7 +415,8 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
 	  if(loval>0x7fff)loval=0x7fff;
 	  if(hival>0x7fff)hival=0x7fff;
-	  c->dec_firsttable[i]=0x80000000UL | (loval<<15) | hival;
+	  c->dec_firsttable[bitreverse(word)]=
+	    0x80000000UL | (loval<<15) | hival;
 	}
       }
     }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.33 2001/12/23 11:53:53 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.34 2002/01/22 02:16:40 xiphmont Exp $
 
  ********************************************************************/
 
@@ -915,10 +915,8 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
 				long min_bitrate){
 
   double tnominal=nominal_bitrate;
-  double approx_vbr=approx_bitrate_to_vbr(channels,(channels==2), 
-					  (float)nominal_bitrate,rate);
+  double approx_vbr;
   int ret=0;
-  if(approx_vbr<0)return(OV_EIMPL);
 
   if(nominal_bitrate<=0.){
     if(max_bitrate>0.){
@@ -931,6 +929,11 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
       }
     }
   }
+
+  approx_vbr=approx_bitrate_to_vbr(channels,(channels==2), 
+				   (float)nominal_bitrate,rate);
+  if(approx_vbr<0)return(OV_EIMPL);
+
 
   ret=vorbis_encode_setup_vbr(vi,channels,rate,approx_vbr);
   if(ret){
