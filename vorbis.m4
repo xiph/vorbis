@@ -9,22 +9,31 @@ AC_DEFUN(AM_PATH_VORBIS,
 [dnl 
 dnl Get the cflags and libraries
 dnl
-AC_ARG_WITH(vorbis-prefix,[  --with-vorbis-prefix=PFX   Prefix where libvorbis is installed (optional)], vorbis_prefix="$withval", vorbis_prefix="")
+AC_ARG_WITH(vorbis,[  --with-vorbis=PFX   Prefix where libvorbis is installed (optional)], vorbis_prefix="$withval", vorbis_prefix="")
+AC_ARG_WITH(vorbis-libraries,[  --with-vorbis-libraries=DIR   Directory where libvorbis library is installed (optional)], vorbis_libraries="$withval", vorbis_libraries="")
+AC_ARG_WITH(vorbis-includes,[  --with-vorbis-includes=DIR   Directory where libvorbis header files are installed (optional)], vorbis_includes="$withval", vorbis_includes="")
 AC_ARG_ENABLE(vorbistest, [  --disable-vorbistest       Do not try to compile and run a test Vorbis program],, enable_vorbistest=yes)
 
-  if test "x$vorbis_prefix" != "x" ; then
-    vorbis_args="$vorbis_args --prefix=$vorbis_prefix"
-    VORBIS_CFLAGS="-I$vorbis_prefix/include"
-    VORBIS_LIBDIR="-L$vorbis_prefix/lib"
+  if test "x$vorbis_libraries" != "x" ; then
+    VORBIS_LIBS="-L$vorbis_libraries"
+  elif test "x$vorbis_prefix" != "x" ; then
+    VORBIS_LIBS="-L$vorbis_prefix/lib"
   elif test "x$prefix" != "xNONE"; then
-    vorbis_args="$vorbis_args --prefix=$prefix"
-    VORBIS_CFLAGS="-I$prefix/include"
-    VORBIS_LIBDIR="-L$prefix/lib"
+    VORBIS_LIBS="-L$prefix/lib"
   fi
 
-  VORBIS_LIBS="$VORBIS_LIBDIR -lvorbis -lm"
+  VORBIS_LIBS="$VORBIS_LIBS -lvorbis -lm"
   VORBISFILE_LIBS="-lvorbisfile"
   VORBISENC_LIBS="-lvorbisenc"
+
+  if test "x$vorbis_includes" != "x" ; then
+    VORBIS_CFLAGS="-I$vorbis_includes"
+  elif test "x$vorbis_prefix" != "x" ; then
+    VORBIS_CFLAGS="-I$vorbis_prefix/include"
+  elif test "x$prefix" != "xNONE"; then
+    VORBIS_CFLAGS="-I$prefix/include"
+  fi
+
 
   AC_MSG_CHECKING(for Vorbis)
   no_vorbis=""
@@ -33,7 +42,7 @@ AC_ARG_ENABLE(vorbistest, [  --disable-vorbistest       Do not try to compile an
   if test "x$enable_vorbistest" = "xyes" ; then
     ac_save_CFLAGS="$CFLAGS"
     ac_save_LIBS="$LIBS"
-    CFLAGS="$CFLAGS $VORBIS_CFLAGS"
+    CFLAGS="$CFLAGS $VORBIS_CFLAGS $OGG_CFLAGS"
     LIBS="$LIBS $VORBIS_LIBS $OGG_LIBS"
 dnl
 dnl Now check if the installed Vorbis is sufficiently new.
