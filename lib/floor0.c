@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.8 2000/02/09 22:04:12 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.9 2000/02/12 08:33:05 xiphmont Exp $
 
  ********************************************************************/
 
@@ -142,6 +142,20 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     /* LSP <-> LPC is orthogonal and LSP quantizes more stably  */
     vorbis_lpc_to_lsp(out,out,look->m);
     memcpy(work,out,sizeof(double)*look->m);
+
+#ifdef TRAIN
+    {
+      int j;
+      FILE *of;
+      char buffer[80];
+      sprintf(buffer,"lsp0coeff_%d.vqd",vb->mode);
+      of=fopen(buffer,"a");
+      for(j=0;j<look->m;j++)
+	fprintf(of,"%g, ",out[j]);
+      fprintf(of,"\n");
+      fclose(of);
+    }
+#endif
 
     /* code the spectral envelope, and keep track of the actual
        quantized values; we don't want creeping error as each block is

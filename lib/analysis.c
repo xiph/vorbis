@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.22 2000/01/22 13:28:14 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.23 2000/02/12 08:33:04 xiphmont Exp $
 
  ********************************************************************/
 
@@ -44,6 +44,7 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
 
   if(vb->W &&vi->modes>1)mode=1;
   type=vi->map_type[vi->mode_param[mode]->mapping];
+  vb->mode=mode;
 
   /* Encode frame mode, pre,post windowsize, then dispatch */
   _oggpack_write(&vb->opb,mode,vd->modebits);

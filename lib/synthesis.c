@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.14 2000/01/22 13:28:33 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.15 2000/02/12 08:33:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -40,6 +40,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
 
   /* read our mode and pre/post windowsize */
   mode=_oggpack_read(opb,vd->modebits);
+  vb->mode=mode;
   vb->W=vi->mode_param[mode]->blockflag;
   if(vb->W){
     vb->lW=_oggpack_read(opb,1);

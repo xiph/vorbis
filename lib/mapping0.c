@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.8 2000/02/09 22:04:14 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.9 2000/02/12 08:33:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -190,7 +190,6 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
   double *window=vd->window[vb->W][vb->lW][vb->nW][mode->windowtype];
 
   double **pcmbundle=alloca(sizeof(double *)*vi->channels);
-  int **auxbundle=alloca(sizeof(int *)*vi->channels);
   int *nonzero=alloca(sizeof(int)*vi->channels);
   
   /* time domain pre-window: NONE IMPLEMENTED */
@@ -216,19 +215,17 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
     double *decfloor=_vorbis_block_alloc(vb,n*sizeof(double)/2);
     double *floor=_vorbis_block_alloc(vb,n*sizeof(double)/2);
     double *mask=_vorbis_block_alloc(vb,n*sizeof(double)/2);
-    int **pcmaux=_vorbis_block_alloc(vb,vi->channels*sizeof(int *));
     
     for(i=0;i<vi->channels;i++){
       double *pcm=vb->pcm[i];
       int submap=map->chmuxlist[i];
 
-      pcmaux[i]=_vorbis_block_alloc(vb,n/2*sizeof(int));
- 
       /* perform psychoacoustics; takes PCM vector; 
 	 returns two curves: the desired transform floor and the masking curve */
       memset(floor,0,sizeof(double)*n/2);
       memset(mask,0,sizeof(double)*n/2);
-      _vp_mask_floor(look->psy_look+submap,pcm,mask,floor);
+      _vp_mask_floor(look->psy_look+submap,pcm,floor,0);
+      _vp_mask_floor(look->psy_look+submap,pcm,mask,1);
  
       /* perform floor encoding; takes transform floor, returns decoded floor */
       nonzero[i]=look->floor_func[submap]->
@@ -236,12 +233,28 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       
       /* no iterative residue/floor tuning at the moment */
       
-      /* perform residue prequantization.  Do it now so we have all
-         the values if we need them */
-      _vp_quantize(look->psy_look+submap,pcm,mask,decfloor,pcmaux[i],0,n/2,n/2);
-      
+#ifdef TRAIN
+      if(nonzero[i]){
+	FILE *of;
+	char buffer[80];
+	
+	sprintf(buffer,"masked_%d.vqd",vb->mode);
+	of=fopen(buffer,"a");
+	for(i=0;i<n/2;i++)
+	  fprintf(of,"%g, ",pcm[i]/mask[i]);
+	fprintf(of,"\n");
+	fclose(of);
+	sprintf(buffer,"floored_%d.vqd",vb->mode);
+	of=fopen(buffer,"a");
+	for(i=0;i<n/2;i++)
+	  fprintf(of,"%g, ",pcm[i]/floor[i]);
+	fprintf(of,"\n");
+	fclose(of);
+      }
+#endif      
+
     }
-  
+    
     /* perform residue encoding with residue mapping; this is
        multiplexed.  All the channels belonging to one submap are
        encoded (values interleaved), then the next submap, etc */
@@ -251,12 +264,11 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       for(j=0;j<vi->channels;j++){
 	if(map->chmuxlist[j]==i && nonzero[j]==1){
 	  pcmbundle[ch_in_bundle]=vb->pcm[j];
-	  auxbundle[ch_in_bundle++]=pcmaux[j];
 	}
       }
       
-      look->residue_func[i]->forward(vb,look->residue_look[i],pcmbundle,auxbundle,
-				 ch_in_bundle);
+      look->residue_func[i]->forward(vb,look->residue_look[i],
+				     pcmbundle,ch_in_bundle);
     }
   }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.15 2000/02/06 13:39:44 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16 2000/02/12 08:33:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -84,18 +84,18 @@ void _vp_psy_clear(vorbis_look_psy *p){
 
 /* Masking curve: linear rolloff on a Bark/dB scale, attenuated by
    maskthresh */
-/* right now, floor==mask */
-void _vp_mask_floor(vorbis_look_psy *p,double *f, double *mask,double *floor){
+
+void _vp_mask_floor(vorbis_look_psy *p,double *f, double *floor,int attp){
   int n=p->n;
   double hroll=p->vi->hrolldB;
   double lroll=p->vi->lrolldB;
-  double curmask=todB(f[0])+p->maskthresh[0];
+  double curmask=todB(f[0])+(attp?p->maskthresh[0]:0);
   double curoc=0.;
   long i;
 
   /* run mask forward then backward */
   for(i=0;i<n;i++){
-    double newmask=todB(f[i])+p->maskthresh[i];
+    double newmask=todB(f[i])+(attp?p->maskthresh[i]:0);
     double newoc=p->barknum[i];
     double roll=curmask-(newoc-curoc)*hroll;
     double troll;
@@ -104,14 +104,13 @@ void _vp_mask_floor(vorbis_look_psy *p,double *f, double *mask,double *floor){
       curoc=newoc;
     }
     troll=fromdB(roll);
-    if(mask[i]<troll)mask[i]=troll;
     if(floor[i]<troll)floor[i]=troll;
   }
 
-  curmask=todB(f[n-1])+p->maskthresh[n-1];
+  curmask=todB(f[n-1])+(attp?p->maskthresh[n-1]:0);
   curoc=p->barknum[n-1];
   for(i=n-1;i>=0;i--){
-    double newmask=todB(f[i])+p->maskthresh[i];
+    double newmask=todB(f[i])+(attp?p->maskthresh[i]:0);
     double newoc=p->barknum[i];
     double roll=curmask-(curoc-newoc)*lroll;
     double troll;
@@ -120,32 +119,8 @@ void _vp_mask_floor(vorbis_look_psy *p,double *f, double *mask,double *floor){
       curoc=newoc;
     }
     troll=fromdB(roll);
-    if(mask[i]<troll)mask[i]=troll;
     if(floor[i]<troll)floor[i]=troll;
   }
-}
-
-/* take a masking curve and raw residue; eliminate the inaduble and
-   quantize to the final form handed to the VQ.  All and any tricks to
-   squeeze out bits given knowledge of the encoding mode should go
-   here too */
-
-/* modifies the pcm vector, returns book membership in aux */
-
-void _vp_quantize(vorbis_look_psy *p, double *pcm, double *mask, 
-		  double *floor,int *aux,long begin, long n,long subn){
-  long i,j;
-    /* for now, we're not worrying about subvector, but the idea is
-       that we normal blocks not have zeroes; zeroes only exist as an
-       all-zero block */
-
-  for(i=begin;i<n;i++){
-    double value=rint(pcm[i]/floor[i]);
-    if(value>15)value=15;
-    if(value<-15)value=-15;
-    pcm[i]=value;
-  }
-
 }
 
 /* s must be padded at the end with m-1 zeroes */

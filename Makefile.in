@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.4 1999/12/30 07:26:22 xiphmont Exp $
+# $Id: Makefile.in,v 1.5 2000/02/12 08:32:57 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -17,7 +17,7 @@
 
 @SET_MAKE@
 
-SUBDIRS =	lib vq examples # cmdline xmms
+SUBDIRS =	lib vq huff examples # cmdline xmms
 
 all debug profile selftest target clean:
 	@for dir in $(SUBDIRS); do (cd $$dir && $(MAKE) $(MFLAGS) $@) || exit 1; done

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.8 2000/02/06 13:39:37 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.9 2000/02/12 08:33:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -269,6 +269,7 @@ typedef struct vorbis_block{
   long  W;
   long  nW;
   int   pcmend;
+  int   mode;
 
   int eofflag;
   int frameno;
