@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.57 2002/01/22 08:06:06 xiphmont Exp $
+ last mod: $Id: block.c,v 1.58 2002/01/22 11:59:00 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -190,27 +190,9 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
   mdct_init(b->transform[0][0],ci->blocksizes[0]);
   mdct_init(b->transform[1][0],ci->blocksizes[1]);
 
-  b->window[0][0][0]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[0][0][0]));
-  b->window[0][0][1]=b->window[0][0][0];
-  b->window[0][1][0]=b->window[0][0][0];
-  b->window[0][1][1]=b->window[0][0][0];
-  b->window[1][0][0]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][0][0]));
-  b->window[1][0][1]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][0][1]));
-  b->window[1][1][0]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][1][0]));
-  b->window[1][1][1]=_ogg_calloc(VI_WINDOWB,sizeof(*b->window[1][1][1]));
-
-  for(i=0;i<VI_WINDOWB;i++){
-    b->window[0][0][0][i]=
-      _vorbis_window(i,ci->blocksizes[0],ci->blocksizes[0]/2,ci->blocksizes[0]/2);
-    b->window[1][0][0][i]=
-      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[0]/2,ci->blocksizes[0]/2);
-    b->window[1][0][1][i]=
-      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[0]/2,ci->blocksizes[1]/2);
-    b->window[1][1][0][i]=
-      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[1]/2,ci->blocksizes[0]/2);
-    b->window[1][1][1][i]=
-      _vorbis_window(i,ci->blocksizes[1],ci->blocksizes[1]/2,ci->blocksizes[1]/2);
-  }
+  /* Vorbis I uses only window type 0 */
+  b->window[0]=_vorbis_window(0,ci->blocksizes[0]/2);
+  b->window[1]=_vorbis_window(0,ci->blocksizes[1]/2);
 
   if(encp){ /* encode/decode differ here */
     /* finish the codebooks */
@@ -284,26 +266,18 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
 }
 
 void vorbis_dsp_clear(vorbis_dsp_state *v){
-  int i,j,k;
+  int i;
   if(v){
     vorbis_info *vi=v->vi;
     codec_setup_info *ci=(vi?vi->codec_setup:NULL);
     backend_lookup_state *b=v->backend_state;
 
     if(b){
-      if(b->window[0][0][0]){
-	for(i=0;i<VI_WINDOWB;i++)
-	  if(b->window[0][0][0][i])_ogg_free(b->window[0][0][0][i]);
-	_ogg_free(b->window[0][0][0]);
+      if(b->window[0])
+	_ogg_free(b->window[0]);
+      if(b->window[1])
+	_ogg_free(b->window[1]);
 	
-	for(j=0;j<2;j++)
-	  for(k=0;k<2;k++){
-	    for(i=0;i<VI_WINDOWB;i++)
-	      if(b->window[1][j][k][i])_ogg_free(b->window[1][j][k][i]);
-	    _ogg_free(b->window[1][j][k]);
-	  }
-      }
-
       if(b->ve){
 	_ve_envelope_clear(b->ve);
 	_ogg_free(b->ve);

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.13 2002/01/22 08:06:06 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.14 2002/01/22 11:59:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,7 +59,7 @@ typedef void vorbis_info_mapping;
 typedef struct backend_lookup_state {
   /* local lookup storage */
   envelope_lookup        *ve; /* envelope lookup */    
-  float                 **window[2][2][2]; /* block, leadin, leadout, type */
+  float                  *window[2];
   vorbis_look_transform **transform[2];    /* block, type */
   vorbis_look_psy_global *psy_g_look;
 

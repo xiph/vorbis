@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: window functions
- last mod: $Id: window.c,v 1.15 2001/12/20 01:00:30 segher Exp $
+ last mod: $Id: window.c,v 1.16 2002/01/22 11:59:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,16 +20,14 @@
 #include "os.h"
 #include "misc.h"
 
-float *_vorbis_window(int type, int window,int left,int right){
-  float *ret=_ogg_calloc(window,sizeof(*ret));
+float *_vorbis_window(int type, int left){
+  float *ret=_ogg_calloc(left,sizeof(*ret));
+  int i;
 
   switch(type){
   case 0:
     /* The 'vorbis window' (window 0) is sin(sin(x)*sin(x)*2pi) */
     {
-      int leftbegin=window/4-left/2;
-      int rightbegin=window-window/4-right/2;
-      int i;
     
       for(i=0;i<left;i++){
 	float x=(i+.5f)/left*M_PI/2.;
@@ -37,19 +35,7 @@ float *_vorbis_window(int type, int window,int left,int right){
 	x*=x;
 	x*=M_PI/2.f;
 	x=sin(x);
-	ret[i+leftbegin]=x;
-      }
-      
-      for(i=leftbegin+left;i<rightbegin;i++)
-	ret[i]=1.f;
-      
-      for(i=0;i<right;i++){
-	float x=(right-i-.5f)/right*M_PI/2.;
-	x=sin(x);
-	x*=x;
-	x*=M_PI/2.f;
-	x=sin(x);
-	ret[i+rightbegin]=x;
+	ret[i]=x;
       }
     }
     break;
@@ -60,3 +46,30 @@ float *_vorbis_window(int type, int window,int left,int right){
   return(ret);
 }
 
+void _vorbis_apply_window(float *d,float *window[2],long *blocksizes,
+			  int lW,int W,int nW){
+
+  long n=blocksizes[W];
+  long ln=blocksizes[lW];
+  long rn=blocksizes[nW];
+
+  long leftbegin=n/4-ln/4;
+  long leftend=leftbegin+ln/2;
+
+  long rightbegin=n/2+n/4-rn/4;
+  long rightend=rightbegin+rn/2;
+  
+  int i,p;
+
+  for(i=0;i<leftbegin;i++)
+    d[i]=0.f;
+
+  for(p=0;i<leftend;i++,p++)
+    d[i]*=window[lW][p];
+
+  for(i=rightbegin,p=rn/2-1;i<rightend;i++,p--)
+    d[i]*=window[nW][p];
+
+  for(;i<n;i++)
+    d[i]=0.f;
+}

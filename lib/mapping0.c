@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.43 2001/12/20 01:00:27 segher Exp $
+ last mod: $Id: mapping0.c,v 1.44 2002/01/22 11:59:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "codebook.h"
+#include "window.h"
 #include "registry.h"
 #include "psy.h"
 #include "misc.h"
@@ -295,7 +296,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
   int                    n=vb->pcmend;
   int i,j;
-  float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
   int   *nonzero=alloca(sizeof(*nonzero)*vi->channels);
 
   float *work=_vorbis_block_alloc(vb,n*sizeof(*work));
@@ -334,8 +334,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     _analysis_output("pcm",seq+i,pcm,n,0,0);
 
     /* window the PCM data */
-    for(j=0;j<n;j++)
-      fft[j]=pcm[j]*=window[j];
+    _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
+    memcpy(fft,pcm,sizeof(*fft)*n);
     
     /*_analysis_output("windowed",seq+i,pcm,n,0,0);*/
 
@@ -579,7 +579,6 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   int                   i,j;
   long                  n=vb->pcmend=ci->blocksizes[vb->W];
 
-  float *window=b->window[vb->W][vb->lW][vb->nW][mode->windowtype];
   float **pcmbundle=alloca(sizeof(*pcmbundle)*vi->channels);
   int    *zerobundle=alloca(sizeof(*zerobundle)*vi->channels);
 
@@ -676,8 +675,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
     if(nonzero[i])
-      for(j=0;j<n;j++)
-	pcm[j]*=window[j];
+      _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
     else
       for(j=0;j<n;j++)
 	pcm[j]=0.f;
