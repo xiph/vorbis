@@ -12,7 +12,7 @@
 
  function: utility main for setting entropy encoding parameters
            for lattice codebooks
- last mod: $Id: latticetune.c,v 1.7 2001/02/26 03:51:12 xiphmont Exp $
+ last mod: $Id: latticetune.c,v 1.8 2001/06/04 05:50:12 xiphmont Exp $
 
  ********************************************************************/
 
@@ -106,11 +106,15 @@ int main(int argc,char *argv[]){
     }
   }
 
-  if(!strrcmp_i(argv[0],"restune")){
-    long step;
+  if(!strrcmp_i(argv[0],"res0tune") || !strrcmp_i(argv[0],"res1tune")){
+    long step,adv,max;
     long lines=0;
     long cols=-1;
     float *vec;
+    long interleave=1;
+    if(!strrcmp_i(argv[0],"res1tune"))
+      interleave=0;
+
     line=setup_line(in);
     while(line){
       int code;
@@ -124,7 +128,15 @@ int main(int argc,char *argv[]){
 	  while(*temp==' ')temp++;
 	}
 	vec=alloca(sizeof(float)*cols);
-	step=cols/dim;
+	if(interleave){
+	  step=cols/dim;
+	  adv=1;
+	  max=step;
+	}else{
+	  step=1;
+	  adv=dim;
+	  max=cols-dim+1;
+	}
       }
       
       for(j=0;j<cols;j++)
@@ -133,7 +145,7 @@ int main(int argc,char *argv[]){
 	  exit(1);
 	}
       
-      for(j=0;j<step;j++){
+      for(j=0;j<max;j+=adv){
 	lines++;
 	code=_best(b,vec+j,step);
       	hits[code]++;

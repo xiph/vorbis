@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.24 2001/05/27 06:43:59 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.25 2001/06/04 05:50:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -341,52 +341,10 @@ long vorbis_book_decode(codebook *book, oggpack_buffer *b){
   return(-ptr);
 }
 
-/* returns the entry number or -1 on eof *************************************/
-long vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
-			  int step,int addmul){
-  long entry=vorbis_book_decode(book,b);
-  int i,o;
-  float *t;
-  if(entry==-1)return(-1);
-  t = book->valuelist+entry*book->dim;
-  switch(addmul){
-  case -1:
-    for(i=0,o=0;i<book->dim-3;i+=4,o+=4*step) {
-      a[o]=t[i];
-      a[o+step]=t[i+1];
-      a[o+2*step]=t[i+2];
-      a[o+3*step]=t[i+3];
-    }
-    for(;i<book->dim;i++,o+=step)
-      a[o]=t[i];
-    break;
-  case 0:
-    for(i=0,o=0;i<book->dim-3;i+=4,o+=4*step) {
-      a[o]+=t[i];
-      a[o+step]+=t[i+1];
-      a[o+2*step]+=t[i+2];
-      a[o+3*step]+=t[i+3];
-    }
-    for(;i<book->dim;i++,o+=step)
-      a[o]+=t[i];
-    break;
-  case 1:
-    for(i=0,o=0;i<book->dim-3;i+=4,o+=4*step) {
-      a[o]*=t[i];
-      a[o+step]*=t[i+1];
-      a[o+2*step]*=t[i+2];
-      a[o+3*step]*=t[i+3];
-    }
-    for(;i<book->dim;i++,o+=step)
-      a[o]*=t[i];
-    break;
-  }
-  return(entry);
-}
-
 /* returns 0 on OK or -1 on eof *************************************/
-long s_vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
-                         int step,int addmul){
+long vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
+                         int n,int addmul){
+  int step=n/book->dim;
   long *entry = alloca(sizeof(long)*step);
   float **t = alloca(sizeof(float *)*step);
   int i,j,o;
@@ -416,14 +374,14 @@ long s_vorbis_book_decodevs(codebook *book,float *a,oggpack_buffer *b,
   return(0);
 }
 
-long s_vorbis_book_decodev(codebook *book,float *a,oggpack_buffer *b,
-			   int partsize,int addmul){
+long vorbis_book_decodev(codebook *book,float *a,oggpack_buffer *b,
+			 int n,int addmul){
   int i,j,entry;
   float *t;
 
   switch(addmul){
   case -1:
-    for(i=0;i<partsize;){
+    for(i=0;i<n;){
       entry = vorbis_book_decode(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
@@ -432,7 +390,7 @@ long s_vorbis_book_decodev(codebook *book,float *a,oggpack_buffer *b,
     }
     break;
   case 0:
-    for(i=0;i<partsize;){
+    for(i=0;i<n;){
       entry = vorbis_book_decode(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
@@ -441,7 +399,7 @@ long s_vorbis_book_decodev(codebook *book,float *a,oggpack_buffer *b,
     }
     break;
   case 1:
-    for(i=0;i<partsize;){
+    for(i=0;i<n;){
       entry = vorbis_book_decode(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;

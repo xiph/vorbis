@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: hufftree builder
- last mod: $Id: huffbuild.c,v 1.9 2001/05/27 06:44:07 xiphmont Exp $
+ last mod: $Id: huffbuild.c,v 1.10 2001/06/04 05:50:12 xiphmont Exp $
 
  ********************************************************************/
 
@@ -82,7 +82,6 @@ int main(int argc, char *argv[]){
       loval=atoi(argv[2]);
       maxval=atoi(dpos+1);
       subn=1;
-      subn=1;
       begin=0;
     }else{
       begin=atoi(argv[2]);
@@ -138,7 +137,7 @@ int main(int argc, char *argv[]){
       i/=subn;
       while(!feof(file)){
 	long val=getval(file,begin,n,subn,maxval);
-	if(val==-1 || val>=maxval)break;
+	if(val==-1 || val>=vals)break;
 	hist[val]++;
 	if(!(i--&0xff))spinnit("loading... ",i*subn);
       }

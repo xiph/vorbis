@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.28 2001/05/27 06:44:00 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.29 2001/06/04 05:50:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -147,6 +147,7 @@ static void mapping0_pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer
   int i;
   vorbis_info_mapping0 *info=(vorbis_info_mapping0 *)vm;
 
+  /* leave submaps as a hook to be filled in later */
   oggpack_write(opb,info->submaps-1,4);
   /* we don't write the channel submappings if we only have one... */
   if(info->submaps>1){
@@ -317,6 +318,10 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     
     look->residue_func[i]->forward(vb,look->residue_look[i],
 				   pcmbundle,ch_in_bundle);
+  }
+
+  for(j=0;j<vi->channels;j++){
+    _analysis_output("resres",seq-vi->channels+j,vb->pcm[j],n/2,0,0);
   }
   
   look->lastframe=vb->sequence;

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.40 2001/05/27 06:43:59 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.41 2001/06/04 05:50:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -422,7 +422,7 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
       memset(out,0,sizeof(float)*look->m);    
       
       for(j=0;j<look->m;j+=b->dim)
-	if(vorbis_book_decodevs(b,lsp+j,&vb->opb,1,-1)==-1)goto eop;
+	if(vorbis_book_decodev(b,lsp+j,&vb->opb,b->dim,-1)==-1)goto eop;
       for(j=0;j<look->m;){
 	for(k=0;k<b->dim;k++,j++)lsp[j]+=last;
 	last=lsp[j-1];
