@@ -28,7 +28,7 @@ AC_ARG_ENABLE(vorbistest, [  --disable-vorbistest       Do not try to compile an
     ac_save_CFLAGS="$CFLAGS"
     ac_save_LIBS="$LIBS"
     CFLAGS="$CFLAGS $VORBIS_CFLAGS"
-    LIBS="$LIBS $VORBIS_LIBS"
+    LIBS="$LIBS $VORBIS_LIBS $OGG_LIBS"
 dnl
 dnl Now check if the installed Vorbis is sufficiently new.
 dnl
@@ -60,7 +60,7 @@ int main ()
      else
        echo "*** Could not run Vorbis test program, checking why..."
        CFLAGS="$CFLAGS $VORBIS_CFLAGS"
-       LIBS="$LIBS $VORBIS_LIBS"
+       LIBS="$LIBS $VORBIS_LIBS $OGG_LIBS"
        AC_TRY_LINK([
 #include <stdio.h>
 #include <vorbis/codec.h>

@@ -73,6 +73,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 /usr/include/vorbis/book/resaux0_*.vqh
 /usr/lib/libvorbis.a
 /usr/lib/libvorbis.so
+/usr/lib/libvorbisfile.a
+/usr/lib/libvorbisfile.so
 
 %clean 
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
