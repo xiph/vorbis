@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.11.2.1.2.2 2000/04/06 15:59:36 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.11.2.1.2.3 2000/04/06 16:47:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -202,7 +202,7 @@ static double _curve_to_lpc(double *curve,double *lpc,vorbis_look_floor0 *l,
   }
   for(i=0;i<l->ln;i++)work[i]-=l->subcurve[i];
 
-#if 0
+#if 1
     { /******************/
       FILE *of;
       char buffer[80];
@@ -232,7 +232,7 @@ static void _lpc_to_curve(double *curve,double *lpc,double amp,
   }
   vorbis_lpc_to_curve(lcurve,lpc,amp,&(l->lpclook));
 
-#if 0
+#if 1
     { /******************/
       FILE *of;
       char buffer[80];
@@ -304,7 +304,7 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     }
 #endif
 
-#if 0
+#if 1
     { /******************/
       vorbis_lsp_to_lpc(out,in,look->m); 
       _lpc_to_curve(in,in,amp,look,"prefloor",vb->sequence);
