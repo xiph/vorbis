@@ -12,14 +12,14 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.6 1999/12/31 12:35:15 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.7 2000/01/05 03:10:59 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_LPC_H_
 #define _V_LPC_H_
 
-#include "codec.h"
+#include "vorbis/codec.h"
 
 extern void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m);
 extern void lpc_clear(lpc_lookup *l);

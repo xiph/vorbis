@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.7 1999/12/30 07:27:06 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.8 2000/01/05 03:11:12 xiphmont Exp $
 
  ********************************************************************/
 
@@ -121,7 +121,7 @@ void pq_in_out(vqgen *v,double *n,double *c,double *p,double *q){
   }
 }
 
-static void spinnit(void){
+static void spinnit(int n){
   static int p=0;
   static long lasttime=0;
   long test;
@@ -132,19 +132,21 @@ static void spinnit(void){
   if(lasttime!=test){
     lasttime=test;
 
+    fprintf(stderr," %d ",n);
+
     p++;if(p>3)p=0;
     switch(p){
     case 0:
-      fprintf(stderr,"|\b");
+      fprintf(stderr,"|    \r");
       break;
     case 1:
-      fprintf(stderr,"/\b");
+      fprintf(stderr,"/    \r");
       break;
     case 2:
-      fprintf(stderr,"-\b");
+      fprintf(stderr,"-    \r");
       break;
     case 3:
-      fprintf(stderr,"\\\b");
+      fprintf(stderr,"\\    \r");
       break;
     }
     fflush(stderr);
@@ -185,7 +187,7 @@ int lp_split(vqgen *v,vqbook *b,
     long   firstentry=0;
     double firstmetric=_dist_sq(v,_now(v,entryindex[0]),ppt);
     
-    if(points*entries>64*1024)spinnit();
+    if(points*entries>64*1024)spinnit(entries);
 
     for(j=1;j<entries;j++){
       double thismetric=_dist_sq(v,_now(v,entryindex[j]),ppt);
@@ -204,13 +206,13 @@ int lp_split(vqgen *v,vqbook *b,
   /* more than one way to do this part.  For small sets, we can brute
      force it. */
 
-  if(entries<8 || points*entries*entries<128*1024*1024){
+  if(entries<8 || (double)points*entries*entries<128.*1024*1024){
     /* try every pair possibility */
     double best=0;
     double this;
     for(i=0;i<entries-1;i++){
       for(j=i+1;j<entries;j++){
-	spinnit();
+	spinnit(entries-i);
 	pq_in_out(v,n,&c,_now(v,entryindex[i]),_now(v,entryindex[j]));
 	vqsp_count(v,membership,
 		   entryindex,entries, 
@@ -245,7 +247,7 @@ int lp_split(vqgen *v,vqbook *b,
     /* eventually, we want to select the closest entry and figure n/c
        from p/q (because storing n/c is too large */
     for(k=0;k<v->elements;k++){
-      spinnit();
+      spinnit(entries);
       
       p[k]=0.;
       for(j=0;j<entries;j++)
@@ -263,7 +265,7 @@ int lp_split(vqgen *v,vqbook *b,
       double ref_best=0.;
       double ref_j=-1;
       double this;
-      spinnit();
+      spinnit(entries-i);
       
       for(k=0;k<v->elements;k++)
 	q[k]=2*p[k]-ppi[k];

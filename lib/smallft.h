@@ -12,14 +12,14 @@
  ********************************************************************
 
  function: fft transform
- last mod: $Id: smallft.h,v 1.4 1999/12/30 07:26:50 xiphmont Exp $
+ last mod: $Id: smallft.h,v 1.5 2000/01/05 03:11:02 xiphmont Exp $
 
 ********************************************************************/
 
 #ifndef _V_SMFT_H_
 #define _V_SMFT_H_
 
-#include "codec.h"
+#include "vorbis/codec.h"
 
 extern void drft_forward(drft_lookup *l,double *data);
 extern void drft_backward(drft_lookup *l,double *data);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.3 2000/01/04 09:04:55 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.1 2000/01/05 03:10:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,7 @@
 #define _V_MODES_H_
 
 #include <stdio.h>
-#include "codec.h"
+#include "vorbis/codec.h"
 
 /*
    0      1      2      3      4     5      6     7     8     9 

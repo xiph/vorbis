@@ -1,3 +1,5 @@
+#define CODEBOOK _vq_book_lsp_256_32_44100_8
+#include "lsp_256_32_44100_8.vqh"
 /********************************************************************
  *                                                                  *
  * THIS FILE IS PART OF THE Ogg Vorbis SOFTWARE CODEC SOURCE CODE.  *
@@ -12,7 +14,7 @@
  ********************************************************************
 
  function: utility main for loading/testing/running finished codebooks
- last mod: $Id: run.c,v 1.2 1999/12/30 07:27:01 xiphmont Exp $
+ last mod: $Id: run.c,v 1.3 2000/01/05 03:11:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -84,6 +86,16 @@ void vqbook_unquantize(vqbook *b){
   }
 }
 
+double _ssqe(int el,double *a, double *b){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(a[i]-b[i]);
+    acc+=val*val;
+  }
+  return acc;
+}
+
 
 /* command line:
    run outbase [-m] [-s <start>,<n>] datafile [-s <start>,<n>] [datafile...]
@@ -104,7 +116,7 @@ int main(int argc,char *argv[]){
   long i,j,k;
   int start=0,num=-1;
 
-  double mean=0.,meansquare=0.,mean_count=0.;
+  double mean=0.,br_mean=0.,mean_count=0.;
   
   argv++;
 
@@ -219,15 +231,25 @@ int main(int argc,char *argv[]){
 	    entry=vqenc_entry(b,base);
 
 	    /* accumulate metrics */
-	    for(k=0;k<b->dim;k++){
-	      double err=base[k]-b->valuelist[k+entry*b->dim];
-	      mean+=fabs(err);
-	      meansquare+=err*err;
-	      mean_count++;
+	    mean+=_ssqe(b->dim,base,b->valuelist+entry*b->dim);
+
+	    /* brute force it as a sanity check of the decision
+               table... did that work better? */
+	    {
+	      double best=_ssqe(b->dim,base,b->valuelist);
+	      int bestj=0;
+	      for(j=0;j<b->entries;j++){
+		double this=_ssqe(b->dim,base,b->valuelist+j*b->dim);
+		if(this<best){
+		  best=this;
+		  bestj=j;
+		}
+	      }
+
+	      br_mean+=best;
 	    }
 
-	    /* brute force it... did that work better? */
-
+	    mean_count+=b->dim;
 
 	    /* paint the cell if -m */
 	    if(cells){
@@ -242,7 +264,7 @@ int main(int argc,char *argv[]){
 
 
 	  }
-          free(b);
+          free(p);
         }
       }
       fclose(in);
@@ -254,8 +276,9 @@ int main(int argc,char *argv[]){
   if(cells)fclose(cells);
 
   /* print accumulated error statistics */
-  fprintf(stderr,"results:\n\tmean squared error:%g\n\tmean error:%g\n\n",
-	  sqrt(meansquare/mean_count),mean/mean_count);
+  fprintf(stderr,"results:\n\tsqrt(mean squared error) from decision tree:%g\n"
+	  "\tsqrt(mean squared error) by brute force:%g\n\n",
+	  sqrt(mean/mean_count),sqrt(br_mean/mean_count));
 
   return 0;
 }

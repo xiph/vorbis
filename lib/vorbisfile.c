@@ -12,16 +12,17 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.11 1999/12/30 07:26:54 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.12 2000/01/05 03:11:05 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include "vorbis/codec.h"
+#include "vorbis/vorbisfile.h"
+
 #include "os.h"
-#include "codec.h"
-#include "vorbisfile.h"
 
 /* A 'chained bitstream' is a Vorbis bitstream that contains more than
    one logical bitstream arranged end to end (the only form of Ogg

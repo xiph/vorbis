@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.4 2000/01/04 09:04:54 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.1 2000/01/05 03:10:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,61 +32,8 @@
 #  define int16_t size16
 #endif
 
-/* lookup structures for various simple transforms *****************/
-
-typedef struct {
-  int n;
-  struct vorbis_info *vi;
-
-  double *maskthresh;
-  double *barknum;
-
-} psy_lookup;
-
-typedef struct {
-  int n;
-  int log2n;
-  
-  double *trig;
-  int    *bitrev;
-
-} mdct_lookup;
-
-typedef struct {
-  int n;
-  double *trigcache;
-  int *splitcache;
-} drft_lookup;
-
-typedef struct {
-  int winlen;
-  double *window;
-  mdct_lookup mdct;
-} envelope_lookup;
-
-typedef struct lpclook{
-  /* en/decode lookups */
-  int *linearmap;
-  double *barknorm;
-  drft_lookup fft;
-
-  int n;
-  int ln;
-  int m;
-
-} lpc_lookup;
-
-/* structures for various internal data abstractions ********************/
-
-typedef struct {
-  long endbyte;     
-  int  endbit;      
-
-  unsigned char *buffer;
-  unsigned char *ptr;
-  long storage;
-  
-} oggpack_buffer;
+#include "vorbis/codebook.h"
+#include "vorbis/internal.h"
 
 /* vobis_info contains all the setup information specific to the specific
    compression/decompression mode in progress (eg, psychoacoustic settings,

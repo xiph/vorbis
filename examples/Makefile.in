@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.1 1999/12/31 12:35:38 xiphmont Exp $
+# $Id: Makefile.in,v 1.2 2000/01/05 03:10:23 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -27,7 +27,7 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-HFILES =	../include/codec.h ../include/vorbisfile.h
+HFILES =	../include/vorbis/codec.h ../include/vorbis/vorbisfile.h
 OFILES =	encoder_example.o decoder_example.o chaining_example.o
 BINFILES =      encoder_example decoder_example chaining_example
 

@@ -12,14 +12,14 @@
  ********************************************************************
 
  function: modified discrete cosine transform prototypes
- last mod: $Id: mdct.h,v 1.8 1999/12/30 07:26:45 xiphmont Exp $
+ last mod: $Id: mdct.h,v 1.9 2000/01/05 03:11:00 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _OGG_mdct_H_
 #define _OGG_mdct_H_
 
-#include "codec.h"
+#include "vorbis/codec.h"
 
 extern void mdct_init(mdct_lookup *lookup,int n);
 extern void mdct_clear(mdct_lookup *l);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.2 1999/12/30 07:26:28 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.3 2000/01/05 03:10:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include "codec.h"
+#include "vorbis/codec.h"
 
 #define READ 1024
 signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */

@@ -12,12 +12,13 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.10 1999/12/30 07:26:53 xiphmont Exp $
+ last mod: $Id: synthesis.c,v 1.11 2000/01/05 03:11:04 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdio.h>
-#include "codec.h"
+#include "vorbis/codec.h"
+
 #include "envelope.h"
 #include "mdct.h"
 #include "lpc.h"

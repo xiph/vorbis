@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.2 1999/12/30 07:26:27 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.3 2000/01/05 03:10:25 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,7 +24,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "codec.h"
+#include "vorbis/codec.h"
 
 int16_t convbuffer[4096]; /* take 8k out of the data segment, not the stack */
 int convsize=4096;

@@ -12,14 +12,14 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.h,v 1.3 1999/12/30 07:26:34 xiphmont Exp $
+  last mod: $Id: bitwise.h,v 1.4 2000/01/05 03:10:54 xiphmont Exp $
 
  ********************************************************************/
 
 #ifndef _V_BITW_H_
 #define _V_BITW_H_
 
-#include "codec.h"
+#include "vorbis/codec.h"
 
 extern void _oggpack_writeinit(oggpack_buffer *b);
 extern void _oggpack_reset(oggpack_buffer *b);

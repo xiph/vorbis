@@ -12,14 +12,15 @@
  ********************************************************************
 
  function: spectrum envelope and residue code/decode
- last mod: $Id: spectrum.c,v 1.9 2000/01/04 09:05:03 xiphmont Exp $
+ last mod: $Id: spectrum.c,v 1.10 2000/01/05 03:11:03 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdio.h>
 #include <math.h>
+#include "vorbis/codec.h"
+
 #include "os.h"
-#include "codec.h"
 #include "bitwise.h"
 #include "spectrum.h"
 

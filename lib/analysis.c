@@ -12,15 +12,16 @@
  ********************************************************************
 
  function: single-block PCM analysis
- last mod: $Id: analysis.c,v 1.19 2000/01/04 09:04:57 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.20 2000/01/05 03:10:53 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include "vorbis/codec.h"
+
 #include "os.h"
-#include "codec.h"
 #include "lpc.h"
 #include "lsp.h"
 #include "envelope.h"

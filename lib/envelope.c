@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.12 1999/12/30 07:26:36 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.13 2000/01/05 03:10:56 xiphmont Exp $
 
  Preecho calculation.
 
@@ -22,9 +22,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <math.h>
+#include "vorbis/codec.h"
 
 #include "os.h"
-#include "codec.h"
 #include "mdct.h"
 #include "envelope.h"
 #include "bitwise.h"

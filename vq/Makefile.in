@@ -1,4 +1,4 @@
-# $Id: Makefile.in,v 1.4 1999/12/30 07:26:58 xiphmont Exp $
+# $Id: Makefile.in,v 1.5 2000/01/05 03:11:10 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -14,7 +14,7 @@
 # (unless, of course, you know what you are doing :) ##########################
 
 @SET_MAKE@
-FLAGS=-I. @TYPESIZES@ @CFLAGS@
+FLAGS=-I. -I../include @TYPESIZES@ @CFLAGS@
 OPT=@OPT@ $(FLAGS)
 DEBUG=@DEBUG@ $(FLAGS)
 PROFILE=@PROFILE@ $(FLAGS)
@@ -25,7 +25,7 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-HFILES =	vqgen.h vqext.h
+HFILES =	../include/vorbis/codebook.h vqgen.h vqext.h
 
 OFILES = 	vqgen.o vqsplit.o 
 ALLOFILES = 	$(OFILES) lspdata.o train.o build.o

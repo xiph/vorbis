@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.13 2000/01/04 09:05:00 xiphmont Exp $
+ last mod: $Id: info.c,v 1.14 2000/01/05 03:10:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -22,7 +22,7 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include "modes.h"
+#include "vorbis/modes.h"
 #include "bitwise.h"
 
 static int ilog2(unsigned int v){

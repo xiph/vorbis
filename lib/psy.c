@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.c,v 1.9 2000/01/04 09:05:02 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.10 2000/01/05 03:11:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,7 +20,8 @@
 #include <math.h>
 #include <string.h>
 #include <stdio.h>
-#include "codec.h"
+#include "vorbis/codec.h"
+
 #include "psy.h"
 #include "lpc.h"
 #include "smallft.h"
