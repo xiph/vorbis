@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.12 1999/10/18 09:41:07 xiphmont Exp $
+# $Id: Makefile.in,v 1.13 1999/11/02 11:17:34 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -34,7 +34,7 @@ LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
 		spectrum.o
 
-EFILES =	encoder_example.o decoder_example.o
+EFILES =	encoder_example.o decoder_example.o chaining_example.o
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -48,7 +48,7 @@ analysis:
 profile: 
 	$(MAKE) target CFLAGS="$(PROFILE)"
 
-target:	libvorbis.a encoder_example decoder_example
+target:	libvorbis.a encoder_example decoder_example chaining_example
 
 selftest:	
 	$(MAKE) clean
@@ -66,6 +66,10 @@ encoder_example:	$(EFILES) libvorbis.a
 decoder_example:	$(EFILES) libvorbis.a
 	$(CC) $(CFLAGS) $(LDFLAGS) decoder_example.o libvorbis.a -o \
 			decoder_example -lm
+
+chaining_example:	$(EFILES) libvorbis.a
+	$(CC) $(CFLAGS) $(LDFLAGS) chaining_example.o libvorbis.a -o \
+			chaining_example -lm
 
 libvorbis.a: 	$(LFILES)	
 		$(AR) -r libvorbis.a $(LFILES)

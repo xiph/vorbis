@@ -417,9 +417,108 @@ int ogg_sync_wrote(ogg_sync_state *oy, long bytes){
   return(0);
 }
 
-/* sync the stream.  If we had to recapture, return -1.  If we
-   couldn't capture at all, return 0.  If a page was already framed
-   and ready to go, return 1 and fill in the page struct.
+/* sync the stream.  This is meant to be useful for finding page
+   boundaries.
+
+   return values for this:
+  -n) skipped n bytes
+   0) page not ready; more data (no bytes skipped)
+   n) page synced at current location; page length n bytes
+   
+*/
+
+long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
+  unsigned char *page=oy->data+oy->returned;
+  unsigned char *next;
+  long bytes=oy->fill-oy->returned;
+  
+  if(oy->headerbytes==0){
+    int headerbytes,i;
+    if(bytes<27)return(0); /* not enough for a header */
+    
+    /* verify capture pattern */
+    if(memcmp(page,"OggS",4))goto sync_fail;
+    
+    headerbytes=page[26]+27;
+    if(bytes<headerbytes)return(0); /* not enough for header + seg table */
+    
+    /* count up body length in the segment table */
+    
+    for(i=0;i<page[26];i++)
+      oy->bodybytes+=page[27+i];
+    oy->headerbytes=headerbytes;
+  }
+  
+  if(oy->bodybytes+oy->headerbytes>bytes)return(0);
+  
+  /* The whole test page is buffered.  Verify the checksum */
+  {
+    /* Grab the checksum bytes, set the header field to zero */
+    char chksum[4];
+    ogg_page log;
+    
+    memcpy(chksum,page+22,4);
+    memset(page+22,0,4);
+    
+    /* set up a temp page struct and recompute the checksum */
+    log.header=page;
+    log.header_len=oy->headerbytes;
+    log.body=page+oy->headerbytes;
+    log.body_len=oy->bodybytes;
+    _os_checksum(&log);
+    
+    /* Compare */
+    if(memcmp(chksum,page+22,4)){
+      /* D'oh.  Mismatch! Corrupt page (or miscapture and not a page
+	 at all) */
+      /* replace the computed checksum with the one actually read in */
+      memcpy(page+22,chksum,4);
+      
+      /* Bad checksum. Lose sync */
+      goto sync_fail;
+    }
+  }
+  
+  /* yes, have a whole page all ready to go */
+  {
+    unsigned char *page=oy->data+oy->returned;
+    long bytes;
+
+    if(og){
+      og->header=page;
+      og->header_len=oy->headerbytes;
+      og->body=page+oy->headerbytes;
+      og->body_len=oy->bodybytes;
+    }
+
+    oy->unsynced=0;
+    oy->returned+=(bytes=oy->headerbytes+oy->bodybytes);
+    oy->headerbytes=0;
+    oy->bodybytes=0;
+    return(bytes);
+  }
+  
+ sync_fail:
+  
+  oy->headerbytes=0;
+  oy->bodybytes=0;
+  
+  /* search for possible capture */
+  next=memchr(page+1,'O',bytes-1);
+  if(!next)
+    next=oy->data+oy->fill;
+
+  oy->returned=next-oy->data;
+  return(-(next-page));
+}
+
+/* sync the stream and get a page.  Keep trying until we find a page.
+   Supress 'sync errors' after reporting the first.
+
+   return values:
+   -1) recapture (hole in data)
+    0) need more data
+    1) page returned
 
    Returns pointers into buffered data; invalidated by next call to
    _stream, _clear, _init, or _buffer */
@@ -431,87 +530,23 @@ int ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og){
      frame */
 
   while(1){
-    unsigned char *page=oy->data+oy->returned;
-    long bytes=oy->fill-oy->returned;
-      
-    if(oy->headerbytes==0){
-      int headerbytes,i;
-      if(bytes<27)return(0); /* not enough for a header */
-
-      /* verify capture pattern */
-      if(memcmp(page,"OggS",4))goto sync_fail;
-      
-      headerbytes=page[26]+27;
-      if(bytes<headerbytes)return(0); /* not enough for header + seg table */
-
-      /* count up body length in the segment table */
-
-      for(i=0;i<page[26];i++)
-	oy->bodybytes+=page[27+i];
-      oy->headerbytes=headerbytes;
+    long ret=ogg_sync_pageseek(oy,og);
+    if(ret>0){
+      /* have a page */
+      return(1);
+    }
+    if(ret==0){
+      /* need more data */
+      return(0);
     }
     
-    if(oy->bodybytes+oy->headerbytes>bytes)return(0);
-
-    /* The whole test page is buffered.  Verify the checksum */
-    {
-      /* Grab the checksum bytes, set the header field to zero */
-      char chksum[4];
-      ogg_page log;
-      
-      memcpy(chksum,page+22,4);
-      memset(page+22,0,4);
-      
-      /* set up a temp page struct and recompute the checksum */
-      log.header=page;
-      log.header_len=oy->headerbytes;
-      log.body=page+oy->headerbytes;
-      log.body_len=oy->bodybytes;
-      _os_checksum(&log);
-	
-      /* Compare */
-      if(memcmp(chksum,page+22,4)){
-	/* D'oh.  Mismatch! Corrupt page (or miscapture and not a page
-	   at all) */
-	/* replace the computed checksum with the one actually read in */
-	memcpy(page+22,chksum,4);
-	  
-	/* Bad checksum. Lose sync */
-	goto sync_fail;
-      }
-    }
-	
-    og->header=page;
-    og->header_len=oy->headerbytes;
-    og->body=page+oy->headerbytes;
-    og->body_len=oy->bodybytes;
-    
-    oy->unsynced=0;
-    oy->returned+=oy->headerbytes+oy->bodybytes;
-    oy->headerbytes=0;
-    oy->bodybytes=0;
-
-    return(1);
-
-  sync_fail:
-    
-    oy->headerbytes=0;
-    oy->bodybytes=0;
-
-    /* search for possible capture */
-    
-    page=memchr(page+1,'O',bytes-1);
-    if(page)
-      oy->returned=page-oy->data;
-    else
-      oy->returned=oy->fill;
-
+    /* head did not start a synced page... skipped some bytes */
     if(!oy->unsynced){
       oy->unsynced=1;
       return(-1);
     }
 
-    /* loop; verifier above will take care of determining capture or not */
+    /* loop. keep looking */
 
   }
 }

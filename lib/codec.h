@@ -102,7 +102,7 @@ typedef struct {
 
 typedef struct vorbis_info{
   int channels;
-  int rate;
+  long rate;
   int version;
 
   char **user_comments;
@@ -329,6 +329,7 @@ extern int    ogg_sync_reset(ogg_sync_state *oy);
 
 extern char  *ogg_sync_buffer(ogg_sync_state *oy, long size);
 extern int    ogg_sync_wrote(ogg_sync_state *oy, long bytes);
+extern long   ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og);
 extern int    ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og);
 extern int    ogg_stream_pagein(ogg_stream_state *os, ogg_page *og);
 extern int    ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op);

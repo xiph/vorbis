@@ -111,8 +111,9 @@ int vorbis_block_clear(vorbis_block *vb){
       free(vb->pcm[i]);
     free(vb->pcm);
   }
-  if(vb->vd->analysisp)
-    _oggpack_writeclear(&vb->opb);
+  if(vb->vd)
+    if(vb->vd->analysisp)
+      _oggpack_writeclear(&vb->opb);
 
   memset(vb,0,sizeof(vorbis_block));
   return(0);
