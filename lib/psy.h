@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.8 2000/01/28 15:25:11 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.9 2000/02/05 23:31:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,6 +25,13 @@ typedef struct {
 
   double *maskthresh;
   double *barknum;
+
+  int    framebegin;
+  int    frameend;
+  int    subframelen;
+  int    elements[4];
+  double cutoffs[4];
+  int    quantval[4];
 
 } vorbis_look_psy;
 

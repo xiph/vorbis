@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.c,v 1.7 2000/02/05 23:23:56 xiphmont Exp $
+  last mod: $Id: bitwise.c,v 1.8 2000/02/05 23:31:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -363,7 +363,45 @@ int main(void){
 
   fprintf(stderr,"\nSingle bit unclicpped packing: ");
   cliptest(testbuffer3,test3size,1,six,sixsize);
+  fprintf(stderr,"ok.");
+
+  fprintf(stderr,"\nTesting read past end: ");
+  _oggpack_readinit(&r,"\0\0\0\0\0\0\0\0",8);
+  for(i=0;i<64;i++){
+    if(_oggpack_read(&r,1)!=0){
+      fprintf(stderr,"failed; got -1 prematurely.\n");
+      exit(1);
+    }
+  }
+  if(_oggpack_look(&r,1)!=-1 ||
+     _oggpack_read(&r,1)!=-1){
+      fprintf(stderr,"failed; read past end without -1.\n");
+      exit(1);
+  }
+  _oggpack_readinit(&r,"\0\0\0\0\0\0\0\0",8);
+  if(_oggpack_read(&r,30)!=0 || _oggpack_read(&r,16)!=0){
+      fprintf(stderr,"failed 2; got -1 prematurely.\n");
+      exit(1);
+  }
+
+  if(_oggpack_look(&r,18)!=0 ||
+     _oggpack_look(&r,18)!=0){
+    fprintf(stderr,"failed 3; got -1 prematurely.\n");
+      exit(1);
+  }
+  if(_oggpack_look(&r,19)!=-1 ||
+     _oggpack_look(&r,19)!=-1){
+    fprintf(stderr,"failed; read past end without -1.\n");
+      exit(1);
+  }
+  if(_oggpack_look(&r,32)!=-1 ||
+     _oggpack_look(&r,32)!=-1){
+    fprintf(stderr,"failed; read past end without -1.\n");
+      exit(1);
+  }
   fprintf(stderr,"ok.\n\n");
+
+
   return(0);
 }  
 #endif
