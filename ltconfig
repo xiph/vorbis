@@ -1,0 +1,4 @@
+This is not used.  And should be removed once a suitable automake comes
+out that doesn't hardcode this file in.
+
+jack.
