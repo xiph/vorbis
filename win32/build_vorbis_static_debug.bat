@@ -1,8 +1,8 @@
 @echo off
-echo ---+++--- Building Vorbis (Dynamic) ---+++---
+echo ---+++--- Building Vorbis (Static) ---+++---
 
 if .%SRCROOT%==. set SRCROOT=c:\src
-           
+
 set OLDPATH=%PATH%
 set OLDINCLUDE=%INCLUDE%
 set OLDLIB=%LIB%
@@ -10,9 +10,9 @@ set OLDLIB=%LIB%
 call "c:\program files\microsoft visual studio\vc98\bin\vcvars32.bat"
 echo Setting include/lib paths for Vorbis
 set INCLUDE=%INCLUDE%;%SRCROOT%\ogg\include;c:\src\vorbis\include
-set LIB=%LIB%;%SRCROOT%\ogg\win32\Dynamic_Release
+set LIB=%LIB%;%SRCROOT%\ogg\win32\Static_Debug
 echo Compiling...
-msdev vorbis_dynamic.dsp /useenv /make "vorbis_dynamic - Win32 Release" /rebuild
+msdev vorbis_static.dsp /useenv /make "vorbis_static - Win32 Debug" /rebuild
 
 set PATH=%OLDPATH%
 set INCLUDE=%OLDINCLUDE%
