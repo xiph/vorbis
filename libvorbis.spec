@@ -1,5 +1,5 @@
 Name:		libvorbis
-Version:	1.0
+Version:	1.0.1
 Release:	1
 Summary:	The Vorbis General Audio Compression Codec
 
@@ -19,8 +19,8 @@ Epoch:          2
 Provides:       %{name} = %{epoch}:1.0rc3-%{release}
 Provides:       %{name} = %{epoch}:1.0beta4-%{release}
 
-Requires:	libogg >= 1.0
-BuildRequires:	libogg-devel >= 1.0
+Requires:	libogg >= 1.1
+BuildRequires:	libogg-devel >= 1.1
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
@@ -30,7 +30,7 @@ and variable bitrates from 16 to 128 kbps/channel.
 %package devel
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
-Requires:	libogg-devel >= 1.0
+Requires:	libogg-devel >= 1.1
 Requires:	libvorbis = %{version}
 # Dirty trick to tell rpm that this package actually provides what the
 # last rc and beta was offering
@@ -82,13 +82,22 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %{_includedir}/vorbis/vorbisfile.h
 %{_includedir}/vorbis/vorbisenc.h
 %{_libdir}/libvorbis.a
+%{_libdir}/libvorbis.la
 %{_libdir}/libvorbis.so
 %{_libdir}/libvorbisfile.a
+%{_libdir}/libvorbisfile.la
 %{_libdir}/libvorbisfile.so
 %{_libdir}/libvorbisenc.a
+%{_libdir}/libvorbisenc.la
 %{_libdir}/libvorbisenc.so
+%{_libdir}/pkgconfig/vorbis.pc
+%{_libdir}/pkgconfig/vorbisfile.pc
+%{_libdir}/pkgconfig/vorbisenc.pc
 
 %changelog
+* Tue Oct 07 2003 Warren Dukes <shank@xiph.org>
+- update for 1.0.1 release
+
 * Sun Jul 14 2002 Thomas Vander Stichele <thomas@apestaart.org>
 - Added BuildRequires:
 - updated for 1.0 release
