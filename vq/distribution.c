@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.1.2.2 2000/12/30 06:30:58 xiphmont Exp $
+ last mod: $Id: distribution.c,v 1.1.2.3 2000/12/31 23:56:07 xiphmont Exp $
 
  ********************************************************************/
 
@@ -158,6 +158,7 @@ int main(int argc,char *argv[]){
       
       while(sscanf(line,"%f",&code)==1){
 	line=strchr(line,',');
+	if(line)line++;
 	if(code<min)min=code;
 	if(code>max)max=code;
       }
@@ -189,6 +190,7 @@ int main(int argc,char *argv[]){
       
       while(sscanf(line,"%f",&code)==1){
 	line=strchr(line,',');
+	if(line)line++;
 	
 	code-=min;
 	code/=(max-min);
@@ -209,6 +211,7 @@ int main(int argc,char *argv[]){
 	if(countarray[i]>maxcount)maxcount=countarray[i];
       
       printf("\r                                                     \r");
+      printf("Total scalars: %ld\n",total);
       for(i=0;i<bins+1;i++){
 	int stars=rint(50./maxcount*countarray[i]);
 	printf("%08f (%8ld) |",(max-min)/bins*i+min,countarray[i]);
