@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: registry for time, floor, res backends and channel mappings
- last mod: $Id: registry.h,v 1.9 2001/10/18 17:35:44 cwolf Exp $
+ last mod: $Id: registry.h,v 1.10 2001/10/18 23:29:29 cwolf Exp $
 
  ********************************************************************/
 
@@ -25,8 +25,8 @@
 #define VI_RESB 3
 #define VI_MAPB 1
 
-#if defined(_MSC_VER) && defined(DLL_IMPORT)
-# define EXTERN _declspec(dllimport) extern
+#if defined(_WIN32) && defined(VORBISDLL_IMPORT)
+# define EXTERN __declspec(dllimport) extern
 #else
 # define EXTERN extern
 #endif
