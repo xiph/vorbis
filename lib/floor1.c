@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.21 2002/06/28 22:19:35 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.22 2002/07/01 11:20:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -59,8 +59,6 @@ typedef struct lsfit_acc{
   long xya; 
   long n;
   long an;
-  long edgey0;
-  long edgey1;
 } lsfit_acc;
 
 /***********************************************/
@@ -422,10 +420,9 @@ static int accumulate_fit(const float *flr,const float *mdct,
   memset(a,0,sizeof(*a));
   a->x0=x0;
   a->x1=x1;
-  a->edgey0=quantized;
-  if(x1>n)x1=n;
+  if(x1>=n)x1=n-1;
 
-  for(i=x0;i<x1;i++){
+  for(i=x0;i<=x1;i++){
     int quantized=vorbis_dBquant(flr+i);
     if(quantized){
       if(mdct[i]+info->twofitatten>=flr[i]){
@@ -455,7 +452,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
 
   /* weight toward the actually used frequencies if we meet the threshhold */
   {
-    int weight=info->twofitweight/na;
+    int weight=nb*info->twofitweight/na;
 
     a->xa=xa*weight+xb;
     a->ya=ya*weight+yb;
@@ -466,11 +463,6 @@ static int accumulate_fit(const float *flr,const float *mdct,
     a->n=nb;
   }
 
-  a->edgey1=-200;
-  if(x1<n){
-    int quantized=vorbis_dBquant(flr+i);
-    a->edgey1=quantized;
-  }
   return(na);
 }
 

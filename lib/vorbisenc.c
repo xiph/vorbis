@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.43 2002/06/30 08:31:01 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.44 2002/07/01 11:20:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -141,10 +141,13 @@ typedef struct {
 } ve_setup_data_template;
 
 #include "modes/setup_44.h"
+#include "modes/setup_44u.h"
 
 static ve_setup_data_template *setup_list[]={
   &ve_setup_44_stereo,
   &ve_setup_44_stereo_low,
+  &ve_setup_44_uncoupled,
+  &ve_setup_44_uncoupled_low,
   0
 };
 
@@ -244,37 +247,43 @@ static int vorbis_encode_global_stereo(vorbis_info *vi,
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy_global *g=&ci->psy_g_param;
 
-  memcpy(g->coupling_prepointamp,p[is].pre,sizeof(*p[is].pre)*PACKETBLOBS);
-  memcpy(g->coupling_postpointamp,p[is].post,sizeof(*p[is].post)*PACKETBLOBS);
+  if(p){
+    memcpy(g->coupling_prepointamp,p[is].pre,sizeof(*p[is].pre)*PACKETBLOBS);
+    memcpy(g->coupling_postpointamp,p[is].post,sizeof(*p[is].post)*PACKETBLOBS);
 
-  if(hi->managed){
-    /* interpolate the kHz threshholds */
-    for(i=0;i<PACKETBLOBS;i++){
-      float kHz=p[is].kHz[i]*(1.-ds)+p[is+1].kHz[i]*ds;
-      g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-      g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
-      g->coupling_pkHz[i]=kHz;
-
-      kHz=p[is].lowpasskHz[i]*(1.-ds)+p[is+1].lowpasskHz[i]*ds;
-      g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-      g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
-
+    if(hi->managed){
+      /* interpolate the kHz threshholds */
+      for(i=0;i<PACKETBLOBS;i++){
+	float kHz=p[is].kHz[i]*(1.-ds)+p[is+1].kHz[i]*ds;
+	g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+	g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+	g->coupling_pkHz[i]=kHz;
+	
+	kHz=p[is].lowpasskHz[i]*(1.-ds)+p[is+1].lowpasskHz[i]*ds;
+	g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+	g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+	
+      }
+    }else{
+      float kHz=p[is].kHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].kHz[PACKETBLOBS/2]*ds;
+      for(i=0;i<PACKETBLOBS;i++){
+	g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+	g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+	g->coupling_pkHz[i]=kHz;
+      }
+      
+      kHz=p[is].lowpasskHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].lowpasskHz[PACKETBLOBS/2]*ds;
+      for(i=0;i<PACKETBLOBS;i++){
+	g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+	g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+      }
     }
   }else{
-    float kHz=p[is].kHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].kHz[PACKETBLOBS/2]*ds;
     for(i=0;i<PACKETBLOBS;i++){
-      g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-      g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
-      g->coupling_pkHz[i]=kHz;
-    }
-
-    kHz=p[is].lowpasskHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].lowpasskHz[PACKETBLOBS/2]*ds;
-    for(i=0;i<PACKETBLOBS;i++){
-      g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-      g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+      g->sliding_lowpass[0][i]=ci->blocksizes[0];
+      g->sliding_lowpass[1][i]=ci->blocksizes[1];
     }
   }
-
   return(0);
 }
 
@@ -370,7 +379,8 @@ static int vorbis_encode_peak_setup(vorbis_info *vi,double s,int block,
 static int vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
 					 int *suppress,
 					 noise3 *in,
-					 noiseguard *guard){
+					 noiseguard *guard,
+					 double userbias){
   int i,is=s,j;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
@@ -384,6 +394,16 @@ static int vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
   for(j=0;j<P_NOISECURVES;j++)
     for(i=0;i<P_BANDS;i++)
       p->noiseoff[j][i]=in[is].data[j][i]*(1.-ds)+in[is+1].data[j][i]*ds;
+
+  /* impulse blocks may take a user specified bias to boost the
+     nominal/high noise encoding depth */
+  for(j=0;j<P_NOISECURVES;j++){
+    float min=p->noiseoff[j][0]+6; /* the lowest it can go */
+    for(i=0;i<P_BANDS;i++){
+      p->noiseoff[j][i]+=userbias;
+      if(p->noiseoff[j][i]<min)p->noiseoff[j][i]=min;
+    }
+  }
 
   return(0);
 }
@@ -739,19 +759,20 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[i0].noise_bias_setting,0,
 				     setup->psy_noise_dBsuppress,
 				     setup->psy_noise_bias_impulse,
-				     setup->psy_noiseguards);
+				     setup->psy_noiseguards,
+				     hi->impulse_noisetune);
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[1].noise_bias_setting,1,
 				     setup->psy_noise_dBsuppress,
 				     setup->psy_noise_bias_padding,
-				     setup->psy_noiseguards);
+				     setup->psy_noiseguards,0.);
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[2].noise_bias_setting,2,
 				     setup->psy_noise_dBsuppress,
 				     setup->psy_noise_bias_trans,
-				     setup->psy_noiseguards);
+				     setup->psy_noiseguards,0.);
   ret|=vorbis_encode_noisebias_setup(vi,hi->block[3].noise_bias_setting,3,
 				     setup->psy_noise_dBsuppress,
 				     setup->psy_noise_bias_long,
-				     setup->psy_noiseguards);
+				     setup->psy_noiseguards,0.);
 
   ret|=vorbis_encode_ath_setup(vi,0);
   ret|=vorbis_encode_ath_setup(vi,1);
@@ -840,6 +861,7 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
   highlevel_encode_setup *hi=&ci->hi;
 
   quality+=.00001;
+  if(quality>=1.)quality=.9999;
 
   get_setup_template(vi,channels,rate,quality,0);
   if(!hi->setup)return OV_EIMPL;
@@ -1030,7 +1052,39 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
 	  hi->managed=0;
       }
       return(0);
+
+    case OV_ECTL_LOWPASS_GET:
+      {
+	double *farg=(double *)arg;
+	*farg=hi->lowpass_kHz;
+      }
+      return(0);
+    case OV_ECTL_LOWPASS_SET:
+      {
+	double *farg=(double *)arg;
+	hi->lowpass_kHz=*farg;
+
+	if(hi->lowpass_kHz<2.)hi->lowpass_kHz=2.;
+	if(hi->lowpass_kHz>99.)hi->lowpass_kHz=99.;
+      }
+      return(0);
+    case OV_ECTL_IBLOCK_GET:
+      {
+	double *farg=(double *)arg;
+	*farg=hi->impulse_noisetune;
+      }
+      return(0);
+    case OV_ECTL_IBLOCK_SET:
+      {
+	double *farg=(double *)arg;
+	hi->impulse_noisetune=*farg;
+
+	if(hi->impulse_noisetune>0.)hi->impulse_noisetune=0.;
+	if(hi->impulse_noisetune<-15.)hi->impulse_noisetune=-15.;
+      }
+      return(0);      
     }
+
 
     return(OV_EIMPL);
   }

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.51 2002/06/30 08:31:00 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.52 2002/07/01 11:20:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -511,15 +511,17 @@ static int mapping0_forward(vorbis_block *vb){
     float **mag_memo;
     int **mag_sort;
 
-    mag_memo=_vp_quantize_couple_memo(vb,
-				      psy_look,
+    if(info->coupling_steps){
+      mag_memo=_vp_quantize_couple_memo(vb,
+					psy_look,
 				      info,
-				      gmdct);    
-
-    mag_sort=_vp_quantize_couple_sort(vb,
-				      psy_look,
-				      info,
-				      mag_memo);    
+					gmdct);    
+      
+      mag_sort=_vp_quantize_couple_sort(vb,
+					psy_look,
+					info,
+					mag_memo);    
+    }
 
     memset(sortindex,0,sizeof(*sortindex)*vi->channels);
     if(psy_look->vi->normal_channel_p){
@@ -605,9 +607,6 @@ static int mapping0_forward(vorbis_block *vb){
 		   ilogmaskch,
 		   nonzero,
 		   ci->psy_g_param.sliding_lowpass[vb->W][k]);
-      }else{
-	for(i=0;i<vi->channels;i++)
-	  memcpy(vb->pcm[i]+n/2,vb->pcm[i],n/2*sizeof(**vb->pcm));
       }
       
       /* classify and encode by submap */

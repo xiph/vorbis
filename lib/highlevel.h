@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: highlevel encoder setup struct seperated out for vorbisenc clarity
- last mod: $Id: highlevel.h,v 1.3 2002/06/30 08:31:00 xiphmont Exp $
+ last mod: $Id: highlevel.h,v 1.4 2002/07/01 11:20:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -29,6 +29,7 @@ typedef struct highlevel_encode_setup {
   double base_setting;
   double long_setting;
   double short_setting;
+  double impulse_noisetune;
 
   int    managed;
   long   bitrate_min;

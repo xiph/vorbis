@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.53 2002/06/30 08:31:00 xiphmont Exp $
+ last mod: $Id: analysis.c,v 1.54 2002/07/01 11:20:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -77,9 +77,8 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg
     
     for(j=0;j<n;j++){
       if(bark){
-	float oc=toOC((22050.f*j/n)+.25)*.5;
-	if(oc<0)continue;
-	fprintf(of,"%f ",toOC((22050.f*j/n)+.25));
+	float b=toBARK((22050.f*j/n)+.25);
+	fprintf(of,"%f ",b);
       }else
 	if(off!=0)
 	  fprintf(of,"%f ",(double)(j+off)/44100.);

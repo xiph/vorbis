@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.12 2002/06/28 22:19:54 xiphmont Exp $
+ last mod: $Id: residue_44.h,v 1.13 2002/07/01 11:20:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,13 +20,6 @@
 #include "books/coupled/res_books_44c.h"
 
 /***** residue backends *********************************************/
-
-/* the books used depend on stereo-or-not, but the residue setup below
-   can apply to coupled or not.  These templates are for a first pass;
-   a last pass is mechanically added in vorbisenc for residue backfill
-   at 1/3 and 1/9, as well as an optional middle pass for stereo
-   backfill */
-
 
 static vorbis_info_residue0 _residue_44_mid={
   0,-1, -1, 10,-1,

@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.46 2002/06/28 22:19:37 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.47 2002/07/01 11:20:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -378,7 +378,8 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   
   int partvals=n/samples_per_partition;
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(*partword));
-  float scale=vi->rate/ci->blocksizes[vb->W]*.001;
+  float scale=100./samples_per_partition;
+
   /* we find the partition type for each partition of each
      channel.  We'll go back and do the interleaved encoding in a
      bit.  For now, clarity */
@@ -390,15 +391,18 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   
   for(i=0;i<partvals;i++){
     int offset=i*samples_per_partition+info->begin;
-    float cur=offset*scale;
     for(j=0;j<ch;j++){
       float max=0.;
-      for(k=0;k<samples_per_partition;k++)
+      float ent=0.;
+      for(k=0;k<samples_per_partition;k++){
 	if(fabs(in[j][offset+k])>max)max=fabs(in[j][offset+k]);
+	ent+=fabs(rint(in[j][offset+k]));
+      }
+      ent*=scale;
       
       for(k=0;k<possible_partitions-1;k++)
 	if(max<=info->classmetric1[k] &&
-	   cur<info->classmetric2[k])
+	   (info->classmetric2[k]<0 || (int)ent<info->classmetric2[k]))
 	  break;
       
       partword[j][i]=k;  
