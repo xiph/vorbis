@@ -5,16 +5,16 @@ dnl Initialization and Versioning
 dnl ------------------------------------------------
 
 AC_INIT(lib/mdct.c)
-AM_INIT_AUTOMAKE(libvorbis,1.0beta4)
+AM_INIT_AUTOMAKE(libvorbis,1.0rc1)
 
 dnl Library versioning
 
 V_LIB_CURRENT=0
 V_LIB_REVISION=1
 V_LIB_AGE=0
-VF_LIB_CURRENT=0
-VF_LIB_REVISION=1
-VF_LIB_AGE=0
+VF_LIB_CURRENT=1
+VF_LIB_REVISION=0
+VF_LIB_AGE=1
 VE_LIB_CURRENT=0
 VE_LIB_REVISION=1
 VE_LIB_AGE=0
