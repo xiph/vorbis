@@ -2,12 +2,12 @@ Source: libvorbis
 Section: devel
 Priority: optional
 Maintainer: Christopher L Cheney <ccheney@debian.org>
-Build-Depends: debhelper, libogg0-dev
+Build-Depends: debhelper, libogg-dev
 Standards-Version: 3.1.1
 
-Package: libvorbis0-dev
+Package: libvorbis-dev
 Architecture: any
-Depends: libvorbis0 (= ${Source-Version}), libc6-dev
+Depends: libvorbis0 (= ${Source-Version}), libogg-dev, libc6-dev
 Replaces: libvorbis-dev
 Conflicts: libvorbis-dev
 Description: Development library for OGG Vorbis
