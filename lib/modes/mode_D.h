@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_D.h,v 1.16 2001/08/13 01:37:14 xiphmont Exp $
+ last mod: $Id: mode_D.h,v 1.17 2001/08/13 08:38:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -286,7 +286,8 @@ static vorbis_info_floor1 _floor_set1D={10,
 					20,600,
 					1024};
 
-static vorbis_info_residue0 _residue_set0D={0,256,16,10,23,
+static vorbis_info_residue0 _residue_set0D={
+0,256,16,10,23,
 					    {0,1,1,1,1,1,1,1,3,7},
 					    {25,
 					     26,
