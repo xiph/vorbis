@@ -18,7 +18,7 @@ AC_ARG_ENABLE(vorbistest, [  --disable-vorbistest       Do not try to compile an
     VORBIS_LIBS="-L$vorbis_prefix/lib"
   fi
 
-  VORBIS_LIBS="$VORBIS_LIBS -lvorbisfile -lvorbis"
+  VORBIS_LIBS="$VORBIS_LIBS -lvorbisfile -lvorbis -lm"
 
   AC_MSG_CHECKING(for Vorbis)
   no_vorbis=""
