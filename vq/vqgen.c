@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.30.4.3 2000/04/21 16:35:40 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.30.4.4 2000/05/06 05:41:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -204,7 +204,7 @@ void vqgen_quantize(vqgen *v,quant_meta *q){
       double val=_now(v,j)[k];
       double now=rint((val-last-mindel)/delta);
       
-      _now(v,j)[k]=now+1;
+      _now(v,j)[k]=now;
       if(now<0){
 	/* be paranoid; this should be impossible */
 	fprintf(stderr,"fault; quantized value<0\n");

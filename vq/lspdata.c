@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.11.4.4 2000/05/04 23:08:10 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.11.4.5 2000/05/06 05:41:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,16 +21,61 @@
 #include <stdio.h>
 #include "vqgen.h"
 #include "vqext.h"
+#include "../lib/sharedbook.h"
 
 char *vqext_booktype="LSPdata";  
 quant_meta q={0,0,0,1};          /* set sequence data */
 int vqext_aux=1;
 
+double global_maxdel=M_PI;
+double global_mindel=M_PI;
+#if 0
+void vqext_quantize(vqgen *v,quant_meta *q){
+  double delta,mindel;
+  double maxquant=((1<<q->quant)-1);
+  int j,k;
+
+  /* first find the basic delta amount from the maximum span to be
+     encoded.  Loosen the delta slightly to allow for additional error
+     during sequence quantization */
+
+  delta=(global_maxdel-global_mindel)/((1<<q->quant)-1.5);
+  
+  q->min=_float32_pack(global_mindel);
+  q->delta=_float32_pack(delta);
+
+  mindel=_float32_unpack(q->min);
+  delta=_float32_unpack(q->delta);
+
+  for(j=0;j<v->entries;j++){
+    double last=0;
+    for(k=0;k<v->elements;k++){
+      double val=_now(v,j)[k];
+      double now=rint((val-last-mindel)/delta);
+      
+      _now(v,j)[k]=now;
+      if(now<0){
+	/* be paranoid; this should be impossible */
+	fprintf(stderr,"fault; quantized value<0\n");
+	exit(1);
+      }
+
+      if(now>maxquant){
+	/* be paranoid; this should be impossible */
+	fprintf(stderr,"fault; quantized value>max\n");
+	exit(1);
+      }
+      last=(now*delta)+mindel+last;
+    }
+  }
+
+}
+#else
 void vqext_quantize(vqgen *v,quant_meta *q){
   vqgen_quantize(v,q);
 }
+#endif
 
-double global_maxdel=M_PI;
 double *weight=NULL;
 #if 0
 /* LSP training metric.  We weight error proportional to distance
@@ -99,16 +144,17 @@ void vqext_preprocess(vqgen *v){
   long j,k;
 
   global_maxdel=0.;
+  global_mindel=M_PI;
   for(j=0;j<v->points;j++){
     double last=0.;
     for(k=0;k<v->elements+v->aux;k++){
       double p=_point(v,j)[k];
       if(p-last>global_maxdel)global_maxdel=p-last;
+      if(p-last<global_mindel)global_mindel=p-last;
       last=p;
     }
   }
 
-  global_maxdel*=1.1;
   weight=malloc(sizeof(double)*v->elements);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.12.4.6 2000/05/04 23:08:10 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.12.4.7 2000/05/06 05:41:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -563,11 +563,11 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     fprintf(out,"\tNULL,\n");
 
   if(n)
-    fprintf(out,"\t&_vq_auxn_%s\n",name);
+    fprintf(out,"\t&_vq_auxn_%s,\n",name);
   else
     fprintf(out,"\tNULL,\n");
   if(t)
-    fprintf(out,"\t&_vq_auxt_%s\n",name);
+    fprintf(out,"\t&_vq_auxt_%s,\n",name);
   else
     fprintf(out,"\tNULL,\n");
 
