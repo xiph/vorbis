@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.1 2000/01/05 10:14:54 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.2 2000/01/05 15:04:55 xiphmont Exp $
 
  ********************************************************************/
 
@@ -53,7 +53,7 @@ char *get_line(FILE *in){
     int gotline=0;
 
     while(!gotline){
-      if(sofar>=lbufsize){
+      if(sofar+1>=lbufsize){
         if(!lbufsize){  
           lbufsize=1024;
           linebuffer=malloc(lbufsize);

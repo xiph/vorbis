@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.9 2000/01/05 10:14:59 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.10 2000/01/05 15:05:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -68,7 +68,7 @@ int iascsort(const void *a,const void *b){
 }
 
 /* grab it from vqgen.c */
-extern double _dist_sq(vqgen *v,double *a, double *b);
+extern double _dist(vqgen *v,double *a, double *b);
 
 /* goes through the split, but just counts it and returns a metric*/
 void vqsp_count(vqgen *v,long *membership,
@@ -162,12 +162,12 @@ int lp_split(vqgen *v,codebook *b,
   for(i=0;i<points;i++){
     double *ppt=_point(v,pointindex[i]);
     long   firstentry=0;
-    double firstmetric=_dist_sq(v,_now(v,entryindex[0]),ppt);
+    double firstmetric=_dist(v,_now(v,entryindex[0]),ppt);
     
     if(points*entries>64*1024)spinnit(spinbuf,entries);
 
     for(j=1;j<entries;j++){
-      double thismetric=_dist_sq(v,_now(v,entryindex[j]),ppt);
+      double thismetric=_dist(v,_now(v,entryindex[j]),ppt);
       if(thismetric<firstmetric){
 	firstmetric=thismetric;
 	firstentry=j;
@@ -249,7 +249,7 @@ int lp_split(vqgen *v,codebook *b,
 
       for(j=0;j<entries;j++){
 	if(j!=i){
-	  double this=_dist_sq(v,q,_now(v,entryindex[j]));
+	  double this=_dist(v,q,_now(v,entryindex[j]));
 	  if(ref_j==-1 || this<ref_best){
 	    ref_best=this;
 	    ref_j=entryindex[j];
@@ -416,10 +416,10 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   for(i=0;i<v->points;i++){
     double *ppt=_point(v,i);
     long   firstentry=0;
-    double firstmetric=_dist_sq(v,_now(v,0),ppt);
+    double firstmetric=_dist(v,_now(v,0),ppt);
     
     for(j=1;j<v->entries;j++){
-      double thismetric=_dist_sq(v,_now(v,j),ppt);
+      double thismetric=_dist(v,_now(v,j),ppt);
       if(thismetric<firstmetric){
 	firstmetric=thismetric;
 	firstentry=j;

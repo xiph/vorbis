@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.26 2000/01/05 10:14:57 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.27 2000/01/05 15:05:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -58,7 +58,7 @@
 #define vN(data,i) (data+v->elements*i)
 
 /* default metric; squared 'distance' from desired value. */
-double _dist_sq(vqgen *v,double *a, double *b){
+double _dist(vqgen *v,double *a, double *b){
   int i;
   int el=v->elements;
   double acc=0.;
@@ -66,7 +66,7 @@ double _dist_sq(vqgen *v,double *a, double *b){
     double val=(a[i]-b[i]);
     acc+=val*val;
   }
-  return acc;
+  return sqrt(acc);
 }
 
 double *_weight_null(vqgen *v,double *a){
@@ -215,7 +215,7 @@ void vqgen_init(vqgen *v,int elements,int aux,int entries,
   if(metric)
     v->metric_func=metric;
   else
-    v->metric_func=_dist_sq;
+    v->metric_func=_dist;
   if(weight)
     v->weight_func=weight;
   else
@@ -253,6 +253,19 @@ double vqgen_iterate(vqgen *v){
   double *new=malloc(sizeof(double)*v->entries*v->elements);
   long   *nearcount=malloc(v->entries*sizeof(long));
   double *nearbias=malloc(v->entries*desired2*sizeof(double));
+ #ifdef NOISY
+   char buff[80];
+   FILE *assig;
+   FILE *bias;
+   FILE *cells;
+   sprintf(buff,"cells%d.m",v->it);
+   cells=fopen(buff,"w");
+   sprintf(buff,"assig%d.m",v->it);
+   assig=fopen(buff,"w");
+   sprintf(buff,"bias%d.m",v->it);
+   bias=fopen(buff,"w");
+ #endif
+ 
 
   if(v->entries<2){
     fprintf(stderr,"generation requires at least two entries\n");
@@ -294,9 +307,17 @@ double vqgen_iterate(vqgen *v){
 	}
       }
     }
-      
+
     j=firstentry;
-    meterror+=sqrt(_dist_sq(v,_now(v,j),ppt)/v->elements);
+      
+#ifdef NOISY
+    fprintf(cells,"%g %g\n%g %g\n\n",
+          _now(v,j)[0],_now(v,j)[1],
+          ppt[0],ppt[1]);
+#endif
+
+    j=firstentry;
+    meterror+=firstmetric-v->bias[firstentry];
     /* set up midpoints for next iter */
     if(v->assigned[j]++)
       for(k=0;k<v->elements;k++)
@@ -356,6 +377,10 @@ double vqgen_iterate(vqgen *v){
   /* assign midpoints */
 
   for(j=0;j<v->entries;j++){
+#ifdef NOISY
+    fprintf(assig,"%ld\n",v->assigned[j]);
+    fprintf(bias,"%g\n",v->bias[j]);
+#endif
     asserror+=fabs(v->assigned[j]-fdesired);
     if(v->assigned[j])
       for(k=0;k<v->elements;k++)

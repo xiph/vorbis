@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.12 2000/01/05 10:14:56 xiphmont Exp $
+ last mod: $Id: train.c,v 1.13 2000/01/05 15:05:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -245,7 +245,7 @@ int main(int argc,char *argv[]){
 	}
 	{
 	  int i;
-	  double *b=malloc(cols*sizeof(double));
+	  double b[cols];
 	  if(start*num+dim>cols){
 	    fprintf(stderr,"ran out of columns reading %s\n",file);
 	    exit(1);
@@ -270,7 +270,6 @@ int main(int argc,char *argv[]){
 	  for(i=0;i<num;i++)
 	    vqext_addpoint_adj(&v,b,start+i*dim,dim,cols);
 
-	  free(b);
 	}
       }
       fclose(in);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: generic euclidian distance metric for VQ codebooks
- last mod: $Id: genericdata.c,v 1.1 2000/01/05 10:14:55 xiphmont Exp $
+ last mod: $Id: genericdata.c,v 1.2 2000/01/05 15:04:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -40,7 +40,7 @@ double vqext_metric(vqgen *v,double *e, double *p){
     double val=p[i]-e[i];
     acc+=val*val;
   }
-  return acc;
+  return sqrt(acc/v->elements);
 }
 
 void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
@@ -50,5 +50,9 @@ void vqext_addpoint_adj(vqgen *v,double *b,int start,int dim,int cols){
 void vqext_preprocess(vqgen *v){
   /* noop */
 }
+
+
+
+
 
 

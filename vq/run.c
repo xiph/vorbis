@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for loading and operating on codebooks
- last mod: $Id: run.c,v 1.4 2000/01/05 10:14:55 xiphmont Exp $
+ last mod: $Id: run.c,v 1.5 2000/01/05 15:04:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -36,7 +36,9 @@
 
  */
 
-extern void process_vector(codebook *b,double *a,char *basename);
+extern void process_preprocess(codebook *b,char *basename);
+extern void process_postprocess(codebook *b,char *basename);
+extern void process_vector(codebook *b,double *a);
 extern void process_usage(void);
 
 int main(int argc,char *argv[]){
@@ -66,6 +68,8 @@ int main(int argc,char *argv[]){
     dot=strchr(basename,'.');
     if(dot)*dot='\0';
   }
+
+  process_preprocess(b,basename);
   
   while(*argv){
     /* only input files */
@@ -74,7 +78,7 @@ int main(int argc,char *argv[]){
     reset_next_value();
 
     while(get_vector(b,in,a)!=-1)
-      process_vector(b,a,basename);
+      process_vector(b,a);
 
     fclose(in);
   }
@@ -89,8 +93,11 @@ int main(int argc,char *argv[]){
     if((S_IFIFO|S_IFREG|S_IFSOCK)&st.st_mode){
       reset_next_value();
       while(get_vector(b,stdin,a)!=-1)
-	process_vector(b,a,basename);
+	process_vector(b,a);
     }
   }
+
+  process_postprocess(b,basename);
+
   return 0;
 }

@@ -12,13 +12,18 @@
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.1 2000/01/05 10:14:55 xiphmont Exp $
+ last mod: $Id: cascade.c,v 1.2 2000/01/05 15:04:56 xiphmont Exp $
 
  ********************************************************************/
 
 /* this one just outputs to stdout */
 
 #include "bookutil.h"
+
+void process_preprocess(codebook *b,char *basename){
+}
+void process_postprocess(codebook *b,char *basename){
+}
 
 void process_vector(codebook *b,double *a){
   int entry=codebook_entry(b,a);

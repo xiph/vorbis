@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.7 1999/12/30 07:27:00 xiphmont Exp $
+ last mod: $Id: lspdata.c,v 1.8 2000/01/05 15:04:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -58,7 +58,7 @@ double vqext_metric(vqgen *v,double *e, double *p){
     double val=(p[i]-e[i])*FUDGE;
     acc+=val*val;
   }
-  return acc;
+  return sqrt(acc/v->elements);
 }
 
 /* Data files are line-vectors, starting with zero.  If we want to
