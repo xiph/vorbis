@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.8 2000/01/22 13:28:22 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.9 2000/01/28 09:05:12 xiphmont Exp $
 
  ********************************************************************/
 
@@ -45,8 +45,6 @@ extern double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l);
 extern double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l);
 extern void vorbis_lpc_to_curve(double *curve,double *lpc, double amp,
 				lpc_lookup *l);
-extern void vorbis_lpc_apply(double *residue,double *lpc, double amp,
-			     lpc_lookup *l);
 
 /* standard lpc stuff */
 extern void vorbis_lpc_residue(double *coeff,double *prime,int m,

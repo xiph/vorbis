@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.3 2000/01/22 13:28:17 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.4 2000/01/28 09:05:08 xiphmont Exp $
 
  ********************************************************************/
 
@@ -33,20 +33,7 @@ static int ilog(unsigned int v){
   return(ret);
 }
 
-static long _float24_pack(double val){
-  int sign=0;
-  long exp;
-  long mant;
-  if(val<0){
-    sign=0x800000;
-    val= -val;
-  }
-  exp= floor(log(val)/log(2));
-  mant=rint(ldexp(val,17-exp));
-  exp=(exp+VQ_FEXP_BIAS)<<18;
-
-  return(sign|exp|mant);
-}
+/* code that packs the 24 bit float can be found in vq/bookutil.c */
 
 static double _float24_unpack(long val){
   double mant=val&0x3ffff;
@@ -121,8 +108,43 @@ long *_make_words(long *l,long n){
   return(r);
 }
 
+/* build the decode helper tree from the codewords */
+decode_aux *_make_decode_tree(codebook *c){
+  const static_codebook *s=c->c;
+  long top=0,i,j;
+  decode_aux *t=malloc(sizeof(decode_aux));
+  long *ptr0=t->ptr0=calloc(c->entries*2,sizeof(long));
+  long *ptr1=t->ptr1=calloc(c->entries*2,sizeof(long));
+  long *codelist=_make_words(s->lengthlist,s->entries);
+
+  if(codelist==NULL)return(NULL);
+  t->aux=c->entries*2;
+
+  for(i=0;i<c->entries;i++){
+    long ptr=0;
+    for(j=0;j<s->lengthlist[i]-1;j++){
+      int bit=(codelist[i]>>j)&1;
+      if(!bit){
+	if(!ptr0[ptr])
+	  ptr0[ptr]= ++top;
+	ptr=ptr0[ptr];
+      }else{
+	if(!ptr1[ptr])
+	  ptr1[ptr]= ++top;
+	ptr=ptr1[ptr];
+      }
+    }
+    if(!((codelist[i]>>j)&1))
+      ptr0[ptr]=-i;
+    else
+      ptr1[ptr]=-i;
+  }
+  free(codelist);
+  return(t);
+}
+
 /* unpack the quantized list of values for encode/decode ***********/
-static double *_book_unquantize(static_codebook *b){
+static double *_book_unquantize(const static_codebook *b){
   long j,k;
   double mindel=_float24_unpack(b->q_min);
   double delta=_float24_unpack(b->q_delta);
@@ -139,8 +161,23 @@ static double *_book_unquantize(static_codebook *b){
   return(r);
 }
 
+void vorbis_staticbook_clear(static_codebook *b){
+  if(b->quantlist)free(b->quantlist);
+  if(b->lengthlist)free(b->lengthlist);
+  if(b->encode_tree){
+    free(b->encode_tree->ptr0);
+    free(b->encode_tree->ptr1);
+    free(b->encode_tree->p);
+    free(b->encode_tree->q);
+    memset(b->encode_tree,0,sizeof(encode_aux));
+    free(b->encode_tree);
+  }
+  memset(b,0,sizeof(static_codebook));
+}
+
 void vorbis_book_clear(codebook *b){
-  /* static book is not cleared.  It exists only in encode */
+  /* static book is not cleared; we're likely called on the lookup and
+     the static codebook belongs to the info struct */
   if(b->decode_tree){
     free(b->decode_tree->ptr0);
     free(b->decode_tree->ptr1);
@@ -152,19 +189,33 @@ void vorbis_book_clear(codebook *b){
   memset(b,0,sizeof(codebook));
 }
 
-int vorbis_book_finish(codebook *c, static_codebook *s){
+int vorbis_book_init_encode(codebook *c,const static_codebook *s){
   memset(c,0,sizeof(codebook));
   c->c=s;
-  c->elements=s->elements;
+  c->entries=s->entries;
   c->dim=s->dim;
-  c->codelist=_make_words(c->lengthlist,c->entries);
-  c->valuelist=_book_unquantize(c);
+  c->codelist=_make_words(s->lengthlist,s->entries);
+  c->valuelist=_book_unquantize(s);
   return(0);
+}
+
+int vorbis_book_init_decode(codebook *c,const static_codebook *s){
+  memset(c,0,sizeof(codebook));
+  c->c=s;
+  c->entries=s->entries;
+  c->dim=s->dim;
+  c->valuelist=_book_unquantize(s);
+  c->decode_tree=_make_decode_tree(c);
+  if(c->decode_tree==NULL)goto err_out;
+  return(0);
+ err_out:
+  vorbis_book_clear(c);
+  return(-1);
 }
 
 /* packs the given codebook into the bitstream **************************/
 
-int vorbis_book_pack(static_codebook *c,oggpack_buffer *opb){
+int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
   long i,j;
   int ordered=0;
 
@@ -235,45 +286,41 @@ int vorbis_book_pack(static_codebook *c,oggpack_buffer *opb){
 
 /* unpacks a codebook from the packet buffer into the codebook struct,
    readies the codebook auxiliary structures for decode *************/
-int vorbis_book_unpack(oggpack_buffer *opb,codebook *c){
+int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   long i,j;
-  long *lengthlist=NULL;
-  long *codelist=NULL;
-  static codebook s;
-  memset(c,0,sizeof(codebook));
-  memset(&s,0,sizeof(s));
+  memset(s,0,sizeof(static_codebook));
 
   /* make sure alignment is correct */
   if(_oggpack_read(opb,24)!=0x564342)goto _eofout;
 
   /* first the basic parameters */
-  c->dim=_oggpack_read(opb,16);
-  c->entries=_oggpack_read(opb,24);
-  if(c->entries==-1)goto _eofout;
+  s->dim=_oggpack_read(opb,16);
+  s->entries=_oggpack_read(opb,24);
+  if(s->entries==-1)goto _eofout;
 
   /* codeword ordering.... length ordered or unordered? */
   switch(_oggpack_read(opb,1)){
   case 0:
     /* unordered */
-    lengthlist=malloc(sizeof(long)*c->entries);
-    for(i=0;i<c->entries;i++){
+    s->lengthlist=malloc(sizeof(long)*s->entries);
+    for(i=0;i<s->entries;i++){
       long num=_oggpack_read(opb,5);
       if(num==-1)goto _eofout;
-      lengthlist[i]=num+1;
+      s->lengthlist[i]=num+1;
     }
-
+    
     break;
   case 1:
     /* ordered */
     {
       long length=_oggpack_read(opb,5)+1;
-      lengthlist=malloc(sizeof(long)*c->entries);
-
-      for(i=0;i<c->entries;){
-	long num=_oggpack_read(opb,ilog(c->entries-i));
+      s->lengthlist=malloc(sizeof(long)*s->entries);
+      
+      for(i=0;i<s->entries;){
+	long num=_oggpack_read(opb,ilog(s->entries-i));
 	if(num==-1)goto _eofout;
 	for(j=0;j<num;j++,i++)
-	  lengthlist[i]=length;
+	  s->lengthlist[i]=length;
 	length++;
       }
     }
@@ -283,60 +330,20 @@ int vorbis_book_unpack(oggpack_buffer *opb,codebook *c){
     return(-1);
   }
   
-  /* now we generate the codewords for the given lengths */
-  codelist=_make_words(c->lengthlist,c->entries);
-  if(codelist==NULL)goto _errout;
-
-  /* ...and the decode helper tree from the codewords */
-  {
-    long top=0;
-    decode_aux *t=c->decode_tree=malloc(sizeof(decode_aux));
-    long *ptr0=t->ptr0=calloc(c->entries*2,sizeof(long));
-    long *ptr1=t->ptr1=calloc(c->entries*2,sizeof(long));
-    t->aux=c->entries*2;
-
-    for(i=0;i<c->entries;i++){
-      long ptr=0;
-      for(j=0;j<lengthlist[i]-1;j++){
-	int bit=(codelist[i]>>j)&1;
-	if(!bit){
-	  if(!ptr0[ptr])
-	    ptr0[ptr]= ++top;
-	  ptr=ptr0[ptr];
-	}else{
-	  if(!ptr1[ptr])
-	    ptr1[ptr]= ++top;
-	  ptr=ptr1[ptr];
-	}
-      }
-      if(!((codelist[i]>>j)&1))
-	ptr0[ptr]=-i;
-      else
-	ptr1[ptr]=-i;
-    }
-  }
-  /* no longer needed */
-  free(lengthlist);
-  free(codelist);
-
   /* Do we have a mapping to unpack? */
   if(_oggpack_read(opb,1)){
 
     /* values that define the dequantization */
-    s.q_min=_oggpack_read(opb,24);
-    s.q_delta=_oggpack_read(opb,24);
-    s.q_quant=_oggpack_read(opb,4)+1;
-    s.q_sequencep=_oggpack_read(opb,1);
-    s.dim=c->dim;
-    s.entries=c->entries;
+    s->q_min=_oggpack_read(opb,24);
+    s->q_delta=_oggpack_read(opb,24);
+    s->q_quant=_oggpack_read(opb,4)+1;
+    s->q_sequencep=_oggpack_read(opb,1);
 
     /* quantized values */
-    s.quantlist=malloc(sizeof(double)*c->entries*c->dim);
-    for(i=0;i<c->entries*c->dim;i++)
-      s.quantlist[i]=_oggpack_read(opb,s.q_quant);
-    if(s.quantlist[i-1]==-1)goto _eofout;
-    c->valuelist=_book_unquantize(&s);
-    free(s.quantlist);memset(&s,0,sizeof(s));
+    s->quantlist=malloc(sizeof(double)*s->entries*s->dim);
+    for(i=0;i<s->entries*s->dim;i++)
+      s->quantlist[i]=_oggpack_read(opb,s->q_quant);
+    if(s->quantlist[i-1]==-1)goto _eofout;
   }
 
   /* all set */
@@ -344,12 +351,8 @@ int vorbis_book_unpack(oggpack_buffer *opb,codebook *c){
 
  _errout:
  _eofout:
-  if(lengthlist)free(lengthlist);
-  if(s.quantlist)free(s.quantlist);
-  if(codelist)free(codelist);
-  vorbis_book_clear(c);
-  return(-1);
- 
+  vorbis_staticbook_clear(s);
+  return(-1); 
 }
 
 /* returns the number of bits ***************************************/
@@ -539,6 +542,7 @@ int main(){
 
   while(testlist[ptr]){
     codebook c;
+    static_codebook s;
     double *qv=alloca(sizeof(double)*TESTSIZE);
     double *iv=alloca(sizeof(double)*TESTSIZE);
     memcpy(qv,testvec[ptr],sizeof(double)*TESTSIZE);
@@ -547,8 +551,9 @@ int main(){
 
     /* pack the codebook, write the testvector */
     _oggpack_reset(&write);
-    vorbis_book_finish(&c,testlist[ptr]); /* get it into memory we can write */
-    vorbis_book_pack(&c,&write);
+    vorbis_book_init_encode(&c,testlist[ptr]); /* get it into memory
+                                                  we can write */
+    vorbis_book_pack(testlist[ptr],&write);
     fprintf(stderr,"Codebook size %ld bytes... ",_oggpack_bytes(&write));
     for(i=0;i<TESTSIZE;i+=TESTDIM)
       vorbis_book_encodev(&c,qv+i,&write);
@@ -559,10 +564,15 @@ int main(){
 
     /* transfer the write data to a read buffer and unpack/read */
     _oggpack_readinit(&read,_oggpack_buffer(&write),_oggpack_bytes(&write));
-    if(vorbis_book_unpack(&read,&c)){
+    if(vorbis_book_unpack(&read,&s)){
       fprintf(stderr,"Error unpacking codebook.\n");
       exit(1);
     }
+    if(vorbis_book_init_decode(&c,&s)){
+      fprintf(stderr,"Error initializing codebook.\n");
+      exit(1);
+    }
+
     for(i=0;i<TESTSIZE;i+=TESTDIM)
       if(vorbis_book_decodev(&c,iv+i,&read)){
 	fprintf(stderr,"Error reading codebook test data (EOP).\n");

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.2 2000/01/22 13:28:19 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.3 2000/01/28 09:05:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,6 +21,16 @@
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "registry.h"
+
+static void free_info(vorbis_info_floor *i){
+  vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
+  if(d){
+    if(d->books)free(d->books);
+    memset(i,0,sizeof(vorbis_info_floor0));
+  }
+}
+static void free_look(vorbis_look_floor *i){
+}
 
 static void pack (vorbis_info_floor *i,oggpack_buffer *opb){
   vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
@@ -61,17 +71,8 @@ static vorbis_look_floor *look (vorbis_info *vi,vorbis_info_mode *mi,
                               vorbis_info_floor *i){
 
 }
-static void free_info(vorbis_info_floor *i){
-  vorbis_info_floor0 *d=(vorbis_info_floor0 *)i;
-  if(d){
-    if(d->books)free(d->books);
-    memset(i,0,sizeof(vorbis_info_floor0));
-  }
-}
-static void free_look(vorbis_look_floor *i){
-}
 
-static void forward(vorbis_block *vb,vorbis_look_floor *i,
+static int forward(vorbis_block *vb,vorbis_look_floor *i,
 		    double *in,double *out){
 
 
@@ -93,8 +94,8 @@ static void forward(vorbis_block *vb,vorbis_look_floor *i,
       vorbis_lpc_to_curve(curve,lpc,vb->amp[i],vl);*/
   return(0);
 }
-static void inverse(vorbis_block *vb,vorbis_look_floor *i,
-		    double *in,double *out){
+static int inverse(vorbis_block *vb,vorbis_look_floor *i,
+		    double *buf){
   return(0);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.1 2000/01/20 04:43:04 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.2 2000/01/28 09:05:16 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,34 +21,44 @@
 #include "vorbis/codec.h"
 #include "bitwise.h"
 #include "registry.h"
-#include "res0.h"
 
 /* unfinished as of 20000118 */
-extern _vi_info_res *_vorbis_res0_dup(_vi_info_res *source){
-  vorbis_info_res0 *d=malloc(sizeof(vorbis_info_res0));
-  memcpy(d,source,sizeof(vorbis_info_res0));
-  d->books=malloc(sizeof(int)*d->stages);
-  memcpy(d->books,((vorbis_info_res0 *)source)->books,
-	 sizeof(int)*d->stages);
-  return(d); 
-}
 
-extern void _vorbis_res0_free(_vi_info_res *i){
-  vorbis_info_res0 *d=(vorbis_info_res0 *)i;
+void free_info(vorbis_info_residue *i){
+  vorbis_info_residue0 *d=(vorbis_info_residue0 *)i;
   if(d){
     if(d->books)free(d->books);
-    memset(d,0,sizeof(vorbis_info_res0));
+    memset(d,0,sizeof(vorbis_info_residue0));
     free(d);
   }
 }
 
-/* not yet */
-extern void _vorbis_res0_pack(oggpack_buffer *opb, _vi_info_res *vi){
+void free_look(vorbis_look_residue *i){
 }
 
-extern _vi_info_res *_vorbis_res0_unpack(vorbis_info *vi,
-					 oggpack_buffer *opb){
-  vorbis_info_res0 d;
-  memset(&d,0,sizeof(d));
-  return(_vorbis_res0_dup(&d));
+/* not yet */
+void pack(vorbis_info_residue *vr,oggpack_buffer *opb){
 }
+
+/* vorbis_info is for range checking */
+vorbis_info_residue *unpack(vorbis_info *vi,oggpack_buffer *opb){
+}
+
+vorbis_look_residue *look (vorbis_info *vi,vorbis_info_mode *vm,
+			  vorbis_info_residue *vr){
+}
+
+int forward(vorbis_block *vb,vorbis_look_residue *l,double **in,int **aux,int ch){
+}
+int inverse(vorbis_block *vb,vorbis_look_residue *l,double **in,int ch){
+}
+
+vorbis_func_residue residue0_exportbundle={
+  &pack,
+  &unpack,
+  &look,
+  &free_info,
+  &free_look,
+  &forward,
+  &inverse
+};

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.4 2000/01/22 13:28:09 xiphmont Exp $
+ last mod: $Id: encoder_example.c,v 1.5 2000/01/28 09:04:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,6 +37,8 @@ int main(){
   ogg_packet       op; /* one raw packet of data for decode */
   
   vorbis_info      vi; /* struct that stores all the static vorbis bitstream
+			  settings */
+  vorbis_comment   vc; /* struct that stores all the user comments */
 			  settings */
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */

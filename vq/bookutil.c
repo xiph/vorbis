@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.6 2000/01/21 13:42:35 xiphmont Exp $
+ last mod: $Id: bookutil.c,v 1.7 2000/01/28 09:05:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -26,7 +26,7 @@
 
 void codebook_unquantize(codebook *b){
   long j,k;
-  static_codebook *c=b->c;
+  const static_codebook *c=b->c;
   double mindel=float24_unpack(c->q_min);
   double delta=float24_unpack(c->q_delta);
   if(!b->valuelist)b->valuelist=malloc(sizeof(double)*c->entries*c->dim);
@@ -136,7 +136,7 @@ void reset_next_value(void){
 
 int get_vector(codebook *b,FILE *in,int start, int n,double *a){
   int i;
-  static_codebook *c=b->c;
+  const static_codebook *c=b->c;
 
   while(1){
 
@@ -188,7 +188,7 @@ char *find_seek_to(FILE *in,char *s){
 
 codebook *codebook_load(char *filename){
   codebook *b=calloc(1,sizeof(codebook));
-  static_codebook *c=b->c=calloc(1,sizeof(static_codebook));
+  static_codebook *c=(static_codebook *)(b->c=calloc(1,sizeof(static_codebook)));
   encode_aux *a=calloc(1,sizeof(encode_aux));
   FILE *in=fopen(filename,"r");
   char *line;
@@ -298,7 +298,7 @@ codebook *codebook_load(char *filename){
 }
 
 int codebook_entry(codebook *b,double *val){
-  static_codebook *c=b->c;
+  const static_codebook *c=b->c;
   encode_aux *t=c->encode_tree;
   int ptr=0,k;
   double *n=alloca(c->dim*sizeof(double));

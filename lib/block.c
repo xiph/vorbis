@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.23 2000/01/22 13:28:15 xiphmont Exp $
+ last mod: $Id: block.c,v 1.24 2000/01/28 09:05:06 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -204,11 +204,6 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
 					 vi->map_param[maptype]);
   }
 
-  /* finish the codebooks */
-  v->fullbooks=calloc(vi->books,sizeof(codebook));
-  for(i=0;i<vi->books;i++)
-    vorbis_book_finish(v->fullbooks+i,vi->book_param[i]);
-
   /* initialize the storage vectors to a decent size greater than the
      minimum */
   
@@ -237,8 +232,13 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi){
 
 /* arbitrary settings and spec-mandated numbers get filled in here */
 int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
-
+  int i;
   _vds_shared_init(v,vi);
+
+  /* finish the codebooks */
+  v->fullbooks=calloc(vi->books,sizeof(codebook));
+  for(i=0;i<vi->books;i++)
+    vorbis_book_init_encode(v->fullbooks+i,vi->book_param[i]);
 
   /* Initialize the envelope multiplier storage */
 
@@ -522,7 +522,13 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
 }
 
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
+  int i;
   _vds_shared_init(v,vi);
+
+  /* finish the codebooks */
+  v->fullbooks=calloc(vi->books,sizeof(codebook));
+  for(i=0;i<vi->books;i++)
+    vorbis_book_init_decode(v->fullbooks+i,vi->book_param[i]);
 
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;

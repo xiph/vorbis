@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.5 2000/01/22 13:28:11 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.6 2000/01/28 09:05:01 xiphmont Exp $
 
  ********************************************************************/
 
@@ -294,14 +294,14 @@ typedef struct vorbis_block{
 
 /* the comments are not part of vorbis_info so that vorbis_info can be
    static storage */
-typedef struct vorbis_comments{
+typedef struct vorbis_comment{
   /* unlimited user comment fields.  libvorbis writes 'libvorbis'
      whatever vendor is set to in encode */
   char **user_comments;
   int    comments;
   char  *vendor;
 
-} vorbis_comments;
+} vorbis_comment;
 
 
 /* libvorbis encodes in two abstraction layers; first we perform DSP
@@ -353,18 +353,21 @@ extern int      ogg_page_pageno(ogg_page *og);
 
 /* Vorbis PRIMITIVES: general ***************************************/
 
-extern int      vorbis_info_init(vorbis_info *vi,vorbis_comments *vc);
-extern int      vorbis_comment_init(vorbis_comments *vc);
-extern int      vorbis_comment_add(vorbis_comments *vc, char *comment); 
-extern int      vorbis_comment_clear(vorbis_comments *vc);
+extern void     vorbis_info_init(vorbis_info *vi);
+extern void     vorbis_info_clear(vorbis_info *vi);
+extern void     vorbis_comment_init(vorbis_comment *vc);
+extern void     vorbis_comment_add(vorbis_comment *vc, char *comment); 
+extern void     vorbis_comment_clear(vorbis_comment *vc);
 
 extern int      vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
 extern int      vorbis_block_clear(vorbis_block *vb);
 extern void     vorbis_dsp_clear(vorbis_dsp_state *v);
 
 /* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
+
 extern int      vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi);
 extern int      vorbis_analysis_headerout(vorbis_dsp_state *v,
+					  vorbis_comment *vc,
 					  ogg_packet *op,
 					  ogg_packet *op_comm,
 					  ogg_packet *op_code);
@@ -374,7 +377,7 @@ extern int      vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb);
 extern int      vorbis_analysis(vorbis_block *vb,ogg_packet *op);
 
 /* Vorbis PRIMITIVES: synthesis layer *******************************/
-extern int      vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comments *vc,
+extern int      vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,
 					  ogg_packet *op);
 
 extern int      vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi);

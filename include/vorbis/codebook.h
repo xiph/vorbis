@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.3 2000/01/22 10:40:36 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.4 2000/01/28 09:05:00 xiphmont Exp $
 
  ********************************************************************/
 
@@ -69,7 +69,7 @@ typedef struct decode_aux{
 typedef struct codebook{
   long dim;           /* codebook dimensions (elements per vector) */
   long entries;       /* codebook entries */
-  static_codebook *c;
+  const static_codebook *c;
 
   double *valuelist;  /* list of dim*entries actual entry values */
   long   *codelist;   /* list of bitstream codewords for each entry */

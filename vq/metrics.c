@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.4 2000/01/21 13:42:38 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.5 2000/01/28 09:05:20 xiphmont Exp $
 
  ********************************************************************/
 
@@ -66,7 +66,7 @@ void process_preprocess(codebook **bs,char *basename){
   }
 
   if(books){
-    static_codebook *b=bs[books-1]->c;
+    const static_codebook *b=bs[books-1]->c;
     histogram=calloc(b->entries,sizeof(double));
     histogram_distance=calloc(b->entries,sizeof(double));
     histogram_errorsq=calloc(b->entries*dim,sizeof(double));

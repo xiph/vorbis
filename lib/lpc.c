@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.14 2000/01/20 04:43:01 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.15 2000/01/28 09:05:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -350,23 +350,6 @@ void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
     fclose(out);
   }
 #endif
-}
-
-void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
-  double *lcurve=alloca(sizeof(double)*((l->ln+l->n)*2));
-  int i;
-
-  if(amp==0){
-    memset(residue,0,l->n*sizeof(double));
-  }else{
-    
-    _vlpc_de_helper(lcurve,lpc,amp,l);
-
-    for(i=0;i<l->ln;i++)lcurve[i]/=l->barknorm[i];
-    for(i=0;i<l->n;i++)
-      if(residue[i]!=0)
-	residue[i]*=lcurve[l->linearmap[i]];
-  }
 }
 
 /* subtract or add an lpc filter to data.  Vorbis doesn't actually use this. */

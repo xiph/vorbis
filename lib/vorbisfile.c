@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.13 2000/01/10 14:06:31 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.14 2000/01/28 09:05:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -197,7 +197,8 @@ static void _bisect_forward_serialno(OggVorbis_File *vf,
 
 /* uses the local ogg_stream storage in vf; this is important for
    non-streaming input sources */
-static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
+static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
+			  long *serialno){
   ogg_page og;
   ogg_packet op;
   int i,ret;
@@ -214,8 +215,8 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
   /* extract the initial header from the first page and verify that the
      Ogg bitstream is in fact Vorbis data */
   
-  vorbis_info_clear(vi);
   vorbis_info_init(vi);
+  vorbis_comment_init(vc);
   
   i=0;
   while(i<3){
@@ -227,7 +228,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
 	fprintf(stderr,"Corrupt header in logical bitstream.\n");
 	goto bail_header;
       }
-      if(vorbis_info_headerin(vi,&op)){
+      if(vorbis_synthesis_headerin(vi,vc,&op)){
 	fprintf(stderr,"Illegal header in logical bitstream.\n");
 	goto bail_header;
       }
@@ -244,6 +245,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
 
  bail_header:
   vorbis_info_clear(vi);
+  vorbis_comment_clear(vc);
   ogg_stream_clear(&vf->os);
   return -1;
 }
@@ -252,7 +254,8 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,long *serialno){
    vorbis_info structs and PCM positions.  Only called by the seekable
    initialization (local stream storage is hacked slightly; pay
    attention to how that's done) */
-static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first,
+static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
+				  vorbis_comment *first_c,
 				  long dataoffset){
   ogg_page og;
   int i,ret;
@@ -263,19 +266,18 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first,
   vf->serialnos=malloc(vf->links*sizeof(long));
   
   for(i=0;i<vf->links;i++){
-    if(first && i==0){
+    if(first_i && first_c && i==0){
       /* we already grabbed the initial header earlier.  This just
          saves the waste of grabbing it again */
-      memcpy(vf->vi+i,first,sizeof(vorbis_info));
-      memset(first,0,sizeof(vorbis_info));
+      memcpy(vf->vi+i,first_i,sizeof(vorbis_info));
+      memcpy(vf->vc+i,first_c,sizeof(vorbis_comment));
       vf->dataoffsets[i]=dataoffset;
     }else{
 
       /* seek to the location of the initial header */
 
       _seek_helper(vf,vf->offsets[i]);
-      if(_fetch_headers(vf,vf->vi+i,NULL)==-1){
-	vorbis_info_clear(vf->vi+i);
+      if(_fetch_headers(vf,vf->vi+i,vf->vc+i,NULL)==-1){
 	fprintf(stderr,"Error opening logical bitstream #%d.\n\n",i+1);
     
 	ogg_stream_clear(&vf->os); /* clear local storage.  This is not
@@ -301,6 +303,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first,
 	  fprintf(stderr,"Could not find last page of logical "
 		  "bitstream #%d\n\n",i);
 	  vorbis_info_clear(vf->vi+i);
+	  vorbis_comment_clear(vf->vc+i);
 	  break;
 	}
 	if(ogg_page_frameno(&og)!=-1){
@@ -314,15 +317,17 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first,
 }
 
 static int _open_seekable(OggVorbis_File *vf){
-  vorbis_info initial;
+  vorbis_info initial_i;
+  vorbis_comment initial_c;
   long serialno,end;
   int ret;
   long dataoffset;
   ogg_page og;
   
   /* is this even vorbis...? */
-  memset(&initial,0,sizeof(vorbis_info));
-  ret=_fetch_headers(vf,&initial,&serialno);
+  vorbis_info_init(&initial_i);
+  vorbis_comment_init(&initial_c);
+  ret=_fetch_headers(vf,&initial_i,&initial_c,&serialno);
   dataoffset=vf->offset;
   ogg_stream_clear(&vf->os);
   if(ret==-1)return(-1);
@@ -350,7 +355,7 @@ static int _open_seekable(OggVorbis_File *vf){
 
   }
 
-  _prefetch_all_headers(vf,&initial,dataoffset);
+  _prefetch_all_headers(vf,&initial_i,&initial_c,dataoffset);
   ov_raw_seek(vf,0);
 
   return(0);
@@ -362,7 +367,7 @@ static int _open_nonseekable(OggVorbis_File *vf){
   vf->vi=malloc(sizeof(vorbis_info));
 
   /* Try to fetch the headers, maintaining all the storage */
-  if(_fetch_headers(vf,vf->vi,&vf->current_serialno)==-1)return(-1);
+  if(_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno)==-1)return(-1);
     
   return 0;
 }
@@ -477,7 +482,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	/* we're streaming */
 	/* fetch the three header packets, build the info struct */
 	
-	_fetch_headers(vf,vf->vi,&vf->current_serialno);
+	_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno);
 	vf->current_link++;
 	link=0;
       }
@@ -505,8 +510,10 @@ int ov_clear(OggVorbis_File *vf){
     
     if(vf->vi && vf->links){
       int i;
-      for(i=0;i<vf->links;i++)
+      for(i=0;i<vf->links;i++){
 	vorbis_info_clear(vf->vi+i);
+	vorbis_comment_clear(vf->vc+i);
+      }
       free(vf->vi);
     }
     if(vf->dataoffsets)free(vf->dataoffsets);
@@ -914,6 +921,27 @@ vorbis_info *ov_info(OggVorbis_File *vf,int link){
   }else{
     if(vf->decode_ready)
       return vf->vi;
+    else
+      return NULL;
+  }
+}
+
+/* grr, strong typing, grr, no templates/inheritence, grr */
+vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
+  if(vf->seekable){
+    if(link<0)
+      if(vf->decode_ready)
+	return vf->vc+vf->current_link;
+      else
+	return NULL;
+    else
+      if(link>=vf->links)
+	return NULL;
+      else
+	return vf->vc+link;
+  }else{
+    if(vf->decode_ready)
+      return vf->vc;
     else
       return NULL;
   }

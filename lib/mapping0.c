@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.2 2000/01/22 13:28:23 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.3 2000/01/28 09:05:13 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,30 +20,43 @@
 #include <string.h>
 #include <math.h>
 #include "vorbis/codec.h"
+#include "vorbis/backends.h"
 #include "bitwise.h"
 #include "bookinternal.h"
 #include "registry.h"
-#include "mapping0.h"
+#include "psy.h"
+#include "misc.h"
 
-_vi_info_map *_vorbis_map0_dup(vorbis_info *vi,_vi_info_map *source){
-  vorbis_info_mapping0 *d=malloc(sizeof(vorbis_info_mapping0));
-  vorbis_info_mapping0 *s=(vorbis_info_mapping0 *)source;
-  memcpy(d,s,sizeof(vorbis_info_mapping0));
+/* simplistic, wasteful way of doing this (unique lookup for each
+   mode/submapping); there should be a central repository for
+   identical lookups.  That will require minor work, so I'm putting it
+   off as low priority.
 
-  d->floorsubmap=malloc(sizeof(int)*vi->channels);
-  d->residuesubmap=malloc(sizeof(int)*vi->channels);
-  d->psysubmap=malloc(sizeof(int)*vi->channels);
-  memcpy(d->floorsubmap,s->floorsubmap,sizeof(int)*vi->channels);
-  memcpy(d->residuesubmap,s->residuesubmap,sizeof(int)*vi->channels);
-  memcpy(d->psysubmap,s->psysubmap,sizeof(int)*vi->channels);
+   Why a lookup for each backend in a given mode?  Because the
+   blocksize is set by the mode, and low backend lookups may require
+   parameters from other areas of the mode/mapping */
 
-  return(d);
-}
+typedef struct {
+  vorbis_info_mode *mode;
+  vorbis_info_mapping0 *map;
 
-void _vorbis_map0_free(_vi_info_map *i){
+  vorbis_look_time **time_look;
+  vorbis_look_floor **floor_look;
+  vorbis_look_residue **residue_look;
+  vorbis_look_psy *psy_look;
+
+  vorbis_func_time **time_func;
+  vorbis_func_floor **floor_func;
+  vorbis_func_residue **residue_func;
+
+} vorbis_look_mapping0;
+
+void free_info(vorbis_info_mapping *i){
   vorbis_info_mapping0 *d=(vorbis_info_mapping0 *)i;
 
   if(d){
+    if(d->chmuxlist)free(d->chmuxlist);
+    if(d->timesubmap)free(d->timesubmap);
     if(d->floorsubmap)free(d->floorsubmap);
     if(d->residuesubmap)free(d->residuesubmap);
     if(d->psysubmap)free(d->psysubmap);
@@ -52,80 +65,118 @@ void _vorbis_map0_free(_vi_info_map *i){
   }
 }
 
-void _vorbis_map0_pack(vorbis_info *vi,oggpack_buffer *opb,
-			      _vi_info_map *source){
+void free_look(vorbis_look_mapping *look){
   int i;
-  vorbis_info_mapping0 *d=(vorbis_info_mapping0 *)source;
+  vorbis_look_mapping0 *l=(vorbis_look_mapping0 *)look;
+  if(l){
+    for(i=0;i<l->map->submaps;i++){
+      l->time_func[i]->free_look(l->time_look[i]);
+      l->floor_func[i]->free_look(l->floor_look[i]);
+      l->residue_func[i]->free_look(l->residue_look[i]);
+      if(l->psy_look)_vp_psy_clear(l->psy_look+i);
+    }
+    free(l->time_func);
+    free(l->floor_func);
+    free(l->residue_func);
+    free(l->time_look);
+    free(l->floor_look);
+    free(l->residue_look);
+    if(l->psy_look)free(l->psy_look);
+    memset(l,0,sizeof(vorbis_info_mapping0));
+    free(l);
+  }
+}
 
-  _oggpack_write(opb,d->timesubmap,8);
+vorbis_look_mapping *look(vorbis_info *vi,vorbis_info_mode *vm,
+			  vorbis_info_mapping *m){
+  int i;
+  vorbis_look_mapping0 *ret=calloc(1,sizeof(vorbis_look_mapping0));
+  vorbis_info_mapping0 *map=ret->map=(vorbis_info_mapping0 *)m;
+  ret->mode=vm;
+  
+  ret->time_look=calloc(map->submaps,sizeof(vorbis_look_time *));
+  ret->floor_look=calloc(map->submaps,sizeof(vorbis_look_floor *));
+  ret->residue_look=calloc(map->submaps,sizeof(vorbis_look_residue *));
+  ret->psy_look=calloc(map->submaps,sizeof(vorbis_look_psy));
 
-  /* we abbreviate the channel submappings if they all map to the same
-     floor/res/psy */
-  for(i=1;i<vi->channels;i++)if(d->floorsubmap[i]!=d->floorsubmap[i-1])break;
-  if(i==vi->channels){
-    _oggpack_write(opb,0,1);
-    _oggpack_write(opb,d->floorsubmap[0],8);
-  }else{
-    _oggpack_write(opb,1,1);
-    for(i=0;i<vi->channels;i++)
-      _oggpack_write(opb,d->floorsubmap[i],8);
+  ret->time_func=calloc(map->submaps,sizeof(vorbis_func_time *));
+  ret->floor_func=calloc(map->submaps,sizeof(vorbis_func_floor *));
+  ret->residue_func=calloc(map->submaps,sizeof(vorbis_func_residue *));
+  
+  for(i=0;i<map->submaps;i++){
+    int timenum=map->timesubmap[i];
+    int floornum=map->floorsubmap[i];
+    int resnum=map->residuesubmap[i];
+
+    ret->time_func[i]=_time_P[vi->time_type[timenum]];
+    ret->time_look[i]=ret->time_func[i]->
+      look(vi,vm,vi->time_param[timenum]);
+    ret->floor_func[i]=_floor_P[vi->floor_type[floornum]];
+    ret->floor_look[i]=ret->floor_func[i]->
+      look(vi,vm,vi->floor_param[floornum]);
+    ret->residue_func[i]=_residue_P[vi->residue_type[resnum]];
+    ret->residue_look[i]=ret->residue_func[i]->
+      look(vi,vm,vi->residue_param[resnum]);
+    
+    if(map->psysubmap){
+      int psynum=map->psysubmap[i];
+      _vp_psy_init(ret->psy_look+i,vi->psy_param[psynum],
+		   vi->blocksizes[vm->blockflag],vi->rate);
+    }
   }
 
-  for(i=1;i<vi->channels;i++)
-    if(d->residuesubmap[i]!=d->residuesubmap[i-1])break;
-  if(i==vi->channels){
-    /* no channel submapping */
-    _oggpack_write(opb,0,1);
-    _oggpack_write(opb,d->residuesubmap[0],8);
-  }else{
-    /* channel submapping */
-    _oggpack_write(opb,1,1);
+  return(ret);
+}
+
+void pack(vorbis_info *vi,vorbis_info_mapping *vm,oggpack_buffer *opb){
+  int i;
+  vorbis_info_mapping0 *d=(vorbis_info_mapping0 *)vm;
+
+  _oggpack_write(opb,d->submaps,4);
+  /* we don't write the channel submappings if we only have one... */
+  if(d->submaps>1){
     for(i=0;i<vi->channels;i++)
-      _oggpack_write(opb,d->residuesubmap[i],8);
+      _oggpack_write(opb,d->chmuxlist[i],4);
+  }
+  for(i=0;i<d->submaps;i++){
+    _oggpack_write(opb,d->timesubmap[i],8);
+    _oggpack_write(opb,d->floorsubmap[i],8);
+    _oggpack_write(opb,d->residuesubmap[i],8);
   }
 }
 
 /* also responsible for range checking */
-extern _vi_info_map *_vorbis_map0_unpack(vorbis_info *vi,oggpack_buffer *opb){
+vorbis_info_mapping *unpack(vorbis_info *vi,oggpack_buffer *opb){
   int i;
   vorbis_info_mapping0 *d=calloc(1,sizeof(vorbis_info_mapping0));
   memset(d,0,sizeof(vorbis_info_mapping0));
 
-  d->timesubmap=_oggpack_read(opb,8);
-  if(d->timesubmap>=vi->times)goto err_out;
+  d->submaps=_oggpack_read(opb,4);
 
-  d->floorsubmap=malloc(sizeof(int)*vi->channels);
-  if(_oggpack_read(opb,1)){
-    /* channel submap */
-    for(i=0;i<vi->channels;i++)
-      d->floorsubmap[i]=_oggpack_read(opb,8);
-  }else{
-    int temp=_oggpack_read(opb,8);
-    for(i=0;i<vi->channels;i++)
-      d->floorsubmap[i]=temp;
+  d->chmuxlist=calloc(vi->channels,sizeof(int));
+  d->timesubmap=malloc(sizeof(int)*d->submaps);
+  d->floorsubmap=malloc(sizeof(int)*d->submaps);
+  d->residuesubmap=malloc(sizeof(int)*d->submaps);
+
+  if(d->submaps>1){
+    for(i=0;i<vi->channels;i++){
+      d->chmuxlist[i]=_oggpack_read(opb,4);
+      if(d->chmuxlist[i]>=d->submaps)goto err_out;
+    }
   }
-
-  d->residuesubmap=malloc(sizeof(int)*vi->channels);
-  if(_oggpack_read(opb,1)){
-    /* channel submap */
-    for(i=0;i<vi->channels;i++)
-      d->residuesubmap[i]=_oggpack_read(opb,8);
-  }else{
-    int temp=_oggpack_read(opb,8);
-    for(i=0;i<vi->channels;i++)
-      d->residuesubmap[i]=temp;
-  }
-
-  for(i=0;i<vi->channels;i++){
-    if(d->floorsubmap[i]<0 || d->floorsubmap[i]>=vi->floors)goto err_out;
-    if(d->residuesubmap[i]<0 || d->residuesubmap[i]>=vi->residues)
-      goto err_out;
+  for(i=0;i<d->submaps;i++){
+    d->timesubmap[i]=_oggpack_read(opb,8);
+    if(d->timesubmap[i]>=vi->times)goto err_out;
+    d->floorsubmap[i]=_oggpack_read(opb,8);
+    if(d->floorsubmap[i]>=vi->floors)goto err_out;
+    d->residuesubmap[i]=_oggpack_read(opb,8);
+    if(d->residuesubmap[i]>=vi->residues)goto err_out;
   }
 
   return d;
 
  err_out:
-  _vorbis_map0_free(d);
+  free_info(d);
   return(NULL);
 }
 
@@ -140,110 +191,144 @@ extern _vi_info_map *_vorbis_map0_unpack(vorbis_info *vi,oggpack_buffer *opb){
 #include "spectrum.h"
 
 /* no time mapping implementation for now */
-int _vorbis_map0_analysis(int mode,vorbis_block *vb){
+int forward(vorbis_block *vb,vorbis_look_mapping *l){
   vorbis_dsp_state     *vd=vb->vd;
-  oggpack_buffer       *opb=&vb->opb;
   vorbis_info          *vi=vd->vi;
-  vorbis_info_mapping0 *map=(vorbis_info_mapping0 *)(vi->modelist[mode]);
+  vorbis_look_mapping0 *look=(vorbis_look_mapping0 *)l;
+  vorbis_info_mapping0 *map=look->map;
+  vorbis_info_mode     *mode=look->mode;
   int                   n=vb->pcmend;
   int i,j;
+  double *window=vd->window[vb->W][vb->lW][vb->nW][mode->windowtype];
+
+  double **pcmbundle=alloca(sizeof(double *)*vi->channels);
+  int **auxbundle=alloca(sizeof(int *)*vi->channels);
 
   /* time domain pre-window: NONE IMPLEMENTED */
 
   /* window the PCM data: takes PCM vector, vb; modifies PCM vector */
 
-  {
-    double *window=vd->window[vb->W][vb->lW][vb->nW][vi->windowtypes[mode]];
-    for(i=0;i<vi->channels;i++){
-      double *pcm=vb->pcm[i];
-      for(j=0;j<n;j++)
-	pcm[j]*=window[j];
-    }
+  for(i=0;i<vi->channels;i++){
+    double *pcm=vb->pcm[i];
+    for(j=0;j<n;j++)
+      pcm[j]*=window[j];
   }
 	    
   /* time-domain post-window: NONE IMPLEMENTED */
 
   /* transform the PCM data; takes PCM vector, vb; modifies PCM vector */
   /* only MDCT right now.... */
-  {
-    for(i=0;i<vi->channels;i++){
-      double *pcm=vb->pcm[i];
-      mdct_forward(vd->transform[vb->W][0],pcm,pcm);
-    }
+  for(i=0;i<vi->channels;i++){
+    double *pcm=vb->pcm[i];
+    mdct_forward(vd->transform[vb->W][0],pcm,pcm);
   }
 
   {
     double *decfloor=_vorbis_block_alloc(vb,n*sizeof(double)/2);
     double *floor=_vorbis_block_alloc(vb,n*sizeof(double)/2);
     double *mask=_vorbis_block_alloc(vb,n*sizeof(double)/2);
-
+    int **pcmaux=_vorbis_block_alloc(vb,vi->channels*sizeof(int *));
+    
     for(i=0;i<vi->channels;i++){
       double *pcm=vb->pcm[i];
-      double *pcmaux=vb->pcm[i]+n/2;
-      int floorsub=map->floorsubmap[i];
-      int ressub=map->residuesubmap[i];
-      int psysub=map->psysubmap[i];
-      
+      int submap=map->chmuxlist[i];
+
+      pcmaux[i]=_vorbis_block_alloc(vb,n/2*sizeof(int));
+ 
       /* perform psychoacoustics; takes PCM vector; 
 	 returns two curves: the desired transform floor and the masking curve */
       memset(floor,0,sizeof(double)*n/2);
       memset(mask,0,sizeof(double)*n/2);
-      _vp_mask_floor(&vd->psy[psysub],pcm,mask,floor);
+      _vp_mask_floor(look->psy_look+submap,pcm,mask,floor);
  
       /* perform floor encoding; takes transform floor, returns decoded floor */
-      vorbis_floor_encode_P[vi->floortypes[floorsub]]
-	(vi->floorlist[floorsub],vd->floor[floorsub],pcm,floor,decfloor);
+      look->floor_func[submap]->
+	forward(vb,look->floor_look[submap],floor,decfloor);
 
-      /* perform residue prequantization */
-      _vp_quantize(&vd->psy[psysub],pcm,mask,decfloor,pcmaux);
-
+      /* no iterative residue/floor tuning at the moment */
+      
+      /* perform residue prequantization.  Do it now so we have all
+         the values if we need them */
+      _vp_quantize(look->psy_look+submap,pcm,mask,decfloor,pcmaux[i]);
+      
+    }
+  
+    /* perform residue encoding with residue mapping; this is
+       multiplexed.  All the channels belonging to one submap are
+       encoded (values interleaved), then the next submap, etc */
+    
+    for(i=0;i<map->submaps;i++){
+      int ch_in_bundle=0;
+      for(j=0;j<vi->channels;j++){
+      if(map->chmuxlist[j]==i)
+	pcmbundle[ch_in_bundle]=vb->pcm[j];
+	auxbundle[ch_in_bundle++]=pcmaux[j];
+      }
+      
+      look->residue_func[i]->forward(vb,look->residue_look[i],pcmbundle,auxbundle,
+				 ch_in_bundle);
     }
   }
-
-  /* perform residue encoding with residue mapping; this is multiplexed */
-  /* multiplexing works like this: The first 
-
-  vorbis_res_encode_P[vi->restypes[ressub]]
-	(vi->reslist[ressub],vd->residue[ressub],pcm,mask,decfloor);
-
-
 
   return(0);
 }
 
-int _vorbis_map0_synthesis(int mode,vorbis_block *vb){
+int inverse(vorbis_block *vb,vorbis_look_mapping *l){
+  vorbis_dsp_state     *vd=vb->vd;
+  vorbis_info          *vi=vd->vi;
+  vorbis_look_mapping0 *look=(vorbis_look_mapping0 *)l;
+  vorbis_info_mapping0 *map=look->map;
+  vorbis_info_mode     *mode=look->mode;
+  int                   i,j;
+  long                  n=vb->pcmend=vi->blocksizes[vb->W];
 
-
-
-  window=vb->vd->window[vb->W][vb->lW][vb->nW];
-
-  n=vb->pcmend=vi->blocksize[vb->W];
+  double *window=vd->window[vb->W][vb->lW][vb->nW][mode->windowtype];
+  double **pcmbundle=alloca(sizeof(double *)*vi->channels);
   
-  /* No envelope encoding yet */
-  _oggpack_read(opb,0,1);
+  /* time domain information decode (note that applying the
+     information would have to happen later; we'll probably add a
+     function entry to the harness for that later */
+  /* NOT IMPLEMENTED */
 
+  /* recover the spectral envelope; store it in the PCM vector for now */
   for(i=0;i<vi->channels;i++){
-    double *lpc=vb->lpc[i];
-    double *lsp=vb->lsp[i];
-    
-    /* recover the spectral envelope */
-    if(_vs_spectrum_decode(vb,&vb->amp[i],lsp)<0)return(-1);
-    
-    /* recover the spectral residue */  
-    if(_vs_residue_decode(vb,vb->pcm[i])<0)return(-1);
-
-    /* LSP->LPC */
-    vorbis_lsp_to_lpc(lsp,lpc,vl->m); 
-
-    /* apply envelope to residue */
-    
-    vorbis_lpc_apply(vb->pcm[i],lpc,vb->amp[i],vl);
-      
-
-    /* MDCT->time */
-    mdct_backward(&vb->vd->vm[vb->W],vb->pcm[i],vb->pcm[i],window);
-    
+    double *pcm=vb->pcm[i];
+    int submap=map->chmuxlist[i];
+    look->floor_func[submap]->inverse(vb,look->floor_look[submap],pcm);
   }
+
+  /* recover the residue, apply directly to the spectral envelope */
+  for(i=0;i<map->submaps;i++){
+    int ch_in_bundle=0;
+    for(j=0;j<vi->channels;j++){
+      if(map->chmuxlist[j]==i)
+	pcmbundle[ch_in_bundle++]=vb->pcm[j];
+    }
+
+    look->residue_func[i]->inverse(vb,look->residue_look[i],pcmbundle,ch_in_bundle);
+  }
+
+  /* transform the PCM data; takes PCM vector, vb; modifies PCM vector */
+  /* only MDCT right now.... */
+  for(i=0;i<vi->channels;i++){
+    double *pcm=vb->pcm[i];
+    mdct_backward(vd->transform[vb->W][0],pcm,pcm);
+  }
+
+  /* now apply the decoded pre-window time information */
+  /* NOT IMPLEMENTED */
+  
+  /* window the data */
+  for(i=0;i<vi->channels;i++){
+    double *pcm=vb->pcm[i];
+    for(j=0;j<n;j++)
+      pcm[j]*=window[j];
+  }
+	    
+  /* now apply the decoded post-window time information */
+  /* NOT IMPLEMENTED */
+
+  /* all done! */
   return(0);
 }
 

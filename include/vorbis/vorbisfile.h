@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.1 2000/01/05 03:10:47 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.2 2000/01/28 09:05:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,6 +37,7 @@ typedef struct {
   long             *serialnos;
   int64_t           *pcmlengths;
   vorbis_info      *vi;
+  vorbis_comment  *vc;
 
   /* Decoding working state local storage */
   int64_t          pcm_offset;
@@ -72,6 +73,7 @@ extern int64_t ov_pcm_tell(OggVorbis_File *vf);
 extern double ov_time_tell(OggVorbis_File *vf);
 
 extern vorbis_info *ov_info(OggVorbis_File *vf,int link);
+extern vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
 
 extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int bigendianp,int word,int sgned,int *bitstream);

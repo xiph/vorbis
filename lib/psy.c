@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.12 2000/01/22 13:28:27 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.13 2000/01/28 09:05:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -43,9 +43,9 @@ static void set_curve(double *ref,double *c,int n, double crate){
   }
 }
 
-void _vp_psy_init(psy_lookup *p,vorbis_info_psy *vi,int n,long rate){
+void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   long i;
-  memset(p,0,sizeof(psy_lookup));
+  memset(p,0,sizeof(vorbis_look_psy));
   p->maskthresh=malloc(n*sizeof(double));
   p->barknum=malloc(n*sizeof(double));
   p->vi=vi;
@@ -74,18 +74,18 @@ void _vp_psy_init(psy_lookup *p,vorbis_info_psy *vi,int n,long rate){
 
 }
 
-void _vp_psy_clear(psy_lookup *p){
+void _vp_psy_clear(vorbis_look_psy *p){
   if(p){
     if(p->maskthresh)free(p->maskthresh);
     if(p->barknum)free(p->barknum);
-    memset(p,0,sizeof(psy_lookup));
+    memset(p,0,sizeof(vorbis_look_psy));
   }
 }
 
 /* Masking curve: linear rolloff on a Bark/dB scale, attenuated by
    maskthresh */
 /* right now, floor==mask */
-void _vp_mask_floor(psy_lookup *p,double *f, double *mask,double *floor){
+void _vp_mask_floor(vorbis_look_psy *p,double *f, double *mask,double *floor){
   int n=p->n;
   double hroll=p->vi->hrolldB;
   double lroll=p->vi->lrolldB;
@@ -137,25 +137,6 @@ static void time_convolve(double *s,double *r,int n,int m){
       acc+=s[i+j]*r[m-j-1];
 
     s[i]=acc;
-  }
-}
-
-/* for duplicating the info struct */
-
-void *_vi_psy_dup(void *i){
-  vorbis_info_psy *source=i;
-  if(source){
-    vorbis_info_psy *d=malloc(sizeof(vorbis_info_psy));
-    memcpy(d,source,sizeof(vorbis_info_psy));
-    return(d);
-  }else
-    return(NULL);
-}
-
-void _vi_psy_free(void *i){
-  if(i){
-    memset(i,0,sizeof(vorbis_info_psy));
-    free(i);
   }
 }
 

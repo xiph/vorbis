@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: build a VQ codebook and the encoding decision 'tree'
- last mod: $Id: vqsplit.c,v 1.13 2000/01/21 13:42:41 xiphmont Exp $
+ last mod: $Id: vqsplit.c,v 1.14 2000/01/28 09:05:21 xiphmont Exp $
 
  ********************************************************************/
 
@@ -392,7 +392,7 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
   long *entryindex=malloc(sizeof(long)*v->entries);
   long *pointindex=malloc(sizeof(long)*v->points);
   long i,j;
-  static_codebook *c=b->c;
+  static_codebook *c=(static_codebook *)b->c;
   encode_aux *t;
 
   memset(b,0,sizeof(codebook));
