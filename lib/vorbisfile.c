@@ -12,12 +12,13 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.17 2000/03/10 16:23:57 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.18 2000/04/03 08:30:49 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <math.h>
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"
@@ -898,7 +899,7 @@ double ov_time_tell(OggVorbis_File *vf){
     }
   }
 
-  return(time_total+(vf->pcm_offset-pcm_total)/vf->vi[link].rate);
+  return((double)time_total+(double)(vf->pcm_offset-pcm_total)/vf->vi[link].rate);
 }
 
 /*  link:   -1) return the vorbis_info struct for the bitstream section

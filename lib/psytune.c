@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1 2000/02/25 11:05:32 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.2 2000/04/03 08:30:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include <math.h>
 
 #include "vorbis/codec.h"
+#include "os.h"
 #include "psy.h"
 #include "mdct.h"
 #include "window.h"

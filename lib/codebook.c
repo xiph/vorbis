@@ -12,11 +12,12 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.12 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.13 2000/04/03 08:30:49 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include "vorbis/codec.h"
 #include "vorbis/codebook.h"

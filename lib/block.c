@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.28 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: block.c,v 1.29 2000/04/03 08:30:49 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -118,7 +118,7 @@ void *_vorbis_block_alloc(vorbis_block *vb,long bytes){
     vb->localtop=0;
   }
   {
-    void *ret=vb->localstore+vb->localtop;
+    void *ret=(void *)(((char *)vb->localstore)+vb->localtop);
     vb->localtop+=bytes;
     return ret;
   }

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.17 2000/03/10 13:21:18 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.18 2000/04/03 08:30:49 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,6 +23,7 @@
 #include "vorbis/codec.h"
 
 #include "psy.h"
+#include "os.h"
 #include "lpc.h"
 #include "smallft.h"
 #include "scales.h"
