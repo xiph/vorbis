@@ -1,5 +1,8 @@
-; vorbisenc.def
-LIBRARY vorbisenc
+;
+; $Id: vorbisenc.def,v 1.2 2001/09/07 09:42:01 cwolf Exp $
+;
+LIBRARY
+
 EXPORTS
 vorbis_encode_init
 vorbis_encode_ctl

@@ -1,5 +1,7 @@
-; vorbis.def
-LIBRARY vorbis
+; 
+; $Id: vorbis.def,v 1.4 2001/09/07 09:42:01 cwolf Exp $
+;
+LIBRARY
 EXPORTS
 vorbis_info_init
 vorbis_info_clear
