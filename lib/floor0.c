@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.52 2002/06/28 22:19:35 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.53 2002/07/17 21:34:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -181,7 +181,11 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
       codec_setup_info  *ci=vb->vd->vi->codec_setup;
       codebook *b=ci->fullbooks+info->books[booknum];
       float last=0.f;
-      float *lsp=_vorbis_block_alloc(vb,sizeof(*lsp)*(look->m+1));
+
+      /* the additional b->dim is a guard against any possible stack
+         smash; b->dim is provably more than we can overflow the
+         vector */
+      float *lsp=_vorbis_block_alloc(vb,sizeof(*lsp)*(look->m+b->dim+1));
             
       for(j=0;j<look->m;j+=b->dim)
 	if(vorbis_book_decodev_set(b,lsp+j,&vb->opb,b->dim)==-1)goto eop;
