@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.65 2002/06/28 22:19:35 xiphmont Exp $
+ last mod: $Id: block.c,v 1.66 2002/07/03 05:26:17 xiphmont Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -427,14 +427,14 @@ int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
       _preextrapolate_helper(v);
 
     /* We're encoding the end of the stream.  Just make sure we have
-       [at least] a full block of zeroes at the end. */
+       [at least] a few full blocks of zeroes at the end. */
     /* actually, we don't want zeroes; that could drop a large
        amplitude off a cliff, creating spread spectrum noise that will
        suck to encode.  Extrapolate for the sake of cleanliness. */
 
-    vorbis_analysis_buffer(v,ci->blocksizes[1]*2);
+    vorbis_analysis_buffer(v,ci->blocksizes[1]*3); 
     v->eofflag=v->pcm_current;
-    v->pcm_current+=ci->blocksizes[1]*2;
+    v->pcm_current+=ci->blocksizes[1]*3;
 
     for(i=0;i<vi->channels;i++){
       if(v->eofflag>order*2){
@@ -502,10 +502,14 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
      marking impulses too. */
   {  
     long bp=_ve_envelope_search(v);
-    if(bp==-1)return(0); /* not enough data currently to search for a
-                            full long block */
+    if(bp==-1){
 
-    v->nW=bp;
+      if(v->eofflag==0)return(0); /* not enough data currently to search for a
+				     full long block */
+      v->nW=0;
+    }else{
+      v->nW=bp;
+    }
   }
 
   centerNext=v->centerW+ci->blocksizes[v->W]/4+ci->blocksizes[v->nW]/4;
@@ -614,6 +618,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       
       if(v->eofflag){
 	v->eofflag-=movementW;
+	if(v->eofflag<=0)v->eofflag=-1;
 	/* do not add padding to end of stream! */
 	if(v->centerW>=v->eofflag){
 	  v->granulepos+=movementW-(v->centerW-v->eofflag);
