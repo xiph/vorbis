@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.23.4.1 2000/07/24 23:22:10 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.23.4.2 2000/07/25 00:18:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -160,6 +160,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   memset(p,0,sizeof(vorbis_look_psy));
   p->ath=malloc(n*sizeof(double));
   p->octave=malloc(n*sizeof(int));
+  p->bark=malloc(n*sizeof(double));
   p->vi=vi;
   p->n=n;
 
@@ -168,6 +169,8 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,int n,long rate){
   set_curve(ATH_Bark_dB, p->ath,n,rate);
   for(i=0;i<n;i++)
     p->ath[i]=fromdB(p->ath[i]);
+  for(i=0;i<n;i++)
+    p->bark[i]=toBARK(rate/(2*n)*i);
 
   for(i=0;i<n;i++){
     int oc=toOC((i+.5)*rate2/n);
@@ -508,30 +511,20 @@ static void max_seeds(vorbis_look_psy *p,double *flr){
      had in Grad Skool... I didn't solve it at the time ;-) */
 }
 
-static void quarter_octave_noise(long n,double *f,double *noise){
-  long i;
-  memset(noise,0,sizeof(double)*n);
+static void bark_noise(long n,double *b,double *f,double *noise){
+  long i,lo=0,hi=0;
+  double acc=0.;
 
   for(i=0;i<n;i++){
-    long newhi=((i*_eights[18])>>12);
-    long newlo=((i*_eights[15])>>12);
-    double v;
-    if(newhi>n)newhi=n;
-    
-    if(newhi-newlo>0){
-      v=f[i]/(newhi-newlo);
 
-      noise[newlo]+=v;
-      noise[newhi]-=v;
-    }
-  }
-
-  {
-    double acc=0.;
-    for(i=0;i<n;i++){
-      acc+=noise[i];
-      noise[i]=acc;
-    }
+    for(;b[hi]-.5<b[i] && hi<n;hi++)
+      acc+=f[hi]*f[hi];
+    for(;b[lo]+.5<b[i];lo++)
+      acc-=f[lo]*f[lo];
+    if(hi-lo>0)
+      noise[i]=sqrt(acc/(hi-lo));
+    else
+      noise[i]=0.;
   }
 }
 
@@ -558,7 +551,8 @@ void _vp_compute_mask(vorbis_look_psy *p,double *f,
 
   /* don't use the smoothed data for noise */
   if(p->vi->noisemaskp){
-    quarter_octave_noise(p->n,f,work2);
+    bark_noise(n,p->bark,f,work2);
+    _analysis_output("noise",frameno,work2,n,0,1);
   }
 
   if(p->vi->smoothp){
