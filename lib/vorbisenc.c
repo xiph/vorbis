@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.30 2001/12/21 14:52:36 segher Exp $
+ last mod: $Id: vorbisenc.c,v 1.31 2001/12/22 09:40:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -224,7 +224,7 @@ static int vorbis_encode_tonemask_setup(vorbis_info *vi,double q,int block,
   }
 
   p->tone_masteratt=att[iq]*(1.-dq)+att[iq+1]*dq;
-  p->max_curve_dB=max[iq];
+  p->max_curve_dB=max[iq]*(1.-dq)+max[iq+1]*dq;
   p->curvelimitp=peaklimit_bands[iq];
 
   iq=q*5.;

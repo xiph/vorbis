@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.63 2001/12/21 15:24:43 segher Exp $
+ last mod: $Id: psy.c,v 1.64 2001/12/22 09:40:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -296,10 +296,10 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   memcpy(p->tonecurves[14][8]+2,tone_8000_80dB_SL,sizeof(*p->tonecurves[14][8])*EHMER_MAX);
   memcpy(p->tonecurves[14][10]+2,tone_8000_100dB_SL,sizeof(*p->tonecurves[14][10])*EHMER_MAX);
 
-  memcpy(p->tonecurves[16][4]+2,tone_8000_40dB_SL,sizeof(*p->tonecurves[16][4])*EHMER_MAX);
-  memcpy(p->tonecurves[16][6]+2,tone_8000_60dB_SL,sizeof(*p->tonecurves[16][6])*EHMER_MAX);
-  memcpy(p->tonecurves[16][8]+2,tone_8000_80dB_SL,sizeof(*p->tonecurves[16][8])*EHMER_MAX);
-  memcpy(p->tonecurves[16][10]+2,tone_8000_100dB_SL,sizeof(*p->tonecurves[16][10])*EHMER_MAX);
+  memcpy(p->tonecurves[16][4]+2,tone_16000_40dB_SL,sizeof(*p->tonecurves[16][4])*EHMER_MAX);
+  memcpy(p->tonecurves[16][6]+2,tone_16000_60dB_SL,sizeof(*p->tonecurves[16][6])*EHMER_MAX);
+  memcpy(p->tonecurves[16][8]+2,tone_16000_80dB_SL,sizeof(*p->tonecurves[16][8])*EHMER_MAX);
+  memcpy(p->tonecurves[16][10]+2,tone_16000_100dB_SL,sizeof(*p->tonecurves[16][10])*EHMER_MAX);
 
   for(i=0;i<P_BANDS;i+=2)
     for(j=4;j<P_LEVELS;j+=2)
