@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.46 2001/05/27 08:16:00 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.47 2001/05/27 20:08:07 giles Exp $
 
  ********************************************************************/
 
@@ -49,7 +49,7 @@
    information exists in an Ogg bitstream to seek to
    sample-granularity positions in the output.  Or, one can seek by
    picking some portion of the stream roughly in the desired area if
-   we only want course navigation through the stream. */
+   we only want coarse navigation through the stream. */
 
 /*************************************************************************
  * Many, many internal helpers.  The intention is not to be confusing; 
@@ -57,7 +57,8 @@
  * harder to understand anyway.  The high level functions are last.  Begin
  * grokking near the end of the file */
 
-/* read a little more data from the file/pipe into the ogg_sync framer */
+/* read a little more data from the file/pipe into the ogg_sync framer
+*/
 #define CHUNKSIZE 8500 /* a shade over 8k; anyone using pages well
                           over 8k gets what they deserve */
 static long _get_data(OggVorbis_File *vf){
