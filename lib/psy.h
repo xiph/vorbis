@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.21.2.4 2001/08/03 06:48:03 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.21.2.5 2001/08/07 03:47:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -20,6 +20,12 @@
 #include "smallft.h"
 
 #include "backends.h"
+
+#define BLOCKTYPE_IMPULSE    0
+#define BLOCKTYPE_PADDING    1
+#define BLOCKTYPE_TRANSITION 0 
+#define BLOCKTYPE_LONG       1
+
 
 #ifndef EHMER_MAX
 #define EHMER_MAX 56
@@ -52,6 +58,10 @@ typedef struct vp_couple_pass{
   vp_couple couple[8];
 } vp_couple_pass;
 
+typedef struct vp_attenblock{
+  float block[P_BANDS][P_LEVELS];
+} vp_attenblock;
+
 typedef struct vorbis_info_psy{
   float  *ath;
 
@@ -65,10 +75,10 @@ typedef struct vorbis_info_psy{
 
   int tonemaskp;
   float tone_masteratt;
-  float toneatt[P_BANDS][P_LEVELS];
+  vp_attenblock *toneatt;
 
   int peakattp;
-  float peakatt[P_BANDS][P_LEVELS];
+  vp_attenblock *peakatt;
 
   int noisemaskp;
   float noisemaxsupp;
@@ -77,7 +87,8 @@ typedef struct vorbis_info_psy{
   int   noisewindowlomin;
   int   noisewindowhimin;
   int   noisewindowfixed;
-  float noisemedian[P_BANDS*2];
+  float noiseoff[P_BANDS];
+  float noisethresh[P_BANDS];
 
   float max_curve_dB;
 
@@ -118,7 +129,7 @@ typedef struct {
   struct vorbis_info_psy *vi;
 
   float ***tonecurves;
-  int   *noisemedian;
+  float *noisethresh;
   float *noiseoffset;
 
   float *ath;

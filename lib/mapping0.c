@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.33.2.4 2001/08/02 22:14:21 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.33.2.5 2001/08/07 03:47:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -46,7 +46,7 @@ typedef struct {
   vorbis_look_floor **floor_look;
 
   vorbis_look_residue **residue_look;
-  vorbis_look_psy *psy_look;
+  vorbis_look_psy *psy_look[2];
 
   vorbis_func_time **time_func;
   vorbis_func_floor **floor_func;
@@ -82,9 +82,13 @@ static void mapping0_free_look(vorbis_look_mapping *look){
       l->floor_func[i]->free_look(l->floor_look[i]);
       l->residue_func[i]->free_look(l->residue_look[i]);
     }
-    if(l->psy_look){
-      _vp_psy_clear(l->psy_look);
-      _ogg_free(l->psy_look);
+    if(l->psy_look[1] && l->psy_look[1]!=l->psy_look[0]){
+      _vp_psy_clear(l->psy_look[1]);
+      _ogg_free(l->psy_look[1]);
+    }
+    if(l->psy_look[0]){
+      _vp_psy_clear(l->psy_look[0]);
+      _ogg_free(l->psy_look[0]);
     }
     _ogg_free(l->time_func);
     _ogg_free(l->floor_func);
@@ -110,7 +114,6 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
   look->floor_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_floor *));
 
   look->residue_look=_ogg_calloc(info->submaps,sizeof(vorbis_look_residue *));
-  if(ci->psys)look->psy_look=_ogg_calloc(1,sizeof(vorbis_look_psy));
 
   look->time_func=_ogg_calloc(info->submaps,sizeof(vorbis_func_time *));
   look->floor_func=_ogg_calloc(info->submaps,sizeof(vorbis_func_floor *));
@@ -133,10 +136,29 @@ static vorbis_look_mapping *mapping0_look(vorbis_dsp_state *vd,vorbis_info_mode 
     
   }
   if(ci->psys && vd->analysisp){
-    int psynum=info->psy;;
-    _vp_psy_init(look->psy_look,ci->psy_param[psynum],
-		 ci->psy_g_param,
-		 ci->blocksizes[vm->blockflag]/2,vi->rate);
+    if(info->psy[0] != info->psy[1]){
+
+      int psynum=info->psy[0];
+      look->psy_look[0]=_ogg_calloc(1,sizeof(vorbis_look_psy));      
+      _vp_psy_init(look->psy_look[0],ci->psy_param[psynum],
+		   ci->psy_g_param,
+		   ci->blocksizes[vm->blockflag]/2,vi->rate);
+
+      psynum=info->psy[1];
+      look->psy_look[1]=_ogg_calloc(1,sizeof(vorbis_look_psy));      
+      _vp_psy_init(look->psy_look[1],ci->psy_param[psynum],
+		   ci->psy_g_param,
+		   ci->blocksizes[vm->blockflag]/2,vi->rate);
+    }else{
+
+      int psynum=info->psy[0];
+      look->psy_look[0]=_ogg_calloc(1,sizeof(vorbis_look_psy));      
+      look->psy_look[1]=look->psy_look[0];
+      _vp_psy_init(look->psy_look[0],ci->psy_param[psynum],
+		   ci->psy_g_param,
+		   ci->blocksizes[vm->blockflag]/2,vi->rate);
+
+    }
   }
 
   look->ch=vi->channels;
@@ -276,6 +298,29 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
   float global_ampmax=vbi->ampmax;
   float *local_ampmax=alloca(sizeof(float)*vi->channels);
+  int blocktype;
+
+  /* we differentiate between short and long block types to help the
+     masking engine; the window shapes also matter.
+     impulse block (a short block in which an impulse occurs)
+     padding block (a short block that pads between a transitional 
+          long block and an impulse block, or vice versa)
+     transition block (the wqeird one; a long block with the transition 
+          window; affects bass/midrange response and that must be 
+	  accounted for in masking) 
+     long block (run of the mill long block)
+  */
+
+  if(vb->W){
+    if(!vb->lW || !vb->nW)
+      blocktype=BLOCKTYPE_TRANSITION;
+    else
+      blocktype=BLOCKTYPE_LONG;
+  }else{
+    /* right now we're missing the infrastructure to distingush the
+       two short types */
+    blocktype=BLOCKTYPE_IMPULSE;
+  }
 
   for(i=0;i<vi->channels;i++){
     float scale=4.f/n;
@@ -333,7 +378,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
 
     /* perform psychoacoustics; do masking */
-    _vp_compute_mask(look->psy_look,
+    _vp_compute_mask(look->psy_look[blocktype],
 		     b->psy_g_look,
 		     i,
 		     logfft, /* -> logmax */
@@ -357,7 +402,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 
 
     _analysis_output("mdct2",seq+i,mdct,n/2,1,1);
-    _vp_remove_floor(look->psy_look,
+    _vp_remove_floor(look->psy_look[blocktype],
 		     b->psy_g_look,
 		     logmdct,
 		     mdct,
@@ -412,7 +457,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     int      chcounter=0;
 
     /* play a little loose with this abstraction */
-    int   quant_passes=look->psy_look->vi->coupling_passes;
+    int   quant_passes=look->psy_look[blocktype]->vi->coupling_passes;
     int   stopflag=0;
 
     for(i=0;i<vi->channels;i++){
@@ -426,7 +471,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     zerobundle[0]=alloca(sizeof(int)*vi->channels);
 
     /* initial down-quantized coupling */
-    _vp_quantize_couple(look->psy_look,
+    _vp_quantize_couple(look->psy_look[blocktype],
 			info,
 			pcm,
 			sofar,
@@ -484,7 +529,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
       if(!stopflag){
 	/* down-couple/down-quantize from perfect-'so-far' -> 
 	   new quantized vector */
-	_vp_quantize_couple(look->psy_look,
+	_vp_quantize_couple(look->psy_look[blocktype],
 			    info,
 			    pcm,
 			    sofar,

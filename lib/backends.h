@@ -12,7 +12,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.9.2.3 2001/08/02 22:14:22 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.9.2.4 2001/08/07 03:47:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -176,7 +176,9 @@ typedef struct vorbis_info_mapping0{
   int   timesubmap[16];    /* [mux] */
   int   floorsubmap[16];   /* [mux] submap to floors */
   int   residuesubmap[16]; /* [mux] submap to residue */
-  int   psy;               /* encode only */
+
+  int   psy[2]; /* by blocktype; impulse/padding for short,
+                   transition/normal for long */
 
   int   coupling_steps;
   int   coupling_mag[256];
