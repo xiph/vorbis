@@ -320,7 +320,7 @@ extern int  vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi);
 extern int vorbis_synthesis(vorbis_block *vb,ogg_packet *op);
 extern int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb);
 extern int vorbis_synthesis_pcmout(vorbis_dsp_state *v,double ***pcm);
-extern int vorbis_synthesis_read(vorbis_dsp_state *v,int bytes);
+extern int vorbis_synthesis_read(vorbis_dsp_state *v,int samples);
 
 #define min(x,y)  ((x)>(y)?(y):(x))
 #define max(x,y)  ((x)<(y)?(y):(x))
