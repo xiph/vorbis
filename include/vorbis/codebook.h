@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.4.4.3 2000/04/06 15:59:36 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.4.4.4 2000/04/13 00:03:22 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,8 +41,8 @@ typedef struct static_codebook{
 
   /* The below does a linear, single monotonic sequence mapping.  
      The log mapping uses this, but extends it */
-  long   q_min;       /* packed 24 bit float; quant value 0 maps to minval */
-  long   q_delta;     /* packed 24 bit float; val 1 - val 0 == delta */
+  long   q_min;       /* packed 32 bit float; quant value 0 maps to minval */
+  long   q_delta;     /* packed 32 bit float; val 1 - val 0 == delta */
   int    q_quant;     /* bits: 0 < quant <= 16 */
   int    q_sequencep; /* bitflag */
 
@@ -54,11 +54,8 @@ typedef struct static_codebook{
      mirror of the positive mapping. */
   int    q_zeroflag;  
   int    q_negflag;
-
   /* encode only values that provide log encoding error parameters */
   double q_encodebias; /* encode only */
-  double q_entropy;    /* encode only */
-
 
   long   *quantlist;  /* list of dim*entries quantized entry values */
 
