@@ -7,7 +7,7 @@ SUBDIRS = vorbisfile vorbisenc
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
 static_docs = components.png \
-	draft-kerr-avt-vorbis-rtp-02.txt \
+	draft-kerr-avt-vorbis-rtp-03.txt \
 	eightphase.png \
 	evenlsp.png \
 	floor1-1.png \
