@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.23.2.3 2000/09/02 05:19:25 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.23.2.4 2000/09/26 22:31:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -160,13 +160,14 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
      the encoder may do what it wishes in filling them.  They're
      necessary in some mapping combinations to keep the scale spacing
      accurate */
-  look->linearmap=malloc(look->n*sizeof(int));
+  look->linearmap=malloc((look->n+1)*sizeof(int));
   for(j=0;j<look->n;j++){
     int val=floor( toBARK((info->rate/2.)/look->n*j) 
 		   *scale); /* bark numbers represent band edges */
     if(val>look->ln)val=look->ln; /* guard against the approximation */
     look->linearmap[j]=val;
   }
+  look->linearmap[j]=-1;
 
   look->lsp_look=malloc(look->ln*sizeof(float));
   for(j=0;j<look->ln;j++)
@@ -179,7 +180,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
    not bottlenecked here anyway */
 
 float _curve_to_lpc(float *curve,float *lpc,
-		     vorbis_look_floor0 *l,long frameno){
+		     vorbis_look_floor0 *l){
   /* map the input curve to a bark-scale curve for encoding */
   
   int mapped=l->ln;
@@ -222,61 +223,11 @@ float _curve_to_lpc(float *curve,float *lpc,
   for(i=bark+1;i<mapped;i++)
     work[i]=work[i-1];
   
-#if 0
-    { /******************/
-      FILE *of;
-      char buffer[80];
-      int i;
-
-      sprintf(buffer,"Fmask_%d.m",frameno);
-      of=fopen(buffer,"w");
-      for(i=0;i<mapped;i++)
-	fprintf(of,"%g\n",work[i]);
-      fclose(of);
-    }
-#endif
-
   return vorbis_lpc_from_curve(work,lpc,&(l->lpclook));
 }
 
 /* generate the whole freq response curve of an LSP IIR filter */
 
-void _lsp_to_curve(float *curve,float *lsp,float amp,
-			  vorbis_look_floor0 *l,char *name,long frameno){
-  /* l->m+1 must be less than l->ln, but guard in case we get a bad stream */
-  float *lcurve=alloca(sizeof(float)*l->ln);
-  int i;
-
-  if(amp==0){
-    memset(curve,0,sizeof(float)*l->n);
-    return;
-  }
-  vorbis_lsp_to_curve(lcurve,l->ln,lsp,l->m,amp,l->lsp_look);
-
-  for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
-
-}
-
-void s_lsp_to_curve(float *curve,float *lsp,float amp,
-                         vorbis_look_floor0 *l,char *name,long frameno,
-                         float ampdB){
-  /* l->m+1 must be less than l->ln, but guard in case we get a bad stream */
-  float *lcurve=alloca(sizeof(double)*l->ln);
-  int i;
-
-  if(amp==0){
-    memset(curve,0,sizeof(double)*l->n);
-    return;
-  }
-  vorbis_lsp_to_curve(lcurve,l->ln,lsp,l->m,amp,l->lsp_look);
-
-  for (i = 0; i < l->ln; i++)
-    lcurve[i] = fromdB(lcurve[i]-ampdB);
-  for(i=0;i<l->n;i++)curve[i]=lcurve[l->linearmap[i]];
-
-}
-
-static long seq=0;
 static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 		    float *in,float *out){
   long j;
@@ -308,7 +259,7 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 
   /* use 'out' as temp storage */
   /* Convert our floor to a set of lpc coefficients */ 
-  amp=sqrt(_curve_to_lpc(work,out,look,seq));
+  amp=sqrt(_curve_to_lpc(work,out,look));
 
   /* amp is in the range (0. to ampdB].  Encode that range using
      ampbits bits */
@@ -374,7 +325,6 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 	last=work[j];
       }
     }
-    _analysis_output("lsp",seq,out,look->m,0,0);
 	
 #endif
 
@@ -383,12 +333,12 @@ static int floor0_forward(vorbis_block *vb,vorbis_look_floor *i,
 #endif
 
     /* take the coefficients back to a spectral envelope curve */
-    s_lsp_to_curve(out,work,amp,look,"Ffloor",seq++,info->ampdB);
+    vorbis_lsp_to_curve(out,look->linearmap,look->n,look->ln,
+			work,look->m,amp,info->ampdB);
     return(1);
   }
 
   memset(out,0,sizeof(float)*look->n);
-  seq++;
   return(0);
 }
 
@@ -402,22 +352,22 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
     long maxval=(1<<info->ampbits)-1;
     float amp=(float)ampraw/maxval*info->ampdB;
     int booknum=_oggpack_read(&vb->opb,_ilog(info->numbooks));
+    float *lsp=alloca(sizeof(float)*look->m);
 
     if(booknum!=-1){
       codebook *b=vb->vd->fullbooks+info->books[booknum];
       float last=0.;
       
-      memset(out,0,sizeof(float)*look->m);    
-      
       for(j=0;j<look->m;j+=b->dim)
-	if(vorbis_book_decodevs(b,out+j,&vb->opb,1,-1)==-1)goto eop;
+	if(vorbis_book_decodevs(b,lsp+j,&vb->opb,1,-1)==-1)goto eop;
       for(j=0;j<look->m;){
-	for(k=0;k<b->dim;k++,j++)out[j]+=last;
-	last=out[j-1];
+	for(k=0;k<b->dim;k++,j++)lsp[j]+=last;
+	last=lsp[j-1];
       }
       
       /* take the coefficients back to a spectral envelope curve */
-      s_lsp_to_curve(out,out,amp,look,"",0,info->ampdB);
+      vorbis_lsp_to_curve(out,look->linearmap,look->n,look->ln,
+			  lsp,look->m,amp,info->ampdB);
       return(1);
     }
   }

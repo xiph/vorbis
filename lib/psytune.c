@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.6.2.1 2000/08/31 09:00:01 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.6.2.2 2000/09/26 22:31:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -150,10 +150,6 @@ typedef struct {
   lpc_lookup lpclook;
 } vorbis_look_floor0;
 
-extern float _curve_to_lpc(float *curve,float *lpc,vorbis_look_floor0 *l,
-			    long frameno);
-extern void _lsp_to_curve(float *curve,float *lpc,float amp,
-			  vorbis_look_floor0 *l,char *name,long frameno);
 
 long frameno=0;
 
@@ -295,16 +291,9 @@ int main(int argc,char *argv[]){
 
 	_vp_compute_mask(&p_look,pcm[i],floor,decay[i]);
 	
-	analysis("prefloor",frameno,floor,framesize/2,1,1);
+	analysis("floor",frameno,floor,framesize/2,1,1);
 	analysis("decay",frameno,decay[i],framesize/2,1,1);
 	
-	for(j=0;j<framesize/2;j++)floor[j]=todB(floor[j])+150;
-	amp=_curve_to_lpc(floor,lpc,&floorlook,frameno);
-	vorbis_lpc_to_lsp(lpc,lpc,order);
-	_lsp_to_curve(floor,lpc,sqrt(amp),&floorlook,"Ffloor",frameno);
-	for(j=0;j<framesize/2;j++)floor[j]=fromdB(floor[j]-150);
-	analysis("floor",frameno,floor,framesize/2,1,1);
-
 	_vp_apply_floor(&p_look,pcm[i],floor);
 	/*r(j=0;j<framesize/2;j++)
 	  if(fabs(pcm[i][j])<1.)pcm[i][j]=0;*/

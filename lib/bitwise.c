@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.c,v 1.12.4.1 2000/09/02 05:19:24 xiphmont Exp $
+  last mod: $Id: bitwise.c,v 1.12.4.2 2000/09/26 22:31:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -126,21 +126,6 @@ long _oggpack_look1(oggpack_buffer *b){
   return((b->ptr[0]>>b->endbit)&1);
 }
 
-/* Read in bits without advancing the bitptr; bits <= 8 */
-/* we never return 'out of bits'; we'll handle it on _adv */
-long _oggpack_look_huff(oggpack_buffer *b,int bits){
-  unsigned long ret;
-  unsigned long m=mask[bits];
-  
-  bits+=b->endbit;
-  
-  ret=b->ptr[0]>>b->endbit;
-  if(bits>8){
-    ret|=b->ptr[1]<<(8-b->endbit);  
-  }
-  return(m&ret);
-}
-
 void _oggpack_adv(oggpack_buffer *b,int bits){
   bits+=b->endbit;
   b->ptr+=bits/8;
@@ -154,16 +139,6 @@ void _oggpack_adv1(oggpack_buffer *b){
     b->ptr++;
     b->endbyte++;
   }
-}
-
-/* have to check for overflow now. return -1 on overflow */
-int _oggpack_adv_huff(oggpack_buffer *b,int bits){
-  if(b->endbyte+(b->endbit+bits-1)/8>=b->storage)return(-1);
-  bits+=b->endbit;
-  b->ptr+=bits/8;
-  b->endbyte+=bits/8;
-  b->endbit=bits&7;
-  return 0;
 }
 
 /* bits <= 32 */

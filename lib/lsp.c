@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LSP (also called LSF) conversion routines
-  last mod: $Id: lsp.c,v 1.9.2.3 2000/09/02 09:39:19 xiphmont Exp $
+  last mod: $Id: lsp.c,v 1.9.2.4 2000/09/26 22:31:50 xiphmont Exp $
 
   The LSP generation code is taken (with minimal modification) from
   "On the Computation of the LSP Frequencies" by Joseph Rothweiler
@@ -38,23 +38,189 @@
 #include "lsp.h"
 #include "os.h"
 #include "misc.h"
+#include "lookup.h"
+#include "scales.h"
 
-void vorbis_lsp_to_curve(float *curve,int n,float *lsp,int m,float amp,
-			 float *w){
-  int i,j,k;
-  float *coslsp=alloca(m*sizeof(float));
-  for(i=0;i<m;i++)coslsp[i]=2*cos(lsp[i]);
+/* three possible LSP to f curve functions; the exact computation
+   (float), a lookup based float implementation, and an integer
+   implementation.  The float lookup is likely the optimal choice on
+   any machine with an FPU.  The integer implementation is *not* fixed
+   point (due to the need for a large dynamic range and thus a
+   seperately tracked exponent) and thus much more complex than the
+   relatively simple float implementations. It's mostly for future
+   work on a fully fixed point implementation for processors like the
+   ARM family. */
 
-  for(k=0;k<n;k++){
-    double p=.5;
-    double q=.5;
-    for(j=0;j<m;j+=2){
-      p*= w[k]-coslsp[j];
-      q*= w[k]-coslsp[j+1];
-    }
-    curve[k]=amp/sqrt(p*p*(2.+ w[k])+q*q*(2.- w[k]));
+/* undefine both for the 'old' but more precise implementation */
+#define  FLOAT_LOOKUP
+#undef   INT_LOOKUP
+
+#ifdef FLOAT_LOOKUP
+#include "lookup.c" /* catch this in the build system; we #include for
+                       compilers (like gcc) that can't inline across
+                       modules */
+
+/* side effect: changes *lsp to cosines of lsp */
+void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
+			    float amp,float ampoffset){
+  int i;
+  float wdel=M_PI/ln;
+  for(i=0;i<m;i++)lsp[i]=vorbis_coslook(lsp[i]);
+
+  i=0;
+  while(i<n){
+    int j,k=map[i];
+    int qexp;
+    float p=.7071067812;
+    float q=.7071067812;
+    float w=vorbis_coslook(wdel*k);
+
+    for(j=0;j<m;j+=2)    p *= lsp[j]-w;
+    for(j=1;j<m;j+=2)    q *= lsp[j]-w;
+
+    q=frexp(p*p*(1.+w)+q*q*(1.-w),&qexp);
+    q=vorbis_fromdBlook(amp*             
+			vorbis_invsqlook(q)*
+			vorbis_invsq2explook(qexp+m)- 
+			ampoffset);
+
+    curve[i++]=q;
+    while(map[i]==k)curve[i++]=q;
   }
 }
+
+#else
+
+#ifdef INT_LOOKUP
+#include "lookup.c" /* catch this in the build system; we #include for
+                       compilers (like gcc) that can't inline across
+                       modules */
+
+static int MLOOP_1[64]={
+   0,10,11,11, 12,12,12,12, 13,13,13,13, 13,13,13,13,
+  14,14,14,14, 14,14,14,14, 14,14,14,14, 14,14,14,14,
+  15,15,15,15, 15,15,15,15, 15,15,15,15, 15,15,15,15,
+  15,15,15,15, 15,15,15,15, 15,15,15,15, 15,15,15,15,
+};
+
+static int MLOOP_2[64]={
+  0,4,5,5, 6,6,6,6, 7,7,7,7, 7,7,7,7,
+  8,8,8,8, 8,8,8,8, 8,8,8,8, 8,8,8,8,
+  9,9,9,9, 9,9,9,9, 9,9,9,9, 9,9,9,9,
+  9,9,9,9, 9,9,9,9, 9,9,9,9, 9,9,9,9,
+};
+
+static int MLOOP_3[8]={0,1,2,2,3,3,3,3};
+
+
+/* side effect: changes *lsp to cosines of lsp */
+void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
+			    float amp,float ampoffset){
+
+  /* 0 <= m < 256 */
+
+  /* set up for using all int later */
+  int i;
+  int ampoffseti=rint(ampoffset*4096.);
+  int ampi=rint(amp*16.);
+  long *ilsp=alloca(m*sizeof(long));
+  for(i=0;i<m;i++)ilsp[i]=vorbis_coslook_i(lsp[i]/M_PI*65536.+.5);
+
+  i=0;
+  while(i<n){
+    int j,k=map[i];
+    unsigned long pi=46341; /* 2**-.5 in 0.16 */
+    unsigned long qi=46341;
+    int qexp=0,shift;
+    long wi=vorbis_coslook_i(k*65536/ln);
+
+    pi*=labs(ilsp[0]-wi);
+    qi*=labs(ilsp[1]-wi);
+
+    for(j=2;j<m;j+=2){
+      if(!(shift=MLOOP_1[(pi|qi)>>25]))
+	if(!(shift=MLOOP_2[(pi|qi)>>19]))
+	  shift=MLOOP_3[(pi|qi)>>16];
+      pi=(pi>>shift)*labs(ilsp[j]-wi);
+      qi=(qi>>shift)*labs(ilsp[j+1]-wi);
+      qexp+=shift;
+    }
+    if(!(shift=MLOOP_1[(pi|qi)>>25]))
+      if(!(shift=MLOOP_2[(pi|qi)>>19]))
+	shift=MLOOP_3[(pi|qi)>>16];
+    pi>>=shift;
+    qi>>=shift;
+    qexp+=shift-7*m;
+
+    /* pi,qi normalized collectively, both tracked using qexp */
+
+    /* p*=p(1-w), q*=q(1+w), let normalization drift because it isn't
+       worth tracking step by step */
+
+    pi=((pi*pi)>>16);
+    qi=((qi*qi)>>16);
+    qexp=qexp*2+m;
+
+    qi*=(1<<14)-wi;
+    pi*=(1<<14)+wi;
+    
+    qi=(qi+pi)>>14;
+
+    /* we've let the normalization drift because it wasn't important;
+       however, for the lookup, things must be normalized again.  We
+       need at most one right shift or a number of left shifts */
+
+    if(qi&0xffff0000){ /* checks for 1.xxxxxxxxxxxxxxxx */
+      qi>>=1; qexp++; 
+    }else
+      while(qi && !(qi&0x8000)){ /* checks for 0.0xxxxxxxxxxxxxxx or less*/
+	qi<<=1; qexp--; 
+      }
+
+    amp=vorbis_fromdBlook_i(ampi*                     /*  n.4         */
+			    vorbis_invsqlook_i(qi,qexp)- 
+			                              /*  m.8, m+n<=8 */
+			    ampoffseti);              /*  8.12[0]     */
+
+    curve[i]=amp;
+    while(map[++i]==k)curve[i]=amp;
+  }
+}
+
+#else 
+
+/* old, nonoptimized but simple version for any poor sap who needs to
+   figure out what the hell this code does, or wants the other tiny
+   fraction of a dB precision */
+
+/* side effect: changes *lsp to cosines of lsp */
+void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
+			    float amp,float ampoffset){
+  int i;
+  float wdel=M_PI/ln;
+  for(i=0;i<m;i++)lsp[i]=2*cos(lsp[i]);
+
+  i=0;
+  while(i<n){
+    int j,k=map[i];
+    float p=.5;
+    float q=.5;
+    float w=2*cos(wdel*k);
+    for(j=0;j<m;j+=2){
+      p *= w-lsp[j];
+      q *= w-lsp[j+1];
+    }
+    p*=p*(2.+w);
+    q*=q*(2.-w);
+    q=fromdB(amp/sqrt(p+q)-ampoffset);
+
+    curve[i]=q;
+    while(map[++i]==k)curve[i]=q;
+  }
+}
+
+#endif
+#endif
 
 static void cheby(float *g, int ord) {
   int i, j;
@@ -76,13 +242,10 @@ static int comp(const void *a,const void *b){
 }
 
 /* CACM algorithm 283. */
-/* we require doubles here due to the huge spread between val/p and
-   the required max error of 1.e-12, which is beyond the capabilities
-   of floats */
 static void cacm283(float *a,int ord,float *r){
   int i, k;
-  double val, p, delta, error;
-  double rooti;
+  float val, p, delta, error;
+  float rooti;
 
   for(i=0; i<ord;i++) r[i] = 2.0 * (i+0.5) / ord - 1.0;
   

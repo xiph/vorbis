@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.25.2.1 2000/08/31 09:00:00 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.25.2.2 2000/09/26 22:31:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -193,3 +193,8 @@ void vorbis_lpc_predict(float *coeff,float *prime,int m,
     data[i]=work[o]=y;
   }
 }
+
+
+
+
+

@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.h,v 1.13.2.1 2000/08/31 09:00:00 xiphmont Exp $
+  last mod: $Id: lpc.h,v 1.13.2.2 2000/09/26 22:31:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -40,6 +40,5 @@ extern float vorbis_lpc_from_curve(float *curve,float *lpc,lpc_lookup *l);
 
 extern void vorbis_lpc_predict(float *coeff,float *prime,int m,
 			       float *data,long n);
-
 
 #endif

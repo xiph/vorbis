@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: packing variable sized words into an octet stream
-  last mod: $Id: bitwise.h,v 1.6.4.1 2000/09/02 05:19:24 xiphmont Exp $
+  last mod: $Id: bitwise.h,v 1.6.4.2 2000/09/26 22:31:50 xiphmont Exp $
 
  ********************************************************************/
 
@@ -27,10 +27,8 @@ extern void  _oggpack_writeclear(oggpack_buffer *b);
 extern void  _oggpack_readinit(oggpack_buffer *b,unsigned char *buf,int bytes);
 extern void  _oggpack_write(oggpack_buffer *b,unsigned long value,int bits);
 extern long  _oggpack_look(oggpack_buffer *b,int bits);
-extern long  _oggpack_look_huff(oggpack_buffer *b,int bits);
 extern long  _oggpack_look1(oggpack_buffer *b);
 extern void  _oggpack_adv(oggpack_buffer *b,int bits);
-extern int   _oggpack_adv_huff(oggpack_buffer *b,int bits);
 extern void  _oggpack_adv1(oggpack_buffer *b);
 extern long  _oggpack_read(oggpack_buffer *b,int bits);
 extern long  _oggpack_read1(oggpack_buffer *b);
