@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.53 2002/07/17 21:34:31 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.54 2003/03/07 09:13:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,8 +39,6 @@ typedef struct {
   int  n[2];
 
   vorbis_info_floor0 *vi;
-  lpc_lookup lpclook;
-  float *lsp_look;
 
   long bits;
   long frames;
@@ -68,8 +66,6 @@ static void floor0_free_look(vorbis_look_floor *i){
 
       _ogg_free(look->linearmap);
     }
-    if(look->lsp_look)_ogg_free(look->lsp_look);
-    lpc_clear(&look->lpclook);
     memset(look,0,sizeof(*look));
     _ogg_free(look);
   }
@@ -154,14 +150,7 @@ static vorbis_look_floor *floor0_look(vorbis_dsp_state *vd,
   look->ln=info->barkmap;
   look->vi=info;
 
-  if(vd->analysisp)
-    lpc_init(&look->lpclook,look->ln,look->m);
-
   look->linearmap=_ogg_calloc(2,sizeof(*look->linearmap));
-
-  look->lsp_look=_ogg_malloc(look->ln*sizeof(*look->lsp_look));
-  for(j=0;j<look->ln;j++)
-    look->lsp_look[j]=2*cos(M_PI/look->ln*j);
 
   return look;
 }

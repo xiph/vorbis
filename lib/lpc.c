@@ -11,7 +11,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.35 2002/07/11 06:40:49 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.36 2003/03/07 09:13:30 xiphmont Exp $
 
  ********************************************************************/
 
@@ -58,17 +58,17 @@ Carsten Bormann
 /* Input : n elements of time doamin data
    Output: m lpc coefficients, excitation energy */
 
-float vorbis_lpc_from_data(float *data,float *lpc,int n,int m){
-  float *aut=alloca(sizeof(*aut)*(m+1));
-  float error;
+float vorbis_lpc_from_data(float *data,float *lpci,int n,int m){
+  double *aut=alloca(sizeof(*aut)*(m+1));
+  double *lpc=alloca(sizeof(*lpc)*(m));
+  double error;
   int i,j;
 
   /* autocorrelation, p+1 lag coefficients */
-
   j=m+1;
   while(j--){
     double d=0; /* double needed for accumulator depth */
-    for(i=j;i<n;i++)d+=data[i]*data[i-j];
+    for(i=j;i<n;i++)d+=(double)data[i]*data[i-j];
     aut[j]=d;
   }
   
@@ -77,7 +77,7 @@ float vorbis_lpc_from_data(float *data,float *lpc,int n,int m){
   error=aut[0];
   
   for(i=0;i<m;i++){
-    float r= -aut[i+1];
+    double r= -aut[i+1];
 
     if(error==0){
       memset(lpc,0,m*sizeof(*lpc));
@@ -96,73 +96,22 @@ float vorbis_lpc_from_data(float *data,float *lpc,int n,int m){
     
     lpc[i]=r;
     for(j=0;j<i/2;j++){
-      float tmp=lpc[j];
+      double tmp=lpc[j];
+
       lpc[j]+=r*lpc[i-1-j];
       lpc[i-1-j]+=r*tmp;
     }
     if(i%2)lpc[j]+=lpc[j]*r;
-    
+
     error*=1.f-r*r;
   }
-  
+
+  for(j=0;j<m;j++)lpci[j]=(float)lpc[j];
+
   /* we need the error value to know how big an impulse to hit the
      filter with later */
   
   return error;
-}
-
-/* Input : n element envelope spectral curve
-   Output: m lpc coefficients, excitation energy */
-
-float vorbis_lpc_from_curve(float *curve,float *lpc,lpc_lookup *l){
-  int n=l->ln;
-  int m=l->m;
-  float *work=alloca(sizeof(*work)*(n+n));
-  float fscale=.5f/n;
-  int i,j;
-  
-  /* input is a real curve. make it complex-real */
-  /* This mixes phase, but the LPC generation doesn't care. */
-  for(i=0;i<n;i++){
-    work[i*2]=curve[i]*fscale;
-    work[i*2+1]=0;
-  }
-  work[n*2-1]=curve[n-1]*fscale;
-  
-  n*=2;
-  drft_backward(&l->fft,work);
-
-  /* The autocorrelation will not be circular.  Shift, else we lose
-     most of the power in the edges. */
-  
-  for(i=0,j=n/2;i<n/2;){
-    float temp=work[i];
-    work[i++]=work[j];
-    work[j++]=temp;
-  }
-  
-  /* we *could* shave speed here by skimping on the edges (thus
-     speeding up the autocorrelation in vorbis_lpc_from_data) but we
-     don't right now. */
-
-  return(vorbis_lpc_from_data(work,lpc,n,m));
-}
-
-void lpc_init(lpc_lookup *l,long mapped, int m){
-  memset(l,0,sizeof(*l));
-
-  l->ln=mapped;
-  l->m=m;
-
-  /* we cheat decoding the LPC spectrum via FFTs */  
-  drft_init(&l->fft,mapped*2);
-
-}
-
-void lpc_clear(lpc_lookup *l){
-  if(l){
-    drft_clear(&l->fft);
-  }
 }
 
 void vorbis_lpc_predict(float *coeff,float *prime,int m,
