@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.10.2.4 2000/11/04 06:43:50 xiphmont Exp $
+ last mod: $Id: os.h,v 1.10.2.5 2000/11/04 06:58:38 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,7 +30,7 @@
 
 #ifndef __GNUC__
 #ifdef _WIN32
-#  include <_ogg_malloc.h>
+#  include <malloc.h>
 #  define rint(x)   (floor((x)+0.5)) 
 #endif
 #endif
