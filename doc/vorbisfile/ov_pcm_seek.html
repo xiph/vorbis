@@ -9,7 +9,7 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
 </tr>
 </table>
 
@@ -46,33 +46,35 @@ functions.</dd>
 
 <h3>Return Values</h3>
 <blockquote>
+<ul>
 <li>0 for success</li>
 
 <li>
-nonzero indicates failure, described by several error codes:</li>
-<ul>
-<li>OV_ENOSEEK - Bitstream is not seekable.
-</li>
-<li>OV_EINVAL - Invalid argument value.
-</li>
-<li>OV_EREAD - A read from media returned an error.
-</li>
-<li>OV_EFAULT - Internal logic fault; indicates a bug or heap/stack 
+nonzero indicates failure, described by several error codes:
+  <ul>
+  <li>OV_ENOSEEK - Bitstream is not seekable.
+  </li>
+  <li>OV_EINVAL - Invalid argument value; possibly called with an OggVorbis_File structure that isn't open.
+  </li>
+  <li>OV_EREAD - A read from media returned an error.
+  </li>
+  <li>OV_EFAULT - Internal logic fault; indicates a bug or heap/stack 
 		corruption.
-</li>
-<li>OV_EBADLINK - Invalid stream section supplied to libvorbisfile, or the requested link is corrupt. 
-</li>
+  </li>
+  <li>OV_EBADLINK - Invalid stream section supplied to libvorbisfile, or the requested link is corrupt. 
+  </li>
+  </ul></li>
 </ul></blockquote>
 
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2002 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2003 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>libVorbisfile version 1.65 - 20020702</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
 </tr>
 </table>
 
