@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.21 2001/02/02 03:51:55 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.22 2001/02/10 01:13:14 xiphmont Exp $
 
  ********************************************************************/
 
@@ -233,7 +233,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
       }
       
       /* quantized values */
-      s->quantlist=_ogg_malloc(sizeof(float)*quantvals);
+      s->quantlist=_ogg_malloc(sizeof(long)*quantvals);
       for(i=0;i<quantvals;i++)
 	s->quantlist[i]=oggpack_read(opb,s->q_quant);
       
