@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.30 2000/10/12 03:12:41 xiphmont Exp $
+ last mod: $Id: codec.h,v 1.31 2000/10/12 04:26:39 jack Exp $
 
  ********************************************************************/
 
@@ -28,6 +28,7 @@ extern "C"
 
 #include <ogg/ogg.h>
 #include "vorbis/codebook.h"
+#include "vorbis/backends.h"
 
 typedef void vorbis_look_transform;
 typedef void vorbis_info_time;
@@ -239,7 +240,6 @@ typedef struct vorbis_block{
 
 } vorbis_block;
 
-#include "vorbis/backends.h"
 
 /* vorbis_info contains all the setup information specific to the
    specific compression/decompression mode in progress (eg,
