@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for building thresh/pigeonhole encode hints
- last mod: $Id: latticehint.c,v 1.1.2.1 2000/08/03 21:12:53 xiphmont Exp $
+ last mod: $Id: latticehint.c,v 1.1.2.2 2000/08/04 05:15:09 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,6 +24,8 @@
 #include "vorbis/codebook.h"
 #include "../lib/sharedbook.h"
 #include "bookutil.h"
+#include "vqgen.h"
+#include "vqsplit.h"
 
 /* The purpose of this util is to build encode hints for lattice
    codebooks so that brute forcing each codebook entry isn't needed.
@@ -116,6 +118,16 @@ static double maxerror(int dim,double *a,encode_aux_pigeonhole *p,
   return(err);
 }
 
+static double _dist(double *ref, double *b,int el){
+  int i;
+  double acc=0.;
+  for(i=0;i<el;i++){
+    double val=(ref[i]-b[i]);
+    acc+=val*val;
+  }
+  return(acc);
+}
+
 int main(int argc,char *argv[]){
   codebook *b;
   static_codebook *c;
@@ -183,9 +195,100 @@ int main(int argc,char *argv[]){
       t->quantthresh[i]=(*(quantsort[i])+*(quantsort[i+1]))*.5*del+min;
   }
 
+  /* do we want a split-tree hint? */
+  if(1){
+    long quantvals=_book_maptype1_quantvals(c);
+    int fac=4;
+    int over=4;
+    double ldel=del/fac;
+    double lmin=min-ldel*fac*over-ldel*.5;
+    long max=quantvals*fac+over*2;
+    long points=1;
+    long *entryindex=malloc(c->entries*sizeof(long *));
+    long *pointindex;
+    long *membership;
+    long *reventry;
+    double *pointlist;
+    long pointssofar=0;
+    encode_aux_nearestmatch *t;
+
+    for(i=0;i<dim;i++)points*=max;
+
+    t=c->nearest_tree=calloc(1,sizeof(encode_aux_nearestmatch));
+  
+    pointindex=malloc(points*sizeof(long));
+    pointlist=malloc(points*dim*sizeof(double));
+    membership=malloc(points*sizeof(long));
+    reventry=malloc(c->entries*sizeof(long));
+      
+    for(i=0;i<c->entries;i++)entryindex[i]=i;
+
+    /* set points on a fine mesh */
+    {
+      long k=0;
+      long *temptrack=calloc(dim,sizeof(long));
+      for(i=0;i<points;i++){
+	double last=0.;
+	pointindex[i]=i;
+
+	for(j=0;j<dim;j++){
+	  pointlist[k]=temptrack[j]*ldel+lmin+last;
+	  if(c->q_sequencep)last=pointlist[k];
+	  k++;
+	}
+	for(j=0;j<dim;j++){
+	  temptrack[j]++;
+	  if(temptrack[j]<max)break;
+	  temptrack[j]=0;
+	}
+      }
+    }
+
+    t->alloc=4096;
+    t->ptr0=malloc(sizeof(long)*t->alloc);
+    t->ptr1=malloc(sizeof(long)*t->alloc);
+    t->p=malloc(sizeof(long)*t->alloc);
+    t->q=malloc(sizeof(long)*t->alloc);
+    t->aux=0;
+
+    for(i=0;i<points;i++)membership[i]=-1;
+    for(i=0;i<points;i++){
+      double *ppt=pointlist+i*dim;
+      long   firstentry=0;
+      double firstmetric=_dist(b->valuelist,ppt,dim);
+    
+      if(!(i&0xff))spinnit("assigning... ",points-i);
+
+      for(j=1;j<b->entries;j++){
+	if(c->lengthlist[j]>0){
+	  double thismetric=_dist(b->valuelist+j*dim,ppt,dim);
+	  if(thismetric<=firstmetric){
+	    firstmetric=thismetric;
+	    firstentry=j;
+	  }
+	}
+      }
+      
+      membership[i]=firstentry;
+    }
+
+    fprintf(stderr,"Leaves added: %d              \n",
+	    lp_split(pointlist,points,
+		     b,entryindex,b->entries,
+		     pointindex,points,
+		     membership,reventry,
+		     0,&pointssofar));
+      
+    free(pointlist);
+    free(pointindex);
+    free(entryindex);
+    free(membership);
+    free(reventry);
+  }
+
   /* Do we want to gen a pigeonhole hint? */
   for(i=0;i<entries;i++)if(c->lengthlist[i]==0)break;
-  if(c->q_sequencep || i<entries){
+  if(0){/*if(c->q_sequencep || i<entries){*/
     long **tempstack;
     long *tempcount;
     long *temptrack;
