@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: predefined encoding modes; 44kHz stereo ~64kbps true VBR
- last mod: $Id: mode_44c_A.h,v 1.4.2.3 2001/10/11 20:34:16 xiphmont Exp $
+ last mod: $Id: mode_44c_A.h,v 1.4.2.4 2001/10/12 00:08:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -107,10 +107,10 @@ static vp_couple_pass _psy_pass_44c_A[]={
 
 static float _psy_compand_44c_A[NOISE_COMPAND_LEVELS]={
   0.f, 1.f, 2.f, 3.f, 4.f, 5.f, 6.f,  7.f,     /* 7dB */
-  8.f, 8.f, 7.f, 6.f, 5.f, 4.f, 3.f,  2.f,     /* 15dB */
-  1.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,  0.f,     /* 23dB */
-  0.f, 0.f, 0.f, 0.f, 0.f, 0.f, 0.f,  0.f,     /* 31dB */
-  1.f, 2.f, 3.f, 4.f, 5.f, 6.f, 7.f,  8.f,     /* 39dB */
+  8.f, 8.f, 7.f, 6.f, 5.f, 4.f, 4.f,  4.f,     /* 15dB */
+  4.f, 4.f, 5.f, 5.f, 5.f, 6.f, 6.f,  6.f,     /* 23dB */
+  7.f, 7.f, 7.f, 8.f, 8.f, 8.f, 9.f, 10.f,     /* 31dB */
+ 11.f,12.f,13.f,14.f,15.f,16.f,17.f, 18.f,     /* 39dB */
 };
 
 
@@ -155,7 +155,7 @@ static vorbis_info_psy _psy_set_44c_AT={
       4,4,100,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-30,-30,-30,-30,-26,-20,-20,-10, -6,  -2,  -3,  -3,  0,   0,  0,  0,  3},
+  {-30,-30,-30,-30,-26,-20,-20,-10, -6,  -2,  -5,  -5,  -2,   0,  0,  0,  3},
   _psy_compand_44c_A,
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
@@ -180,7 +180,7 @@ static vorbis_info_psy _psy_set_44c_A={
       4,4,100,
 
   /*63     125     250     500      1k      2k      4k       8k     16k*/
-  {-20,-20,-20,-20,-20,-20,-20,-10, -6, -2, -3, -3,  0,  0,  0,  0,  3},
+  {-20,-20,-20,-20,-20,-20,-20,-10, -6, -2, -5, -5,  -2,  0,  0,  0,  3},
   _psy_compand_44c_A,
 
   95.f,  /* even decade + 5 is important; saves an rint() later in a
@@ -212,7 +212,7 @@ static vorbis_info_floor1 _floor_set_44c_A0={
   60,30,500,
   999,999,1,18.,
   8,70,
-  96};
+  112};
 
 
 static vorbis_info_floor1 _floor_set_44c_A={
@@ -246,7 +246,7 @@ static vorbis_info_floor1 _floor_set_44c_A={
   896};
 
 static vorbis_info_residue0 _residue_set_44c_A0={
-  0,192, 16, 10,23,
+  0,224, 16, 10,23,
   {64,4,40,
    2,2,20,
    18,22,22,7},

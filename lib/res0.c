@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.37.2.2 2001/10/11 15:41:45 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.37.2.3 2001/10/12 00:08:06 xiphmont Exp $
 
  ********************************************************************/
 
@@ -594,8 +594,10 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	    if(statebook){
 	      int ret=encode(&vb->opb,in[j]+offset,samples_per_partition,
 			     statebook,look);
-	      look->postbits+=ret;
-	      resbits[partword[j][i]]+=ret;
+	      if(!stoppos){
+		look->postbits+=ret;
+		resbits[partword[j][i]]+=ret;
+	      }
 	    }
 	  }
 	}

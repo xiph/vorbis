@@ -27,7 +27,7 @@ huffbuild line_1024x31_3sub1.vqd 1-9
 huffbuild line_1024x31_3sub2.vqd 9-25
 huffbuild line_1024x31_3sub3.vqd 25-64
 
-residuesplit residue_0#0.vqd 0,192,16 res_A ,.7,    ,1.5,8 ,1.5 ,2.5,3 ,2.5,8 ,2.5 ,4.5 ,17.5 ,84.5 
+residuesplit residue_0#0.vqd 0,224,16 res_A ,.7,    ,1.5,8 ,1.5 ,2.5,3 ,2.5,8 ,2.5 ,4.5 ,17.5 ,84.5 
 mv res_Aaux.vqd res_44c_A_128aux.vqd
 
 residuesplit residue_1#0.vqd residue_1#1.vqd 0,1792,32 res_B ,.7, ,1.5,32 ,1.5 ,2.5,18 ,2.5,32 ,2.5 ,4.5 ,17.5 ,84.5
@@ -36,7 +36,7 @@ mv res_Baux.vqd res_44c_A_1024aux.vqd
 GO
 
 >res_Ac_128 noninterleaved
-haux res_44c_A_128aux.vqd 0,12,2
+haux res_44c_A_128aux.vqd 0,14,2
 
 >res_Ac noninterleaved
 haux res_44c_A_1024aux.vqd 0,56,2
