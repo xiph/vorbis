@@ -10,4 +10,7 @@ debian/tmp/usr/lib/libvorbisenc.so
 debian/tmp/usr/lib/libvorbisfile.a
 debian/tmp/usr/lib/libvorbisfile.la
 debian/tmp/usr/lib/libvorbisfile.so
+debian/tmp/usr/lib/pkgconfig/vorbis.pc
+debian/tmp/usr/lib/pkgconfig/vorbisenc.pc
+debian/tmp/usr/lib/pkgconfig/vorbisfile.pc
 debian/tmp/usr/share/aclocal/vorbis.m4
