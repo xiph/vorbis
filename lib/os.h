@@ -13,7 +13,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.22 2001/02/02 03:51:57 xiphmont Exp $
+ last mod: $Id: os.h,v 1.23 2001/02/19 05:34:59 jsquyres Exp $
 
  ********************************************************************/
 
@@ -40,6 +40,10 @@
 #  define rint(x)   (floor((x)+0.5f)) 
 #  define NO_FLOAT_MATH_LIB
 #  define FAST_HYPOT(a, b) sqrt((a)*(a) + (b)*(b))
+#endif
+
+#ifndef __GNUC__
+#  define NO_FLOAT_MATH_LIB
 #endif
 
 #ifdef DARWIN
