@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.18 2000/02/23 09:24:28 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.19 2000/05/01 05:46:23 jon Exp $
 
  ********************************************************************/
 
@@ -296,7 +296,9 @@ void _vlpc_de_helper(double *curve,double *lpc,double amp,
     for(i=1;i<l->ln;i++){
       double real=(curve[i]+curve[l2-i]);
       double imag=(curve[i]-curve[l2-i]);
-      curve[i]=(1./hypot(real+unit,imag));
+
+      double a = real + unit;
+      curve[i] = 1.0 / FAST_HYPOT(a, imag);
     }
   }
 }  
