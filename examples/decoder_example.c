@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: simple example decoder
- last mod: $Id: decoder_example.c,v 1.11.2.1 2000/08/31 08:05:47 xiphmont Exp $
+ last mod: $Id: decoder_example.c,v 1.11.2.2 2000/08/31 08:59:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -216,14 +216,14 @@ int main(int argc, char **argv){
 	      /* no reason to complain; already complained above */
 	    }else{
 	      /* we have a packet.  Decode it */
-	      double **pcm;
+	      float **pcm;
 	      int samples;
 	      
 	      if(vorbis_synthesis(&vb,&op)==0) /* test for success! */
 		vorbis_synthesis_blockin(&vd,&vb);
 	      /* 
 		 
-	      **pcm is a multichannel double vector.  In stereo, for
+	      **pcm is a multichannel float vector.  In stereo, for
 	      example, pcm[0] is left, and pcm[1] is right.  samples is
 	      the size of each channel.  Convert the float values
 	      (-1.<=range<=1.) to whatever PCM format and write it out */
@@ -233,11 +233,11 @@ int main(int argc, char **argv){
 		int clipflag=0;
 		int bout=(samples<convsize?samples:convsize);
 		
-		/* convert doubles to 16 bit signed ints (host order) and
+		/* convert floats to 16 bit signed ints (host order) and
 		   interleave */
 		for(i=0;i<vi.channels;i++){
 		  ogg_int16_t *ptr=convbuffer+i;
-		  double  *mono=pcm[i];
+		  float  *mono=pcm[i];
 		  for(j=0;j<bout;j++){
 		    int val=mono[j]*32767.;
 		    /* might as well guard against clipping */

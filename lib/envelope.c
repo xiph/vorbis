@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.21.2.1 2000/08/31 08:05:47 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.21.2.2 2000/08/31 09:00:00 xiphmont Exp $
 
  Preecho calculation.
 
@@ -40,9 +40,9 @@
 
 #if 0
 static int    cheb_bandpass_stages=10;
-static double cheb_bandpass_gain=5.589612458e+01;
-static double cheb_bandpass_B[]={-1.,0.,5.,0.,-10.,0.,10.,0.,-5.,0.,1};
-static double cheb_bandpass_A[]={
+static float cheb_bandpass_gain=5.589612458e+01;
+static float cheb_bandpass_B[]={-1.,0.,5.,0.,-10.,0.,10.,0.,-5.,0.,1};
+static float cheb_bandpass_A[]={
   -0.1917409386,
   0.0078657069,
   -0.7126903444,
@@ -56,10 +56,10 @@ static double cheb_bandpass_A[]={
 #endif 
 
 static int    cheb_highpass_stages=10;
-static double cheb_highpass_gain= 5.291963434e+01;
+static float cheb_highpass_gain= 5.291963434e+01;
 /* z^-stage, z^-stage+1... */
-static double cheb_highpass_B[]={1,-10,45,-120,210,-252,210,-120,45,-10,1};
-static double cheb_highpass_A[]={
+static float cheb_highpass_B[]={1,-10,45,-120,210,-252,210,-120,45,-10,1};
+static float cheb_highpass_A[]={
   -0.1247628029,
   0.1334086523,
   -0.3997715614,
@@ -78,17 +78,17 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   e->winlength=window;
   e->minenergy=fromdB(vi->preecho_minenergy);
   e->iir=calloc(ch,sizeof(IIR_state));
-  e->filtered=calloc(ch,sizeof(double *));
+  e->filtered=calloc(ch,sizeof(float *));
   e->ch=ch;
   e->storage=128;
   for(i=0;i<ch;i++){
     IIR_init(e->iir+i,cheb_highpass_stages,cheb_highpass_gain,
 	     cheb_highpass_A,cheb_highpass_B);
-    e->filtered[i]=calloc(e->storage,sizeof(double));
+    e->filtered[i]=calloc(e->storage,sizeof(float));
   }
 
   drft_init(&e->drft,window);
-  e->window=malloc(e->winlength*sizeof(double));
+  e->window=malloc(e->winlength*sizeof(float));
   /* We just use a straight sin(x) window for this */
   for(i=0;i<e->winlength;i++)
     e->window[i]=sin((i+.5)/e->winlength*M_PI);
@@ -106,13 +106,13 @@ void _ve_envelope_clear(envelope_lookup *e){
   memset(e,0,sizeof(envelope_lookup));
 }
 
-static double _ve_deltai(envelope_lookup *ve,IIR_state *iir,
-		      double *pre,double *post){
+static float _ve_deltai(envelope_lookup *ve,IIR_state *iir,
+		      float *pre,float *post){
   long n2=ve->winlength*2;
   long n=ve->winlength;
 
-  double *workA=alloca(sizeof(double)*n2),A=0.;
-  double *workB=alloca(sizeof(double)*n2),B=0.;
+  float *workA=alloca(sizeof(float)*n2),A=0.;
+  float *workB=alloca(sizeof(float)*n2),B=0.;
   long i;
 
   /*_analysis_output("A",frameno,pre,n,0,0);
@@ -133,7 +133,7 @@ static double _ve_deltai(envelope_lookup *ve,IIR_state *iir,
      basing blocks on quantization noise that outweighs the signal
      itself (for low power signals) */
   {
-    double min=ve->minenergy;
+    float min=ve->minenergy;
     for(i=0;i<n;i++){
       if(fabs(workA[i])<min)workA[i]=min;
       if(fabs(workB[i])<min)workB[i]=min;
@@ -163,13 +163,13 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   if(v->pcm_storage>ve->storage){
     ve->storage=v->pcm_storage;
     for(i=0;i<ve->ch;i++)
-      ve->filtered[i]=realloc(ve->filtered[i],ve->storage*sizeof(double));
+      ve->filtered[i]=realloc(ve->filtered[i],ve->storage*sizeof(float));
   }
 
   /* catch up the highpass to match the pcm */
   for(i=0;i<ve->ch;i++){
-    double *filtered=ve->filtered[i];
-    double *pcm=v->pcm[i];
+    float *filtered=ve->filtered[i];
+    float *pcm=v->pcm[i];
     IIR_state *iir=ve->iir+i;
     
     for(j=ve->current;j<v->pcm_current;j++)
@@ -186,9 +186,9 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
 
   while(j+ve->winlength<=v->pcm_current){
     for(i=0;i<ve->ch;i++){
-      double *filtered=ve->filtered[i]+j;
+      float *filtered=ve->filtered[i]+j;
       IIR_state *iir=ve->iir+i;
-      double m=_ve_deltai(ve,iir,filtered-ve->winlength,filtered);
+      float m=_ve_deltai(ve,iir,filtered-ve->winlength,filtered);
       
       if(m>vi->preecho_thresh){
 	/*frameno++;*/
@@ -208,7 +208,7 @@ void _ve_envelope_shift(envelope_lookup *e,long shift){
   int i;
   for(i=0;i<e->ch;i++)
     memmove(e->filtered[i],e->filtered[i]+shift,(e->current-shift)*
-	    sizeof(double));
+	    sizeof(float));
   e->current-=shift;
 }
 

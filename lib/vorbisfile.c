@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.27.2.1 2000/08/31 08:05:48 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.27.2.2 2000/08/31 09:00:02 xiphmont Exp $
 
  ********************************************************************/
 
@@ -873,7 +873,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   /* discard samples until we reach the desired position. Crossing a
      logical bitstream boundary with abandon is OK. */
   while(vf->pcm_offset<pos){
-    double **pcm;
+    float **pcm;
     long target=pos-vf->pcm_offset;
     long samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
 
@@ -1056,7 +1056,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 
   while(1){
     if(vf->decode_ready){
-      double **pcm;
+      float **pcm;
       long samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
       if(samples){
 	/* yay! proceed to pack data into the byte buffer */
@@ -1083,7 +1083,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	    if(host_endian==bigendianp){
 	      if(sgned){
 		for(i=0;i<channels;i++) { /* It's faster in this order */
-		  double *src=pcm[i];
+		  float *src=pcm[i];
 		  short *dest=((short *)buffer)+i;
 		  for(j=0;j<samples;j++) {
 		    val=(int)(src[j]*32768. + 0.5);
@@ -1095,7 +1095,7 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		}
 	      }else{
 		for(i=0;i<channels;i++) {
-		  double *src=pcm[i];
+		  float *src=pcm[i];
 		  short *dest=((short *)buffer)+i;
 		  for(j=0;j<samples;j++) {
 		    val=(int)(src[j]*32768. + 0.5);
