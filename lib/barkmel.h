@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: linear scale -> bark and mel scales
- last mod: $Id: barkmel.h,v 1.1 1999/12/31 12:35:12 xiphmont Exp $
+ last mod: $Id: barkmel.h,v 1.2 2000/01/01 02:52:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,6 +32,7 @@
 
 #define fBARK(f) (13.1*atan(.00074*(f))+2.24*atan((f)*(f)*1.85e-8)+1e-4*(f))
 #define iBARK(z) (102.*(z)-2.*pow(z,2.)+.4*pow(z,3)+pow(1.46,z)-1.)
-#define fMEL(f)  (1000.*(log(1.+(f)*.001)*1.442695))
+#define fMEL(f)  (log(1.+(f)*.001)*1442.695)
+#define iMEL(m)  (1000.*exp((m)/1442.695)-1000.)
 
 #endif

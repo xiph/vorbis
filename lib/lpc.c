@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.11 1999/12/31 12:35:14 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.12 2000/01/01 02:52:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -149,9 +149,7 @@ double vorbis_lpc_from_spectrum(double *curve,double *lpc,lpc_lookup *l){
 
    The below is authoritative in terms of defining scale mapping.
    Note that the scale depends on the sampling rate as well as the
-   linear block and mapping sizes (note that for a given sample rate
-   and block size, there's generally a fairly obviously optimal
-   mapping size */
+   linear block and mapping sizes */
 
 void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
   int i;
@@ -172,9 +170,11 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
   scale=mapped/fBARK(rate);
 
   /* the mapping from a linear scale to a smaller bark scale is
-     straightforward with a single catch; make sure not to skip any
-     bark-scale bins.  In order to do this, we assign map_N = min
-     (map_N-1 + 1, bark(N)) */
+     straightforward.  We do *not* make sure that the linear mapping
+     does not skip bark-scale bins; the decoder simply skips them and
+     the encoder may do what it wishes in filling them.  They're
+     necessary in some mapping combinations to keep the scale spacing
+     accurate */
   {
     int last=-1;
     for(i=0;i<n;i++){
@@ -182,7 +182,6 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
                                                           represent
                                                           band edges */
       if(val>=mapped)val=mapped; /* guard against the approximation */
-      if(val>last+1)val=last+1;
       l->linearmap[i]=val;
       last=val;
     }
@@ -193,9 +192,7 @@ void lpc_init(lpc_lookup *l,int n, long mapped, long rate, int m){
      frequencies.  We figure the weight of bands in proportion to
      their linear/bark width ratio below, again, authoritatively.  We
      use computed width (not the number of actual bins above) for
-     smoothness in the scale; they should agree closely unless the
-     encoder chose parameters poorly (and got a bark scale that would
-     have had lots of skipped bins) */
+     smoothness in the scale; they should agree closely */
 
   for(i=0;i<mapped;i++)
     l->barknorm[i]=iBARK((i+1)/scale)-iBARK(i/scale);
@@ -223,7 +220,7 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
   
   int mapped=l->ln;
   double *work=alloca(sizeof(double)*mapped);
-  int i;
+  int i,j,last=0;
 
   memset(work,0,sizeof(double)*mapped);
 
@@ -231,12 +228,29 @@ double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
      we select the maximum value of each band as representative (this
      helps make sure peaks don't go out of range.  In error terms,
      selecting min would make more sense, but the codebook is trained
-     numerically, so we don't lose in encoding.  We'd still want to
+     numerically, so we don't actually lose.  We'd still want to
      use the original curve for error and noise estimation */
 
   for(i=0;i<l->n;i++){
     int bark=l->linearmap[i];
     if(work[bark]<curve[i])work[bark]=curve[i];
+    if(bark>last+1){
+      /* If the bark scale is climbing rapidly, some bins may end up
+         going unused.  This isn't a waste actually; it keeps the
+         scale resolution even so that the LPC generator has an easy
+         time.  However, if we leave the bins empty we lose energy.
+         So, fill 'em in.  The decoder does not do anything witht he
+         unused bins, so we can fill them anyway we like to end up
+         with a better spectral curve */
+
+      /* we'll always have a bin zero, so we don't need to guard init */
+      long span=bark-last;
+      for(j=1;j<span;j++){
+	double del=(double)j/span;
+	work[j+last]=work[bark]*del+work[last]*(1.-del);
+      }
+    }
+    last=bark;
   }
   for(i=0;i<mapped;i++)work[i]*=l->barknorm[i];
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: modes.h,v 1.1 1999/12/31 12:35:11 xiphmont Exp $
+ last mod: $Id: modes.h,v 1.2 2000/01/01 02:52:57 xiphmont Exp $
 
  ********************************************************************/
 
@@ -35,16 +35,16 @@ vorbis_info predef_modes[]={
     /* dummy, dummy, dummy, dummy */
     0, NULL, 0, NULL, 
     /* smallblock, largeblock, LPC order (small, large) */
-    {256, 2048}, {8,22}, 
+    {256, 2048}, {12,22}, 
     /* {bark mapping size}, spectral channels */
-    {32,128}, 2,
+    {64,256}, 2,
     /* thresh sample period, preecho clamp trigger threshhold, range, dummy */
     64, 4, 2, NULL,
     /* noise masking curve dB attenuation levels [20] */
     /*{-12,-12,-18,-18,-18,-18,-18,-18,-18,-12,
       -8,-4,0,0,0,0,0,0,0,0},*/
     {-100,-100,-100,-100,-100,-100,-100,-24,-24,-24,
-     -24,-24,-24,-24,-24,-24,-24,-24,-24,-24},
+      -24,-24,-24,-24,-24,-24,-24,-24,-24,-24},
     /* noise masking scale biases */
     .95,1.01,.01,
     /* tone masking curve dB attenuation levels [20] */
