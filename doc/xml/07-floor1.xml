@@ -1,8 +1,8 @@
 <section id="vorbis-spec-floor1">
 <sectioninfo>
 <releaseinfo>
- $Id: 07-floor1.xml,v 1.1 2002/10/12 20:37:11 giles Exp $
- <emphasis>Last update to this document: September 19, 2002</emphasis>
+ $Id: 07-floor1.xml,v 1.2 2002/10/18 00:43:00 giles Exp $
+ <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
 <title>floor type 1 setup and decode</title>
@@ -308,8 +308,8 @@ Unwrap the always-positive-or-zero values read from the packet into
        8) [high_neighbor_offset] = <link linkend="vorbis-spec-high_neighbor">high_neighbor</link>([floor1_X_list],[i])
 
        9) [predicted] = <link linkend="vorbis-spec-render_point">render_point</link>( vector [floor1_X_list] element [low_neighbor_offset],
-                                      vector [floor1_X_list] element [high_neighbor_offset],
 				      vector [floor1_final_Y] element [low_neighbor_offset],
+                                      vector [floor1_X_list] element [high_neighbor_offset],
 				      vector [floor1_final_Y] element [high_neighbor_offset],
                                       vector [floor1_X_list] element [i] )
 
@@ -339,7 +339,7 @@ Unwrap the always-positive-or-zero values read from the packet into
 		     
 		      } else [hiroom] is not greater than [lowroom] {
               
-                        23) vector [floor1_final_Y] element [i] = [predicted] - ([val] - [lowroom]) - 1
+                        23) vector [floor1_final_Y] element [i] = [predicted] - [val] + [hiroom] - 1
                    
                       }
                
@@ -348,7 +348,7 @@ Unwrap the always-positive-or-zero values read from the packet into
 		  24) if ([val] is odd) {
                  
                         25) vector [floor1_final_Y] element [i] = 
-                            [predicted] - (([val] - 1) divided by  2 using integer division)
+                            [predicted] - (([val] + 1) divided by  2 using integer division)
 
                       } else [val] is even {
 
@@ -409,22 +409,22 @@ Then compute the final curve in one pass:</para>
 
              6) [hy] = [floor1_final_Y]' element [i] * [floor1_multiplier]
  	     7) [hx] = [floor1_X_list]' element [i]
-             8) <link linkend="vorbis-spec-render_line">render_line</link>( [lx], [hx], [ly], [hy], [floor] )
+             8) <link linkend="vorbis-spec-render_line">render_line</link>( [lx], [ly], [hx], [hy], [floor] )
              9) [lx] = [hx]
 	    10) [ly] = [hy]
           }
+     }
  
-      11) if ( [hx] is less than [n] ) {
+ 11) if ( [hx] is less than [n] ) {
 
-            12) <link linkend="vorbis-spec-render_line">render_line</link>( [hx], [hy], [n], [hy], [floor] )
+        12) <link linkend="vorbis-spec-render_line">render_line</link>( [hx], [hy], [n], [hy], [floor] )
 
-          }
+     }
 
-      13) if ( [hx] is greater than [n] ) {
+ 13) if ( [hx] is greater than [n] ) {
 
             14) truncate vector [floor] to [n] elements
 
-          }
      }
  
  15) for each scalar in vector [floor], perform a lookup substitution using 

@@ -1,8 +1,8 @@
 <section id="vorbis-spec-codec">
 <sectioninfo>
 <releaseinfo>
- $Id: 04-codec.xml,v 1.2 2002/10/14 23:47:54 giles Exp $
- <emphasis>Last update to this document: September 20, 2002</emphasis>
+ $Id: 04-codec.xml,v 1.3 2002/10/18 00:43:00 giles Exp $
+ <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
 <title>codec setup and packet decode</title>
@@ -220,53 +220,40 @@ of <varname>[vorbis_mapping_count]</varname> mapping numbers:</simpara>
        <listitem><simpara>if unset, <varname>[vorbis_mapping_submaps]</varname> = 1</simpara></listitem>
       </orderedlist>
      </listitem>
-     <listitem><simpara>read 1 bit as a boolean flag; if set, square polar channel mapping is in use:</simpara>
-      <orderedlist>
-       <listitem><simpara><varname>[vorbis_mapping_coupling_steps]</varname>= read 8 bits as unsigned integer and add one</simpara></listitem>
-       <listitem><simpara>for <varname>[j]</varname> each of <varname>[vorbis_mapping_coupling_steps]</varname>
-steps:</simpara>
-        <orderedlist>
-         <listitem><simpara>vector <varname>[vorbis_mapping_magnitude]</varname> element
-<varname>[j]</varname>= read <link linkend="vorbis-spec-ilog">ilog</link>([audio_channels] - 1) bits as
-unsigned integer</simpara></listitem>
-         <listitem><simpara>vector <varname>[vorbis_mapping_angle]</varname> element <varname>[j]</varname>=
-read <link linkend="vorbis-spec-ilog">ilog</link>([audio_channels] - 1)
-bits as unsigned integer</simpara></listitem>
-         <listitem><simpara>the numbers read in the above two steps are channel numbers representing the channel to treat as
-magnitude and the channel to treat as angle, respectively.  If for any coupling step the angle channel number equals the
-magnitude channel number, the magnitude channel number is greater than <varname>[audio_channels]</varname>-1, or the angle
-channel is greater than <varname>[audio_channels]</varname>-1, the stream is undecodable.</simpara></listitem>
-        </orderedlist>
-       </listitem>
-      </orderedlist>
+     <listitem><simpara>read 1 bit as a boolean flag</simpara>
+       <orderedlist>
+         <listitem><para>if set, square polar channel mapping is in use:
+           <orderedlist>
+             <listitem><simpara><varname>[vorbis_mapping_coupling_steps]</varname> = read 8 bits as unsigned integer and add one</simpara></listitem>
+             <listitem><para>for <varname>[j]</varname> each of <varname>[vorbis_mapping_coupling_steps]</varname> steps:
+               <orderedlist>
+                 <listitem><simpara>vector <varname>[vorbis_mapping_magnitude]</varname> element <varname>[j]</varname>= read <link linkend="vorbis-spec-ilog">ilog</link>(<varname>[audio_channels]</varname> - 1) bits as unsigned integer</simpara></listitem>
+                 <listitem><simpara>vector <varname>[vorbis_mapping_angle]</varname> element <varname>[j]</varname>= read <link linkend="vorbis-spec-ilog">ilog</link>(<varname>[audio_channels]</varname> - 1) bits as unsigned integer</simpara></listitem>
+                 <listitem><simpara>the numbers read in the above two steps are channel numbers representing the channel to treat as magnitude and the channel to treat as angle, respectively.  If for any coupling step the angle channel number equals the magnitude channel number, the magnitude channel number is greater than <varname>[audio_channels]</varname>-1, or the angle channel is greater than <varname>[audio_channels]</varname>-1, the stream is undecodable.</simpara></listitem>
+               </orderedlist>
+             </para></listitem>
+           </orderedlist>
+         </para></listitem>
+         <listitem><simpara>if unset, <varname>[vorbis_mapping_coupling_steps]</varname> = 0</simpara></listitem>
+       </orderedlist>
      </listitem>
      <listitem><simpara>read 2 bits (reserved field); if the value is nonzero, the stream is undecodable</simpara></listitem>
-     <listitem><simpara>if <varname>[vorbis_mapping_submaps]</varname> is greater than one, we read channel multiplex
-settings.  For each <varname>[j]</varname> of <varname>[audio_channels]</varname> channels:</simpara>
+     <listitem><simpara>if <varname>[vorbis_mapping_submaps]</varname> is greater than one, we read channel multiplex settings. For each <varname>[j]</varname> of <varname>[audio_channels]</varname> channels:</simpara>
       <orderedlist>
-       <listitem><simpara>vector <varname>[vorbis_mapping_mux]</varname> element <varname>[j]</varname> = read 4 bits as
-unsigned integer</simpara></listitem>
-       <listitem><simpara>if the value is greater than the highest numbered submap
-(<varname>[vorbis_mapping_submaps]</varname> - 1), this in an error condition rendering the stream
-undecodable</simpara></listitem>
+       <listitem><simpara>vector <varname>[vorbis_mapping_mux]</varname> element <varname>[j]</varname> = read 4 bits as unsigned integer</simpara></listitem>
+       <listitem><simpara>if the value is greater than the highest numbered submap (<varname>[vorbis_mapping_submaps]</varname> - 1), this in an error condition rendering the stream undecodable</simpara></listitem>
       </orderedlist>
      </listitem>
-     <listitem><simpara>for each submap <varname>[j]</varname> of <varname>[vorbis_mapping_submaps]</varname> submaps, read
-the floor and residue numbers for use in decoding that submap:</simpara>
+     <listitem><simpara>for each submap <varname>[j]</varname> of <varname>[vorbis_mapping_submaps]</varname> submaps, read the floor and residue numbers for use in decoding that submap:</simpara>
       <orderedlist>
        <listitem><simpara>read and discard 8 bits (the unused time configuration placeholder)</simpara></listitem>
-       <listitem><simpara>read 8 bits as unsigned integer for the floor number; save in vector
-<varname>[vorbis_mapping_submap_floor]</varname> element <varname>[j]</varname></simpara></listitem>
-       <listitem><simpara>verify the floor number is not greater than the highest number floor configured for the bitstream. 
-If it is, the bitstream is undecodable</simpara></listitem>
-       <listitem><simpara>read 8 bits as unsigned integer for the residue number; save in vector
-<varname>[vorbis_mapping_submap_residue]</varname> element <varname>[j]</varname></simpara></listitem>
-       <listitem><simpara>verify the residue number is not greater than the highest number residue configured for the
-bitstream.  If it is, the bitstream is undecodable</simpara></listitem>
+       <listitem><simpara>read 8 bits as unsigned integer for the floor number; save in vector <varname>[vorbis_mapping_submap_floor]</varname> element <varname>[j]</varname></simpara></listitem>
+       <listitem><simpara>verify the floor number is not greater than the highest number floor configured for the bitstream. If it is, the bitstream is undecodable</simpara></listitem>
+       <listitem><simpara>read 8 bits as unsigned integer for the residue number; save in vector <varname>[vorbis_mapping_submap_residue]</varname> element <varname>[j]</varname></simpara></listitem>
+       <listitem><simpara>verify the residue number is not greater than the highest number residue configured for the bitstream.  If it is, the bitstream is undecodable</simpara></listitem>
       </orderedlist>
      </listitem>
-     <listitem><simpara>save this mapping configuration in slot <varname>[i]</varname> of the mapping configuration array
-<varname>[vorbis_mapping_configurations]</varname>.</simpara></listitem>
+     <listitem><simpara>save this mapping configuration in slot <varname>[i]</varname> of the mapping configuration array <varname>[vorbis_mapping_configurations]</varname>.</simpara></listitem>
     </orderedlist></para>
    </listitem>
   </orderedlist>
@@ -354,9 +341,10 @@ illustration of overlapping dissimilar
 </orderedlist>
 
 <para>
-Vorbis windows all use the slope function y=sin(2*PI*sin^2(x/n)),
-but dissimilar lapping requirements can affect overall shape.  Window
-generation proceeds as follows:</para>
+Vorbis windows all use the slope function y=sin(0.5 * &pi; * sin^2((x+.5)/n * &pi;)),
+where n is window size and x ranges 0...n-1, but dissimilar
+lapping requirements can affect overall shape.  Window generation
+proceeds as follows:</para>
 
 <orderedlist>
  <listitem><simpara> <varname>[window_center]</varname> = <varname>[n]</varname> / 2</simpara></listitem>
@@ -394,9 +382,9 @@ set) then
  </listitem>
  <listitem><simpara> window from range 0 ... <varname>[left_window_start]</varname>-1 inclusive is zero</simpara></listitem>
  <listitem><simpara> for <varname>[i]</varname> in range <varname>[left_window_start]</varname> ...
-<varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(2*PI*sin^2((<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5)/<varname>[left_n]</varname>*PI/2))</simpara></listitem>
+<varname>[left_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[left_window_start]</varname>+.5) / <varname>[left_n]</varname> * .5 * &pi;) )</simpara></listitem>
  <listitem><simpara> window from range <varname>[left_window_end]</varname> ... <varname>[right_window_start]</varname>-1
-inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(2*PI*sin^2((<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5)/<varname>[right_n]</varname>*PI/2.+PI/2.))</simpara></listitem>
+inclusive is one</simpara></listitem><listitem><simpara> for <varname>[i]</varname> in range <varname>[right_window_start]</varname> ... <varname>[right_window_end]</varname>-1, window(<varname>[i]</varname>) = sin(.5 * &pi; * sin^2( (<varname>[i]</varname>-<varname>[right_window_start]</varname>+.5) / <varname>[right_n]</varname> * .5 * &pi;/2. + .5 * &pi;) )</simpara></listitem>
 <listitem><simpara> window from range <varname>[rigth_window_start]</varname> ... <varname>[n]</varname>-1 is
 zero</simpara></listitem>
 </orderedlist>

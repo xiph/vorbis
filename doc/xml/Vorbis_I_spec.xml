@@ -15,7 +15,7 @@
 <!ENTITY oggvorbis SYSTEM "a1-encapsulation_ogg.xml">
 <!ENTITY rtpvorbis SYSTEM "a2-encapsulation_rtp.xml">
 <!ENTITY footer SYSTEM "footer.xml">
-<!ENTITY draft-rtp SYSTEM "../draft-moffitt-vorbis-rtp-00.txt" NDATA TXT>
+<!ENTITY draft-rtp SYSTEM "../draft-moffitt-vorbis-rtp-00.txt">
 ]>
 
 <article>
