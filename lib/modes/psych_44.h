@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: key psychoacoustic settings for 44.1/48kHz
- last mod: $Id: psych_44.h,v 1.27 2002/10/18 06:00:12 xiphmont Exp $
+ last mod: $Id: psych_44.h,v 1.28 2003/09/02 06:05:47 xiphmont Exp $
 
  ********************************************************************/
 
@@ -391,7 +391,7 @@ static int _psy_ath_floater[11]={
 };
 
 static int _psy_ath_abs[11]={
-  -110,-110,-120,-130,-140,-140,-140,-140,-140,-140,-150,
+  -130,-130,-130,-130,-140,-140,-140,-140,-140,-140,-150,
 };
 
 /* stereo setup.  These don't map directly to quality level, there's
