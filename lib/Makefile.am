@@ -4,7 +4,7 @@ AUTOMAKE_OPTIONS = foreign
 
 SUBDIRS = modes books
 
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES = -I$(top_srcdir)/include @OGG_CFLAGS@
 
 lib_LTLIBRARIES = libvorbis.la libvorbisfile.la libvorbisenc.la
 
