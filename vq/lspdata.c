@@ -26,7 +26,13 @@
 char *vqext_booktype="LSPdata";
 
 /* LSP training metric.  We weight error proportional to distance
-   *between* LSP vector values */
+   *between* LSP vector values.  The idea of this metric is not to set
+   final cells, but get the midpoint spacing into a form conducive to
+   what we want, which is weighting toward preserving narrower
+   features. */
+
+double global_maxdel=M_PI;
+#define FUDGE ((global_maxdel*1.0)-testdist)
 
                             /* candidate,actual */
 double vqext_metric(vqgen *v,double *b, double *a){
@@ -34,17 +40,19 @@ double vqext_metric(vqgen *v,double *b, double *a){
   int el=v->elements;
   double acc=0.;
   double lasta=0.;
-  /*double lastb=0.;*/
+  double lastb=0.;
   for(i=0;i<el;i++){
-    double actualdist=(a[i]-lasta);
-    /*double testdist=(b[i]-lastb);
 
-      double disterr=fabs(testdist-actualdist);*/
-    double poserr=fabs(a[i]-b[i]);
-    acc+=poserr/actualdist;
+    /*    double needdist=(a[i]-lastb);
+	  double actualdist=(a[i]-lasta);*/
+    double testdist=(b[i]-lastb);
 
-    lasta=a[i];
-    /*lastb=b[i];*/
+    double val=(a[i]-b[i])*FUDGE;
+
+    acc+=val*val;
+
+    /*lasta=a[i];*/
+    lastb=b[i];
   }
   return acc;
 }
@@ -107,11 +115,14 @@ quant_return vqext_quantize(vqgen *v,int quantbits){
 /* much easier :-) */
 void vqext_unquantize(vqgen *v,quant_return *q){
   long j,k;
+  if(global_maxdel==M_PI)global_maxdel=0.;
   for(j=0;j<v->entries;j++){
     double last=0.;
     for(k=0;k<v->elements;k++){
-      last=(_now(v,j)[k]+q->addtoquant)*q->delt+q->minval+last;
+      double del=(_now(v,j)[k]+q->addtoquant)*q->delt+q->minval;
+      last+=del;
       _now(v,j)[k]=last;
+      if(del>global_maxdel)global_maxdel=del;
     }
   }
 }

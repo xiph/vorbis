@@ -177,7 +177,7 @@ double vqgen_iterate(vqgen *v){
     }
       
     j=firstentry;
-    meterror+=firstmetric-v->bias[firstentry];
+    meterror+=sqrt(_dist_sq(v,_now(v,j),_point(v,i)));
     /* set up midpoints for next iter */
     if(v->assigned[j]++)
       for(k=0;k<v->elements;k++)
@@ -251,7 +251,7 @@ double vqgen_iterate(vqgen *v){
 
   asserror/=(v->entries*fdesired);
   fprintf(stderr,": dist %g(%g) metric error=%g \n",
-	  asserror,fdesired,meterror/v->points);
+	  asserror,fdesired,meterror/v->points/v->elements);
   v->it++;
   
   free(new);
