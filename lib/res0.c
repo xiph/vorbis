@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 implementation
- last mod: $Id: res0.c,v 1.12 2000/05/08 20:49:49 xiphmont Exp $
+ last mod: $Id: res0.c,v 1.13 2000/06/14 01:38:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -151,18 +151,43 @@ vorbis_look_residue *look (vorbis_dsp_state *vd,vorbis_info_mode *vm,
   return(look);
 }
 
-/* classify by max quantized amplitude only */
-static int _testhack(double *vec,int n,vorbis_look_residue0 *look){
+
+/* does not guard against invalid settings; eg, a subn of 16 and a
+   subgroup request of 32.  Max subn of 128 */
+static int _testhack(double *vec,int n,vorbis_look_residue0 *look,int auxparts){
   vorbis_info_residue0 *info=look->info;
-  double max=0.;
-  int i;
-  
+  int i,j=0;
+  double max,localmax=0.;
+  double temp[128];
+  double entropy[8];
+
+  /* setup */
+  for(i=0;i<n;i++)temp[i]=fabs(rint(vec[i]));
+
+  /* handle case subgrp==1 outside */
   for(i=0;i<n;i++)
-    if(fabs(vec[i])>max)max=fabs(vec[i]);
+    if(temp[i]>localmax)localmax=temp[i];
+  max=localmax;
   
-  for(i=0;i<look->parts-1;i++)
-    if(max>=info->ampmax[i])
+  while(1){
+    entropy[j]=localmax;
+    n>>=1;
+    j++;
+
+    if(n<=0)break;
+    for(i=0;i<n;i++){
+      temp[i]+=temp[i+n];
+    }
+    localmax=0.;
+    for(i=0;i<n;i++)
+      if(temp[i]>localmax)localmax=temp[i];
+  }
+
+  for(i=0;i<auxparts-1;i++)
+    if(entropy[info->subgrp[i]]<=info->entmax[i] &&
+       max<=info->ampmax[i])
       break;
+
   return(i);
 }
 
@@ -217,6 +242,9 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   int partvals=n/samples_per_partition;
   int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
   long **partword=_vorbis_block_alloc(vb,ch*sizeof(long *));
+  long auxperpart=(info->Bpoint==-1?look->parts:
+		   (info->Cpoint==-1?look->parts/2:look->parts/3));
+
   partvals=partwords*partitions_per_word;
 
   /* we find the patition type for each partition of each
@@ -231,12 +259,18 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
     memset(partword[i],0,n/samples_per_partition*sizeof(long));
   }
 
-  for(i=info->begin,l=0;i<info->end;i+=samples_per_partition,l++)
+  for(i=info->begin,l=0;i<info->end;i+=samples_per_partition,l++){
+    int offset=((info->Bpoint==-1 || l<info->Bpoint)?0:
+		((info->Cpoint==-1 || l<info->Cpoint)?auxperpart:
+		 auxperpart*2));
+    
     for(j=0;j<ch;j++)
       /* do the partition decision based on the number of 'bits'
          needed to encode the block */
-      partword[j][l]=_testhack(in[j]+i,samples_per_partition,look);
+      partword[j][l]=
+	_testhack(in[j]+i,samples_per_partition,look,auxperpart)+offset;
   
+  }
   /* we code the partition words for each channel, then the residual
      words for a partition per channel until we've written all the
      residual words for that partition word.  Then write the next
@@ -263,12 +297,12 @@ int forward(vorbis_block *vb,vorbis_look_residue *vl,
   }
 
   for(i=0;i<possible_partitions;i++)resbitsT+=resbits[i];
-  fprintf(stderr,
+  /*fprintf(stderr,
 	  "Encoded %ld res vectors in %ld phrasing and %ld res bits\n\t",
 	  ch*(info->end-info->begin),phrasebits,resbitsT);
   for(i=0;i<possible_partitions;i++)
     fprintf(stderr,"%ld(%ld):%ld ",i,resvals[i],resbits[i]);
-  fprintf(stderr,"\n");
+    fprintf(stderr,"\n");*/
  
   return(0);
 }

@@ -12,19 +12,19 @@
  ********************************************************************
 
  function: basic shared codebook operations
- last mod: $Id: sharedbook.c,v 1.3 2000/05/17 22:34:22 xiphmont Exp $
+ last mod: $Id: sharedbook.c,v 1.4 2000/06/14 01:38:32 xiphmont Exp $
 
  ********************************************************************/
 
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include "os.h"
 #include "vorbis/codec.h"
 #include "vorbis/codebook.h"
 #include "bitwise.h"
 #include "scales.h"
 #include "sharedbook.h"
-#include "os.h"
 
 /**** pack/unpack helpers ******************************************/
 int _ilog(unsigned int v){

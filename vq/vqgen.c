@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: train a VQ codebook 
- last mod: $Id: vqgen.c,v 1.31 2000/05/08 20:49:51 xiphmont Exp $
+ last mod: $Id: vqgen.c,v 1.32 2000/06/14 01:38:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -79,6 +79,7 @@ void _vqgen_seed(vqgen *v){
   long i;
   for(i=0;i<v->entries;i++)
     memcpy(_now(v,i),_point(v,i),sizeof(double)*v->elements);
+  v->seeded=1;
 }
 
 int directdsort(const void *a, const void *b){
@@ -241,9 +242,10 @@ void vqgen_unquantize(vqgen *v,quant_meta *q){
 
 void vqgen_init(vqgen *v,int elements,int aux,int entries,double mindist,
 		double  (*metric)(vqgen *,double *, double *),
-		double *(*weight)(vqgen *,double *)){
+		double *(*weight)(vqgen *,double *),int centroid){
   memset(v,0,sizeof(vqgen));
 
+  v->centroid=centroid;
   v->elements=elements;
   v->aux=aux;
   v->mindist=mindist;
@@ -264,35 +266,86 @@ void vqgen_init(vqgen *v,int elements,int aux,int entries,double mindist,
   else
     v->weight_func=_weight_null;
 
+  v->asciipoints=tmpfile();
+
 }
 
 void vqgen_addpoint(vqgen *v, double *p,double *a){
+  int k;
+  for(k=0;k<v->elements;k++)
+    fprintf(v->asciipoints,"%.12g\n",p[k]);
+  for(k=0;k<v->aux;k++)
+    fprintf(v->asciipoints,"%.12g\n",a[k]);
+
   if(v->points>=v->allocated){
     v->allocated*=2;
     v->pointlist=realloc(v->pointlist,v->allocated*(v->elements+v->aux)*
 			 sizeof(double));
   }
-  
+
   memcpy(_point(v,v->points),p,sizeof(double)*v->elements);
   if(v->aux)memcpy(_point(v,v->points)+v->elements,a,sizeof(double)*v->aux);
+ 
+  /* quantize to the density mesh if it's selected */
+  if(v->mindist>0.){
+    /* quantize to the mesh */
+    for(k=0;k<v->elements+v->aux;k++)
+      _point(v,v->points)[k]=
+	rint(_point(v,v->points)[k]/v->mindist)*v->mindist;
+  }
   v->points++;
-  if(v->points==v->entries)_vqgen_seed(v);
   if(!(v->points&0xff))spinnit("loading... ",v->points);
+}
+
+/* yes, not threadsafe.  These utils aren't */
+static int sortit=0;
+static int sortsize=0;
+static int meshcomp(const void *a,const void *b){
+  if(((sortit++)&0xfff)==0)spinnit("sorting mesh...",sortit);
+  return(memcmp(a,b,sortsize));
+}
+
+void vqgen_sortmesh(vqgen *v){
+  sortit=0;
+  if(v->mindist>0.){
+    long i,march=1;
+
+    /* sort to make uniqueness detection trivial */
+    sortsize=(v->elements+v->aux)*sizeof(double);
+    qsort(v->pointlist,v->points,sortsize,meshcomp);
+
+    /* now march through and eliminate dupes */
+    for(i=1;i<v->points;i++){
+      if(memcmp(_point(v,i),_point(v,i-1),sortsize)){
+	/* a new, unique entry.  march it down */
+	if(i>march)memcpy(_point(v,march),_point(v,i),sortsize);
+	march++;
+      }
+      spinnit("eliminating density... ",v->points-i);
+    }
+
+    /* we're done */
+    fprintf(stderr,"\r%ld training points remining out of %ld"
+	    " after density mesh (%ld%%)\n",march,v->points,march*100/v->points);
+    v->points=march;
+
+  }
+  v->sorted=1;
 }
 
 double vqgen_iterate(vqgen *v,int biasp){
   long   i,j,k;
-  long   biasable;
 
-  double fdesired=(double)v->points/v->entries;
-  long  desired=fdesired;
-  long  desired2=desired*2;
+  double fdesired;
+  long  desired;
+  long  desired2;
 
   double asserror=0.;
   double meterror=0.;
-  double *new=malloc(sizeof(double)*v->entries*v->elements);
-  long   *nearcount=malloc(v->entries*sizeof(long));
-  double *nearbias=malloc(v->entries*desired2*sizeof(double));
+  double *new;
+  double *new2;
+  long   *nearcount;
+  double *nearbias;
  #ifdef NOISY
    char buff[80];
    FILE *assig;
@@ -312,11 +365,21 @@ double vqgen_iterate(vqgen *v,int biasp){
     exit(1);
   }
 
+  if(!v->sorted)vqgen_sortmesh(v);
+  if(!v->seeded)_vqgen_seed(v);
+
+  fdesired=(double)v->points/v->entries;
+  desired=fdesired;
+  desired2=desired*2;
+  new=malloc(sizeof(double)*v->entries*v->elements);
+  new2=malloc(sizeof(double)*v->entries*v->elements);
+  nearcount=malloc(v->entries*sizeof(long));
+  nearbias=malloc(v->entries*desired2*sizeof(double));
+
   /* fill in nearest points for entry biasing */
   /*memset(v->bias,0,sizeof(double)*v->entries);*/
   memset(nearcount,0,sizeof(long)*v->entries);
   memset(v->assigned,0,sizeof(long)*v->entries);
-  biasable=0;
   if(biasp){
     for(i=0;i<v->points;i++){
       double *ppt=v->weight_func(v,_point(v,i));
@@ -324,7 +387,6 @@ double vqgen_iterate(vqgen *v,int biasp){
       double secondmetric=v->metric_func(v,_now(v,1),ppt)+v->bias[1];
       long   firstentry=0;
       long   secondentry=1;
-      int    biasflag=1;
       
       if(!(i&0xff))spinnit("biasing... ",v->points+v->points+v->entries-i);
       
@@ -373,31 +435,26 @@ double vqgen_iterate(vqgen *v,int biasp){
 	   cells in a codebook to be roughly some minimum size (as with
 	   the low resolution residue books) */
 	
-	if(localmetric>=v->mindist){
-	  
-	  /* a cute two-stage delayed sorting hack */
-	  if(k<desired){
-	    nearbiasptr[k]=thismetric;
-	    k++;
-	    if(k==desired){
-	      spinnit("biasing... ",v->points+v->points+v->entries-i);
-	      qsort(nearbiasptr,desired,sizeof(double),directdsort);
-	    }
-	    
-	  }else if(thismetric>nearbiasptr[desired-1]){
-	    nearbiasptr[k]=thismetric;
-	    k++;
-	    if(k==desired2){
-	      spinnit("biasing... ",v->points+v->points+v->entries-i);
-	      qsort(nearbiasptr,desired2,sizeof(double),directdsort);
-	      k=desired;
-	    }
+	/* a cute two-stage delayed sorting hack */
+	if(k<desired){
+	  nearbiasptr[k]=thismetric;
+	  k++;
+	  if(k==desired){
+	    spinnit("biasing... ",v->points+v->points+v->entries-i);
+	    qsort(nearbiasptr,desired,sizeof(double),directdsort);
 	  }
-	  nearcount[j]=k;
-	}else
-	  biasflag=0;
+	  
+	}else if(thismetric>nearbiasptr[desired-1]){
+	  nearbiasptr[k]=thismetric;
+	  k++;
+	  if(k==desired2){
+	    spinnit("biasing... ",v->points+v->points+v->entries-i);
+	    qsort(nearbiasptr,desired2,sizeof(double),directdsort);
+	    k=desired;
+	  }
+	}
+	nearcount[j]=k;
       }
-      biasable+=biasflag;
     }
     
     /* inflate/deflate */
@@ -410,17 +467,9 @@ double vqgen_iterate(vqgen *v,int biasp){
       /* due to the delayed sorting, we likely need to finish it off....*/
       if(nearcount[i]>desired)
 	qsort(nearbiasptr,nearcount[i],sizeof(double),directdsort);
-      
-      /* desired is the *maximum* bias queue size.  If we're using
-	 minimum distance, we're not interested in the max size... we're
-	 interested in the biasable number of points */
-      {
-	long localdesired=(double)biasable/v->entries;
-	if(localdesired)
-	  v->bias[i]=nearbiasptr[localdesired-1];
-	else
-	  v->bias[i]=nearbiasptr[0];
-      }
+
+      v->bias[i]=nearbiasptr[desired-1];
+
     }
   }else{ 
     memset(v->bias,0,v->entries*sizeof(double));
@@ -450,17 +499,35 @@ double vqgen_iterate(vqgen *v,int biasp){
           ppt[0],ppt[1]);
 #endif
 
-    firstmetric-=v->bias[firstentry];
+    firstmetric-=v->bias[j];
     meterror+=firstmetric;
-    /* set up midpoints for next iter */
-    if(v->assigned[j]++){
-      for(k=0;k<v->elements;k++)
-	vN(new,j)[k]+=ppt[k];
-      if(firstmetric>v->max[firstentry])v->max[firstentry]=firstmetric;
+
+    if(v->centroid==0){
+      /* set up midpoints for next iter */
+      if(v->assigned[j]++){
+	for(k=0;k<v->elements;k++)
+	  vN(new,j)[k]+=ppt[k];
+	if(firstmetric>v->max[j])v->max[j]=firstmetric;
+      }else{
+	for(k=0;k<v->elements;k++)
+	  vN(new,j)[k]=ppt[k];
+	v->max[j]=firstmetric;
+      }
     }else{
-      for(k=0;k<v->elements;k++)
-	vN(new,j)[k]=ppt[k];
-      v->max[firstentry]=firstmetric;
+      /* centroid */
+      if(v->assigned[j]++){
+	for(k=0;k<v->elements;k++){
+	  if(vN(new,j)[k]>ppt[k])vN(new,j)[k]=ppt[k];
+	  if(vN(new2,j)[k]<ppt[k])vN(new2,j)[k]=ppt[k];
+	}
+	if(firstmetric>v->max[firstentry])v->max[j]=firstmetric;
+      }else{
+	for(k=0;k<v->elements;k++){
+	  vN(new,j)[k]=ppt[k];
+	  vN(new2,j)[k]=ppt[k];
+	}
+	v->max[firstentry]=firstmetric;
+      }
     }
   }
 
@@ -473,8 +540,13 @@ double vqgen_iterate(vqgen *v,int biasp){
 #endif
     asserror+=fabs(v->assigned[j]-fdesired);
     if(v->assigned[j])
-      for(k=0;k<v->elements;k++)
-	_now(v,j)[k]=vN(new,j)[k]/v->assigned[j];
+      if(v->centroid==0){
+	for(k=0;k<v->elements;k++)
+	  _now(v,j)[k]=vN(new,j)[k]/v->assigned[j];
+      }else{
+	for(k=0;k<v->elements;k++)
+	  _now(v,j)[k]=(vN(new,j)[k]+vN(new2,j)[k])/2.;
+      }
   }
 
   asserror/=(v->entries*fdesired);

@@ -13,7 +13,7 @@
 
  function: libvorbis backend and mapping structures; needed for 
            static mode headers
- last mod: $Id: backends.h,v 1.8 2000/05/08 20:49:42 xiphmont Exp $
+ last mod: $Id: backends.h,v 1.9 2000/06/14 01:38:27 xiphmont Exp $
 
  ********************************************************************/
 
@@ -50,14 +50,16 @@ typedef struct{
 
 /* Floor backend generic *****************************************/
 typedef struct{
-  void               (*pack)  (vorbis_info_floor *,oggpack_buffer *);
-  vorbis_info_floor *(*unpack)(vorbis_info *,oggpack_buffer *);
-  vorbis_look_floor *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
-			       vorbis_info_floor *);
+  void                   (*pack)  (vorbis_info_floor *,oggpack_buffer *);
+  vorbis_info_floor     *(*unpack)(vorbis_info *,oggpack_buffer *);
+  vorbis_look_floor     *(*look)  (vorbis_dsp_state *,vorbis_info_mode *,
+				   vorbis_info_floor *);
+  vorbis_echstate_floor *(*state) (vorbis_info_floor *);
   void (*free_info) (vorbis_info_floor *);
   void (*free_look) (vorbis_look_floor *);
+  void (*free_state)(vorbis_echstate_floor *);
   int  (*forward)   (struct vorbis_block *,vorbis_look_floor *,
-		     double *,double *);
+		     double *,double *,vorbis_echstate_floor *);
   int  (*inverse)   (struct vorbis_block *,vorbis_look_floor *,
 		     double *);
 } vorbis_func_floor;
@@ -95,12 +97,16 @@ typedef struct vorbis_info_residue0{
 
   /* first stage (lossless partitioning) */
   int    grouping;         /* group n vectors per partition */
-  int    partitions;       /* possible codebooks ofr a partition */
+  int    partitions;       /* possible codebooks for a partition */
   int    groupbook;        /* huffbook for partitioning */
-
-  double ampmax[64];       /* book amp threshholds for *encode* */
   int    secondstages[64]; /* expanded out to pointers in lookup */
   int    booklist[256];    /* list of second stage books */
+
+  double entmax[64];       /* book entropy threshholds for *encode* */
+  double ampmax[64];       /* book amp threshholds for *encode* */
+  int    subgrp[64];       /* book subgroup size for *encode* */
+  long   Bpoint;
+  long   Cpoint;
 
 } vorbis_info_residue0;
 

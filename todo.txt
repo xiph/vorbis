@@ -1,0 +1,24 @@
+Development hit list for 1.0:
+
+libvorbis:
+
+libvorbis isn't doing the 'how much data in the last frame' trick from
+the PCM counter/last page flag.
+
+Implement correct truncated packet handling; this is mostly a case of
+'intiialize vectors and check return values' in res0.c:inverse (but
+not entirely)
+
+Meaningful error code returns
+
+Option for brute-forcing vq search on maptype 2 (helps on undertrained
+sets).
+
+API changes: 
+  break up some of the more monolithic calls (eg, allow access
+       to MDCT domain data, additional low level framing capability)
+  convenience calls for text comments
+
+other:
+
+command line suite

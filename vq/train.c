@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: utility main for training codebooks
- last mod: $Id: train.c,v 1.17 2000/05/08 20:49:51 xiphmont Exp $
+ last mod: $Id: train.c,v 1.18 2000/06/14 01:38:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -53,8 +53,10 @@ static void usage(void){
 	  "         -s[ubvector]  <start[,num]>\n"
 	  "         -e[rror]      <desired_error>\n"
 	  "         -i[terations] <maxiterations>\n"
-	  "         -d[istance]   desired minimum cell radius from midpoint\n"
+	  "         -d[istance]   quantization mesh spacing for density limitation\n"
 	  "         -b <dummy>    eliminate cell size biasing; use normal LBG\n\n"
+	  "         -c <dummy>    Use centroid (not median) midpoints\n"
+
 	  "examples:\n"
 	  "   train a new codebook to 1%% tolerance on datafile 'foo':\n"
 	  "      xxxvqtrain book -p 256,6,8 -e .01 foo\n"
@@ -80,6 +82,7 @@ int main(int argc,char *argv[]){
   double desired=.05,mindist=0.;
   int iter=1000;
   int biasp=1;
+  int centroid=0;
 
   FILE *out=NULL;
   char *line;
@@ -132,7 +135,7 @@ int main(int argc,char *argv[]){
       }
       
       vqgen_init(&v,dim,vqext_aux,entries,mindist,
-		 vqext_metric,vqext_weight);
+		 vqext_metric,vqext_weight,centroid);
       init=1;
       
       /* quant setup */
@@ -154,7 +157,7 @@ int main(int argc,char *argv[]){
       }      
       vqgen_unquantize(&v,&q);
 
-      /* bias, points */
+      /* bias */
       i=0;
       for(j=0;j<entries;j++){
 	line=rline(in,out,0);
@@ -162,10 +165,10 @@ int main(int argc,char *argv[]){
 	v.bias[i++]=a;
       }
       
+      v.seeded=1;
       {
 	double *b=alloca((dim+vqext_aux)*sizeof(double));
 	i=0;
-	v.entries=0; /* hack to avoid reseeding */
 	while(1){
 	  for(k=0;k<dim+vqext_aux;k++){
 	    line=rline(in,out,0);
@@ -175,7 +178,6 @@ int main(int argc,char *argv[]){
 	  if(feof(in))break;
 	  vqgen_addpoint(&v,b,b+dim);
 	}
-	v.entries=entries;
       }
       
       fclose(in);
@@ -210,6 +212,7 @@ int main(int argc,char *argv[]){
       case 'd':
 	if(sscanf(argv[1],"%lf",&mindist)!=1)
 	  goto syner;
+	if(init)v.mindist=mindist;
 	break;
       case 'i':
 	if(sscanf(argv[1],"%d",&iter)!=1)
@@ -217,6 +220,9 @@ int main(int argc,char *argv[]){
 	break;
       case 'b':
 	biasp=0;
+	break;
+      case 'c':
+	centroid=1;
 	break;
       default:
 	fprintf(stderr,"Unknown option %s\n",argv[0]);
@@ -235,7 +241,7 @@ int main(int argc,char *argv[]){
 	  exit(1);
 	}
 	vqgen_init(&v,dim,vqext_aux,entries,mindist,
-		   vqext_metric,vqext_weight);
+		   vqext_metric,vqext_weight,centroid);
 	init=1;
       }
 
@@ -330,13 +336,21 @@ int main(int argc,char *argv[]){
   for(j=0;j<entries;j++)
     fprintf(out,"%f\n",v.bias[i++]);
 
+  /* we may have done the density limiting mesh trick; refetch the
+     training points from the temp file */
+
+  rewind(v.asciipoints);
   fprintf(out,"# points---\n");
-  i=0;
-  for(j=0;j<v.points;j++)
-    for(k=0;k<dim+vqext_aux;k++)
-      fprintf(out,"%f\n",v.pointlist[i++]);
+  {
+    /* sloppy, no error handling */
+    long bytes;
+    char buff[4096];
+    while((bytes=fread(buff,1,4096,v.asciipoints)))
+      while(bytes)bytes-=fwrite(buff,1,bytes,out);
+  }
 
   fclose(out);
+  fclose(v.asciipoints);
 
   vqgen_unquantize(&v,&q);
   vqgen_cellmetric(&v);

@@ -1,6 +1,5 @@
 # vorbis makefile configured for use with gcc on any platform
-
-# $Id: Makefile.in,v 1.28 2000/05/26 23:08:36 dbt Exp $
+# $Id: Makefile.in,v 1.29 2000/06/14 01:38:30 xiphmont Exp $
 
 ###############################################################################
 #                                                                             #
@@ -86,7 +85,6 @@ vorbisfile.a:	$(VF_LFILES)
 
 psytune:	$(PSY_FILES)
 	        $(CC) $(CFLAGS) $(LDFLAGS) $(PSY_FILES) -o $@ $(LIBS)
-
 
 $(LFILES): 	$(HFILES)
 $(VF_LFILES): 	$(VF_HFILES)

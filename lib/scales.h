@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: linear scale -> dB, Bark and Mel scales
- last mod: $Id: scales.h,v 1.4 2000/05/27 18:43:58 jon Exp $
+ last mod: $Id: scales.h,v 1.5 2000/06/14 01:38:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -41,11 +41,11 @@
 #define toMEL(f)    (log(1.+(f)*.001)*1442.695)
 #define fromMEL(m)  (1000.*exp((m)/1442.695)-1000.)
 
-/* Frequency to octave.  We arbitrarily declare 250.0 Hz to be octave
+/* Frequency to octave.  We arbitrarily declare 125.0 Hz to be octave
    0.0 */
 
-#define toOC(f)     (log(f)*1.442695-7.965784)
-#define fromOC(o)   (exp(((o)+7.965784)*.693147))
+#define toOC(f)     (log(f)*1.442695-6.965784)
+#define fromOC(o)   (exp(((o)+6.965784)*.693147))
 
 #endif
 

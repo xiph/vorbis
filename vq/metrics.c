@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: function calls to collect codebook metrics
- last mod: $Id: metrics.c,v 1.7 2000/05/08 20:49:50 xiphmont Exp $
+ last mod: $Id: metrics.c,v 1.8 2000/06/14 01:38:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -217,7 +217,7 @@ double process_one(codebook *b,int book,double *a,int dim,int step,int addmul,
   if(book==0){
     double last=base;
     for(j=0;j<dim;j++){
-      amplitude=a[j*step]-last;
+      amplitude=a[j*step]-(b->c->q_sequencep?last:0);
       meanamplitude_acc+=fabs(amplitude);
       meanamplitudesq_acc+=amplitude*amplitude;
       count++;
@@ -235,6 +235,11 @@ double process_one(codebook *b,int book,double *a,int dim,int step,int addmul,
   }
 
   entry=vorbis_book_besterror(b,a,step,addmul);
+
+  if(entry==-1){
+    fprintf(stderr,"Internal error: _best returned -1.\n");
+    exit(1);
+  }
   
   histogram[book][entry]++;  
   bits+=vorbis_book_codelen(b,entry);

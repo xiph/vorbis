@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.17 2000/05/08 20:49:48 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.18 2000/06/14 01:38:31 xiphmont Exp $
 
  Preecho calculation.
 
@@ -38,10 +38,11 @@ void _ve_envelope_init(envelope_lookup *e,int samples_per){
   e->window=malloc(e->winlen*sizeof(double));
   mdct_init(&e->mdct,e->winlen);
 
-  /* We just use a straight sin(x) window for this */
-  for(i=0;i<e->winlen;i++)
+  /* We just use a straight sin^2(x) window for this */
+  for(i=0;i<e->winlen;i++){
     e->window[i]=sin((i+.5)/e->winlen*M_PI);
-
+    e->window[i]*=e->window[i];
+  }
 }
 
 void _ve_envelope_clear(envelope_lookup *e){

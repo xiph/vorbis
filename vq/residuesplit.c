@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: residue backend 0 partitioner/classifier
- last mod: $Id: residuesplit.c,v 1.2 2000/05/08 20:49:42 xiphmont Exp $
+ last mod: $Id: residuesplit.c,v 1.3 2000/06/14 01:38:26 xiphmont Exp $
 
  ********************************************************************/
 
@@ -21,30 +21,63 @@
 #include <math.h>
 #include <stdio.h>
 #include "../vq/bookutil.h"
+#include "../lib/sharedbook.h"
+
+/* does not guard against invalid settings; eg, a subn of 16 and a
+   subgroup request of 32.  Max subn of 128 */
+static void _testhack(double *vec,int n,double *entropy){
+  int i,j=0;
+  double max=0.;
+  double temp[128];
+
+  /* setup */
+  for(i=0;i<n;i++)temp[i]=fabs(rint(vec[i]));
+
+  /* handle case subgrp==1 outside */
+  for(i=0;i<n;i++)
+    if(temp[i]>max)max=temp[i];
+
+  while(1){
+    entropy[j]=max;
+    n>>=1;
+    j++;
+
+    if(n<=0)break;
+    for(i=0;i<n;i++){
+      temp[i]+=temp[i+n];
+    }
+    max=0.;
+    for(i=0;i<n;i++)
+      if(temp[i]>max)max=temp[i];
+  }
+}
 
 static FILE *of;
 static FILE **or;
 
-/* currently classify only by maximum amplitude */
-
+/* we evaluate the the entropy measure for each interleaved subgroup */
 /* This is currently a bit specific to/hardwired for mapping 0; things
    will need to change in the future when we get real multichannel
    mappings */
+int quantaux(double *res,int n,double *ebound,double *mbound,int *subgrp,int parts, int subn){
+  long i,j;
+  double entropy[8];
+  int aux;
 
-int quantaux(double *res,int n,double *bound,int parts, int subn){
-  long i,j,aux;
-  
   for(i=0;i<=n-subn;i+=subn){
     double max=0.;
+
+    _testhack(res+i,subn,entropy);
     for(j=0;j<subn;j++)
       if(fabs(res[i+j])>max)max=fabs(res[i+j]);
-    
+
     for(j=0;j<parts-1;j++)
-      if(max>=bound[j])
+      if(entropy[subgrp[j]]<=ebound[j] &&
+	 max<=mbound[j])
 	break;
     aux=j;
     
-    fprintf(of,"%ld, ",aux);
+    fprintf(of,"%d, ",aux);
     
     for(j=0;j<subn;j++)
       fprintf(or[aux],"%g, ",res[j+i]);
@@ -82,12 +115,15 @@ static int getline(FILE *in,double *vec,int begin,int n){
 static void usage(){
   fprintf(stderr,
 	  "usage:\n" 
-	  "residuesplit <res> <begin,n,group> <baseout> <min> [<min>]...\n"
+	  "residuesplit <res> <begin,n,group> <baseout> <ent,peak,sub> [<ent,peak,sub>]...\n"
 	  "   where begin,n,group is first scalar, \n"
 	  "                          number of scalars of each in line,\n"
 	  "                          number of scalars in a group\n"
-	  "         min is the minimum peak value required for membership in a group\n"
-	  "eg: residuesplit mask.vqd floor.vqd 0,1024,16 res 25.5 13.5 7.5 1.5 0\n"
+	  "         ent is the maximum entropy value allowed for membership in a group\n"
+	  "         peak is the maximum amplitude value allowed for membership in a group\n"
+	  "         subn is the maximum entropy value allowed for membership in a group\n"
+	           
+	  "eg: residuesplit mask.vqd floor.vqd 0,1024,16 res 0,.5,16 3,1.5,8 \n"
 	  "produces resaux.vqd and res_0...n.vqd\n\n");
   exit(1);
 }
@@ -95,9 +131,9 @@ static void usage(){
 int main(int argc, char *argv[]){
   char *buffer;
   char *base;
-  int i,parts,begin,n,subn;
+  int i,parts,begin,n,subn,*subgrp;
   FILE *res;
-  double *bound,*vec;
+  double *ebound,*mbound,*vec;
   long c=0;
   if(argc<5)usage();
 
@@ -123,12 +159,39 @@ int main(int argc, char *argv[]){
 
   /* how many parts?... */
   parts=argc-3;
-  bound=malloc(sizeof(double)*parts);
-
+  
+  ebound=malloc(sizeof(double)*parts);
+  mbound=malloc(sizeof(double)*parts);
+  subgrp=malloc(sizeof(int)*parts);
+  
   for(i=0;i<parts-1;i++){
-    bound[i]=atof(argv[4+i]);
+    char *pos=strchr(argv[4+i],',');
+    if(*argv[4+i]==',')
+      ebound[i]=1e50;
+    else
+      ebound[i]=atof(argv[4+i]);
+
+    if(!pos){
+      mbound[i]=1e50;
+      subgrp[i]=_ilog(subn)-1;
+     }else{
+       if(*(pos+1)==',')
+	 mbound[i]=1e50;
+       else
+	 mbound[i]=atof(pos+1);
+       pos=strchr(pos+1,',');
+       
+       if(!pos){
+	 subgrp[i]=_ilog(subn)-1;
+       }else{
+	 subgrp[i]=_ilog(atoi(pos+1))-1;
+       }
+     }
   }
-  bound[i]=0;
+
+  ebound[i]=1e50;
+  mbound[i]=1e50;
+  subgrp[i]=_ilog(subn)-1;
 
   res=fopen(argv[1],"r");
   if(!res){
@@ -156,7 +219,7 @@ int main(int argc, char *argv[]){
   /* get the input line by line and process it */
   while(!feof(res)){
     if(getline(res,vec,begin,n))
-      quantaux(vec,n,bound,parts,subn);
+      quantaux(vec,n,ebound,mbound,subgrp,parts,subn);
     c++;
     if(!(c&0xf)){
       spinnit("kB so far...",(int)(ftell(res)/1024));

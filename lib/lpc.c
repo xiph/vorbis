@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: LPC low level routines
-  last mod: $Id: lpc.c,v 1.20 2000/05/08 20:49:49 xiphmont Exp $
+  last mod: $Id: lpc.c,v 1.21 2000/06/14 01:38:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -127,6 +127,7 @@ double vorbis_lpc_from_curve(double *curve,double *lpc,lpc_lookup *l){
     work[i*2]=curve[i]*fscale;
     work[i*2+1]=0;
   }
+  work[n*2-1]=curve[n-1]*fscale;
   
   n*=2;
   drft_backward(&l->fft,work);

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.14 2000/05/08 20:49:48 xiphmont Exp $
+ last mod: $Id: codebook.c,v 1.15 2000/06/14 01:38:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -272,10 +272,18 @@ be encoded that way, but to change it, one will need to add more
 infrastructure on the encode side (decode side is specced and simpler) */
 
 /* floor0 LSP (single stage, non interleaved, nearest match) */
-/* returns the number of bits and *modifies a* to the quantization value *****/
-int vorbis_book_encodev(codebook *book,double *a,oggpack_buffer *b){
+/* returns entry number and *modifies a* to the quantization value *****/
+int vorbis_book_errorv(codebook *book,double *a){
   int dim=book->dim,k;
   int best=_best(book,a,1);
+  for(k=0;k<dim;k++)
+    a[k]=(book->valuelist+best*dim)[k];
+  return(best);
+}
+
+/* returns the number of bits and *modifies a* to the quantization value *****/
+int vorbis_book_encodev(codebook *book,int best,double *a,oggpack_buffer *b){
+  int k,dim=book->dim;
   for(k=0;k<dim;k++)
     a[k]=(book->valuelist+best*dim)[k];
   return(vorbis_book_encode(book,best,b));
