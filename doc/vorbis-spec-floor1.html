@@ -1,0 +1,124 @@
+<HTML><HEAD><TITLE>xiph.org: Ogg Vorbis documentation</TITLE>
+<BODY bgcolor="#ffffff" text="#202020" link="#006666" vlink="#000000">
+<nobr><img src="white-ogg.png"><img src="vorbisword2.png"></nobr><p>
+
+<h1><font color=#000070>
+Ogg Vorbis I format specification: floor type 1 setup and decode
+</font></h1>
+
+<em>Last update to this document: July 17, 2002</em><br>
+
+<h1>Overview</h1>
+
+Vorbis floor type one uses a piecewise stright-line representation to
+encode a spectral envelope curve. The representation plots this curve
+mechanically on a linear frequency axis and a logarithmic (dB)
+amplitude axis. The integer plotting algorithm used is similar to
+Bresenham's algorithm.<p>
+
+<h1>Floor 1 format</h1>
+
+<h2>model</h2> Floor type one represents a spectral curve as series of
+line segments.  Synthesis constructs a floor curve using iterative
+refinement in a process roughly equivalent to the following simplified
+description:<p>
+
+<ul><li> the first line segment (base case) is a logical line spanning
+from x_0,y_0 to x_1,y_1 where in the base case x_0=0 and x_1=[n], the
+full range of the spectral floor to be computed.<p>
+
+<li>the induction step chooses a point x_new within an existing
+logical line segment and produces a y_new value at that point computed
+from the existing line's y value at x_new (as plotted by the line) and
+a difference value decoded from the bitstream packet.<p>
+
+<li>floor computation produces two new line segments, one running from
+x_0,y_0 to x_new,y_new and from x_new,y_new to x_1,y_1. This step is
+performed logically even if y_new represents no change to the
+amplitude value at x_new so that later refinement is additionally
+bounded at x_new.<p>
+
+<li>the induction step repeats, using a list of x values specified in
+the codec setup header at floor 1 initiialization time.  Computation
+is completed at the end of the x value list.
+
+</ul>
+
+Consider the following example, with values chosen for ease of
+understanding rather than representing typical configuration:<p>
+
+We assume a floor setup with an [n] of 128.  The list of selected X
+values in increasing order are 0,16,32,48,64,80,96,112 and 128.  In
+list order, they're interleaved as 0, 128, 64, 32, 96, 16, 48, 80 and
+112.  The corresponding list-order Y values as decoded from the
+bitstream are 110, 20, -5, -45, 0, -25, -10, 30 and -10.  We compute
+the floor in the following way, beginning with the first line:<p>
+
+<img src="floor1-1.png"><p>
+
+We now draw new logical lines to reflect the correction to new_Y, and
+iterate for X positions 32 and 96:<p>
+
+<img src="floor1-2.png"><p>
+
+Although the new Y value at X position 96 is unchanged, it is still
+used later as an endpoint for further refinement.  From here on, the
+pattern should be clear; we complete the floor computation as follows:<p>
+
+<img src="floor1-3.png"><p>
+<img src="floor1-4.png"><p>
+
+A more efficient algorithm with carefully defined integer rounding
+behavior is used for actual decode, as described later.  The actual
+algorithm splits Y value computation and line plotting into two steps
+with modifications to the above algorithm to eliminate noise
+accumulation through integer roundoff/truncation. <p>
+
+<h2>header decode</h2>
+
+A list of floor X values is stored in the packet header in interleaved
+format (used in list order during packet decode and synthesis).  This
+list is split into partitions, and each partition is assigned to a
+partition class.  The partition class defines the codebooks to be used
+during synthesis to decode the Y values coresponding to the X
+locations in that parition.  X positions 0 and [n] are implicit and do
+not belong to an explicit partition or partition class.
+
+
+<h2>packet decode</h2>
+
+<h2>curve computation</h2>
+
+</pre>
+
+<hr>
+<a href="http://www.xiph.org/">
+<img src="white-xifish.png" align=left border=0>
+</a>
+<font size=-2 color=#505050>
+
+Ogg is a <a href="http://www.xiph.org">Xiph.org Foundation</a> effort
+to protect essential tenets of Internet multimedia from corporate
+hostage-taking; Open Source is the net's greatest tool to keep
+everyone honest. See <a href="http://www.xiph.org/about.html">About
+the Xiph.org Foundation</a> for details.
+<p>
+
+Ogg Vorbis is the first Ogg audio CODEC.  Anyone may freely use and
+distribute the Ogg and Vorbis specification, whether in a private,
+public or corporate capacity.  However, the Xiph.org Foundation and
+the Ogg project (xiph.org) reserve the right to set the Ogg Vorbis
+specification and certify specification compliance.<p>
+
+Xiph.org's Vorbis software CODEC implementation is distributed under a
+BSD-like license.  This does not restrict third parties from
+distributing independent implementations of Vorbis software under
+other licenses.<p>
+
+Ogg, Vorbis, Xiph.org Foundation and their logos are trademarks (tm)
+of the <a href="http://www.xiph.org/">Xiph.org Foundation</a>.  These
+pages are copyright (C) 1994-2002 Xiph.org Foundation. All rights
+reserved.<p>
+
+</body>
+
