@@ -2,4 +2,4 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = mode_AA.h mode_A.h mode_B.h mode_C.h mode_D.h mode_E.h modes.h
+EXTRA_DIST = maskadj_Z.h mode_44c_Z.h mode_AA.h mode_A.h mode_B.h mode_C.h mode_D.h mode_E.h modes.h mode_Za.h mode_Zb.h mode_Zc.h

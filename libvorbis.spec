@@ -1,5 +1,5 @@
 %define name	libvorbis
-%define version	1.0rc1
+%define version	1.0rc2
 %define release 1
 
 Summary:	The Vorbis General Audio Compression Codec
@@ -12,7 +12,7 @@ URL:		http://www.xiph.org/
 Vendor:		Xiphophorus <team@xiph.org>
 Source:		ftp://ftp.xiph.org/pub/ogg/vorbis/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-root
-Requires:	libogg >= 1.0beta4
+Requires:	libogg >= 1.0rc2
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
@@ -22,7 +22,7 @@ and variable bitrates from 16 to 128 kbps/channel.
 %package devel
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
-Requires:	libogg-devel >= 1.0beta4
+Requires:	libogg-devel >= 1.0rc2
 Requires:	libvorbis-devel = %{version}
 
 %description devel
