@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.7 2000/06/14 01:38:31 xiphmont Exp $
+ last mod: $Id: os.h,v 1.8 2000/07/07 00:48:19 xiphmont Exp $
 
  ********************************************************************/
 
@@ -39,6 +39,14 @@
 #  define FAST_HYPOT hypot
 #endif
 
+#endif
+
+#ifdef USE_ALLOCA_H
+#include <alloca.h>
+#endif
+
+#ifdef USE_MEMORY_H
+#include <memory.h>
 #endif
 
 #ifndef min
