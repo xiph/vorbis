@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.29 2001/01/22 01:38:24 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.30 2001/01/31 23:58:49 xiphmont Exp $
 
  Preecho calculation.
 
@@ -30,10 +30,6 @@
 #include "scales.h"
 #include "envelope.h"
 #include "misc.h"
-
-/* We use a Chebyshev bandbass for the preecho trigger bandpass; it's
-   close enough for sample rates 32000-48000 Hz (corner frequencies at
-   6k/14k assuming sample rate of 44.1kHz) */
 
 /* Digital filter designed by mkfilter/mkshape/gencode A.J. Fisher
    Command line: /www/usr/fisher/helpers/mkfilter -Ch \
@@ -57,6 +53,26 @@ static float cheb_bandpass_A[]={
   0.0303413711f};
 #endif 
 
+/* 4kHz Chebyshev highpass */
+static int    cheb_highpass_stages=10;
+static float cheb_highpass_gain= 1.314337427e+01f;
+/* z^-stage, z^-stage+1... */
+static float cheb_highpass_B[]={1.f,-10.f,45.f,-120.f,210.f,
+				-252.f,210.f,-120.f,45.f,-10.f,1.f};
+static float cheb_highpass_A[]={
+  -0.1013448254f,
+  0.4524819695f,
+  -1.3268091670f,
+  3.2875726855f,
+  -7.2782468961f,
+  13.0298867474f,
+  -17.6698599469f,
+  17.2757670409f,
+  -11.6207967046f,
+  4.8672119675f};
+
+#if 0
+/* 6kHz Chebyshev highpass */
 static int    cheb_highpass_stages=10;
 static float cheb_highpass_gain= 5.291963434e+01f;
 /* z^-stage, z^-stage+1... */
@@ -73,6 +89,7 @@ static float cheb_highpass_A[]={
   4.1950871291f,
   -4.2771757867f,
   2.3920318913f};
+#endif
 
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -164,7 +181,8 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
   envelope_lookup *ve=((backend_lookup_state *)(v->backend_state))->ve;
-  long i,j;
+  long i,j,k;
+  float *work=alloca(sizeof(float)*ve->winlength*2);
 
   /* make sure we have enough storage to match the PCM */
   if(v->pcm_storage>ve->storage){
@@ -211,7 +229,31 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
       }
       /*granulepos++;*/
     }
-    
+
+    /* look also for preecho in coupled channel pairs with the center
+       subtracted out (A-B) */
+    for(i=1;i<ve->ch;i+=2){
+      float *filteredA=ve->filtered[i-1]+j-ve->winlength;
+      float *filteredB=ve->filtered[i]+j-ve->winlength;
+      float m;
+
+      for(k=0;k<ve->winlength*2;k++)
+	work[k]=filteredA[k]-filteredB[k];
+
+      m=_ve_deltai(ve,work,work+ve->winlength);
+      
+      if(m>ci->preecho_thresh){
+	/*granulepos++;*/
+	return(0);
+      }
+      if(m<ci->postecho_thresh){
+	/*granulepos++;*/
+	return(0);
+      }
+      /*granulepos++;*/
+    }
+
+
     j+=min(ci->blocksizes[0],ve->winlength)/2;
 
     if(j>=searchpoint){
