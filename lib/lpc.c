@@ -14,16 +14,15 @@
   function: LPC low level routines
   author: Monty <monty@xiph.org>
   modifications by: Monty
-  last modification date: Aug 02 1999
+  last modification date: Aug 22 1999
 
  ********************************************************************/
 
 /* Some of these routines (autocorrelator, LPC coefficient estimator)
-   are directly derived from and/or modified from code written by
-   Jutta Degener and Carsten Bormann; thus we include their copyright
-   below.  The entirety of this file is freely redistributable on the
-   condition that both of these copyright notices are preserved
-   without modification.  */
+   are derived from code written by Jutta Degener and Carsten Bormann;
+   thus we include their copyright below.  The entirety of this file
+   is freely redistributable on the condition that both of these
+   copyright notices are preserved without modification.  */
 
 /* Preserved Copyright: *********************************************/
 
@@ -48,10 +47,12 @@ Carsten Bormann
 *********************************************************************/
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include "smallft.h"
 #include "lpc.h"
+#include "xlogmap.h"
 
 /* This is pared down for Vorbis where we only use LPC to encode
    spectral envelope curves.  Thus we only are interested in
@@ -62,7 +63,53 @@ Carsten Bormann
 /*  Input : n element envelope curve
     Output: m lpc coefficients, excitation energy */
 
-double vorbis_curve_to_lpc(double *curve,int n,double *lpc,int m){
+double memcof(double *data, int n, int m, double *d){
+  int k,j,i;
+  double p=0.,wk1[n],wk2[n],wkm[m],xms;
+  
+  memset(wk1,0,sizeof(wk1));
+  memset(wk2,0,sizeof(wk2));
+  memset(wkm,0,sizeof(wkm));
+    
+  for (j=0;j<n;j++) p += data[j]*data[j];
+  xms=p/n;
+
+  wk1[0]=data[0];
+  wk2[n-2]=data[n-1];
+
+  for (j=2;j<=n-1;j++) {
+    wk1[j-1]=data[j-1];
+    wk2[j-2]=data[j-1];
+  }
+
+  for (k=1;k<=m;k++) {
+    double num=0.,denom=0.;
+    for (j=1;j<=(n-k);j++) {
+
+      num += wk1[j-1]*wk2[j-1];
+      denom += wk1[j-1]*wk1[j-1] + wk2[j-1]*wk2[j-1];
+
+    }
+
+    d[k-1]=2.0*num/denom;
+    xms *= (1.0-d[k-1]*d[k-1]);
+
+    for (i=1;i<=(k-1);i++)
+      d[i-1]=wkm[i-1]-d[k-1]*wkm[k-i-1];
+
+    if (k == m) return xms;
+   
+    for (i=1;i<=k;i++) wkm[i-1]=d[i-1];
+    for (j=1;j<=(n-k-1);j++) {
+
+      wk1[j-1] -= wkm[k-1]*wk2[j-1];
+      wk2[j-1]=wk2[j]-wkm[k-1]*wk1[j];
+
+    }
+  }
+}
+
+static double vorbis_gen_lpc(double *curve,int n,double *lpc,int m){
   double aut[m+1],work[n+n],error;
   drft_lookup dl;
   int i,j;
@@ -136,36 +183,147 @@ double vorbis_curve_to_lpc(double *curve,int n,double *lpc,int m){
 
 /* One can do this the long way by generating the transfer function in
    the time domain and taking the forward FFT of the result.  The
-   results from direct calculation are cleaner and faster, however */
+   results from direct calculation are cleaner and faster. If one
+   looks at the below in the context of the calling function, there's
+   lots of redundant trig, but at least it's clear */
 
 static double vorbis_lpc_magnitude(double w,double *lpc, int m){
   int k;
   double real=1,imag=0;
+  double wn=w;
   for(k=0;k<m;k++){
-    real+=lpc[k]*cos((k+1)*w);
-    imag+=lpc[k]*sin((k+1)*w);
+    real+=lpc[k]*cos(wn);
+    imag+=lpc[k]*sin(wn);
+    wn+=w;
   }  
   return(1./sqrt(real*real+imag*imag));
 }
 
+/* On top of this basic LPC infrastructure we introduce two modifications:
+
+   1) Filter generation is limited in the resolution of features it
+   can represent (this is more obvious when the filter is looked at as
+   a set of LSP coefficients).  Human perception of the audio spectrum
+   is logarithmic not only in amplitude, but also frequency.  Because
+   the high frequency features we'll need to encode will be broader
+   than the low frequency features, filter generation will be
+   dominated by higher frequencies (when most of the energy is in the
+   lowest frequencies, and greatest perceived resolution is in the
+   midrange).  To avoid this effect, Vorbis encodes the frequency
+   spectrum with a biased log frequency scale. The intent is to
+   roughly equalize the sizes of the octaves (see xlogmap.h)
+
+   2) When we change the frequency scale, we also change the
+   (apparent) relative energies of the bands; that is, on a log scale
+   covering 5 octaves, the highest octave goes from being represented
+   in half the bins, to only 1/32 of the bins.  If the amplitudes
+   remain the same, we have divided the energy represented by the
+   highest octave by 16 (as far as Levinson-Durbin is concerned).
+   This will seriously skew filter generation, which bases calculation
+   on the mean square error with respect to energy.  Thus, Vorbis
+   normalizes the amplitudes of the log spectrum frequencies to keep
+   the relative octave energies correct. */
+
+/* n == size of vector to be used for filter, m == order of filter,
+   oct == octaves in normalized scale, encode_p == encode (1) or
+   decode (0) */
+
+double lpc_init(lpc_lookup *l,int n, int m, int oct, int encode_p){
+  double bias=LOG_BIAS(n,oct);
+  double scale=(float)n/(float)oct; /* where n==mapped */    
+  int i;
+
+  l->n=n;
+  l->m=m;
+  l->escale=malloc(n*sizeof(double));
+  l->dscale=malloc(n*sizeof(double));
+  l->norm=malloc(n*sizeof(double));
+
+  for(i=0;i<n;i++){
+    /* how much 'real estate' in the log domain does the bin in the
+       linear domain represent? */
+    double logA=LOG_X(i-.5,bias);
+    double logB=LOG_X(i+.5,bias);
+    l->norm[i]=logB-logA;  /* this much */
+  }
+
+  /* the scale is encode/decode specific for algebraic simplicity */
+
+  if(encode_p){
+    /* encode */
+
+    for(i=0;i<n;i++)
+      l->escale[i]=LINEAR_X(i/scale,bias);
+    
+  }
+  /* decode; encode may use this too */
+  
+  {
+    double w=1./oct*M_PI;
+    for(i=0;i<n;i++)
+      l->dscale[i]=LOG_X(i,bias)*w;   
+  }
+}
+
+void lpc_clear(lpc_lookup *l){
+  if(l){
+    if(l->escale)free(l->escale);
+    free(l->dscale);
+    free(l->norm);
+  }
+}
+
+
+/* less efficient than the decode side (written for clarity).  We're
+   not bottlenecked here anyway */
+
+double vorbis_curve_to_lpc(double *curve,double *lpc,lpc_lookup *l){
+  /* map the input curve to a log curve for encoding */
+
+  /* for clarity, mapped and n are both represented although setting
+     'em equal is a decent rule of thumb. */
+  
+  int n=l->n;
+  int m=l->m;
+  int mapped=n;
+  double work[mapped];
+  int i;
+
+  /* fairly correct for low frequencies, naieve for high frequencies
+     (suffers from undersampling) */
+
+  for(i=0;i<mapped;i++){
+    double lin=l->escale[i];
+    int a=floor(lin);
+    int b=ceil(lin);
+    double del=lin-floor(lin);
+
+    work[i]=(curve[a]/l->norm[a]*(1.-del)+
+	     curve[b]/l->norm[b]*del);      
+
+  }
+
+  memcpy(curve,work,sizeof(work));
+
+  return vorbis_gen_lpc(work,mapped,lpc,l->m);
+}
+
 /* generate the whole freq response curve on an LPC IIR filter */
 
-void vorbis_lpc_to_curve(double *curve,int n,double *lpc, double amp,int m){
+void vorbis_lpc_to_curve(double *curve,double *lpc,double amp,lpc_lookup *l){
   int i;
-  double w=1./n*M_PI;
-  for(i=0;i<n;i++)
-    curve[i]=vorbis_lpc_magnitude(i*w,lpc,m)*amp;
+  for(i=0;i<l->n;i++)
+    curve[i]=vorbis_lpc_magnitude(l->dscale[i],lpc,l->m)*amp*l->norm[i];
 }
 
 /* find frequency response of LPC filter only at nonsero residue
    points and apply the envelope to the residue */
 
-void vorbis_lpc_apply(double *residue,int n,double *lpc, double amp,int m){
+void vorbis_lpc_apply(double *residue,double *lpc,double amp,lpc_lookup *l){
   int i;
-  double w=1./n*M_PI;
-  for(i=0;i<n;i++)
+  for(i=0;i<l->n;i++)
     if(residue[i])
-      residue[i]*=vorbis_lpc_magnitude(i*w,lpc,m)*amp;
+      residue[i]*=vorbis_lpc_magnitude(l->dscale[i],lpc,l->m)*amp*l->norm[i];
 }
 
 
