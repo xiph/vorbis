@@ -132,46 +132,7 @@ fi
 
 AC_HEADER_STDC
 
-dnl AC_PATH_X
-dnl AC_PATH_XTRA
-
-#AC_CHECK_LIB(pthread, pthread_create, 
-#	pthread_lib="-lpthread"; AC_DEFINE(HAVE_LIBPTHREAD), :)
-# We no longer use config.h
-AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
-
-#dnl Linuxthreads require you to define _REENTRANT in all threaded
-#dnl code.  Bogus, bogus...
-#
-#if test -n "$pthread_lib"; then
-#	case $host in 
-#	i?86-*-linux*)
-#		AC_DEFINE(_REENTRANT)
-#		;;
-#	esac
-#fi
-# We no longer use config.h
-
-#if test -n "$x_libraries"; then
-#	XOGG="yes"
-#
-#	dnl If we find libgtk installed, great; otherwise assume we have
-#	dnl to build it ourselves.
-#
-#	AC_CHECK_LIB(gtk, gtk_main, :, LIBGTKDIR="libgtk", $X_LIBS -lglib -lgdk -lX11 -lXext -lm)
-#
-#	dnl libpthread is required for xogg.
-#
-#	if test -z "$pthread_lib"; then XOGG=""; fi
-#
-#	dnl If we don't have libgtk installed, and we don't have a libgtk 
-#	dnl  subdirectory to build the library ourself, we can't build xogg.
-#
-#	if test -n "$LIBGTKDIR" -a ! -d "$LIBGTKDIR"; then
-#		XOGG=""
-#		LIBGTKDIR=""
-#	fi
-#fi
+AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread")
 
 dnl This seems to be the only way to make autoconf only *sometimes* configure
 dnl a subdirectory with AC_CONFIG_SUBDIRS.  "__noconf" is assumed to not 
@@ -180,13 +141,6 @@ dnl the shell variable $dummy is reset to an existing directory inside the
 dnl if clause.
 
 dummy="__noconf"
-
-#if test -d "$LIBGTKDIR"; then
-#	enable_shared="no"; export enable_shared
-#	dummy="libgtk"
-#	AC_CONFIG_SUBDIRS("$dummy")
-#	X_LIBS="-L${srcdir}/libgtk/gtk/.libs -L${srcdir}/libgtk/gdk/.libs -L${srcdir}/libgtk/glib/.libs $X_LIBS"
-#fi
 
 # check macro modified from Jon Shiring's to compensate for autoconf's lagging
 # behind the times on type madness
@@ -322,10 +276,8 @@ dnl --------------------------------------------------
 dnl Do substitutions
 dnl --------------------------------------------------
 
-AC_SUBST(LIBS)
 AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
-AC_SUBST(CC)
 AC_SUBST(pthread_lib)
 
 AC_OUTPUT(Makefile lib/Makefile doc/Makefile include/Makefile include/vorbis/Makefile include/vorbis/book/Makefile examples/Makefile)
