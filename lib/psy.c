@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.4 2000/03/31 00:23:02 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.5 2000/04/01 12:51:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -421,6 +421,7 @@ static int comp(const void *a,const void *b){
 
 /* this applies the floor and (optionally) tries to preserve noise
    energy in low resolution portions of the spectrum */
+/* f and flr are *linear* scale, not dB */
 void _vp_apply_floor(vorbis_look_psy *p,double *f, 
 		      double *flr){
   double *work=alloca(p->n*sizeof(double));
@@ -430,15 +431,11 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 
   /* subtract the floor */
   for(j=0;j<p->n;j++){
-    if(f[j]==0)
+    if(flr[j]<=0)
       work[j]=0;
     else{
-      double val=rint((todB(f[j])-flr[j]));
-      if(val<=0.){
-	val=0.;
-      }else{
-	if(f[j]<0)val= -val;
-      }
+      double val=rint(f[j]/flr[j]);
+      if(fabs(val)<1.)val=0.;
       work[j]=val;
     }
   }
@@ -470,31 +467,25 @@ void _vp_apply_floor(vorbis_look_psy *p,double *f,
 	}	
       }
 
-      XXX we also want to add back only if the current_SL is less than/on the order of the energy represented by the floor.  Otherwise we'll get tricked by log scale quantization...
-
       /* sort the zeroed values; add back the largest first, stop when
          we violate the desired result above (which may be
          immediately) */
-      if(z && z<p->vi->noisefit_subblock){
+      if(z &&current_SL*thresh<original_SL){
 	qsort(index,z,sizeof(double *),&comp);
-
+	
 	for(j=0;j<z;j++){
-	  if(current_SL*thresh>original_SL)break;
-	  {
-	    int p=index[j]-f;
-	    double lflr=fromdB(flr[p]);
-	    double val=lflr*lflr+current_SL;
-	    
-	    if(val<original_SL){
-	      addcount++;
-	      if(f[p]>0)
-		work[p]=.01;
-	      else
-		work[p]=-.01;
-	      current_SL=val;
-	    }else
-	      break;
-	  }
+	  int p=index[j]-f;
+	  double val=flr[p]*flr[p]+current_SL;
+	  
+	  if(val<original_SL){
+	    addcount++;
+	    if(f[p]>0)
+	      work[p]=1.;
+	    else
+		work[p]=-1.;
+	    current_SL=val;
+	  }else
+	    break;
 	}
       }
     }
@@ -532,5 +523,4 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr,
     analysis("Pmask",frameno*10+i,flr,p->n,1,1);
   
   }
-  for(j=0;j<p->n;j++)flr[j]=todB(flr[j]);
 }

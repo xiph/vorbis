@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.2.2.3 2000/03/30 11:54:09 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2.2.4 2000/04/01 12:51:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,9 +30,9 @@
 #include "lpc.h"
 
 static vorbis_info_psy _psy_set0={
-  3,1,0,
+  3,1,1,
 
-  1,16,3.,
+  1,16,4.,
 
   -130.,
 
@@ -55,9 +55,9 @@ static vorbis_info_psy _psy_set0={
   {-8.,-12.,-18.,-20.,-24.},
   {-8.,-12.,-18.,-20.,-24.},
   {-8.,-12.,-18.,-20.,-24.},
-  -25.,-12.,
+  -20.,-10.,
 
-  100.,
+  110.,
 
   .9998, .9997  /* attack/decay control */
 };
@@ -233,28 +233,25 @@ int main(int argc,char *argv[]){
 	{
 	  double amp;
 
-	  for(j=0;j<framesize/2;j++)floor[j]+=DYNAMIC_RANGE_dB;
+	  for(j=0;j<framesize/2;j++)floor[j]=todB(floor[j]+DYNAMIC_RANGE_dB);
 	  amp=sqrt(vorbis_curve_to_lpc(floor,lpc,&lpc_look));
 	  fprintf(stderr,"amp=%g\n",amp);
 	  vorbis_lpc_to_curve(floor,lpc,amp,&lpc_look);
-	  for(j=0;j<framesize/2;j++)floor[j]-=DYNAMIC_RANGE_dB;
-	  analysis("floor",frameno,floor,framesize/2,1,0);
+	  for(j=0;j<framesize/2;j++)floor[j]=fromdB(floor[j]-DYNAMIC_RANGE_dB);
+	  analysis("floor",frameno,floor,framesize/2,1,1);
 
 	}
 
 	_vp_apply_floor(&p_look,pcm[i],floor);
 
-	/* quantize according to masking */
+	/* re-add floor */
 	for(j=0;j<framesize/2;j++){
 	  double val=pcm[i][j];
 	  tot++;
 	  if(val){
 	    nonz++;
-	    acc+=log(fabs(val)*2.+1.)/log(2);
-	    if(val>0)
-	      pcm[i][j]=fromdB(val+floor[j]);
-	    else
-	      pcm[i][j]=-fromdB(floor[j]-val);
+	    acc+=log(fabs(todB(val))*2.+1.)/log(2);
+	    pcm[i][j]=val*floor[j];
 	  }
 	}
 	

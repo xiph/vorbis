@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.11.2.1 2000/03/29 03:49:28 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.11.2.1.2.1 2000/04/01 12:51:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -31,9 +31,6 @@ typedef struct {
   long n;
   long m;
   
-  double ampscale;
-  double ampvals;
-
   vorbis_info_floor0 *vi;
   lpc_lookup lpclook;
 } vorbis_look_floor0;
@@ -115,26 +112,28 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
   double amp;
   long bits=0;
 
+  /* our floor comes in on a [-Inf...0] dB scale.  The curve has to be
+     positive, so we offset it. */
+  for(j=0;j<look->n;j++)in[j]+=info->ampdB;
+
   /* use 'out' as temp storage */
   /* Convert our floor to a set of lpc coefficients */ 
   amp=sqrt(vorbis_curve_to_lpc(in,out,&look->lpclook));
 
-  /* amp is in the range 0. to 1. (well, more like .7). Log scale it */
-  
-  /* 0              == 0 dB
-     (1<<ampbits)-1 == amp dB   = 1. amp */
+  /* amp is in the range (0. to ampdB].  Encode that range using
+     ampbits bits */
+ 
   {
-    long ampscale=fromdB(info->ampdB);
     long maxval=(1<<info->ampbits)-1;
 
-    long val=todB(amp*ampscale)/info->ampdB*maxval+1;
+    long val=amp/info->ampdB*maxval+1;
 
     if(val<0)val=0;           /* likely */
     if(val>maxval)val=maxval; /* not bloody likely */
 
     _oggpack_write(&vb->opb,val,info->ampbits);
     if(val>0)
-      amp=fromdB((val-.5)/maxval*info->ampdB)/ampscale;
+      amp=(val-.5)/maxval*info->ampdB;
     else
       amp=0;
   }
@@ -159,14 +158,6 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
       fclose(of);
     }
 #endif
-
-#ifdef ANALYSIS
-    vorbis_lsp_to_lpc(out,out,look->m); 
-    vorbis_lpc_to_curve(out,out,amp,&look->lpclook);
-    _analysis_output("floor0_pre",vb->sequence,out,look->n);
-    memcpy(out,work,sizeof(double)*look->m);
-#endif
-
 
     /* code the spectral envelope, and keep track of the actual
        quantized values; we don't want creeping error as each block is
@@ -199,15 +190,11 @@ static int forward(vorbis_block *vb,vorbis_look_floor *i,
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_lpc(out,out,look->m); 
     vorbis_lpc_to_curve(out,out,amp,&look->lpclook);
-    _analysis_output("floor0_post",vb->sequence,out,look->n);
-    fprintf(stderr,"Encoded %ld LSP coefficients in %ld bits\n",look->m,bits);
+    for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
     return(1);
   }
 
-  fprintf(stderr,"Encoded %ld LSP coefficients in %ld bits\n",look->m,bits);
-
   memset(out,0,sizeof(double)*look->n);
-  _analysis_output("floor0_post",vb->sequence,out,look->n);
   return(0);
 }
 
@@ -218,9 +205,8 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
   
   long ampraw=_oggpack_read(&vb->opb,info->ampbits);
   if(ampraw>0){
-    long ampscale=fromdB(info->ampdB);
     long maxval=(1<<info->ampbits)-1;
-    double amp=fromdB((ampraw-.5)/maxval*info->ampdB)/ampscale;
+    double amp=(ampraw-.5)/maxval*info->ampdB;
 
     memset(out,0,sizeof(double)*look->m);    
     for(stage=0;stage<info->stages;stage++){
@@ -240,9 +226,12 @@ static int inverse(vorbis_block *vb,vorbis_look_floor *i,double *out){
     /* take the coefficients back to a spectral envelope curve */
     vorbis_lsp_to_lpc(out,out,look->m); 
     vorbis_lpc_to_curve(out,out,amp,&look->lpclook);
+
+    for(j=0;j<look->n;j++)out[j]= fromdB(out[j]-info->ampdB);
     return(1);
   }else
     memset(out,0,sizeof(double)*look->n);
+
   return(0);
 }
 

@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.11.2.2.2.1 2000/03/30 09:37:57 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.11.2.2.2.2 2000/04/01 12:51:32 xiphmont Exp $
 
  ********************************************************************/
 
@@ -51,7 +51,8 @@ typedef struct {
 
   int ch;
   double **decay;
-
+  long lastframe; /* if a different mode is called, we need to 
+		     invalidate decay */
 } vorbis_look_mapping0;
 
 static void free_info(vorbis_info_mapping *i){
@@ -237,18 +238,20 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
       double *decay=look->decay[i];
       int submap=info->chmuxlist[i];
 
+      /* if some other mode/mapping was called last frame, our decay
+         accumulator is out of date.  Clear it. */
+      if(look->lastframe+1 != vb->sequence)
+	memset(decay,0,n*sizeof(double)/2);
+
       /* perform psychoacoustics; do masking */
-      /*memset(mask,0,sizeof(double)*n/2);*/
       _vp_tone_tone_mask(look->psy_look+submap,pcm,mask,decay);
  
       /* perform floor encoding */
-
       nonzero[i]=look->floor_func[submap]->
 	forward(vb,look->floor_look[submap],mask,floor);
 
-      _analysis_output("map0_mdct",vb->sequence,pcm,n/2);
-      _analysis_output("map0_mask",vb->sequence,mask,n/2);
-      _analysis_output("map0_decay",vb->sequence,decay,n/2);
+      /* apply the floor, do optional noise levelling */
+      _vp_apply_floor(look->psy_look+submap,pcm,floor);
 
 #ifdef TRAIN
       if(nonzero[i]){
@@ -256,24 +259,15 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
 	char buffer[80];
 	int i;
 	
-	sprintf(buffer,"masked_%d.vqd",vb->mode);
+	sprintf(buffer,"residue_%d.vqd",vb->mode);
 	of=fopen(buffer,"a");
 	for(i=0;i<n/2;i++)
-	  fprintf(of,"%g, ",pcm[i]/mask[i]);
-	fprintf(of,"\n");
-	fclose(of);
-	sprintf(buffer,"floored_%d.vqd",vb->mode);
-	of=fopen(buffer,"a");
-	for(i=0;i<n/2;i++)
-	  fprintf(of,"%g, ",pcm[i]/floor[i]);
+	  fprintf(of,"%g, ",pcm[i]);
 	fprintf(of,"\n");
 	fclose(of);
       }
 #endif      
 
-      /* no iterative residue/floor tuning at the moment */
-      if(nonzero[i])for(j=0;j<n/2;j++)pcm[j]/=floor[j];
-      
     }
     
     /* perform residue encoding with residue mapping; this is
@@ -293,6 +287,7 @@ static int forward(vorbis_block *vb,vorbis_look_mapping *l){
     }
   }
 
+  look->lastframe=vb->sequence;
   return(0);
 }
 

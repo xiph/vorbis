@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: codebook types
- last mod: $Id: codebook.h,v 1.4.4.1 2000/03/30 01:46:47 xiphmont Exp $
+ last mod: $Id: codebook.h,v 1.4.4.2 2000/04/01 12:51:31 xiphmont Exp $
 
  ********************************************************************/
 
@@ -37,10 +37,28 @@ typedef struct static_codebook{
   long entries;       /* codebook entries */
 
   /* mapping */
+  int    q_log;       /* 0 == linear, 1 == log (dB) mapping */
+
+  /* The below does a linear, single monotonic sequence mapping.  
+     The log mapping uses this, but extends it */
   long   q_min;       /* packed 24 bit float; quant value 0 maps to minval */
   long   q_delta;     /* packed 24 bit float; val 1 - val 0 == delta */
-  int    q_quant;     /* 0 < quant <= 16 */
+  int    q_quant;     /* bits: 0 < quant <= 16 */
   int    q_sequencep; /* bitflag */
+
+  /* additional information for log (dB) mapping; the linear mapping
+     is assumed to actually be values in dB.  encodebias is used to
+     assign an error weight to 0 dB. We have two additional flags:
+     zeroflag indicates if entry zero is to represent -Inf dB; negflag
+     indicates if we're to represent negative linear values in a
+     mirror of the positive mapping. */
+  int    q_zeroflag;  
+  int    q_negflag;
+
+  /* encode only values that provide log encoding error parameters */
+  double q_encodebias; /* encode only */
+  double q_entropy;    /* encode only */
+
 
   long   *quantlist;  /* list of dim*entries quantized entry values */
 
@@ -72,6 +90,7 @@ typedef struct codebook{
   const static_codebook *c;
 
   double *valuelist;  /* list of dim*entries actual entry values */
+  double *logdist;    /* list of dim*entries metric vals for log encode */
   long   *codelist;   /* list of bitstream codewords for each entry */
   struct decode_aux *decode_tree;
 
