@@ -1,6 +1,6 @@
 # vorbis makefile configured for use with gcc on any platform
 
-# $Id: Makefile.in,v 1.24 2000/01/28 09:05:05 xiphmont Exp $
+# $Id: Makefile.in,v 1.25 2000/04/12 07:55:06 msmith Exp $
 
 ###############################################################################
 #                                                                             #
@@ -27,7 +27,7 @@ AR=@AR@
 RANLIB=@RANLIB@
 LIBS=@LIBS@ -lm
 
-HFILES =	../include/vorbis/codec.h ../include/vorbis/vorbisfile.h \
+HFILES =	../include/vorbis/codec.h \
 		../include/vorbis/internal.h ../include/vorbis/backends.h \
 		../include/vorbis/codebook.h \
 		bitwise.h envelope.h lpc.h lsp.h bookinternal.h misc.h\
@@ -35,7 +35,12 @@ HFILES =	../include/vorbis/codec.h ../include/vorbis/vorbisfile.h \
 LFILES = 	framing.o mdct.o smallft.o block.o envelope.o window.o\
 		lsp.o lpc.o analysis.o synthesis.o psy.o info.o bitwise.o\
 		time0.o floor0.o res0.o mapping0.o registry.o\
-		codebook.o vorbisfile.o
+		codebook.o
+VF_HFILES = ../include/vorbis/vorbisfile.h ../include/vorbis/codec.h \
+		../include/vorbis/internal.h ../include/vorbis/codebook.h \
+		os.h misc.h
+VF_LFILES = vorbisfile.o
+
 
 all:
 	$(MAKE) target CFLAGS="$(OPT)"
@@ -68,12 +73,13 @@ libvorbis.a: 	$(LFILES)
 		$(AR) -r libvorbis.a $^
 		$(RANLIB) libvorbis.a
 
-vorbisfile.a:	$(LFILES)
+vorbisfile.a:	$(VF_LFILES)
 		$(AR) -r vorbisfile.a $^
 		$(RANLIB) vorbisfile.a
 
 
 $(LFILES): 	$(HFILES)
+$(VF_LFILES): 	$(VF_HFILES)
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<
