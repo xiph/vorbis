@@ -4,7 +4,7 @@ libvorbis (1.0.0-1) unstable; urgency=low
   * Split libvorbis package into libvorbis libvorbisenc libvorbisfile due to
     shared object major versions going out of sync.
 
- -- Christopher L Cheney <ccheney@debian.org>  Thu, 11 Jul 2002 15:00:00 -0500
+ -- Christopher L Cheney <ccheney@debian.org>  Fri, 19 Jul 2002 09:00:00 -0500
 
 libvorbis (1.0rc3-1) unstable; urgency=low
 
