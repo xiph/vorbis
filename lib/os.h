@@ -14,7 +14,7 @@
  ********************************************************************
 
  function: #ifdef jail to whip a few platforms into the UNIX ideal.
- last mod: $Id: os.h,v 1.12 2000/11/06 08:55:15 jack Exp $
+ last mod: $Id: os.h,v 1.13 2000/11/06 11:55:44 msmith Exp $
 
  ********************************************************************/
 
@@ -111,13 +111,11 @@ static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
 static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
 }
 #else 
-static inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
-}
+/* We don't have special code for this compiler/arch, so do it the slow way */
+#define vorbis_fpu_setround(vorbis_fpu_control) {}
+#define vorbis_fpu_restore(vorbis_fpu_control) {}
 
-static inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
-}
 #endif
-
 
 #endif
 
