@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM analysis mode dispatch
- last mod: $Id: analysis.c,v 1.33.2.2.2.1 2000/09/03 08:34:51 jack Exp $
+ last mod: $Id: analysis.c,v 1.33.2.2.2.2 2000/09/26 18:45:33 jack Exp $
 
  ********************************************************************/
 
@@ -67,7 +67,7 @@ int vorbis_analysis(vorbis_block *vb,ogg_packet *op){
   op->bytes=oggpack_bytes(&vb->opb);
   op->b_o_s=0;
   op->e_o_s=vb->eofflag;
-  op->frameno=vb->frameno;
+  op->granulepos=vb->granulepos;
   op->packetno=vb->sequence; /* for sake of completeness */
 
   return(0);

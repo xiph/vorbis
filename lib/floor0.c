@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.23.2.3.2.1 2000/09/03 08:34:52 jack Exp $
+ last mod: $Id: floor0.c,v 1.23.2.3.2.2 2000/09/26 18:45:33 jack Exp $
 
  ********************************************************************/
 
@@ -179,7 +179,7 @@ static vorbis_look_floor *floor0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi
    not bottlenecked here anyway */
 
 float _curve_to_lpc(float *curve,float *lpc,
-		     vorbis_look_floor0 *l,long frameno){
+		     vorbis_look_floor0 *l,long granulepos){
   /* map the input curve to a bark-scale curve for encoding */
   
   int mapped=l->ln;
@@ -228,7 +228,7 @@ float _curve_to_lpc(float *curve,float *lpc,
       char buffer[80];
       int i;
 
-      sprintf(buffer,"Fmask_%d.m",frameno);
+      sprintf(buffer,"Fmask_%d.m",granulepos);
       of=fopen(buffer,"w");
       for(i=0;i<mapped;i++)
 	fprintf(of,"%g\n",work[i]);
@@ -242,7 +242,7 @@ float _curve_to_lpc(float *curve,float *lpc,
 /* generate the whole freq response curve of an LSP IIR filter */
 
 void _lsp_to_curve(float *curve,float *lsp,float amp,
-			  vorbis_look_floor0 *l,char *name,long frameno){
+			  vorbis_look_floor0 *l,char *name,long granulepos){
   /* l->m+1 must be less than l->ln, but guard in case we get a bad stream */
   float *lcurve=alloca(sizeof(float)*l->ln);
   int i;
@@ -258,7 +258,7 @@ void _lsp_to_curve(float *curve,float *lsp,float amp,
 }
 
 void s_lsp_to_curve(float *curve,float *lsp,float amp,
-                         vorbis_look_floor0 *l,char *name,long frameno,
+                         vorbis_look_floor0 *l,char *name,long granulepos,
                          float ampdB){
   /* l->m+1 must be less than l->ln, but guard in case we get a bad stream */
   float *lcurve=alloca(sizeof(double)*l->ln);

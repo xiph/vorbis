@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.30.4.1 2000/09/03 08:34:52 jack Exp $
+ last mod: $Id: info.c,v 1.30.4.2 2000/09/26 18:45:33 jack Exp $
 
  ********************************************************************/
 
@@ -509,7 +509,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   op->bytes=oggpack_bytes(&opb);
   op->b_o_s=1;
   op->e_o_s=0;
-  op->frameno=0;
+  op->granulepos=0;
 
   /* second header packet (comments) **********************************/
 
@@ -523,7 +523,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   op_comm->bytes=oggpack_bytes(&opb);
   op_comm->b_o_s=0;
   op_comm->e_o_s=0;
-  op_comm->frameno=0;
+  op_comm->granulepos=0;
 
   /* third header packet (modes/codebooks) ****************************/
 
@@ -537,7 +537,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   op_code->bytes=oggpack_bytes(&opb);
   op_code->b_o_s=0;
   op_code->e_o_s=0;
-  op_code->frameno=0;
+  op_code->granulepos=0;
 
   oggpack_writeclear(&opb);
   return(0);

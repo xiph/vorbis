@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: single-block PCM synthesis
- last mod: $Id: synthesis.c,v 1.17.4.1.2.1 2000/09/03 08:34:52 jack Exp $
+ last mod: $Id: synthesis.c,v 1.17.4.1.2.2 2000/09/26 18:45:34 jack Exp $
 
  ********************************************************************/
 
@@ -55,7 +55,7 @@ int vorbis_synthesis(vorbis_block *vb,ogg_packet *op){
   }
   
   /* more setup */
-  vb->frameno=op->frameno;
+  vb->granulepos=op->granulepos;
   vb->sequence=op->packetno-3; /* first block is third packet */
   vb->eofflag=op->e_o_s;
 

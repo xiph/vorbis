@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.27.2.2.2.2 2000/09/03 08:34:51 jack Exp $
+ last mod: $Id: codec.h,v 1.27.2.2.2.3 2000/09/26 18:45:32 jack Exp $
 
  ********************************************************************/
 
@@ -171,7 +171,7 @@ typedef struct vorbis_dsp_state{
   long nW;
   long centerW;
 
-  ogg_int64_t frameno;
+  ogg_int64_t granulepos;
   ogg_int64_t sequence;
 
   ogg_int64_t glue_bits;
@@ -219,7 +219,7 @@ typedef struct vorbis_block{
   int   mode;
 
   int eofflag;
-  ogg_int64_t frameno;
+  ogg_int64_t granulepos;
   ogg_int64_t sequence;
   vorbis_dsp_state *vd; /* For read-only access of configuration */
 

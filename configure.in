@@ -1,11 +1,20 @@
 dnl Process this file with autoconf to produce a configure script
 
 dnl ------------------------------------------------
-dnl Initialization
+dnl Initialization and Versioning
 dnl ------------------------------------------------
 
 AC_INIT(lib/mdct.c)
 AM_INIT_AUTOMAKE(libvorbis,1.0.0)
+
+dnl Library versioning
+
+LIB_CURRENT=0
+LIB_REVISION=0
+LIB_AGE=0
+AC_SUBST(LIB_CURRENT)
+AC_SUBST(LIB_REVISION)
+AC_SUBST(LIB_AGE)
 
 dnl --------------------------------------------------  
 dnl Check for programs

@@ -12,7 +12,7 @@ libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c lpc.c\
 			iir.c vorbisfile.c\
 			envelope.h lpc.h lsp.h bookinternal.h misc.h psy.h\
 			masking.h sharedbook.h iir.h os.h
-libvorbis_la_LDFLAGS = -version-info 1:0:0
+libvorbis_la_LDFLAGS = -version-info @LIB_CURRENT@:@LIB_REVISION@:@LIB_AGE@
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"

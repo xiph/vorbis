@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.27.2.2 2000/08/31 09:00:02 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.27.2.2.2.1 2000/09/26 18:45:34 jack Exp $
 
  ********************************************************************/
 
@@ -306,9 +306,9 @@ static void _prefetch_all_headers(OggVorbis_File *vf,vorbis_info *first_i,
 	  vorbis_comment_clear(vf->vc+i);
 	  break;
 	}
-	if(ogg_page_frameno(&og)!=-1){
+	if(ogg_page_granulepos(&og)!=-1){
 	  vf->serialnos[i]=ogg_page_serialno(&og);
-	  vf->pcmlengths[i]=ogg_page_frameno(&og);
+	  vf->pcmlengths[i]=ogg_page_granulepos(&og);
 	  break;
 	}
       }
@@ -413,14 +413,14 @@ static int _process_packet(OggVorbis_File *vf,int readp){
     if(vf->decode_ready){
       ogg_packet op;
       int result=ogg_stream_packetout(&vf->os,&op);
-      ogg_int64_t frameno;
+      ogg_int64_t granulepos;
       
       /* if(result==-1)return(-1); hole in the data. For now, swallow
                                    and go. We'll need to add a real
                                    error code in a bit. */
       if(result>0){
 	/* got a packet.  process it */
-	frameno=op.frameno;
+	granulepos=op.granulepos;
 	if(!vorbis_synthesis(&vf->vb,&op)){ /* lazy check for lazy
                                                header handling.  The
                                                header packets aren't
@@ -438,7 +438,7 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 	  }
 	  
 	  /* update the pcm offset. */
-	  if(frameno!=-1 && !op.e_o_s){
+	  if(granulepos!=-1 && !op.e_o_s){
 	    int link=(vf->seekable?vf->current_link:0);
 	    int i,samples;
 	    
@@ -449,18 +449,18 @@ static int _process_packet(OggVorbis_File *vf,int readp){
 
 	       As an aside, this trick is inaccurate if we begin
 	       reading anew right at the last page; the end-of-stream
-	       frameno declares the last frame in the stream, and the
+	       granulepos declares the last frame in the stream, and the
 	       last packet of the last page may be a partial frame.
-	       So, we need a previous frameno from an in-sequence page
+	       So, we need a previous granulepos from an in-sequence page
 	       to have a reference point.  Thus the !op.e_o_s clause
 	       above */
 	    
 	    samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
 	    
-	    frameno-=samples;
+	    granulepos-=samples;
 	    for(i=0;i<link;i++)
-	      frameno+=vf->pcmlengths[i];
-	    vf->pcm_offset=frameno;
+	      granulepos+=vf->pcmlengths[i];
+	    vf->pcm_offset=granulepos;
 	  }
 	  return(1);
 	}
@@ -766,7 +766,7 @@ int ov_raw_seek(OggVorbis_File *vf,long pos){
   /* we need to make sure the pcm_offset is set.  We use the
      _fetch_packet helper to process one packet with readp set, then
      call it until it returns '0' with readp not set (the last packet
-     from a page has the 'frameno' field set, and that's how the
+     from a page has the 'granulepos' field set, and that's how the
      helper updates the offset */
 
   switch(_process_packet(vf,1)){
@@ -851,9 +851,9 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
       if(ret==-1){
 	end=bisect;
       }else{
-	ogg_int64_t frameno=ogg_page_frameno(&og);
-	if(frameno<target){
-	  best=ret;  /* raw offset of packet with frameno */ 
+	ogg_int64_t granulepos=ogg_page_granulepos(&og);
+	if(granulepos<target){
+	  best=ret;  /* raw offset of packet with granulepos */ 
 	  begin=vf->offset; /* raw offset of next packet */
 	}else{
 	  end=bisect;

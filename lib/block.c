@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.38.2.2.2.1 2000/09/03 08:34:51 jack Exp $
+ last mod: $Id: block.c,v 1.38.2.2.2.2 2000/09/26 18:45:33 jack Exp $
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -512,7 +512,7 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
   }
   vb->vd=v;
   vb->sequence=v->sequence;
-  vb->frameno=v->frameno;
+  vb->granulepos=v->granulepos;
   vb->pcmend=vi->blocksizes[v->W];
   
   /* copy the vectors; this uses the local storage in vb */
@@ -559,12 +559,12 @@ int vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb){
       v->eofflag-=movementW;
       /* do not add padding to end of stream! */
       if(v->centerW>=v->eofflag){
-	v->frameno+=movementW-(v->centerW-v->eofflag);
+	v->granulepos+=movementW-(v->centerW-v->eofflag);
       }else{
-	v->frameno+=movementW;
+	v->granulepos+=movementW;
       }
     }else{
-      v->frameno+=movementW;
+      v->granulepos+=movementW;
     }
   }
 
@@ -578,7 +578,7 @@ int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
   /* Adjust centerW to allow an easier mechanism for determining output */
   v->pcm_returned=v->centerW;
   v->centerW-= vi->blocksizes[v->W]/4+vi->blocksizes[v->lW]/4;
-  v->frameno=-1;
+  v->granulepos=-1;
   v->sequence=-1;
 
   return(0);
@@ -622,7 +622,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   v->floor_bits+=vb->floor_bits;
   v->res_bits+=vb->res_bits;
 
-  if(v->sequence+1 != vb->sequence)v->frameno=-1; /* out of sequence;
+  if(v->sequence+1 != vb->sequence)v->granulepos=-1; /* out of sequence;
                                                      lose count */
 
   v->sequence=vb->sequence;
@@ -673,7 +673,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     /* track the frame number... This is for convenience, but also
        making sure our last packet doesn't end with added padding.  If
        the last packet is partial, the number of samples we'll have to
-       return will be past the vb->frameno.
+       return will be past the vb->granulepos.
        
        This is not foolproof!  It will be confused if we begin
        decoding at the last page after a seek or hole.  In that case,
@@ -681,17 +681,17 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
        is.  For this reason, vorbisfile will always try to make sure
        it reads the last two marked pages in proper sequence */
 
-    if(v->frameno==-1)
-      v->frameno=vb->frameno;
+    if(v->granulepos==-1)
+      v->granulepos=vb->granulepos;
     else{
-      v->frameno+=(centerW-v->centerW);
-      if(vb->frameno!=-1 && v->frameno!=vb->frameno){
-	if(v->frameno>vb->frameno && vb->eofflag){
+      v->granulepos+=(centerW-v->centerW);
+      if(vb->granulepos!=-1 && v->granulepos!=vb->granulepos){
+	if(v->granulepos>vb->granulepos && vb->eofflag){
 	  /* partial last frame.  Strip the padding off */
-	  centerW-=(v->frameno-vb->frameno);
+	  centerW-=(v->granulepos-vb->granulepos);
 	}/* else{ Shouldn't happen *unless* the bitstream is out of
             spec.  Either way, believe the bitstream } */
-	v->frameno=vb->frameno;
+	v->granulepos=vb->granulepos;
       }
     }
 
