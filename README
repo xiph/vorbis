@@ -15,16 +15,21 @@ NEW AND IMPORTANT:
 
 If you're used to the source distribution from the first two beta
 relaeases, things are now rearranged a bit.  Specifically, the
-'vorbis' CVS module contains only the libvorbis and libvorbisfile
-libraries.  Because Ogg bitstreams are to be used by other Ogg codecs,
-Ogg framing and streaming functionality is now in libogg (the 'ogg'
-CVS module).  Vorbis utilities are in 'vorbis-tools' and various
+'vorbis' CVS module contains only the libvorbis, libvorbisfile, and
+libvorbisenc libraries.  Because Ogg bitstreams are to be used by other 
+Ogg codecs, Ogg framing and streaming functionality is now in libogg 
+(the 'ogg' CVS module).  Vorbis utilities are in 'vorbis-tools' and various
 player plugins are in 'vorbis-plugins'.  For now, you'll need to check
-out these other modules seperately.
+out these other modules seperately. (Note: the xmms plugin is in the xmms
+CVS tree in xmms/Input/vorbis.)
 
 Secondly, the Ogg/Vorbis build systems now use automake.  Instead of
-'./configure;make', the proper build sequence (in each module) is
-'./autogen.sh;make'.
+'./configure; make', the proper build sequence (in each module) is
+'./autogen.sh; make'.
+
+You will also need the newest versions of autoconf, automake, and libtool
+in order to compile vorbis from CVS.  configure scripts are provided for you
+in tarball distributions.
 
 WHAT'S HERE:
 
@@ -34,21 +39,22 @@ the Ogg Vorbis audio coding format.
 
 Directory:
 
-./lib  		The source for libvorbis, an LGPLed inplementation of 
-		the public domain OggSquish Vorbis audio encoding
+./lib  		The source for the libraries, an LGPLed inplementation of 
+		the public domain Ogg Vorbis audio encoding
 		format.
 
-./include       Library API headers and codebooks
+./include       Library API headers
 
 ./debian        Rules/spec files for building Debian .deb packages
 
-./doc           Vorbis specification documents
+./doc           Vorbis documentation
 
-./examples	Example code illustrating programmatic use of libogg, 
-		libvorbis, libvorbisfile and libvorbisenc
+./examples	Example code illustrating programmatic use of libvorbis, 
+		libvorbisfile and libvorbisenc
 
 ./mac 		Codewarrior project files and build tweaks for MacOS.
 
+./win32		Win32 projects files and build automation
 
 ./vq 		Internal utilities for training/building new LSP/residue 
 		and auxiliary codebooks.
@@ -82,7 +88,7 @@ libvorbisenc
 
 CONTACT:
 
-The OggSquish homepage is located at 'http://www.xiph.org/ogg/'.
+The Ogg homepage is located at 'http://www.xiph.org/ogg/'.
 Vorbis's homepage is located at 'http://www.xiph.org/ogg/vorbis/'.
 Up to date technical documents, contact information, source code and
 pre-built utilities may be found there.
@@ -102,6 +108,4 @@ This will install the vorbis libraries (static and shared) into
 /usr/local/lib, includes into /usr/local/include and API manpages
 (once we write some) into /usr/local/man.
 
-Monty <monty@xiph.org>
-
-$Id: README,v 1.5 2000/10/12 03:12:36 xiphmont Exp $
+$Id: README,v 1.6 2000/11/08 08:36:35 jack Exp $

@@ -1,5 +1,5 @@
 %define name	libvorbis
-%define version	1.0.0
+%define version	1.0beta3
 %define release 1
 
 Summary:	The Vorbis General Audio Compression Codec
@@ -23,6 +23,7 @@ and variable bitrates from 16 to 128 kbps/channel.
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
 Requires:	libogg-devel >= 1.0.0
+Requires:	libvorbis-devel = %{version}
 
 %description devel
 The libvorbis-devel package contains the header files and documentation
