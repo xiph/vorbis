@@ -42,14 +42,6 @@ doc_DATA = components.png \
 	vorbis-clip.txt \
 	vorbis-errors.txt \
 	vorbis-fidelity.html \
-	vorbis-ogg.html \
-	vorbis-spec-bitpack.html \
-	vorbis-spec-codebook.html \
-	vorbis-spec-floor0.html \
-	vorbis-spec-floor1.html \
-	vorbis-spec-intro.html \
-	vorbis-spec-ref.html \
-	vorbis-spec-res.html \
 	vorbis.html \
 	vorbisword2.png \
 	wait.png \
