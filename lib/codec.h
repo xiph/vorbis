@@ -71,7 +71,7 @@ typedef struct {
   long header_len;
   unsigned char *body;
   long body_len;
-} vorbis_page;
+} ogg_page;
 
 typedef struct {
  
@@ -111,7 +111,7 @@ typedef struct {
   long    pageno;
   size64  pcmpos;
 
-} vorbis_stream_state;
+} ogg_stream_state;
 
 typedef struct {
   unsigned char *packet;
@@ -121,10 +121,10 @@ typedef struct {
 
   size64 pcm_pos;
 
-} vorbis_packet;
+} ogg_packet;
 
 typedef struct {
-  char *data;
+  unsigned char *data;
   int storage;
   int fill;
   int returned;
@@ -132,11 +132,11 @@ typedef struct {
   int unsynced;
   int headerbytes;
   int bodybytes;
-} vorbis_sync_state;
+} ogg_sync_state;
 
 /* libvorbis encodes in two abstraction layers; first we perform DSP
    and produce a packet (see docs/analysis.txt).  The packet is then
-   coded into a framed bitstream by the second layer (see
+   coded into a framed OggSquish bitstream by the second layer (see
    docs/framing.txt).  Decode is the reverse process; we sync/frame
    the bitstream and extract individual packets, then decode the
    packet back into PCM audio.
@@ -146,53 +146,52 @@ typedef struct {
    packetization aren't necessary as they're provided by the transport
    and the streaming layer is not used */
 
-/* ENCODING PRIMITIVES: analysis/DSP layer **************************/
+/* OggSquish BITSREAM PRIMITIVES: encoding **************************/
 
-extern int vorbis_analysis_init(vorbis_dsp_state *vd,vorbis_info *i);
+extern int    ogg_stream_packetin(ogg_stream_state *os, ogg_packet *op);
+extern int    ogg_stream_pageout(ogg_stream_state *os, ogg_page *og);
+
+/* OggSquish BITSREAM PRIMITIVES: decoding **************************/
+
+extern int    ogg_sync_init(ogg_sync_state *oy);
+extern int    ogg_sync_clear(ogg_sync_state *oy);
+extern int    ogg_sync_destroy(ogg_sync_state *oy);
+extern int    ogg_sync_reset(ogg_sync_state *oy);
+
+extern char  *ogg_sync_buffer(ogg_sync_state *oy, long size);
+extern int    ogg_sync_wrote(ogg_sync_state *oy, long bytes);
+extern int    ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og);
+extern int    ogg_stream_pagein(ogg_stream_state *os, ogg_page *og);
+extern int    ogg_stream_packetout(ogg_stream_state *os,ogg_packet *op);
+
+/* OggSquish BITSREAM PRIMITIVES: general ***************************/
+
+extern int    ogg_stream_init(ogg_stream_state *os,int serialno);
+extern int    ogg_stream_clear(ogg_stream_state *os);
+extern int    ogg_stream_reset(ogg_stream_state *os);
+extern int    ogg_stream_destroy(ogg_stream_state *os);
+extern int    ogg_stream_eof(ogg_stream_state *os);
+
+extern int    ogg_page_version(ogg_page *og);
+extern int    ogg_page_continued(ogg_page *og);
+extern int    ogg_page_bos(ogg_page *og);
+extern int    ogg_page_eos(ogg_page *og);
+extern size64 ogg_page_frameno(ogg_page *og);
+extern int    ogg_page_serialno(ogg_page *og);
+extern int    ogg_page_pageno(ogg_page *og);
+
+/* Vorbis PRIMITIVES: analysis/DSP layer ****************************/
+
+extern int  vorbis_analysis_init(vorbis_dsp_state *vd,vorbis_info *vi);
 extern void vorbis_dsp_state_free(vorbis_dsp_state *vd);
-extern int vorbis_analysis_input(vorbis_dsp_state *vd,double **pcm,int vals);
-extern int vorbis_analysis(vorbis_dsp_state *vd,vorbis_packet *vp);
+extern int  vorbis_analysis_input(vorbis_dsp_state *vd,double **pcm,int vals);
+extern int  vorbis_analysis(vorbis_dsp_state *vd,ogg_packet *op);
 
-/* GENERAL PRIMITIVES: packet streaming layer ***********************/
+/* Vorbis PRIMITIVES: synthesis layer *******************************/
 
-extern int vorbis_stream_init(vorbis_stream_state *vs,int serialno);
-extern int vorbis_stream_clear(vorbis_stream_state *vs);
-extern int vorbis_stream_destroy(vorbis_stream_state *vs);
-extern int vorbis_stream_eof(vorbis_stream_state *vs);
-
-extern int vorbis_page_version(vorbis_page *vg);
-extern int vorbis_page_continued(vorbis_page *vg);
-extern int vorbis_page_bos(vorbis_page *vg);
-extern int vorbis_page_eos(vorbis_page *vg);
-extern size64 vorbis_page_pcmpos(vorbis_page *vg);
-extern int vorbis_page_serialno(vorbis_page *vg);
-extern int vorbis_page_pageno(vorbis_page *vg);
-
-/* ENCODING PRIMITIVES: packet streaming layer **********************/
-
-extern int vorbis_stream_encode(vorbis_stream_state *vs,vorbis_packet *vp);
-extern int vorbis_stream_page(vorbis_stream_state *vs, vorbis_page *vg);
-
-/* DECODING PRIMITIVES: packet streaming layer **********************/
-
-extern int vorbis_sync_init(vorbis_sync_state *vs);
-extern int vorbis_sync_clear(vorbis_sync_state *vs);
-extern int vorbis_sync_destroy(vorbis_sync_state *vs);
-
-extern char *vorbis_decode_buffer(vorbis_sync_state *vs, long size);
-extern int vorbis_decode_wrote(vorbis_sync_state *vs, long bytes);
-extern int vorbis_decode_stream(vorbis_sync_state *vs, vorbis_page *vg);
-extern int vorbis_decode_page(vorbis_stream_state *vs, vorbis_page *vg);
-extern int vorbis_stream_packet(vorbis_stream_state *vs,vorbis_packet *vp);
-
-extern int vorbis_sync_reset(vorbis_sync_state *vs);
-extern int vorbis_stream_reset(vorbis_stream_state *vs);
-
-/* DECODING PRIMITIVES: synthesis layer *****************************/
-
-extern int vorbis_synthesis_info(vorbis_dsp_state *vd,vorbis_info *vi);
-extern int vorbis_synthesis(vorbis_dsp_state *vd,vorbis_packet *vp);
-extern int vorbis_synthesis_output(vorbis_dsp_state *vd,double **pcm);
+extern int  vorbis_synthesis_info(vorbis_dsp_state *vd,vorbis_info *vi);
+extern int  vorbis_synthesis_packet(vorbis_dsp_state *vd,ogg_packet *op);
+extern int  vorbis_synthesis_output(vorbis_dsp_state *vd,double **pcm);
 
 #endif
 
