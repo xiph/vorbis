@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.17.2.8 2001/12/11 08:19:39 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.17.2.9 2001/12/12 09:13:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -591,12 +591,12 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 			   ){
   int ret=0;
 
-  base_quality=0.;
+  base_quality=.4;
 
   if(rate>40000){
     ret|=vorbis_encode_toplevel_init(vi,256,2048,channels,rate);
     ret|=vorbis_encode_floor_init(vi,base_quality,0,_floor_44_128_books,_floor_44_128,
-				  0,0,0,1,1,1,1,1,1,1,1);
+				  0,1,1,2,2,2,2,2,2,2,2);
     ret|=vorbis_encode_floor_init(vi,base_quality,1,_floor_44_1024_books,_floor_44_1024,
 				  0,0,0,0,0,0,0,0,0,0,0);
     
@@ -637,13 +637,13 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				      _psy_noiseguards_long);
 
     ret|=vorbis_encode_ath_init(vi,base_quality,0,ATH_Bark_dB,
-				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
+				0., 0., 0., 0., .2, .5, 1., 1., 1.5, 2., 2.);
     ret|=vorbis_encode_ath_init(vi,base_quality,1,ATH_Bark_dB,
-				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
+				0., 0., 0., 0., .2, .5, 1., 1., 1.5, 2., 2.);
     ret|=vorbis_encode_ath_init(vi,base_quality,2,ATH_Bark_dB,
-				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
+				0., 0., 0., 0., .2, .5, 1., 1., 1.5, 2., 2.);
     ret|=vorbis_encode_ath_init(vi,base_quality,3,ATH_Bark_dB,
-				0., 0., 0., 0., 0., .5, 1., 1., 1.5, 2., 2.);
+				0., 0., 0., 0., .2, .5, 1., 1., 1.5, 2., 2.);
 
     if(ret){
       vorbis_info_clear(vi);
@@ -660,7 +660,7 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				      0, /* no mid stereo backfill */
 				      0, /* no residue backfill */
 				      _residue_template_44_stereo,
-				      4,  3,  3,  2,   1,  0,  0,  0,  0,  0,  0,
+				      4,  3,  2,  2,   1,  0,  0,  0,  0,  0,  0,
 				      4., 6., 6., 6., 10., 6., 6., 6., 6., 6., 6.);
       
       ret|=vorbis_encode_residue_init(vi,base_quality,1,
@@ -668,14 +668,14 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 				      0, /* no mid stereo backfill */
 				      0, /* no residue backfill */
 				      _residue_template_44_stereo,
-				      4,  3,  3,   2,   1,  0,  0,  0,  0,  0,  0,
+				      4,  3,  2,   2,   1,  0,  0,  0,  0,  0,  0,
 				      6., 6., 6., 10., 10., 6., 6., 6., 6., 6., 6.);      
 
       ret|=vorbis_encode_lowpass_init(vi,base_quality,0,
-				      15.1,15.9,16.9,17.9,19.9,
+				      15.1,15.8,16.5,17.9,20.5,
 				      999.,999.,999.,999.,999.,999.);
       ret|=vorbis_encode_lowpass_init(vi,base_quality,1,
-				      15.1,15.9,16.9,17.9,19.9,
+				      15.1,15.8,16.5,17.9,20.5,
 				      999.,999.,999.,999.,999.,999.);
       
       return(ret);
@@ -703,6 +703,10 @@ int vorbis_encode_init(vorbis_info *vi,
 		       long max_bitrate,
 		       long nominal_bitrate,
 		       long min_bitrate){
+
+  /* it's temporary while I do the merge; relax */
+  return(vorbis_encode_init_vbr(vi,channels,rate, .4);
+
   return(OV_EIMPL);
 }
 

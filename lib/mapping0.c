@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.37.2.13 2001/12/11 08:19:39 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.37.2.14 2001/12/12 09:13:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -348,7 +348,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     for(j=0;j<n;j++)
       fft[j]=pcm[j]*=window[j];
     
-    _analysis_output("windowed",seq+i,pcm,n,0,0);
+    //_analysis_output("windowed",seq+i,pcm,n,0,0);
 
     /* transform the PCM data */
     /* only MDCT right now.... */
@@ -427,7 +427,7 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 	fprintf(stderr,"%ld ",seq+i);
 	}*/
 
-    _analysis_output("res",seq+i,res,n/2,1,0);
+    //_analysis_output("res",seq+i,res,n/2,1,0);
     _analysis_output("codedflr",seq+i,codedflr,n/2,1,1);
       
   }
@@ -506,8 +506,8 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			  0);
     }
 
-    for(i=0;i<vi->channels;i++)
-      _analysis_output("quant",seq+i,quantized[i],n/2,1,0);
+    //for(i=0;i<vi->channels;i++)
+    //_analysis_output("quant",seq+i,quantized[i],n/2,1,0);
 
   
     /* classify, by submap */
@@ -578,9 +578,9 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
 			      nonzero,
 			      i);
 	  
-	  sprintf(buf,"quant%d",i);
-	  for(j=0;j<vi->channels;j++)
-	    _analysis_output(buf,seq+j,quantized[j],n/2,1,0);
+	  //sprintf(buf,"quant%d",i);
+	  //for(j=0;j<vi->channels;j++)
+	  //_analysis_output(buf,seq+j,quantized[j],n/2,1,0);
 	  
 	}
       }
@@ -588,7 +588,6 @@ static int mapping0_forward(vorbis_block *vb,vorbis_look_mapping *l){
     seq+=vi->channels;
   } 
 
-    
   look->lastframe=vb->sequence;
   return(0);
 }
@@ -694,8 +693,8 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
   /* only MDCT right now.... */
   for(i=0;i<vi->channels;i++){
     float *pcm=vb->pcm[i];
-    _analysis_output("out",seq+i,pcm,n/2,1,1);
-    _analysis_output("lout",seq+i,pcm,n/2,0,0);
+    //_analysis_output("out",seq+i,pcm,n/2,1,1);
+    //_analysis_output("lout",seq+i,pcm,n/2,0,0);
     mdct_backward(b->transform[vb->W][0],pcm,pcm);
   }
 
@@ -708,12 +707,15 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_look_mapping *l){
     else
       for(j=0;j<n;j++)
 	pcm[j]=0.f;
-    _analysis_output("final",seq++,pcm,n,0,0);
+
+    //_analysis_output("final",seq,pcm,n,0,0);
   }
 	    
   /* now apply the decoded post-window time information */
   /* NOT IMPLEMENTED */
 
+  fprintf(stderr,"seq %d\r",seq);
+    
   /* all done! */
   return(0);
 }

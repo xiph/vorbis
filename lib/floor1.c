@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.16.2.2 2001/11/30 07:19:53 xiphmont Exp $
+ last mod: $Id: floor1.c,v 1.16.2.3 2001/12/12 09:13:39 xiphmont Exp $
 
  ********************************************************************/
 
@@ -618,6 +618,7 @@ static int post_Y(int *A,int *B,int pos){
     return B[pos];
   if(B[pos]<0)
     return A[pos];
+
   return (A[pos]+B[pos])>>1;
 }
 

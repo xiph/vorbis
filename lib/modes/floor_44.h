@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: key floor settings for 44.1/48kHz
- last mod: $Id: floor_44.h,v 1.1.2.4 2001/12/11 08:19:47 xiphmont Exp $
+ last mod: $Id: floor_44.h,v 1.1.2.5 2001/12/12 09:13:56 xiphmont Exp $
 
  ********************************************************************/
 
@@ -28,6 +28,17 @@
 #include "books/floor/line_128x7_2sub1.vqh"
 #include "books/floor/line_128x7_2sub2.vqh"
 #include "books/floor/line_128x7_2sub3.vqh"
+
+#include "books/floor/line_128x9_class1.vqh"
+#include "books/floor/line_128x9_class2.vqh"
+
+#include "books/floor/line_128x9_0sub0.vqh"
+#include "books/floor/line_128x9_1sub1.vqh"
+#include "books/floor/line_128x9_1sub2.vqh"
+#include "books/floor/line_128x9_1sub3.vqh"
+#include "books/floor/line_128x9_2sub1.vqh"
+#include "books/floor/line_128x9_2sub2.vqh"
+#include "books/floor/line_128x9_2sub3.vqh"
 
 #include "books/floor/line_128x19_class1.vqh"
 #include "books/floor/line_128x19_class2.vqh"
@@ -68,6 +79,18 @@ static static_codebook *_floor_44_128x7_books[]={
   &_huff_book_line_128x7_2sub2,
   &_huff_book_line_128x7_2sub3, 
 };
+static static_codebook *_floor_44_128x9_books[]={
+  &_huff_book_line_128x9_class1,
+  &_huff_book_line_128x9_class2,
+  
+  &_huff_book_line_128x9_0sub0,
+  &_huff_book_line_128x9_1sub1,
+  &_huff_book_line_128x9_1sub2,
+  &_huff_book_line_128x9_1sub3,
+  &_huff_book_line_128x9_2sub1,
+  &_huff_book_line_128x9_2sub2,
+  &_huff_book_line_128x9_2sub3, 
+};
 static static_codebook *_floor_44_128x19_books[]={
   &_huff_book_line_128x19_class1,
   &_huff_book_line_128x19_class2,
@@ -81,8 +104,9 @@ static static_codebook *_floor_44_128x19_books[]={
   &_huff_book_line_128x19_2sub3, 
 };
 
-static static_codebook **_floor_44_128_books[2]={
+static static_codebook **_floor_44_128_books[3]={
   _floor_44_128x7_books,
+  _floor_44_128x9_books,
   _floor_44_128x19_books,
 };
 
@@ -108,7 +132,7 @@ static static_codebook **_floor_44_1024_books[1]={
   _floor_44_1024x31_books
 };
 
-static vorbis_info_floor1 _floor_44_128[2]={
+static vorbis_info_floor1 _floor_44_128[3]={
   {
     3,{0,1,2},{1,3,3},{0,2,2},{-1,0,1},
     {{2},{-1,3,4,5},{-1,6,7,8}},
@@ -119,6 +143,19 @@ static vorbis_info_floor1 _floor_44_128[2]={
     8,70,
     -1 /* lowpass! */
   },
+
+  {
+    3,{0,1,2},{1,4,4},{0,2,2},{-1,0,1},
+    {{2},{-1,3,4,5},{-1,6,7,8}},
+    4,{0,128, 13, 4,2,7,1,  44,30,62,20},
+    
+    60,30,500,
+    999,999,0,18.,
+    8,70,
+    -1 /* lowpass! */
+  },
+
+
   {
     6,{0,1,1,1,2,2},{4,3,3},{0,2,2},{-1,0,1},
     {{2},{-1,3,4,5},{-1,6,7,8}},
