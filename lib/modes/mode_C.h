@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: predefined encoding modes
- last mod: $Id: mode_C.h,v 1.1.2.1 2000/11/03 10:06:06 xiphmont Exp $
+ last mod: $Id: mode_C.h,v 1.1.2.2 2000/11/03 10:37:34 xiphmont Exp $
 
  ********************************************************************/
 
@@ -23,22 +23,22 @@
 #include "vorbis/codec.h"
 #include "backends.h"
 
-#include "vorbis/book/lsp12_0.vqh"
-#include "vorbis/book/lsp30_0.vqh"
+#include "books/lsp12_0.vqh"
+#include "books/lsp30_0.vqh"
 
-#include "vorbis/book/resaux0_128a_192.vqh"
-#include "vorbis/book/resaux0_1024a_192.vqh"
+#include "books/resaux0_128a_192.vqh"
+#include "books/resaux0_1024a_192.vqh"
 
-#include "vorbis/book/res0_128a_192_1.vqh"
-#include "vorbis/book/res0_128a_192_2.vqh"
-#include "vorbis/book/res0_128a_192_3.vqh"
-#include "vorbis/book/res0_128a_192_4.vqh"
-#include "vorbis/book/res0_128a_192_5.vqh"
-#include "vorbis/book/res0_1024a_192_1.vqh"
-#include "vorbis/book/res0_1024a_192_2.vqh"
-#include "vorbis/book/res0_1024a_192_3.vqh"
-#include "vorbis/book/res0_1024a_192_4.vqh"
-#include "vorbis/book/res0_1024a_192_5.vqh"
+#include "books/res0_128a_192_1.vqh"
+#include "books/res0_128a_192_2.vqh"
+#include "books/res0_128a_192_3.vqh"
+#include "books/res0_128a_192_4.vqh"
+#include "books/res0_128a_192_5.vqh"
+#include "books/res0_1024a_192_1.vqh"
+#include "books/res0_1024a_192_2.vqh"
+#include "books/res0_1024a_192_3.vqh"
+#include "books/res0_1024a_192_4.vqh"
+#include "books/res0_1024a_192_5.vqh"
 
 static vorbis_info_psy _psy_set_C={
   1,/*athp*/
