@@ -1,5 +1,5 @@
 ;
-; $Id: vorbis.def,v 1.13 2003/10/01 22:27:26 giles Exp $
+; $Id: vorbis.def,v 1.14 2003/11/16 17:23:55 oddsock Exp $
 ; 
 LIBRARY
 EXPORTS
@@ -48,3 +48,9 @@ vorbis_synthesis_halfrate_p
 ;
 vorbis_window
 _analysis_output_always
+vorbis_encode_init
+vorbis_encode_setup_managed
+vorbis_encode_setup_vbr
+vorbis_encode_init_vbr
+vorbis_encode_setup_init
+vorbis_encode_ctl
