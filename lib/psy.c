@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.62 2001/12/21 14:52:35 segher Exp $
+ last mod: $Id: psy.c,v 1.63 2001/12/21 15:24:43 segher Exp $
 
  ********************************************************************/
 
@@ -969,7 +969,7 @@ void _vp_quantize_couple(vorbis_look_psy *p,
       for(j=0,k=0;j<n;k++){
 	vp_couple *part=info->couple_pass[passno].couple_pass+k;
 	float rqlimit=part->outofphase_requant_limit;
-	float flip_p=part->outofphase_redundant_flip_p;
+	int flip_p=part->outofphase_redundant_flip_p;
     
 	for(;j<part->limit && j<p->n;j++){
 	  /* partition by partition; k is our by-location partition
