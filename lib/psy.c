@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.19 2000/05/08 20:49:49 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.20 2000/05/16 11:54:09 msmith Exp $
 
  ********************************************************************/
 
@@ -349,7 +349,7 @@ static double _eights[EHMER_MAX+1]={
   22.62741699796952076,24.67537320652705316,
   26.90868528811886536,29.34412938254947939};
 
-static void seed_peaks(double *floor,
+static void seed_peaks(double *floorcurve,
 			 double **curves,
 			 double amp,double specmax,
 			 int x,int n,double specatt){
@@ -370,7 +370,7 @@ static void seed_peaks(double *floor,
       nextx=(nextx<n?nextx:n);
       if(lin){
 	lin*=amp;	
-	if(floor[prevx]<lin)floor[prevx]=lin;
+	if(floorcurve[prevx]<lin)floorcurve[prevx]=lin;
       }
       prevx=nextx;
     }
