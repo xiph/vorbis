@@ -12,18 +12,41 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.2 2000/01/28 09:05:02 xiphmont Exp $
+ last mod: $Id: vorbisfile.h,v 1.3 2000/04/21 09:35:03 msmith Exp $
 
  ********************************************************************/
 
 #ifndef _OV_FILE_H_
 #define _OV_FILE_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 #include <stdio.h>
 #include "codec.h"
 
+/* The function prototypes for the callbacks are basically the same as for
+ * the stdio functions fread, fseek, fclose, ftell. 
+ * The one difference is that the FILE * arguments have been replaced with
+ * a void * - this is to be used as a pointer to whatever internal data these
+ * functions might need. In the stdio case, it's just a FILE * cast to a void *
+ * 
+ * If you use other functions, check the docs for these functions and return
+ * the right values. For seek_func(), you *MUST* return -1 if the stream is
+ * unseekable
+ */
 typedef struct {
-  FILE             *f;
+  size_t (*read_func)  (void *ptr, size_t size, size_t nmemb, void *datasource);
+  int    (*seek_func)  (void *datasource, long offset, int whence);
+  int    (*close_func) (void *datasource);
+  long   (*tell_func)  (void *datasource);
+} ov_callbacks;
+
+
+typedef struct {
+  void             *datasource; /* Pointer to a FILE *, etc. */
   int              seekable;
   long             offset;
   long             end;
@@ -35,9 +58,9 @@ typedef struct {
   long             *offsets;
   long             *dataoffsets;
   long             *serialnos;
-  int64_t           *pcmlengths;
+  int64_t          *pcmlengths;
   vorbis_info      *vi;
-  vorbis_comment  *vc;
+  vorbis_comment   *vc;
 
   /* Decoding working state local storage */
   int64_t          pcm_offset;
@@ -50,10 +73,14 @@ typedef struct {
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
 
+  ov_callbacks callbacks;
+
 } OggVorbis_File;
 
 extern int ov_clear(OggVorbis_File *vf);
 extern int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
+extern int ov_open_callback(void *datasource, OggVorbis_File *vf,
+		char *initial, long ibytes, ov_callbacks callbacks);
 
 extern long ov_bitrate(OggVorbis_File *vf,int i);
 extern long ov_streams(OggVorbis_File *vf);
@@ -78,11 +105,10 @@ extern vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
 extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int bigendianp,int word,int sgned,int *bitstream);
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
 #endif
-
-
-
-
-
 
 

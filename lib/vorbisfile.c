@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.19 2000/04/03 09:45:55 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.20 2000/04/21 09:35:03 msmith Exp $
 
  ********************************************************************/
 
@@ -58,15 +58,15 @@
 /* read a little more data from the file/pipe into the ogg_sync framer */
 #define CHUNKSIZE 4096
 static long _get_data(OggVorbis_File *vf){
-  char *buffer=ogg_sync_buffer(&vf->oy,4096);
-  long bytes=fread(buffer,1,4096,vf->f);
+  char *buffer=ogg_sync_buffer(&vf->oy,CHUNKSIZE);
+  long bytes=(vf->callbacks.read_func)(buffer,1,CHUNKSIZE,vf->datasource);
   ogg_sync_wrote(&vf->oy,bytes);
   return(bytes);
 }
 
 /* save a tiny smidge of verbosity to make the code more readable */
 static void _seek_helper(OggVorbis_File *vf,long offset){
-  fseek(vf->f,offset,SEEK_SET);
+  (vf->callbacks.seek_func)(vf->datasource, offset, SEEK_SET);
   vf->offset=offset;
   ogg_sync_reset(&vf->oy);
 }
@@ -338,8 +338,8 @@ static int _open_seekable(OggVorbis_File *vf){
   
   /* we can seek, so set out learning all about this file */
   vf->seekable=1;
-  fseek(vf->f,0,SEEK_END);
-  vf->offset=vf->end=ftell(vf->f);
+  (vf->callbacks.seek_func)(vf->datasource,0,SEEK_END);
+  vf->offset=vf->end=(vf->callbacks.tell_func)(vf->datasource);
   
   /* We get the offset for the last page of the physical bitstream.
      Most OggVorbis files will contain a single logical bitstream */
@@ -527,7 +527,7 @@ int ov_clear(OggVorbis_File *vf){
     if(vf->serialnos)free(vf->serialnos);
     if(vf->offsets)free(vf->offsets);
     ogg_sync_clear(&vf->oy);
-    if(vf->f)fclose(vf->f);
+    if(vf->datasource)(vf->callbacks.close_func)(vf->datasource);
     memset(vf,0,sizeof(OggVorbis_File));
   }
 #ifdef DEBUG_LEAKS
@@ -545,11 +545,25 @@ int ov_clear(OggVorbis_File *vf){
 */
 
 int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
-  long offset=fseek(f,0,SEEK_CUR);
+  ov_callbacks callbacks = {
+    fread,
+    fseek,
+    fclose,
+    ftell};
+
+  return ov_open_callbacks((void *)f, vf, initial, ibytes, callbacks);
+}
+  
+
+int ov_open_callbacks(void *f,OggVorbis_File *vf,char *initial,long ibytes,
+    ov_callbacks callbacks)
+{
+  long offset=callbacks.seek_func(f,0,SEEK_CUR);
   int ret;
 
   memset(vf,0,sizeof(OggVorbis_File));
-  vf->f=f;
+  vf->datasource=f;
+  vf->callbacks = callbacks;
 
   /* init the framing state */
   ogg_sync_init(&vf->oy);
@@ -571,7 +585,7 @@ int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
     ret=_open_nonseekable(vf);
   }
   if(ret){
-    vf->f=NULL;
+    vf->datasource=NULL;
     ov_clear(vf);
   }
   return(ret);
@@ -999,13 +1013,14 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	
 	/* a tight loop to pack each size */
 	{
+	  int val;
 	  if(word==1){
 	    int off=(sgned?0:128);
 	    for(j=0;j<samples;j++)
 	      for(i=0;i<channels;i++){
-		int val=rint(pcm[i][j]*128.);
+		val=(int)(pcm[i][j]*128. + 0.5);
 		if(val>127)val=127;
-		if(val<-128)val=-128;
+		else if(val<-128)val=-128;
 		*buffer++=val+off;
 	      }
 	  }else{
@@ -1014,23 +1029,24 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
 	    if(bigendianp){
 	      for(j=0;j<samples;j++)
 		for(i=0;i<channels;i++){
-		  int val=rint(pcm[i][j]*32768.);
+		  val=(int)(pcm[i][j]*32768. + 0.5);
 		  if(val>32767)val=32767;
-		  if(val<-32768)val=-32768;
+		  else if(val<-32768)val=-32768;
 		  val+=off;
 		  *buffer++=(val>>8);
 		  *buffer++=(val&0xff);
 		}
 	    }else{
+	      int val;
 	      for(j=0;j<samples;j++)
-		for(i=0;i<channels;i++){
-		  int val=rint(pcm[i][j]*32768.);
+	 	for(i=0;i<channels;i++){
+		  val=(int)(pcm[i][j]*32768. + 0.5);
 		  if(val>32767)val=32767;
-		  if(val<-32768)val=-32768;
+		  else if(val<-32768)val=-32768;
 		  val+=off;
 		  *buffer++=(val&0xff);
 		  *buffer++=(val>>8);
-		}
+	  	}
 
 	    }
 	  }
