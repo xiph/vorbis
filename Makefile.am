@@ -8,7 +8,7 @@ m4datadir = $(datadir)/aclocal
 m4data_DATA = vorbis.m4
 
 EXTRA_DIST = README AUTHORS COPYING libvorbis.spec vorbis.m4 acinclude.m4\
-	todo.txt
+	todo.txt mac macosx
 
 debug:
 	$(MAKE) all CFLAGS="@DEBUG@"
