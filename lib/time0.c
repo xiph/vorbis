@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: time backend 0 (dummy)
- last mod: $Id: time0.c,v 1.11 2001/12/20 01:00:30 segher Exp $
+ last mod: $Id: time0.c,v 1.12 2002/03/30 14:02:53 msmith Exp $
 
  ********************************************************************/
 
@@ -36,6 +36,7 @@ static vorbis_look_time *time0_look (vorbis_dsp_state *vd,vorbis_info_mode *mi,
   return "";
 }
 static void time0_free_info(vorbis_info_time *i){
+    free(i); /* Dummy time mapping parameter */
 }
 static void time0_free_look(vorbis_look_time *i){
 }
