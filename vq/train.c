@@ -282,7 +282,7 @@ int main(int argc,char *argv[]){
 	}
 	{
 	  int i;
-	  double *b=alloca(cols*sizeof(double));
+	  double *b=malloc(cols*sizeof(double));
 	  if(start*num+dim>cols){
 	    fprintf(stderr,"ran out of columns reading %s\n",file);
 	    exit(1);
@@ -308,6 +308,7 @@ int main(int argc,char *argv[]){
 	    vqext_adjdata(b,start+i*dim,dim);
 	    vqgen_addpoint(&v,b+start+i*dim);
 	  }
+	  free(b);
 	}
       }
       fclose(in);
