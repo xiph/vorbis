@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.c,v 1.2.2.2 2000/11/04 06:43:50 xiphmont Exp $
+  last mod: $Id: iir.c,v 1.2.2.3 2000/11/04 10:24:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -32,7 +32,6 @@ void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B){
   s->coeff_A=_ogg_malloc(stages*sizeof(float));
   s->coeff_B=_ogg_malloc((stages+1)*sizeof(float));
   s->z_A=_ogg_calloc(stages*2,sizeof(float));
-  s->z_B=_ogg_calloc(stages*2,sizeof(float));
 
   memcpy(s->coeff_A,A,stages*sizeof(float));
   memcpy(s->coeff_B,B,(stages+1)*sizeof(float));
@@ -43,7 +42,6 @@ void IIR_clear(IIR_state *s){
     free(s->coeff_A);
     free(s->coeff_B);
     free(s->z_A);
-    free(s->z_B);
     memset(s,0,sizeof(IIR_state));
   }
 }
@@ -65,6 +63,17 @@ float IIR_filter(IIR_state *s,float in){
   if(++s->ring>=stages)s->ring=0;
 
   return(newB);
+}
+
+/* prevents ringing down to underflow */
+void IIR_clamp(IIR_state *s,float thresh){
+  float *zA=s->z_A+s->ring;
+  int i;
+  for(i=0;i<s->stages;i++)
+    if(fabs(zA[i])>=thresh)break;
+  
+  if(i<s->stages)
+    memset(s->z_A,0,sizeof(float)*s->stages*2);
 }
 
 /* this assumes the symmetrical structure of the feed-forward stage of

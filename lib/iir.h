@@ -12,7 +12,7 @@
  ********************************************************************
 
   function: Direct Form I, II IIR filters, plus some specializations
-  last mod: $Id: iir.h,v 1.2.2.1 2000/11/04 06:21:44 xiphmont Exp $
+  last mod: $Id: iir.h,v 1.2.2.2 2000/11/04 10:24:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -24,14 +24,14 @@ typedef struct {
   float *coeff_A;
   float *coeff_B;
   float *z_A;
-  float *z_B;
   int ring;
   float gain;
 } IIR_state;
 
-void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B);
-void IIR_clear(IIR_state *s);
-float IIR_filter(IIR_state *s,float in);
-float IIR_filter_ChebBand(IIR_state *s,float in);
+extern void IIR_init(IIR_state *s,int stages,float gain, float *A, float *B);
+extern void IIR_clear(IIR_state *s);
+extern float IIR_filter(IIR_state *s,float in);
+extern float IIR_filter_ChebBand(IIR_state *s,float in);
+extern void IIR_clamp(IIR_state *s,float thresh);
 
 #endif

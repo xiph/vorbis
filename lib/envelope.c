@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.c,v 1.23.2.3 2000/11/04 06:43:49 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.23.2.4 2000/11/04 10:24:15 xiphmont Exp $
 
  Preecho calculation.
 
@@ -174,6 +174,7 @@ long _ve_envelope_search(vorbis_dsp_state *v,long searchpoint){
     float *filtered=ve->filtered[i];
     float *pcm=v->pcm[i];
     IIR_state *iir=ve->iir+i;
+    IIR_clamp(iir,9e-15);
     
     for(j=ve->current;j<v->pcm_current;j++)
       filtered[j]=IIR_filter(iir,pcm[j]);
