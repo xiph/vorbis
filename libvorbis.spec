@@ -7,7 +7,7 @@ Name:		%{name}
 Version:	%{version}
 Release:	%{release}
 Group:		Libraries/Multimedia
-Copyright:	LGPL
+Copyright:	BSD
 URL:		http://www.xiph.org/
 Vendor:		Xiphophorus <team@xiph.org>
 Source:		ftp://ftp.xiph.org/pub/ogg/vorbis/%{name}-%{version}.tar.gz
@@ -24,7 +24,7 @@ and variable bitrates from 16 to 128 kbps/channel.
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
 Requires:	libogg-devel >= 1.0rc3
-Requires:	libvorbis-devel = %{version}
+Requires:	libvorbis = %{version}
 
 %description devel
 The libvorbis-devel package contains the header files and documentation
@@ -81,6 +81,8 @@ make DESTDIR=$RPM_BUILD_ROOT install
 /sbin/ldconfig
 
 %changelog
+* Sat May 25 2002 Michael Smith <msmith@icecast.org>
+- Fixed requires, copyright string.
 * Sun Dec 31 2001 Jack Moffitt <jack@xiph.org>
 - Updated for rc3 release.
 
