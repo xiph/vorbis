@@ -1,0 +1,54 @@
+# $Id: Makefile.in,v 1.1 1999/12/17 07:21:26 xiphmont Exp $
+
+###############################################################################
+#                                                                             #
+# To build a production vorbis (preferrably using gmake), just type 'make'.   #
+# To build with debugging or profiling information, use 'make debug' or       #
+# 'make profile' respectively.  'make clean' is a good idea between builds    #
+# with different target names, or before a final build.                       #
+#                                                                             #
+###############################################################################
+
+
+# DO NOT EDIT BELOW! ##########################################################
+# (unless, of course, you know what you are doing :) ##########################
+
+@SET_MAKE@
+FLAGS=-I. @TYPESIZES@ @CFLAGS@
+OPT=@OPT@ $(FLAGS)
+DEBUG=@DEBUG@ $(FLAGS)
+PROFILE=@PROFILE@ $(FLAGS)
+CC=@CC@
+LD=@CC@
+LDFLAGS=@LDFLAGS@ $(FLAGS)
+AR=@AR@
+RANLIB=@RANLIB@
+LIBS=@LIBS@ -lm
+
+HFILES =	vqgen.h vqext.h
+
+OFILES = 	vqgen.o train.o 
+ALLOFILES = 	$(OFILES) lspdata.o
+
+all:
+	$(MAKE) target CFLAGS="$(OPT)"
+
+debug:	
+	$(MAKE) target CFLAGS="$(DEBUG)"
+
+profile: 
+	$(MAKE) target CFLAGS="$(PROFILE)"
+
+target:	lspvqtrain 
+
+lspvqtrain:	$(OFILES) lspdata.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+
+$(ALLOFILES): 	$(HFILES)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+clean:
+	-rm -f *.o *.a test* *~ *.out *.m config.*\
+		lspvqtrain

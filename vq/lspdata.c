@@ -126,3 +126,15 @@ void vqext_unquantize(vqgen *v,quant_return *q){
     }
   }
 }
+
+/* Data files are line-vectors, starting with zero.  If we want to
+   train on a subvector starting in the middle, we need to adjust the
+   data as if it was starting at zero */
+
+void vqext_adjdata(double *b,int start,int dim){
+  if(start>0){
+    int i;
+    double base=b[start-1];
+    for(i=start;i<start+dim;i++)b[i]-=base;
+  }
+}

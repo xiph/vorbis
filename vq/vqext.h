@@ -30,5 +30,6 @@ typedef struct {
 extern double vqext_metric(vqgen *v,double *b, double *a);
 extern quant_return vqext_quantize(vqgen *v,int quantbits);
 extern void vqext_unquantize(vqgen *v,quant_return *q);
+extern void vqext_adjdata(double *b,int start,int dim);
 
 #endif

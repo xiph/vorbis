@@ -27,15 +27,46 @@
 #include "vqgen.h"
 #include "vqext.h"
 
-static int rline(FILE *in,FILE *out,char *line,int max,int pass){
-  while(fgets(line,160,in)){
-    if(line[0]=='#'){
-      if(pass)fprintf(out,"%s",line);
+static char *linebuffer=NULL;
+static int  lbufsize=0;
+static char *rline(FILE *in,FILE *out,int pass){
+  long sofar=0;
+  if(feof(in))return NULL;
+
+  while(1){
+    int gotline=0;
+
+    while(!gotline){
+      if(sofar>=lbufsize){
+	if(!lbufsize){	
+	  lbufsize=1024;
+	  linebuffer=malloc(lbufsize);
+	}else{
+	  lbufsize*=2;
+	  linebuffer=realloc(linebuffer,lbufsize);
+	}
+      }
+      {
+	long c=fgetc(in);
+	switch(c){
+	case '\n':
+	case EOF:
+	  gotline=1;
+	  break;
+	default:
+	  linebuffer[sofar++]=c;
+	  linebuffer[sofar]='\0';
+	  break;
+	}
+      }
+    }
+    
+    if(linebuffer[0]=='#'){
+      if(pass)fprintf(out,"%s",linebuffer);
     }else{
-      return(1);
+      return(linebuffer);
     }
   }
-  return(0);
 }
 
 /* command line:
@@ -55,7 +86,7 @@ int main(int argc,char *argv[]){
 
   int entries=-1,dim=-1,quant=-1;
   FILE *out=NULL;
-  char line[1024];
+  char *line;
   long i,j,k;
 
   double desired=.05;
@@ -93,14 +124,14 @@ int main(int argc,char *argv[]){
 	/* we wish to suck in a preexisting book and continue to train it */
 	double a;
 
-	rline(in,out,line,160,1);
+	line=rline(in,out,1);
 	if(strlen(line)>0)line[strlen(line)-1]='\0';
 	if(strcmp(line,vqext_booktype)){
 	  fprintf(stderr,"wrong book type; %s!=%s\n",line,vqext_booktype);
 	  exit(1);
 	} 
 	    
-	rline(in,out,line,160,1);
+	line=rline(in,out,1);
 	if(sscanf(line,"%d %d",&entries,&dim)!=2){
 	  fprintf(stderr,"Syntax error reading book file\n");
 	  exit(1);
@@ -111,7 +142,7 @@ int main(int argc,char *argv[]){
 	init=1;
 
 	/* quant setup */
-	rline(in,out,line,160,1);
+	line=rline(in,out,1);
 	if(sscanf(line,"%lf %lf %d %d",&q.minval,&q.delt,
 		  &q.addtoquant,&quant)!=4){
 	  fprintf(stderr,"Syntax error reading book file\n");
@@ -122,7 +153,7 @@ int main(int argc,char *argv[]){
 	i=0;
 	for(j=0;j<entries;j++){
 	  for(k=0;k<dim;k++){
-	    rline(in,out,line,160,0);
+	    line=rline(in,out,0);
 	    sscanf(line,"%lf",&a);
 	    v.entrylist[i++]=a;
 	  }
@@ -134,7 +165,7 @@ int main(int argc,char *argv[]){
 	/* bias, points */
 	i=0;
 	for(j=0;j<entries;j++){
-	  rline(in,out,line,160,0);
+	  line=rline(in,out,0);
 	  sscanf(line,"%lf",&a);
 	  v.bias[i++]=a;
 	}
@@ -145,7 +176,7 @@ int main(int argc,char *argv[]){
 	  v.entries=0; /* hack to avoid reseeding */
 	  while(1){
 	    for(k=0;k<dim && k<80;k++){
-	      rline(in,out,line,160,0);
+	      line=rline(in,out,0);
 	      sscanf(line,"%lf",b+k);
 	    }
 	    if(feof(in))break;
@@ -179,6 +210,7 @@ int main(int argc,char *argv[]){
       int start;
       char file[80];
       FILE *in;
+      int cols=-1;
 
       if(sscanf(*argv,"in=%79[^,],%d",file,&start)!=2)goto syner;
       if(!out){
@@ -202,19 +234,32 @@ int main(int argc,char *argv[]){
       }
       fprintf(out,"# training file entry: %s\n",file);
 
-      while(rline(in,out,line,1024,1)){
-	double b[16];
-	int n=sscanf(line,"%lf %lf %lf %lf %lf %lf %lf %lf "
-		     "%lf %lf %lf %lf %lf %lf %lf %lf",
-		     b,b+1,b+2,b+3,b+4,b+5,b+6,b+7,b+8,b+9,b+10,b+11,b+12,b+13,
-		     b+14,b+15);
-	if(start+dim>n){
-	  fprintf(stderr,"ran out of columns reading %s\n",file);
-	  exit(1);
+      while((line=rline(in,out,1))){
+	if(cols==-1){
+	  char *temp=line;
+	  while(*temp==' ')temp++;
+	  for(cols=0;*temp;cols++){
+	    while(*temp>32)temp++;
+	    while(*temp==' ')temp++;
+	  }
 	}
-	vqgen_addpoint(&v,b+start);
+	{
+	  int i;
+	  double *b=alloca(cols*sizeof(double));
+	  if(start+dim>cols){
+	    fprintf(stderr,"ran out of columns reading %s\n",file);
+	    exit(1);
+	  }
+	  while(*line==' ')line++;
+	  for(i=0;i<cols;i++){
+	    b[i]=atof(line);
+	    while(*line>32)line++;
+	    while(*line==' ')line++;
+	  }
+	  vqext_adjdata(b,start,dim);
+	  vqgen_addpoint(&v,b+start);
+	}
       }
-
       fclose(in);
     }
     argv++;
