@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: channel mapping 0 implementation
- last mod: $Id: mapping0.c,v 1.49.2.7 2002/06/26 00:37:38 xiphmont Exp $
+ last mod: $Id: mapping0.c,v 1.49.2.8 2002/06/26 08:03:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -737,8 +737,6 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_info_mapping *l){
     _floor_P[ci->floor_type[info->floorsubmap[submap]]]->
       inverse2(vb,b->flr[info->floorsubmap[submap]],
 	       floormemo[i],pcm);
-    
-    //_analysis_output_always("out",seq++,pcm,n/2,1,1,0);
   }
 
   /* transform the PCM data; takes PCM vector, vb; modifies PCM vector */

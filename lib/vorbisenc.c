@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple programmatic interface for encoder mode setup
- last mod: $Id: vorbisenc.c,v 1.39.2.8 2002/06/26 00:37:40 xiphmont Exp $
+ last mod: $Id: vorbisenc.c,v 1.39.2.9 2002/06/26 08:03:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -42,6 +42,7 @@ typedef struct {
   static_codebook  *book_aux;
   static_codebook  *book_aux_managed;
   static_bookblock *books_base;
+  static_bookblock *books_base_managed;
 } vorbis_residue_template;
 
 typedef struct {
@@ -446,29 +447,46 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
   if(res->res_type==2)
     n=r->end*=vi->channels;
   
-  for(i=0;i<r->partitions;i++)
-    for(k=0;k<3;k++)
-      if(res->books_base->books[i][k])
-	r->secondstages[i]|=(1<<k);
-  
   /* fill in all the books */
   {
     int booklist=0,k;
-
+    
     if(ci->hi.managed){
+      for(i=0;i<r->partitions;i++)
+	for(k=0;k<3;k++)
+	  if(res->books_base_managed->books[i][k])
+	    r->secondstages[i]|=(1<<k);
+
       r->groupbook=book_dup_or_new(ci,res->book_aux_managed);
       ci->book_param[r->groupbook]=res->book_aux_managed;      
+    
+      for(i=0;i<r->partitions;i++){
+	for(k=0;k<3;k++){
+	  if(res->books_base_managed->books[i][k]){
+	    int bookid=book_dup_or_new(ci,res->books_base_managed->books[i][k]);
+	    r->booklist[booklist++]=bookid;
+	    ci->book_param[bookid]=res->books_base_managed->books[i][k];
+	  }
+	}
+      }
+
     }else{
+
+      for(i=0;i<r->partitions;i++)
+	for(k=0;k<3;k++)
+	  if(res->books_base->books[i][k])
+	    r->secondstages[i]|=(1<<k);
+  
       r->groupbook=book_dup_or_new(ci,res->book_aux);
       ci->book_param[r->groupbook]=res->book_aux;
-    }
-
-    for(i=0;i<r->partitions;i++){
-      for(k=0;k<3;k++){
-	if(res->books_base->books[i][k]){
-	  int bookid=book_dup_or_new(ci,res->books_base->books[i][k]);
-	  r->booklist[booklist++]=bookid;
-	  ci->book_param[bookid]=res->books_base->books[i][k];
+      
+      for(i=0;i<r->partitions;i++){
+	for(k=0;k<3;k++){
+	  if(res->books_base->books[i][k]){
+	    int bookid=book_dup_or_new(ci,res->books_base->books[i][k]);
+	    r->booklist[booklist++]=bookid;
+	    ci->book_param[bookid]=res->books_base->books[i][k];
+	  }
 	}
       }
     }

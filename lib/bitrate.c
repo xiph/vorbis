@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: bitrate tracking and management
- last mod: $Id: bitrate.c,v 1.11.4.4 2002/06/26 03:28:25 xiphmont Exp $
+ last mod: $Id: bitrate.c,v 1.11.4.5 2002/06/26 08:03:15 xiphmont Exp $
 
  ********************************************************************/
 
@@ -293,22 +293,7 @@ int vorbis_bitrate_addblock(vorbis_block *vb){
 	/* apply the average floater to new blocks */
 	bin=rint(bm->avgfloat);
 
-	{
-	  double bitrate=(double)(bm->avg_binacc[bin]*8)/
-	    bm->avg_sampleacc*vi->rate;
-	  fprintf(stderr,"upper:%f lower:%f float: %f, bitrate=%f\n",
-		  upper,lower,new,bitrate);
-
-	  fprintf(stderr,"  8:%.0f %.0f 9:%.0f 10:%.0f 11:%.0f 12:%.0f 13:%.0f 14:%.0f\n",
-		  (bm->avg_binacc[7]*8.)/bm->avg_sampleacc*vi->rate,
-		  (bm->avg_binacc[8]*8.)/bm->avg_sampleacc*vi->rate,
-		  (bm->avg_binacc[9]*8.)/bm->avg_sampleacc*vi->rate,
-		  (bm->avg_binacc[10]*8.)/bm->avg_sampleacc*vi->rate,
-		  (bm->avg_binacc[11]*8.)/bm->avg_sampleacc*vi->rate,
-		  (bm->avg_binacc[12]*8.)/bm->avg_sampleacc*vi->rate,
-		  (bm->avg_binacc[13]*8.)/bm->avg_sampleacc*vi->rate,
-		  (bm->avg_binacc[14]*8.)/bm->avg_sampleacc*vi->rate);
-	}
+	/*fprintf(stderr,"%d ",bin);*/
 
 	
 	while(bm->avg_centeracc>desired_center){
@@ -536,14 +521,12 @@ int vorbis_bitrate_flushpacket(vorbis_dsp_state *vd,ogg_packet *op){
       long bytes=markers[bin];
 
       memcpy(op,bm->packets+bm->next_to_flush,sizeof(*op));
-      fprintf(stderr,"bin:%ld packet1:%p ",bin,op->packet);
 
       /* we have [PACKETBLOBS] possible packets all squished together in
 	 the buffer, in sequence.  count in to number [bin] */
       for(i=0;i<bin;i++)
 	op->packet+=markers[i];
       op->bytes=bytes;
-      fprintf(stderr,"packet2:%p\n",op->packet);
 	
     }
 

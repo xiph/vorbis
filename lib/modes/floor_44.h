@@ -11,69 +11,13 @@
  ********************************************************************
 
  function: key floor settings for 44.1/48kHz
- last mod: $Id: floor_44.h,v 1.2.8.3 2002/06/26 00:37:47 xiphmont Exp $
+ last mod: $Id: floor_44.h,v 1.2.8.4 2002/06/26 08:03:21 xiphmont Exp $
 
  ********************************************************************/
 
 #include "vorbis/codec.h"
 #include "backends.h"
-
-#include "books/floor/line_128x4_class0.vqh"
-#include "books/floor/line_128x4_0sub0.vqh"
-#include "books/floor/line_128x4_0sub1.vqh"
-#include "books/floor/line_128x4_0sub2.vqh"
-#include "books/floor/line_128x4_0sub3.vqh"
-
-#include "books/floor/line_128x7_class0.vqh"
-#include "books/floor/line_128x7_class1.vqh"
-#include "books/floor/line_128x7_0sub1.vqh"
-#include "books/floor/line_128x7_0sub2.vqh"
-#include "books/floor/line_128x7_0sub3.vqh"
-#include "books/floor/line_128x7_1sub1.vqh"
-#include "books/floor/line_128x7_1sub2.vqh"
-#include "books/floor/line_128x7_1sub3.vqh"
-
-#include "books/floor/line_128x11_class1.vqh"
-#include "books/floor/line_128x11_class2.vqh"
-#include "books/floor/line_128x11_class3.vqh"
-#include "books/floor/line_128x11_0sub0.vqh"
-#include "books/floor/line_128x11_1sub0.vqh"
-#include "books/floor/line_128x11_1sub1.vqh"
-#include "books/floor/line_128x11_2sub1.vqh"
-#include "books/floor/line_128x11_2sub2.vqh"
-#include "books/floor/line_128x11_2sub3.vqh"
-#include "books/floor/line_128x11_3sub1.vqh"
-#include "books/floor/line_128x11_3sub2.vqh"
-#include "books/floor/line_128x11_3sub3.vqh"
-
-#include "books/floor/line_128x17_class1.vqh"
-#include "books/floor/line_128x17_class2.vqh"
-#include "books/floor/line_128x17_class3.vqh"
-#include "books/floor/line_128x17_0sub0.vqh"
-#include "books/floor/line_128x17_1sub0.vqh"
-#include "books/floor/line_128x17_1sub1.vqh"
-#include "books/floor/line_128x17_2sub1.vqh"
-#include "books/floor/line_128x17_2sub2.vqh"
-#include "books/floor/line_128x17_2sub3.vqh"
-#include "books/floor/line_128x17_3sub1.vqh"
-#include "books/floor/line_128x17_3sub2.vqh"
-#include "books/floor/line_128x17_3sub3.vqh"
-
-#include "books/floor/line_1024x27_class1.vqh"
-#include "books/floor/line_1024x27_class2.vqh"
-#include "books/floor/line_1024x27_class3.vqh"
-#include "books/floor/line_1024x27_class4.vqh"
-#include "books/floor/line_1024x27_0sub0.vqh"
-#include "books/floor/line_1024x27_1sub0.vqh"
-#include "books/floor/line_1024x27_1sub1.vqh"
-#include "books/floor/line_1024x27_2sub0.vqh"
-#include "books/floor/line_1024x27_2sub1.vqh"
-#include "books/floor/line_1024x27_3sub1.vqh"
-#include "books/floor/line_1024x27_3sub2.vqh"
-#include "books/floor/line_1024x27_3sub3.vqh"
-#include "books/floor/line_1024x27_4sub1.vqh"
-#include "books/floor/line_1024x27_4sub2.vqh"
-#include "books/floor/line_1024x27_4sub3.vqh"
+#include "books/floor/floor_books.h"
 
 static static_codebook *_floor_44_128x4_books[]={
   &_huff_book_line_128x4_class0,
