@@ -7,7 +7,7 @@
 Ogg Vorbis comment field specification
 </font></h1>
 
-<em>Last update to this document: October 2, 2001</em><p>
+<em>Last update to this document: July 2, 2002</em><p>
 
 <p>The text comment header is the second (of three) header packets that
 begin a Vorbis bitstream. It is meant for short, text comments,
@@ -68,9 +68,10 @@ to the end of the field.
 Below is a proposed, minimal list of standard filed names with a
 description of intended use.  No single or group of field names is
 mandatory; a comment header may contain one, all or none of the names
-in this list.
+in this list.<p>
+
 <dl>
-<dt>TITLE<dd>Track name
+<dt>TITLE<dd>Track/Work name
 
 <dt>VERSION<dd>The version field may be used to differentiate multiple
 versions of the same track title in a single collection. (e.g. remix info)
@@ -83,6 +84,15 @@ versions of the same track title in a single collection. (e.g. remix info)
 
 <dt>PERFORMER<dd>The artist(s) who performed the work. In classical music this would be the conductor, orchestra, soloists. In an audio book it would be the actor who did the reading. In popular music this is typically the same as the ARTIST and is ommitted.
 
+<dt>COPYRIGHT<dd>Copyright attribution, e.g., '2001 Nobody's Band' or '1999 Jack Moffit'
+
+<dt>LICENSE<dd>License information, eg, 'All Rights Reserved', 'Any
+Use Permitted', a URL to a license such as a Creative Commons license
+("www.creativecommons.org/blahblah/license.html") or the EFF Open
+Audio License ('distributed under the terms of the Open Audio
+License. see http://www.eff.org/IP/Open_licenses/eff_oal.html for
+details'), etc.
+
 <dt>ORGANIZATION<dd>Name of the organization producing the track (i.e.
 the 'record label')
 
@@ -94,13 +104,9 @@ the 'record label')
 
 <dt>LOCATION<dd>Location where track was recorded
 
-<dt>COPYRIGHT<dd>Copyright and license information (e.g. '(c) 2001 Nobody's Band. All rights reserved' or '(c) 1999 Jack Moffit, distributed under the terms of the Open Audio License. see http://www.eff.org/IP/Open_licenses/eff_oal.html for details')
-
 <dt>CONTACT<dd>Contact information for the creators or distributors of the track. This could be a URL, an email address, the physical address of the producing label.
 
 <dt>ISRC<dd>ISRC number for the track; see <a href="http://www.ifpi.org/site-content/online/isrc_intro.html">the ISRC intro page</a> for more information on ISRC numbers.
-
-<dt>DISCID<dd>Table of contents hash from an associated disc, generally used to index the track in published music databases. See <a href="http://freedb.org/">http://freedb.org/</a> for and example of such a hash.
 
 </dl>
 
