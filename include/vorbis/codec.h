@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec.h,v 1.22 2000/07/29 08:45:33 msmith Exp $
+ last mod: $Id: codec.h,v 1.23 2000/08/04 01:05:45 xiphmont Exp $
 
  ********************************************************************/
 
@@ -362,6 +362,7 @@ typedef struct vorbis_comment{
 
 extern int      ogg_stream_packetin(ogg_stream_state *os, ogg_packet *op);
 extern int      ogg_stream_pageout(ogg_stream_state *os, ogg_page *og);
+extern int      ogg_stream_flush(ogg_stream_state *os, ogg_page *og);
 
 /* OggSquish BITSREAM PRIMITIVES: decoding **************************/
 

@@ -13,7 +13,7 @@
 
  function: code raw [Vorbis] packets into framed OggSquish stream and
            decode Ogg streams back into raw packets
- last mod: $Id: framing.c,v 1.21 2000/07/07 01:41:43 xiphmont Exp $
+ last mod: $Id: framing.c,v 1.22 2000/08/04 01:05:45 xiphmont Exp $
 
  note: The CRC code is directly derived from public domain code by
  Ross Williams (ross@guest.adelaide.edu.au).  See docs/framing.html
@@ -221,12 +221,134 @@ int ogg_stream_packetin(ogg_stream_state *os,ogg_packet *op){
   return(0);
 }
 
+/* This will flush remaining packets into a page (returning nonzero),
+   even if there is not enough data to trigger a flush normally
+   (undersized page). If there are no packets or partial packets to
+   flush, ogg_stream_flush returns 0.  Note that ogg_stream_flush will
+   try to flush a normal sized page like ogg_stream_pageout; a call to
+   ogg_stream_flush does not gurantee that all packets have flushed.
+   Only a return value of 0 from ogg_stream_flush indicates all packet
+   data is flushed into pages.
+
+   ogg_stream_page will flush the last page in a stream even if it's
+   undersized; you almost certainly want to use ogg_stream_pageout
+   (and *not* ogg_stream_flush) unless you need to flush an undersized
+   page in the middle of a stream for some reason. */
+
+int ogg_stream_flush(ogg_stream_state *os,ogg_page *og){
+  int i;
+  int vals=0;
+  int maxvals=(os->lacing_fill>255?255:os->lacing_fill);
+  int bytes=0;
+  long acc=0;
+  int64_t pcm_pos=os->pcm_vals[0];
+
+  if(maxvals==0)return(0);
+  
+  /* construct a page */
+  /* decide how many segments to include */
+  
+  /* If this is the initial header case, the first page must only include
+     the initial header packet */
+  if(os->b_o_s==0){  /* 'initial header page' case */
+    pcm_pos=0;
+    for(vals=0;vals<maxvals;vals++){
+      if((os->lacing_vals[vals]&0x0ff)<255){
+	vals++;
+	break;
+      }
+    }
+  }else{
+    for(vals=0;vals<maxvals;vals++){
+      if(acc>4096)break;
+      acc+=os->lacing_vals[vals]&0x0ff;
+      pcm_pos=os->pcm_vals[vals];
+    }
+  }
+  
+  /* construct the header in temp storage */
+  memcpy(os->header,"OggS",4);
+  
+  /* stream structure version */
+  os->header[4]=0x00;
+  
+  /* continued packet flag? */
+  os->header[5]=0x00;
+  if((os->lacing_vals[0]&0x100)==0)os->header[5]|=0x01;
+  /* first page flag? */
+  if(os->b_o_s==0)os->header[5]|=0x02;
+  /* last page flag? */
+  if(os->e_o_s && os->lacing_fill==vals)os->header[5]|=0x04;
+  os->b_o_s=1;
+
+  /* 64 bits of PCM position */
+  for(i=6;i<14;i++){
+    os->header[i]=(pcm_pos&0xff);
+    pcm_pos>>=8;
+  }
+
+  /* 32 bits of stream serial number */
+  {
+    long serialno=os->serialno;
+    for(i=14;i<18;i++){
+      os->header[i]=(serialno&0xff);
+      serialno>>=8;
+    }
+  }
+
+  /* 32 bits of page counter (we have both counter and page header
+     because this val can roll over) */
+  if(os->pageno==-1)os->pageno=0; /* because someone called
+				     stream_reset; this would be a
+				     strange thing to do in an
+				     encode stream, but it has
+				     plausible uses */
+  {
+    long pageno=os->pageno++;
+    for(i=18;i<22;i++){
+      os->header[i]=(pageno&0xff);
+      pageno>>=8;
+    }
+  }
+  
+  /* zero for computation; filled in later */
+  os->header[22]=0;
+  os->header[23]=0;
+  os->header[24]=0;
+  os->header[25]=0;
+  
+  /* segment table */
+  os->header[26]=vals&0xff;
+  for(i=0;i<vals;i++)
+    bytes+=os->header[i+27]=(os->lacing_vals[i]&0xff);
+  
+  /* advance the lacing data and set the body_returned pointer */
+  
+  os->lacing_fill-=vals;
+  memmove(os->lacing_vals,os->lacing_vals+vals,os->lacing_fill*sizeof(int));
+  memmove(os->pcm_vals,os->pcm_vals+vals,os->lacing_fill*sizeof(int64_t));
+  os->body_returned=bytes;
+  
+  /* set pointers in the ogg_page struct */
+  og->header=os->header;
+  og->header_len=os->header_fill=vals+27;
+  og->body=os->body_data;
+  og->body_len=bytes;
+  
+  /* calculate the checksum */
+  
+  _os_checksum(og);
+
+  /* done */
+  return(1);
+}
+
+
 /* This constructs pages from buffered packet segments.  The pointers
 returned are to static buffers; do not free. The returned buffers are
 good only until the next call (using the same ogg_stream_state) */
 
 int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
-  int i;
 
   if(os->body_returned){
     /* advance packet data according to the body_returned pointer. We
@@ -244,109 +366,10 @@ int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
      os->body_fill > 4096 ||          /* 'page nominal size' case */
      os->lacing_fill>=255 ||          /* 'segment table full' case */
      (os->lacing_fill&&!os->b_o_s)){  /* 'initial header page' case */
-
-    int vals=0,bytes=0;
-    int maxvals=(os->lacing_fill>255?255:os->lacing_fill);
-    long acc=0;
-    int64_t pcm_pos=os->pcm_vals[0];
-
-    /* construct a page */
-    /* decide how many segments to include */
-
-    /* If this is the initial header case, the first page must only include
-       the initial header packet */
-    if(os->b_o_s==0){  /* 'initial header page' case */
-      pcm_pos=0;
-      for(vals=0;vals<maxvals;vals++){
-	if((os->lacing_vals[vals]&0x0ff)<255){
-	  vals++;
-	  break;
-	}
-      }
-    }else{
-      for(vals=0;vals<maxvals;vals++){
-	if(acc>4096)break;
-	acc+=os->lacing_vals[vals]&0x0ff;
-	pcm_pos=os->pcm_vals[vals];
-      }
-    }
-
-    /* construct the header in temp storage */
-    memcpy(os->header,"OggS",4);
-
-    /* stream structure version */
-    os->header[4]=0x00;
-    
-    /* continued packet flag? */
-    os->header[5]=0x00;
-    if((os->lacing_vals[0]&0x100)==0)os->header[5]|=0x01;
-    /* first page flag? */
-    if(os->b_o_s==0)os->header[5]|=0x02;
-    /* last page flag? */
-    if(os->e_o_s && os->lacing_fill==vals)os->header[5]|=0x04;
-    os->b_o_s=1;
-
-    /* 64 bits of PCM position */
-    for(i=6;i<14;i++){
-      os->header[i]=(pcm_pos&0xff);
-      pcm_pos>>=8;
-    }
-
-    /* 32 bits of stream serial number */
-    {
-      long serialno=os->serialno;
-      for(i=14;i<18;i++){
-	os->header[i]=(serialno&0xff);
-	serialno>>=8;
-      }
-    }
-
-    /* 32 bits of page counter (we have both counter and page header
-       because this val can roll over) */
-    if(os->pageno==-1)os->pageno=0; /* because someone called
-                                       stream_reset; this would be a
-                                       strange thing to do in an
-                                       encode stream, but it has
-                                       plausible uses */
-    {
-      long pageno=os->pageno++;
-      for(i=18;i<22;i++){
-	os->header[i]=(pageno&0xff);
-	pageno>>=8;
-      }
-    }
-
-    /* zero for computation; filled in later */
-    os->header[22]=0;
-    os->header[23]=0;
-    os->header[24]=0;
-    os->header[25]=0;
-
-    /* segment table */
-    os->header[26]=vals&0xff;
-    for(i=0;i<vals;i++)
-      bytes+=os->header[i+27]=(os->lacing_vals[i]&0xff);
-      
-    /* advance the lacing data and set the body_returned pointer */
-
-    os->lacing_fill-=vals;
-    memmove(os->lacing_vals,os->lacing_vals+vals,os->lacing_fill*sizeof(int));
-    memmove(os->pcm_vals,os->pcm_vals+vals,os->lacing_fill*sizeof(int64_t));
-    os->body_returned=bytes;
-
-    /* set pointers in the ogg_page struct */
-    og->header=os->header;
-    og->header_len=os->header_fill=vals+27;
-    og->body=os->body_data;
-    og->body_len=bytes;
-
-    /* calculate the checksum */
-
-    _os_checksum(og);
-
-    return(1);
+        
+    return(ogg_stream_flush(os,og));
   }
-
+  
   /* not enough data to construct a page and not end of stream */
   return(0);
 }
@@ -359,15 +382,15 @@ int ogg_stream_eof(ogg_stream_state *os){
 
 /* This has two layers to place more of the multi-serialno and paging
    control in the application's hands.  First, we expose a data buffer
-   using ogg_decode_buffer().  The app either copies into the
+   using ogg_sync_buffer().  The app either copies into the
    buffer, or passes it directly to read(), etc.  We then call
-   ogg_decode_wrote() to tell how many bytes we just added.
+   ogg_sync_wrote() to tell how many bytes we just added.
 
    Pages are returned (pointers into the buffer in ogg_sync_state)
-   by ogg_decode_stream().  The page is then submitted to
-   ogg_decode_page() along with the appropriate
+   by ogg_sync_pageout().  The page is then submitted to
+   ogg_stream_pagein() along with the appropriate
    ogg_stream_state* (ie, matching serialno).  We then get raw
-   packets out calling ogg_stream_packet() with a
+   packets out calling ogg_stream_packetout() with a
    ogg_stream_state.  See the 'frame-prog.txt' docs for details and
    example code. */
 
