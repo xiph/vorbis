@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis 
- last mod: $Id: envelope.c,v 1.46 2002/03/29 08:18:23 xiphmont Exp $
+ last mod: $Id: envelope.c,v 1.47 2002/03/30 01:56:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -50,12 +50,13 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   }
 
   /* magic follows */
-  e->band[0].begin=4;  e->band[0].end=8;
-  e->band[1].begin=8;  e->band[1].end=10;
-  e->band[2].begin=14; e->band[2].end=12;
-  e->band[3].begin=20; e->band[3].end=16;
-  e->band[4].begin=28; e->band[4].end=20;
-  e->band[5].begin=40; e->band[5].end=20;
+  e->band[0].begin=2;  e->band[0].end=4;
+  e->band[1].begin=4;  e->band[1].end=8;
+  e->band[2].begin=6;  e->band[2].end=10;
+  e->band[3].begin=12; e->band[3].end=12;
+  e->band[4].begin=18; e->band[4].end=16;
+  e->band[5].begin=26; e->band[5].end=20;
+  e->band[6].begin=36; e->band[6].end=24;
 
   for(j=0;j<VE_BANDS;j++){
     n=e->band[j].end;
@@ -82,8 +83,6 @@ void _ve_envelope_clear(envelope_lookup *e){
   _ogg_free(e->mark);
   memset(e,0,sizeof(*e));
 }
-
-extern void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg_int64_t off);
 
 /* fairly straight threshhold-by-band based until we find something
    that works better and isn't patented. */
@@ -121,7 +120,7 @@ static int _ve_amp(envelope_lookup *ve,
     vec[i]=data[i]*ve->mdct_win[i];
   mdct_forward(&ve->mdct,vec,vec);
   
-  /* _analysis_output_always("mdct",seq2,vec,n/2,0,1,0); */
+  /*_analysis_output_always("mdct",seq2,vec,n/2,0,1,0); */
 
   /* near-DC spreading function; this has nothing to do with
      psychoacoustics, just sidelobe leakage and window size */
@@ -159,7 +158,7 @@ static int _ve_amp(envelope_lookup *ve,
     decay-=8.;
   }
 
-  /* _analysis_output_always("spread",seq2++,vec,n/4,0,0,0);*/
+  /*_analysis_output_always("spread",seq2++,vec,n/4,0,0,0);*/
   
   /* perform preecho/postecho triggering by band */
   for(j=0;j<VE_BANDS;j++){
@@ -193,17 +192,20 @@ static int _ve_amp(envelope_lookup *ve,
       valmin=postmin-premin;
       valmax=postmax-premax;
 
+      filters[j].markers[pos]=valmax;
+
       filters[j].ampbuf[this]=acc;
       filters[j].ampptr++;
       if(filters[j].ampptr>=VE_AMP)filters[j].ampptr=0;
     }
 
     /* look at min/max, decide trigger */
-    if(valmax>gi->preecho_thresh[j]+penalty)ret|=1;
+    if(valmax>gi->preecho_thresh[j]+penalty){
+      ret|=1;
+      ret|=4;
+    }
     if(valmin<gi->postecho_thresh[j]-penalty)ret|=2;
   }
-
-  if(ret&1)ve->stretch=-1;
  
   return(ret);
 }
@@ -247,6 +249,8 @@ long _ve_envelope_search(vorbis_dsp_state *v){
       ve->mark[j]=1;
       if(j>0)ve->mark[j-1]=1;
     }
+
+    if(ret&4)ve->stretch=-1;
   }
 
   ve->current=last*ve->searchstep;
@@ -299,9 +303,6 @@ long _ve_envelope_search(vorbis_dsp_state *v){
 	      _analysis_output_always(buf,seq,marker,v->pcm_current,0,0,totalshift);
 	    }
 	    
-	    for(l=0;l<last;l++)marker[l*ve->searchstep]=ve->stretchm[l]*.1;
-	    _analysis_output_always("stretch",seq,marker,v->pcm_current,0,0,totalshift);
-	    
 	    seq++;
 	    
 	  }
@@ -352,14 +353,11 @@ void _ve_envelope_shift(envelope_lookup *e,long shift){
 
   memmove(e->mark,e->mark+smallshift,(smallsize-smallshift)*sizeof(*e->mark));
   
-  #if 0
+#if 0
   for(i=0;i<VE_BANDS*e->ch;i++)
     memmove(e->filter[i].markers,
 	    e->filter[i].markers+smallshift,
 	    (1024-smallshift)*sizeof(*(*e->filter).markers));
-  memmove(e->stretchm,
-	  e->stretchm+smallshift,
-	  (1024-smallshift)*sizeof(*e->stretchm));
   totalshift+=shift;
 #endif 
 

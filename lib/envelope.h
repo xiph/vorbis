@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data envelope analysis and manipulation
- last mod: $Id: envelope.h,v 1.22 2002/03/29 07:10:39 xiphmont Exp $
+ last mod: $Id: envelope.h,v 1.23 2002/03/30 01:56:58 xiphmont Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,7 @@
 #define VE_POST   2
 #define VE_AMP    (VE_PRE+VE_POST-1)
 
-#define VE_BANDS  6
+#define VE_BANDS  7
 #define VE_NEARDC 15
 
 #define VE_MINSTRETCH 2   /* a bit less than short block */
@@ -39,6 +39,8 @@ typedef struct {
   float nearDC_acc;
   float nearDC_partialacc;
   int   nearptr;
+
+  float markers[1024];
 } envelope_filter_state;
 
 typedef struct {
