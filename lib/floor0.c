@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 0 implementation
- last mod: $Id: floor0.c,v 1.36 2001/02/02 03:51:56 xiphmont Exp $
+ last mod: $Id: floor0.c,v 1.37 2001/02/10 02:06:59 xiphmont Exp $
 
  ********************************************************************/
 
@@ -398,7 +398,7 @@ static int floor0_inverse(vorbis_block *vb,vorbis_look_floor *i,float *out){
     int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
     float *lsp=alloca(sizeof(float)*look->m);
 
-    if(booknum!=-1){
+    if(booknum!=-1 && booknum<info->numbooks){ /* be paranoid */
       backend_lookup_state *be=vb->vd->backend_state;
       codebook *b=be->fullbooks+info->books[booknum];
       float last=0.f;
