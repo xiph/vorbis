@@ -223,6 +223,7 @@ examples/Makefile
 win32/Makefile
 debian/Makefile
 vq/Makefile
+libvorbis.spec
 vorbis.pc
 vorbisenc.pc
 vorbisfile.pc

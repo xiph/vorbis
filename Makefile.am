@@ -10,7 +10,8 @@ m4data_DATA = vorbis.m4
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = vorbis.pc vorbisenc.pc vorbisfile.pc
 
-EXTRA_DIST = HACKING todo.txt macos macosx autogen.sh libvorbis.spec \
+EXTRA_DIST = HACKING todo.txt macos macosx autogen.sh \
+	libvorbis.spec libvorbis.spec.in \
 	vorbis.m4 vorbis.pc.in vorbisenc.pc.in vorbisfile.pc.in
 
 dist-hook:
