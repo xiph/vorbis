@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: libvorbis codec headers
- last mod: $Id: codec_internal.h,v 1.14.4.3 2002/05/18 01:39:27 xiphmont Exp $
+ last mod: $Id: codec_internal.h,v 1.14.4.4 2002/05/31 00:16:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -97,6 +97,7 @@ typedef struct highlevel_block {
 } highlevel_block;
 
 typedef struct highlevel_encode_setup {
+  int    managed;
   double base_quality;       /* these have to be tracked by the ctl */
   double base_quality_short; /* interface so that the right books get */
   double base_quality_long;  /* chosen... */
@@ -106,8 +107,7 @@ typedef struct highlevel_encode_setup {
   int impulse_block_p;
   int stereo_couple_p;
 
-  int    stereo_point_dB_q;
-  double stereo_point_kHz[2];
+  double stereo_point_q;
   double lowpass_kHz[2];
 
   double ath_floating_dB;
@@ -159,7 +159,6 @@ typedef struct codec_setup_info {
   vorbis_info_psy_global psy_g_param;
 
   bitrate_manager_info   bi;
-  int                    modeselect[2][PACKETBLOBS];
   highlevel_encode_setup hi;
   
 } codec_setup_info;

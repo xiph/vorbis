@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.67.2.4 2002/05/18 01:39:28 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.67.2.5 2002/05/31 00:16:10 xiphmont Exp $
 
  ********************************************************************/
 
@@ -911,10 +911,12 @@ void _vp_remove_floor(vorbis_look_psy *p,
 		      float *mdct,
 		      int *codedflr,
 		      float *residue){ 
+
   int i,n=p->n;
   
   for(i=0;i<n;i++)
-      residue[i]=mdct[i]*FLOOR1_fromdB_INV_LOOKUP[codedflr[i]];
+    residue[i]=
+      mdct[i]*FLOOR1_fromdB_INV_LOOKUP[codedflr[i]];
 }
 
 void _vp_noisemask(vorbis_look_psy *p,
@@ -969,7 +971,6 @@ void _vp_tonemask(vorbis_look_psy *p,
 
 }
 
-
 void _vp_offset_and_mix(vorbis_look_psy *p,
 			float *noise,
 			float *tone,
@@ -977,11 +978,11 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 			float *logmask){
   int i,n=p->n;
   float toneatt=p->vi->tone_masteratt[offset_select];
-
+  
   for(i=0;i<n;i++){
-    logmask[i]= noise[i]+p->noiseoffset[offset_select][i];
-    if(logmask[i]>p->vi->noisemaxsupp)logmask[i]=p->vi->noisemaxsupp;
-    logmask[i]=max(logmask[i],tone[i]+toneatt);
+    float val= noise[i]+p->noiseoffset[offset_select][i];
+    if(val>p->vi->noisemaxsupp)val=p->vi->noisemaxsupp;
+    logmask[i]=max(val,tone[i]+toneatt);
   }
 }
 
@@ -999,19 +1000,22 @@ float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd){
 }
 
 static void couple_lossless(float A, float B, 
-			    float *mag, float *ang){
+			    float *qA, float *qB){
+  int test1=fabs(*qA)>fabs(*qB);
+  test1-= fabs(*qA)<fabs(*qB);
   
-  if(fabs(A)>fabs(B)){
-    A=rint(A);B=rint(B);
-    *mag=A; *ang=(A>0.f?A-B:B-A);
+  if(!test1)test1=((fabs(A)>fabs(B))<<1)-1;
+  if(test1==1){
+    *qB=(*qA>0.f?*qA-*qB:*qB-*qA);
   }else{
-    A=rint(A);B=rint(B);  
-    *mag=B; *ang=(B>0.f?A-B:B-A);
+    float temp=*qB;  
+    *qB=(*qB>0.f?*qA-*qB:*qB-*qA);
+    *qA=temp;
   }
 
-  if(*ang>fabs(*mag)*1.9999f){
-    *ang= -fabs(*mag)*2.f;
-    *mag= -*mag;
+  if(*qB>fabs(*qA)*1.9999f){
+    *qB= -fabs(*qA)*2.f;
+    *qA= -*qA;
   }
 }
 
@@ -1025,7 +1029,6 @@ static float hypot_lookup[32]={
   -0.159093, -0.175146, -0.192286, -0.210490, 
   -0.229718, -0.249913, -0.271001, -0.292893};
 
-/* floorA and B are the pre-lookup logscale integers from floor1 decode */
 static void precomputed_couple_point(float premag,
 				     float A, float B,
 				     int floorA,int floorB,
@@ -1034,14 +1037,14 @@ static void precomputed_couple_point(float premag,
   int test=(floorA>floorB)-1;
   int offset=31-abs(floorA-floorB);
   float floormag=hypot_lookup[((offset<0)-1)&offset]+1.f;
-  
+
   floormag*=FLOOR1_fromdB_INV_LOOKUP[(floorB&test)|(floorA&(~test))];
+
   if(fabs(A)>fabs(B)){
-    premag*=unitnorm(A);
+    *mag=unitnorm(A)*premag*floormag;
   }else{
-    premag*=unitnorm(B);
+    *mag=unitnorm(B)*premag*floormag;
   }
-  *mag=premag*floormag;
   *ang=0.f;
 }
 
@@ -1057,29 +1060,117 @@ float **_vp_quantize_couple_memo(vorbis_block *vb,
   float **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
   
   for(i=0;i<vi->coupling_steps;i++){
-    float point=stereo_threshholds[vi->coupling_pointamp];
-    int limit=vi->coupling_pointlimit;
-
-    ret[i]=0;
-    if(point>0){
-      float *mdctM=mdct[vi->coupling_mag[i]];
-      float *mdctA=mdct[vi->coupling_ang[i]];
-      ret[i]=_vorbis_block_alloc(vb,(n-limit)*sizeof(**ret));
-      for(j=limit;j<n;j++)
-	ret[i][j-limit]=FAST_HYPOT(mdctM[j],mdctA[j]);
-    }
+    float *mdctM=mdct[vi->coupling_mag[i]];
+    float *mdctA=mdct[vi->coupling_ang[i]];
+    ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+    for(j=0;j<n;j++)
+      ret[i][j]=FAST_HYPOT(mdctM[j],mdctA[j]);
   }
+
   return(ret);
 }
 
-void _vp_quantize_couple(vorbis_look_psy *p,
-			 vorbis_info_mapping0 *vi,
-			 float **res,
-			 float **mag_memo,
-			 int   **ifloor,
-			 int   *nonzero){
+/* this is for per-channel noise normalization */
+static int apsort(const void *a, const void *b){
+  if(fabs(**(float **)a)>fabs(**(float **)b))return -1;
+  return 1;
+}
 
+int **_vp_quantize_couple_sort(vorbis_block *vb,
+				 vorbis_look_psy *p,
+				 vorbis_info_mapping0 *vi,
+				 float **mags){
+  
+  int i,j,k,n=p->n;
+  int **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
+  int partition=p->vi->normal_partition;
+  float **work=alloca(sizeof(*work)*partition);
+  
+  for(i=0;i<vi->coupling_steps;i++){
+    ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+
+    for(j=0;j<n;j+=partition){
+      for(k=0;k<partition;k++)work[k]=mags[i]+k+j;
+      qsort(work,partition,sizeof(*work),apsort);
+      for(k=0;k<partition;k++)ret[i][k+j]=work[k]-mags[i];
+    }
+  }
+  
+  return(ret);
+}
+
+void _vp_noise_normalize_sort(vorbis_look_psy *p,
+			      float *magnitudes,int *sortedindex){
   int i,j,n=p->n;
+  vorbis_info_psy *vi=p->vi;
+  int partition=vi->normal_partition;
+  float **work=alloca(sizeof(*work)*partition);
+  int start=vi->normal_start;
+
+  for(j=start;j<n;j+=partition){
+    if(j+partition>n)partition=n-j;
+    for(i=0;i<partition;i++)work[i]=magnitudes+i+j;
+    qsort(work,partition,sizeof(*work),apsort);
+    for(i=0;i<partition;i++){
+      sortedindex[i+j-start]=work[i]-magnitudes;
+    }
+  }
+}
+
+void _vp_noise_normalize(vorbis_look_psy *p,
+			 float *in,float *out,int *sortedindex){
+  int i,j,n=p->n;
+  vorbis_info_psy *vi=p->vi;
+  int partition=vi->normal_partition;
+  int start=vi->normal_start;
+
+  for(j=0;j<start;j++)
+    out[j]=rint(in[j]);
+    
+  for(;j+partition<=n;j+=partition){
+    float acc=0.,qacc=0.;
+    int flag=0;
+    for(i=0;i<partition;i++)
+      acc+=in[i+j]*in[i+j];
+    
+    for(i=0;i<partition;i++){
+      int k=sortedindex[i+j-start];
+      float qval=rint(in[k]);
+      
+      if(qval){
+	qacc+=in[k]*in[k];
+	flag=1;
+	out[k]=qval;
+      }else{
+	if(qacc>acc)break;
+	qacc+=1.;
+	out[k]=unitnorm(in[k]);
+      }
+    }
+
+    if(!flag && i<2)i=0;
+    for(;i<partition;i++){
+      int k=sortedindex[i+j-start];
+      out[k]=0.;
+    }
+  }
+
+  for(;j<n;j++)
+    out[j]=rint(in[j]);
+
+}
+
+void _vp_couple(int blobno,
+		vorbis_info_psy_global *g,
+		vorbis_look_psy *p,
+		vorbis_info_mapping0 *vi,
+		float **res,
+		float **mag_memo,
+		int   **mag_sort,
+		int   **ifloor,
+		int   *nonzero){
+
+  int i,j,k,n=p->n;
 
   /* perform any requested channel coupling */
   /* point stereo can only be used in a first stage (in this encoder)
@@ -1099,34 +1190,50 @@ void _vp_quantize_couple(vorbis_look_psy *p,
        nonzero[vi->coupling_ang[i]]){
      
 
-      float *resM=res[vi->coupling_mag[i]];
-      float *resA=res[vi->coupling_ang[i]];
+      float *rM=res[vi->coupling_mag[i]];
+      float *rA=res[vi->coupling_ang[i]];
+      float *qM=rM+n;
+      float *qA=rA+n;
       int *floorM=ifloor[vi->coupling_mag[i]];
       int *floorA=ifloor[vi->coupling_ang[i]];
-      float *outM=res[vi->coupling_mag[i]]+n;
-      float *outA=res[vi->coupling_ang[i]]+n;
-      int limit=vi->coupling_pointlimit;
-      float point=stereo_threshholds[vi->coupling_pointamp];
- 
+      int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
+      float point=stereo_threshholds[g->coupling_pointamp[blobno]];
+      int partition=p->vi->normal_partition;
+
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
 
-      for(j=0;j<limit;j++){
+      for(j=0;j<p->n;j+=partition){
+	float acc=0.f,qacc=0.f;
 
-	couple_lossless(resM[j],resA[j],outM+j,outA+j);
-      }
-
-      for(;j<p->n;j++){
-
-	if(fabs(resM[j])<point && fabs(resA[j])<point){
-	  precomputed_couple_point(mag_memo[i][j-limit],resM[j],resA[j],
-				   floorM[j],floorA[j],
-				   outM+j,outA+j);
-	  
-	}else{
-	  couple_lossless(resM[j],resA[j],outM+j,outA+j);
+	for(k=0;k<partition;k++){
+	  int l=k+j;
+	  if(l>=limit && fabs(rM[l])<point && fabs(rA[l])<point){
+	    precomputed_couple_point(mag_memo[i][l],rM[l],rA[l],
+				     floorM[l],floorA[l],
+				     qM+l,qA+l);
+	    if(rint(qM[l])==0.f)
+	      acc+=qM[l]*qM[l];
+	  }else{
+	    couple_lossless(rM[l],rA[l],qM+l,qA+l);
+	  }
 	}
+
+	for(k=0;k<partition && qacc<acc;k++){
+	  int l=mag_sort[i][j+k];
+	  if(l>=limit && rint(qM[l])==0.f){
+	    qM[l]=unitnorm(qM[l]);
+	    qacc+=1.f;
+	  }
+	} 
       }
     }
   }
 }
+
+
+
+
+
+
+

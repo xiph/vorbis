@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.28.2.2 2002/05/14 07:06:42 xiphmont Exp $
+ last mod: $Id: psy.h,v 1.28.2.3 2002/05/31 00:16:11 xiphmont Exp $
 
  ********************************************************************/
 
@@ -66,6 +66,8 @@ typedef struct vorbis_info_psy{
 
   float max_curve_dB;
 
+  int normal_start;
+  int normal_partition;
 } vorbis_info_psy;
 
 typedef struct{
@@ -83,8 +85,10 @@ typedef struct{
      current block to aid in analysis? */
   int   delaycache;
 
-  /* channel monofilter config */
-  float monofilter_kHz[P_NOISECURVES];  
+  /* channel coupling config */
+  float monofilter_kHz[PACKETBLOBS];  
+  int   coupling_pointlimit[2][PACKETBLOBS];  
+  int   coupling_pointamp[PACKETBLOBS];  
 
 } vorbis_info_psy_global;
 
@@ -93,6 +97,7 @@ typedef struct {
   int   channels;
 
   vorbis_info_psy_global *gi;
+  int   coupling_pointlimit[2][P_NOISECURVES];  
 } vorbis_look_psy_global;
 
 
@@ -150,25 +155,26 @@ extern float **_vp_quantize_couple_memo(vorbis_block *vb,
 					vorbis_info_mapping0 *vi,
 					float **mdct);
 
-extern void _vp_quantize_couple(vorbis_look_psy *p,
-				vorbis_info_mapping0 *vi,
-				float **res,
-				float **mag_memo,
-				int   **ifloor,
-				int   *nonzero);
+extern void _vp_couple(int blobno,
+		       vorbis_info_psy_global *g,
+		       vorbis_look_psy *p,
+		       vorbis_info_mapping0 *vi,
+		       float **res,
+		       float **mag_memo,
+		       int   **mag_sort,
+		       int   **ifloor,
+		       int   *nonzero);
+
+extern void _vp_noise_normalize(vorbis_look_psy *p,
+				float *in,float *out,int *sortedindex);
+
+extern void _vp_noise_normalize_sort(vorbis_look_psy *p,
+				     float *magnitudes,int *sortedindex);
+
+extern int **_vp_quantize_couple_sort(vorbis_block *vb,
+				      vorbis_look_psy *p,
+				      vorbis_info_mapping0 *vi,
+				      float **mags);
 
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
 
