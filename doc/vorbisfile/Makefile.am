@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
+docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)/vorbisfile
 
 doc_DATA = OggVorbis_File.html chaining_example_c.html chainingexample.html\
 	datastructures.html decoding.html example.html exampleindex.html\

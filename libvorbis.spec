@@ -12,7 +12,7 @@ URL:		http://www.xiph.org/
 Vendor:		Xiphophorus <team@xiph.org>
 Source:		ftp://ftp.xiph.org/pub/ogg/vorbis/%{name}-%{version}.tar.gz
 BuildRoot:	%{_tmppath}/%{name}-root
-Requires:	libogg >= 1.0.0
+Requires:	libogg >= 1.0beta3
 
 %description
 Ogg Vorbis is a fully open, non-proprietary, patent-and-royalty-free,
@@ -22,7 +22,7 @@ and variable bitrates from 16 to 128 kbps/channel.
 %package devel
 Summary: 	Vorbis Library Development
 Group: 		Development/Libraries
-Requires:	libogg-devel >= 1.0.0
+Requires:	libogg-devel >= 1.0beta3
 Requires:	libvorbis-devel = %{version}
 
 %description devel
@@ -47,6 +47,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %files
 %defattr(-,root,root)
 %doc COPYING
+%doc AUTHORS
 %doc README
 /usr/lib/libvorbis.so.*
 /usr/lib/libvorbisfile.so.*
@@ -54,10 +55,12 @@ make DESTDIR=$RPM_BUILD_ROOT install
 
 %files devel
 %doc doc/*.html
-%doc doc/*.txt
 %doc doc/*.png
-%doc doc/vorbisfile/*.html
-%doc doc/vorbisfile/*.css
+%doc doc/*.txt
+%{_docdir}/%{name}-%{version}/vorbisfile/*.html
+%{_docdir}/%{name}-%{version}/vorbisfile/*.css
+%{_docdir}/%{name}-%{version}/vorbisenc/*.html
+%{_docdir}/%{name}-%{version}/vorbisenc/*.css
 /usr/include/vorbis/codec.h
 /usr/include/vorbis/vorbisfile.h
 /usr/include/vorbis/vorbisenc.h
