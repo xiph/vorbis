@@ -11,6 +11,7 @@ config.sub
 config.guess
 configure
 *.gz
+*.zip
 .libs
 .deps
 *.ogg
