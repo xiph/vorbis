@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.42 2001/03/20 07:39:07 giles Exp $
+ last mod: $Id: vorbisfile.c,v 1.43 2001/03/20 08:04:05 giles Exp $
 
  ********************************************************************/
 
@@ -1104,7 +1104,11 @@ int host_is_big_endian() {
 
    ov_read returns the sequential logical bitstream number currently
    being decoded along with the PCM data in order that the toplevel
-   application can take action on channel/sample rate changes.
+   application can take action on channel/sample rate changes.  This
+   number will be incremented even for streamed (non-seekable) streams
+   (for seekable streams, it represents the actual logical bitstream
+   index within the physical bitstream.  Note that the accessor
+   functions above are aware of this dichotomy).
 
    input values: buffer) a buffer to hold packed PCM data for return
 		 length) the byte length requested to be placed into buffer

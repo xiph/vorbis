@@ -26,7 +26,13 @@
    if the toplevel application didn't particularly care.  However, when we actually read audio back, we must be aware that multiple bitstream sections do not necessarily
    have to have the same number of channels or sampling rate.
 </p><p>
-   <tt>ov_read()</tt> passes back the logical bitstream number currently
+    <tt>ov_read()</tt> passes back the index of the sequential logical
+    bitstream currently being decoded along with the PCM data in order
+    that the toplevel application can take action on channel/sample rate
+    changes. This number will be incremented at chaining boundaries even
+    for non-seekable streams. For seekable streams, it represents the
+    actual chaining index within the physical bitstream.
+<tt>ov_read()</tt> passes back the logical bitstream number currently
    being decoded along with the PCM data in order that the toplevel
    application can take action on channel/sample rate changes.
 </p>
