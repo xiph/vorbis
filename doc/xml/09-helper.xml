@@ -1,8 +1,8 @@
 <section id="vorbis-spec-helper">
 <sectioninfo>
 <releaseinfo>
- $Id: 09-helper.xml,v 1.2 2002/10/13 15:18:47 giles Exp $
- <emphasis>Last update to this document: September 10, 2002</emphasis>
+ $Id: 09-helper.xml,v 1.3 2002/10/16 21:43:32 giles Exp $
+ <emphasis>Last update to this document: October 15, 2002</emphasis>
 </releaseinfo>
 </sectioninfo>
 <title>helper equations</title>
@@ -119,7 +119,7 @@ than vector <varname>[v]</varname> element <varname>[x]</varname>.</para>
 <title>render_point</title>
 
 <para>
-"render_point(x0,x1,y0,y1,X)" is used to find the Y value at point X
+"render_point(x0,y0,x1,y1,X)" is used to find the Y value at point X
 along the line specified by x0, x1, y0 and y1.  This function uses an
 integer algorithm to solve for the point directly without calculating
 intervening values along the line.</para>
