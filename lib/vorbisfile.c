@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.52 2001/12/12 09:45:26 xiphmont Exp $
+ last mod: $Id: vorbisfile.c,v 1.53 2001/12/14 00:30:33 jack Exp $
 
  ********************************************************************/
 
@@ -25,7 +25,6 @@
 #include "vorbis/vorbisfile.h"
 
 #include "os.h"
-#include "codec_internal.h"
 #include "misc.h"
 
 /* A 'chained bitstream' is a Vorbis bitstream that contains more than
@@ -1336,7 +1335,7 @@ vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
   }
 }
 
-int host_is_big_endian() {
+static int host_is_big_endian() {
   ogg_int32_t pattern = 0xfeedface; /* deadbeef */
   unsigned char *bytewise = (unsigned char *)&pattern;
   if (bytewise[0] == 0xfe) return 1;
