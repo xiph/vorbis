@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.50 2001/10/02 00:14:32 segher Exp $
+ last mod: $Id: vorbisfile.c,v 1.51 2001/11/12 13:41:10 msmith Exp $
 
  ********************************************************************/
 
@@ -142,6 +142,8 @@ static long _get_prev_page(OggVorbis_File *vf,ogg_page *og){
 
   while(offset==-1){
     begin-=CHUNKSIZE;
+    if(begin<0)
+      begin=0;
     _seek_helper(vf,begin);
     while(vf->offset<begin+CHUNKSIZE){
       ret=_get_next_page(vf,og,begin+CHUNKSIZE-vf->offset);
@@ -425,57 +427,61 @@ static int _process_packet(OggVorbis_File *vf,int readp){
     /* process a packet if we can.  If the machine isn't loaded,
        neither is a page */
     if(vf->ready_state==INITSET){
-      ogg_packet op;
-      int result=ogg_stream_packetout(&vf->os,&op);
-      ogg_int64_t granulepos;
+      while(1) {
+      	ogg_packet op;
+	int result=ogg_stream_packetout(&vf->os,&op);
+	ogg_int64_t granulepos;
 
-      if(result==-1)return(OV_HOLE); /* hole in the data. */
-      if(result>0){
-	/* got a packet.  process it */
-	granulepos=op.granulepos;
-	if(!vorbis_synthesis(&vf->vb,&op)){ /* lazy check for lazy
-                                               header handling.  The
-                                               header packets aren't
-                                               audio, so if/when we
-                                               submit them,
-                                               vorbis_synthesis will
-                                               reject them */
+	if(result==-1)return(OV_HOLE); /* hole in the data. */
+	if(result>0){
+	  /* got a packet.  process it */
+	  granulepos=op.granulepos;
+	  if(!vorbis_synthesis(&vf->vb,&op)){ /* lazy check for lazy
+                                                 header handling.  The
+                                                 header packets aren't
+                                                 audio, so if/when we
+                                                 submit them,
+                                                 vorbis_synthesis will
+                                                 reject them */
 
-	  /* suck in the synthesis data and track bitrate */
-	  {
-	    int oldsamples=vorbis_synthesis_pcmout(&vf->vd,NULL);
-	    vorbis_synthesis_blockin(&vf->vd,&vf->vb);
-	    vf->samptrack+=vorbis_synthesis_pcmout(&vf->vd,NULL)-oldsamples;
-	    vf->bittrack+=op.bytes*8;
-	  }
+	    /* suck in the synthesis data and track bitrate */
+	    {
+	      int oldsamples=vorbis_synthesis_pcmout(&vf->vd,NULL);
+	      vorbis_synthesis_blockin(&vf->vd,&vf->vb);
+	      vf->samptrack+=vorbis_synthesis_pcmout(&vf->vd,NULL)-oldsamples;
+	      vf->bittrack+=op.bytes*8;
+	    }
 	  
-	  /* update the pcm offset. */
-	  if(granulepos!=-1 && !op.e_o_s){
-	    int link=(vf->seekable?vf->current_link:0);
-	    int i,samples;
+	    /* update the pcm offset. */
+	    if(granulepos!=-1 && !op.e_o_s){
+	      int link=(vf->seekable?vf->current_link:0);
+	      int i,samples;
 	    
-	    /* this packet has a pcm_offset on it (the last packet
-	       completed on a page carries the offset) After processing
-	       (above), we know the pcm position of the *last* sample
-	       ready to be returned. Find the offset of the *first*
+	      /* this packet has a pcm_offset on it (the last packet
+	         completed on a page carries the offset) After processing
+	         (above), we know the pcm position of the *last* sample
+	         ready to be returned. Find the offset of the *first*
 
-	       As an aside, this trick is inaccurate if we begin
-	       reading anew right at the last page; the end-of-stream
-	       granulepos declares the last frame in the stream, and the
-	       last packet of the last page may be a partial frame.
-	       So, we need a previous granulepos from an in-sequence page
-	       to have a reference point.  Thus the !op.e_o_s clause
-	       above */
+	         As an aside, this trick is inaccurate if we begin
+	         reading anew right at the last page; the end-of-stream
+	         granulepos declares the last frame in the stream, and the
+	         last packet of the last page may be a partial frame.
+	         So, we need a previous granulepos from an in-sequence page
+	         to have a reference point.  Thus the !op.e_o_s clause
+	         above */
 	    
-	    samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
+	      samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
 	    
-	    granulepos-=samples;
-	    for(i=0;i<link;i++)
-	      granulepos+=vf->pcmlengths[i];
-	    vf->pcm_offset=granulepos;
+	      granulepos-=samples;
+	      for(i=0;i<link;i++)
+	        granulepos+=vf->pcmlengths[i];
+	      vf->pcm_offset=granulepos;
+	    }
+	    return(1);
 	  }
-	  return(1);
 	}
+	else 
+	  break;
       }
     }
 
