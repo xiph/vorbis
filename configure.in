@@ -1,4 +1,4 @@
-# $Id: configure.in,v 1.18 2000/07/07 06:16:24 xiphmont Exp $
+# $Id: configure.in,v 1.19 2000/07/22 02:03:45 kcarnold Exp $
 
 AC_INIT(lib/mdct.c)
 #AC_CONFIG_HEADER(config.h)
@@ -235,6 +235,8 @@ AC_SUBST(RANLIB)
 #AC_SUBST(XOGG)
 #AC_SUBST(LIBGTKDIR)
 AC_SUBST(pthread_lib)
+
+AC_CONFIG_SUBDIRS(vorbis-tools/libao)
 
 AC_OUTPUT(Makefile lib/Makefile examples/Makefile vorbis-tools/Makefile\
 	vq/Makefile huff/Makefile cmdline/Makefile xmms/Makefile kmpg/Makefile)
