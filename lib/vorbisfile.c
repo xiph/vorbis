@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.c,v 1.53 2001/12/14 00:30:33 jack Exp $
+ last mod: $Id: vorbisfile.c,v 1.54 2001/12/18 22:02:25 jack Exp $
 
  ********************************************************************/
 
@@ -1407,7 +1407,25 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
   int host_endian = host_is_big_endian();
 
   float **pcm;
-  long samples=ov_read_float(vf,&pcm,bitstream);
+  long samples;
+
+  if(vf->ready_state<OPENED)return(OV_EINVAL);
+
+  while(1){
+    if(vf->ready_state>=STREAMSET){
+      samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
+      if(samples)break;
+    }
+
+    /* suck in another packet */
+    {
+      int ret=_process_packet(vf,1);
+      if(ret==OV_EOF)return(0);
+      if(ret<=0)return(ret);
+    }
+
+  }
+
   if(samples>0){
   
     /* yay! proceed to pack data into the byte buffer */
