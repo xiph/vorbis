@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.13 2002/02/28 04:12:47 xiphmont Exp $
+ last mod: $Id: seeking_example.c,v 1.14 2002/07/09 13:41:08 giles Exp $
 
  ********************************************************************/
 
@@ -146,7 +146,6 @@ int main(){
 
     printf("\r");
     {
-      ogg_int64_t length=ov.end;
       printf("testing pcm page seeking to random places in %ld samples....\n",
 	     (long)pcmlength);
     
