@@ -11,14 +11,14 @@
  ********************************************************************
 
  function: key psychoacoustic settings for 44.1/48kHz
- last mod: $Id: psych_44.h,v 1.10 2002/03/24 21:04:03 xiphmont Exp $
+ last mod: $Id: psych_44.h,v 1.11 2002/03/24 21:24:01 xiphmont Exp $
 
  ********************************************************************/
 
 
 /* preecho trigger settings *****************************************/
 
-static vorbis_info_psy_global _psy_global_44[4]={
+static vorbis_info_psy_global _psy_global_44[5]={
 
   {8,   /* lines per eighth octave */
    /*{990.f,990.f,990.f,990.f}, {-990.f,-990.f,-990.f,-990.f}, -90.f,
