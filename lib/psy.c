@@ -12,7 +12,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.16.2.2.2.1 2000/03/30 09:37:57 xiphmont Exp $
+ last mod: $Id: psy.c,v 1.16.2.2.2.2 2000/03/30 11:46:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -416,16 +416,16 @@ static void _vp_tone_tone_iter(vorbis_look_psy *p,double *f, double *flr,
 }
 
 static int comp(const void *a,const void *b){
-  return(**(double **)a<**(double **)b);
+  return(fabs(**(double **)a)<fabs(**(double **)b));
 }
 
 /* this applies the floor and (optionally) tries to preserve noise
    energy in low resolution portions of the spectrum */
-static void _vp_apply_floor(vorbis_look_psy *p,double *f, 
+void _vp_apply_floor(vorbis_look_psy *p,double *f, 
 		      double *flr){
   double *work=alloca(p->n*sizeof(double));
   double thresh=fromdB(p->vi->noisefit_threshdB);
-  int i,j;
+  int i,j,addcount=0;
   thresh*=thresh;
 
   /* subtract the floor */
@@ -454,47 +454,49 @@ static void _vp_apply_floor(vorbis_look_psy *p,double *f,
        close to (but still less than) the original as possible.  Don't
        bother if the net result is a change of less than
        p->vi->noisefit_thresh dB */
-    for(i=0;i<p->n;i++){
+    for(i=0;i<p->n;){
       double original_SL=0.;
       double current_SL=0.;
-      int nonz=0;
+      int z=0;
 
       /* compute current SL */
-      for(j=0;j<p->vi->noisefit_subblock;j++){
-	double y=(f[j+i]*f[j+i]);
+      for(j=0;j<p->vi->noisefit_subblock && i<p->n;j++,i++){
+	double y=(f[i]*f[i]);
 	original_SL+=y;
-	if(work[j]){
-	  index[nonz]=f+j+i;
-	  nonz++;
+	if(work[i]){
 	  current_SL+=y;
-	}
+	}else{
+	  index[z++]=f+i;
+	}	
       }
+
       /* sort the zeroed values; add back the largest first, stop when
          we violate the desired result above (which may be
          immediately) */
-      if(nonz<p->vi->noisefit_subblock){
-	qsort(index,nonz,sizeof(double *),&comp);
-	for(j=0;j<nonz;j++)
-	  fprintf(stderr,"%02g ", *(index[j]));
-	fprintf(stderr,"::");
+      if(z && z<p->vi->noisefit_subblock){
+	qsort(index,z,sizeof(double *),&comp);
 
-	for(j=0;j<nonz;j++){
-	  int p=index[j]-f;
-	  double val=flr[p]*flr[p]+current_SL;
-	  
-	  if(val<original_SL){
-	    if(f[p]<0)
-	      work[p]=.01;
-	    else
-	      work[p]=-.01;
-	    current_SL=val;
-	    if(val*thresh>original_SL)break;
-	  }else
+	for(j=0;j<z;j++){
+	  if(current_SL*thresh>original_SL)break;
+	  {
+	    int p=index[j]-f;
+	    double lflr=fromdB(flr[p]);
+	    double val=lflr*lflr+current_SL;
+	    
+	    if(val<original_SL){
+	      addcount++;
+	      if(f[p]<0)
+		work[p]=.01;
+	      else
+		work[p]=-.01;
+	      current_SL=val;
+	    }else
 	    break;
-
+	  }
 	}
       }
     }
+    fprintf(stderr,"added %d noise coeffs back\n",addcount);
   }
   memcpy(f,work,p->n*sizeof(double));
 }
@@ -517,12 +519,13 @@ void _vp_tone_tone_mask(vorbis_look_psy *p,double *f, double *flr,
       for(j=0;j<p->n;j++)
 	flr[j]=(flr[j]+iter[j])/2.;
     }
-    if(i!=p->vi->curve_fit_iterations-1)
+    if(i!=p->vi->curve_fit_iterations-1){
       for(j=0;j<p->n;j++)
 	if(fabs(f[j])<flr[j])
 	  iter[j]=0.;
 	else
 	  iter[j]=fabs(f[j]);
+    }
 
     analysis("Pmask",frameno*10+i,flr,p->n,1,1);
   

@@ -13,7 +13,7 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.1.2.2.2.1 2000/03/30 09:37:57 xiphmont Exp $
+ last mod: $Id: psytune.c,v 1.1.2.2.2.2 2000/03/30 11:46:18 xiphmont Exp $
 
  ********************************************************************/
 
@@ -30,7 +30,9 @@
 #include "lpc.h"
 
 static vorbis_info_psy _psy_set0={
-  3,1,0,0,
+  3,1,0,
+
+  1,16,3.,
 
   -130.,
 
@@ -240,34 +242,22 @@ int main(int argc,char *argv[]){
 
 	}
 
+	_vp_apply_floor(&p_look,pcm[i],floor);
 
 	/* quantize according to masking */
 	for(j=0;j<framesize/2;j++){
-	  double val;
-	  if(mask[j]==0)
-	    val=0;
-	  else{
-	    val=rint((todB(pcm[i][j])-floor[j]));
-	    if(val<=0.){
-	      val=0.;
-	    }else{
-	      nonz+=1;
-	      if(pcm[i][j]<0)val= -val;
-	    }
-	  }
-	  
-	  acc+=log(fabs(val)*2.+1.)/log(2);
+	  double val=pcm[i][j];
 	  tot++;
-	  if(val==0)
-	    pcm[i][j]=0.;
-	  else{
+	  if(val){
+	    nonz++;
+	    acc+=log(fabs(val)*2.+1.)/log(2);
 	    if(val>0)
 	      pcm[i][j]=fromdB(val+floor[j]);
 	    else
 	      pcm[i][j]=-fromdB(floor[j]-val);
 	  }
 	}
-
+	
 	analysis("final",frameno,pcm[i],framesize/2,1,1);
 
 	/* take it back to time */
