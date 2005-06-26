@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: PCM data vector blocking, windowing and dis/reassembly
- last mod: $Id: block.c,v 1.76 2003/12/30 11:02:22 xiphmont Exp $
+ last mod: $Id$
 
  Handle windowing, overlap-add, etc of the PCM vectors.  This is made
  more amusing by Vorbis' current two allowed block sizes.
@@ -106,7 +106,7 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
       oggpack_writeinit(vbi->packetblob[i]);
     }    
   }
-  
+
   return(0);
 }
 
@@ -292,6 +292,10 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   _ve_envelope_init(b->ve,vi);
 
   vorbis_bitrate_init(vi,&b->bms);
+
+  /* compressed audio packets start after the headers
+     with sequence number 3 */
+  v->sequence=3;
 
   return(0);
 }
