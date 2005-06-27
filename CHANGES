@@ -1,6 +1,7 @@
-libvorbis 1.1.1 (unreleased) -- "Xiph.Org libVorbis I 20050304"
+libvorbis 1.1.1 (2005-06-27) -- "Xiph.Org libVorbis I 20050304"
 
  * bug fix to the bitrate management encoder interface
+ * bug fix to properly set packetno field in the encoder
  * new draft RTP encapsulation spec
  * library API documentation improvements
 
