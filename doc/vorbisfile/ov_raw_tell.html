@@ -17,7 +17,9 @@
 
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
-<p>Returns the current offset in raw compressed bytes.
+<p>Returns the current offset in raw compressed bytes.</p>
+
+<p>Note that if you later use ov_raw_seek() to return to this point, you won't generally get back to exactly the same place, due to internal buffering. Also note that a read operation may not cause a change to the current raw offset - only a read that requires reading more data from the underlying data source will do that.</p>
 
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
