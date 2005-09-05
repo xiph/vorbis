@@ -169,14 +169,6 @@ else
 		CFLAGS="-O20 -D__NO_MATH_INLINES -fsigned-char"
 		PROFILE="-O20 -g -pg -D__NO_MATH_INLINES -fsigned-char" ;;
         esac
-
-	case "$GCC_VERSION" in
-	4.*)
-		# work around a problem with the gcc4 optimizer
-		PROFILE="$DEBUG -fno-inline-functions"
-		CFLAGS="$CFLAGS -fno-inline-functions"
-		PROFILE="$PROFILE -fno-inline-functions" ;;
-	esac
 fi
 CFLAGS="$CFLAGS $cflags_save"
 LDFLAGS="$LDFLAGS $ldflags_save"
