@@ -10,6 +10,10 @@ m4data_DATA = vorbis.m4
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = vorbis.pc vorbisenc.pc vorbisfile.pc
 
+# we include the whole debian/ dir in EXTRA_DIST because there's a problem
+# with autotools and HFS+ MacOSX file systems that caused debian/Makefile.am
+# to pick up on the lowercase changelog file and add ChangeLog to DIST_COMMON
+# because of it, breaking make dist.  This works just as well.
 EXTRA_DIST = \
 	todo.txt macos macosx autogen.sh \
 	libvorbis.spec libvorbis.spec.in \
