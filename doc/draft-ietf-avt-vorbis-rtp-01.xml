@@ -242,8 +242,7 @@ Raw Vorbis packets are unbounded in length currently, although at some future po
 </figure>
 
 <t>
-Each Vorbis payload packet starts with a two octet length header, which is used to represent the size of the following 
-data payload, followed by the raw Vorbis data.
+Each Vorbis payload packet starts with a two octet length header, which is used to represent the size of the following data payload, followed by the raw Vorbis data.
 </t>
 
 <t>
@@ -508,13 +507,6 @@ Intended usage: COMMON
 </section>
 </section>
 
-<section anchor="Configuration Caching" title="Configuration Caching"> 
-
-<t>
-Configuration caching allows clients that have previously connected to a stream to re-use the associated configuration data. When a client receives a Packed Configuration packet it may store it locally and can compare the Ident key with that of the new stream and begin decoding before it has received any of the headers.
-</t>
-
-</section>
 
 <section anchor="Loss of Configuration Headers" title="Loss of Configuration Headers"> 
 
@@ -542,7 +534,7 @@ The mapping between the stream and the the configuration is explicit.
 <section anchor="Comment Headers" title="Comment Headers">
 
 <t>
-With the payload type flag set to 2, this indicates that the packet contain the comment metadata, such as artist name, track title and so on. These metadata messages are not intended to be fully descriptive but to offer basic track/song information. This packet SHOULD NOT be sent and clients MAY ignore it completely. During a session the Details on the format of the comments can be found in the <xref target="vorbis-spec-ref">Vorbis documentation</xref>.
+With the payload type flag set to 2, this indicates that the packet contain the comment metadata, such as artist name, track title and so on. These metadata messages are not intended to be fully descriptive but to offer basic track/song information. This packet SHOULD NOT be sent and clients MAY ignore it completely. The details on the format of the comments can be found in the <xref target="vorbis-spec-ref">Vorbis documentation</xref>.
 </t>
 <figure anchor="Comment Packet Figure" title="Comment Packet">
 <artwork><![CDATA[
@@ -584,14 +576,13 @@ Any Vorbis data packet that is less than path MTU SHOULD be bundled in the RTP p
 </t>
 
 <t>
-If a Vorbis packet is larger than 65535 octets it MUST be fragmented.  A fragmented packet has a zero in the last four bits of the payload header. The first fragment will set the Fragment type to 1. Each fragment after the first will set the Fragment type to 2 in the payload header.  The RTP packet containing the last fragment of the Vorbis packet will have the Fragment type set to 3.  To maintain the correct sequence for fragmented packet reception the timestamp field of fragmented packets MUST be the same as the first packet sent, with the sequence number incremented as normal for the subsequent RTP packets.
+If a Vorbis packet, not only data but also Configuration and Comment, is larger than 65535 octets it MUST be fragmented. A fragmented packet has a zero in the last four bits of the payload header. The first fragment will set the Fragment type to 1. Each fragment after the first will set the Fragment type to 2 in the payload header.  The RTP packet containing the last fragment of the Vorbis packet will have the Fragment type set to 3.  To maintain the correct sequence for fragmented packet reception the timestamp field of fragmented packets MUST be the same as the first packet sent, with the sequence number incremented as normal for the subsequent RTP packets.
 </t>
 
 <section anchor="Example Fragmented Vorbis Packet" title="Example Fragmented Vorbis Packet">
 
 <t>
-Here is an example fragmented Vorbis packet split over three RTP packets.  Each packet contains the standard RTP headers as 
-well as the 4 octet Vorbis headers.
+Here is an example fragmented Vorbis packet split over three RTP packets.  Each packet contains the standard RTP headers as well as the 4 octet Vorbis headers.
 </t>
 
 <figure anchor="Example Fragmented Packet (Packet 1)" title="Example Fragmented Packet (Packet 1)">
@@ -611,7 +602,7 @@ well as the 4 octet Vorbis headers.
    |                              ...                              |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                      Ident                    | 1 | 0 |      0|
+   |                       Ident                   | 1 | 0 |      0|
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |             length            |            vorbis data       ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -722,7 +713,7 @@ configuration: the <xref target="rfc3548">base16</xref> (hexadecimal) representa
 
 <t>
 Optional Parameters: </t><t>
-configuration-uri: the URI of the configuration headers in case of out of band transmission. In the form of proto://path/to/resource/Ident
+configuration-uri: the URI of the configuration headers in case of out of band transmission. In the form of proto://path/to/resource/ Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream.
 </t>
 
 <t>
@@ -812,14 +803,11 @@ The port value is specified by the server application bound to the address speci
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 VORBIS/44100/2</t>
 <t>a=delivery:out_band/http</t>
-<t>a=fmtp:98 delivery-method:inline,out_band/http; configuration=base16string1; configuration-uri=http://path/to/the/resource/159</t>
+<t>a=fmtp:98 delivery-method:inline,out_band/http; configuration=base16string1; configuration-uri=http://path/to/the/resource</t>
 </list>
 
 <t>
-Note that the payload format (encoding) names are commonly shown in upper case.  MIME subtypes are commonly shown in lower 
-case.  These names are case-insensitive in both places.  Similarly, parameter names are case-insensitive both in MIME types and 
-in the default mapping to the SDP a=fmtp attribute.  The exception regarding case sensitivity is the configuration header URL 
-which MUST be regarded as being case sensitive.
+Note that the payload format (encoding) names are commonly shown in upper case.  MIME subtypes are commonly shown in lower case. These names are case-insensitive in both places.  Similarly, parameter names are case-insensitive both in MIME types and in the default mapping to the SDP a=fmtp attribute.  The exception regarding case sensitivity is the configuration-uri URI which MUST be regarded as being case sensitive.
 </t>
 
 <t>
@@ -862,7 +850,7 @@ This document is a continuation of draft-moffitt-vorbis-rtp-00.txt and draft-ker
 </t>
 
 <t>
-Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher Montgomery,  Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David Barrett, Politecnico di Torino (LS)³/IMG Group in particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
+Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher Montgomery,  Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David Barrett, Silvia Pfeiffer, Politecnico di Torino (LS)³/IMG Group in particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 </t>
 
 </section> 

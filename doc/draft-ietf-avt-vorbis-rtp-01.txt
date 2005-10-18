@@ -1,6 +1,7 @@
 
 
 
+
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                  Xiph.Org
 Expires: April 18, 2006                                 October 15, 2005
@@ -79,11 +80,10 @@ Table of Contents
        3.1.1.  Packed Configuration . . . . . . . . . . . . . . . . .  9
      3.2.  Packed Headers Delivery  . . . . . . . . . . . . . . . . . 10
        3.2.1.  Packed Headers IANA Considerations . . . . . . . . . . 11
-     3.3.  Configuration Caching  . . . . . . . . . . . . . . . . . . 12
-     3.4.  Loss of Configuration Headers  . . . . . . . . . . . . . . 12
+     3.3.  Loss of Configuration Headers  . . . . . . . . . . . . . . 12
    4.  Comment Headers  . . . . . . . . . . . . . . . . . . . . . . . 12
    5.  Frame Packetizing  . . . . . . . . . . . . . . . . . . . . . . 13
-     5.1.  Example Fragmented Vorbis Packet . . . . . . . . . . . . . 14
+     5.1.  Example Fragmented Vorbis Packet . . . . . . . . . . . . . 13
      5.2.  Packet Loss  . . . . . . . . . . . . . . . . . . . . . . . 16
    6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 17
      6.1.  Mapping MIME Parameters into SDP . . . . . . . . . . . . . 18
@@ -95,6 +95,7 @@ Table of Contents
      10.2. Informative References . . . . . . . . . . . . . . . . . . 21
    Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 22
    Intellectual Property and Copyright Statements . . . . . . . . . . 23
+
 
 
 
@@ -619,15 +620,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
    Change controller: IETF AVT Working Group
 
-3.3.  Configuration Caching
-
-   Configuration caching allows clients that have previously connected
-   to a stream to re-use the associated configuration data.  When a
-   client receives a Packed Configuration packet it may store it locally
-   and can compare the Ident key with that of the new stream and begin
-   decoding before it has received any of the headers.
-
-3.4.  Loss of Configuration Headers
+3.3.  Loss of Configuration Headers
 
    Unlike the loss of raw Vorbis payload data, loss of a configuration
    header can lead to a situation where it will not be possible to
@@ -644,34 +637,8 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    contain the comment metadata, such as artist name, track title and so
    on.  These metadata messages are not intended to be fully descriptive
    but to offer basic track/song information.  This packet SHOULD NOT be
-   sent and clients MAY ignore it completely.  During a session the
-   Details on the format of the comments can be found in the Vorbis
-   documentation [12].
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Barbato                  Expires April 18, 2006                [Page 12]
-
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
-
+   sent and clients MAY ignore it completely.  The details on the format
+   of the comments can be found in the Vorbis documentation [12].
 
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -701,6 +668,12 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    fragmented.
 
 
+
+Barbato                  Expires April 18, 2006                [Page 12]
+
+Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+
+
 5.  Frame Packetizing
 
    Each RTP packet contains either one Vorbis packet fragment, or an
@@ -711,16 +684,44 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    in the RTP packet with as many Vorbis packets as will fit, up to a
    maximum of 15.  Path MTU is detailed in [6] and [7].
 
-   If a Vorbis packet is larger than 65535 octets it MUST be fragmented.
-   A fragmented packet has a zero in the last four bits of the payload
-   header.  The first fragment will set the Fragment type to 1.  Each
-   fragment after the first will set the Fragment type to 2 in the
-   payload header.  The RTP packet containing the last fragment of the
-   Vorbis packet will have the Fragment type set to 3.  To maintain the
-   correct sequence for fragmented packet reception the timestamp field
-   of fragmented packets MUST be the same as the first packet sent, with
-   the sequence number incremented as normal for the subsequent RTP
-   packets.
+   If a Vorbis packet, not only data but also Configuration and Comment,
+   is larger than 65535 octets it MUST be fragmented.  A fragmented
+   packet has a zero in the last four bits of the payload header.  The
+   first fragment will set the Fragment type to 1.  Each fragment after
+   the first will set the Fragment type to 2 in the payload header.  The
+   RTP packet containing the last fragment of the Vorbis packet will
+   have the Fragment type set to 3.  To maintain the correct sequence
+   for fragmented packet reception the timestamp field of fragmented
+   packets MUST be the same as the first packet sent, with the sequence
+   number incremented as normal for the subsequent RTP packets.
+
+5.1.  Example Fragmented Vorbis Packet
+
+   Here is an example fragmented Vorbis packet split over three RTP
+   packets.  Each packet contains the standard RTP headers as well as
+   the 4 octet Vorbis headers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -728,12 +729,6 @@ Barbato                  Expires April 18, 2006                [Page 13]
 
 Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
-
-5.1.  Example Fragmented Vorbis Packet
-
-   Here is an example fragmented Vorbis packet split over three RTP
-   packets.  Each packet contains the standard RTP headers as well as
-   the 4 octet Vorbis headers.
 
       Packet 1:
 
@@ -750,7 +745,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
       |                              ...                              |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |                      Ident                    | 1 | 0 |      0|
+      |                       Ident                   | 1 | 0 |      0|
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |             length            |            vorbis data       ..
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -763,6 +758,12 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    is xxxxx.  The Fragment type is set to 1, the number of packets field
    is set to 0, and as the payload is raw Vorbis data the VDT field is
    set to 0.
+
+
+
+
+
+
 
 
 
@@ -917,8 +918,9 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    Optional Parameters:
 
    configuration-uri: the URI of the configuration headers in case of
-   out of band transmission.  In the form of
-   proto://path/to/resource/Ident
+   out of band transmission.  In the form of proto://path/to/resource/
+   Depending on the specific method the single ident packet could be
+   retrived by their number, or aggregated in a single stream.
 
    Encoding considerations:
 
@@ -944,7 +946,6 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    Person & email address to contact for further information:
 
    Luca Barbato: <lu_zero@gentoo.org>
-
 
 
 
@@ -1012,14 +1013,14 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
       a=delivery:out_band/http
       a=fmtp:98 delivery-method:inline,out_band/http;
       configuration=base16string1;
-      configuration-uri=http://path/to/the/resource/159
+      configuration-uri=http://path/to/the/resource
 
    Note that the payload format (encoding) names are commonly shown in
    upper case.  MIME subtypes are commonly shown in lower case.  These
    names are case-insensitive in both places.  Similarly, parameter
    names are case-insensitive both in MIME types and in the default
    mapping to the SDP a=fmtp attribute.  The exception regarding case
-   sensitivity is the configuration header URL which MUST be regarded as
+   sensitivity is the configuration-uri URI which MUST be regarded as
    being case sensitive.
 
    The answer to any offer, [8], MUST NOT change the URI specified in
@@ -1070,9 +1071,9 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro,
    Jack Moffitt, Christopher Montgomery, Colin Perkins, Barry Short,
    Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David
-   Barrett, Politecnico di Torino (LS)^3/IMG Group in particular
-   Federico Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De
-   Martin.
+   Barrett, Silvia Pfeiffer, Politecnico di Torino (LS)^3/IMG Group in
+   particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini,
+   Juan Carlos De Martin.
 
 
 10.  References
@@ -1286,3 +1287,4 @@ Acknowledgment
 
 Barbato                  Expires April 18, 2006                [Page 23]
 
+
