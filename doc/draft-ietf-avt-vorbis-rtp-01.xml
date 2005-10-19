@@ -50,12 +50,17 @@ All references to RFC XXXX are to be replaced by references to the RFC number of
 <section anchor="Introduction" title="Introduction">
 
 <t>
-Vorbis is a general purpose perceptual audio codec intended to allow maximum encoder flexibility, thus allowing it to scale 
-competitively over an exceptionally wide range of bitrates.   At the high quality/bitrate end of the scale (CD or DAT rate 
-stereo, 16/24 bits), it is in the same league as MPEG-2 and MPC. Similarly, the 1.0 encoder can encode high-quality CD and 
-DAT rate stereo at below 48k bits/sec without resampling to a lower rate.   Vorbis is also intended for lower and higher sample 
-rates (from 8kHz telephony to 192kHz digital masters) and a range of channel representations (monaural, polyphonic, stereo, 
-quadraphonic, 5.1, ambisonic, or up to 255 discrete channels).
+Vorbis is a general purpose perceptual audio codec intended to allow 
+maximum encoder flexibility, thus allowing it to scale competitively 
+over an exceptionally wide range of bitrates. At the high 
+quality/bitrate end of the scale (CD or DAT rate stereo, 16/24 bits), it 
+is in the same league as MPEG-2 and MPC. 
+Similarly, the version 1.1 reference encoder can encode high-quality CD 
+and DAT rate stereo at below 48k bits/sec without resampling to a lower 
+rate. Vorbis is also intended for lower and higher sample rates (from 
+8kHz telephony to 192kHz digital masters) and a range of channel 
+representations (monaural, polyphonic, stereo, quadraphonic, 5.1, 
+ambisonic, or up to 255 discrete channels).
 </t>
 
 <t>
@@ -193,7 +198,7 @@ This 24 bit field is used to associate the Vorbis data to a decoding Configurati
 </t>
 
 <t>
-Fragment type (F): 2 bit</t>
+Fragment type (F): 2 bits</t>
 <t>
 This field is set accordingly the following list
 </t>
@@ -324,15 +329,35 @@ The payload data section of the RTP packet starts with the 24 bit Ident field fo
 <section anchor="Configuration Headers" title="Configuration Headers">
 
 <t>
-Unlike other mainstream audio codecs Vorbis has no statically configured probability model, instead it packs all entropy decoding configuration, VQ and Huffman models into a self-contained codebook. This codebook block also requires additional identification information detailing the number of audio channels, bitrates and other information used to initialise the Vorbis stream.
+Unlike other mainstream audio codecs Vorbis has no statically 
+configured probability model. Instead, it packs all entropy decoding 
+configuration, VQ and Huffman models into a data block that must be 
+transmitted to the decoder along with the compressed data. A decoder 
+also requires identification information detailing the number of audio 
+channels, bitrates and other information to configure itself for a 
+particular compressed data stream. These two blocks of information are 
+often referred to collectively as the "codebooks" for a Vorbis stream,
+and are nominally included as special "header" packets at the start 
+of the compressed data.
 </t>
 
 <t>
-To decode a Vorbis stream, three configuration header blocks are needed.  The first header, named identification, indicates the sample and bitrates, the number of channels and the version of the Vorbis encoder used. The second header, named comment, details stream comments and the third header, named setup, contains the decoders probability model, or codebook. Further details are available in the <xref target="vorbis-spec-ref">Vorbis I specification</xref>
+Thus these two codebook header packets must be received by the decoder
+before any audio data can be interpreted. In addition,
+the <xref target="vorbis-spec-ref">Vorbis I specification</xref>
+requires the presense of a comment header packet which gives simple
+metadata about the stream. This requirement poses problems in RTP,
+which is often used over unreliable transports.
 </t>
 
 <t>
-As the RTP stream may change certain configuration data mid-session there are different methods for delivering this configuration data to a client, both in-band and out-of-band which is detailed below. SDP delivery is used to setup an initial state for the client application. The changes may be due to different codebooks as well as different bitrates of the stream.
+Since this information must be transmitted reliably, and as the RTP 
+stream may change certain configuration data mid-session there are 
+different methods for delivering this configuration data to a 
+client, both in-band and out-of-band which is detailed below. SDP 
+delivery is used to setup an initial state for the client application. 
+The changes may be due to different codebooks as well as different 
+bitrates of the stream.
 </t>
 
 <t>

@@ -1,7 +1,6 @@
 
 
 
-
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                  Xiph.Org
 Expires: April 18, 2006                                 October 15, 2005
@@ -120,13 +119,13 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    maximum encoder flexibility, thus allowing it to scale competitively
    over an exceptionally wide range of bitrates.  At the high quality/
    bitrate end of the scale (CD or DAT rate stereo, 16/24 bits), it is
-   in the same league as MPEG-2 and MPC.  Similarly, the 1.0 encoder can
-   encode high-quality CD and DAT rate stereo at below 48k bits/sec
-   without resampling to a lower rate.  Vorbis is also intended for
-   lower and higher sample rates (from 8kHz telephony to 192kHz digital
-   masters) and a range of channel representations (monaural,
-   polyphonic, stereo, quadraphonic, 5.1, ambisonic, or up to 255
-   discrete channels).
+   in the same league as MPEG-2 and MPC.  Similarly, the version 1.1
+   reference encoder can encode high-quality CD and DAT rate stereo at
+   below 48k bits/sec without resampling to a lower rate.  Vorbis is
+   also intended for lower and higher sample rates (from 8kHz telephony
+   to 192kHz digital masters) and a range of channel representations
+   (monaural, polyphonic, stereo, quadraphonic, 5.1, ambisonic, or up to
+   255 discrete channels).
 
    Vorbis encoded audio is generally encapsulated within an Ogg format
    bitstream [1], which provides framing and synchronization.  For the
@@ -263,7 +262,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    This 24 bit field is used to associate the Vorbis data to a decoding
    Configuration.
 
-   Fragment type (F): 2 bit
+   Fragment type (F): 2 bits
 
    This field is set accordingly the following list
 
@@ -397,26 +396,30 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 3.  Configuration Headers
 
    Unlike other mainstream audio codecs Vorbis has no statically
-   configured probability model, instead it packs all entropy decoding
-   configuration, VQ and Huffman models into a self-contained codebook.
-   This codebook block also requires additional identification
-   information detailing the number of audio channels, bitrates and
-   other information used to initialise the Vorbis stream.
+   configured probability model.  Instead, it packs all entropy decoding
+   configuration, VQ and Huffman models into a data block that must be
+   transmitted to the decoder along with the compressed data.  A decoder
+   also requires identification information detailing the number of
+   audio channels, bitrates and other information to configure itself
+   for a particular compressed data stream.  These two blocks of
+   information are often referred to collectively as the "codebooks" for
+   a Vorbis stream, and are nominally included as special "header"
+   packets at the start of the compressed data.
 
-   To decode a Vorbis stream, three configuration header blocks are
-   needed.  The first header, named identification, indicates the sample
-   and bitrates, the number of channels and the version of the Vorbis
-   encoder used.  The second header, named comment, details stream
-   comments and the third header, named setup, contains the decoders
-   probability model, or codebook.  Further details are available in the
-   Vorbis I specification [12]
+   Thus these two codebook header packets must be received by the
+   decoder before any audio data can be interpreted.  In addition, the
+   Vorbis I specification [12] requires the presense of a comment header
+   packet which gives simple metadata about the stream.  This
+   requirement poses problems in RTP, which is often used over
+   unreliable transports.
 
-   As the RTP stream may change certain configuration data mid-session
-   there are different methods for delivering this configuration data to
-   a client, both in-band and out-of-band which is detailed below.  SDP
-   delivery is used to setup an initial state for the client
-   application.  The changes may be due to different codebooks as well
-   as different bitrates of the stream.
+   Since this information must be transmitted reliably, and as the RTP
+   stream may change certain configuration data mid-session there are
+   different methods for delivering this configuration data to a client,
+   both in-band and out-of-band which is detailed below.  SDP delivery
+   is used to setup an initial state for the client application.  The
+   changes may be due to different codebooks as well as different
+   bitrates of the stream.
 
    The delivery vectors in use are specified by an SDP attribute to
    indicate the method and the optional URI where the Vorbis Packed
@@ -438,10 +441,6 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
    The Packed Configuration (Section 3.1.1) Payload is sent in-band with
    the packet type bits set to match the payload type.  Clients MUST be
-   capable of dealing with fragmentation and periodic re-transmission of
-   the configuration headers.
-
-
 
 
 
@@ -449,6 +448,9 @@ Barbato                  Expires April 18, 2006                 [Page 8]
 
 Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
+
+   capable of dealing with fragmentation and periodic re-transmission of
+   the configuration headers.
 
 3.1.1.  Packed Configuration
 
@@ -495,9 +497,6 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    Payload Packets to address this Configuration.  The Fragment type is
    set to 0 since the packet bears the full Packed configuration, the
    number of packet is set to 1
-
-
-
 
 
 
@@ -1287,4 +1286,3 @@ Acknowledgment
 
 Barbato                  Expires April 18, 2006                [Page 23]
 
-
