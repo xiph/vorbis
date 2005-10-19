@@ -247,7 +247,7 @@ Raw Vorbis packets are unbounded in length currently, although at some future po
 </figure>
 
 <t>
-Each Vorbis payload packet starts with a two octet length header, which is used to represent the size of the following data payload, followed by the raw Vorbis data.
+Each Vorbis payload packet starts with a two octet length header, which is used to represent the size of the following data payload, followed by the raw Vorbis data padded to the nearest byte boundary.
 </t>
 
 <t>
@@ -259,7 +259,7 @@ The Vorbis packet length header is the length of the Vorbis data block only and 
 </t>
 
 <t>
-The payload packing of the Vorbis data packets SHOULD follow the guidelines set-out in <xref target="rfc3551"></xref> where the oldest packet occurs immediately after the RTP packet header.
+The payload packing of the Vorbis data packets MUST follow the guidelines set-out in <xref target="rfc3551"></xref> where the oldest packet occurs immediately after the RTP packet header.
 </t>
 
 <t>
@@ -559,7 +559,7 @@ The mapping between the stream and the the configuration is explicit.
 <section anchor="Comment Headers" title="Comment Headers">
 
 <t>
-With the payload type flag set to 2, this indicates that the packet contain the comment metadata, such as artist name, track title and so on. These metadata messages are not intended to be fully descriptive but to offer basic track/song information. This packet SHOULD NOT be sent and clients MAY ignore it completely. The details on the format of the comments can be found in the <xref target="vorbis-spec-ref">Vorbis documentation</xref>.
+With the payload type flag set to 2, this indicates that the packet contain the comment metadata, such as artist name, track title and so on. These metadata messages are not intended to be fully descriptive but to offer basic track/song information. Clients MAY ignore it completely. The details on the format of the comments can be found in the <xref target="vorbis-spec-ref">Vorbis documentation</xref>.
 </t>
 <figure anchor="Comment Packet Figure" title="Comment Packet">
 <artwork><![CDATA[
@@ -704,7 +704,7 @@ This is the last Vorbis fragment packet.  The Fragment type is set to 3 and the 
 <section anchor="Packet Loss" title="Packet Loss">
 
 <t>
-As there is no error correction within the Vorbis stream, packet loss will result in a loss of signal. Packet loss is more of an issue for fragmented Vorbis packets as the client will have to cope with the handling of the Fragment Type. In case of loss of fragments the client MUST discard all of them. If we use the fragmented Vorbis packet example above and the first packet is lost the client MUST detect that the next packet has the packet count field set to 0 and the Fragment type 2 and MUST drop it. The next packet, which is the final fragmented packet, MUST be dropped in the same manner. Feedback reports on lost and dropped packets MUST be sent back via RTCP.
+As there is no error correction within the Vorbis stream, packet loss will result in a loss of signal. Packet loss is more of an issue for fragmented Vorbis packets as the client will have to cope with the handling of the Fragment Type. In case of loss of fragments the client MUST discard all the remaining fragments and decode the incomplete packet. If we use the fragmented Vorbis packet example above and the first packet is lost the client MUST detect that the next packet has the packet count field set to 0 and the Fragment type 2 and MUST drop it. The next packet, which is the final fragmented packet, MUST be dropped in the same manner. If the missing packet is the last, the received two fragments will be kept and the incomplete vorbis packet decoded. Feedback reports on lost and dropped packets MUST be sent back via RTCP.
 </t>
 
 <t>
@@ -794,7 +794,7 @@ The information carried in the MIME media type specification has a specific mapp
 <t>The MIME type ("audio") goes in SDP "m=" as the media name.</t>
 <vspace blankLines="1" />
 
-<t>The MIME subtype ("VORBIS") goes in SDP "a=rtpmap" as the encoding name.</t>
+<t>The MIME subtype ("vorbis") goes in SDP "a=rtpmap" as the encoding name.</t>
 <vspace blankLines="1" />
 
 <t>The parameter "rate" also goes in "a=rtpmap" as clock rate.</t>
