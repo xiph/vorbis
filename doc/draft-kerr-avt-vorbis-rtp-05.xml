@@ -365,7 +365,7 @@ The delivery vectors in use are specified by an SDP attribute to indicate the me
 </t>
 
 <t>
-The 24 bit Ident field is used to indicate when a change in the stream has taken place. The client application MUST have in advance the correct configuration and if the client detects a change in the Ident value and does not have this information it MUST NOT decode the raw Vorbis data.
+The 24 bit Ident field is used to map which Configuration will be used to decodea packet. When the Ident field changes, it indicates that a change in the stream has taken place. The client application MUST have in advance the correct configuration and if the client detects a change in the Ident value and does not have this information it MUST NOT decode the raw Vorbis data associated until it fetches the correct Configuration.
 </t>
 
 <section anchor="In-band Header Transmission" title="In-band Header Transmission">
@@ -532,6 +532,13 @@ Intended usage: COMMON
 </section>
 </section>
 
+<!--<section anchor="Out-of-band Header Transmission" title="Out-of-band Header Transmission">
+
+<t>
+
+</t>
+
+</section>-->
 
 <section anchor="Loss of Configuration Headers" title="Loss of Configuration Headers"> 
 
@@ -738,7 +745,7 @@ configuration: the <xref target="rfc3548">base16</xref> (hexadecimal) representa
 
 <t>
 Optional Parameters: </t><t>
-configuration-uri: the URI of the configuration headers in case of out of band transmission. In the form of proto://path/to/resource/ Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream.
+configuration-uri: the URI of the configuration headers in case of out of band transmission. In the form of "protocol://path/to/resource/". Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream.
 </t>
 
 <t>
@@ -828,7 +835,7 @@ The port value is specified by the server application bound to the address speci
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 VORBIS/44100/2</t>
 <t>a=delivery:out_band/http</t>
-<t>a=fmtp:98 delivery-method:inline,out_band/http; configuration=base16string1; configuration-uri=http://path/to/the/resource</t>
+<t>a=fmtp:98 delivery-method:in_band,out_band/http; configuration=base16string1; configuration-uri=http://path/to/the/resource</t>
 </list>
 
 <t>
@@ -857,6 +864,30 @@ If a particular multicast session has a large number of participants care must b
 </t>
 
 </section> 
+
+<section anchor="Examples" title="Examples">
+
+<t>
+The following examples are common usage patterns that MAY be applied in such situations, the main scope of this section is to explain better usage of the transmission vectors.
+</t>
+
+<section anchor="Stream Radio" title="Stream Radio">
+
+<t>That is one of the most common situation: one single server streaming content in multicast, the clients may start a session at random time. The content itself could be a mix of live stream as the dj's speech and stored streams as the music she plays.</t>
+
+<t>In this situation we don't know in advance how many codebooks we will use and. The clients can join anytime and users expect to start listening to the content in a short time</t>
+
+<t>On join the client will receive the current Configuration necessary to decode the current stream inlined in the SDP. And can start decoding the current stream.</t>
+
+<t>When the streamed content changes the new Configuration is sent in-band befoe the actual stream, and the Configuration that has to be sent inline in the SDP updated.</t>
+
+<t>A serverside optimization would be keep an hash list of the Configurations per session to avoid packing them and send the same Configuration with different Ident tags</t>
+<t>A clientside optimization would be keep a tag list of the Configurations per session and don't process configuration packets already known.</t>
+
+<t>Let's assume that the client playout buffer can store at least 7 packets and that is the maximum latency.</t>
+
+</section>
+</section>
 
 <section anchor="Security Considerations" title="Security Considerations"> 
 <t>
