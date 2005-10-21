@@ -329,7 +329,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    guidelines set-out in [4] where the oldest packet occurs immediately
    after the RTP packet header.
 
-   Channel mapping of the audio is in accordance with BS. 775-1 ITU-R
+   Channel mapping of the audio is in accordance with the Vorbis I
 
 
 
@@ -338,7 +338,7 @@ Barbato                  Expires April 18, 2006                 [Page 6]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   [14].
+   Specification [12].
 
 2.4.  Example RTP Packet
 
@@ -1181,10 +1181,10 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
          specification.  Available from the Xiph website,
          http://www.xiph.org".
 
-   [14]  "ITU (1992-1994) ITU-R Recommendation BS. 775-1 Multi-channel
-         stereophonic sound system with or without accompanying
-         picture. International Telecommunications Union. Available from
-         the ITU website, http://www.itu.int".
+
+
+
+
 
 
 
