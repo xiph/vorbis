@@ -263,7 +263,7 @@ The payload packing of the Vorbis data packets MUST follow the guidelines set-ou
 </t>
 
 <t>
-Channel mapping of the audio is in accordance with BS. 775-1 ITU-R <xref target="775itu"></xref>.
+Channel mapping of the audio is in accordance with the <xref target="vorbis-spec-ref">Vorbis I Specification</xref>.
 </t>
 
 </section>
@@ -1025,14 +1025,6 @@ Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aar
 <front>
 <title>Ogg Vorbis I specification:  Comment field and header specification.  Available from the Xiph website, 
 http://www.xiph.org</title>
-</front>
-</reference>   
-
-<reference anchor="775itu">
-<front>
-<title>ITU (1992-1994) ITU-R Recommendation BS. 775-1 Multi-channel stereophonic sound system with or without accompanying 
-picture. International Telecommunications Union. Available from the ITU website, http://www.itu.int
-</title>
 </front>
 </reference>   
 
