@@ -4,7 +4,7 @@
 
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                  Xiph.Org
-Expires: April 18, 2006                                 October 15, 2005
+Expires: April 24, 2006                                 October 21, 2005
 
 
                       draft-kerr-avt-vorbis-rtp-05
@@ -35,7 +35,7 @@ Status of this Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on April 18, 2006.
+   This Internet-Draft will expire on April 24, 2006.
 
 Copyright Notice
 
@@ -53,7 +53,7 @@ Abstract
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 1]
+Barbato                  Expires April 24, 2006                 [Page 1]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 2]
+Barbato                  Expires April 24, 2006                 [Page 2]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -165,7 +165,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 3]
+Barbato                  Expires April 24, 2006                 [Page 3]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -221,7 +221,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 4]
+Barbato                  Expires April 24, 2006                 [Page 4]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -277,7 +277,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 5]
+Barbato                  Expires April 24, 2006                 [Page 5]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -333,7 +333,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 6]
+Barbato                  Expires April 24, 2006                 [Page 6]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -389,7 +389,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 7]
+Barbato                  Expires April 24, 2006                 [Page 7]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -445,7 +445,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 8]
+Barbato                  Expires April 24, 2006                 [Page 8]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -501,7 +501,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                 [Page 9]
+Barbato                  Expires April 24, 2006                 [Page 9]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -557,7 +557,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 10]
+Barbato                  Expires April 24, 2006                [Page 10]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -613,7 +613,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 11]
+Barbato                  Expires April 24, 2006                [Page 11]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -669,7 +669,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 12]
+Barbato                  Expires April 24, 2006                [Page 12]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -725,7 +725,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 13]
+Barbato                  Expires April 24, 2006                [Page 13]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -781,7 +781,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 14]
+Barbato                  Expires April 24, 2006                [Page 14]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -837,7 +837,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 15]
+Barbato                  Expires April 24, 2006                [Page 15]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -893,7 +893,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 16]
+Barbato                  Expires April 24, 2006                [Page 16]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -949,7 +949,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 17]
+Barbato                  Expires April 24, 2006                [Page 17]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1005,13 +1005,13 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 18]
+Barbato                  Expires April 24, 2006                [Page 18]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    the configuration-uri attribute.  The Configuration inlined in the
-   configuration parameter COULD change.
+   configuration parameter MAY change.
 
       c=IN IP4/6
       m=audio RTP/AVP 98
@@ -1061,7 +1061,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 19]
+Barbato                  Expires April 24, 2006                [Page 19]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1117,7 +1117,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 20]
+Barbato                  Expires April 24, 2006                [Page 20]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1173,7 +1173,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 18, 2006                [Page 21]
+Barbato                  Expires April 24, 2006                [Page 21]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1229,7 +1229,7 @@ Author's Address
 
 
 
-Barbato                  Expires April 18, 2006                [Page 22]
+Barbato                  Expires April 24, 2006                [Page 22]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1285,6 +1285,6 @@ Acknowledgment
 
 
 
-Barbato                  Expires April 18, 2006                [Page 23]
+Barbato                  Expires April 24, 2006                [Page 23]
 
 

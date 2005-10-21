@@ -16,7 +16,7 @@
 </address>
 </author>
 
-<date day="15" month="October" year="2005" />
+<date day="21" month="October" year="2005" />
 
 <area>General</area>
 <workgroup>AVT Working Group</workgroup>
@@ -828,7 +828,7 @@ The port value is specified by the server application bound to the address speci
 </t>
 
 <t>
-The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter COULD change.
+The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter MAY change.
 </t>
 
 <vspace blankLines="1" />
