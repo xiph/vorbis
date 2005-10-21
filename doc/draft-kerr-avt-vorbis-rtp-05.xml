@@ -6,7 +6,7 @@
 <rfc ipr="full3667" docName="RTP Payload Format for Vorbis Encoded Audio">
 
 <front>
-<title>draft-ietf-avt-vorbis-rtp-01</title>
+<title>draft-kerr-avt-vorbis-rtp-05</title>
 
 <author initials="L" surname="Barbato" fullname="Luca Barbato">
 <organization>Xiph.Org</organization>
@@ -414,7 +414,7 @@ A Vorbis Packed Configuration is indicated with the payload type field set to 1.
 ]]></artwork>
 </figure>
 
-<t>The Ident field is set with the value that will be used by the Raw Payload Packets to address this Configuration. The Fragment type is set to 0 since the packet bears the full Packed configuration, the number of packet is set to 1</t>
+<t>The Ident field is set with the value that will be used by the Raw Payload Packets to address this Configuration. The Fragment type is set to 0 since the packet bears the full Packed configuration, the number of packet is set to 1.</t>
 </section>
 
 
@@ -719,7 +719,7 @@ If a particular multicast session has a large number of participants care must b
 </t>
 
 <t>
-Loss of any of the configuration headers, detailed below, is dealt with in the Loss of Configuration Headers Section later.
+Loss of any of the Configuration fragment will result in the loss of the full Configuration packet with the result detailed in the <xref target="Loss of Configuration Headers">Loss of Configuration Headers</xref> section.
 </t>
 
 </section>
@@ -822,7 +822,7 @@ If the stream comprises chained Vorbis files and all of them are known in advanc
 </t>
 
 <t>
-The Vorbis configuration specified in the configuration-uri attribute MUST point to a location where all of the Configuration Packets needed for the life of the session reside.
+The URI specified in the configuration-uri attribute MUST point to a location where all of the Configuration Packets needed for the life of the session reside.
 </t>
 
 <t>
@@ -843,7 +843,7 @@ Note that the payload format (encoding) names are commonly shown in upper case. 
 </t>
 
 <t>
-The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. 
+The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter COULD change.
 </t>
 
 </section> 
@@ -853,14 +853,11 @@ The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI
 <section anchor="Congestion Control" title="Congestion Control"> 
 
 <t>
-Vorbis clients SHOULD send regular receiver reports detailing congestion.  A mechanism for dynamically downgrading the stream, 
-known as bitrate peeling, will allow for a graceful backing off of the stream bitrate.  This feature is not available at present
-so an alternative would be to redirect the client to a lower bitrate stream if one is available.  
+Vorbis clients SHOULD send regular receiver reports detailing congestion.  A mechanism for dynamically downgrading the stream, known as bitrate peeling, will allow for a graceful backing off of the stream bitrate. This feature is not available at present so an alternative would be to redirect the client to a lower bitrate stream if one is available.
 </t>
 
 <t>
-If a particular multicast session has a large number of participants care must be taken to prevent an RTCP feedback implosion, 
-<xref target="rtcp-feedback"></xref>, in the event of congestion.
+If a particular multicast session has a large number of participants care must be taken to prevent an RTCP feedback implosion, <xref target="rtcp-feedback"></xref>, in the event of congestion.
 </t>
 
 </section> 

@@ -7,7 +7,7 @@ Internet-Draft                                                  Xiph.Org
 Expires: April 18, 2006                                 October 15, 2005
 
 
-                      draft-ietf-avt-vorbis-rtp-01
+                      draft-kerr-avt-vorbis-rtp-05
               RTP Payload Format for Vorbis Encoded Audio
 
 Status of this Memo
@@ -55,7 +55,7 @@ Abstract
 
 Barbato                  Expires April 18, 2006                 [Page 1]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    use of Vorbis with MIME and Session Description Protocol (SDP).
@@ -111,7 +111,7 @@ Table of Contents
 
 Barbato                  Expires April 18, 2006                 [Page 2]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 1.  Introduction
@@ -167,7 +167,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                 [Page 3]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
        0                   1                   2                   3
@@ -223,7 +223,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                 [Page 4]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    Sequence number: 16 bits
@@ -279,7 +279,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                 [Page 5]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    This field sets the packet payload type for the Vorbis data.  There
@@ -335,7 +335,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                 [Page 6]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    [14].
@@ -391,7 +391,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                 [Page 7]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 3.  Configuration Headers
@@ -447,7 +447,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                 [Page 8]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 3.1.  In-band Header Transmission
@@ -503,13 +503,13 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                 [Page 9]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    The Ident field is set with the value that will be used by the Raw
    Payload Packets to address this Configuration.  The Fragment type is
    set to 0 since the packet bears the full Packed configuration, the
-   number of packet is set to 1
+   number of packet is set to 1.
 
 3.2.  Packed Headers Delivery
 
@@ -559,7 +559,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 10]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    The key difference between the in-band format is there is no need for
@@ -615,7 +615,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 11]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    Author: Luca Barbato
@@ -671,7 +671,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 12]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
    The 2 bytes length field is necessary since this packet could be
@@ -727,7 +727,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 13]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
       Packet 1:
@@ -783,7 +783,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 14]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
       Packet 2:
@@ -839,7 +839,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 15]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
       Packet 3:
@@ -895,11 +895,12 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 16]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   Loss of any of the configuration headers, detailed below, is dealt
-   with in the Loss of Configuration Headers Section later.
+   Loss of any of the Configuration fragment will result in the loss of
+   the full Configuration packet with the result detailed in the Loss of
+   Configuration Headers (Section 3.3) section.
 
 
 6.  IANA Considerations
@@ -945,14 +946,15 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
    Additional information: none
 
-   Person & email address to contact for further information:
 
 
 
 Barbato                  Expires April 18, 2006                [Page 17]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
+
+   Person & email address to contact for further information:
 
    Luca Barbato: <lu_zero@gentoo.org>
 
@@ -990,16 +992,14 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    known in advance, the Configuration Packet for each file SHOULD be
    passed to the client using the configuration attribute.
 
-   The Vorbis configuration specified in the configuration-uri attribute
-   MUST point to a location where all of the Configuration Packets
-   needed for the life of the session reside.
+   The URI specified in the configuration-uri attribute MUST point to a
+   location where all of the Configuration Packets needed for the life
+   of the session reside.
 
    The port value is specified by the server application bound to the
    address specified in the c attribute.  The bitrate value and channels
    specified in the rtpmap attribute MUST match the Vorbis sample rate
    value.  An example is found below.
-
-      c=IN IP4/6
 
 
 
@@ -1007,9 +1007,10 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 Barbato                  Expires April 18, 2006                [Page 18]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
+      c=IN IP4/6
       m=audio RTP/AVP 98
       a=rtpmap:98 VORBIS/44100/2
       a=delivery:out_band/http
@@ -1026,7 +1027,8 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    being case sensitive.
 
    The answer to any offer, [8], MUST NOT change the URI specified in
-   the configuration-uri attribute.
+   the configuration-uri attribute.  The Configuration inlined in the
+   configuration parameter COULD change.
 
 
 7.  Congestion Control
@@ -1056,16 +1058,16 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    The content itself could be a mix of live stream as the dj's speech
    and stored streams as the music she plays.
 
-   In this situation we don't know in advance how many codebooks we will
-   use and.  The clients can join anytime and users expect to start
 
 
 
 Barbato                  Expires April 18, 2006                [Page 19]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
+   In this situation we don't know in advance how many codebooks we will
+   use and.  The clients can join anytime and users expect to start
    listening to the content in a short time
 
    On join the client will receive the current Configuration necessary
@@ -1112,14 +1114,15 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
    Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David
    Barrett, Silvia Pfeiffer, Politecnico di Torino (LS)^3/IMG Group in
    particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini,
-   Juan Carlos De Martin.
-
 
 
 
 Barbato                  Expires April 18, 2006                [Page 20]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
+
+   Juan Carlos De Martin.
 
 
 11.  References
@@ -1167,16 +1170,16 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
          Available from the Xiph website, http://www.xiph.org".
 
    [13]  "Ogg Vorbis I specification:  Comment field and header
-         specification.  Available from the Xiph website,
-         http://www.xiph.org".
-
 
 
 
 Barbato                  Expires April 18, 2006                [Page 21]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
+
+         specification.  Available from the Xiph website,
+         http://www.xiph.org".
 
    [14]  "ITU (1992-1994) ITU-R Recommendation BS. 775-1 Multi-channel
          stereophonic sound system with or without accompanying
@@ -1226,12 +1229,9 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
 
 
 
-
-
-
 Barbato                  Expires April 18, 2006                [Page 22]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 Author's Address
@@ -1287,7 +1287,7 @@ Author's Address
 
 Barbato                  Expires April 18, 2006                [Page 23]
 
-Internet-Draft        draft-ietf-avt-vorbis-rtp-01          October 2005
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 Intellectual Property Statement
