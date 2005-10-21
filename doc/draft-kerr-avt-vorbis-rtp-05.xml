@@ -351,8 +351,8 @@ which is often used over unreliable transports.
 </t>
 
 <t>
-Since this information must be transmitted reliably, and as the RTP 
-stream may change certain configuration data mid-session there are 
+Since this information must be transmitted reliably and, as the RTP 
+stream may change certain configuration data mid-session, there are 
 different methods for delivering this configuration data to a 
 client, both in-band and out-of-band which is detailed below. SDP 
 delivery is used to setup an initial state for the client application. 
@@ -397,7 +397,7 @@ A Vorbis Packed Configuration is indicated with the payload type field set to 1.
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                      Ident                    | 0 | 1 |      1|
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |           Setup length         |        Identification       ..
+   |           length              |        Identification       ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    ..                        Identification                       ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -416,11 +416,16 @@ A Vorbis Packed Configuration is indicated with the payload type field set to 1.
 
 <t>The Ident field is set with the value that will be used by the Raw Payload Packets to address this Configuration. The Fragment type is set to 0 since the packet bears the full Packed configuration, the number of packet is set to 1.</t>
 </section>
-
-
 </section>
 
-<section anchor="Packed Headers Delivery" title="Packed Headers Delivery"> 
+<section anchor="Out of Band Transmission" title="Out of Band Transmission">
+
+
+<t>
+This section, as stated before, won't cover all the possible out-of-band delivery methods since they rely to different protocols and be linked to a specific application. The following packet definition SHOULD be used in out-of-band delivery and MUST be used when Configuration is inlined in the SDP.
+</t>
+
+<section anchor="Packed Headers" title="Packed Headers"> 
 
 <t>
 As mentioned above the RECOMMENDED delivery vector for Vorbis configuration data is via a retrieval method that can be performed using a reliable transport protocol. As the RTP headers are not required for this method of delivery the structure of the configuration data is slightly different. The packed header starts with a 32 bit count field which details the number of packed headers that are contained in the bundle. Next is the Packed header payload for each chained Vorbis stream.
@@ -441,7 +446,7 @@ As mentioned above the RECOMMENDED delivery vector for Vorbis configuration data
 </figure>
 
 <t>
-Since the Configuration Ident and the Identification Header are fixed length there is only a 2 byte Setup Length tag to define the length of the Setup header.
+Since the Configuration Ident and the Identification Header are fixed length there is only a 2 byte length tag to define the length of the packed headers.
 </t>
 
 <figure anchor="Packed Headers Detail Figure" title="Packed Headers Detail">
@@ -451,7 +456,7 @@ Since the Configuration Ident and the Identification Header are fixed length the
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                   Ident                       |              ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   ..   Length     |              Identification Header           ..
+   ..   length     |              Identification Header           ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    ..                    Identification Header                     |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -462,7 +467,7 @@ Since the Configuration Ident and the Identification Header are fixed length the
 ]]></artwork>
 </figure>
 <t>
-The key difference between the in-band format is there is no need for the payload header octet.
+The key difference between the in-band format and this one, is there is no need for the payload header octet.
 </t>
 
 <section anchor="Packed Headers IANA Considerations" title="Packed Headers IANA Considerations"> 
@@ -531,14 +536,7 @@ Intended usage: COMMON
 
 </section>
 </section>
-
-<!--<section anchor="Out-of-band Header Transmission" title="Out-of-band Header Transmission">
-
-<t>
-
-</t>
-
-</section>-->
+</section>
 
 <section anchor="Loss of Configuration Headers" title="Loss of Configuration Headers"> 
 
@@ -608,7 +606,7 @@ Any Vorbis data packet that is less than path MTU SHOULD be bundled in the RTP p
 </t>
 
 <t>
-If a Vorbis packet, not only data but also Configuration and Comment, is larger than 65535 octets it MUST be fragmented. A fragmented packet has a zero in the last four bits of the payload header. The first fragment will set the Fragment type to 1. Each fragment after the first will set the Fragment type to 2 in the payload header.  The RTP packet containing the last fragment of the Vorbis packet will have the Fragment type set to 3.  To maintain the correct sequence for fragmented packet reception the timestamp field of fragmented packets MUST be the same as the first packet sent, with the sequence number incremented as normal for the subsequent RTP packets.
+If a Vorbis packet, not only data but also Configuration and Comment, is larger than 65535 octets it MUST be fragmented. A fragmented packet has a zero in the last four bits of the payload header. The first fragment will set the Fragment type to 1. Each fragment after the first will set the Fragment type to 2 in the payload header.  The RTP packet containing the last fragment of the Vorbis packet will have the Fragment type set to 3.  To maintain the correct sequence for fragmented packet reception the timestamp field of fragmented packets MUST be the same as the first packet sent, with the sequence number incremented as normal for the subsequent RTP packets. The length field shows the fragment length.
 </t>
 
 <section anchor="Example Fragmented Vorbis Packet" title="Example Fragmented Vorbis Packet">
@@ -740,7 +738,7 @@ Required Parameters:
 <t>
 delivery-method: indicates the delivery methods in use, the possible values are:inline, in_band, out_band
 </t><t>
-configuration: the <xref target="rfc3548">base16</xref> (hexadecimal) representation of the <xref target="Packed Headers Delivery">Packed Headers</xref>.
+configuration: the <xref target="rfc3548">base16</xref> (hexadecimal) representation of the <xref target="Packed Headers">Packed Headers</xref>.
 </t>
 
 <t>
@@ -829,6 +827,10 @@ The URI specified in the configuration-uri attribute MUST point to a location wh
 The port value is specified by the server application bound to the address specified in the c attribute.  The bitrate value and channels specified in the rtpmap attribute MUST match the Vorbis sample rate value.  An example is found below.
 </t>
 
+<t>
+The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter COULD change.
+</t>
+
 <vspace blankLines="1" />
 <list style="empty">
 <t>c=IN IP4/6 </t>
@@ -840,10 +842,6 @@ The port value is specified by the server application bound to the address speci
 
 <t>
 Note that the payload format (encoding) names are commonly shown in upper case.  MIME subtypes are commonly shown in lower case. These names are case-insensitive in both places.  Similarly, parameter names are case-insensitive both in MIME types and in the default mapping to the SDP a=fmtp attribute.  The exception regarding case sensitivity is the configuration-uri URI which MUST be regarded as being case sensitive.
-</t>
-
-<t>
-The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter COULD change.
 </t>
 
 </section> 
