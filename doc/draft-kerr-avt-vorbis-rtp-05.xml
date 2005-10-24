@@ -3,7 +3,7 @@
 <?rfc toc="yes" ?>
 <?rfc compact='yes'?>
 
-<rfc ipr="full3667" docName="RTP Payload Format for Vorbis Encoded Audio">
+<rfc ipr="full3978" docName="RTP Payload Format for Vorbis Encoded Audio">
 
 <front>
 <title>draft-kerr-avt-vorbis-rtp-05</title>

@@ -12,12 +12,10 @@ Expires: April 24, 2006                                 October 21, 2005
 
 Status of this Memo
 
-   This document is an Internet-Draft and is subject to all provisions
-   of Section 3 of RFC 3667.  By submitting this Internet-Draft, each
-   author represents that any applicable patent or other IPR claims of
-   which he or she is aware have been or will be disclosed, and any of
-   which he or she become aware will be disclosed, in accordance with
-   RFC 3668.
+   By submitting this Internet-Draft, each author represents that any
+   applicable patent or other IPR claims of which he or she is aware
+   have been or will be disclosed, and any of which he or she becomes
+   aware will be disclosed, in accordance with Section 6 of BCP 79.
 
    Internet-Drafts are working documents of the Internet Engineering
    Task Force (IETF), its areas, and its working groups.  Note that
@@ -50,6 +48,8 @@ Abstract
    information.
 
    Also included within the document are the necessary details for the
+   use of Vorbis with MIME and Session Description Protocol (SDP).
+
 
 
 
@@ -57,8 +57,6 @@ Barbato                  Expires April 24, 2006                 [Page 1]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
-
-   use of Vorbis with MIME and Session Description Protocol (SDP).
 
 Editors Note
 
@@ -97,6 +95,8 @@ Table of Contents
      11.2. Informative References . . . . . . . . . . . . . . . . . . 21
    Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 22
    Intellectual Property and Copyright Statements . . . . . . . . . . 23
+
+
 
 
 
