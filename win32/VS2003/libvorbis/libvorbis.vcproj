@@ -322,9 +322,6 @@
 				RelativePath="..\..\..\lib\vorbisenc.c">
 			</File>
 			<File
-				RelativePath="..\..\..\lib\vorbisfile.c">
-			</File>
-			<File
 				RelativePath="..\..\..\lib\window.c">
 			</File>
 		</Filter>
