@@ -182,7 +182,7 @@ context.</para>
 
        19) [current_class_number] = vector [floor1_partition_class_list] element [i]
        20) iterate [j] over the range 0 ... ([floor1_class_dimensions] element [current_class_number])-1 {
-             21) vector [floor1_X_list] element ([j] + [floor1_values]) = 
+             21) vector [floor1_X_list] element ([floor1_values]) = 
                  read [rangebits] bits as unsigned integer
              22) increment [floor1_values] by one
            }
@@ -326,7 +326,7 @@ Unwrap the always-positive-or-zero values read from the packet into
          
           } else [highroom] is not less than [lowroom] {
 		      
-            15) [root] = [lowroom] * 2
+            15) [room] = [lowroom] * 2
         
           }
 
@@ -409,7 +409,7 @@ Then compute the final curve in one pass:</para>
   3) [ly] = vector [floor1_final_Y]' element [0] * [floor1_multiplier]
   4) iterate [i] over the range 1 ... [floor1_values]-1 {
 
-       5) if ( [floor1_step2_flag]' is set ) {
+       5) if ( [floor1_step2_flag]' element [i] is set ) {
 
              6) [hy] = [floor1_final_Y]' element [i] * [floor1_multiplier]
  	     7) [hx] = [floor1_X_list]' element [i]

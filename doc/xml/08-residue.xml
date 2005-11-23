@@ -298,50 +298,53 @@ Packet decode proceeds as follows, matching the description offered earlier in t
 
        3) [partition_count] = 0
 
-       4) if ([pass] is zero) {
+       4) while [partition_count] is less than [partitions_to_read]
+
+            5) if ([pass] is zero) {
      
-            5) iterate [j] over the range 0 .. [ch]-1 {
+                 6) iterate [j] over the range 0 .. [ch]-1 {
 
-                 6) if vector [j] is not marked 'do not decode' {
+                      7) if vector [j] is not marked 'do not decode' {
 
-                      7) [temp] = read from packet using codebook [residue_classbook] in scalar context
-                      8) iterate [i] descending over the range [classwords_per_codeword]-1 ... 0 {
+                           8) [temp] = read from packet using codebook [residue_classbook] in scalar context
+                           9) iterate [i] descending over the range [classwords_per_codeword]-1 ... 0 {
 
-                           9) array [classifications] element [j],([i]+[partition_count]) =
-                              [temp] integer modulo [residue_classifications]
-                          10) [temp] = [temp] / [residue_classifications] using integer division
+                               10) array [classifications] element [j],([i]+[partition_count]) =
+                                   [temp] integer modulo [residue_classifications]
+                               11) [temp] = [temp] / [residue_classifications] using integer division
 
-                         }
+                              }
       
-                    }
+                         }
             
+                    }
+          
                }
-        
-          }
 
-      11) iterate [i] over the range 0 .. ([classwords_per_codeword] - 1) while [partition_count] 
-          is also less than [partitions_to_read] {
+           12) iterate [i] over the range 0 .. ([classwords_per_codeword] - 1) while [partition_count] 
+               is also less than [partitions_to_read] {
 
-            12) iterate [j] over the range 0 .. [ch]-1 {
+                 13) iterate [j] over the range 0 .. [ch]-1 {
    
-                 13) if vector [j] is not marked 'do not decode' {
+                      14) if vector [j] is not marked 'do not decode' {
    
-                      14) [vqclass] = array [classifications] element [j],[partition_count]
-                      15) [vqbook] = array [residue_books] element [vqclass],[pass]
-                      16) if ([vqbook] is not 'unused') {
+                           15) [vqclass] = array [classifications] element [j],[partition_count]
+                           16) [vqbook] = array [residue_books] element [vqclass],[pass]
+                           17) if ([vqbook] is not 'unused') {
    
-                           17) decode partition into output vector number [j], starting at scalar 
-                           offset [residue_begin]+[partition_count]*[residue_partition_size] using 
-                           codebook number [vqbook] in VQ context
+                                18) decode partition into output vector number [j], starting at scalar 
+                                    offset [residue_begin]+[partition_count]*[residue_partition_size] using 
+                                    codebook number [vqbook] in VQ context
+                          }
                      }
-                }
    
-            18) increment [partition_count] by one
+                 19) increment [partition_count] by one
 
+               }
           }
      }
  
- 19) done
+ 20) done
 
 </programlisting>
 
