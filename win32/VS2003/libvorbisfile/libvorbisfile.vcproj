@@ -72,7 +72,7 @@
 				AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS"
 				RuntimeLibrary="0"
-				UsePrecompiledHeader="3"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
