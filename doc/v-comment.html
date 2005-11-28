@@ -89,7 +89,7 @@ they turn out to be, eg:</p>
 
 <blockquote><p>
 "Honest Bob and the Factory-to-Dealer-Incentives, _I'm Still Around_,
-opening for Moxy Fruvous, 1997"
+opening for Moxy Fr&uuml;vous, 1997"
 </p></blockquote>
 
 <h1>Comment encoding</h1>
@@ -101,8 +101,8 @@ number of vectors is bounded to 2^32-1 and the length of each vector
 is limited to 2^32-1 bytes. The vector length is encoded; the vector
 contents themselves are not null terminated. In addition to the vector
 list, there is a single vector for vendor name (also 8 bit clean,
-length encoded in 32 bits). Libvorbis currently sets the vendor string
-to "Xiph.Org libVorbis I 20020717".</p>
+length encoded in 32 bits). For example, the 1.0 release of libvorbis 
+set the vendor string to "Xiph.Org libVorbis I 20020717".</p>
 
 <p>The comment header is decoded as follows:</p>
 
@@ -118,14 +118,14 @@ to "Xiph.Org libVorbis I 20020717".</p>
      }
 
   7) [framing_bit] = read a single bit as boolean
-  8) if ( [framing_bit]  unset or end of packet ) then ERROR
+  8) if ( [framing_bit] unset or end of packet ) then ERROR
   9) done.
 </pre>
 
 <h2>Content vector format</h2>
 
 <p>The comment vectors are structured similarly to a UNIX environment variable.
-That is, comment fields consist of a field name and a field value and
+That is, comment fields consist of a field name and a corresponding value and
 look like:</p>
 
 <pre>
@@ -138,10 +138,10 @@ comment[1]="TITLE=the sound of Vorbis";
 0x7D, 0x3D ('=') excluded. ASCII 0x41 through 0x5A inclusive (A-Z) is
 to be considered equivalent to ASCII 0x61 through 0x7A inclusive
 (a-z).</li>
-<li>The field name is immediately followed by ASCII 0x3D ('='); this
-equals sign is used to terminate the field name.</li>
-<li>0x3D is followed by 8 bit clean UTF-8 encoded field contents
-to the end of the field.</li>
+<li>The field name is immediately followed by ASCII 0x3D ('='); 
+this equals sign is used to terminate the field name.</li>
+<li>0x3D is followed by the 8 bit clean UTF-8 encoded value of the 
+field contents to the end of the field.</li>
 </ul>
 
 <h3>Field names</h3>
@@ -221,8 +221,9 @@ ISRC intro page</a> for more information on ISRC numbers.</dd>
 <ul>
 <li>Field names should not be 'internationalized'; this is a
 concession to simplicity not an attempt to exclude the majority of
-the world that doesn't speak English. Field *contents*, however,
-are represented in UTF-8 to allow easy representation of any language.</li>
+the world that doesn't speak English. Field <emph>contents</emph>, 
+however, use the UTF-8 character encoding to allow easy representation 
+of any language.</li>
 <li>We have the length of the entirety of the field and restrictions on
 the field name so that the field name is bounded in a known way. Thus
 we also have the length of the field contents.</li>
@@ -249,7 +250,7 @@ well know artists; the following is permissible, and encouraged:
 header packet. Unlike the first bitstream header packet, it is not
 generally the only packet on the second page and may not be restricted
 to within the second bitstream page. The length of the comment header
-packet is [practically] unbounded. The comment header packet is not
+packet is (practically) unbounded. The comment header packet is not
 optional; it must be present in the bitstream even if it is
 effectively empty.</p>
 

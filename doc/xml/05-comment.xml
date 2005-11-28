@@ -202,9 +202,9 @@ intro page</ulink> for more information on ISRC numbers.
 
 <para>Field names should not be 'internationalized'; this is a
 concession to simplicity not an attempt to exclude the majority of
-the world that doesn't speak English. Field <emphasis>contents</emphasis>
-however, use the UTF-8 character encoding to allow easy representation of any
-language.</para>
+the world that doesn't speak English. Field <emphasis>contents</emphasis>,
+however, use the UTF-8 character encoding to allow easy representation 
+of any language.</para>
 
 <para>We have the length of the entirety of the field and restrictions on
 the field name so that the field name is bounded in a known way. Thus
