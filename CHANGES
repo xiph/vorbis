@@ -1,3 +1,10 @@
+libvorbis 1.1.2 (unreleased snapshot) -- "Xiph.Org libVorbis I 20050304"
+
+ * fix a serious encoder bug with gcc 4 optimized builds
+ * documentation and spec fixes
+ * updated VS2003 and XCode builds
+ * new draft RTP encapsulation spec
+
 libvorbis 1.1.1 (2005-06-27) -- "Xiph.Org libVorbis I 20050304"
 
  * bug fix to the bitrate management encoder interface
