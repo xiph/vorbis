@@ -50,6 +50,7 @@ A set of coded residue vectors are all of the same length.  High level
 coding structure, ignoring for the moment exactly how a partition is
 encoded and simply trusting that it is, is as follows:</para>
 
+<para>
 <itemizedlist>
 <listitem><para>Each vector is partitioned into multiple equal sized chunks
 according to configuration specified.  If we have a vector size of
@@ -81,6 +82,7 @@ a partition is the same in each pass, thus the classification codeword
 is coded only in the first pass.</para></listitem>
 
 </itemizedlist>
+</para>
 
 <mediaobject>
 <imageobject>
@@ -362,11 +364,13 @@ Format zero decodes partitions exactly as described earlier in the
 'Residue Format: residue 0' section.  The following pseudocode
 presents the same algorithm. Assume:</para>
 
+<para>
 <itemizedlist>
 <listitem><simpara> <varname>[n]</varname> is the value in <varname>[residue_partition_size]</varname></simpara></listitem>
 <listitem><simpara><varname>[v]</varname> is the residue vector</simpara></listitem>
 <listitem><simpara><varname>[offset]</varname> is the beginning read offset in [v]</simpara></listitem>
 </itemizedlist>
+</para>
 
 <programlisting>
  1) [step] = [n] / [codebook_dimensions]
@@ -396,12 +400,14 @@ Format 1 decodes partitions exactly as described earlier in the
 'Residue Format: residue 1' section.  The following pseudocode
 presents the same algorithm. Assume:</para>
 
+<para>
 <itemizedlist>
 <listitem><simpara> <varname>[n]</varname> is the value in
 <varname>[residue_partition_size]</varname></simpara></listitem>
 <listitem><simpara><varname>[v]</varname> is the residue vector</simpara></listitem>
 <listitem><simpara><varname>[offset]</varname> is the beginning read offset in [v]</simpara></listitem>
 </itemizedlist>
+</para>
 
 <programlisting>
  1) [i] = 0

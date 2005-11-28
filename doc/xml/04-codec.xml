@@ -90,12 +90,14 @@ The bitrate fields above are used only as hints. The nominal bitrate
 field especially may be considerably off in purely VBR streams.  The
 fields are meaningful only when greater than zero.</para>
 
+<para>
 <itemizedlist>
   <listitem><simpara>All three fields set to the same value implies a fixed rate, or tightly bounded, nearly fixed-rate bitstream</simpara></listitem>
   <listitem><simpara>Only nominal set implies a VBR or ABR stream that averages the nominal bitrate</simpara></listitem>
   <listitem><simpara>Maximum and or minimum set implies a VBR bitstream that obeys the bitrate limits</simpara></listitem>
   <listitem><simpara>None set indicates the encoder does not care to speculate.</simpara></listitem>
 </itemizedlist>
+</para>
 
 </section>
 
