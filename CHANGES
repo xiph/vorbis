@@ -1,4 +1,4 @@
-libvorbis 1.1.2 (unreleased snapshot) -- "Xiph.Org libVorbis I 20050304"
+libvorbis 1.1.2 (2005-11-27) -- "Xiph.Org libVorbis I 20050304"
 
  * fix a serious encoder bug with gcc 4 optimized builds
  * documentation and spec fixes
