@@ -827,9 +827,6 @@ The URI specified in the configuration-uri attribute MUST point to a location wh
 The port value is specified by the server application bound to the address specified in the c attribute.  The bitrate value and channels specified in the rtpmap attribute MUST match the Vorbis sample rate value.  An example is found below.
 </t>
 
-<t>
-The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter MAY change.
-</t>
 
 <vspace blankLines="1" />
 <list style="empty">
@@ -844,9 +841,17 @@ The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI
 Note that the payload format (encoding) names are commonly shown in upper case.  MIME subtypes are commonly shown in lower case. These names are case-insensitive in both places.  Similarly, parameter names are case-insensitive both in MIME types and in the default mapping to the SDP a=fmtp attribute.  The exception regarding case sensitivity is the configuration-uri URI which MUST be regarded as being case sensitive.
 </t>
 
-</section> 
 </section>
 
+<section anchor="Usage with the SDP Offer/Answer Mode" title="Usage with the SDP Offer/Answer Model">
+
+<t>
+The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter MAY change.
+</t>
+
+</section>
+
+</section>
 
 <section anchor="Congestion Control" title="Congestion Control"> 
 
