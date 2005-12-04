@@ -846,7 +846,7 @@ Note that the payload format (encoding) names are commonly shown in upper case. 
 <section anchor="Usage with the SDP Offer/Answer Mode" title="Usage with the SDP Offer/Answer Model">
 
 <t>
-The answer to any offer, <xref target="rfc3264"></xref>, MUST NOT change the URI specified in the configuration-uri attribute. The Configuration inlined in the configuration parameter MAY change.
+The offer, as described in <xref target="rfc3264">An Offer/Answer Model Session Description Protocol</xref>, may contain a large number of delivery methods per single fmtp attribute, the answerer MUST remove every delivery-method and configuration-uri not supported.
 </t>
 
 </section>
