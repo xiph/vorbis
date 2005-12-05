@@ -1028,9 +1028,10 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 6.2.  Usage with the SDP Offer/Answer Model
 
-   The answer to any offer, [8], MUST NOT change the URI specified in
-   the configuration-uri attribute.  The Configuration inlined in the
-   configuration parameter MAY change.
+   The offer, as described in An Offer/Answer Model Session Description
+   Protocol [8], may contain a large number of delivery methods per
+   single fmtp attribute, the answerer MUST remove every delivery-method
+   and configuration-uri not supported.
 
 
 7.  Congestion Control
@@ -1057,7 +1058,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    That is one of the most common situation: one single server streaming
    content in multicast, the clients may start a session at random time.
-   The content itself could be a mix of live stream as the dj's speech
 
 
 
@@ -1066,6 +1066,7 @@ Barbato                  Expires April 24, 2006                [Page 19]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
+   The content itself could be a mix of live stream as the dj's speech
    and stored streams as the music she plays.
 
    In this situation we don't know in advance how many codebooks we will
@@ -1113,7 +1114,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal
    Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro,
    Jack Moffitt, Christopher Montgomery, Colin Perkins, Barry Short,
-   Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David
 
 
 
@@ -1122,6 +1122,7 @@ Barbato                  Expires April 24, 2006                [Page 20]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
+   Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David
    Barrett, Silvia Pfeiffer, Politecnico di Torino (LS)^3/IMG Group in
    particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini,
    Juan Carlos De Martin.
@@ -1169,7 +1170,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
          http://www.xiph.org".
 
    [12]  "Ogg Vorbis I specification:  Codec setup and packet decode.
-         Available from the Xiph website, http://www.xiph.org".
 
 
 
@@ -1178,11 +1178,11 @@ Barbato                  Expires April 24, 2006                [Page 21]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
+         Available from the Xiph website, http://www.xiph.org".
+
    [13]  "Ogg Vorbis I specification:  Comment field and header
          specification.  Available from the Xiph website,
          http://www.xiph.org".
-
-
 
 
 
