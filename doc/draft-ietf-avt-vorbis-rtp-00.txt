@@ -79,24 +79,24 @@ Table of Contents
      3.2.  Out of Band Transmission . . . . . . . . . . . . . . . . . 10
        3.2.1.  Packed Headers . . . . . . . . . . . . . . . . . . . . 10
        3.2.2.  Well Known Configurations  . . . . . . . . . . . . . . 12
-     3.3.  Loss of Configuration Headers  . . . . . . . . . . . . . . 12
+     3.3.  Loss of Configuration Headers  . . . . . . . . . . . . . . 13
    4.  Comment Headers  . . . . . . . . . . . . . . . . . . . . . . . 13
-   5.  Frame Packetizing  . . . . . . . . . . . . . . . . . . . . . . 13
-     5.1.  Example Fragmented Vorbis Packet . . . . . . . . . . . . . 14
-     5.2.  Packet Loss  . . . . . . . . . . . . . . . . . . . . . . . 16
-   6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 17
-     6.1.  Mapping MIME Parameters into SDP . . . . . . . . . . . . . 18
-     6.2.  Usage with the SDP Offer/Answer Model  . . . . . . . . . . 19
-   7.  Congestion Control . . . . . . . . . . . . . . . . . . . . . . 19
-   8.  Examples . . . . . . . . . . . . . . . . . . . . . . . . . . . 19
-     8.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 20
-   9.  Security Considerations  . . . . . . . . . . . . . . . . . . . 20
-   10. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 20
-   11. References . . . . . . . . . . . . . . . . . . . . . . . . . . 21
-     11.1. Normative References . . . . . . . . . . . . . . . . . . . 21
-     11.2. Informative References . . . . . . . . . . . . . . . . . . 22
-   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 23
-   Intellectual Property and Copyright Statements . . . . . . . . . . 24
+   5.  Frame Packetizing  . . . . . . . . . . . . . . . . . . . . . . 14
+     5.1.  Example Fragmented Vorbis Packet . . . . . . . . . . . . . 15
+     5.2.  Packet Loss  . . . . . . . . . . . . . . . . . . . . . . . 17
+   6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 18
+     6.1.  Mapping MIME Parameters into SDP . . . . . . . . . . . . . 19
+     6.2.  Usage with the SDP Offer/Answer Model  . . . . . . . . . . 20
+   7.  Congestion Control . . . . . . . . . . . . . . . . . . . . . . 21
+   8.  Examples . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+     8.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 21
+   9.  Security Considerations  . . . . . . . . . . . . . . . . . . . 22
+   10. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 22
+   11. References . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+     11.1. Normative References . . . . . . . . . . . . . . . . . . . 22
+     11.2. Informative References . . . . . . . . . . . . . . . . . . 23
+   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 24
+   Intellectual Property and Copyright Statements . . . . . . . . . . 25
 
 
 
@@ -592,24 +592,24 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    Required Parameters:
 
-   None.
+      None
 
    Optional Parameters:
 
-   None.
+      None
 
    Encoding considerations:
 
-   This type is only defined for transfer via non RTP protocols as
-   specified in RFC XXXX.
+      This media type contains binary data.
 
    Security Considerations:
 
-   See Section 6 of RFC 3047.
+      See Section 6 of RFC XXXX.
 
-   Interoperability considerations: none
 
-   Published specification:
+
+
+
 
 
 
@@ -618,25 +618,41 @@ Barbato                  Expires April 24, 2006                [Page 11]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   See RFC XXXX for details.
+   Interoperability considerations:
+
+      None
+
+   Published specification:
+
+      RFC XXXX [RFC Editor: please replace by the RFC number of this
+      memo, when published]
 
    Applications which use this media type:
 
-   Vorbis encoded audio, configuration data.
+      Vorbis encoded audio, configuration data.
 
-   Additional information: none
+   Additional information:
+
+      None
 
    Person & email address to contact for further information:
 
-   Luca Barbato: <lu_zero@gentoo.org>
+      Luca Barbato: <lu_zero@gentoo.org>
+      IETF Audio/Video Transport Working Group
 
    Intended usage: COMMON
 
-   Author/Change controller:
+   Restriction on usage:
 
-   Author: Luca Barbato
+      This media type doesn't depend on the transport.
 
-   Change controller: IETF AVT Working Group
+   Author:
+
+      Luca Barbato
+
+   Change controller:
+
+      IETF AVT Working Group
 
 3.2.2.  Well Known Configurations
 
@@ -649,6 +665,14 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    provide codebooks.  Every Configuration that is available as Well
    Known has the Ident highest bit set.  Every Well Known List MUST
    contain at most 2^23 items.
+
+
+
+
+Barbato                  Expires April 24, 2006                [Page 12]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
 
    {FIXME: reference to bzip2, gz, and sha1sum} This off band delivery
    method MUST be signaled as "out_band/wkc/list_name" using the
@@ -666,14 +690,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 3.3.  Loss of Configuration Headers
 
    Unlike the loss of raw Vorbis payload data, loss of a configuration
-
-
-
-Barbato                  Expires April 24, 2006                [Page 12]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
-
    header can lead to a situation where it will not be possible to
    successfully decode the stream.
 
@@ -690,6 +706,29 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    but to offer basic track/song information.  Clients MAY ignore it
    completely.  The details on the format of the comments can be found
    in the Vorbis documentation [12].
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Barbato                  Expires April 24, 2006                [Page 13]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
 
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -722,14 +761,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 5.  Frame Packetizing
 
    Each RTP packet contains either one Vorbis packet fragment, or an
-
-
-
-Barbato                  Expires April 24, 2006                [Page 13]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
-
    integer number of complete Vorbis packets (up to a max of 15 packets,
    since the number of packets is defined by a 4 bit value).
 
@@ -747,6 +778,14 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    for fragmented packet reception the timestamp field of fragmented
    packets MUST be the same as the first packet sent, with the sequence
    number incremented as normal for the subsequent RTP packets.  The
+
+
+
+Barbato                  Expires April 24, 2006                [Page 14]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
+
    length field shows the fragment length.
 
 5.1.  Example Fragmented Vorbis Packet
@@ -779,17 +818,29 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    Figure 10: Example Fragmented Packet (Packet 1)
 
-
-
-Barbato                  Expires April 24, 2006                [Page 14]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
-
    In this packet the initial sequence number is 1000 and the timestamp
    is xxxxx.  The Fragment type is set to 1, the number of packets field
    is set to 0, and as the payload is raw Vorbis data the VDT field is
    set to 0.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Barbato                  Expires April 24, 2006                [Page 15]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
 
       Packet 2:
 
@@ -837,7 +888,12 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 24, 2006                [Page 15]
+
+
+
+
+
+Barbato                  Expires April 24, 2006                [Page 16]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -893,7 +949,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-Barbato                  Expires April 24, 2006                [Page 16]
+Barbato                  Expires April 24, 2006                [Page 17]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -911,62 +967,87 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    Required Parameters:
 
-   delivery-method: indicates the delivery methods in use, the possible
-   values are:inline, in_band, out_band
+      delivery-method: indicates the delivery methods in use, the
+         possible values are: inline, in_band, out_band/specific_name
+         Where "specific_name" is the name of the out of band delivery
+         method.
 
-   configuration: the base16 [9] (hexadecimal) representation of the
-   Packed Headers (Section 3.2.1).
+      configuration: the base16 [9] (hexadecimal) representation of the
+         Packed Headers (Section 3.2.1).
 
-   {FIXME:xref missing} Optional Parameters:
+   Optional Parameters:
 
-   configuration-uri: the URI of the configuration headers in case of
-   out of band transmission.  In the form of
-   "protocol://path/to/resource/".  Depending on the specific method the
-   single ident packet could be retrived by their number, or aggregated
-   in a single stream, aggregates MAY be compressed using gz or bzip2
-   and an sha1 checksum MAY be provided in the form of
-   "protocol://path/to/resource/!sha1hash"
+      configuration-uri: the URI of the configuration headers in case of
+         out of band transmission.  In the form of
+         "protocol://path/to/resource/".  Depending on the specific
+         method the single ident packet could be retrived by their
+         number, or aggregated in a single stream, aggregates MAY be
+         compressed using gz or bzip2 and an sha1 checksum MAY be
+         provided in the form of "protocol://path/to/resource/!
+         sha1hash"
 
    Encoding considerations:
 
-   This type is only defined for transfer via RTP as specified in RFC
-   XXXX.
+      This media type is framed and contains binary data.
 
    Security Considerations:
 
-   See Section 6 of RFC 3047.
+      See Section 6 of RFC XXXX.
 
-   Interoperability considerations: none
+   Interoperability considerations:
 
-   Published specification:
-
-   See the Vorbis documentation [12] for details.
-
-   Applications which use this media type:
-
-   Audio streaming and conferencing tools
+      None
 
 
 
 
-Barbato                  Expires April 24, 2006                [Page 17]
+
+
+
+
+Barbato                  Expires April 24, 2006                [Page 18]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   Additional information: none
+   Published specification:
+
+      RFC XXXX [RFC Editor: please replace by the RFC number of this
+      memo, when published]
+
+      Ogg Vorbis I specification: Codec setup and packet decode.
+      Available from the Xiph website, http://www.xiph.org
+
+   Applications which use this media type:
+
+      Audio streaming and conferencing tools
+
+   Additional information:
+
+      None
 
    Person & email address to contact for further information:
 
-   Luca Barbato: <lu_zero@gentoo.org>
+      Luca Barbato: <lu_zero@gentoo.org>
+      IETF Audio/Video Transport Working Group
 
-   Intended usage: COMMON
+   Intended usage:
 
-   Author/Change controller:
+      COMMON
 
-   Author: Luca Barbato
+   Restriction on usage:
 
-   Change controller: IETF AVT Working Group
+      This media type depends on RTP framing, and hence is only defined
+      for transfer via RTP [3]
+
+   Author:
+
+      Luca Barbato
+
+   Change controller:
+
+      IETF AVT Working Group
+
 
 6.1.  Mapping MIME Parameters into SDP
 
@@ -974,6 +1055,16 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    specific mapping to fields in the Session Description Protocol (SDP)
    [5], which is commonly used to describe RTP sessions.  When SDP is
    used to specify sessions the mapping are as follows:
+
+
+
+
+
+
+Barbato                  Expires April 24, 2006                [Page 19]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
 
    o  The MIME type ("audio") goes in SDP "m=" as the media name.
 
@@ -1002,14 +1093,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    The port value is specified by the server application bound to the
    address specified in the c attribute.  The bitrate value and channels
    specified in the rtpmap attribute MUST match the Vorbis sample rate
-
-
-
-Barbato                  Expires April 24, 2006                [Page 18]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
-
    value.  An example is found below.
 
       c=IN IP4/6
@@ -1031,6 +1114,14 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 6.2.  Usage with the SDP Offer/Answer Model
 
    The offer, as described in An Offer/Answer Model Session Description
+
+
+
+Barbato                  Expires April 24, 2006                [Page 20]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
+
    Protocol [8], may contain a large number of delivery methods per
    single fmtp attribute, the answerer MUST remove every delivery-method
    and configuration-uri not supported.  All the parameters MUST not be
@@ -1057,15 +1148,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    in such situations, the main scope of this section is to explain
    better usage of the transmission vectors.
 
-
-
-
-
-Barbato                  Expires April 24, 2006                [Page 19]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
-
 8.1.  Stream Radio
 
    That is one of the most common situation: one single server streaming
@@ -1088,6 +1170,13 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    A serverside optimization would be keep an hash list of the
    Configurations per session to avoid packing them and send the same
    Configuration with different Ident tags
+
+
+
+Barbato                  Expires April 24, 2006                [Page 21]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
 
    A clientside optimization would be keep a tag list of the
    Configurations per session and don't process configuration packets
@@ -1114,14 +1203,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    and draft-kerr-avt-vorbis-rtp-04.txt.  The MIME type section is a
    continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 
-
-
-
-Barbato                  Expires April 24, 2006                [Page 20]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
-
    Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve
    Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal
    Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro,
@@ -1146,6 +1227,13 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
          "RTP: A Transport Protocol for real-time applications",
          RFC 3550.
 
+
+
+Barbato                  Expires April 24, 2006                [Page 22]
+
+Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
+
+
    [4]   Schulzrinne, H. and S. Casner, "RTP Profile for Audio and Video
          Conferences with Minimal Control.", RFC 3551.
 
@@ -1167,16 +1255,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
          "Extended RTP Profile for RTCP-based Feedback (RTP/AVPF)",
          Internet Draft (draft-ietf-avt-rtcp-feedback-11: Work in
          progress).
-
-
-
-
-
-
-Barbato                  Expires April 24, 2006                [Page 21]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
 
 11.2.  Informative References
 
@@ -1207,29 +1285,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Barbato                  Expires April 24, 2006                [Page 22]
+Barbato                  Expires April 24, 2006                [Page 23]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1285,7 +1341,7 @@ Author's Address
 
 
 
-Barbato                  Expires April 24, 2006                [Page 23]
+Barbato                  Expires April 24, 2006                [Page 24]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1341,6 +1397,6 @@ Acknowledgment
 
 
 
-Barbato                  Expires April 24, 2006                [Page 24]
+Barbato                  Expires April 24, 2006                [Page 25]
 
 

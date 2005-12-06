@@ -476,63 +476,106 @@ The key difference between the in-band format and this one, is there is no need 
 The following IANA considerations MUST only be applied to the packed headers.
 </t>
 
-<t>
-MIME media type name: audio
-</t>
-<t>
-MIME subtype: vorbis-config
-</t>
+<vspace blankLines="1" />
 
-<t>
-Required Parameters:</t><t>
-None.
-</t>
+<list style="hanging">
+<t hangText="MIME media type name:"> audio </t>
 
-<t>
-Optional Parameters: </t><t>
-None.
-</t>
+<vspace blankLines="1" />
 
-<t>
-Encoding considerations:</t><t>
-This type is only defined for transfer via non RTP protocols as specified in RFC XXXX.
+<t hangText="MIME subtype:"> vorbis-config </t>
+
+<vspace blankLines="1" />
+
+<t hangText="Required Parameters:">
+<vspace blankLines="1" />
+None
 </t>
 
-<t>
-Security Considerations:</t><t>
-See Section 6 of RFC 3047.
+<vspace blankLines="1" />
+
+<t hangText="Optional Parameters:">
+<vspace blankLines="1" />
+None
 </t>
 
-<t>
-Interoperability considerations: none
+<vspace blankLines="1" />
+
+<t hangText="Encoding considerations:">
+<vspace blankLines="1" />
+This media type contains binary data.
 </t>
 
-<t>
-Published specification:</t>
-<t>See RFC XXXX for details.</t>
+<vspace blankLines="1" />
 
-<t>
-Applications which use this media type:</t><t>
+<t hangText="Security Considerations:">
+<vspace blankLines="1" />
+See Section 6 of RFC XXXX.
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Interoperability considerations:">
+<vspace blankLines="1" />
+None
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Published specification:">
+<vspace blankLines="1" />
+RFC XXXX [RFC Editor: please replace by the RFC number of  this memo,
+       when published]
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Applications which use this media type:">
+<vspace blankLines="1" />
 Vorbis encoded audio, configuration data.
 </t>
 
-<t>
-Additional information: none
+<vspace blankLines="1" />
+
+<t hangText="Additional information:"> 
+<vspace blankLines="1" />
+None
 </t>
 
-<t>
-Person &amp; email address to contact for further information:</t><t>
+<vspace blankLines="1" />
+
+<t hangText="Person &amp; email address to contact for further information:">
+<vspace blankLines="1" />
 Luca Barbato: &lt;lu_zero@gentoo.org&gt;
+<vspace blankLines="0" />
+IETF Audio/Video Transport Working Group
 </t>
 
-<t>
-Intended usage: COMMON
+<vspace blankLines="1" />
+
+<t hangText="Intended usage:">
+COMMON
 </t>
 
-<t>Author/Change controller:</t>
-<t>Author: Luca Barbato</t>
-<t>Change controller: IETF AVT Working Group</t>
+<vspace blankLines="1" />
 
+<t hangText="Restriction on usage:">
+<vspace blankLines="1" />
+This media type doesn't depend on the transport.
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Author:">
+<vspace blankLines="1" />
+Luca Barbato</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Change controller:">
+<vspace blankLines="1" />
+IETF AVT Working Group</t>
+</list>
 
 </section>
 </section>
@@ -746,69 +789,123 @@ Loss of any of the Configuration fragment will result in the loss of the full Co
 </section>
 <section anchor="IANA Considerations" title="IANA Considerations"> 
 
-<t>
-MIME media type name: audio
-</t>
-<t>
-MIME subtype: vorbis
-</t>
+<vspace blankLines="1" />
 
-<t>
-Required Parameters:
-</t>
+<list style="hanging">
+<t hangText="MIME media type name:"> audio </t>
 
-<t>
-delivery-method: indicates the delivery methods in use, the possible values are:inline, in_band, out_band
-</t><t>
-configuration: the <xref target="rfc3548">base16</xref> (hexadecimal) representation of the <xref target="Packed Headers">Packed Headers</xref>.
-</t>
+<vspace blankLines="1" />
 
-<t>
-{FIXME:xref missing}
-Optional Parameters: </t><t>
-configuration-uri: the URI of the configuration headers in case of out of band transmission. In the form of "protocol://path/to/resource/". Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream, aggregates MAY be compressed using gz or bzip2 and an sha1 checksum MAY be provided in the form of "protocol://path/to/resource/!sha1hash"
+<t hangText="MIME subtype:"> vorbis </t>
+
+<vspace blankLines="1" />
+
+<t hangText="Required Parameters:">
+
+<vspace blankLines="1" />
+
+<list style="hanging">
+<t hangText="delivery-method:"> indicates the delivery methods in use, the possible values are: inline, in_band, out_band/specific_name<vspace blankLines="0" />
+Where "specific_name" is the name of the out of band delivery method.
+
 </t>
 
-<t>
-Encoding considerations:</t><t>
-This type is only defined for transfer via RTP as specified 
-in RFC XXXX.
+<vspace blankLines="1" />
+
+<t hangText="configuration:"> the <xref target="rfc3548">base16</xref> (hexadecimal) representation of the <xref target="Packed Headers">Packed Headers</xref>.
+</t>
+</list>
 </t>
 
-<t>
-Security Considerations:</t><t>
-See Section 6 of RFC 3047.
+<vspace blankLines="1" />
+
+<t hangText="Optional Parameters:">
+
+<vspace blankLines="1" />
+
+<list style="hanging">
+<t hangText="configuration-uri:"> the URI of the configuration headers in case of out of band transmission.  In the form of "protocol://path/to/resource/".  Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream, aggregates MAY be compressed using gz or bzip2 and an sha1 checksum MAY be provided in the form of "protocol://path/to/resource/! sha1hash"</t>
+</list>
 </t>
 
-<t>
-Interoperability considerations: none
+<vspace blankLines="1" />
+
+<t hangText="Encoding considerations:">
+<vspace blankLines="1" />
+This media type is framed and contains binary data.
 </t>
 
-<t>
-Published specification:</t>
-<t>See the Vorbis documentation <xref target="vorbis-spec-ref"></xref> for details.</t>
+<vspace blankLines="1" />
 
-<t>
-Applications which use this media type:</t><t>
-Audio streaming and conferencing tools
+<t hangText="Security Considerations:">
+<vspace blankLines="1" />
+See Section 6 of RFC XXXX.</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Interoperability considerations:">
+<vspace blankLines="1" />
+None</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Published specification:">
+
+<vspace blankLines="1" />
+
+<t> RFC XXXX [RFC Editor: please replace by the RFC number of  this memo, when published]</t>
+<vspace blankLines="1" />
+<t>Ogg Vorbis I specification:  Codec setup and packet decode. Available from the Xiph website, http://www.xiph.org</t>
+
 </t>
 
-<t>
-Additional information: none
+<vspace blankLines="1" />
+
+<t hangText="Applications which use this media type:">
+<vspace blankLines="1"/>
+Audio streaming and conferencing tools </t>
+
+<vspace blankLines="1" />
+
+<t hangText="Additional information:">
+<vspace blankLines="1" />
+None </t>
+
+<vspace blankLines="1" />
+
+<t hangText="Person &amp; email address to contact for further information:">
+
+<vspace blankLines="1" />
+
+<t>Luca Barbato: &lt;lu_zero@gentoo.org&gt;</t>
+<t>IETF Audio/Video Transport Working Group</t>
+
 </t>
 
-<t>
-Person &amp; email address to contact for further information:</t><t>
-Luca Barbato: &lt;lu_zero@gentoo.org&gt;
-</t>
+<vspace blankLines="1" />
 
-<t>
-Intended usage: COMMON
-</t>
+<t hangText="Intended usage:">
+<vspace blankLines="1" />
+COMMON</t>
 
-<t>Author/Change controller:</t>
-<t>Author: Luca Barbato</t>
-<t>Change controller: IETF AVT Working Group</t>
+<vspace blankLines="1" />
+
+<t hangText="Restriction on usage:">
+<vspace blankLines="1" />
+This media type depends on RTP framing, and hence is only defined for transfer via <xref target="rfc3550">RTP</xref></t>
+
+<vspace blankLines="1" />
+
+<t hangText="Author:">
+<vspace blankLines="1"/>Luca Barbato</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Change controller:"><vspace blankLines="1"/> IETF AVT Working Group</t>
+
+<vspace blankLines="1" />
+
+</list>
 
 <section anchor="Mapping MIME Parameters into SDP" title="Mapping MIME Parameters into SDP"> 
 
