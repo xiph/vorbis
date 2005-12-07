@@ -210,7 +210,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    Marker (M): 1 bit
 
    Set to zero.  Audio silence suppression not used.  This conforms to
-   section 4.1 of [12].
+   section 4.1 of [15].
 
    Payload Type (PT): 7 bits
 
@@ -300,7 +300,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    Raw Vorbis packets are unbounded in length currently, although at
    some future point there will likely be a practical limit placed on
    them.  Typical Vorbis packet sizes are from very small (2-3 bytes) to
-   quite large (8-12 kilobytes).  The reference implementation [11]
+   quite large (8-12 kilobytes).  The reference implementation [14]
    typically produces packets less than ~800 bytes, except for the setup
    header packets which are ~4-12 kilobytes.  Within an RTP context the
    maximum packet size, including the RTP and payload headers, SHOULD be
@@ -338,7 +338,7 @@ Barbato                  Expires April 24, 2006                 [Page 6]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   Specification [12].
+   Specification [15].
 
 2.4.  Example RTP Packet
 
@@ -409,7 +409,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    Thus these two codebook header packets must be received by the
    decoder before any audio data can be interpreted.  In addition, the
-   Vorbis I specification [12] requires the presense of a comment header
+   Vorbis I specification [15] requires the presense of a comment header
    packet which gives simple metadata about the stream.  This
    requirement poses problems in RTP, which is often used over
    unreliable transports.
@@ -461,7 +461,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    A Vorbis Packed Configuration is indicated with the payload type
    field set to 1.  Of the three headers, defined in the Vorbis I
-   specification [12], the identification and the setup will be packed
+   specification [15], the identification and the setup will be packed
    together, the comment header is completely suppressed.  Is up to the
    client provide a minimal size comment header to the decoder if
    required by the implementation.
@@ -674,13 +674,12 @@ Barbato                  Expires April 24, 2006                [Page 12]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   {FIXME: reference to bzip2, gz, and sha1sum} This off band delivery
-   method MUST be signaled as "out_band/wkc/list_name" using the
-   mandated parameter delivery-method.  An optional configuration-uri
-   MAY point to a location where to fetch it.  The list is in the form
-   of Packed Headers (Section 3.2.1), that MAY be compressed using bzip2
-   or gz algorithms as further explained in the IANA Considerations
-   (Section 6) section.
+   This off band delivery method MUST be signaled as "out_band/wkc/
+   list_name" using the mandated parameter delivery-method.  An optional
+   configuration-uri MAY point to a location where to fetch it.  The
+   list is in the form of Packed Headers (Section 3.2.1), that MAY be
+   compressed using bzip2 [13] or gzip [11] as further explained in the
+   IANA Considerations (Section 6) section.
 
    Only one list MUST be used at time.  During SDP Offer/Answer [8]
    client and server MAY agree on a specific list, that subject will be
@@ -705,7 +704,8 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    on.  These metadata messages are not intended to be fully descriptive
    but to offer basic track/song information.  Clients MAY ignore it
    completely.  The details on the format of the comments can be found
-   in the Vorbis documentation [12].
+   in the Vorbis documentation [15].
+
 
 
 
@@ -982,9 +982,9 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
          "protocol://path/to/resource/".  Depending on the specific
          method the single ident packet could be retrived by their
          number, or aggregated in a single stream, aggregates MAY be
-         compressed using gz or bzip2 and an sha1 checksum MAY be
-         provided in the form of "protocol://path/to/resource/!
-         sha1hash"
+         compressed using bzip2 [13] or gzip [11] and an sha1 [12]
+         checksum MAY be provided in the form of
+         "protocol://path/to/resource/! sha1hash"
 
    Encoding considerations:
 
@@ -1256,25 +1256,25 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
          Internet Draft (draft-ietf-avt-rtcp-feedback-11: Work in
          progress).
 
+   [11]  Deutsch, P., "GZIP file format specification version 4.3",
+         RFC 1952.
+
+   [12]  National Institute of Standards and Technology, "Secure Hash
+         Standard", May 1993.
+
+   [13]  Seward, J., "libbz2 and bzip2".
+
 11.2.  Informative References
 
-   [11]  "libvorbis: Available from the Xiph website,
+   [14]  "libvorbis: Available from the Xiph website,
          http://www.xiph.org".
 
-   [12]  "Ogg Vorbis I specification:  Codec setup and packet decode.
+   [15]  "Ogg Vorbis I specification:  Codec setup and packet decode.
          Available from the Xiph website, http://www.xiph.org".
 
-   [13]  "Ogg Vorbis I specification:  Comment field and header
+   [16]  "Ogg Vorbis I specification:  Comment field and header
          specification.  Available from the Xiph website,
          http://www.xiph.org".
-
-
-
-
-
-
-
-
 
 
 

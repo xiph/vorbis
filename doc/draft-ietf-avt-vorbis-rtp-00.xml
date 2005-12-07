@@ -590,8 +590,7 @@ Every Configuration that is available as Well Known has the Ident highest bit se
 </t>
 
 <t>
-{FIXME: reference to bzip2, gz, and sha1sum}
-This off band delivery method MUST be signaled as "out_band/wkc/list_name" using the mandated parameter delivery-method. An optional configuration-uri MAY point to a location where to fetch it. The list is in the form of <xref target="Packed Headers">Packed Headers</xref>, that MAY be compressed using bzip2 or gz algorithms as further explained in the <xref target="IANA Considerations">IANA Considerations</xref> section.
+This off band delivery method MUST be signaled as "out_band/wkc/list_name" using the mandated parameter delivery-method. An optional configuration-uri MAY point to a location where to fetch it. The list is in the form of <xref target="Packed Headers">Packed Headers</xref>, that MAY be compressed using <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref> as further explained in the <xref target="IANA Considerations">IANA Considerations</xref> section.
 </t>
 
 <t>
@@ -824,7 +823,7 @@ Where "specific_name" is the name of the out of band delivery method.
 <vspace blankLines="1" />
 
 <list style="hanging">
-<t hangText="configuration-uri:"> the URI of the configuration headers in case of out of band transmission.  In the form of "protocol://path/to/resource/".  Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream, aggregates MAY be compressed using gz or bzip2 and an sha1 checksum MAY be provided in the form of "protocol://path/to/resource/! sha1hash"</t>
+<t hangText="configuration-uri:"> the URI of the configuration headers in case of out of band transmission.  In the form of "protocol://path/to/resource/".  Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream, aggregates MAY be compressed using <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref> and an <xref target="FIPS180">sha1</xref> checksum MAY be provided in the form of "protocol://path/to/resource/! sha1hash"</t>
 </list>
 </t>
 
@@ -1127,6 +1126,31 @@ Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aar
 </front>
 <seriesInfo name="Internet Draft" value="(draft-ietf-avt-rtcp-feedback-11: Work in progress)" />
 </reference>   
+
+<reference anchor="rfc1952">
+<front>
+<title>GZIP file format specification version 4.3</title>
+<author initials="P" surname="Deutsch" fullname="L. Peter Deutsch"></author>
+</front>
+<seriesInfo name="RFC" value="1952" />
+</reference>
+
+<reference anchor="FIPS180">
+<front>
+<title>Secure Hash Standard</title>
+<author>
+<organization>National Institute of Standards and Technology</organization>
+</author>
+<date month="May" year="1993"/>
+</front>
+</reference>
+
+<reference anchor="BZ2">
+<front>
+<title>libbz2 and bzip2</title>
+<author initials="J" surname="Seward" fullname="Julian Seward" />
+</front>
+</reference>
 
 
 </references>
