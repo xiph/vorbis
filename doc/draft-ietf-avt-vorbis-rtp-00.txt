@@ -1152,7 +1152,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    That is one of the most common situation: one single server streaming
    content in multicast, the clients may start a session at random time.
-   The content itself could be a mix of live stream as the dj's speech
+   The content itself could be a mix of live stream, as the dj's voice,
    and stored streams as the music she plays.
 
    In this situation we don't know in advance how many codebooks we will
@@ -1161,15 +1161,15 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    On join the client will receive the current Configuration necessary
    to decode the current stream inlined in the SDP.  And can start
-   decoding the current stream.
+   decoding the current stream as soon it joins the session.
 
    When the streamed content changes the new Configuration is sent in-
    band before the actual stream, and the Configuration that has to be
-   sent inline in the SDP updated.
-
-   A serverside optimization would be keep an hash list of the
-   Configurations per session to avoid packing them and send the same
-   Configuration with different Ident tags
+   sent inline in the SDP updated.  Since the inline method is
+   unreliable, an out of band fallback is provided.  The client could
+   choose to fetch the Configuration from the alternate source as soon
+   it discovers a Configuration packet got lost inline or use selective
+   retransmission{FIXME}, if the server supports them
 
 
 
@@ -1178,7 +1178,11 @@ Barbato                  Expires April 24, 2006                [Page 21]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   A clientside optimization would be keep a tag list of the
+   A serverside optimization would be to keep an hash list of the
+   Configurations per session to avoid packing all of them and send the
+   same Configuration with different Ident tags
+
+   A clientside optimization would be to keep a tag list of the
    Configurations per session and don't process configuration packets
    already known.
 
@@ -1223,16 +1227,16 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    [2]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
          Levels", RFC 2119.
 
-   [3]   Schulzrinne, H., Casner, S., Frederick, R., and V. Jacobson,
-         "RTP: A Transport Protocol for real-time applications",
-         RFC 3550.
-
 
 
 Barbato                  Expires April 24, 2006                [Page 22]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
+
+   [3]   Schulzrinne, H., Casner, S., Frederick, R., and V. Jacobson,
+         "RTP: A Transport Protocol for real-time applications",
+         RFC 3550.
 
    [4]   Schulzrinne, H. and S. Casner, "RTP Profile for Audio and Video
          Conferences with Minimal Control.", RFC 3551.
@@ -1275,10 +1279,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    [16]  "Ogg Vorbis I specification:  Comment field and header
          specification.  Available from the Xiph website,
          http://www.xiph.org".
-
-
-
-
 
 
 
