@@ -1,7 +1,6 @@
 
 
 
-
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                  Xiph.Org
 Expires: April 24, 2006                                 October 21, 2005
@@ -80,7 +79,7 @@ Table of Contents
        3.2.1.  Packed Headers . . . . . . . . . . . . . . . . . . . . 10
      3.3.  Loss of Configuration Headers  . . . . . . . . . . . . . . 12
    4.  Comment Headers  . . . . . . . . . . . . . . . . . . . . . . . 13
-   5.  Frame Packetizing  . . . . . . . . . . . . . . . . . . . . . . 13
+   5.  Frame Packetization  . . . . . . . . . . . . . . . . . . . . . 13
      5.1.  Example Fragmented Vorbis Packet . . . . . . . . . . . . . 14
      5.2.  Packet Loss  . . . . . . . . . . . . . . . . . . . . . . . 16
    6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 17
@@ -237,7 +236,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    A timestamp representing the sampling time of the first sample of the
    first Vorbis packet in the RTP packet.  The clock frequency MUST be
    set to the sample rate of the encoded audio data and is conveyed out-
-   of-band as a SDP attribute.
+   of-band as a SDP parameter.
 
    SSRC/CSRC identifiers:
 
@@ -282,8 +281,8 @@ Barbato                  Expires April 24, 2006                 [Page 5]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
-   This field sets the packet payload type for the Vorbis data.  There
-   are currently three type of Vorbis payloads.
+   This field sets the payload type for the Vorbis data in this RTP
+   packet.  There are currently three type of Vorbis payloads.
 
       0 = Raw Vorbis payload
       1 = Vorbis Packed Configuration payload
@@ -298,13 +297,14 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 2.3.  Payload Data
 
    Raw Vorbis packets are unbounded in length currently, although at
-   some future point there will likely be a practical limit placed on
-   them.  Typical Vorbis packet sizes are from very small (2-3 bytes) to
-   quite large (8-12 kilobytes).  The reference implementation [14]
+   some future point application profiles will likely define a practical
+   limit.  Typical Vorbis packet sizes are from very small (2-3 bytes)
+   to quite large (8-12 kilobytes).  The reference implementation [14]
    typically produces packets less than ~800 bytes, except for the setup
-   header packets which are ~4-12 kilobytes.  Within an RTP context the
-   maximum packet size, including the RTP and payload headers, SHOULD be
-   kept below the path MTU to avoid packet fragmentation.
+   header packets which are ~4-12 kilobytes.  Within an RTP context, to
+   avoid fragmentation, the Vorbis data packet size SHOULD be kept
+   sufficiently small so that after adding the the RTP and payload
+   headers, the complete RTP packet is smaller than the path MTU.
 
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -327,9 +327,8 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    The payload packing of the Vorbis data packets MUST follow the
    guidelines set-out in [4] where the oldest packet occurs immediately
-   after the RTP packet header.
-
-   Channel mapping of the audio is in accordance with the Vorbis I
+   after the RTP packet header.  Subsequence packets, if any, MUST
+   follow in temporal order.
 
 
 
@@ -338,6 +337,7 @@ Barbato                  Expires April 24, 2006                 [Page 6]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
+   Channel mapping of the audio is in accordance with the Vorbis I
    Specification [15].
 
 2.4.  Example RTP Packet
@@ -388,7 +388,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
 
-
 Barbato                  Expires April 24, 2006                 [Page 7]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
@@ -400,25 +399,25 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    configured probability model.  Instead, it packs all entropy decoding
    configuration, VQ and Huffman models into a data block that must be
    transmitted to the decoder along with the compressed data.  A decoder
-   also requires identification information detailing the number of
-   audio channels, bitrates and other information to configure itself
-   for a particular compressed data stream.  These two blocks of
-   information are often referred to collectively as the "codebooks" for
-   a Vorbis stream, and are nominally included as special "header"
-   packets at the start of the compressed data.
+   also requires information detailing the number of audio channels,
+   bitrates and similar information to configure itself for a particular
+   compressed data stream.  These two blocks of information are often
+   referred to collectively as the "codebooks" for a Vorbis stream, and
+   are nominally included as special "header" packets at the start of
+   the compressed data.  In addition, the Vorbis I specification [15]
+   requires the presence of a comment header packet which gives simple
+   metadata about the stream, but this information is not required for
+   decoding the frame sequence.
 
    Thus these two codebook header packets must be received by the
-   decoder before any audio data can be interpreted.  In addition, the
-   Vorbis I specification [15] requires the presense of a comment header
-   packet which gives simple metadata about the stream.  This
-   requirement poses problems in RTP, which is often used over
-   unreliable transports.
+   decoder before any audio data can be interpreted.  These requirements
+   pose problems in RTP, which is often used over unreliable transports.
 
    Since this information must be transmitted reliably and, as the RTP
    stream may change certain configuration data mid-session, there are
    different methods for delivering this configuration data to a client,
    both in-band and out-of-band which is detailed below.  SDP delivery
-   is used to setup an initial state for the client application.  The
+   is used to set up an initial state for the client application.  The
    changes may be due to different codebooks as well as different
    bitrates of the stream.
 
@@ -428,18 +427,18 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    delivery methods MAY be advertised for the same session.  The in-band
    Configuration delivery SHOULD be considered as baseline, out-of-band
    delivery methods that don't use RTP will not be described in this
-   document.  For non chained streams, the Configuration delivery method
-   RECOMMENDED is inline the Packed Configuration (Section 3.1.1) in the
-   SDP as explained in the IANA considerations (Section 6.1) section.
+   document.  For non chained streams, the Configuration recommended
+   delivery method is inline the Packed Configuration (Section 3.1.1) in
+   the SDP as explained in the IANA considerations (Section 6.1)
+   section.
 
    The 24 bit Ident field is used to map which Configuration will be
-   used to decodea packet.  When the Ident field changes, it indicates
+   used to decode a packet.  When the Ident field changes, it indicates
    that a change in the stream has taken place.  The client application
    MUST have in advance the correct configuration and if the client
    detects a change in the Ident value and does not have this
    information it MUST NOT decode the raw Vorbis data associated until
    it fetches the correct Configuration.
-
 
 
 
@@ -513,9 +512,9 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 3.2.  Out of Band Transmission
 
-   This section, as stated before, won't cover all the possible out-of-
-   band delivery methods since they rely to different protocols and be
-   linked to a specific application.  The following packet definition
+   This section, as stated above, does not cover all the possible out-
+   of-band delivery methods since they rely to different protocols and
+   are linked to specific applications.  The following packet definition
    SHOULD be used in out-of-band delivery and MUST be used when
    Configuration is inlined in the SDP.
 
@@ -711,17 +710,17 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    fragmented.
 
 
-5.  Frame Packetizing
+5.  Frame Packetization
 
    Each RTP packet contains either one Vorbis packet fragment, or an
-   integer number of complete Vorbis packets (up to a max of 15 packets,
-   since the number of packets is defined by a 4 bit value).
+   integer number of complete Vorbis packets (up to a maximum of 15
+   packets, since the number of packets is defined by a 4 bit value).
 
    Any Vorbis data packet that is less than path MTU SHOULD be bundled
    in the RTP packet with as many Vorbis packets as will fit, up to a
-   maximum of 15.  Path MTU is detailed in [6] and [7].
-
-   If a Vorbis packet, not only data but also Configuration and Comment,
+   maximum of 15, except when such bundling would exceed an
+   application's desired transmission latency.  Path MTU is detailed in
+   [6] and [7].
 
 
 
@@ -730,6 +729,7 @@ Barbato                  Expires April 24, 2006                [Page 13]
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
 
+   If a Vorbis packet, not only data but also Configuration and Comment,
    is larger than 65535 octets it MUST be fragmented.  A fragmented
    packet has a zero in the last four bits of the payload header.  The
    first fragment will set the Fragment type to 1.  Each fragment after
@@ -775,7 +775,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    is xxxxx.  The Fragment type is set to 1, the number of packets field
    is set to 0, and as the payload is raw Vorbis data the VDT field is
    set to 0.
-
 
 
 
@@ -1101,7 +1100,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
    In this situation we don't know in advance how many codebooks we will
    use.  The clients can join anytime and users expect to start
-   listening to the content in a short time
+   listening to the content in a short time.
 
    On join the client will receive the current Configuration necessary
    to decode the current stream inlined in the SDP.  And can start
@@ -1343,4 +1342,3 @@ Acknowledgment
 
 Barbato                  Expires April 24, 2006                [Page 24]
 
-
