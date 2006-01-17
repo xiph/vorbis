@@ -224,6 +224,8 @@ This field sets the payload type for the Vorbis data in this RTP packet. There a
 <t>      3 = Reserved</t>
 </list>
 
+<t> The packets with a TDT of value 3 MUST be ignored </t>
+
 <t>
 The last 4 bits are the number of complete packets in this payload.  This provides for a maximum number of 15 Vorbis packets in the payload. If the packet contains fragmented data the number of packets MUST be set to 0.
 </t>
@@ -995,15 +997,18 @@ The following examples are common usage patterns that MAY be applied in such sit
 
 <section anchor="Stream Radio" title="Stream Radio">
 
-<t>That is one of the most common situation: one single server streaming content in multicast, the clients may start a session at random time. The content itself could be a mix of live stream, as the dj's voice, and stored streams as the music she plays.</t>
+<t>That is one of the most common situation: one single server streaming content in multicast, the clients may start a session at random time. The content itself could be a mix of live stream, as the wj's voice, and stored streams as the music she plays.</t>
 
 <t>In this situation we don't know in advance how many codebooks we will use. The clients can join anytime and users expect to start listening to the content in a short time.</t>
 
-<t>On join the client will receive the current Configuration necessary to decode the current stream inlined in the SDP. And can start decoding the current stream as soon it joins the session.</t>
+<t>On join the client will receive the current Configuration necessary to decode the current stream inlined in the SDP so that the decoding will start immediately after.</t>
 
-<t>When the streamed content changes the new Configuration is sent in-band before the actual stream, and the Configuration that has to be sent inline in the SDP updated. Since the inline method is unreliable, an out of band fallback is provided. The client could choose to fetch the Configuration from the alternate source as soon it discovers a Configuration packet got lost inline or use <xref target="RFC3611">selective retransmission</xref>, if the server supports that feature.</t>
+<t>When the streamed content changes the new Configuration is sent in-band before the actual stream, and the Configuration that has to be sent inline in the SDP updated. Since the inline method is unreliable, an out of band fallback is provided.</t>
+
+<t>The client could choose to fetch the Configuration from the alternate source as soon it discovers a Configuration packet got lost inline or use <xref target="RFC3611">selective retransmission</xref>, if the server supports that feature.</t>
 
 <t>A serverside optimization would be to keep an hash list of the Configurations per session to avoid packing all of them and send the same Configuration with different Ident tags</t>
+
 <t>A clientside optimization would be to keep a tag list of the Configurations per session and don't process configuration packets already known.</t>
 
 <t>Let's assume that the client playout buffer can store at least 7 packets.</t>
