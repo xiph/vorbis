@@ -11,6 +11,7 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = vorbis.pc vorbisenc.pc vorbisfile.pc
 
 EXTRA_DIST = \
+	CHANGES COPYING \
 	todo.txt autogen.sh \
 	libvorbis.spec libvorbis.spec.in \
 	vorbis.m4 \
