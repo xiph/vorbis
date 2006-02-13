@@ -1011,8 +1011,6 @@ The following examples are common usage patterns that MAY be applied in such sit
 
 <t>A clientside optimization would be to keep a tag list of the Configurations per session and don't process configuration packets already known.</t>
 
-<t>Let's assume that the client playout buffer can store at least 7 packets.</t>
-
 </section>
 </section>
 

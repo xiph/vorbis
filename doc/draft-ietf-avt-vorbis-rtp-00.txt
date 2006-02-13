@@ -94,8 +94,8 @@ Table of Contents
    11. References . . . . . . . . . . . . . . . . . . . . . . . . . . 22
      11.1. Normative References . . . . . . . . . . . . . . . . . . . 22
      11.2. Informative References . . . . . . . . . . . . . . . . . . 23
-   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 25
-   Intellectual Property and Copyright Statements . . . . . . . . . . 26
+   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 24
+   Intellectual Property and Copyright Statements . . . . . . . . . . 25
 
 
 
@@ -1189,9 +1189,6 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    Configurations per session and don't process configuration packets
    already known.
 
-   Let's assume that the client playout buffer can store at least 7
-   packets.
-
 
 9.  Security Considerations
 
@@ -1227,15 +1224,15 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
    [1]   Pfeiffer, S., "The Ogg Encapsulation Format Version 0",
          RFC 3533.
 
+   [2]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
+         Levels", RFC 2119.
+
 
 
 Barbato                  Expires April 24, 2006                [Page 22]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
-
-   [2]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
-         Levels", RFC 2119.
 
    [3]   Schulzrinne, H., Casner, S., Frederick, R., and V. Jacobson,
          "RTP: A Transport Protocol for real-time applications",
@@ -1283,65 +1280,12 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
          specification.  Available from the Xiph website,
          http://www.xiph.org".
 
-
-
-Barbato                  Expires April 24, 2006                [Page 23]
-
-Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
-
-
    [17]  Friedman, T., Caceres, R., and A. Clark, "RTP Control Protocol
          Extended Reports (RTCP XR)", RFC 3611, November 2003.
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Barbato                  Expires April 24, 2006                [Page 24]
+Barbato                  Expires April 24, 2006                [Page 23]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1397,7 +1341,7 @@ Author's Address
 
 
 
-Barbato                  Expires April 24, 2006                [Page 25]
+Barbato                  Expires April 24, 2006                [Page 24]
 
 Internet-Draft        draft-kerr-avt-vorbis-rtp-05          October 2005
 
@@ -1453,6 +1397,6 @@ Acknowledgment
 
 
 
-Barbato                  Expires April 24, 2006                [Page 26]
+Barbato                  Expires April 24, 2006                [Page 25]
 
 
