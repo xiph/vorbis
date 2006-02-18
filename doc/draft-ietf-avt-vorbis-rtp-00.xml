@@ -6,7 +6,7 @@
 <rfc ipr="full3978" docName="RTP Payload Format for Vorbis Encoded Audio">
 
 <front>
-<title>draft-kerr-avt-vorbis-rtp-05</title>
+<title>draft-kerr-avt-vorbis-rtp-06</title>
 
 <author initials="L" surname="Barbato" fullname="Luca Barbato">
 <organization>Xiph.Org</organization>
@@ -828,7 +828,7 @@ Where "specific_name" is the name of the out of band delivery method.
 <vspace blankLines="1" />
 
 <list style="hanging">
-<t hangText="configuration-uri:"> the URI of the configuration headers in case of out of band transmission.  In the form of "protocol://path/to/resource/".  Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream, aggregates MAY be compressed using <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref> and an <xref target="FIPS180">sha1</xref> checksum MAY be provided in the form of "protocol://path/to/resource/! sha1hash"</t>
+<t hangText="configuration-uri:"> the URI of the configuration headers in case of out of band transmission.  In the form of "protocol://path/to/resource/".  Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream, aggregates MAY be compressed using <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref> and an <xref target="FIPS180">sha1</xref> checksum MAY be provided in the form of "protocol://path/to/resource/aggregated.bz2!sha1hash"</t>
 </list>
 </t>
 
@@ -951,15 +951,18 @@ The URI specified in the configuration-uri attribute MUST point to a location wh
 The port value is specified by the server application bound to the address specified in the c attribute.  The bitrate value and channels specified in the rtpmap attribute MUST match the Vorbis sample rate value.  An example is found below.
 </t>
 
+<section anchor="SDP Example" title="SDP Example">
+<t>The following example shows a basic SDP single stream. The first configuration packet is inlined in the sdp, other configurations could be fetched at any time from the first provided uri using or all the known configuration could be downloaded using the second uri. The inline <xref target="rfc3548">base16</xref> configuration string is omitted because of the lenght.</t>
 
-<vspace blankLines="1" />
 <list style="empty">
-<t>c=IN IP4/6 </t>
+<t>c=IN IP4 192.0.0.1</t>
 <t>m=audio  RTP/AVP 98</t>
-<t>a=rtpmap:98 VORBIS/44100/2</t>
+<t>a=rtpmap:98 vorbis/44100/2</t>
 <t>a=delivery:out_band/http</t>
-<t>a=fmtp:98 delivery-method:in_band,out_band/http; configuration=base16string1; configuration-uri=http://path/to/the/resource</t>
+<t>a=fmtp:98 delivery-method=in_band; configuration=base16string1; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!sha1hash;</t>
 </list>
+</section>
+
 
 <t>
 Note that the payload format (encoding) names are commonly shown in upper case.  MIME subtypes are commonly shown in lower case. These names are case-insensitive in both places.  Similarly, parameter names are case-insensitive both in MIME types and in the default mapping to the SDP a=fmtp attribute.  The exception regarding case sensitivity is the configuration-uri URI which MUST be regarded as being case sensitive.
@@ -1031,7 +1034,7 @@ This document is a continuation of draft-moffitt-vorbis-rtp-00.txt and draft-ker
 </t>
 
 <t>
-Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher Montgomery,  Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David Barrett, Silvia Pfeiffer, Politecnico di Torino (LS)³/IMG Group in particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
+Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher Montgomery,  Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David Barrett, Silvia Pfeiffer, Stefan Ehmann. Politecnico di Torino (LS)³/IMG Group in particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 </t>
 
 </section> 
