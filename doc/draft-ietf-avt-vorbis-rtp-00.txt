@@ -7,7 +7,7 @@ Internet-Draft                                                  Xiph.Org
 Expires: August 24, 2006                               February 20, 2006
 
 
-                      draft-kerr-avt-vorbis-rtp-06
+                      draft-ietf-avt-vorbis-rtp-00
               RTP Payload Format for Vorbis Encoded Audio
 
 Status of this Memo
@@ -55,7 +55,7 @@ Abstract
 
 Barbato                  Expires August 24, 2006                [Page 1]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
 Editors Note
@@ -111,7 +111,7 @@ Table of Contents
 
 Barbato                  Expires August 24, 2006                [Page 2]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
 1.  Introduction
@@ -167,7 +167,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006                [Page 3]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
        0                   1                   2                   3
@@ -223,7 +223,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006                [Page 4]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    Sequence number: 16 bits
@@ -279,7 +279,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006                [Page 5]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    This field sets the payload type for the Vorbis data in this RTP
@@ -335,7 +335,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006                [Page 6]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    after the RTP packet header.  Subsequence packets, if any, MUST
@@ -391,7 +391,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006                [Page 7]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    prefixed by the two octet length field.  The Packet Type and Fragment
@@ -447,7 +447,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006                [Page 8]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    detects a change in the Ident value and does not have this
@@ -503,7 +503,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006                [Page 9]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
        0                   1                   2                   3
@@ -559,7 +559,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 10]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    configuration data is via a retrieval method that can be performed
@@ -615,7 +615,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 11]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    MIME media type name: audio
@@ -671,7 +671,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 12]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    Restriction on usage:
@@ -727,7 +727,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 13]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
        0                   1                   2                   3
@@ -783,7 +783,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 14]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    packets MUST be the same as the first packet sent, with the sequence
@@ -839,7 +839,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 15]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
       Packet 2:
@@ -895,7 +895,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 16]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
       Packet 3:
@@ -951,7 +951,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 17]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    Loss of any of the Configuration fragment will result in the loss of
@@ -1007,7 +1007,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 18]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    Published specification:
@@ -1063,7 +1063,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 19]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    o  The MIME type ("audio") goes in SDP "m=" as the media name.
@@ -1119,7 +1119,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 20]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    upper case.  MIME subtypes are commonly shown in lower case.  These
@@ -1175,7 +1175,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 21]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    to decode the current stream inlined in the SDP so that the decoding
@@ -1231,7 +1231,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 22]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
 11.  References
@@ -1287,7 +1287,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 23]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
    [15]  "Ogg Vorbis I specification:  Codec setup and packet decode.
@@ -1343,7 +1343,7 @@ Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
 
 Barbato                  Expires August 24, 2006               [Page 24]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
 Author's Address
@@ -1399,7 +1399,7 @@ Author's Address
 
 Barbato                  Expires August 24, 2006               [Page 25]
 
-Internet-Draft        draft-kerr-avt-vorbis-rtp-06         February 2006
+Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
 Intellectual Property Statement
