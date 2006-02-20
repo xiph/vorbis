@@ -82,7 +82,7 @@ in this document are to be interpreted as described in RFC 2119 <xref target="rf
 <section anchor="Payload Format" title="Payload Format">
 
 <t>
-For RTP based transportation of Vorbis encoded audio the standard RTP header is followed by a 4 octet payload header, then the payload data.  The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the the number of whole Vorbis data frames.  The payload data contains the raw Vorbis bitstream information.
+For RTP based transportation of Vorbis encoded audio the standard RTP header is followed by a 4 octet payload header, then the payload data.  The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames.  The payload data contains the raw Vorbis bitstream information.
 </t>
 
 <section anchor="RTP Header" title="RTP Header">
@@ -235,7 +235,7 @@ The last 4 bits are the number of complete packets in this payload.  This provid
 <section anchor="Payload Data" title="Payload Data">
 
 <t>
-Raw Vorbis packets are unbounded in length currently, although at some future point application profiles will likely define a practical limit.  Typical Vorbis packet sizes are from very small (2-3 bytes) to quite large (8-12 kilobytes). The reference implementation <xref target="libvorbis"></xref> typically produces packets less than ~800 bytes, except for the setup header packets which are ~4-12 kilobytes.  Within an RTP context, to avoid fragmentation, the Vorbis data packet size SHOULD be kept sufficiently small so that after adding the the RTP and payload headers, the complete RTP packet is smaller than the path MTU.  
+Raw Vorbis packets are currently unbounded in length, application profiles will likely define a practical limit. Typical Vorbis packet sizes range from very small (2-3 bytes) to quite large (8-12 kilobytes). The reference implementation <xref target="libvorbis"></xref> typically produces packets less than ~800 bytes, except for the setup header packets which are ~4-12 kilobytes. Within an RTP context, to avoid fragmentation, the Vorbis data packet size SHOULD be kept sufficiently small so that after adding the the RTP and payload headers, the complete RTP packet is smaller than the path MTU.
 </t>
 
 <figure anchor="Payload Data Figure" title="Payload Data Header">
@@ -243,7 +243,7 @@ Raw Vorbis packets are unbounded in length currently, although at some future po
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |            length             |       vorbis packet data     ..  
+   |            length             |       vorbis packet data     ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork>
 </figure>
@@ -426,7 +426,7 @@ A Vorbis Packed Configuration is indicated with the payload type field set to 1.
 
 
 <t>
-This section, as stated above, does not cover all the possible out-of-band delivery methods since they rely to different protocols and are linked to specific applications. The following packet definition SHOULD be used in out-of-band delivery and MUST be used when Configuration is inlined in the SDP.
+This section, as stated above, does not cover all the possible out-of-band delivery methods since they rely on different protocols and are linked to specific applications. The following packet definition SHOULD be used in out-of-band delivery and MUST be used when Configuration is inlined in the SDP.
 </t>
 
 <section anchor="Packed Headers" title="Packed Headers"> 
@@ -675,7 +675,7 @@ Any Vorbis data packet that is less than path MTU SHOULD be bundled in the RTP p
 </t>
 
 <t>
-If a Vorbis packet, not only data but also Configuration and Comment, is larger than 65535 octets it MUST be fragmented. A fragmented packet has a zero in the last four bits of the payload header. The first fragment will set the Fragment type to 1. Each fragment after the first will set the Fragment type to 2 in the payload header.  The RTP packet containing the last fragment of the Vorbis packet will have the Fragment type set to 3.  To maintain the correct sequence for fragmented packet reception the timestamp field of fragmented packets MUST be the same as the first packet sent, with the sequence number incremented as normal for the subsequent RTP packets. The length field shows the fragment length.
+A fragmented packet has a zero in the last four bits of the payload header. The first fragment will set the Fragment type to 1. Each fragment after the first will set the Fragment type to 2 in the payload header.  The RTP packet containing the last fragment of the Vorbis packet will have the Fragment type set to 3.  To maintain the correct sequence for fragmented packet reception the timestamp field of fragmented packets MUST be the same as the first packet sent, with the sequence number incremented as normal for the subsequent RTP packets. The length field shows the fragment length.
 </t>
 
 <section anchor="Example Fragmented Vorbis Packet" title="Example Fragmented Vorbis Packet">
@@ -1000,7 +1000,7 @@ The following examples are common usage patterns that MAY be applied in such sit
 
 <section anchor="Stream Radio" title="Stream Radio">
 
-<t>That is one of the most common situation: one single server streaming content in multicast, the clients may start a session at random time. The content itself could be a mix of live stream, as the wj's voice, and stored streams as the music she plays.</t>
+<t>This is one of the most common situation: one single server streaming content in multicast, the clients may start a session at random time. The content itself could be a mix of live stream, as the wj's voice, and stored streams as the music she plays.</t>
 
 <t>In this situation we don't know in advance how many codebooks we will use. The clients can join anytime and users expect to start listening to the content in a short time.</t>
 
@@ -1008,7 +1008,7 @@ The following examples are common usage patterns that MAY be applied in such sit
 
 <t>When the streamed content changes the new Configuration is sent in-band before the actual stream, and the Configuration that has to be sent inline in the SDP updated. Since the inline method is unreliable, an out of band fallback is provided.</t>
 
-<t>The client could choose to fetch the Configuration from the alternate source as soon it discovers a Configuration packet got lost inline or use <xref target="RFC3611">selective retransmission</xref>, if the server supports that feature.</t>
+<t>The client could choose to fetch the Configuration from the alternate source as soon it discovers a Configuration packet got lost inline or use <xref target="RFC3611">selective retransmission</xref>, if the server supports the feature.</t>
 
 <t>A serverside optimization would be to keep an hash list of the Configurations per session to avoid packing all of them and send the same Configuration with different Ident tags</t>
 
@@ -1034,7 +1034,7 @@ This document is a continuation of draft-moffitt-vorbis-rtp-00.txt and draft-ker
 </t>
 
 <t>
-Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher Montgomery,  Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David Barrett, Silvia Pfeiffer, Stefan Ehmann. Politecnico di Torino (LS)³/IMG Group in particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
+Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher Montgomery,  Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David Barrett, Silvia Pfeiffer, Stefan Ehmann, Alessandro Salvatori. Politecnico di Torino (LS)³/IMG Group in particular Federico Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 </t>
 
 </section> 
