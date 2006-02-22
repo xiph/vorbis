@@ -82,7 +82,7 @@ in this document are to be interpreted as described in RFC 2119 <xref target="rf
 <section anchor="Payload Format" title="Payload Format">
 
 <t>
-For RTP based transportation of Vorbis encoded audio the standard RTP header is followed by a 4 octet payload header, then the payload data.  The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames.  The payload data contains the raw Vorbis bitstream information.
+For RTP based transport of Vorbis encoded audio the standard RTP header is followed by a 4 octets payload header, then the payload data.  The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames.  The payload data contains the raw Vorbis bitstream information.
 </t>
 
 <section anchor="RTP Header" title="RTP Header">
@@ -178,7 +178,7 @@ These two fields, 32 bits each with one SSRC field and a maximum of 16 CSRC fiel
 <section anchor="Payload Header" title="Payload Header">
 
 <t>
-After the RTP Header section the following 4 octets are the Payload Header.  This header is split into a number of bitfields detailing the format of the following payload data packets.
+The 4 octets following the RTP Header section are the Payload Header.  This header is split into a number of bitfields detailing the format of the following payload data packets.
 </t>
 
 <figure anchor="Payload Header Figure" title="Payload Header">
@@ -200,7 +200,7 @@ This 24 bit field is used to associate the Vorbis data to a decoding Configurati
 <t>
 Fragment type (F): 2 bits</t>
 <t>
-This field is set accordingly the following list
+This field is set according to the following list
 </t>
 <vspace blankLines="1" />
 <list style="empty">
@@ -227,7 +227,7 @@ This field sets the payload type for the Vorbis data in this RTP packet. There a
 <t> The packets with a TDT of value 3 MUST be ignored </t>
 
 <t>
-The last 4 bits are the number of complete packets in this payload.  This provides for a maximum number of 15 Vorbis packets in the payload. If the packet contains fragmented data the number of packets MUST be set to 0.
+The last 4 bits represent the number of complete packets in this payload.  This provides for a maximum number of 15 Vorbis packets in the payload. If the packet contains fragmented data the number of packets MUST be set to 0.
 </t>
 
 </section>
@@ -261,7 +261,7 @@ The Vorbis packet length header is the length of the Vorbis data block only and 
 </t>
 
 <t>
-The payload packing of the Vorbis data packets MUST follow the guidelines set-out in <xref target="rfc3551"></xref> where the oldest packet occurs immediately after the RTP packet header. Subsequence packets, if any, MUST follow in temporal order.
+The payload packing of the Vorbis data packets MUST follow the guidelines set-out in <xref target="rfc3551"></xref> where the oldest packet occurs immediately after the RTP packet header. Subsequent packets, if any, MUST follow in temporal order.
 </t>
 
 <t>
@@ -320,7 +320,7 @@ Payload Data:
 </figure>
 
 <t>
-The payload data section of the RTP packet starts with the 24 bit Ident field followed by the one octet bitfield header, which has the number of Vorbis frames set to 2.  Each of the Vorbis data frames is prefixed by the two octet length field. The Packet Type and Fragment Type are set to 0. The decode Configuration that will be used to decode the packets is the one indexed by the ident value.
+The payload data section of the RTP packet begins with the 24 bit Ident field followed by the one octet bitfield header, which has the number of Vorbis frames set to 2.  Each of the Vorbis data frames is prefixed by the two octets length field. The Packet Type and Fragment Type are set to 0. The Configuration that will be used to decode the packets is the one indexed by the ident value.
 </t>
 
 </section>
@@ -681,7 +681,7 @@ A fragmented packet has a zero in the last four bits of the payload header. The 
 <section anchor="Example Fragmented Vorbis Packet" title="Example Fragmented Vorbis Packet">
 
 <t>
-Here is an example fragmented Vorbis packet split over three RTP packets.  Each packet contains the standard RTP headers as well as the 4 octet Vorbis headers.
+Here is an example fragmented Vorbis packet split over three RTP packets.  Each packet contains the standard RTP headers as well as the 4 octets Vorbis headers.
 </t>
 
 <figure anchor="Example Fragmented Packet (Packet 1)" title="Example Fragmented Packet (Packet 1)">

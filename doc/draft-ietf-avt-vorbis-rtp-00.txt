@@ -142,13 +142,13 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 2.  Payload Format
 
-   For RTP based transportation of Vorbis encoded audio the standard RTP
-   header is followed by a 4 octet payload header, then the payload
+   For RTP based transport of Vorbis encoded audio the standard RTP
+   header is followed by a 4 octets payload header, then the payload
    data.  The payload headers are used to associate the Vorbis data with
    its associated decoding codebooks as well as indicating if the
-   following packet contains fragmented Vorbis data and/or the the
-   number of whole Vorbis data frames.  The payload data contains the
-   raw Vorbis bitstream information.
+   following packet contains fragmented Vorbis data and/or the number of
+   whole Vorbis data frames.  The payload data contains the raw Vorbis
+   bitstream information.
 
 2.1.  RTP Header
 
@@ -246,9 +246,9 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 2.2.  Payload Header
 
-   After the RTP Header section the following 4 octets are the Payload
-   Header.  This header is split into a number of bitfields detailing
-   the format of the following payload data packets.
+   The 4 octets following the RTP Header section are the Payload Header.
+   This header is split into a number of bitfields detailing the format
+   of the following payload data packets.
 
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -265,7 +265,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
    Fragment type (F): 2 bits
 
-   This field is set accordingly the following list
+   This field is set according to the following list
 
       0 = Not Fragmented
       1 = Start Fragment
@@ -292,20 +292,20 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
    The packets with a TDT of value 3 MUST be ignored
 
-   The last 4 bits are the number of complete packets in this payload.
-   This provides for a maximum number of 15 Vorbis packets in the
-   payload.  If the packet contains fragmented data the number of
+   The last 4 bits represent the number of complete packets in this
+   payload.  This provides for a maximum number of 15 Vorbis packets in
+   the payload.  If the packet contains fragmented data the number of
    packets MUST be set to 0.
 
 2.3.  Payload Data
 
-   Raw Vorbis packets are unbounded in length currently, although at
-   some future point application profiles will likely define a practical
-   limit.  Typical Vorbis packet sizes are from very small (2-3 bytes)
-   to quite large (8-12 kilobytes).  The reference implementation [14]
-   typically produces packets less than ~800 bytes, except for the setup
-   header packets which are ~4-12 kilobytes.  Within an RTP context, to
-   avoid fragmentation, the Vorbis data packet size SHOULD be kept
+   Raw Vorbis packets are currently unbounded in length, application
+   profiles will likely define a practical limit.  Typical Vorbis packet
+   sizes range from very small (2-3 bytes) to quite large (8-12
+   kilobytes).  The reference implementation [14] typically produces
+   packets less than ~800 bytes, except for the setup header packets
+   which are ~4-12 kilobytes.  Within an RTP context, to avoid
+   fragmentation, the Vorbis data packet size SHOULD be kept
    sufficiently small so that after adding the the RTP and payload
    headers, the complete RTP packet is smaller than the path MTU.
 
@@ -338,8 +338,8 @@ Barbato                  Expires August 24, 2006                [Page 6]
 Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
-   after the RTP packet header.  Subsequence packets, if any, MUST
-   follow in temporal order.
+   after the RTP packet header.  Subsequent packets, if any, MUST follow
+   in temporal order.
 
    Channel mapping of the audio is in accordance with the Vorbis I
    Specification [15].
@@ -383,7 +383,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
    Figure 5: Example Packet (Payload Data)
 
-   The payload data section of the RTP packet starts with the 24 bit
+   The payload data section of the RTP packet begins with the 24 bit
    Ident field followed by the one octet bitfield header, which has the
    number of Vorbis frames set to 2.  Each of the Vorbis data frames is
 
@@ -394,8 +394,8 @@ Barbato                  Expires August 24, 2006                [Page 7]
 Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
-   prefixed by the two octet length field.  The Packet Type and Fragment
-   Type are set to 0.  The decode Configuration that will be used to
+   prefixed by the two octets length field.  The Packet Type and
+   Fragment Type are set to 0.  The Configuration that will be used to
    decode the packets is the one indexed by the ident value.
 
 
@@ -546,7 +546,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 3.2.  Out of Band Transmission
 
    This section, as stated above, does not cover all the possible out-
-   of-band delivery methods since they rely to different protocols and
+   of-band delivery methods since they rely on different protocols and
    are linked to specific applications.  The following packet definition
    SHOULD be used in out-of-band delivery and MUST be used when
    Configuration is inlined in the SDP.
@@ -770,14 +770,14 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
    application's desired transmission latency.  Path MTU is detailed in
    [6] and [7].
 
-   If a Vorbis packet, not only data but also Configuration and Comment,
-   is larger than 65535 octets it MUST be fragmented.  A fragmented
-   packet has a zero in the last four bits of the payload header.  The
-   first fragment will set the Fragment type to 1.  Each fragment after
-   the first will set the Fragment type to 2 in the payload header.  The
-   RTP packet containing the last fragment of the Vorbis packet will
-   have the Fragment type set to 3.  To maintain the correct sequence
-   for fragmented packet reception the timestamp field of fragmented
+   A fragmented packet has a zero in the last four bits of the payload
+   header.  The first fragment will set the Fragment type to 1.  Each
+   fragment after the first will set the Fragment type to 2 in the
+   payload header.  The RTP packet containing the last fragment of the
+   Vorbis packet will have the Fragment type set to 3.  To maintain the
+   correct sequence for fragmented packet reception the timestamp field
+   of fragmented packets MUST be the same as the first packet sent, with
+   the sequence number incremented as normal for the subsequent RTP
 
 
 
@@ -786,15 +786,13 @@ Barbato                  Expires August 24, 2006               [Page 14]
 Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 
-   packets MUST be the same as the first packet sent, with the sequence
-   number incremented as normal for the subsequent RTP packets.  The
-   length field shows the fragment length.
+   packets.  The length field shows the fragment length.
 
 5.1.  Example Fragmented Vorbis Packet
 
    Here is an example fragmented Vorbis packet split over three RTP
    packets.  Each packet contains the standard RTP headers as well as
-   the 4 octet Vorbis headers.
+   the 4 octets Vorbis headers.
 
       Packet 1:
 
@@ -824,6 +822,8 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
    is xxxxx.  The Fragment type is set to 1, the number of packets field
    is set to 0, and as the payload is raw Vorbis data the VDT field is
    set to 0.
+
+
 
 
 
@@ -1160,7 +1160,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
 8.1.  Stream Radio
 
-   That is one of the most common situation: one single server streaming
+   This is one of the most common situation: one single server streaming
    content in multicast, the clients may start a session at random time.
    The content itself could be a mix of live stream, as the wj's voice,
    and stored streams as the music she plays.
@@ -1188,7 +1188,7 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
 
    The client could choose to fetch the Configuration from the alternate
    source as soon it discovers a Configuration packet got lost inline or
-   use selective retransmission [17], if the server supports that
+   use selective retransmission [17], if the server supports the
    feature.
 
    A serverside optimization would be to keep an hash list of the
@@ -1222,9 +1222,9 @@ Internet-Draft        draft-ietf-avt-vorbis-rtp-00         February 2006
    Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro,
    Jack Moffitt, Christopher Montgomery, Colin Perkins, Barry Short,
    Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David
-   Barrett, Silvia Pfeiffer, Stefan Ehmann.  Politecnico di Torino
-   (LS)^3/IMG Group in particular Federico Ridolfo, Francesco Varano,
-   Giampaolo Mancini, Juan Carlos De Martin.
+   Barrett, Silvia Pfeiffer, Stefan Ehmann, Alessandro Salvatori.
+   Politecnico di Torino (LS)^3/IMG Group in particular Federico
+   Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 
 
 
