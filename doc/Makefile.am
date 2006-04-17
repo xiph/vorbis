@@ -6,8 +6,8 @@ docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
 ### all of the static docs, commited to SVN and included as is
 static_docs = \
-	draft-ieft-avt-rtp-vorbis-00.xml \
-	draft-ieft-avt-rtp-vorbis-00.txt \
+	draft-ietf-avt-rtp-vorbis-00.xml \
+	draft-ietf-avt-rtp-vorbis-00.txt \
 	eightphase.png \
 	evenlsp.png \
 	floor1_inverse_dB_table.html \
