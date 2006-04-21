@@ -97,6 +97,23 @@ which may require reading large parts of the file under certain circumstances
 (determining all the logical bitstreams in one physical bitstream, for
 example).  See <a href="threads.html">Thread Safety</a> for other information on using libvorbisfile with threads.
 
+<p> <b> WARNING for windows developers: </b> this function cannot be used on win32 if your application dynamically links to libvorbisfile (see <a href="http://msdn2.microsoft.com/en-us/library/abx4dbyh(VS.80).aspx">this microsoft page</a> for details of why). Instead, you <em>must</em> use ov_open_callbacks(). A simple set of callbacks that will work is:
+<p><pre>
+  static int _fseek64_wrap(FILE *f,ogg_int64_t off,int whence){
+    if(f==NULL)return(-1);
+    return fseek(f,off,whence);
+  }
+
+  ov_callbacks callbacks = {
+    (size_t (*)(void *, size_t, size_t, void *))  fread,
+    (int (*)(void *, ogg_int64_t, int))           _fseek64_wrap,
+    (int (*)(void *))                             fclose,
+    (long (*)(void *))                            ftell
+  };
+
+</pre>
+</p>
+</p>
 
 <br><br>
 <hr noshade>
