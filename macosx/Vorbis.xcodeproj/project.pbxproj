@@ -543,12 +543,10 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
 				HEADER_SEARCH_PATHS = ../lib;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Library/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Vorbis;
 				SECTORDER_FLAGS = "";
@@ -575,7 +573,6 @@
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Library/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Vorbis;
 				SECTORDER_FLAGS = "";
@@ -589,18 +586,48 @@
 			};
 			name = Deployment;
 		};
-		730F23EF091827B100AB638C /* Default */ = {
+		730F23F4091827B200AB638C /* Development */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Development;
+		};
+		730F23F5091827B200AB638C /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
+				OTHER_CFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-ffast-math",
+					"-falign-loops=16",
+				);
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Deployment;
+		};
+		733D19A009FD5619009384C9 /* Development UB */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
 				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				HEADER_SEARCH_PATHS = ../lib;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = /Library/Frameworks;
 				LIBRARY_SEARCH_PATHS = "";
-				OTHER_CFLAGS = "";
 				OTHER_LDFLAGS = "";
 				PRODUCT_NAME = Vorbis;
 				SECTORDER_FLAGS = "";
@@ -610,29 +637,62 @@
 					"-Wno-unknown-pragmas",
 				);
 				WRAPPER_EXTENSION = framework;
+				ZERO_LINK = YES;
 			};
-			name = Default;
+			name = "Development UB";
 		};
-		730F23F4091827B200AB638C /* Development */ = {
+		733D19A109FD5619009384C9 /* Deployment non-UB */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_SEARCH_PATHS = /Library/Frameworks;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				HEADER_SEARCH_PATHS = ../lib;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = /Library/Frameworks;
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = Vorbis;
+				SECTORDER_FLAGS = "";
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+				WRAPPER_EXTENSION = framework;
+				ZERO_LINK = NO;
 			};
-			name = Development;
+			name = "Deployment non-UB";
 		};
-		730F23F5091827B200AB638C /* Deployment */ = {
+		733D19A209FD5619009384C9 /* Development UB */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
-			name = Deployment;
+			name = "Development UB";
 		};
-		730F23F6091827B200AB638C /* Default */ = {
+		733D19A309FD5619009384C9 /* Deployment non-UB */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_PREPROCESSOR_DEFINITIONS = __MACOSX__;
+				OTHER_CFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-ffast-math",
+					"-falign-loops=16",
+				);
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
 			};
-			name = Default;
+			name = "Deployment non-UB";
 		};
 /* End XCBuildConfiguration section */
 
@@ -641,21 +701,23 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				730F23ED091827B100AB638C /* Development */,
+				733D19A009FD5619009384C9 /* Development UB */,
 				730F23EE091827B100AB638C /* Deployment */,
-				730F23EF091827B100AB638C /* Default */,
+				733D19A109FD5619009384C9 /* Deployment non-UB */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Deployment;
 		};
 		730F23F3091827B200AB638C /* Build configuration list for PBXProject "Vorbis" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				730F23F4091827B200AB638C /* Development */,
+				733D19A209FD5619009384C9 /* Development UB */,
 				730F23F5091827B200AB638C /* Deployment */,
-				730F23F6091827B200AB638C /* Default */,
+				733D19A309FD5619009384C9 /* Deployment non-UB */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Default;
+			defaultConfigurationName = Deployment;
 		};
 /* End XCConfigurationList section */
 	};
