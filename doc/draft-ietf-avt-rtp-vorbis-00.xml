@@ -958,7 +958,6 @@ The port value is specified by the server application bound to the address speci
 <t>c=IN IP4 192.0.0.1</t>
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 vorbis/44100/2</t>
-<t>a=delivery:out_band/http</t>
 <t>a=fmtp:98 delivery-method=in_band; configuration=base16string1; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!sha1hash;</t>
 </list>
 </section>

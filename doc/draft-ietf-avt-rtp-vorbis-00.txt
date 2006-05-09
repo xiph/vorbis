@@ -1106,7 +1106,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-00         February 2006
       c=IN IP4 192.0.0.1
       m=audio RTP/AVP 98
       a=rtpmap:98 vorbis/44100/2
-      a=delivery:out_band/http
       a=fmtp:98 delivery-method=in_band; configuration=base16string1;
       delivery-method=out_band/rtsp;
       configuration-uri=rtsp://path/to/the/resource; delivery-
@@ -1114,6 +1113,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-00         February 2006
       resource/aggregate.bz2!sha1hash;
 
    Note that the payload format (encoding) names are commonly shown in
+   upper case.  MIME subtypes are commonly shown in lower case.  These
 
 
 
@@ -1122,7 +1122,6 @@ Barbato                  Expires August 29, 2006               [Page 20]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-00         February 2006
 
 
-   upper case.  MIME subtypes are commonly shown in lower case.  These
    names are case-insensitive in both places.  Similarly, parameter
    names are case-insensitive both in MIME types and in the default
    mapping to the SDP a=fmtp attribute.  The exception regarding case
@@ -1170,6 +1169,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-00         February 2006
    listening to the content in a short time.
 
    On join the client will receive the current Configuration necessary
+   to decode the current stream inlined in the SDP so that the decoding
 
 
 
@@ -1178,7 +1178,6 @@ Barbato                  Expires August 29, 2006               [Page 21]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-00         February 2006
 
 
-   to decode the current stream inlined in the SDP so that the decoding
    will start immediately after.
 
    When the streamed content changes the new Configuration is sent in-
@@ -1225,6 +1224,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-00         February 2006
    Barrett, Silvia Pfeiffer, Stefan Ehmann, Alessandro Salvatori.
    Politecnico di Torino (LS)^3/IMG Group in particular Federico
    Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
+
 
 
 
