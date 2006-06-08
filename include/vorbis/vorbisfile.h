@@ -49,6 +49,11 @@ typedef struct {
 #define  STREAMSET 3
 #define  INITSET   4
 
+typedef struct OggBitstreamInfo {
+	long serialno;		/* serialno of this logical bitstream */
+	char signature[8];	/* header signature of this logical bitstream, like 0x1vorbis */
+} OggBitstreamInfo;
+
 typedef struct OggVorbis_File {
   void            *datasource; /* Pointer to a FILE *, etc. */
   int              seekable;
@@ -84,7 +89,10 @@ typedef struct OggVorbis_File {
 
   ov_callbacks callbacks;
 
+  OggBitstreamInfo *obi; /* holds information on all logical bitstream contained in the file */
+  int obilen;		/* holds the size of OggBitstreamInfo array */
 } OggVorbis_File;
+
 
 extern int ov_clear(OggVorbis_File *vf);
 extern int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes);
