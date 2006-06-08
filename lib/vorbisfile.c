@@ -595,10 +595,17 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
       /* has our decoding just traversed a bitstream boundary? */
       if(vf->ready_state==INITSET){
 	if(vf->os.serialno!=ogg_page_serialno(&og)){
-	  /* found a packet we are not going to decode, its non-vorbis 
-	   * or not part of the first vorbis stream. so try getting the next page.
-	   */	
-	  goto try_next_page;
+	  /* We need to check if this is a vorbis packet, if so we are assuming we are 
+	   * at a bitstream boundary and need to reset the decoder. But if its a
+	   * non-vorbis packet or an packet whose serialno is not known from the header
+	   * we simply skip it.
+	   */
+	  for (i = 0; i < vf->obilen; ++i) {
+	    if (vf->obi[i].serialno==ogg_page_serialno(&og))
+	      break;
+	  }
+	  if (i<vf->obilen && memcmp(vf->obi[i].signature+1, "vorbis", 6))
+	    goto try_next_page;
 	  if(!spanp)
 	    return(OV_EOF);
 
