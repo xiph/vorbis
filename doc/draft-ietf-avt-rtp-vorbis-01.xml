@@ -6,7 +6,7 @@
 <rfc ipr="full3978" docName="RTP Payload Format for Vorbis Encoded Audio">
 
 <front>
-<title>draft-ietf-avt-rtp-vorbis-00</title>
+<title>draft-ietf-avt-rtp-vorbis-01</title>
 
 <author initials="L" surname="Barbato" fullname="Luca Barbato">
 <organization>Xiph.Org</organization>
@@ -16,7 +16,7 @@
 </address>
 </author>
 
-<date day="25" month="February" year="2006" />
+<date day="16" month="June" year="2006" />
 
 <area>General</area>
 <workgroup>AVT Working Group</workgroup>
@@ -28,7 +28,7 @@
 
 <abstract>
 <t>
-This document describes an RTP payload format for transporting Vorbis encoded audio.  It details the RTP encapsulation mechanism for raw Vorbis data and details the delivery mechanisms for the decoder probability model, referred to as a codebook and other setup information.
+This document describes an RTP payload format for transporting Vorbis encoded audio. It details the RTP encapsulation mechanism for raw Vorbis data and details the delivery mechanisms for the decoder probability model, referred to as a codebook and other setup information.
 </t>
 
 <t>
@@ -82,7 +82,7 @@ in this document are to be interpreted as described in RFC 2119 <xref target="rf
 <section anchor="Payload Format" title="Payload Format">
 
 <t>
-For RTP based transport of Vorbis encoded audio the standard RTP header is followed by a 4 octets payload header, then the payload data.  The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames.  The payload data contains the raw Vorbis bitstream information.
+For RTP based transport of Vorbis encoded audio the standard RTP header is followed by a 4 octets payload header, then the payload data.  The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames. The payload data contains the raw Vorbis bitstream information.
 </t>
 
 <section anchor="RTP Header" title="RTP Header">
@@ -148,21 +148,19 @@ Set to zero.  Audio silence suppression not used.  This conforms to section 4.1 
 <t>
 Payload Type (PT): 7 bits</t>
 <t>
-An RTP profile for a class of applications is expected to assign a payload type for this format, or a dynamically allocated 
-payload type SHOULD be chosen which designates the payload as Vorbis.
+An RTP profile for a class of applications is expected to assign a payload type for this format, or a dynamically allocated payload type SHOULD be chosen which designates the payload as Vorbis.
 </t>
 
 <t>
 Sequence number: 16 bits</t>
 <t>
-The sequence number increments by one for each RTP data packet sent, and may be used by the receiver to detect packet loss and
-to restore packet sequence. This field is detailed further in <xref target="rfc3550"></xref>.
+The sequence number increments by one for each RTP data packet sent, and may be used by the receiver to detect packet loss and to restore packet sequence. This field is detailed further in <xref target="rfc3550"></xref>.
 </t>
 
 <t>
 Timestamp: 32 bits</t>
 <t>
-A timestamp representing the sampling time of the first sample of the first Vorbis packet in the RTP packet.  The clock frequency 
+A timestamp representing the sampling time of the first sample of the first Vorbis packet in the RTP packet. The clock frequency 
 MUST be set to the sample rate of the encoded audio data and is conveyed out-of-band as a SDP parameter.
 </t>
 
@@ -224,7 +222,7 @@ This field sets the payload type for the Vorbis data in this RTP packet. There a
 <t>      3 = Reserved</t>
 </list>
 
-<t> The packets with a TDT of value 3 MUST be ignored </t>
+<t> The packets with a VDT of value 3 MUST be ignored </t>
 
 <t>
 The last 4 bits represent the number of complete packets in this payload.  This provides for a maximum number of 15 Vorbis packets in the payload. If the packet contains fragmented data the number of packets MUST be set to 0.
