@@ -230,7 +230,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
 			  long *serialno,ogg_page *og_ptr){
   ogg_page og;
   ogg_packet op;
-  int i,j,ret,skip;
+  int i,ret,skip;
   
   if(!og_ptr){
     ogg_int64_t llret=_get_next_page(vf,&og,CHUNKSIZE);
@@ -248,46 +248,22 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
   
   vorbis_info_init(vi);
   vorbis_comment_init(vc);
-
   
   i=0;
   while(i<3){
     ogg_stream_pagein(&vf->os,og_ptr);
     while(i<3){
-      skip = 0;    
+      skip=0;    
       int result=ogg_stream_packetout(&vf->os,&op);
       if(result==0)break;
       if(result==-1){
 	ret=OV_EBADHEADER;
 	goto bail_header;
       }
-      /* trying to find OggBitstreamInfo (obi) has info on this stream. matching info on
-       * existing stream by using the serialno.
-       */
-      for(j = 0; j < vf->obilen; ++j) {
-	      if (vf->obi[j].serialno == ogg_page_serialno(og_ptr))
-		      break;
-      }
-      /* IMPORTANT: shouldn't use variable j, the value is used later. */
-      if (j == vf->obilen) {
-	     /* haven't seen this logical stream before, adding it to the OggBitstreamInfo structure */ 
-	     if (j == 0) { 
-		     vf->obi = _ogg_calloc(1, sizeof(OggBitstreamInfo)); 
-	     } else {
-		     vf->obi = _ogg_realloc(vf->obi, (j+1)*sizeof(OggBitstreamInfo));
-	     }
-	     vf->obi[j].serialno = ogg_page_serialno(og_ptr);
-	     memcpy(vf->obi[j].signature, op.packet, 8);
-	     ++vf->obilen;
-      }
-      if(memcmp(op.packet+1,"vorbis",6)){
-	skip = 1;
-      } else {
+      if(!memcmp(op.packet+1,"vorbis",6)){
+	if((ret=vorbis_synthesis_headerin(vi,vc,&op)))
+	  goto bail_header;      
 	++i;
-      }
-      if(skip == 0){
-	      if((ret=vorbis_synthesis_headerin(vi,vc,&op)))
-		goto bail_header;
       }
     }
     if(i<3)
@@ -296,10 +272,9 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
 	goto bail_header;
       }
     if (vf->os.serialno != ogg_page_serialno(og_ptr)) {
-	    ogg_stream_reset_serialno(&vf->os,ogg_page_serialno(og_ptr));
+      ogg_stream_reset_serialno(&vf->os,ogg_page_serialno(og_ptr));
     }
   }
-
   return 0; 
 
  bail_header:
@@ -323,7 +298,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
   ogg_page og;
   int i;
   ogg_int64_t ret;
-
+  
   vf->vi=_ogg_realloc(vf->vi,vf->links*sizeof(*vf->vi));
   vf->vc=_ogg_realloc(vf->vc,vf->links*sizeof(*vf->vc));
   vf->dataoffsets=_ogg_malloc(vf->links*sizeof(*vf->dataoffsets));
@@ -492,15 +467,6 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 				     int readp,
 				     int spanp){
   ogg_page og;
-  int i;
-
-  /* finding the serialno of the first vorbis stream. */
-  for (i = 0; i < vf->obilen; ++i) {
-	  if (!memcmp(vf->obi[i].signature+1, "vorbis", 6))
-		  break;
-  }
-  /* set the serialno of ogg_stream_state in OggVorbis_File */
-  vf->os.serialno=vf->obi[i].serialno;
 
   /* handle one packet.  Try to fetch it from current stream state */
   /* extract packets from page */
@@ -594,18 +560,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
       
       /* has our decoding just traversed a bitstream boundary? */
       if(vf->ready_state==INITSET){
-	if(vf->os.serialno!=ogg_page_serialno(&og)){
-	  /* We need to check if this is a vorbis packet, if so we are assuming we are 
-	   * at a bitstream boundary and need to reset the decoder. But if its a
-	   * non-vorbis packet or an packet whose serialno is not known from the header
-	   * we simply skip it.
-	   */
-	  for (i = 0; i < vf->obilen; ++i) {
-	    if (vf->obi[i].serialno==ogg_page_serialno(&og))
-	      break;
-	  }
-	  if (i<vf->obilen && memcmp(vf->obi[i].signature+1, "vorbis", 6))
-	    goto try_next_page;
+	if(vf->current_serialno!=ogg_page_serialno(&og)){
 	  if(!spanp)
 	    return(OV_EOF);
 
@@ -669,7 +624,6 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 	if(ret<0)return ret;
       }
     }
-    try_next_page:
     ogg_stream_pagein(&vf->os,&og);
   }
 }
@@ -685,7 +639,7 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
 		     long ibytes, ov_callbacks callbacks){
   int offsettest=(f?callbacks.seek_func(f,0,SEEK_CUR):-1);
   int ret;
-  
+
   memset(vf,0,sizeof(*vf));
   vf->datasource=f;
   vf->callbacks = callbacks;
@@ -761,7 +715,6 @@ int ov_clear(OggVorbis_File *vf){
     if(vf->offsets)_ogg_free(vf->offsets);
     ogg_sync_clear(&vf->oy);
     if(vf->datasource)(vf->callbacks.close_func)(vf->datasource);
-    if(vf->obi)_ogg_free(vf->obi);
     memset(vf,0,sizeof(*vf));
   }
 #ifdef DEBUG_LEAKS
