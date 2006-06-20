@@ -6,8 +6,8 @@ docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
 ### all of the static docs, commited to SVN and included as is
 static_docs = \
-	draft-ietf-avt-rtp-vorbis-00.xml \
-	draft-ietf-avt-rtp-vorbis-00.txt \
+	draft-ietf-avt-rtp-vorbis-01.xml \
+	draft-ietf-avt-rtp-vorbis-01.txt \
 	eightphase.png \
 	evenlsp.png \
 	floor1_inverse_dB_table.html \
@@ -101,7 +101,7 @@ $(BUILDDIR)/Vorbis_I_spec.xml: $(doc_sources)
 	@mkdir -p $(BUILDDIR)
 	@for file in $(doc_sources); do cp $(srcdir)/$$file $(BUILDDIR); done
 # translate the draft rtp.txt to .xml in the BUILDDIR
-$(BUILDDIR)/draft-rtp.xml: draft-ietf-avt-rtp-vorbis-00.txt
+$(BUILDDIR)/draft-rtp.xml: draft-ietf-avt-rtp-vorbis-01.txt
 	cat $< | sed 's///g' > $@
 # cat $< | sed 's///g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' > $@
 
