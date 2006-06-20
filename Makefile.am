@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS = foreign dist-zip
+AUTOMAKE_OPTIONS = 1.6 foreign dist-zip
 
 SUBDIRS = lib include doc examples vq
 
