@@ -54,19 +54,15 @@ Vorbis is a general purpose perceptual audio codec intended to allow
 maximum encoder flexibility, thus allowing it to scale competitively 
 over an exceptionally wide range of bitrates. At the high 
 quality/bitrate end of the scale (CD or DAT rate stereo, 16/24 bits), it 
-is in the same league as MPEG-2 and MPC. 
-Similarly, the version 1.1 reference encoder can encode high-quality CD 
-and DAT rate stereo at below 48k bits/sec without resampling to a lower 
-rate. Vorbis is also intended for lower and higher sample rates (from 
+is in the same league as AAC.
+Vorbis is also intended for lower and higher sample rates (from 
 8kHz telephony to 192kHz digital masters) and a range of channel 
 representations (monaural, polyphonic, stereo, quadraphonic, 5.1, 
 ambisonic, or up to 255 discrete channels).
 </t>
 
 <t>
-Vorbis encoded audio is generally encapsulated within an Ogg format bitstream <xref target="rfc3533"></xref>, which provides 
-framing and synchronization.  For the purposes of RTP transport, this layer is unnecessary, and so raw Vorbis packets are used 
-in the payload.
+Vorbis encoded audio is generally encapsulated within an Ogg format bitstream <xref target="rfc3533"></xref>, which provides framing and synchronization.  For the purposes of RTP transport, this layer is unnecessary, and so raw Vorbis packets are used in the payload.
 </t>
 
 <section anchor="Terminology" title="Terminology">
@@ -379,7 +375,7 @@ The <xref target="Packed Configuration">Packed Configuration</xref> Payload is s
 <section anchor="Packed Configuration" title="Packed Configuration">
 
 <t>
-A Vorbis Packed Configuration is indicated with the payload type field set to 1. Of the three headers, defined in the <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the identification and the setup will be packed together, the comment header is completely suppressed. Is up to the client provide a minimal size comment header to the decoder if required by the implementation.
+A Vorbis Packed Configuration is indicated with the payload type field set to 1. Of the three headers, defined in the <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the identification and the setup will be packed together, the comment header is completely suppressed. Is up to the client to provide a minimal size comment header to the decoder if required by the implementation.
 </t>
 
 <figure anchor="Packed Configuration Figure" title="Packed Configuration Figure">
@@ -826,7 +822,7 @@ Where "specific_name" is the name of the out of band delivery method.
 <vspace blankLines="1" />
 
 <list style="hanging">
-<t hangText="configuration-uri:"> the URI of the configuration headers in case of out of band transmission.  In the form of "protocol://path/to/resource/".  Depending on the specific method the single ident packet could be retrived by their number, or aggregated in a single stream, aggregates MAY be compressed using <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref> and an <xref target="FIPS180">sha1</xref> checksum MAY be provided in the form of "protocol://path/to/resource/aggregated.bz2!sha1hash"</t>
+<t hangText="configuration-uri:"> the URI of the configuration headers in case of out of band transmission. In the form of "protocol://path/to/resource/". Depending on the specific method, a single configuration packet could be retrived by its number, or multiple packets could be aggregated in a single stream. Such aggregates MAY be compressed using either <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref>. A <xref target="FIPS180">sha1</xref> checksum MAY be provided for aggregates. In this latter case the URI will end with the aggregate name, followed by its compressed extension if applies, a "!" and the hexadecimal representation of the sha1hash of the above mentioned compressed aggregatedas in: "protocol://path/to/resource/aggregated.bz2!sha1hash".</t>
 </list>
 </t>
 
@@ -956,7 +952,7 @@ The port value is specified by the server application bound to the address speci
 <t>c=IN IP4 192.0.0.1</t>
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 vorbis/44100/2</t>
-<t>a=fmtp:98 delivery-method=in_band; configuration=base16string1; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!sha1hash;</t>
+<t>a=fmtp:98 delivery-method=in_band; configuration=base16string1; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
 </list>
 </section>
 
