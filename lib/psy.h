@@ -56,6 +56,9 @@ typedef struct vorbis_info_psy{
   int   noisewindowfixed;
   float noiseoff[P_NOISECURVES][P_BANDS];
   float noisecompand[NOISE_COMPAND_LEVELS];
+  float noisecompand_high[NOISE_COMPAND_LEVELS];
+  
+  float flacint;
 
   float max_curve_dB;
 
@@ -132,6 +135,7 @@ extern void _vp_remove_floor(vorbis_look_psy *p,
 			     int sliding_lowpass);
 
 extern void _vp_noisemask(vorbis_look_psy *p,
+			  float noise_compand_level,
 			  float *logmdct, 
 			  float *logmask);
 
@@ -185,6 +189,12 @@ extern int **_vp_quantize_couple_sort(vorbis_block *vb,
 				      vorbis_look_psy *p,
 				      vorbis_info_mapping0 *vi,
 				      float **mags);
+
+extern float lb_loudnoise_fix(vorbis_look_psy *p,
+		float noise_compand_level,
+		float *logmdct,
+		int lW_modenumber,
+		int blocktype, int modenumber);
 
 
 #endif

@@ -1,4 +1,4 @@
-aoTuV beta4 release note
+aoTuV beta4.51 release note
 
 "aoTuV" tunes up Xiph.Org's libvorbis uniquely. 
 A license is taken as "BSD-style license" as well as original libvorbis. 
@@ -17,7 +17,7 @@ Thanks! Manuke.
 
 aoTuV based on <Xiph.Org libvorbis>
 
-Copyright (c) 2002-2004 Xiph.Org Foundation
+Copyright (c) 2002-2005 Xiph.Org Foundation
 Copyright (c) 2003-2005 Aoyumi
 
 

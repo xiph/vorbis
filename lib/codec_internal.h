@@ -85,6 +85,7 @@ typedef struct private_state {
 
   /* encode only
     added by aoyumi */
+  float *lownoise_compand_level;
   float *nblock; /* lW logmdct buffer */  
   float *tblock; /* temporal masking buffer (impulse block) */
   int lW_blocktype; /* last window block type */

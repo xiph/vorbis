@@ -290,6 +290,7 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   /* added by aoyumi */
   b->nblock = _ogg_calloc((128*vi->channels), sizeof(*b->nblock));
   b->tblock = _ogg_calloc((128*vi->channels), sizeof(*b->tblock));
+  b->lownoise_compand_level = _ogg_calloc(vi->channels, sizeof(*b->lownoise_compand_level));
   
   /* Initialize the envelope state storage */
   b->ve=_ogg_calloc(1,sizeof(*b->ve));
@@ -356,6 +357,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       /* added by aoyumi */
       if(b->nblock) _ogg_free(b->nblock);
       if(b->tblock) _ogg_free(b->tblock);
+      if(b->lownoise_compand_level) _ogg_free(b->lownoise_compand_level);
 
     }
     

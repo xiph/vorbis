@@ -370,11 +370,16 @@ static void vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
 
 static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
 				       compandblock *in, double *x){
-  int i,is=s;
-  double ds=s-is;
+  int i,is=s, ishcm, hcm_stop=5; // high compander limit
+  double ds=s-is, dshcm;
+  
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
+  
+   /* the place was borrowed...  */
+   p->flacint=ds;
 
+  /* interpolate the compander mapping */
   ds=x[is]*(1.-ds)+x[is+1]*ds;
   is=(int)ds;
   ds-=is;
@@ -383,9 +388,32 @@ static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
     ds=1.;
   }
 
+  /* high compander setup */
+  ishcm = is;
+  dshcm = ds+.3;
+  if(dshcm > 1.0){
+  	 ishcm++;
+  	 dshcm=dshcm-1;
+  }
+  if(x[hcm_stop] < ((float)ishcm+dshcm)){
+  	ishcm = x[hcm_stop];
+  	dshcm = x[hcm_stop]-ishcm;
+  }
+  if(dshcm==0 && ishcm>0){ // the same
+    ishcm--;
+    dshcm=1.;
+  }
+  
   /* interpolate the compander settings */
   for(i=0;i<NOISE_COMPAND_LEVELS;i++)
     p->noisecompand[i]=in[is].data[i]*(1.-ds)+in[is+1].data[i]*ds;
+  /* interpolate the high compander settings */
+  if(s < (float)hcm_stop){
+  	for(i=0;i<NOISE_COMPAND_LEVELS;i++)
+  	  p->noisecompand_high[i]=in[ishcm].data[i]*(1.-dshcm)+in[ishcm+1].data[i]*dshcm;
+  }else{ // disable high compander
+  	for(i=0;i<NOISE_COMPAND_LEVELS;i++)p->noisecompand_high[i]=0;
+  }
   return;
 }
 
