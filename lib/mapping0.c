@@ -246,6 +246,7 @@ static int mapping0_forward(vorbis_block *vb){
   codec_setup_info      *ci=vi->codec_setup;
   private_state         *b=vb->vd->backend_state;
   vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
+  vorbis_info_floor1    *vif=ci->floor_param[vb->W];
   int                    n=vb->pcmend;
   int i,j,k;
 
@@ -487,6 +488,8 @@ static int mapping0_forward(vorbis_block *vb){
 			   mdct,
 			   logmdct,
 			   lastmdct, tempmdct,
+			   *lowcomp,
+			   vif->n,
 			   blocktype, modenumber,
 			   vb->nW,
 			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
@@ -534,6 +537,8 @@ static int mapping0_forward(vorbis_block *vb){
 			   mdct,
 			   logmdct,
 			   lastmdct, tempmdct,
+			   *lowcomp,
+			   vif->n,
 			   blocktype, modenumber,
 			   vb->nW,
 			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
@@ -561,6 +566,8 @@ static int mapping0_forward(vorbis_block *vb){
 			   mdct,
 			   logmdct,
 			   lastmdct, tempmdct,
+			   *lowcomp,
+			   vif->n,
 			   blocktype, modenumber,
 			   vb->nW,
 			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
@@ -727,8 +734,6 @@ static int mapping0_forward(vorbis_block *vb){
 		   ilogmaskch,
 		   nonzero,
 		   ci->psy_g_param.sliding_lowpass[vb->W][k],
-		   blocktype, modenumber,
-		   b->lW_blocktype, b->lW_modenumber,
 		   gmdct, res_org);
       }
       

@@ -1,11 +1,43 @@
+aoTuV beta5 technical information
+
+
+The differences from the aoTuV beta 4.51...
+
+  1.   In order to work noise normalization correctly, the value of tone 
+  masking is compressed under certain conditions. A floor curve approaches 
+  the original audio spectrum line as a result.  [New M4] 
+
+  2.   In order to cut down the bitrate, a part of M2 code of beta4 was 
+  deleted. 
+
+Å@3.   The ATH curve was changed slightly. 
+
+  4.   Pre-echo decreased slightly. This is based on change of M3 code. 
+
+  5.   In order to decrease artifact by collapse of audio energy, noise 
+  normalization processing of point stereo was extended. [32/44.1/48kHz only] 
+
+  6.   The threshold of channel coupling (lossless <=> point) is changed dynamically. This is a method based on a certain idea. [M6] 
+
+...and I tune up many parameters. 
+
+
+2006/10/24
+Aoyumi
+
+----------------------------------------------------------------------------
+
 aoTuV beta4.51 technical information
 
 
 The differences from the aoTuV beta 4.5...
 
-  1.  The changed part of "scale.h" of Xiph.Org SVN was reflected in aoTuV. This will solve the problem of the compile by gcc4. 
+  1.  The changed part of "scale.h" of Xiph.Org SVN was reflected in aoTuV. 
+  This will solve the problem of the compile by gcc4. 
 
-  2.  A part of portion added by beta4.5 had caused memory access violation. Depending on environment, a problem arises in qualiy-1/-2. This problem was corrected. 
+  2.  A part of portion added by beta4.5 had caused memory access violation. 
+  Depending on environment, a problem arises in qualiy-1/-2. This problem was 
+  corrected. 
 
 
 2005/11/17
@@ -18,11 +50,17 @@ aoTuV beta4.5 technical information
 
 The differences from the aoTuV beta 4...
 
-  1.  M4 code of beta3 was deleted. M5 is added as what is replaced with it. The advantage of this method is that the result stabilized more is obtained. Instead, the change width of the bit rate becomes large rather than before. [32/44.1/48kHz only] 
+  1.  M4 code of beta3 was deleted. M5 is added as what is replaced with it. 
+  The advantage of this method is that the result stabilized more is obtained. 
+  Instead, the change width of the bit rate becomes large rather than before. 
+  [32/44.1/48kHz only] 
 
-  2.  New M4 was added. There is this for the same purpose as M1. However, it is tuned up only in the low bit rate region according to work and individual parameters. [32/44.1/48kHz only] 
+  2.  New M4 was added. There is this for the same purpose as M1. However, 
+  it is tuned up only in the low bit rate region according to work and 
+  individual parameters. [32/44.1/48kHz only] 
 
-  3.  M2 code was extended. This decreases a specific noise problem.  [32/44.1/48kHz only] 
+  3.  M2 code was extended. This decreases a specific noise problem.  
+  [32/44.1/48kHz only] 
 
 ...and I mainly tune up tone/noise masking and noise normalization parameters. 
 

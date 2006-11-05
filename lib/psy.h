@@ -116,7 +116,15 @@ typedef struct {
   long  rate; /* cache it */
 
   int m3n[4]; /* number for M3 */
-  float m_val; /* Masking compensation value */
+  int tonecomp_endp; /* for M4 */
+  int min_nn_lp; /* for M6 */
+  float tonecomp_thres; /* for M4 */
+  float m_val; /* masking compensation value */
+  
+  int st_freqlimit; /* for M6 */
+  int n25p;
+  int n33p;
+  int n75p;
 
 } vorbis_look_psy;
 
@@ -153,6 +161,8 @@ extern void _vp_offset_and_mix(vorbis_look_psy *p,
 			       float *mdct,
 			       float *logmdct,
 			       float *lastmdct, float *tempmdct,
+			       float low_compand,
+			       int end_block,
 			       int blocktype, int modenumber,
 			       int nW_modenumber,
 			       int lW_blocktype, int lW_modenumber, int lW_no);
@@ -175,8 +185,6 @@ extern void _vp_couple(int blobno,
 		       int   **ifloor,
 		       int   *nonzero,
 		       int   sliding_lowpass,
-		       int blocktype, int modenumber,
-		       int lW_blocktype, int lW_modenumber,
 		       float **mdct, float **res_org);
 
 extern void _vp_noise_normalize(vorbis_look_psy *p,

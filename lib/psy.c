@@ -33,13 +33,13 @@
 
 /*
   rephase   = reverse phase limit (postpoint)
-  lowlong   = low quality long-block limit (postpoint)
-  diffmid   = diffuse mid sound limit (postpoint)
                                                 0    1    2    3    4    5    6    7    8  */
 static double stereo_threshholds[]=           {0.0, 0.5, 1.0, 1.5, 2.5, 4.5, 8.5,16.5, 9e10};
-static double stereo_threshholds_rephase[]=   {0.0, 0.5, 0.5, 1.0, 1.5, 1.5, 1.5, 2.5, 9e10};
-static double stereo_threshholds_lowlong[]=   {0.0, 0.5, 1.0, 1.5, 2.5, 3.0, 6.5,10.5, 9e10};
-static double stereo_threshholds_diffmid[]=   {0.0, 0.5, 1.0, 1.5, 1.5, 1.5, 2.5, 5.5, 9e10};
+static double stereo_threshholds_rephase[]=   {0.0, 0.5, 0.5, 1.0, 1.5, 1.5, 2.5, 2.5, 9e10};
+
+static double stereo_threshholds_low[]=       {0.0, 0.5, 0.5, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0};
+static double stereo_threshholds_high[]=      {0.0, 0.5, 0.5, 0.5, 1.0, 3.0, 5.5, 8.5, 0.0};
+
 
 static int m3n32[] = {21,13,10,4};
 static int m3n44[] = {15,9,7,3};
@@ -55,6 +55,8 @@ static int temp_bfn[128] = {
 24,24,24,24,25,25,25,24,23,22,21,20,19,18,17,16,
 15,14,13,12,11,10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
 };
+
+static float nnmid_th=0.2;
 
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
@@ -309,18 +311,53 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->rate=rate;
 
   /* AoTuV HF weighting etc. */
+  p->n25p=n/4;
+  p->n33p=n/3;
+  p->n75p=n*3/4;
   if(rate < 26000){
+  	/* below 26kHz */
   	p->m_val = 0;
   	for(i=0; i<4; i++) p->m3n[i] = 0;
-  }else if(rate < 38000){   /* 32kHz */
-  	p->m_val = .94;
+  	p->tonecomp_endp=0; // dummy
+  	p->tonecomp_thres=.25;
+  	p->st_freqlimit=n;
+  	p->min_nn_lp=0;
+  }else if(rate < 38000){
+  	/* 32kHz */
+  	p->m_val = .93;
   	for(i=0; i<4; i++) p->m3n[i] = m3n32[i];
-  }else if(rate > 46000){  /* 48kHz */
+  	if(n==128)      { p->tonecomp_endp= 124; p->tonecomp_thres=.5;
+  	                 p->st_freqlimit=n; p->min_nn_lp=   0;}
+  	else if(n==256) { p->tonecomp_endp= 248; p->tonecomp_thres=.7;
+  	                 p->st_freqlimit=n; p->min_nn_lp=   0;}
+  	else if(n==1024){ p->tonecomp_endp= 992; p->tonecomp_thres=.5;
+  	                 p->st_freqlimit=n; p->min_nn_lp= 832;}
+  	else if(n==2048){ p->tonecomp_endp=1984; p->tonecomp_thres=.7;
+  	                 p->st_freqlimit=n; p->min_nn_lp=1664;}
+  }else if(rate > 46000){
+  	/* 48kHz */
   	p->m_val = 1.205;
   	for(i=0; i<4; i++) p->m3n[i] = m3n48[i];
-  }else{                   /* 44.1kHz */
+  	if(n==128)      { p->tonecomp_endp=  83; p->tonecomp_thres=.5;
+  	                 p->st_freqlimit=  89; p->min_nn_lp=   0;}
+  	else if(n==256) { p->tonecomp_endp= 166; p->tonecomp_thres=.7;
+  	                 p->st_freqlimit= 178; p->min_nn_lp=   0;}
+  	else if(n==1024){ p->tonecomp_endp= 664; p->tonecomp_thres=.5;
+  	                 p->st_freqlimit= 712; p->min_nn_lp= 576;}
+  	else if(n==2048){ p->tonecomp_endp=1328; p->tonecomp_thres=.7;
+  	                 p->st_freqlimit=1424; p->min_nn_lp=1152;}
+  }else{
+  	/* 44.1kHz */
   	p->m_val = 1.;
   	for(i=0; i<4; i++) p->m3n[i] = m3n44[i];
+  	if(n==128)      { p->tonecomp_endp=  90; p->tonecomp_thres=.5;
+  	                 p->st_freqlimit=  96; p->min_nn_lp=   0;}
+  	else if(n==256) { p->tonecomp_endp= 180; p->tonecomp_thres=.7;
+  	                 p->st_freqlimit= 192; p->min_nn_lp=   0;}
+  	else if(n==1024){ p->tonecomp_endp= 720; p->tonecomp_thres=.5;
+  	                 p->st_freqlimit= 768; p->min_nn_lp= 608;}
+  	else if(n==2048){ p->tonecomp_endp=1440; p->tonecomp_thres=.7;
+  	                 p->st_freqlimit=1536; p->min_nn_lp=1216;}
   }
 
   /* set up the lookups for a given blocksize and sample rate */
@@ -851,7 +888,7 @@ void _vp_noisemask(vorbis_look_psy *p,
   /* aoTuV M5 extension */
   i=0;
   if((p->vi->noisecompand_high[NOISE_COMPAND_LEVELS-1] > 1) && (noise_compand_level > 0)){
-  	int thter = n/3;
+  	int thter = p->n33p;
   	for(;i<thter;i++){
     	int dB=logmask[i]+.5;
     	if(dB>=NOISE_COMPAND_LEVELS)dB=NOISE_COMPAND_LEVELS-1;
@@ -902,6 +939,8 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 			float *mdct,
 			float *logmdct,
 			float *lastmdct, float *tempmdct,
+			float low_compand,
+			int end_block,
 			int blocktype, int modenumber,
 			int nW_modenumber,
 			int lW_blocktype, int lW_modenumber, int lW_no){
@@ -909,29 +948,33 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
   int i,j,n=p->n;
   int m2_sw=0,  padth; /* aoTuV for M2 */
   int it_sw, *m3n, m3_count; /* aoTuV for M3 */
-  int m4_start, fmask; /* aoTuV for M4 */
+  int m4_end, lp_pos, m4_start; /* aoTuV for M4 */
   float de, coeffi, cx; /* aoTuV for M1 */
   float toneth; /* aoTuV for M2 */
   float noise_rate, noise_rate_low, noise_center, rate_mod; /* aoTuV for M3 */
-  float m4_val; /* aoTuV for M4 */
+  float m4_thres; /* aoTuV for M4 */
   float toneatt=p->vi->tone_masteratt[offset_select];
 
   cx = p->m_val;
   m3n = p->m3n;
+  m4_start=p->vi->normal_start;
+  m4_end = p->tonecomp_endp;
+  m4_thres = p->tonecomp_thres;
+  lp_pos=9999;
+  
+  end_block+=p->vi->normal_partition;
+  if(end_block>n)end_block=n;
+  
+  /* Collapse of low(mid) frequency is prevented. (for 32/44/48kHz q-2) */
+  if(low_compand<0 || toneatt<25.)low_compand=0;
+  else low_compand*=(toneatt-25.);
   
   /** @ M2 PRE **/
-  if(p->vi->normal_thresh<.45){
-  	if(modenumber){
-  		// sample
-    	//  21@ [q-2] 0,0,-1,-7,-11 [q2] (48/44.1/32kHz quality mode)
-    	//  20@ [q-2] 0,0, 0,-6,-10 [q2] (48/44.1/32kHz quality mode)
-    	toneth=toneatt-20.45;
-    	if(toneth>0.1) toneth=0;
-    	m2_sw=1;
-    }else if((cx > 0.5) && blocktype && (n==128)){
-    	if(p->vi->normal_thresh>.25) padth = 10+(int)(p->vi->flacint*100);
+  if(p->vi->normal_thresh<.48){
+  	if((cx > 0.5) && !modenumber && blocktype && (n==128)){
+    	if(p->vi->normal_thresh>.35) padth = 10+(int)(p->vi->flacint*100);
     	else padth = 10;
-    	m2_sw=2;
+    	m2_sw=1;
     }
   }
 
@@ -942,11 +985,11 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
   	if(!lW_blocktype && !lW_modenumber){ /* last window "short" - type "impulse" */
   		if(lW_no < 8){
   			/* impulse - @impulse case1 */
-  			noise_rate = 0.8-(float)(lW_no-1)/17;
+  			noise_rate = 0.7-(float)(lW_no-1)/17;
   			noise_center = (float)(lW_no*m3_count);
   		}else{
   			/* impulse - @impulse case2 */
-  			noise_rate = 0.4;
+  			noise_rate = 0.3;
   			noise_center = 25;
   			if((lW_no*m3_count) < 24) noise_center = lW_no*m3_count;
   		}
@@ -954,14 +997,13 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
   			for(i=0; i<128; i++) tempmdct[i] -= 5;
   		}
   	}else{ /* non_impulse - @Short(impulse) case */
-  		noise_rate = 0.9;
+  		noise_rate = 0.7;
   		noise_center = 0;
   		if(offset_select == 1){
   			for(i=0; i<128; i++) tempmdct[i] = lastmdct[i] - 5;
   		}
-  		if(p->vi->normal_thresh < .45) noise_rate = 0.8;
   	}
-  	noise_rate_low = noise_rate*0.6;
+  	noise_rate_low = 0;
   	it_sw = 1;
   }else{
   	it_sw = 0;
@@ -969,55 +1011,39 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
   
   /** @ M3&M4 PRE **/
   if(cx < 0.5){
-  	it_sw = 0; /* M3 */
-  	m4_val=-1.; /* M4 */
-  }else if((offset_select==1) && (p->vi->normal_thresh<.45)){
-  	/* for M4 */
-  	for(i=p->vi->normal_start; i<n; i++){
-  		if(p->noiseoffset[1][i] >= -0.91){
-  			m4_start = i;
-  			break;
-  		}
-  	}
-  	if(p->vi->normal_thresh < .175){
-  		m4_val=.966; // .966  q-2
-  	}else if(p->vi->normal_thresh < .195){
-  		m4_val=.973; // .973  q-1/0
-  	}else if(p->vi->normal_thresh < .3){
-  		m4_val=.974; // .974  q1
-  	}else m4_val=.986; // .986  q2
-  }else m4_val=-1.;
+  	it_sw = 0; /* for M3 */
+  	m4_end=end_block; /* for M4 */
+  }else if(p->vi->normal_thresh>1.){
+  	m4_start = 9999;
+  }else{
+  	if(m4_end>end_block)lp_pos=m4_end;
+  	else lp_pos=end_block;
+  }
 
   for(i=0;i<n;i++){
     float val= noise[i]+p->noiseoffset[offset_select][i];
     float tval= tone[i]+toneatt;
+    if(i<=m4_start)tval-=low_compand;
     if(val>p->vi->noisemaxsupp)val=p->vi->noisemaxsupp;
     
     /* AoTuV */
     /** @ M2 MAIN **
-    floor is pulled below suitably. (long/trans./padding block)
-    by Aoyumi @ 2005/09/14
+    floor is pulled below suitably. (padding block only) (#2)
+    by Aoyumi @ 2006/06/14
     */
     if(m2_sw){
-    	if(m2_sw == 1){
-   			if(val>(tval+toneth) && ((val-tval+toneth)>20) && val>-80){
-    			if((val-tval+toneth) > 30) val -= ((val-tval+toneth-30)/10+10);
-    			else val -= ((val-tval+toneth)-20);
-    		}
-    	}else{
-			// the conspicuous low level pre-echo of the padding block origin is reduced. 
-    		if((logmdct[i]-lastmdct[i]) > 20){
-    			if(i > m3n[3]) val -= (logmdct[i]-lastmdct[i]-20)/padth;
-    			else val -= (logmdct[i]-lastmdct[i]-20)/(padth+padth);
-    		}
+    	// the conspicuous low level pre-echo of the padding block origin is reduced. 
+    	if((logmdct[i]-lastmdct[i]) > 20){
+    		if(i > m3n[3]) val -= (logmdct[i]-lastmdct[i]-20)/padth;
+    		else val -= (logmdct[i]-lastmdct[i]-20)/(padth+padth);
     	}
     }
     
     /* AoTuV */
     /** @ M3 MAIN **
-    Dynamic impulse block noise control. (#3)
+    Dynamic impulse block noise control. (#4)
     48/44.1/32kHz only.
-    by Aoyumi @ 2004/08/30
+    by Aoyumi @ 2006/02/02
     */
     if(it_sw){
     	for(j=1; j<=temp_bfn[i]; j++){
@@ -1025,49 +1051,58 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 			if( (tempmdct[i+j] < tempbuf) && (tempmdct[i+j] < (logmdct[i+j]-5)) )
 			 tempmdct[i+j] = logmdct[i+j] - 5;
 		}
-		
     	if(val > tval){
-    		if( logmdct[i] > (tempmdct[i]+noise_center) ){
+    		if( (val>lastmdct[i]) && (logmdct[i]>(tempmdct[i]+noise_center)) ){
+    			float valmask=0;
     			tempmdct[i] = logmdct[i];
-    			if(logmdct[i] < lastmdct[i]) rate_mod = noise_rate;
-    			else rate_mod = noise_rate_low;
-				
-				if(i > m3n[1]){
-						if((val-tval) > 30) val = val - ((val-tval-30)/10+30)*rate_mod;
-						else val = val - (val-tval)*rate_mod;
-				}else if(i > m3n[2]){
-						if((val-tval) > 20) val = val - ((val-tval-20)/10+20)*rate_mod;
-						else val = val - (val-tval)*rate_mod;
-				}else if(i > m3n[3]){
-						if((val-tval) > 10) val = val - ((val-tval-10)/10+10)*rate_mod*0.5;
-						else val = val - (val-tval)*rate_mod*0.5;
-				}else{
-					if((val-tval) > 10) val = val - ((val-tval-10)/10+10)*rate_mod*0.3;
-					else val = val - (val-tval)*rate_mod*0.3;
+    			
+    			if(logmdct[i]>lastmdct[i]){
+    				rate_mod = noise_rate;
+    			}else{
+    				rate_mod = noise_rate_low;
 				}
+				if(i > m3n[1]){
+						if((val-tval)>30) valmask=((val-tval-30)/10+30)*rate_mod;
+						else valmask=(val-tval)*rate_mod;
+				}else if(i > m3n[2]){
+						if((val-tval)>20) valmask=((val-tval-20)/10+20)*rate_mod;
+						else valmask=(val-tval)*rate_mod;
+				}else if(i > m3n[3]){
+						if((val-tval)>10) valmask=((val-tval-10)/10+10)*rate_mod*0.5;
+						else valmask=(val-tval)*rate_mod*0.5;
+				}else{
+					if((val-tval)>10) valmask=((val-tval-10)/10+10)*rate_mod*0.3;
+					else valmask=(val-tval)*rate_mod*0.3;
+				}
+				if((val-valmask)>lastmdct[i])val-=valmask;
+				else val=lastmdct[i];
 			}
    		}
    	}
    	
-   	if(val>tval){
-   		logmask[i]=val;
-   		fmask=0;
-   	}else{
-   		logmask[i]=tval;
-   		fmask=1;
-   	}
+   	/* This affects calculation of a floor curve. */
+   	if(i>=lp_pos)logmdct[i]=-160;
+   	
+     /* AoTuV */
+	/** @ M4 MAIN **
+	The purpose of this portion is working Noise Normalization more correctly. 
+	(There is this in order to prevent extreme boost of floor)
+	  m4_start = start point
+	  m4_end   = end point
+	  m4_thres = threshold
+	by Aoyumi @ 2006/03/20
+	*/
     //logmask[i]=max(val,tval);
-    
-    /* AoTuV */
-    /** @ M4 MAIN **
-    This aims at an effect similar to M1. 
-    by Aoyumi @ 2005/09/06
-    */
-    if(m4_val > 0){
-    	if(fmask && (m4_start<i)){
-    		mdct[i] *= m4_val;
-    	}
-    }
+    if(val>tval){
+		logmask[i]=val;
+	}else if((i>m4_start) && (i<m4_end) && (logmdct[i]>-140)){
+		if(logmdct[i]>val){
+			if(logmdct[i]<tval)tval-=(tval-val)*m4_thres;
+		}else{
+			if(val<tval)tval-=(tval-val)*m4_thres;
+		}
+		logmask[i]=tval;
+	}else logmask[i]=tval;
 
     /* AoTuV */
     /** @ M1 **
@@ -1445,7 +1480,7 @@ void _vp_noise_normalize_sort(vorbis_look_psy *p,
 
 void _vp_noise_normalize(vorbis_look_psy *p,
 			 float *in,float *out,int *sortedindex){
-  int flag=0,i,j=0,n=p->n;
+  int i,j=0,n=p->n,min_energy;
   vorbis_info_psy *vi=p->vi;
   int partition=vi->normal_partition;
   int start=vi->normal_start;
@@ -1459,27 +1494,64 @@ void _vp_noise_normalize(vorbis_look_psy *p,
     for(;j+partition<=n;j+=partition){
       float acc=0.;
       int k;
+      int energy_loss=0;
+      int nn_num=0;
+      int freqband_mid=j+16;
+      int freqband_flag=0;
       
-      for(i=j;i<j+partition;i++)
-	acc+=in[i]*in[i]*0.9;
+      for(i=j;i<j+partition;i++){
+        if(rint(in[i])==0.f){
+        	acc+=in[i]*in[i];
+        	energy_loss++;
+        }
+      }
+      /* When an energy loss is large, NN processing is carried out in the middle of partition. */
+      /*if(energy_loss==32 && fabs(in[freqband_mid])>nnmid_th){
+      	if(in[freqband_mid]*in[freqband_mid]<.25f){
+      		i=0;
+      		if(acc>=vi->normal_thresh){
+      			out[freqband_mid]=unitnorm(in[freqband_mid]);
+      			acc-=1.;
+      			freqband_flag=1;
+      			nn_num++;
+      		}
+      	}
+      }*/
       
+      /* NN main */
       for(i=0;i<partition;i++){
-	k=sortedindex[i+j-start];
-	
-	if(in[k]*in[k]>=.25f){ // or rint(in[k])!=0.f
-	  out[k]=rint(in[k]);
-	  acc-=in[k]*in[k]*0.9;
-	  flag=1;
-	}else{
-	  if(acc<vi->normal_thresh)break;
-	  out[k]=unitnorm(in[k]);
-	  acc-=1.;
-	}
+      	k=sortedindex[i+j-start];
+      	if(in[k]*in[k]>=.25f){ // or rint(in[k])!=0.f
+      		out[k]=rint(in[k]);
+      		//acc-=in[k]*in[k];
+      	}else{
+      		if(acc<vi->normal_thresh)break;
+      		if(freqband_flag && freqband_mid==k)continue;
+      		out[k]=unitnorm(in[k]);
+      		acc-=1.;
+      		nn_num++;
+      	}
       }
       
+      /* The minimum energy complement */
+      /*min_energy=32-energy_loss+nn_num;
+      if(min_energy<2 || (j<=p->min_nn_lp && min_energy==2)){
+      	k=sortedindex[i+j-start];
+      	if(freqband_flag && freqband_mid==k){
+      		i++;
+      		k=sortedindex[i+j-start];
+	    }
+	    if(!(fabs(in[k])<0.3)){
+	    	out[k]=unitnorm(in[k]);
+	    	i++;
+	    }
+	  }*/
+	  
+	  // The last process
       for(;i<partition;i++){
-	k=sortedindex[i+j-start];
-	out[k]=0.;
+      	k=sortedindex[i+j-start];
+      	if(freqband_flag && freqband_mid==k)continue;
+      	else out[k]=0.;
       }
     }
   }
@@ -1499,8 +1571,6 @@ void _vp_couple(int blobno,
 		int   **ifloor,
 		int   *nonzero,
 		int  sliding_lowpass,
-		int blocktype, int modenumber,
-		int lW_blocktype, int lW_modenumber,
 		float **mdct, float **res_org){
 
   int i,j,k,n=p->n;
@@ -1535,27 +1605,60 @@ void _vp_couple(int blobno,
       int *floorA=ifloor[vi->coupling_ang[i]];
       float prepoint=stereo_threshholds[g->coupling_prepointamp[blobno]];
       float postpoint=stereo_threshholds[g->coupling_postpointamp[blobno]];
-      float postpoint_bu;
-      float diff_mid;
+      float sth_low=stereo_threshholds_low[g->coupling_prepointamp[blobno]];
+      float sth_high=stereo_threshholds_high[g->coupling_postpointamp[blobno]];
+      float postpoint_backup;
+      float st_thresh;
       int partition=(p->vi->normal_point_p?p->vi->normal_partition:p->n);
       int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
       int pointlimit=limit;
-
+      int freqlimit=p->st_freqlimit;
+      unsigned char Mc_treshp[2048];
+      unsigned char Ac_treshp[2048];
+      int lof_st;
+      int hif_st;
+      int hif_stcopy;
+      int old_lof_st=0;
+      int old_hif_st=0;
+      int Afreq_num=0;
+      int Mfreq_num=0;
+      int stcont_start=0; // M6 start point
+      
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
        
-       if(p->m_val > 0.5){
-       	/* The threshold of a stereo is changed in specific conditions. */
-       	if(modenumber) postpoint=stereo_threshholds_lowlong[g->coupling_postpointamp[blobno]];
-       }
-      postpoint_bu=postpoint;
+      postpoint_backup=postpoint;
       
-      diff_mid = stereo_threshholds_diffmid[g->coupling_postpointamp[blobno]];
-      if((p->vi->normal_thresh>.25) && (p->vi->normal_thresh<.45))
-       diff_mid = postpoint - ((postpoint-diff_mid) * (1.-p->vi->flacint));
-
-      for(j=0;j<p->n;j+=partition){
+      /** @ M6 PRE **/
+      // lossless only?
+      if(!stereo_threshholds[g->coupling_postpointamp[blobno]])stcont_start=n;
+      else{
+      	// exception handling
+      	if((postpoint-sth_high)<prepoint)sth_high=postpoint-prepoint;
+      	// start point setup
+      	for(j=0;j<n;j++){
+      		stcont_start=j;
+      		if(p->noiseoffset[1][j]>=-2)break;
+      	}
+      	// start point correction & threshold setup 
+      	st_thresh=.1;
+      	if(p->m_val<.5){
+      		// low frequency limit
+      		if(stcont_start<limit)stcont_start=limit;
+      	}else if(p->vi->normal_thresh>1.)st_thresh=.5;
+      	for(j=0;j<=freqlimit;j++){ // or j<n
+      		if(fabs(rM[j])<st_thresh)Mc_treshp[j]=1;
+      		else Mc_treshp[j]=0;
+      		if(fabs(rA[j])<st_thresh)Ac_treshp[j]=1;
+      		else Ac_treshp[j]=0;
+      	}
+      }
+      
+      for(j=0;j<n;j+=partition){
 	float acc=0.f;
+	float rpacc;
+	int energy_loss=0;
+	int nn_num=0;
 
 	for(k=0;k<partition;k++){
 	  int l=k+j;
@@ -1563,11 +1666,101 @@ void _vp_couple(int blobno,
 	  float b=mdctA[l];
 	  float dummypoint;
 	  float hypot_reserve;
+	  float slow=0.f;
+	  float shigh=0.f;
+	  float slowM=0.f;
+	  float slowA=0.f;
+	  float shighM=0.f;
+	  float shighA=0.f;
+	  float rMs=fabs(rMo[l]);
+      float rAs=fabs(rAo[l]);
 
-	  postpoint=postpoint_bu;
+	  postpoint=postpoint_backup;
+	  
+	  /* AoTuV */
+	  /** @ M6 MAIN **
+	    The threshold of a stereo is changed dynamically. 
+	    by Aoyumi @ 2006/06/04
+	  */
+	  if(l>=stcont_start){
+	  	int m;
+	  	int lof_num;
+	  	int hif_num;
+	  	
+	  	// (It may be better to calculate this in advance) 
+	  	lof_st=l-(l/2)*.167;
+	  	hif_st=l+l*.167;
+	  
+	  	hif_stcopy=hif_st;
+	  	
+	  	// limit setting
+	  	if(hif_st>freqlimit)hif_st=freqlimit;
+	  	
+	  	if(old_lof_st || old_hif_st){
+	  		if(hif_st>l){
+	  			// hif_st, lof_st ...absolute value
+	  			// lof_num, hif_num ...relative value
+	  			
+	  			// low freq.(lower)
+	  			lof_num=lof_st-old_lof_st;
+	  			if(lof_num==0){
+	  				Afreq_num+=Ac_treshp[l-1];
+	  				Mfreq_num+=Mc_treshp[l-1];
+	  			}else if(lof_num==1){
+	  				Afreq_num+=Ac_treshp[l-1];
+	  				Mfreq_num+=Mc_treshp[l-1];
+	  				Afreq_num-=Ac_treshp[old_lof_st];
+	  				Mfreq_num-=Mc_treshp[old_lof_st];
+	  			}//else puts("err. low");
+	  			
+	  			// high freq.(higher)
+	  			hif_num=hif_st-old_hif_st;
+	  			if(hif_num==0){
+	  				Afreq_num-=Ac_treshp[l];
+	  				Mfreq_num-=Mc_treshp[l];
+	  			}else if(hif_num==1){
+	  				Afreq_num-=Ac_treshp[l];
+	  				Mfreq_num-=Mc_treshp[l];
+	  				Afreq_num+=Ac_treshp[hif_st];
+	  				Mfreq_num+=Mc_treshp[hif_st];
+	  			}else if(hif_num==2){
+	  				Afreq_num-=Ac_treshp[l];
+	  				Mfreq_num-=Mc_treshp[l];
+	  				Afreq_num+=Ac_treshp[hif_st];
+	  				Mfreq_num+=Mc_treshp[hif_st];
+	  				Afreq_num+=Ac_treshp[hif_st-1];
+	  				Mfreq_num+=Mc_treshp[hif_st-1];
+	  			}//else puts("err. high");
+	  		}
+	  	}else{
+	  		for(m=lof_st; m<=hif_st; m++){
+	  			if(m==l)continue;
+	  			if(Ac_treshp[m]) Afreq_num++;
+	  			if(Mc_treshp[m]) Mfreq_num++;
+			}
+	  	}
+	  	if(l>=limit){
+	  		shigh=sth_high/(hif_stcopy-lof_st);
+	  		shighA=shigh*Afreq_num;
+	  		shighM=shigh*Mfreq_num;
+	  		if((shighA+rAs)>(shighM+rMs))shigh=shighA;
+	  		else shigh=shighM;
+		}else{
+			slow=sth_low/(hif_stcopy-lof_st);
+			slowA=slow*Afreq_num;
+			slowM=slow*Mfreq_num;
+			if(p->noiseoffset[1][l]<-1){
+				slowA*=(p->noiseoffset[1][l]+2);
+				slowM*=(p->noiseoffset[1][l]+2);
+			}
+		}
+		old_lof_st=lof_st;
+	  	old_hif_st=hif_st;
+	  }
 
-	  /* The following prevents an extreme reduction of residue. (2ch stereo only) */
 	  if(l>=limit){
+	    postpoint-=shigh;
+	    /* The following prevents an extreme reduction of residue. (2ch stereo only) */
 	  	if( ((a>0.) && (b<0.)) || ((b>0.) && (a<0.)) ){
 	  		hypot_reserve = fabs(fabs(a)-fabs(b));
 	  		if(hypot_reserve < 0.001){ // 0~0.000999-
@@ -1575,15 +1768,12 @@ void _vp_couple(int blobno,
 	  			dummypoint = dummypoint+((postpoint-dummypoint)*(hypot_reserve*1000));
 	  			if(postpoint > dummypoint) postpoint = dummypoint;
 	  		}
-      	}else if(((p->vi->normal_thresh<.45) && (a-b)<0.0001)){
-      		if((rint(rM[l])==0.f && rint(rA[l])!=0.f) || (rint(rA[l])==0.f && rint(rM[l])!=0.f))
-      		postpoint = diff_mid;
       	}
 	  }
-
+	  
 	  if(l<sliding_lowpass){
-	    if((l>=limit && fabs(rMo[l])<postpoint && fabs(rAo[l])<postpoint) ||
-	       (fabs(rMo[l])<prepoint && fabs(rAo[l])<prepoint)){
+	    if((l>=limit && rMs<postpoint && rAs<postpoint) ||
+	       (rMs<(prepoint-slowM) && rAs<(prepoint-slowA))){
 
 
 	      precomputed_couple_point(mag_memo[i][l],
@@ -1591,7 +1781,10 @@ void _vp_couple(int blobno,
 				       qM+l,qA+l);
 
 	      //if(rint(qM[l])==0.f)acc+=qM[l]*qM[l];
-	      if( (rint(qM[l])==0.f) && (l>=limit) )acc+=qM[l]*qM[l]*0.9;
+	      if(rint(qM[l])==0.f){
+	      	energy_loss++;
+	      	if(l>=limit)acc+=qM[l]*qM[l];
+	      }
 	    }else{
 	      couple_lossless(rM[l],rA[l],qM+l,qA+l);
 	    }
@@ -1600,19 +1793,63 @@ void _vp_couple(int blobno,
 	    qA[l]=0.;
 	  }
 	}
-	
+
 	if(p->vi->normal_point_p){
+	  int freqband_mid=j+16;
+	  int freqband_flag=0;
+	  int min_energy;
+	  
+	  rpacc=acc;
+	  /* When the energy loss of a partition is large, NN is performed in the middle of partition.
+	      for 48/44.1/32kHz */
+	  if(energy_loss==32 && fabs(qM[freqband_mid])>nnmid_th && acc>=p->vi->normal_thresh
+	   && freqband_mid<sliding_lowpass && freqband_mid>=pointlimit && rint(qM[freqband_mid])==0.f){
+	  	if( ((mdctM[freqband_mid]>0.) && (mdctA[freqband_mid]<0.)) ||
+	  	 ((mdctA[freqband_mid]>0.) && (mdctM[freqband_mid]<0.)) ){
+	  	 acc-=1.f;
+	  	 rpacc-=1.32;
+	  	}else{
+	  	 acc-=1.f;
+	  	 rpacc-=1.f;
+	  	}
+	  	qM[freqband_mid]=unitnorm(qM[freqband_mid]);
+	  	freqband_flag=1;
+	  	nn_num++;
+	  }
+	  /* NN main (point stereo) */
 	  for(k=0;k<partition && acc>=p->vi->normal_thresh;k++){
-	    int l=mag_sort[i][j+k];
-	    float a=mdctM[l];
-	    float b=mdctA[l];
+	    int l;
+	    l=mag_sort[i][j+k];
+	    if(freqband_mid==l && freqband_flag)continue;
 	    if(l<sliding_lowpass && l>=pointlimit && rint(qM[l])==0.f){
-	      qM[l]=unitnorm(qM[l]);
-	      if( ((a>0.) && (b<0.)) || ((b>0.) && (a<0.)) ){
-	        acc-=1.46;
+	      if( ((mdctM[l]>0.) && (mdctA[l]<0.)) || ((mdctA[l]>0.) && (mdctM[l]<0.)) ){
+	        if(rpacc<p->vi->normal_thresh)continue;
+	        acc-=1.f;
+	        rpacc-=1.32;
 	      }else{
 	        acc-=1.f;
+	        rpacc-=1.f;
 	      }
+	      qM[l]=unitnorm(qM[l]);
+	      nn_num++;
+	    }
+	  }
+	  /* The minimum energy complement.
+	      for 48/44.1/32kHz */
+	  min_energy=32-energy_loss+nn_num;
+	  if(min_energy<2 || (j<=p->min_nn_lp && min_energy==2)){
+	  	int l;
+	  	float ab;
+	    for(;k<partition;k++){
+	    	l=mag_sort[i][j+k];
+	    	ab=fabs(qM[l]);
+	    	if(ab<0.04)break;
+	    	if( ((mdctM[l]>0.) && (mdctA[l]<0.)) || ((mdctA[l]>0.) && (mdctM[l]<0.))
+	    	 && ab<0.11)break; // 0.11
+	    	if(rint(qM[l])==0.f && l>=pointlimit){
+	    		qM[l]=unitnorm(qM[l]);
+	    		break;
+	    	}
 	    }
 	  }
 	}
@@ -1635,7 +1872,7 @@ float lb_loudnoise_fix(vorbis_look_psy *p,
 		int lW_modenumber,
 		int blocktype, int modenumber){
 
-	int i, n=p->n, nq1=n/4, nq3=nq1*3;
+	int i, n=p->n, nq1=p->n25p, nq3=p->n75p;
 	double hi_th=0;
 	
 	if(p->m_val < 0.5)return(-1); /* 48/44.1/32kHz only */

@@ -1,4 +1,4 @@
-aoTuV Release 1
+aoTuV Beta 5
 
 "aoTuV" tunes up Xiph.Org's libvorbis uniquely. 
 A license is taken as "BSD-style license" as well as original libvorbis. 
@@ -10,8 +10,6 @@ A license is taken as "BSD-style license" as well as original libvorbis.
   When "#define OPT_SORT" of "lib/psy.h" is deleted, the conventional 
   processing method is used.
   Thanks! Manuke.
-
-  This version is the same contents as aoTuV beta4.51. 
 
 
 aoTuV based on <Xiph.Org libvorbis>
