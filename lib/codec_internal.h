@@ -79,6 +79,14 @@ typedef struct private_state {
   bitrate_manager_state bms;
 
   ogg_int64_t sample_count;
+
+  /* encode only
+    added by aoyumi */
+  float *nblock; /* lW logmdct buffer */  
+  float *tblock; /* temporal masking buffer (impulse block) */
+  int lW_blocktype; /* last window block type */
+  int lW_modenumber; /* last window mode number (0=short, 1=long) */
+  int lW_no; /* the number of continuous window blocks (last window) */
 } private_state;
 
 /* codec_setup_info contains all the setup information specific to the

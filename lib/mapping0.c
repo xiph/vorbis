@@ -380,6 +380,9 @@ static int mapping0_forward(vorbis_block *vb){
       
       float *logmdct =logfft+n/2;
       float *logmask =logfft;
+      
+      float *lastmdct = b->nblock+i*128;
+      float *tempmdct = b->tblock+i*128;
 
       vb->mode=modenumber;
 
@@ -467,7 +470,11 @@ static int mapping0_forward(vorbis_block *vb){
 			   1,
 			   logmask,
 			   mdct,
-			   logmdct);
+			   logmdct,
+			   lastmdct, tempmdct,
+			   blocktype, modenumber,
+			   vb->nW,
+			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
 	
 #if 0
 	if(vi->channels==2){
@@ -510,7 +517,11 @@ static int mapping0_forward(vorbis_block *vb){
 			   2,
 			   logmask,
 			   mdct,
-			   logmdct);
+			   logmdct,
+			   lastmdct, tempmdct,
+			   blocktype, modenumber,
+			   vb->nW,
+			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
 
 #if 0
 	if(vi->channels==2){
@@ -533,7 +544,11 @@ static int mapping0_forward(vorbis_block *vb){
 			   0,
 			   logmask,
 			   mdct,
-			   logmdct);
+			   logmdct,
+			   lastmdct, tempmdct,
+			   blocktype, modenumber,
+			   vb->nW,
+			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
 
 #if 0
 	if(vi->channels==2)
@@ -691,7 +706,9 @@ static int mapping0_forward(vorbis_block *vb){
 		   mag_sort,
 		   ilogmaskch,
 		   nonzero,
-		   ci->psy_g_param.sliding_lowpass[vb->W][k]);
+		   ci->psy_g_param.sliding_lowpass[vb->W][k],
+		   blocktype, modenumber,
+		   b->lW_blocktype, b->lW_modenumber);
       }
       
       /* classify and encode by submap */
@@ -717,6 +734,11 @@ static int mapping0_forward(vorbis_block *vb){
 		  couple_bundle,NULL,zerobundle,ch_in_bundle,classifications);
       }
       
+      /* set last-window type & number */
+      if((blocktype == b->lW_blocktype) && (modenumber == b->lW_modenumber)) b->lW_no++;
+      else b->lW_no = 1;
+      b->lW_blocktype = blocktype;
+      b->lW_modenumber = modenumber;
       /* ok, done encoding.  Next protopacket. */
     }
     

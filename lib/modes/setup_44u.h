@@ -17,13 +17,15 @@
 
 #include "modes/residue_44u.h"
 
-static double rate_mapping_44_un[12]={
-  32000.,48000.,60000.,70000.,80000.,86000.,
+static double rate_mapping_44_un[13]={
+//  32000.,48000.,60000.,70000.,80000.,86000.,
+  26000.,32000.,48000.,60000.,70000.,80000.,86000.,
   96000.,110000.,120000.,140000.,160000.,240001.
 };
 
 ve_setup_data_template ve_setup_44_uncoupled={
-  11,
+//  11,
+  12,
   rate_mapping_44_un,
   quality_mapping_44,
   -1,

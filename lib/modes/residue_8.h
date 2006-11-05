@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates 8/11kHz
- last mod: $Id: residue_8.h,v 1.2 2002/07/11 06:41:04 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -48,7 +48,8 @@ static vorbis_residue_template _res_8s_1[]={
    &_resbook_8s_1,&_resbook_8s_1},
 };
 
-static vorbis_mapping_template _mapres_template_8_stereo[2]={
+static vorbis_mapping_template _mapres_template_8_stereo[3]={
+  { _map_nominal, _res_8s_0 }, /* -1 */
   { _map_nominal, _res_8s_0 }, /* 0 */
   { _map_nominal, _res_8s_1 }, /* 1 */
 };
@@ -91,7 +92,8 @@ static vorbis_residue_template _res_8u_1[]={
    &_resbook_8u_1,&_resbook_8u_1},
 };
 
-static vorbis_mapping_template _mapres_template_8_uncoupled[2]={
+static vorbis_mapping_template _mapres_template_8_uncoupled[3]={
+  { _map_nominal_u, _res_8u_0 }, /* -1 */
   { _map_nominal_u, _res_8u_0 }, /* 0 */
   { _map_nominal_u, _res_8u_1 }, /* 1 */
 };

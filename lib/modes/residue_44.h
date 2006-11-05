@@ -278,6 +278,7 @@ static vorbis_residue_template _res_44s_9[]={
 };
 
 static vorbis_mapping_template _mapres_template_44_stereo[]={
+  { _map_nominal, _res_44s_n1 }, /* -2 */
   { _map_nominal, _res_44s_n1 }, /* -1 */
   { _map_nominal, _res_44s_0 }, /* 0 */
   { _map_nominal, _res_44s_1 }, /* 1 */
