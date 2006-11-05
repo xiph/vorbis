@@ -19,43 +19,47 @@
 #include "modes/residue_44.h"
 #include "modes/psych_44.h"
 
-static double rate_mapping_44_stereo[12]={
-  22500.,32000.,40000.,48000.,56000.,64000.,
+static double rate_mapping_44_stereo[13]={
+//  22500.,32000.,40000.,48000.,56000.,64000.,
+  16000.,24000.,32000.,40000.,48000.,56000.,64000.,
   80000.,96000.,112000.,128000.,160000.,250001.
 };
 
-static double quality_mapping_44[12]={
-  -.1,.0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1.0
+static double quality_mapping_44[13]={
+  -.2,-.1,.0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1.0
 };
 
-static int blocksize_short_44[11]={
-  512,256,256,256,256,256,256,256,256,256,256
+static int blocksize_short_44[12]={
+  512,512,256,256,256,256,256,256,256,256,256,256
 };
-static int blocksize_long_44[11]={
-  4096,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048
-};
-
-static double _psy_compand_short_mapping[12]={
-  0.5, 1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.
-};
-static double _psy_compand_long_mapping[12]={
-  3.5, 4., 4., 4.3, 4.6, 5., 5., 5., 5., 5., 5., 5.
+static int blocksize_long_44[12]={
+  4096,4096,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048
 };
 
-static double _global_mapping_44[12]={
+static double _psy_compand_short_mapping[13]={
+  1., 1., 1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.
+};
+static double _psy_compand_long_mapping[13]={
+  4., 4., 4., 4., 4.3, 4.6, 5., 5., 5., 5., 5., 5., 5.
+};
+
+static double _global_mapping_44[13]={
   /* 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4. */
- 0., 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.7, 4., 4.
+// 0., 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.7, 4., 4.
+  0., 1., 2., 2., 2.5, 3., 3., 3.5, 3.7, 4., 4., 5., 5. // low
+//  0., 1., 2., 2., 2.5, 3., 3.2, 4.0, 4.0, 4.0, 4.5, 5., 5. // high
 };
 
-static int _floor_short_mapping_44[11]={
-  1,0,0,2,2,4,5,5,5,5,5
+static int _floor_short_mapping_44[12]={
+  1,1,0,0,2,2,4,5,5,5,5,5
 };
-static int _floor_long_mapping_44[11]={
-  8,7,7,7,7,7,7,7,7,7,7
+static int _floor_long_mapping_44[12]={
+  8,8,7,7,7,7,7,7,7,7,7,7
 };
 
 ve_setup_data_template ve_setup_44_stereo={
-  11,
+//  11,
+  12,
   rate_mapping_44_stereo,
   quality_mapping_44,
   2,

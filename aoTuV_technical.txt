@@ -1,4 +1,42 @@
+aoTuV beta4 technical information
+
+
+The differences from the aoTuV beta 3...
+
+
+
+  1.  Adoption of new hypot (point stereo). This works in general better than
+  dipole/round hypot. And when residue is likely to decrease greatly at the
+  time of a reverse phase, added code is made to increase the ratio of lossless.
+
+  2.  Change of ATH curve. This is not a big change. 
+
+  3.  Residue used for threshold calculation of channel coupling is changed.
+  This one seems to be good selection. 
+
+  4.  HF reduction code of beta3 was deleted. Now, this is not required. 
+
+  5.  The energy deficit of M4 code of beta3 -- correction of a bug Now.
+
+  6.  The code for pulling downward floor of the frequency range which can
+  be easy to be heard was added (New M2). This works by the low bit rate and
+  has a comparatively good trade-off. 
+
+  7.  Change of threshold calculation of noise normalization. Moreover, it
+  takes phase information into consideration. 
+
+
+...and I mainly tune up tone/noise masking and noise compander parameters. 
+
+
+
+2005/06/18
+Aoyumi
+
+----------------------------------------------------------------------------
+
 aoTuV beta3 technical information
+
 
 The differences from the aoTuV beta 2 and Vorbis 1.1...
 
