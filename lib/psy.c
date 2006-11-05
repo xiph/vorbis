@@ -30,8 +30,32 @@
 #include "misc.h"
 
 #define NEGINF -9999.f
-static double stereo_threshholds[]={0.0, .5, 1.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
-static double stereo_threshholds_limited[]={0.0, .5, 1.0, 1.5, 2.0, 2.5, 4.5, 8.5, 9e10};
+
+/*
+  rephase   = reverse phase limit (postpoint)
+  lowlong   = low quality long-block limit (postpoint)
+  diffmid   = diffuse mid sound limit (postpoint)
+                                                0    1    2    3    4    5    6    7    8  */
+static double stereo_threshholds[]=           {0.0, 0.5, 1.0, 1.5, 2.5, 4.5, 8.5,16.5, 9e10};
+static double stereo_threshholds_rephase[]=   {0.0, 0.5, 0.5, 1.0, 1.5, 1.5, 1.5, 2.5, 9e10};
+static double stereo_threshholds_lowlong[]=   {0.0, 0.5, 1.0, 1.5, 2.5, 3.0, 6.5,10.5, 9e10};
+static double stereo_threshholds_diffmid[]=   {0.0, 0.5, 1.0, 1.5, 1.5, 1.5, 2.5, 5.5, 9e10};
+
+static int m3n32[] = {21,13,10,4};
+static int m3n44[] = {15,9,7,3};
+static int m3n48[] = {14,8,6,3};
+
+static int temp_bfn[128] = {
+ 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3,
+ 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7,
+ 8, 8, 8, 8, 9, 9, 9, 9,10,10,10,10,11,11,11,11,
+12,12,12,12,13,13,13,13,14,14,14,14,15,15,15,15,
+16,16,16,16,17,17,17,17,18,18,18,18,19,19,19,19,
+20,20,20,20,21,21,21,21,22,22,22,22,23,23,23,23,
+24,24,24,24,25,25,25,24,23,22,21,20,19,18,17,16,
+15,14,13,12,11,10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0,
+};
+
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -284,12 +308,21 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->n=n;
   p->rate=rate;
 
-  /* AoTuV HF weighting */
-  p->m_val = 1.;
-  if(rate < 26000) p->m_val = 0;
-  else if(rate < 38000) p->m_val = .94;   /* 32kHz */
-  else if(rate > 46000) p->m_val = 1.275; /* 48kHz */
-  
+  /* AoTuV HF weighting etc. */
+  if(rate < 26000){
+  	p->m_val = 0;
+  	for(i=0; i<4; i++) p->m3n[i] = 0;
+  }else if(rate < 38000){   /* 32kHz */
+  	p->m_val = .94;
+  	for(i=0; i<4; i++) p->m3n[i] = m3n32[i];
+  }else if(rate > 46000){  /* 48kHz */
+  	p->m_val = 1.205;
+  	for(i=0; i<4; i++) p->m3n[i] = m3n48[i];
+  }else{                   /* 44.1kHz */
+  	p->m_val = 1.;
+  	for(i=0; i<4; i++) p->m3n[i] = m3n44[i];
+  }
+
   /* set up the lookups for a given blocksize and sample rate */
 
   for(i=0,j=0;i<MAX_ATH-1;i++){
@@ -690,70 +723,70 @@ static void bark_noise_hybridmp(int n,const long *b,
 }
 
 static float FLOOR1_fromdB_INV_LOOKUP[256]={
-  0.F, 8.81683e+06F, 8.27882e+06F, 7.77365e+06F, 
-  7.29930e+06F, 6.85389e+06F, 6.43567e+06F, 6.04296e+06F, 
-  5.67422e+06F, 5.32798e+06F, 5.00286e+06F, 4.69759e+06F, 
-  4.41094e+06F, 4.14178e+06F, 3.88905e+06F, 3.65174e+06F, 
-  3.42891e+06F, 3.21968e+06F, 3.02321e+06F, 2.83873e+06F, 
-  2.66551e+06F, 2.50286e+06F, 2.35014e+06F, 2.20673e+06F, 
-  2.07208e+06F, 1.94564e+06F, 1.82692e+06F, 1.71544e+06F, 
-  1.61076e+06F, 1.51247e+06F, 1.42018e+06F, 1.33352e+06F, 
-  1.25215e+06F, 1.17574e+06F, 1.10400e+06F, 1.03663e+06F, 
-  973377.F, 913981.F, 858210.F, 805842.F, 
-  756669.F, 710497.F, 667142.F, 626433.F, 
-  588208.F, 552316.F, 518613.F, 486967.F, 
-  457252.F, 429351.F, 403152.F, 378551.F, 
-  355452.F, 333762.F, 313396.F, 294273.F, 
-  276316.F, 259455.F, 243623.F, 228757.F, 
-  214798.F, 201691.F, 189384.F, 177828.F, 
-  166977.F, 156788.F, 147221.F, 138237.F, 
-  129802.F, 121881.F, 114444.F, 107461.F, 
-  100903.F, 94746.3F, 88964.9F, 83536.2F, 
-  78438.8F, 73652.5F, 69158.2F, 64938.1F, 
-  60975.6F, 57254.9F, 53761.2F, 50480.6F, 
-  47400.3F, 44507.9F, 41792.0F, 39241.9F, 
-  36847.3F, 34598.9F, 32487.7F, 30505.3F, 
-  28643.8F, 26896.0F, 25254.8F, 23713.7F, 
-  22266.7F, 20908.0F, 19632.2F, 18434.2F, 
-  17309.4F, 16253.1F, 15261.4F, 14330.1F, 
-  13455.7F, 12634.6F, 11863.7F, 11139.7F, 
-  10460.0F, 9821.72F, 9222.39F, 8659.64F, 
-  8131.23F, 7635.06F, 7169.17F, 6731.70F, 
-  6320.93F, 5935.23F, 5573.06F, 5232.99F, 
-  4913.67F, 4613.84F, 4332.30F, 4067.94F, 
-  3819.72F, 3586.64F, 3367.78F, 3162.28F, 
-  2969.31F, 2788.13F, 2617.99F, 2458.24F, 
-  2308.24F, 2167.39F, 2035.14F, 1910.95F, 
-  1794.35F, 1684.85F, 1582.04F, 1485.51F, 
-  1394.86F, 1309.75F, 1229.83F, 1154.78F, 
-  1084.32F, 1018.15F, 956.024F, 897.687F, 
-  842.910F, 791.475F, 743.179F, 697.830F, 
-  655.249F, 615.265F, 577.722F, 542.469F, 
-  509.367F, 478.286F, 449.101F, 421.696F, 
-  395.964F, 371.803F, 349.115F, 327.812F, 
-  307.809F, 289.026F, 271.390F, 254.830F, 
-  239.280F, 224.679F, 210.969F, 198.096F, 
-  186.008F, 174.658F, 164.000F, 153.993F, 
-  144.596F, 135.773F, 127.488F, 119.708F, 
-  112.404F, 105.545F, 99.1046F, 93.0572F, 
-  87.3788F, 82.0469F, 77.0404F, 72.3394F, 
-  67.9252F, 63.7804F, 59.8885F, 56.2341F, 
-  52.8027F, 49.5807F, 46.5553F, 43.7144F, 
-  41.0470F, 38.5423F, 36.1904F, 33.9821F, 
-  31.9085F, 29.9614F, 28.1332F, 26.4165F, 
-  24.8045F, 23.2910F, 21.8697F, 20.5352F, 
-  19.2822F, 18.1056F, 17.0008F, 15.9634F, 
-  14.9893F, 14.0746F, 13.2158F, 12.4094F, 
-  11.6522F, 10.9411F, 10.2735F, 9.64662F, 
-  9.05798F, 8.50526F, 7.98626F, 7.49894F, 
-  7.04135F, 6.61169F, 6.20824F, 5.82941F, 
-  5.47370F, 5.13970F, 4.82607F, 4.53158F, 
-  4.25507F, 3.99542F, 3.75162F, 3.52269F, 
-  3.30774F, 3.10590F, 2.91638F, 2.73842F, 
-  2.57132F, 2.41442F, 2.26709F, 2.12875F, 
-  1.99885F, 1.87688F, 1.76236F, 1.65482F, 
-  1.55384F, 1.45902F, 1.36999F, 1.28640F, 
-  1.20790F, 1.13419F, 1.06499F, 1.F
+  0.F, 8.81683e+06F, 8.27882e+06F, 7.77365e+06F, // 1-4
+  7.29930e+06F, 6.85389e+06F, 6.43567e+06F, 6.04296e+06F, // 5-8
+  5.67422e+06F, 5.32798e+06F, 5.00286e+06F, 4.69759e+06F, // 9-12
+  4.41094e+06F, 4.14178e+06F, 3.88905e+06F, 3.65174e+06F, // 13-16
+  3.42891e+06F, 3.21968e+06F, 3.02321e+06F, 2.83873e+06F, // 17-20
+  2.66551e+06F, 2.50286e+06F, 2.35014e+06F, 2.20673e+06F, // 21-24
+  2.07208e+06F, 1.94564e+06F, 1.82692e+06F, 1.71544e+06F, // 25-28
+  1.61076e+06F, 1.51247e+06F, 1.42018e+06F, 1.33352e+06F, // 29-32
+  1.25215e+06F, 1.17574e+06F, 1.10400e+06F, 1.03663e+06F, // 33-36
+  973377.F, 913981.F, 858210.F, 805842.F, // 37-40
+  756669.F, 710497.F, 667142.F, 626433.F, // 41-44
+  588208.F, 552316.F, 518613.F, 486967.F, // 45-48
+  457252.F, 429351.F, 403152.F, 378551.F, // 49-52
+  355452.F, 333762.F, 313396.F, 294273.F, // 53-56
+  276316.F, 259455.F, 243623.F, 228757.F, // 57-60
+  214798.F, 201691.F, 189384.F, 177828.F, // 61-64
+  166977.F, 156788.F, 147221.F, 138237.F, // 65-68
+  129802.F, 121881.F, 114444.F, 107461.F, // 69-72
+  100903.F, 94746.3F, 88964.9F, 83536.2F, // 73-76
+  78438.8F, 73652.5F, 69158.2F, 64938.1F, // 77-80
+  60975.6F, 57254.9F, 53761.2F, 50480.6F, // 81-84
+  47400.3F, 44507.9F, 41792.0F, 39241.9F, // 85-88
+  36847.3F, 34598.9F, 32487.7F, 30505.3F, // 89-92
+  28643.8F, 26896.0F, 25254.8F, 23713.7F, // 93-96
+  22266.7F, 20908.0F, 19632.2F, 18434.2F, // 97-100
+  17309.4F, 16253.1F, 15261.4F, 14330.1F, // 101-104
+  13455.7F, 12634.6F, 11863.7F, 11139.7F, // 105-108
+  10460.0F, 9821.72F, 9222.39F, 8659.64F, // 109-112
+  8131.23F, 7635.06F, 7169.17F, 6731.70F, // 113-116
+  6320.93F, 5935.23F, 5573.06F, 5232.99F, // 117-120
+  4913.67F, 4613.84F, 4332.30F, 4067.94F, // 121-124
+  3819.72F, 3586.64F, 3367.78F, 3162.28F, // 125-128
+  2969.31F, 2788.13F, 2617.99F, 2458.24F, // 129-132
+  2308.24F, 2167.39F, 2035.14F, 1910.95F, // 133-136
+  1794.35F, 1684.85F, 1582.04F, 1485.51F, // 137-140
+  1394.86F, 1309.75F, 1229.83F, 1154.78F, // 141-144
+  1084.32F, 1018.15F, 956.024F, 897.687F, // 145-148
+  842.910F, 791.475F, 743.179F, 697.830F, // 149-152
+  655.249F, 615.265F, 577.722F, 542.469F, // 153-156
+  509.367F, 478.286F, 449.101F, 421.696F, // 157-160
+  395.964F, 371.803F, 349.115F, 327.812F, // 161-164
+  307.809F, 289.026F, 271.390F, 254.830F, // 165-168
+  239.280F, 224.679F, 210.969F, 198.096F, // 169-172
+  186.008F, 174.658F, 164.000F, 153.993F, // 173-176
+  144.596F, 135.773F, 127.488F, 119.708F, // 177-180
+  112.404F, 105.545F, 99.1046F, 93.0572F, // 181-184
+  87.3788F, 82.0469F, 77.0404F, 72.3394F, // 185-188
+  67.9252F, 63.7804F, 59.8885F, 56.2341F, // 189-192
+  52.8027F, 49.5807F, 46.5553F, 43.7144F, // 193-196
+  41.0470F, 38.5423F, 36.1904F, 33.9821F, // 197-200
+  31.9085F, 29.9614F, 28.1332F, 26.4165F, // 201-204
+  24.8045F, 23.2910F, 21.8697F, 20.5352F, // 205-208
+  19.2822F, 18.1056F, 17.0008F, 15.9634F, // 209-212
+  14.9893F, 14.0746F, 13.2158F, 12.4094F, // 213-216
+  11.6522F, 10.9411F, 10.2735F, 9.64662F, // 217-220
+  9.05798F, 8.50526F, 7.98626F, 7.49894F, // 221-224
+  7.04135F, 6.61169F, 6.20824F, 5.82941F, // 225-228
+  5.47370F, 5.13970F, 4.82607F, 4.53158F, // 229-232
+  4.25507F, 3.99542F, 3.75162F, 3.52269F, // 233-236
+  3.30774F, 3.10590F, 2.91638F, 2.73842F, // 237-240
+  2.57132F, 2.41442F, 2.26709F, 2.12875F, // 241-244
+  1.99885F, 1.87688F, 1.76236F, 1.65482F, // 245-248
+  1.55384F, 1.45902F, 1.36999F, 1.28640F, // 249-252
+  1.20790F, 1.13419F, 1.06499F, 1.F // 253-256
 };
 
 void _vp_remove_floor(vorbis_look_psy *p,
@@ -776,6 +809,7 @@ void _vp_remove_floor(vorbis_look_psy *p,
 }
 
 void _vp_noisemask(vorbis_look_psy *p,
+		   float noise_compand_level,
 		   float *logmdct, 
 		   float *logmask){
 
@@ -814,7 +848,19 @@ void _vp_noisemask(vorbis_look_psy *p,
   }
 #endif
 
-  for(i=0;i<n;i++){
+  /* aoTuV M5 extension */
+  i=0;
+  if((p->vi->noisecompand_high[NOISE_COMPAND_LEVELS-1] > 1) && (noise_compand_level > 0)){
+  	int thter = n/3;
+  	for(;i<thter;i++){
+    	int dB=logmask[i]+.5;
+    	if(dB>=NOISE_COMPAND_LEVELS)dB=NOISE_COMPAND_LEVELS-1;
+    	if(dB<0)dB=0;
+    	logmask[i]= work[i]+p->vi->noisecompand[dB]-
+    	  ((p->vi->noisecompand[dB]-p->vi->noisecompand_high[dB])*noise_compand_level);
+  	}
+  }
+  for(;i<n;i++){
     int dB=logmask[i]+.5;
     if(dB>=NOISE_COMPAND_LEVELS)dB=NOISE_COMPAND_LEVELS-1;
     if(dB<0)dB=0;
@@ -854,18 +900,174 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 			int offset_select,
 			float *logmask,
 			float *mdct,
-			float *logmdct){
-  int i,n=p->n;
-  float de, coeffi, cx;/* AoTuV */
+			float *logmdct,
+			float *lastmdct, float *tempmdct,
+			int blocktype, int modenumber,
+			int nW_modenumber,
+			int lW_blocktype, int lW_modenumber, int lW_no){
+
+  int i,j,n=p->n;
+  int m2_sw=0,  padth; /* aoTuV for M2 */
+  int it_sw, *m3n, m3_count; /* aoTuV for M3 */
+  int m4_start, fmask; /* aoTuV for M4 */
+  float de, coeffi, cx; /* aoTuV for M1 */
+  float toneth; /* aoTuV for M2 */
+  float noise_rate, noise_rate_low, noise_center, rate_mod; /* aoTuV for M3 */
+  float m4_val; /* aoTuV for M4 */
   float toneatt=p->vi->tone_masteratt[offset_select];
 
   cx = p->m_val;
+  m3n = p->m3n;
   
+  /** @ M2 PRE **/
+  if(p->vi->normal_thresh<.45){
+  	if(modenumber){
+  		// sample
+    	//  21@ [q-2] 0,0,-1,-7,-11 [q2] (48/44.1/32kHz quality mode)
+    	//  20@ [q-2] 0,0, 0,-6,-10 [q2] (48/44.1/32kHz quality mode)
+    	toneth=toneatt-20.45;
+    	if(toneth>0.1) toneth=0;
+    	m2_sw=1;
+    }else if((cx > 0.5) && blocktype && (n==128)){
+    	if(p->vi->normal_thresh>.25) padth = 10+(int)(p->vi->flacint*100);
+    	else padth = 10;
+    	m2_sw=2;
+    }
+  }
+
+  /** @ M3 PRE **/
+  m3_count = 3;
+  if(toneatt < 3) m3_count = 2; // q6~
+  if((n == 128) && !modenumber && !blocktype){
+  	if(!lW_blocktype && !lW_modenumber){ /* last window "short" - type "impulse" */
+  		if(lW_no < 8){
+  			/* impulse - @impulse case1 */
+  			noise_rate = 0.8-(float)(lW_no-1)/17;
+  			noise_center = (float)(lW_no*m3_count);
+  		}else{
+  			/* impulse - @impulse case2 */
+  			noise_rate = 0.4;
+  			noise_center = 25;
+  			if((lW_no*m3_count) < 24) noise_center = lW_no*m3_count;
+  		}
+  		if(offset_select == 1){
+  			for(i=0; i<128; i++) tempmdct[i] -= 5;
+  		}
+  	}else{ /* non_impulse - @Short(impulse) case */
+  		noise_rate = 0.9;
+  		noise_center = 0;
+  		if(offset_select == 1){
+  			for(i=0; i<128; i++) tempmdct[i] = lastmdct[i] - 5;
+  		}
+  		if(p->vi->normal_thresh < .45) noise_rate = 0.8;
+  	}
+  	noise_rate_low = noise_rate*0.6;
+  	it_sw = 1;
+  }else{
+  	it_sw = 0;
+  }
+  
+  /** @ M3&M4 PRE **/
+  if(cx < 0.5){
+  	it_sw = 0; /* M3 */
+  	m4_val=-1.; /* M4 */
+  }else if((offset_select==1) && (p->vi->normal_thresh<.45)){
+  	/* for M4 */
+  	for(i=p->vi->normal_start; i<n; i++){
+  		if(p->noiseoffset[1][i] >= -0.91){
+  			m4_start = i;
+  			break;
+  		}
+  	}
+  	if(p->vi->normal_thresh < .175){
+  		m4_val=.966; // .966  q-2
+  	}else if(p->vi->normal_thresh < .195){
+  		m4_val=.973; // .973  q-1/0
+  	}else if(p->vi->normal_thresh < .3){
+  		m4_val=.974; // .974  q1
+  	}else m4_val=.986; // .986  q2
+  }else m4_val=-1.;
+
   for(i=0;i<n;i++){
     float val= noise[i]+p->noiseoffset[offset_select][i];
+    float tval= tone[i]+toneatt;
     if(val>p->vi->noisemaxsupp)val=p->vi->noisemaxsupp;
-    logmask[i]=max(val,tone[i]+toneatt);
-
+    
+    /* AoTuV */
+    /** @ M2 MAIN **
+    floor is pulled below suitably. (long/trans./padding block)
+    by Aoyumi @ 2005/09/14
+    */
+    if(m2_sw){
+    	if(m2_sw == 1){
+   			if(val>(tval+toneth) && ((val-tval+toneth)>20) && val>-80){
+    			if((val-tval+toneth) > 30) val -= ((val-tval+toneth-30)/10+10);
+    			else val -= ((val-tval+toneth)-20);
+    		}
+    	}else{
+			// the conspicuous low level pre-echo of the padding block origin is reduced. 
+    		if((logmdct[i]-lastmdct[i]) > 20){
+    			if(i > m3n[3]) val -= (logmdct[i]-lastmdct[i]-20)/padth;
+    			else val -= (logmdct[i]-lastmdct[i]-20)/(padth+padth);
+    		}
+    	}
+    }
+    
+    /* AoTuV */
+    /** @ M3 MAIN **
+    Dynamic impulse block noise control. (#3)
+    48/44.1/32kHz only.
+    by Aoyumi @ 2004/08/30
+    */
+    if(it_sw){
+    	for(j=1; j<=temp_bfn[i]; j++){
+    		float tempbuf = logmdct[i]-(75/temp_bfn[i]*j)-5;
+			if( (tempmdct[i+j] < tempbuf) && (tempmdct[i+j] < (logmdct[i+j]-5)) )
+			 tempmdct[i+j] = logmdct[i+j] - 5;
+		}
+		
+    	if(val > tval){
+    		if( logmdct[i] > (tempmdct[i]+noise_center) ){
+    			tempmdct[i] = logmdct[i];
+    			if(logmdct[i] < lastmdct[i]) rate_mod = noise_rate;
+    			else rate_mod = noise_rate_low;
+				
+				if(i > m3n[1]){
+						if((val-tval) > 30) val = val - ((val-tval-30)/10+30)*rate_mod;
+						else val = val - (val-tval)*rate_mod;
+				}else if(i > m3n[2]){
+						if((val-tval) > 20) val = val - ((val-tval-20)/10+20)*rate_mod;
+						else val = val - (val-tval)*rate_mod;
+				}else if(i > m3n[3]){
+						if((val-tval) > 10) val = val - ((val-tval-10)/10+10)*rate_mod*0.5;
+						else val = val - (val-tval)*rate_mod*0.5;
+				}else{
+					if((val-tval) > 10) val = val - ((val-tval-10)/10+10)*rate_mod*0.3;
+					else val = val - (val-tval)*rate_mod*0.3;
+				}
+			}
+   		}
+   	}
+   	
+   	if(val>tval){
+   		logmask[i]=val;
+   		fmask=0;
+   	}else{
+   		logmask[i]=tval;
+   		fmask=1;
+   	}
+    //logmask[i]=max(val,tval);
+    
+    /* AoTuV */
+    /** @ M4 MAIN **
+    This aims at an effect similar to M1. 
+    by Aoyumi @ 2005/09/06
+    */
+    if(m4_val > 0){
+    	if(fmask && (m4_start<i)){
+    		mdct[i] *= m4_val;
+    	}
+    }
 
     /* AoTuV */
     /** @ M1 **
@@ -903,6 +1105,24 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
       mdct[i] *= de;
       
     }
+  }
+
+  /** @ M3 SET lastmdct **/
+  if(offset_select == 1){
+	if(n == 1024){
+		if(!nW_modenumber){
+			for(i=0; i<128; i++){
+				lastmdct[i] = logmdct[i*8];
+				for(j=1; j<8; j++){
+					if(lastmdct[i] > logmdct[i*8+j]){
+						lastmdct[i] = logmdct[i*8+j];
+					}
+				}
+			}
+		}
+	}else if(n == 128){
+		for(i=0; i<128; i++) lastmdct[i] = logmdct[i];
+	}
   }
 }
 
@@ -955,7 +1175,7 @@ static void precomputed_couple_point(float premag,
   
   int test=(floorA>floorB)-1;
   int offset=31-abs(floorA-floorB);
-  float floormag=hypot_lookup[((offset<0)-1)&offset]+1.f;
+  float floormag=hypot_lookup[((offset<0)-1)&offset]+1.f; // floormag = 0.990065 ~ 0.707107
 
   floormag*=FLOOR1_fromdB_INV_LOOKUP[(floorB&test)|(floorA&(~test))];
 
@@ -989,6 +1209,22 @@ static float round_hypot(float a, float b){
   if(-a>b)return -sqrt(a*a+b*b);
   return sqrt(b*b+a*a);
 }
+/* modified hypot by aoyumi 
+    better method should be found. */
+static float min_indemnity_dipole_hypot(float a, float b){
+  float thnor=0.92;
+  float threv=0.84;
+  float a2 = a*a;
+  float b2 = b*b;
+  if(a>0.){
+    if(b>0.)return sqrt(a2+b2*thnor);
+    if(a>-b)return sqrt(a2-b2+b2*threv); 
+    return -sqrt(b2-a2+a2*threv);
+  }
+  if(b<0.)return -sqrt(a2+b2*thnor);
+  if(-a>b)return -sqrt(a2-b2+b2*threv);
+  return sqrt(b2-a2+a2*threv);
+}
 
 /* revert to round hypot for now */
 float **_vp_quantize_couple_memo(vorbis_block *vb,
@@ -1001,16 +1237,27 @@ float **_vp_quantize_couple_memo(vorbis_block *vb,
   float **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
   int limit=g->coupling_pointlimit[p->vi->blockflag][PACKETBLOBS/2];
   
-  for(i=0;i<vi->coupling_steps;i++){
-    float *mdctM=mdct[vi->coupling_mag[i]];
-    float *mdctA=mdct[vi->coupling_ang[i]];
-    ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
-    for(j=0;j<limit;j++)
-      ret[i][j]=dipole_hypot(mdctM[j],mdctA[j]);
-    for(;j<n;j++)
-      ret[i][j]=round_hypot(mdctM[j],mdctA[j]);
+  if(1){ // set new hypot
+  	for(i=0;i<vi->coupling_steps;i++){
+    	float *mdctM=mdct[vi->coupling_mag[i]];
+    	float *mdctA=mdct[vi->coupling_ang[i]];
+    	
+    	ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+    	for(j=0;j<n;j++)
+    	 ret[i][j]=min_indemnity_dipole_hypot(mdctM[j],mdctA[j]);
+  	}
+  }else{
+    for(i=0;i<vi->coupling_steps;i++){
+    	float *mdctM=mdct[vi->coupling_mag[i]];
+    	float *mdctA=mdct[vi->coupling_ang[i]];
+    	
+    	ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+    	for(j=0;j<limit;j++)
+    	 ret[i][j]=dipole_hypot(mdctM[j],mdctA[j]);
+    	for(;j<n;j++)
+      	 ret[i][j]=round_hypot(mdctM[j],mdctA[j]);
+  	}
   }
-
   return(ret);
 }
 
@@ -1021,12 +1268,130 @@ static int apsort(const void *a, const void *b){
   return (f1<f2)-(f1>f2);
 }
 
+/*** optimization of sort (for 8 or 32 element) ***/
+#ifdef OPT_SORT
+#define C(o,a,b)\
+  (fabs(data[o+a])>=fabs(data[o+b]))
+#define O(o,a,b,c,d)\
+  {n[o]=o+a;n[o+1]=o+b;n[o+2]=o+c;n[o+3]=o+d;}
+#define SORT4(o)\
+  if(C(o,2,3))if(C(o,0,1))if(C(o,0,2))if(C(o,1,2))O(o,0,1,2,3)\
+        else if(C(o,1,3))O(o,0,2,1,3)\
+          else O(o,0,2,3,1)\
+      else if(C(o,0,3))if(C(o,1,3))O(o,2,0,1,3)\
+          else O(o,2,0,3,1)\
+        else O(o,2,3,0,1)\
+    else if(C(o,1,2))if(C(o,0,2))O(o,1,0,2,3)\
+        else if(C(o,0,3))O(o,1,2,0,3)\
+          else O(o,1,2,3,0)\
+      else if(C(o,1,3))if(C(o,0,3))O(o,2,1,0,3)\
+          else O(o,2,1,3,0)\
+        else O(o,2,3,1,0)\
+  else if(C(o,0,1))if(C(o,0,3))if(C(o,1,3))O(o,0,1,3,2)\
+        else if(C(o,1,2))O(o,0,3,1,2)\
+          else O(o,0,3,2,1)\
+      else if(C(o,0,2))if(C(o,1,2))O(o,3,0,1,2)\
+          else O(o,3,0,2,1)\
+        else O(o,3,2,0,1)\
+    else if(C(o,1,3))if(C(o,0,3))O(o,1,0,3,2)\
+        else if(C(o,0,2))O(o,1,3,0,2)\
+          else O(o,1,3,2,0)\
+      else if(C(o,1,2))if(C(o,0,2))O(o,3,1,0,2)\
+          else O(o,3,1,2,0)\
+        else O(o,3,2,1,0)
+
+static void sortindex_fix8(int *index,
+                           float *data,
+                           int offset){
+  int i,j,k,n[8];
+  index+=offset;
+  data+=offset;
+  SORT4(0)
+  SORT4(4)
+  j=0;k=4;
+  for(i=0;i<8;i++)
+    index[i]=n[(k>=8)||(j<4)&&C(0,n[j],n[k])?j++:k++]+offset;
+}
+
+static void sortindex_fix32(int *index,
+                            float *data,
+                            int offset){
+  int i,j,k,n[32];
+  for(i=0;i<32;i+=8)
+    sortindex_fix8(index,data,offset+i);
+  index+=offset;
+  for(i=j=0,k=8;i<16;i++)
+    n[i]=index[(k>=16)||(j<8)&&C(0,index[j],index[k])?j++:k++];
+  for(i=j=16,k=24;i<32;i++)
+    n[i]=index[(k>=32)||(j<24)&&C(0,index[j],index[k])?j++:k++];
+  for(i=j=0,k=16;i<32;i++)
+    index[i]=n[(k>=32)||(j<16)&&C(0,n[j],n[k])?j++:k++];
+}
+
+static void sortindex_shellsort(int *index,
+                                float *data,
+                                int offset,
+                                int count){
+  int gap,pos,left,right,i,j;
+  index+=offset;
+  for(i=0;i<count;i++)index[i]=i+offset;
+  gap=1;
+  while (gap<=count)gap=gap*3+1;
+  gap/=3;
+  if(gap>=4)gap/=3;
+  while(gap>0){
+    for(pos=gap;pos<count;pos++){
+      for(left=pos-gap;left>=0;left-=gap){
+        i=index[left];j=index[left+gap];
+        if(!C(0,i,j)){
+          index[left]=j;
+          index[left+gap]=i;
+        }else break;
+      }
+    }
+    gap/=3;
+  }
+}
+
+static void sortindex(int *index,
+                      float *data,
+                      int offset,
+                      int count){
+  if(count==8)sortindex_fix8(index,data,offset);
+  else if(count==32)sortindex_fix32(index,data,offset);
+  else sortindex_shellsort(index,data,offset,count);
+}
+
+#undef C
+#undef O
+#undef SORT4
+
+#endif
+/*** OPT_SORT End ***/
+
+
 int **_vp_quantize_couple_sort(vorbis_block *vb,
 			       vorbis_look_psy *p,
 			       vorbis_info_mapping0 *vi,
 			       float **mags){
 
-
+#ifdef OPT_SORT
+  if(p->vi->normal_point_p){
+    int i,j,n=p->n;
+    int **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
+    int partition=p->vi->normal_partition;
+    
+    for(i=0;i<vi->coupling_steps;i++){
+      ret[i]=_vorbis_block_alloc(vb,n*sizeof(**ret));
+      
+      for(j=0;j<n;j+=partition){
+      sortindex(ret[i],mags[i],j,partition);
+      }
+    }
+    return(ret);
+  }
+  return(NULL);
+#else
   if(p->vi->normal_point_p){
     int i,j,k,n=p->n;
     int **ret=_vorbis_block_alloc(vb,vi->coupling_steps*sizeof(*ret));
@@ -1045,10 +1410,22 @@ int **_vp_quantize_couple_sort(vorbis_block *vb,
     return(ret);
   }
   return(NULL);
+#endif
 }
 
 void _vp_noise_normalize_sort(vorbis_look_psy *p,
 			      float *magnitudes,int *sortedindex){
+#ifdef OPT_SORT
+  int j,n=p->n;
+  vorbis_info_psy *vi=p->vi;
+  int partition=vi->normal_partition;
+  int start=vi->normal_start;
+
+  for(j=start;j<n;j+=partition){
+    if(j+partition>n)partition=n-j;
+    sortindex(sortedindex-start,magnitudes,j,partition);
+  }
+#else
   int i,j,n=p->n;
   vorbis_info_psy *vi=p->vi;
   int partition=vi->normal_partition;
@@ -1063,6 +1440,7 @@ void _vp_noise_normalize_sort(vorbis_look_psy *p,
       sortedindex[i+j-start]=work[i]-magnitudes;
     }
   }
+#endif
 }
 
 void _vp_noise_normalize(vorbis_look_psy *p,
@@ -1083,14 +1461,14 @@ void _vp_noise_normalize(vorbis_look_psy *p,
       int k;
       
       for(i=j;i<j+partition;i++)
-	acc+=in[i]*in[i];
+	acc+=in[i]*in[i]*0.9;
       
       for(i=0;i<partition;i++){
 	k=sortedindex[i+j-start];
 	
-	if(in[k]*in[k]>=.25f){
+	if(in[k]*in[k]>=.25f){ // or rint(in[k])!=0.f
 	  out[k]=rint(in[k]);
-	  acc-=in[k]*in[k];
+	  acc-=in[k]*in[k]*0.9;
 	  flag=1;
 	}else{
 	  if(acc<vi->normal_thresh)break;
@@ -1120,7 +1498,10 @@ void _vp_couple(int blobno,
 		int   **mag_sort,
 		int   **ifloor,
 		int   *nonzero,
-		int  sliding_lowpass){
+		int  sliding_lowpass,
+		int blocktype, int modenumber,
+		int lW_blocktype, int lW_modenumber,
+		float **mdct, float **res_org){
 
   int i,j,k,n=p->n;
 
@@ -1144,39 +1525,73 @@ void _vp_couple(int blobno,
 
       float *rM=res[vi->coupling_mag[i]];
       float *rA=res[vi->coupling_ang[i]];
+      float *rMo=res_org[vi->coupling_mag[i]];
+      float *rAo=res_org[vi->coupling_ang[i]];
       float *qM=rM+n;
       float *qA=rA+n;
+      float *mdctM=mdct[vi->coupling_mag[i]];
+      float *mdctA=mdct[vi->coupling_ang[i]];
       int *floorM=ifloor[vi->coupling_mag[i]];
       int *floorA=ifloor[vi->coupling_ang[i]];
       float prepoint=stereo_threshholds[g->coupling_prepointamp[blobno]];
       float postpoint=stereo_threshholds[g->coupling_postpointamp[blobno]];
+      float postpoint_bu;
+      float diff_mid;
       int partition=(p->vi->normal_point_p?p->vi->normal_partition:p->n);
       int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
       int pointlimit=limit;
 
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
+       
+       if(p->m_val > 0.5){
+       	/* The threshold of a stereo is changed in specific conditions. */
+       	if(modenumber) postpoint=stereo_threshholds_lowlong[g->coupling_postpointamp[blobno]];
+       }
+      postpoint_bu=postpoint;
+      
+      diff_mid = stereo_threshholds_diffmid[g->coupling_postpointamp[blobno]];
+      if((p->vi->normal_thresh>.25) && (p->vi->normal_thresh<.45))
+       diff_mid = postpoint - ((postpoint-diff_mid) * (1.-p->vi->flacint));
 
-       /* The threshold of a stereo is changed with the size of n */
-       if(n > 1000)
-         postpoint=stereo_threshholds_limited[g->coupling_postpointamp[blobno]]; 
- 
       for(j=0;j<p->n;j+=partition){
 	float acc=0.f;
 
 	for(k=0;k<partition;k++){
 	  int l=k+j;
+	  float a=mdctM[l];
+	  float b=mdctA[l];
+	  float dummypoint;
+	  float hypot_reserve;
+
+	  postpoint=postpoint_bu;
+
+	  /* The following prevents an extreme reduction of residue. (2ch stereo only) */
+	  if(l>=limit){
+	  	if( ((a>0.) && (b<0.)) || ((b>0.) && (a<0.)) ){
+	  		hypot_reserve = fabs(fabs(a)-fabs(b));
+	  		if(hypot_reserve < 0.001){ // 0~0.000999-
+	  			dummypoint = stereo_threshholds_rephase[g->coupling_postpointamp[blobno]];
+	  			dummypoint = dummypoint+((postpoint-dummypoint)*(hypot_reserve*1000));
+	  			if(postpoint > dummypoint) postpoint = dummypoint;
+	  		}
+      	}else if(((p->vi->normal_thresh<.45) && (a-b)<0.0001)){
+      		if((rint(rM[l])==0.f && rint(rA[l])!=0.f) || (rint(rA[l])==0.f && rint(rM[l])!=0.f))
+      		postpoint = diff_mid;
+      	}
+	  }
 
 	  if(l<sliding_lowpass){
-	    if((l>=limit && fabs(rM[l])<postpoint && fabs(rA[l])<postpoint) ||
-	       (fabs(rM[l])<prepoint && fabs(rA[l])<prepoint)){
+	    if((l>=limit && fabs(rMo[l])<postpoint && fabs(rAo[l])<postpoint) ||
+	       (fabs(rMo[l])<prepoint && fabs(rAo[l])<prepoint)){
 
 
 	      precomputed_couple_point(mag_memo[i][l],
 				       floorM[l],floorA[l],
 				       qM+l,qA+l);
 
-	      if(rint(qM[l])==0.f)acc+=qM[l]*qM[l];
+	      //if(rint(qM[l])==0.f)acc+=qM[l]*qM[l];
+	      if( (rint(qM[l])==0.f) && (l>=limit) )acc+=qM[l]*qM[l]*0.9;
 	    }else{
 	      couple_lossless(rM[l],rA[l],qM+l,qA+l);
 	    }
@@ -1189,36 +1604,58 @@ void _vp_couple(int blobno,
 	if(p->vi->normal_point_p){
 	  for(k=0;k<partition && acc>=p->vi->normal_thresh;k++){
 	    int l=mag_sort[i][j+k];
+	    float a=mdctM[l];
+	    float b=mdctA[l];
 	    if(l<sliding_lowpass && l>=pointlimit && rint(qM[l])==0.f){
 	      qM[l]=unitnorm(qM[l]);
-	      acc-=1.f;
+	      if( ((a>0.) && (b<0.)) || ((b>0.) && (a<0.)) ){
+	        acc-=1.46;
+	      }else{
+	        acc-=1.f;
+	      }
 	    }
-	  } 
+	  }
 	}
       }
     }
   }
 }
 
-/* AoTuV */
-/** @ M2 **
-   The boost problem by the combination of noise normalization and point stereo is eased. 
-   However, this is a temporary patch. 
-   by Aoyumi @ 2004/04/18
+/*  aoTuV M5
+	noise_compand_level of low frequency is determined from the level of high frequency. 
+	by Aoyumi @ 2005/09/14
+	
+	return value
+	[normal compander] 0 <> 1.0 [high compander] 
+	-1 @ disable
 */
+float lb_loudnoise_fix(vorbis_look_psy *p,
+		float noise_compand_level,
+		float *logmdct,
+		int lW_modenumber,
+		int blocktype, int modenumber){
 
-void hf_reduction(vorbis_info_psy_global *g,
-                      vorbis_look_psy *p, 
-                      vorbis_info_mapping0 *vi,
-                      float **mdct){
- 
-  int i,j,n=p->n, de=0.3*p->m_val;
-  int limit=g->coupling_pointlimit[p->vi->blockflag][PACKETBLOBS/2];
-  int start=p->vi->normal_start;
-  
-  for(i=0; i<vi->coupling_steps; i++){
-    /* for(j=start; j<limit; j++){} // ???*/
-    for(j=limit; j<n; j++) 
-      mdct[i][j] *= (1.0 - de*((float)(j-limit) / (float)(n-limit)));
-  }
+	int i, n=p->n, nq1=n/4, nq3=nq1*3;
+	double hi_th=0;
+	
+	if(p->m_val < 0.5)return(-1); /* 48/44.1/32kHz only */
+	if(p->vi->normal_thresh>.45)return(-1); /* under q3 */
+
+	/* select trans. block(short>>long case). */
+	if(!modenumber)return(-1);
+	if(blocktype || lW_modenumber)return(noise_compand_level);
+
+	/* calculation of a threshold. */
+	for(i=nq1; i<nq3; i++){
+		if(logmdct[i]>-130)hi_th += logmdct[i];
+		else hi_th += -130;
+	}
+	hi_th /= n;
+	
+	/* calculation of a high_compand_level */
+	if(hi_th > -40.) noise_compand_level=-1;
+	else if(hi_th < -50.) noise_compand_level=1.;
+	else noise_compand_level=1.-((hi_th+50)/10);
+
+	return(noise_compand_level);
 }

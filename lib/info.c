@@ -416,7 +416,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 }
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
-  char temp[]="Xiph.Org libVorbis I 20050304";
+  char temp[]="AO; aoTuV r1 [20051117] (based on Xiph.Org's libVorbis)";
   int bytes = strlen(temp);
 
   /* preamble */  

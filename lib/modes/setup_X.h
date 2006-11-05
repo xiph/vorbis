@@ -15,13 +15,14 @@
 
  ********************************************************************/
 
-static double rate_mapping_X[12]={
-  -1.,-1.,-1.,-1.,-1.,-1.,
+static double rate_mapping_X[13]={
+  -1.,-1.,-1.,-1.,-1.,-1.,-1.
   -1.,-1.,-1.,-1.,-1.,-1.
 };
 
 ve_setup_data_template ve_setup_X_stereo={
-  11,
+//  11,
+  12,
   rate_mapping_X,
   quality_mapping_44,
   2,
@@ -72,7 +73,8 @@ ve_setup_data_template ve_setup_X_stereo={
 };
 
 ve_setup_data_template ve_setup_X_uncoupled={
-  11,
+//  11,
+  12,
   rate_mapping_X,
   quality_mapping_44,
   -1,
@@ -123,7 +125,8 @@ ve_setup_data_template ve_setup_X_uncoupled={
 };
 
 ve_setup_data_template ve_setup_XX_stereo={
-  2,
+//  2,
+  3,
   rate_mapping_X,
   quality_mapping_8,
   2,
@@ -174,7 +177,8 @@ ve_setup_data_template ve_setup_XX_stereo={
 };
 
 ve_setup_data_template ve_setup_XX_uncoupled={
-  2,
+//  2,
+  3,
   rate_mapping_X,
   quality_mapping_8,
   -1,
