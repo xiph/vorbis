@@ -170,7 +170,7 @@ synthesized:</para>
     and
                 
     \begin{math}
-      \mathrm{bark}(x) = 13.1 \arctan (.00074x) + 2.24 \arctan (.0000000158x^2)+.0001x
+      \mathrm{bark}(x) = 13.1 \arctan (.00074x) + 2.24 \arctan (.0000000185x^2 + .0001x)
     \end{math}
     ]]>
    </phrase></textobject>

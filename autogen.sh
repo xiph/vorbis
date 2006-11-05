@@ -32,7 +32,7 @@ echo "checking for automake... "
 
 echo -n "checking for libtool... "
 for LIBTOOLIZE in libtoolize glibtoolize nope; do
-  (which $LIBTOOLIZE) > /dev/null 2>&1 && break
+  (type $LIBTOOLIZE) > /dev/null 2>&1 && break
 done
 if test x$LIBTOOLIZE = xnope; then
   echo "nope."
@@ -72,4 +72,4 @@ echo "  autoconf"
 autoconf || exit 1
 
 cd $olddir
-$srcdir/configure "$@" && echo
+$srcdir/configure --enable-maintainer-mode "$@" && echo

@@ -17,31 +17,28 @@
 
 #include "psych_11.h"
 
-static int blocksize_11[3]={
-  512,512,512
+static int blocksize_11[2]={
+  512,512
 };
 
-static int _floor_mapping_11[3]={
-  6,6,6
+static int _floor_mapping_11[2]={
+  6,6,
 };
 
-static double rate_mapping_11[4]={
-//  8000.,13000.,44000.,
-  8000.,10000.,13000.,44000.,
+static double rate_mapping_11[3]={
+  8000.,13000.,44000.,
 };
 
-static double rate_mapping_11_uncoupled[4]={
-//  12000.,20000.,50000.,
-  14000.,16000.,20000.,50000.,
+static double rate_mapping_11_uncoupled[3]={
+  12000.,20000.,50000.,
 };
 
-static double quality_mapping_11[4]={
-  -.2,-.1,.0,1.
+static double quality_mapping_11[3]={
+  -.1,.0,1.
 };
 
 ve_setup_data_template ve_setup_11_stereo={
-//  2,
-  3,
+  2,
   rate_mapping_11,
   quality_mapping_11,
   2,
@@ -92,8 +89,7 @@ ve_setup_data_template ve_setup_11_stereo={
 };
 
 ve_setup_data_template ve_setup_11_uncoupled={
-//  2,
-  3,
+  2,
   rate_mapping_11_uncoupled,
   quality_mapping_11,
   -1,

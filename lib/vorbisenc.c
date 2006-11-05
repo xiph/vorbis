@@ -1091,9 +1091,9 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
 	if(ai==NULL)return OV_EINVAL;
 	
 	ai->management_active=hi->managed;
-	ai->bitrate_limit_min_kbps=hi->bitrate_min;
-	ai->bitrate_limit_max_kbps=hi->bitrate_max;
-	ai->bitrate_average_kbps=hi->bitrate_av;
+	ai->bitrate_limit_min_kbps=hi->bitrate_min/1000;
+	ai->bitrate_limit_max_kbps=hi->bitrate_max/1000;
+	ai->bitrate_average_kbps=hi->bitrate_av/1000;
 	ai->bitrate_average_damping=hi->bitrate_av_damp;
 	ai->bitrate_limit_reservoir_bits=hi->bitrate_reservoir;
 	ai->bitrate_limit_reservoir_bias=hi->bitrate_reservoir_bias;
@@ -1135,9 +1135,9 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
 	    return OV_EINVAL;
 
 	  hi->managed=ai->management_active;
-	  hi->bitrate_min=ai->bitrate_limit_min_kbps;
-	  hi->bitrate_max=ai->bitrate_limit_max_kbps;
-	  hi->bitrate_av=ai->bitrate_average_kbps;
+	  hi->bitrate_min=ai->bitrate_limit_min_kbps * 1000;
+	  hi->bitrate_max=ai->bitrate_limit_max_kbps * 1000;
+	  hi->bitrate_av=ai->bitrate_average_kbps * 1000;
 	  hi->bitrate_av_damp=ai->bitrate_average_damping;
 	  hi->bitrate_reservoir=ai->bitrate_limit_reservoir_bits;
 	  hi->bitrate_reservoir_bias=ai->bitrate_limit_reservoir_bias;

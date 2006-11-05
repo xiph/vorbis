@@ -15,21 +15,18 @@
 
  ********************************************************************/
 
-static double rate_mapping_22[5]={
-//  15000.,20000.,44000.,86000.
-  14000.,16000.,20000.,44000.,86000.
+static double rate_mapping_22[4]={
+  15000.,20000.,44000.,86000.
 };
 
-static double rate_mapping_22_uncoupled[5]={
-//  16000.,28000.,50000.,90000.
-  22000.,24000.,28000.,50000.,90000.
+static double rate_mapping_22_uncoupled[4]={
+  16000.,28000.,50000.,90000.
 };
 
-static double _psy_lowpass_22[5]={8.5,9.5,11.,30.,99.};
+static double _psy_lowpass_22[4]={9.5,11.,30.,99.};
 
 ve_setup_data_template ve_setup_22_stereo={
-//  3,
-  4,
+  3,
   rate_mapping_22,
   quality_mapping_16,
   2,
@@ -80,8 +77,7 @@ ve_setup_data_template ve_setup_22_stereo={
 };
 
 ve_setup_data_template ve_setup_22_uncoupled={
-//  3,
-  4,
+  3,
   rate_mapping_22_uncoupled,
   quality_mapping_16,
   -1,

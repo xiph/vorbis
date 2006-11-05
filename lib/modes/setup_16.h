@@ -18,40 +18,36 @@
 #include "psych_16.h"
 #include "residue_16.h"
 
-static int blocksize_16_short[4]={
-  1024,1024,512,512
+static int blocksize_16_short[3]={
+  1024,512,512
 };
-static int blocksize_16_long[4]={
-  1024,1024,1024,1024
-};
-
-static int _floor_mapping_16_short[4]={
-  9,9,3,3
-};
-static int _floor_mapping_16[4]={
-  9,9,9,9
+static int blocksize_16_long[3]={
+  1024,1024,1024
 };
 
-static double rate_mapping_16[5]={
-//  12000.,20000.,44000.,86000.
-  10000.,12000.,20000.,44000.,86000.
+static int _floor_mapping_16_short[3]={
+  9,3,3
+};
+static int _floor_mapping_16[3]={
+  9,9,9
 };
 
-static double rate_mapping_16_uncoupled[5]={
-//  16000.,28000.,64000.,100000.
-  16000.,18000.,28000.,64000.,100000.
+static double rate_mapping_16[4]={
+  12000.,20000.,44000.,86000.
 };
 
-static double _global_mapping_16[5]={ 2., 2., 3., 4., 5. };
+static double rate_mapping_16_uncoupled[4]={
+  16000.,28000.,64000.,100000.
+};
 
-static double quality_mapping_16[5]={ -.2,-.1,.05,.5,1. };
+static double _global_mapping_16[4]={ 1., 2., 3., 4. };
 
-//static double _psy_compand_16_mapping[5]={ 0., 0., .8, 1., 1.};
-static double _psy_compand_16_mapping[5]={ 0., 1., 1.8, 2., 2.};
+static double quality_mapping_16[4]={ -.1,.05,.5,1. };
+
+static double _psy_compand_16_mapping[4]={ 0., .8, 1., 1.};
 
 ve_setup_data_template ve_setup_16_stereo={
-//  3,
-  4,
+  3,
   rate_mapping_16,
   quality_mapping_16,
   2,
@@ -102,8 +98,7 @@ ve_setup_data_template ve_setup_16_stereo={
 };
 
 ve_setup_data_template ve_setup_16_uncoupled={
-//  3,
-  4,
+  3,
   rate_mapping_16_uncoupled,
   quality_mapping_16,
   -1,

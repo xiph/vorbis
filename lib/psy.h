@@ -15,8 +15,6 @@
 
  ********************************************************************/
 
-#define OPT_SORT
-
 #ifndef _V_PSY_H_
 #define _V_PSY_H_
 #include "smallft.h"
@@ -112,7 +110,6 @@ typedef struct {
   int   total_octave_lines;  
   long  rate; /* cache it */
 
-  int m3n[4]; /* number for M3 */
   float m_val; /* Masking compensation value */
 
 } vorbis_look_psy;
@@ -147,11 +144,7 @@ extern void _vp_offset_and_mix(vorbis_look_psy *p,
 			       int offset_select,
 			       float *logmask,
 			       float *mdct,
-			       float *logmdct,
-			       float *lastmdct, float *tempmdct,
-			       int blocktype, int modenumber,
-			       int nW_modenumber,
-			       int lW_blocktype, int lW_modenumber, int lW_no);
+			       float *logmdct);
 
 extern float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd);
 
@@ -170,9 +163,7 @@ extern void _vp_couple(int blobno,
 		       int   **mag_sort,
 		       int   **ifloor,
 		       int   *nonzero,
-		       int   sliding_lowpass,
-		       int blocktype, int modenumber,
-		       int lW_blocktype, int lW_modenumber);
+		       int   sliding_lowpass);
 
 extern void _vp_noise_normalize(vorbis_look_psy *p,
 				float *in,float *out,int *sortedindex);

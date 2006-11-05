@@ -416,7 +416,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 }
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
-  char temp[]="AO; aoTuV b3 [20041120] (based on Xiph.Org's libVorbis)";
+  char temp[]="Xiph.Org libVorbis I 20050304";
   int bytes = strlen(temp);
 
   /* preamble */  
@@ -517,6 +517,7 @@ int vorbis_commentheader_out(vorbis_comment *vc,
   op->b_o_s=0;
   op->e_o_s=0;
   op->granulepos=0;
+  op->packetno=1;
 
   return 0;
 }
@@ -550,6 +551,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   op->b_o_s=1;
   op->e_o_s=0;
   op->granulepos=0;
+  op->packetno=0;
 
   /* second header packet (comments) **********************************/
 
@@ -564,6 +566,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   op_comm->b_o_s=0;
   op_comm->e_o_s=0;
   op_comm->granulepos=0;
+  op_comm->packetno=1;
 
   /* third header packet (modes/codebooks) ****************************/
 
@@ -578,6 +581,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   op_code->b_o_s=0;
   op_code->e_o_s=0;
   op_code->granulepos=0;
+  op_code->packetno=2;
 
   oggpack_writeclear(&opb);
   return(0);

@@ -23,14 +23,14 @@ structure when using a data source other than a file.   It allows you to specify
 struct should be passed to all the libvorbisfile functions.
 <p>
 It is often useful to call <tt>ov_open_callbacks()</tt>
-simply to determine whether a given file is a vorbis bitstream. If the
+simply to determine whether a given stream is a vorbis bitstream. If the
 <tt>ov_open_callbacks()</tt>
-call fails, then the file is not recognizable as such. When you use <tt>ov_open_callbacks()
+call fails, then the data is not recognizable as such. When you use <tt>ov_open_callbacks()
 </tt>for
-this, you should <tt>fclose()</tt> the file pointer if, and only if, the
+this, you should close or otherwise deallocate your <tt>datasource</tt> if, and only if, the
 <tt>ov_open_callbacks()</tt>
 call fails. If it succeeds, you must call <a href=ov_clear.html>ov_clear()</a> to clear
-the decoder's buffers and close the file for you.<p>
+the decoder's buffers and call your close callback.<p>
 
 See also <a href="callbacks.html">Callbacks and Non-stdio I/O</a> for information on designing and specifying the required callback functions.<p>
 
@@ -47,24 +47,22 @@ int ov_open_callbacks(void *datasource, <a href="OggVorbis_File.html">OggVorbis_
 
 <h3>Parameters</h3>
 <dl>
-<dt><i>f</i></dt>
-<dd>File pointer to an already opened file
-or pipe (it need not be seekable--though this obviously restricts what
-can be done with the bitstream).</dd>
+<dt><i>datasource</i></dt>
+<dd>Pointer to a data structure allocated by the calling application, containing any state needed by the callbacks provided.</dd>
 <dt><i>vf</i></dt>
 <dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible libvorbisfile
 functions. Once this has been called, the same <tt>OggVorbis_File</tt>
 struct should be passed to all the libvorbisfile functions.</dd>
 <dt><i>initial</i></dt>
 <dd>Typically set to NULL.  This parameter is useful if some data has already been
-read from the file and the stream is not seekable. It is used in conjunction with <tt>ibytes</tt>.  In this case, <tt>initial</tt>
+read from the stream and the stream is not seekable. It is used in conjunction with <tt>ibytes</tt>.  In this case, <tt>initial</tt>
 should be a pointer to a buffer containing the data read.</dd>
 <dt><i>ibytes</i></dt>
 <dd>Typically set to 0.  This parameter is useful if some data has already been
-read from the file and the stream is not seekable. In this case, <tt>ibytes</tt>
+read from the stream and the stream is not seekable. In this case, <tt>ibytes</tt>
 should contain the length (in bytes) of the buffer.  Used together with <tt>initial</tt>.</dd>
 <dt><i>callbacks</i></dt>
-<dd>Pointer to a completed <a href="ov_callbacks.html">ov_callbacks</a> struct which indicates desired custom file manipulation routines.</dd>
+<dd>A completed <a href="ov_callbacks.html">ov_callbacks</a> struct which indicates desired custom file manipulation routines.</dd>
 </dl>
 
 

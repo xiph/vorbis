@@ -1,3 +1,10 @@
+libvorbis 1.1.1 (2005-06-27) -- "Xiph.Org libVorbis I 20050304"
+
+ * bug fix to the bitrate management encoder interface
+ * bug fix to properly set packetno field in the encoder
+ * new draft RTP encapsulation spec
+ * library API documentation improvements
+
 libvorbis 1.1.0 (2004-09-22) -- "Xiph.Org libVorbis I 20040629"
 
  * merges tuning improvements from Aoyumi's aoTuV with fixups
