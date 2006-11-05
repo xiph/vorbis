@@ -70,9 +70,11 @@ Directory:
 CONTACT:
 
 The Ogg homepage is located at 'http://www.xiph.org/ogg/'.
-Vorbis's homepage is located at 'http://www.xiph.org/ogg/vorbis/'.
+Vorbis's homepage is located at 'http://www.xiph.org/vorbis/'.
 Up to date technical documents, contact information, source code and
 pre-built utilities may be found there.
+
+The user website for Ogg Vorbis software and audio is http://vorbis.com/
 
 BUILDING FROM TRUNK:
 

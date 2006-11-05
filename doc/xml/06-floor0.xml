@@ -79,11 +79,10 @@ Packet decode proceeds as follows:</para>
   1) [amplitude] = read an unsigned integer of [floor0_amplitude_bits] bits
   2) if ( [amplitude] is greater than zero ) {
        3) [coefficients] is an empty, zero length vector
-
        4) [booknumber] = read an unsigned integer of <link linkend="vorbis-spec-ilog">ilog</link>( [floor0_number_of_books] ) bits
        5) if ( [booknumber] is greater than the highest number decode codebook ) then packet is undecodable
        6) [last] = zero;
-       7) vector [temp_vector] = read vector from bitstream using codebook number [booknumber] in VQ context.
+       7) vector [temp_vector] = read vector from bitstream using codebook number [floor0_book_list] element [booknumber] in VQ context.
        8) add the scalar value [last] to each scalar in vector [temp_vector]
        9) [last] = the value of the last scalar in vector [temp_vector]
       10) concatenate [temp_vector] onto the end of the [coefficients] vector

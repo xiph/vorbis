@@ -11,19 +11,19 @@ AC_CANONICAL_TARGET
 
 AM_CONFIG_HEADER([config.h])
 
-AM_INIT_AUTOMAKE(libvorbis,1.1.1)
+AM_INIT_AUTOMAKE(libvorbis,1.1.2)
 AM_MAINTAINER_MODE
 
 dnl Library versioning
 
 V_LIB_CURRENT=3
-V_LIB_REVISION=0
+V_LIB_REVISION=1
 V_LIB_AGE=3
 VF_LIB_CURRENT=4
-VF_LIB_REVISION=0
+VF_LIB_REVISION=1
 VF_LIB_AGE=1
 VE_LIB_CURRENT=2
-VE_LIB_REVISION=1
+VE_LIB_REVISION=2
 VE_LIB_AGE=0
 AC_SUBST(V_LIB_CURRENT)
 AC_SUBST(V_LIB_REVISION)
@@ -76,7 +76,6 @@ dnl --------------------------------------------------
 dnl Set some target options
 
 cflags_save="$CFLAGS"
-ldflags_save="$LDFLAGS"
 if test -z "$GCC"; then
 	case $host in 
 	*-*-irix*)
@@ -99,6 +98,9 @@ if test -z "$GCC"; then
         esac
 else
 
+	AC_MSG_CHECKING([GCC version])
+	GCC_VERSION=`$CC -dumpversion`
+	AC_MSG_RESULT([$GCC_VERSION])
 	case $host in 
 	*86-*-linux*)
 		DEBUG="-g -Wall -W -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
@@ -168,7 +170,6 @@ else
         esac
 fi
 CFLAGS="$CFLAGS $cflags_save"
-LDFLAGS="$LDFLAGS $ldflags_save"
 
 dnl --------------------------------------------------
 dnl Check for headers
@@ -234,8 +235,6 @@ lib/books/floor/Makefile
 doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile
 include/Makefile include/vorbis/Makefile
 examples/Makefile
-win32/Makefile
-debian/Makefile
 vq/Makefile
 libvorbis.spec
 vorbis.pc

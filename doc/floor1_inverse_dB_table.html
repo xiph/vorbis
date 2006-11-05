@@ -1,16 +1,80 @@
-<HTML><HEAD><TITLE>xiph.org: Ogg Vorbis documentation</TITLE>
-<BODY bgcolor="#ffffff" text="#202020" link="#006666" vlink="#000000">
-<nobr><img src="white-ogg.png"><img src="vorbisword2.png"></nobr><p>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
 
-<h1><font color=#000070>
-Ogg Vorbis I format specification: floor1_inverse_dB_table
-</font></h1>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-15"/>
+<title>Ogg Vorbis Documentation</title>
 
-<em>Last update to this document: July 18, 2002</em><p>
+<style type="text/css">
+body {
+  margin: 0 18px 0 18px;
+  padding-bottom: 30px;
+  font-family: Verdana, Arial, Helvetica, sans-serif;
+  color: #333333;
+  font-size: .8em;
+}
 
-The vector <tt>[floor1_inverse_dB_table]</tt> is a 256 element static
+a {
+  color: #3366cc;
+}
+
+img {
+  border: 0;
+}
+
+#xiphlogo {
+  margin: 30px 0 16px 0;
+}
+
+#content p {
+  line-height: 1.4;
+}
+
+h1, h1 a, h2, h2 a, h3, h3 a {
+  font-weight: bold;
+  color: #ff9900;
+  margin: 1.3em 0 8px 0;
+}
+
+h1 {
+  font-size: 1.3em;
+}
+
+h2 {
+  font-size: 1.2em;
+}
+
+h3 {
+  font-size: 1.1em;
+}
+
+li {
+  line-height: 1.4;
+}
+
+#copyright {
+  margin-top: 30px;
+  line-height: 1.5em;
+  text-align: center;
+  font-size: .8em;
+  color: #888888;
+  clear: both;
+}
+</style>
+
+</head>
+
+<body>
+
+<div id="xiphlogo">
+  <a href="http://www.xiph.org/"><img src="fish_xiph_org.png" alt="Fish Logo and Xiph.org"/></a>
+</div>
+
+<h1>Ogg Vorbis I format specification: floor1_inverse_dB_table</h1>
+
+<p>The vector <tt>[floor1_inverse_dB_table]</tt> is a 256 element static
 lookup table consiting of the following values (read left to right
-then top to bottom):
+then top to bottom):</p>
 
 <pre>
   1.0649863e-07, 1.1341951e-07, 1.2079015e-07, 1.2863978e-07, 
@@ -77,36 +141,14 @@ then top to bottom):
   0.50028648,    0.53279791,    0.56742212,    0.60429640, 
   0.64356699,    0.68538959,    0.72993007,    0.77736504, 
   0.82788260,    0.88168307,    0.9389798,     1.
-<pre>
+</pre>
 
-<hr>
-<a href="http://www.xiph.org/">
-<img src="white-xifish.png" align=left border=0>
-</a>
-<font size=-2 color=#505050>
+<div id="copyright">
+  The Xiph Fish Logo is a
+  trademark (&trade;) of Xiph.Org.<br/>
 
-Ogg is a <a href="http://www.xiph.org">Xiph.org Foundation</a> effort
-to protect essential tenets of Internet multimedia from corporate
-hostage-taking; Open Source is the net's greatest tool to keep
-everyone honest. See <a href="http://www.xiph.org/about.html">About
-the Xiph.org Foundation</a> for details.
-<p>
-
-Ogg Vorbis is the first Ogg audio CODEC.  Anyone may freely use and
-distribute the Ogg and Vorbis specification, whether in a private,
-public or corporate capacity.  However, the Xiph.org Foundation and
-the Ogg project (xiph.org) reserve the right to set the Ogg Vorbis
-specification and certify specification compliance.<p>
-
-Xiph.org's Vorbis software CODEC implementation is distributed under a
-BSD-like license.  This does not restrict third parties from
-distributing independent implementations of Vorbis software under
-other licenses.<p>
-
-Ogg, Vorbis, Xiph.org Foundation and their logos are trademarks (tm)
-of the <a href="http://www.xiph.org/">Xiph.org Foundation</a>.  These
-pages are copyright (C) 1994-2002 Xiph.org Foundation. All rights
-reserved.<p>
+  These pages &copy; 1994 - 2005 Xiph.Org. All rights reserved.
+</div>
 
 </body>
-
+</html>

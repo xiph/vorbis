@@ -246,14 +246,11 @@ static int mapping0_forward(vorbis_block *vb){
   codec_setup_info      *ci=vi->codec_setup;
   private_state         *b=vb->vd->backend_state;
   vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
-  vorbis_info_floor1    *vif=ci->floor_param[vb->W];
   int                    n=vb->pcmend;
   int i,j,k;
 
   int    *nonzero    = alloca(sizeof(*nonzero)*vi->channels);
   float  **gmdct     = _vorbis_block_alloc(vb,vi->channels*sizeof(*gmdct));
-  float  **gmdct_org = _vorbis_block_alloc(vb,vi->channels*sizeof(*gmdct_org));
-  float  **res_org   = _vorbis_block_alloc(vb,vi->channels*sizeof(*res_org));
   int    **ilogmaskch= _vorbis_block_alloc(vb,vi->channels*sizeof(*ilogmaskch));
   int ***floor_posts = _vorbis_block_alloc(vb,vi->channels*sizeof(*floor_posts));
   
@@ -276,8 +273,6 @@ static int mapping0_forward(vorbis_block *vb){
     float *logfft  =pcm;
 
     gmdct[i]=_vorbis_block_alloc(vb,n/2*sizeof(**gmdct));
-    gmdct_org[i]=_vorbis_block_alloc(vb,n/2*sizeof(**gmdct_org));
-    res_org[i]=_vorbis_block_alloc(vb,n/2*sizeof(**res_org));
 
     scale_dB=todB(&scale) + .345; /* + .345 is a hack; the original
                                      todB estimation used on IEEE 754
@@ -316,7 +311,6 @@ static int mapping0_forward(vorbis_block *vb){
     /* transform the PCM data */
     /* only MDCT right now.... */
     mdct_forward(b->transform[vb->W][0],pcm,gmdct[i]);
-    memcpy(gmdct_org[i], gmdct[i], n/2*sizeof(**gmdct_org));
     
     /* FFT yields more accurate tonal estimation (not phase sensitive) */
     drft_forward(&b->fft_look[vb->W],pcm);
@@ -386,11 +380,6 @@ static int mapping0_forward(vorbis_block *vb){
       
       float *logmdct =logfft+n/2;
       float *logmask =logfft;
-      
-      float *lastmdct = b->nblock+i*128;
-      float *tempmdct = b->tblock+i*128;
-      
-      float *lowcomp = b->lownoise_compand_level+i;
 
       vb->mode=modenumber;
 
@@ -430,15 +419,7 @@ static int mapping0_forward(vorbis_block *vb){
          us a tonality estimate (the larger the value in the
          'noise_depth' vector, the more tonal that area is) */
 
-      *lowcomp=
-      	lb_loudnoise_fix(psy_look,
-      			*lowcomp,
-      			logmdct,
-      			b->lW_modenumber,
-      			blocktype, modenumber);
-      
       _vp_noisemask(psy_look,
-      		*lowcomp,
 		    logmdct,
 		    noise); /* noise does not have by-frequency offset
                                bias applied yet */
@@ -486,13 +467,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   1,
 			   logmask,
 			   mdct,
-			   logmdct,
-			   lastmdct, tempmdct,
-			   *lowcomp,
-			   vif->n,
-			   blocktype, modenumber,
-			   vb->nW,
-			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
+			   logmdct);
 	
 #if 0
 	if(vi->channels==2){
@@ -535,13 +510,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   2,
 			   logmask,
 			   mdct,
-			   logmdct,
-			   lastmdct, tempmdct,
-			   *lowcomp,
-			   vif->n,
-			   blocktype, modenumber,
-			   vb->nW,
-			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
+			   logmdct);
 
 #if 0
 	if(vi->channels==2){
@@ -564,13 +533,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   0,
 			   logmask,
 			   mdct,
-			   logmdct,
-			   lastmdct, tempmdct,
-			   *lowcomp,
-			   vif->n,
-			   blocktype, modenumber,
-			   vb->nW,
-			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
+			   logmdct);
 
 #if 0
 	if(vi->channels==2)
@@ -637,6 +600,11 @@ static int mapping0_forward(vorbis_block *vb){
 					psy_look,
 					info,
 					mag_memo);    
+
+      hf_reduction(&ci->psy_g_param,
+		   psy_look,
+		   info,
+		   mag_memo);
     }
 
     memset(sortindex,0,sizeof(*sortindex)*vi->channels);
@@ -668,9 +636,7 @@ static int mapping0_forward(vorbis_block *vb){
       for(i=0;i<vi->channels;i++){
 	int submap=info->chmuxlist[i];
 	float *mdct    =gmdct[i];
-	float *mdct_org=gmdct_org[i];
 	float *res     =vb->pcm[i];
-	float *resorgch=res_org[i];
 	int   *ilogmask=ilogmaskch[i]=
 	  _vorbis_block_alloc(vb,n/2*sizeof(**gmdct));
       
@@ -692,14 +658,6 @@ static int mapping0_forward(vorbis_block *vb){
 			 ilogmask,
 			 res,
 			 ci->psy_g_param.sliding_lowpass[vb->W][k]);
-
-	/* stereo threshold */
-	_vp_remove_floor(psy_look,
-			 mdct_org,
-			 ilogmask,
-			 resorgch,
-			 ci->psy_g_param.sliding_lowpass[vb->W][k]);
-		 
 
 	_vp_noise_normalize(psy_look,res,res+n/2,sortindex[i]);
 
@@ -733,8 +691,7 @@ static int mapping0_forward(vorbis_block *vb){
 		   mag_sort,
 		   ilogmaskch,
 		   nonzero,
-		   ci->psy_g_param.sliding_lowpass[vb->W][k],
-		   gmdct, res_org);
+		   ci->psy_g_param.sliding_lowpass[vb->W][k]);
       }
       
       /* classify and encode by submap */
@@ -760,11 +717,6 @@ static int mapping0_forward(vorbis_block *vb){
 		  couple_bundle,NULL,zerobundle,ch_in_bundle,classifications);
       }
       
-      /* set last-window type & number */
-      if((blocktype == b->lW_blocktype) && (modenumber == b->lW_modenumber)) b->lW_no++;
-      else b->lW_no = 1;
-      b->lW_blocktype = blocktype;
-      b->lW_modenumber = modenumber;
       /* ok, done encoding.  Next protopacket. */
     }
     

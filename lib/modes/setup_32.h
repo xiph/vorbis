@@ -15,26 +15,22 @@
 
  ********************************************************************/
 
-static double rate_mapping_32[13]={
-//  18000.,28000.,35000.,45000.,56000.,60000.,
-  14000.,21000.,28000.,35000.,45000.,56000.,60000.,
+static double rate_mapping_32[12]={
+  18000.,28000.,35000.,45000.,56000.,60000.,
   75000.,90000.,100000.,115000.,150000.,190000.,
 };
 
-static double rate_mapping_32_un[13]={
-//  30000.,42000.,52000.,64000.,72000.,78000.,
-  24000.,32000.,42000.,52000.,64000.,72000.,78000.,
+static double rate_mapping_32_un[12]={
+  30000.,42000.,52000.,64000.,72000.,78000.,
   86000.,92000.,110000.,120000.,140000.,190000.,
 };
 
-static double _psy_lowpass_32[13]={
-//  12.3,13.,13.,14.,15.,99.,99.,99.,99.,99.,99.,99.
-  12.,12.6,13.,13.,14.,15.,99.,99.,99.,99.,99.,99.,99.
+static double _psy_lowpass_32[12]={
+  12.3,13.,13.,14.,15.,99.,99.,99.,99.,99.,99.,99.
 };
 
 ve_setup_data_template ve_setup_32_stereo={
-//  11,
-  12,
+  11,
   rate_mapping_32,
   quality_mapping_44,
   2,
@@ -63,7 +59,7 @@ ve_setup_data_template ve_setup_32_stereo={
   _psy_compand_short_mapping,
   _psy_compand_long_mapping,
 
-  {_noise_start_short_32,_noise_start_long_32},
+  {_noise_start_short_44,_noise_start_long_44},
   {_noise_part_short_44,_noise_part_long_44},
   _noise_thresh_44,
 
@@ -85,8 +81,7 @@ ve_setup_data_template ve_setup_32_stereo={
 };
 
 ve_setup_data_template ve_setup_32_uncoupled={
-//  11,
-  12,
+  11,
   rate_mapping_32_un,
   quality_mapping_44,
   -1,
@@ -115,7 +110,7 @@ ve_setup_data_template ve_setup_32_uncoupled={
   _psy_compand_short_mapping,
   _psy_compand_long_mapping,
 
-  {_noise_start_short_32,_noise_start_long_32},
+  {_noise_start_short_44,_noise_start_long_44},
   {_noise_part_short_44,_noise_part_long_44},
   _noise_thresh_44,
 
