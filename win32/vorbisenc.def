@@ -1,0 +1,13 @@
+;
+; $Id: vorbisenc.def,v 1.4 2003/10/01 22:27:26 giles Exp $
+;
+LIBRARY
+
+EXPORTS
+vorbis_encode_init
+vorbis_encode_setup_managed
+vorbis_encode_setup_vbr
+vorbis_encode_init_vbr
+vorbis_encode_setup_init
+vorbis_encode_ctl
+

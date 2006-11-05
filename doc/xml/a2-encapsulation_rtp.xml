@@ -1,0 +1,31 @@
+<?xml version="1.0" standalone="no"?>
+<!DOCTYPE appendix PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"
+                "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd" [
+
+]>
+
+<appendix id="vorbis-over-rtp">
+<appendixinfo>
+ <releaseinfo>
+  <emphasis>$Id: a2-encapsulation_rtp.xml,v 1.5 2003/09/24 11:13:42 giles Exp $</emphasis>
+ </releaseinfo>
+</appendixinfo>
+<title>Vorbis encapsulation in RTP</title>
+
+<literallayout class="monospaced">
+<!-- this works with extensions implemented in Saxon and Xalan
+<textobject><textdata 
+fileref="../draft-kerr-avt-vorbis-rtp-02.txt"/></textobject> -->
+<!-- this works with xinclude, implemented in xsltproc -->
+<xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
+      href="../draft-kerr-avt-vorbis-rtp-02.txt" parse="text">
+  <xi:fallback xmlns:xi="http://www.w3.org/2001/XInclude">
+    <para>Please consult the internet draft <citetitle>RTP Payload Format for Vorbis Encoded
+    Audio</citetitle> for description of how to embed Vorbis audio in an RTP stream.</para>
+  </xi:fallback>
+</xi:include>
+</literallayout>
+
+</appendix>
+
+<!-- end rtp appendix -->
