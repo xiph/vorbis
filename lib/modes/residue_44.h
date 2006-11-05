@@ -252,3 +252,9 @@ static vorbis_mapping_template _mapres_template_44_stereo[]={
   { _map_nominal, _res_44s_8 }, /* 8 */
   { _map_nominal, _res_44s_9 }, /* 9 */
 };
+
+// low-mode added
+static vorbis_mapping_template _mapres_template_44_stereo_low[]={
+  { _map_nominal, _res_44s_0 }, /* 0(-2) */
+  { _map_nominal, _res_44s_0 }, /* 1(-1) */
+};

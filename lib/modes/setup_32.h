@@ -25,16 +25,19 @@ static double rate_mapping_32_un[11]={
   86000.,92000.,110000.,120000.,140000.,190000.,
 };
 
-static double rate_mapping_32_low[2]={
-  20000.,28000.
+static double rate_mapping_32_low[3]={
+//  20000.,28000.
+  18000.,22000.,28000.
 };
 
-static double rate_mapping_32_un_low[2]={
-  24000.,42000.,
+static double rate_mapping_32_un_low[3]={
+//  24000.,42000.,
+  30000.,32000.,42000.
 };
 
-static double _psy_lowpass_32_low[2]={
-  13.,13.,
+static double _psy_lowpass_32_low[3]={
+//  13.,13.,
+  12.,12.5,13.
 };
 static double _psy_lowpass_32[11]={
   13.,13.,14.,15.,99.,99.,99.,99.,99.,99.,99.
@@ -143,7 +146,8 @@ ve_setup_data_template ve_setup_32_uncoupled={
 };
 
 ve_setup_data_template ve_setup_32_stereo_low={
-  1,
+//  1,
+  2,
   rate_mapping_32_low,
   quality_mapping_44_stereo_low,
   2,
@@ -154,27 +158,36 @@ ve_setup_data_template ve_setup_32_stereo_low={
   blocksize_long_44_low,
 
   _psy_tone_masteratt_44_low,
-  _psy_tone_0dB,
-  _psy_tone_suppress,
+//  _psy_tone_0dB,
+  _psy_tone_0dB_low,
+//  _psy_tone_suppress,
+  _psy_tone_suppress_low,
 
-  _vp_tonemask_adj_otherblock,
-  _vp_tonemask_adj_longblock,
-  _vp_tonemask_adj_otherblock,
+//  _vp_tonemask_adj_otherblock,
+//  _vp_tonemask_adj_longblock,
+//  _vp_tonemask_adj_otherblock,
+  _vp_tonemask_adj_otherblock_low,
+  _vp_tonemask_adj_longblock_low,
+  _vp_tonemask_adj_otherblock_low,
 
   _psy_noiseguards_44,
   _psy_noisebias_trans_low,
   _psy_noisebias_trans_low,
   _psy_noisebias_trans_low,
   _psy_noisebias_long_low,
-  _psy_noise_suppress,
+//  _psy_noise_suppress,
+  _psy_noise_suppress_low,
   
   _psy_compand_44,
-  _psy_compand_short_mapping,
-  _psy_compand_long_mapping,
+//  _psy_compand_short_mapping,
+  _psy_compand_short_mapping_low,
+//  _psy_compand_long_mapping,
+  _psy_compand_long_mapping_low,
 
   {_noise_start_short_44_low,_noise_start_long_44_low},
   {_noise_part_short_44,_noise_part_long_44},
-  _noise_thresh_44,
+//  _noise_thresh_44,
+   _noise_thresh_44_low,
 
   _psy_ath_floater,
   _psy_ath_abs,
@@ -190,12 +203,14 @@ ve_setup_data_template ve_setup_32_stereo_low={
   _floor_short_mapping_44_low,
   _floor_long_mapping_44_low,
 
-  _mapres_template_44_stereo
+//  _mapres_template_44_stereo
+  _mapres_template_44_stereo_low
 };
 
 
 ve_setup_data_template ve_setup_32_uncoupled_low={
-  1,
+//  1,
+  2,
   rate_mapping_32_un_low,
   quality_mapping_44_stereo_low,
   -1,
@@ -206,23 +221,31 @@ ve_setup_data_template ve_setup_32_uncoupled_low={
   blocksize_long_44_low,
 
   _psy_tone_masteratt_44_low,
-  _psy_tone_0dB,
-  _psy_tone_suppress,
+//  _psy_tone_0dB,
+  _psy_tone_0dB_low,
+//  _psy_tone_suppress,
+  _psy_tone_suppress_low,
 
-  _vp_tonemask_adj_otherblock,
-  _vp_tonemask_adj_longblock,
-  _vp_tonemask_adj_otherblock,
+//  _vp_tonemask_adj_otherblock,
+//  _vp_tonemask_adj_longblock,
+//  _vp_tonemask_adj_otherblock,
+  _vp_tonemask_adj_otherblock_low,
+  _vp_tonemask_adj_longblock_low,
+  _vp_tonemask_adj_otherblock_low,
 
   _psy_noiseguards_44,
   _psy_noisebias_trans_low,
   _psy_noisebias_trans_low,
   _psy_noisebias_trans_low,
   _psy_noisebias_long_low,
-  _psy_noise_suppress,
+//  _psy_noise_suppress,
+  _psy_noise_suppress_low,
   
   _psy_compand_44,
-  _psy_compand_short_mapping,
-  _psy_compand_long_mapping,
+//  _psy_compand_short_mapping,
+  _psy_compand_short_mapping_low,
+//  _psy_compand_long_mapping,
+  _psy_compand_long_mapping_low,
 
   {_noise_start_short_44_low,_noise_start_long_44_low},
   {_noise_part_short_44,_noise_part_long_44},
@@ -242,5 +265,6 @@ ve_setup_data_template ve_setup_32_uncoupled_low={
   _floor_short_mapping_44_low,
   _floor_long_mapping_44_low,
 
-  _mapres_template_44_uncoupled
+//  _mapres_template_44_uncoupled
+  _mapres_template_44_uncoupled_low
 };

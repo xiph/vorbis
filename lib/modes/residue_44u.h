@@ -294,3 +294,9 @@ static vorbis_mapping_template _mapres_template_44_uncoupled[]={
   { _map_nominal_u, _res_44u_8 }, /* 8 */
   { _map_nominal_u, _res_44u_9 }, /* 9 */
 };
+
+// low-mode added
+static vorbis_mapping_template _mapres_template_44_uncoupled_low[]={
+  { _map_nominal_u, _res_44u_0 }, /* 0(-2) */
+  { _map_nominal_u, _res_44u_0 }, /* 1(-1) */
+};
