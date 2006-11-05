@@ -31,6 +31,7 @@
 
 #define NEGINF -9999.f
 static double stereo_threshholds[]={0.0, .5, 1.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
+static double stereo_threshholds_limited[]={0.0, .5, 1.0, 1.5, 2.0, 2.5, 4.5, 8.5, 9e10};
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -282,6 +283,12 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
   p->vi=vi;
   p->n=n;
   p->rate=rate;
+
+  /* This is used by @ M1&M2 */
+  p->m_val = 1.;
+  if(rate < 26000) p->m_val = 0;
+  else if(rate < 38000) p->m_val = .94;   /* 32kHz */
+  else if(rate > 46000) p->m_val = 1.275; /* 48kHz */
 
   /* set up the lookups for a given blocksize and sample rate */
 
@@ -845,14 +852,48 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
 			float *noise,
 			float *tone,
 			int offset_select,
-			float *logmask){
+			float *logmask,
+			float *mdct,
+			float *logmdct){
+
   int i,n=p->n;
+  float de, coeffi, cx=1.0, cy=1.0;
   float toneatt=p->vi->tone_masteratt[offset_select];
+  
+  cx = p->m_val;
+  if(offset_select != 1) cx = 0;
   
   for(i=0;i<n;i++){
     float val= noise[i]+p->noiseoffset[offset_select][i];
     if(val>p->vi->noisemaxsupp)val=p->vi->noisemaxsupp;
     logmask[i]=max(val,tone[i]+toneatt);
+    
+	/** @ M1 **
+	   The following codes improve a noise problem.  
+	   A fundamental idea uses the value of masking and carries out
+	    the relative compensation of the MDCT. 
+	   However, this code is not perfect and all noise problems cannot be solved. 
+	   by Aoyumi @ 2004/04/18
+	*/
+    if(logmask[i] != (tone[i]+toneatt)){
+    	// partial masking value is used here.
+    	coeffi = -17.2*cy;
+    	val = val - logmdct[i];
+		if(val > coeffi){
+			de = 1.0-((val-coeffi)*0.005*cx);
+			if(de < 0) de = 0.0001;
+		}else de = 1.0-((val-coeffi)*0.0003*cx);
+		mdct[i] *= de;
+	}else{
+		// A masking value is used here.
+		coeffi = -57*cy;
+		val = logmask[i];
+		if(val > coeffi){
+			de = 1.0-((val-coeffi)*0.005*cx);
+			if(de < 0) de = 0.0001;
+		}else de = 1.0-((val-coeffi)*0.0003*cx);
+		mdct[i] *= de;
+	}
   }
 }
 
@@ -960,7 +1001,6 @@ float **_vp_quantize_couple_memo(vorbis_block *vb,
     for(;j<n;j++)
       ret[i][j]=round_hypot(mdctM[j],mdctA[j]);
   }
-
   return(ret);
 }
 
@@ -1107,6 +1147,10 @@ void _vp_couple(int blobno,
       nonzero[vi->coupling_mag[i]]=1; 
       nonzero[vi->coupling_ang[i]]=1; 
 
+      /* The threshold of a stereo is changed with the size of n */
+      if(n > 1000)
+        postpoint=stereo_threshholds_limited[g->coupling_postpointamp[blobno]];
+
       for(j=0;j<p->n;j+=partition){
 	float acc=0.f;
 
@@ -1116,7 +1160,6 @@ void _vp_couple(int blobno,
 	  if(l<sliding_lowpass){
 	    if((l>=limit && fabs(rM[l])<postpoint && fabs(rA[l])<postpoint) ||
 	       (fabs(rM[l])<prepoint && fabs(rA[l])<prepoint)){
-
 
 	      precomputed_couple_point(mag_memo[i][l],
 				       floorM[l],floorA[l],
@@ -1146,3 +1189,22 @@ void _vp_couple(int blobno,
   }
 }
 
+/** @ M2 **
+   The boost problem by the combination of noise normalization and point stereo is eased. 
+   However, this is a temporary patch. 
+   by Aoyumi @ 2004/04/18
+*/
+void hf_reduction(vorbis_info_psy_global *g,
+			vorbis_look_psy *p, 
+			vorbis_info_mapping0 *vi,
+			float **mdct){
+
+	int i,j,n=p->n, de=0.3*p->m_val;
+	int limit=g->coupling_pointlimit[p->vi->blockflag][PACKETBLOBS/2];
+	int start=p->vi->normal_start;
+	
+	for(i=0; i<vi->coupling_steps; i++){
+		for(j=start; j<limit; j++){}
+		for(; j<n; j++) mdct[i][j] *= (1.0 - de*((float)(j-limit) / (float)(n-limit)));
+	}
+}

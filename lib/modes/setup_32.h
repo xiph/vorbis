@@ -37,7 +37,7 @@ static double rate_mapping_32_un_low[3]={
 
 static double _psy_lowpass_32_low[3]={
 //  13.,13.,
-  12.,12.5,13.
+  12.3,13.,13.
 };
 static double _psy_lowpass_32[11]={
   13.,13.,14.,15.,99.,99.,99.,99.,99.,99.,99.
