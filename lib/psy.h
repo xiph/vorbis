@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.32 2002/07/13 06:12:47 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -111,6 +111,7 @@ typedef struct {
   long  rate; /* cache it */
 
   float m_val; /* Masking compensation value */
+
 } vorbis_look_psy;
 
 extern void   _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
@@ -176,9 +177,10 @@ extern int **_vp_quantize_couple_sort(vorbis_block *vb,
 				      float **mags);
 
 extern void hf_reduction(vorbis_info_psy_global *g,
-				vorbis_look_psy *p,
-				vorbis_info_mapping0 *vi,
-				float **mdct);
+			 vorbis_look_psy *p,
+			 vorbis_info_mapping0 *vi,
+			 float **mdct);
+
 
 #endif
 

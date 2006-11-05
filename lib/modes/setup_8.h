@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: 8kHz settings 
- last mod: $Id: setup_8.h,v 1.2 2002/07/11 06:41:05 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -23,7 +23,7 @@ static int blocksize_8[2]={
 };
 
 static int _floor_mapping_8[2]={
-  1,1,
+  6,6,
 };
 
 static double rate_mapping_8[3]={
@@ -74,7 +74,7 @@ ve_setup_data_template ve_setup_8_stereo={
 
   {_noise_start_8,_noise_start_8},
   {_noise_part_8,_noise_part_8},
-  _noise_thresh_44_2,
+  _noise_thresh_5only,
 
   _psy_ath_floater_8,
   _psy_ath_abs_8,
@@ -125,7 +125,7 @@ ve_setup_data_template ve_setup_8_uncoupled={
 
   {_noise_start_8,_noise_start_8},
   {_noise_part_8,_noise_part_8},
-  _noise_thresh_44_2,
+  _noise_thresh_5only,
 
   _psy_ath_floater_8,
   _psy_ath_abs_8,

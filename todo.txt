@@ -1,4 +1,4 @@
-Development hit list for 1.0:
+Open project list for further development:
 
 libvorbis:
 

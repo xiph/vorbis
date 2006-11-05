@@ -1,13 +1,10 @@
-cp 44u8/resaux_0.vqd _44u8__short.vqd
-cp 44u8/resaux_1.vqd _44u8__long.vqd
-
 GO
 
 >_44u8s noninterleaved
-haux _44u8__short.vqd 0,16,2
+haux 44u8/resaux_0.vqd _44u8__short 0,16,2 10
 
 >_44u8 noninterleaved
-haux _44u8__long.vqd 0,64,2
+haux 44u8/resaux_1.vqd _44u8__long 0,64,2 10
 	
 
 #     0   1   2   4   8  16  32  71 157   +      

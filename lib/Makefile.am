@@ -1,7 +1,5 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS = foreign
-
 SUBDIRS = modes books
 
 INCLUDES = -I$(top_srcdir)/include @OGG_CFLAGS@
@@ -18,6 +16,7 @@ libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c \
 			registry.h scales.h window.h lookup.h lookup_data.h\
 			codec_internal.h backends.h bitrate.h 
 libvorbis_la_LDFLAGS = -no-undefined -version-info @V_LIB_CURRENT@:@V_LIB_REVISION@:@V_LIB_AGE@
+libvorbis_la_LIBADD = @OGG_LIBS@ @VORBIS_LIBS@
 
 libvorbisfile_la_SOURCES = vorbisfile.c
 libvorbisfile_la_LDFLAGS = -no-undefined -version-info @VF_LIB_CURRENT@:@VF_LIB_REVISION@:@VF_LIB_AGE@

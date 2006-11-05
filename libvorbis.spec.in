@@ -1,15 +1,14 @@
 Name:		libvorbis
-Version:	1.0.1
-Release:	1
-Summary:	The Vorbis General Audio Compression Codec
+Version:	@VERSION@
+Release:	0.xiph.1
+Summary:	The Vorbis General Audio Compression Codec.
 
 Group:		System Environment/Libraries
 License:	BSD
 URL:		http://www.xiph.org/
 Vendor:		Xiph.org Foundation <team@xiph.org>
-Source:		http://www.xiph.org/pub/ogg/vorbis/download/%{name}-%{version}.tar.gz
-Prefix:		%{_prefix}
-BuildRoot:	%{_tmppath}/%{name}-root
+Source:		http://www.vorbis.com/files/1.0.1/unix/%{name}-%{version}.tar.gz
+BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 
 # We're forced to use an epoch since both Red Hat and Ximian use it in their
 # rc packages
@@ -49,24 +48,20 @@ CFLAGS="$RPM_OPT_FLAGS" ./configure --prefix=%{_prefix} --enable-static
 make
 
 %install
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+rm -rf $RPM_BUILD_ROOT
 
 make DESTDIR=$RPM_BUILD_ROOT install
 
 %clean 
-[ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
+rm -rf $RPM_BUILD_ROOT
 
-%post
-/sbin/ldconfig
+%post -p /sbin/ldconfig
 
-%postun
-/sbin/ldconfig
+%postun -p /sbin/ldconfig
 
 %files
 %defattr(-,root,root)
-%doc COPYING
-%doc AUTHORS
-%doc README
+%doc AUTHORS COPYING README
 %{_libdir}/libvorbis.so.*
 %{_libdir}/libvorbisfile.so.*
 %{_libdir}/libvorbisenc.so.*
@@ -78,6 +73,7 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %doc doc/vorbisfile
 %doc doc/vorbisenc
 %{_datadir}/aclocal/vorbis.m4
+%dir %{_includedir}/vorbis
 %{_includedir}/vorbis/codec.h
 %{_includedir}/vorbis/vorbisfile.h
 %{_includedir}/vorbis/vorbisenc.h
@@ -95,6 +91,14 @@ make DESTDIR=$RPM_BUILD_ROOT install
 %{_libdir}/pkgconfig/vorbisenc.pc
 
 %changelog
+* Thu Jun 10 2004 Thomas Vander Stichele <thomas at apestaart dot org>
+- autogenerate from configure
+- fix download location
+- remove Prefix
+- own include dir
+- move ldconfig runs to -p scripts
+- change Release tag to include xiph
+
 * Tue Oct 07 2003 Warren Dukes <shank@xiph.org>
 - update for 1.0.1 release
 

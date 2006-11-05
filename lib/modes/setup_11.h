@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: 11kHz settings 
- last mod: $Id: setup_11.h,v 1.2 2002/07/11 06:41:04 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -22,7 +22,7 @@ static int blocksize_11[2]={
 };
 
 static int _floor_mapping_11[2]={
-  1,1,
+  6,6,
 };
 
 static double rate_mapping_11[3]={

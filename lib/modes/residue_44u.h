@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz uncoupled
- last mod: $Id: residue_44u.h,v 1.3 2002/07/11 06:41:04 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -56,6 +56,18 @@ static vorbis_info_mapping0 _map_nominal_u[2]={
   {1, {0,0}, {1}, {1}, 0,{0},{0}}
 };
 
+static static_bookblock _resbook_44u_n1={
+  {
+    {0},
+    {0,0,&_44un1__p1_0},
+    {0,0,&_44un1__p2_0},
+    {0,0,&_44un1__p3_0},
+    {0,0,&_44un1__p4_0},
+    {0,0,&_44un1__p5_0},
+    {&_44un1__p6_0,&_44un1__p6_1},
+    {&_44un1__p7_0,&_44un1__p7_1,&_44un1__p7_2}
+   }
+};
 static static_bookblock _resbook_44u_0={
   {
     {0},
@@ -187,6 +199,15 @@ static static_bookblock _resbook_44u_9={
    }
 };
 
+static vorbis_residue_template _res_44u_n1[]={
+  {1,0,  &_residue_44_low_un,
+   &_huff_book__44un1__short,&_huff_book__44un1__short,
+   &_resbook_44u_n1,&_resbook_44u_n1},
+
+  {1,0,  &_residue_44_low_un,
+   &_huff_book__44un1__long,&_huff_book__44un1__long,
+   &_resbook_44u_n1,&_resbook_44u_n1}
+};
 static vorbis_residue_template _res_44u_0[]={
   {1,0,  &_residue_44_low_un,
    &_huff_book__44u0__short,&_huff_book__44u0__short,
@@ -283,6 +304,7 @@ static vorbis_residue_template _res_44u_9[]={
 };
 
 static vorbis_mapping_template _mapres_template_44_uncoupled[]={
+  { _map_nominal_u, _res_44u_n1 }, /* -1 */
   { _map_nominal_u, _res_44u_0 }, /* 0 */
   { _map_nominal_u, _res_44u_1 }, /* 1 */
   { _map_nominal_u, _res_44u_2 }, /* 2 */
@@ -293,10 +315,4 @@ static vorbis_mapping_template _mapres_template_44_uncoupled[]={
   { _map_nominal_u, _res_44u_7 }, /* 7 */
   { _map_nominal_u, _res_44u_8 }, /* 8 */
   { _map_nominal_u, _res_44u_9 }, /* 9 */
-};
-
-// low-mode added
-static vorbis_mapping_template _mapres_template_44_uncoupled_low[]={
-  { _map_nominal_u, _res_44u_0 }, /* 0(-2) */
-  { _map_nominal_u, _res_44u_0 }, /* 1(-1) */
 };

@@ -1,8 +1,5 @@
 ## Process this with automake to create Makefile.in
 
-AUTOMAKE_OPTIONS = foreign
-
-
 EXTRA_DIST = vorbis.def vorbis_dynamic.dsp vorbis_static.dsp\
 	vorbisfile.def vorbisfile_dynamic.dsp vorbisfile_static.dsp\
 	vorbisenc.def vorbisenc_dynamic.dsp vorbisenc_static.dsp\

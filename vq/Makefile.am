@@ -1,14 +1,12 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS = foreign
-
 INCLUDES = -I../lib -I$(top_srcdir)/include @OGG_CFLAGS@
 
 EXTRA_PROGRAMS = latticebuild latticepare latticehint\
 	latticetune huffbuild distribution
 CLEANFILES = $(EXTRA_PROGRAMS)
 
-LDFLAGS = -static
+AM_LDFLAGS = -static
 LDADD = ../lib/libvorbis.la
 
 latticebuild_SOURCES = latticebuild.c vqgen.c bookutil.c\

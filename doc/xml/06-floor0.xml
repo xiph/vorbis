@@ -7,8 +7,7 @@
 <section id="vorbis-spec-floor0">
 <sectioninfo>
 <releaseinfo>
-  $Id: 06-floor0.xml,v 1.7 2002/10/27 16:20:47 giles Exp $
-  <emphasis>Last update to this document: July 19, 2002</emphasis>
+  $Id$
 </releaseinfo>
 </sectioninfo>  
 <title>Floor type 0 setup and decode</title>
@@ -83,7 +82,7 @@ Packet decode proceeds as follows:</para>
 
        4) [booknumber] = read an unsigned integer of <link linkend="vorbis-spec-ilog">ilog</link>( [floor0_number_of_books] ) bits
        5) if ( [booknumber] is greater than the highest number decode codebook ) then packet is undecodable
-       6) [lastval] = zero;
+       6) [last] = zero;
        7) vector [temp_vector] = read vector from bitstream using codebook number [booknumber] in VQ context.
        8) add the scalar value [last] to each scalar in vector [temp_vector]
        9) [last] = the value of the last scalar in vector [temp_vector]
@@ -246,7 +245,7 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
  <listitem><simpara><varname>[iteration_condition]</varname> = map element <varname>[i]</varname></simpara></listitem>
  <listitem><simpara><varname>[output]</varname> element <varname>[i]</varname> = <varname>[linear_floor_value]</varname></simpara></listitem>
  <listitem><simpara>increment <varname>[i]</varname></simpara></listitem>
- <listitem><simpara>if ( map element <varname>[i]</varname> is equal to <varname>[iteration_condition]</varname> ) continue at step 7</simpara></listitem>
+ <listitem><simpara>if ( map element <varname>[i]</varname> is equal to <varname>[iteration_condition]</varname> ) continue at step 5</simpara></listitem>
  <listitem><simpara>if ( <varname>[i]</varname> is less than <varname>[n]</varname> ) continue at step 2</simpara></listitem>
  <listitem><simpara>done</simpara></listitem>
 </orderedlist>

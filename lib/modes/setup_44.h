@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: toplevel settings for 44.1/48kHz
- last mod: $Id: setup_44.h,v 1.9 2002/07/11 08:57:29 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -19,87 +19,43 @@
 #include "modes/residue_44.h"
 #include "modes/psych_44.h"
 
-// nominal bitrate (per ch.)
- // q-2 , q-1 , q-0
-static double rate_mapping_44_stereo_low[3]={
-//  22500.,32000.
-  20000.,24000.,32000.
-};
- // q0Å`q10
-static double rate_mapping_44_stereo[11]={
-  32000.,40000.,48000.,56000.,64000.,
+static double rate_mapping_44_stereo[12]={
+  22500.,32000.,40000.,48000.,56000.,64000.,
   80000.,96000.,112000.,128000.,160000.,250001.
 };
 
-
-static double quality_mapping_44_stereo_low[3]={
-//  -.1,.0,
-  -.2,-.1,.0,
-};
-static double quality_mapping_44[11]={
-  .0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1.0
+static double quality_mapping_44[12]={
+  -.1,.0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1.0
 };
 
-
-// q-2 added
-static int blocksize_short_44_low[2]={
-  512,512
+static int blocksize_short_44[11]={
+  512,256,256,256,256,256,256,256,256,256,256
 };
-static int blocksize_long_44_low[2]={
-  4096,4096
+static int blocksize_long_44[11]={
+  4096,2048,2048,2048,2048,2048,2048,2048,2048,2048,2048
 };
 
-static int blocksize_short_44[10]={
-  256,256,256,256,256,256,256,256,256,256
+static double _psy_compand_short_mapping[12]={
+  0.5, 1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.
 };
-static int blocksize_long_44[10]={
-  2048,2048,2048,2048,2048,2048,2048,2048,2048,2048
-};
-
-// noise compand level
-static double _psy_compand_short_mapping[11]={
-  1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.
-};
-static double _psy_compand_long_mapping[11]={
-  4., 4., 4.3, 4.6, 5., 5., 5., 5., 5., 5., 5.
-};
-// low-mode added
-static double _psy_compand_short_mapping_low[3]={
-  0.5, 1., 1.
-};
-static double _psy_compand_long_mapping_low[3]={
-  3.5, 4., 4.
+static double _psy_compand_long_mapping[12]={
+  3.5, 4., 4., 4.3, 4.6, 5., 5., 5., 5., 5., 5., 5.
 };
 
-// precho mapping (_psy_global)
-static double _global_mapping_44[11]={
-// 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4.
- 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.7, 4., 4.
-};
-static double _global_mapping_44_low[3]={
-//  0., 1.,
-  0., 0., 1.,
+static double _global_mapping_44[12]={
+  /* 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.5, 4., 4. */
+ 0., 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.7, 4., 4.
 };
 
-// The floor number defined by floor_all.h 
-// q-2 added
-static int _floor_short_mapping_44_low[2]={
-  1,1
+static int _floor_short_mapping_44[11]={
+  1,0,0,2,2,4,5,5,5,5,5
 };
-static int _floor_long_mapping_44_low[2]={
-  8,8
+static int _floor_long_mapping_44[11]={
+  8,7,7,7,7,7,7,7,7,7,7
 };
 
-static int _floor_short_mapping_44[10]={
-  0,0,2,2,4,5,5,5,5,5
-};
-static int _floor_long_mapping_44[10]={
-  7,7,7,7,7,7,7,7,7,7
-};
-
-// definition
 ve_setup_data_template ve_setup_44_stereo={
-  10,
+  11,
   rate_mapping_44_stereo,
   quality_mapping_44,
   2,
@@ -147,67 +103,5 @@ ve_setup_data_template ve_setup_44_stereo={
   _floor_long_mapping_44,
 
   _mapres_template_44_stereo
-};
-
-ve_setup_data_template ve_setup_44_stereo_low={
-//  1,
-  2,
-  rate_mapping_44_stereo_low,
-  quality_mapping_44_stereo_low,
-  2,
-  40000,
-  50000,
-  
-  blocksize_short_44_low,
-  blocksize_long_44_low,
-
-  _psy_tone_masteratt_44_low,
-//  _psy_tone_0dB,
-  _psy_tone_0dB_low,
-//  _psy_tone_suppress,
-  _psy_tone_suppress_low,
-
-//  _vp_tonemask_adj_otherblock,
-//  _vp_tonemask_adj_longblock,
-//  _vp_tonemask_adj_otherblock,
-  _vp_tonemask_adj_otherblock_low,
-  _vp_tonemask_adj_longblock_low,
-  _vp_tonemask_adj_otherblock_low,
-
-  _psy_noiseguards_44,
-  _psy_noisebias_trans_low,
-  _psy_noisebias_trans_low,
-  _psy_noisebias_trans_low,
-  _psy_noisebias_long_low,
-//  _psy_noise_suppress,
-  _psy_noise_suppress_low,
-  
-  _psy_compand_44,
-//  _psy_compand_short_mapping,
-  _psy_compand_short_mapping_low,
-//  _psy_compand_long_mapping,
-  _psy_compand_long_mapping_low,
-
-  {_noise_start_short_44_low,_noise_start_long_44_low},
-  {_noise_part_short_44,_noise_part_long_44},
-//  _noise_thresh_44,
-   _noise_thresh_44_low,
-
-  _psy_ath_floater,
-  _psy_ath_abs,
-  
-  _psy_lowpass_44_low,
-
-  _psy_global_44,
-  _global_mapping_44_low,
-  _psy_stereo_modes_44_low,
-
-  _floor_books,
-  _floor,
-  _floor_short_mapping_44_low,
-  _floor_long_mapping_44_low,
-
-//  _mapres_template_44_stereo
-  _mapres_template_44_stereo_low
 };
 

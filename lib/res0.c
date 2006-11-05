@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: residue backend 0, 1 and 2 implementation
- last mod: $Id: res0.c,v 1.49 2003/01/18 08:28:37 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -31,7 +31,7 @@
 #include "misc.h"
 #include "os.h"
 
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined (TRAIN_RESAUX)
 #include <stdio.h>
 #endif 
 
@@ -51,7 +51,7 @@ typedef struct {
   long      phrasebits;
   long      frames;
 
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined(TRAIN_RESAUX)
   int        train_seq;
   long      *training_data[8][64];
   float      training_max[8][64];
@@ -100,6 +100,7 @@ void res0_free_look(vorbis_look_residue *i){
 	      look->training_min[k][j],look->training_max[k][j]);*/
 
 	    _ogg_free(look->training_data[k][j]);
+	    look->training_data[k][j]=NULL;
 	  }
 	/*fprintf(stderr,"\n");*/
       }
@@ -255,7 +256,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
 	if(info->secondstages[j]&(1<<k)){
 	  look->partbooks[j][k]=ci->fullbooks+info->booklist[acc++];
 #ifdef TRAIN_RES
-	  look->training_data[k][j]=calloc(look->partbooks[j][k]->entries,
+	  look->training_data[k][j]=_ogg_calloc(look->partbooks[j][k]->entries,
 					   sizeof(***look->training_data));
 #endif
 	}
@@ -276,7 +277,7 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
       look->decodemap[j][k]=deco;
     }
   }
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined (TRAIN_RESAUX)
   {
     static int train_seq=0;
     look->train_seq=train_seq++;
@@ -308,7 +309,7 @@ static int local_book_besterror(codebook *book,float *a){
 	if(val<tt->quantthresh[i])break;
       
     }
-    
+
     best=(best*tt->quantvals)+tt->quantmap[i];
   }
   /* regular lattices are easy :-) */
@@ -446,7 +447,7 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
   int partvals=n/samples_per_partition;
   long **partword=_vorbis_block_alloc(vb,sizeof(*partword));
 
-#ifdef TRAIN_RES
+#if defined(TRAIN_RES) || defined (TRAIN_RESAUX)
   FILE *of;
   char buffer[80];
 #endif
@@ -487,7 +488,8 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
   return(partword);
 }
 
-static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
+static int _01forward(oggpack_buffer *opb,
+		      vorbis_block *vb,vorbis_look_residue *vl,
 		      float **in,int ch,
 		      long **partword,
 		      int (*encode)(oggpack_buffer *,float *,int,
@@ -540,7 +542,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 
 	  /* training hack */
 	  if(val<look->phrasebook->entries)
-	    look->phrasebits+=vorbis_book_encode(look->phrasebook,val,&vb->opb);
+	    look->phrasebits+=vorbis_book_encode(look->phrasebook,val,opb);
 #if 0 /*def TRAIN_RES*/
 	  else
 	    fprintf(stderr,"!");
@@ -575,7 +577,7 @@ static int _01forward(vorbis_block *vb,vorbis_look_residue *vl,
 	      }
 #endif
 	      
-	      ret=encode(&vb->opb,in[j]+offset,samples_per_partition,
+	      ret=encode(opb,in[j]+offset,samples_per_partition,
 			 statebook,accumulator);
 
 	      look->postbits+=ret;
@@ -719,7 +721,7 @@ int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
     return(0);
 }
 
-int res1_forward(vorbis_block *vb,vorbis_look_residue *vl,
+int res1_forward(oggpack_buffer *opb,vorbis_block *vb,vorbis_look_residue *vl,
 		 float **in,float **out,int *nonzero,int ch,
 		 long **partword){
   int i,j,used=0,n=vb->pcmend/2;
@@ -732,7 +734,7 @@ int res1_forward(vorbis_block *vb,vorbis_look_residue *vl,
     }
 
   if(used){
-    int ret=_01forward(vb,vl,in,used,partword,_encodepart);
+    int ret=_01forward(opb,vb,vl,in,used,partword,_encodepart);
     if(out){
       used=0;
       for(i=0;i<ch;i++)
@@ -786,7 +788,8 @@ long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
 /* res2 is slightly more different; all the channels are interleaved
    into a single vector and encoded. */
 
-int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
+int res2_forward(oggpack_buffer *opb,
+		 vorbis_block *vb,vorbis_look_residue *vl,
 		 float **in,float **out,int *nonzero,int ch,
 		 long **partword){
   long i,j,k,n=vb->pcmend/2,used=0;
@@ -803,7 +806,7 @@ int res2_forward(vorbis_block *vb,vorbis_look_residue *vl,
   }
   
   if(used){
-    int ret=_01forward(vb,vl,&work,1,partword,_encodepart);
+    int ret=_01forward(opb,vb,vl,&work,1,partword,_encodepart);
     /* update the sofar vector */
     if(out){
       for(i=0;i<ch;i++){

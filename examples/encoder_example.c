@@ -11,21 +11,9 @@
  ********************************************************************
 
  function: simple example encoder
- last mod: $Id: encoder_example.c,v 1.50 2002/07/16 09:26:07 xiphmont Exp $
+ last mod: $Id$
 
- ********************************************************************
-  modified by AOYUMI
-   //-   delete
-   //+   add
-   //+~, //~+   add range
-   // /[asterisk]-~, [asterisk]/   delete range
-   
-   support only 16bit PCM .WAV file
-   
-   2004/04/26 
-    In order to enable it to compile by Linux, a patch is applied to 
-   a this code.  This patch is offer from Frederik Himpe. 
- *********************************************************************/
+ ********************************************************************/
 
 /* takes a stereo 16bit 44.1kHz WAV file from stdin and encodes it into
    a Vorbis bitstream */
@@ -36,8 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <sys/types.h> //+
-#include <sys/stat.h> //+
 #include <math.h>
 #include <vorbis/vorbisenc.h>
 
@@ -51,12 +37,9 @@
 #endif
 
 #define READ 1024
-#define DEF_Q 0  /* Default Quality Setting */  //+
-
 signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 
-//- int main(){
-  int main(int argc, char *argv[]){ //+
+int main(){
   ogg_stream_state os; /* take physical pages, weld into a logical
 			  stream of packets */
   ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
@@ -71,27 +54,6 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 
   int eos=0,ret;
   int i, founddata;
-
-//+~
-  float qnum = DEF_Q;
-  int qx = 1;
-  if(argc < 2){
-	puts("usage: encoder_example -q4 filename.wav");
-	exit(1);
-  }
-  if( !strncmp(argv[1], "-q", 2) ){
-	if( strlen(argv[1]) > 2 ){
-		qnum = atof(argv[1]+2);
-	}
-	if( !((qnum >= -2) && (qnum <= 10)) ) qnum = DEF_Q;
-	qx++;
-  }
-  FILE *FP;
-  if( !(FP = fopen(argv[qx], "rb")) ){
-	puts("source file not found");
-	exit(1);
-  }
-//~+
 
 #if defined(macintosh) && defined(__MWERKS__)
   int argc = 0;
@@ -118,38 +80,18 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
      verify that it matches 16bit/stereo/44.1kHz.  This is just an
      example, after all. */
 
-  unsigned long footer = 0; //+
-  unsigned long sa_rate = 44100; //+
-  unsigned long channel; //+
-  struct stat sbuf; //+
-  stat(argv[qx], &sbuf); //+
-
   readbuffer[0] = '\0';
-//-  for (i=0, founddata=0; i<30 && ! feof(stdin) && ! ferror(stdin); i++)
-  for (i=0, founddata=0; i<30 && ! feof(FP) && ! ferror(FP); i++) //+
+  for (i=0, founddata=0; i<30 && ! feof(stdin) && ! ferror(stdin); i++)
   {
-//-    fread(readbuffer,1,2,stdin);
-    fread(readbuffer,1,2,FP); //+
-//+~
-    if ( ! memcmp(readbuffer, "fm", 2) ){
-       fread(readbuffer,1,8,FP); //+
-       fread(&channel,1,2,FP); //+
-       fread(&sa_rate,1,4,FP); //+
-    }
-//~+
-//-    if ( ! strncmp((char*)readbuffer, "da", 2) )
-    if ( ! memcmp(readbuffer, "da", 2) ) //+
+    fread(readbuffer,1,2,stdin);
+
+    if ( ! strncmp((char*)readbuffer, "da", 2) )
     {
       founddata = 1;
-//-      fread(readbuffer,1,6,stdin);
-      fread(readbuffer,1,6,FP); //+
-      memcpy(&footer, readbuffer+2, 4); //+
-      footer += ftell(FP); //+
+      fread(readbuffer,1,6,stdin);
       break;
     }
   }
-  footer = sbuf.st_size - footer; //+
-  printf("\n%dHz\n", sa_rate); //+
 
   /********** Encode setup ************/
 
@@ -174,39 +116,24 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 
    ---------------------------------------------------------------------
 
-   Encode using a qulity mode, but select that quality mode by asking for
+   Encode using a quality mode, but select that quality mode by asking for
    an approximate bitrate.  This is not ABR, it is true VBR, but selected
    using the bitrate interface, and then turning bitrate management off:
 
    ret = ( vorbis_encode_setup_managed(&vi,2,44100,-1,128000,-1) ||
-           vorbis_encode_ctl(&vi,OV_ECTL_RATEMANAGE_AVG,NULL) ||
+           vorbis_encode_ctl(&vi,OV_ECTL_RATEMANAGE2_SET,NULL) ||
            vorbis_encode_setup_init(&vi));
 
    *********************************************************************/
 
-//-  ret=vorbis_encode_init_vbr(&vi,2,44100,.4);
-  ret=vorbis_encode_init_vbr(&vi,channel,sa_rate, qnum/10); //+
+  ret=vorbis_encode_init_vbr(&vi,2,44100,0.1);
+
   /* do not continue if setup failed; this can happen if we ask for a
      mode that libVorbis does not support (eg, too low a bitrate, etc,
      will return 'OV_EIMPL') */
 
-//-  if(ret)exit(1);
-//+~
-  if(ret){
-	puts("encode init error");
-	exit(1);
-  }
-  char wfile[1024];
-  strcpy(wfile, argv[qx]);
-  strcat(wfile, ".ogg");
-  FILE *FP2;
-  if( !(FP2 = fopen(wfile, "wb")) ){
-	puts("file open error");
-	exit(1);
-  }
-  
-  printf("Quality %f\n Encoding...", qnum);
-//~+
+  if(ret)exit(1);
+
   /* add a comment */
   vorbis_comment_init(&vc);
   vorbis_comment_add_tag(&vc,"ENCODER","encoder_example.c");
@@ -245,26 +172,22 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 	while(!eos){
 		int result=ogg_stream_flush(&os,&og);
 		if(result==0)break;
-//-		fwrite(og.header,1,og.header_len,stdout);
-		fwrite(og.header,1,og.header_len,FP2); //+
-//-		fwrite(og.body,1,og.body_len,stdout);
-		fwrite(og.body,1,og.body_len,FP2); //+
+		fwrite(og.header,1,og.header_len,stdout);
+		fwrite(og.body,1,og.body_len,stdout);
 	}
 
   }
-
+  
   while(!eos){
     long i;
-//-   long bytes=fread(readbuffer,1,READ*4,stdin); /* stereo hardwired here */
-    long bytes=fread(readbuffer,1,READ*(channel*2),FP); //+
-    if(bytes < (READ*(channel*2))) bytes -= footer; //+
-    if(bytes < 0) bytes = 0; //+
+    long bytes=fread(readbuffer,1,READ*4,stdin); /* stereo hardwired here */
+
     if(bytes==0){
-     /* end of file.  this can be done implicitly in the mainline,
-        but it's easier to see here in non-clever fashion.
-        Tell the library we're at end of stream so that it can handle
-        the last frame and mark end of stream in the output properly */
-       vorbis_analysis_wrote(&vd,0);
+      /* end of file.  this can be done implicitly in the mainline,
+         but it's easier to see here in non-clever fashion.
+         Tell the library we're at end of stream so that it can handle
+         the last frame and mark end of stream in the output properly */
+      vorbis_analysis_wrote(&vd,0);
 
     }else{
       /* data to encode */
@@ -273,23 +196,13 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
       float **buffer=vorbis_analysis_buffer(&vd,READ);
       
       /* uninterleave samples */
-/*-~
       for(i=0;i<bytes/4;i++){
 	buffer[0][i]=((readbuffer[i*4+1]<<8)|
 		      (0x00ff&(int)readbuffer[i*4]))/32768.f;
 	buffer[1][i]=((readbuffer[i*4+3]<<8)|
 		      (0x00ff&(int)readbuffer[i*4+2]))/32768.f;
       }
-*/
-//+~
-      for(i=0;i<bytes/(channel*2);i++){
-	buffer[0][i]=((readbuffer[i*(channel*2)+1]<<8)|
-		      (0x00ff&(int)readbuffer[i*(channel*2)]))/32768.f;
-	if(channel == 2)
-	buffer[1][i]=((readbuffer[i*(channel*2)+3]<<8)|
-		      (0x00ff&(int)readbuffer[i*(channel*2)+2]))/32768.f;
-      }
-//~+
+    
       /* tell the library how much we actually submitted */
       vorbis_analysis_wrote(&vd,i);
     }
@@ -312,10 +225,8 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 	while(!eos){
 	  int result=ogg_stream_pageout(&os,&og);
 	  if(result==0)break;
-//-	  fwrite(og.header,1,og.header_len,stdout);
-	  fwrite(og.header,1,og.header_len,FP2); //+
-//-	  fwrite(og.body,1,og.body_len,stdout);
-	  fwrite(og.body,1,og.body_len,FP2); //+
+	  fwrite(og.header,1,og.header_len,stdout);
+	  fwrite(og.body,1,og.body_len,stdout);
 	  
 	  /* this could be set above, but for illustrative purposes, I do
 	     it here (to show that vorbis does know where the stream ends) */
@@ -336,8 +247,7 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
   
   /* ogg_page and ogg_packet structs always point to storage in
      libvorbis.  They're never freed or manipulated directly */
-  fclose(FP); //+
-  fclose(FP2); //+
+  
   fprintf(stderr,"Done.\n");
   return(0);
 }

@@ -7,8 +7,7 @@
 <section id="vorbis-spec-intro">
 <sectioninfo>
 <releaseinfo>
- $Id: 01-introduction.xml,v 1.8 2002/12/19 06:10:12 xiphmont Exp $
-<emphasis>Last update to this document: July 18, 2002</emphasis>
+ $Id$
 </releaseinfo>
 </sectioninfo>
 <title>Introduction and Description</title>
@@ -131,7 +130,7 @@ unbounded, although for streaming a rule-of-thumb of 4kB or less is
 recommended (and Xiph.Org's Vorbis encoder follows this suggestion).</para>
 
 <para>
-Our own design work indicates the the primary liability of the
+Our own design work indicates the primary liability of the
 required header is in mindshare; it is an unusual design and thus
 causes some amount of complaint among engineers as this runs against
 current design trends (and also points out limitations in some

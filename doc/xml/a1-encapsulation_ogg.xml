@@ -7,8 +7,7 @@
 <appendix id="vorbis-over-ogg">
 <appendixinfo>
  <releaseinfo>
-  <emphasis>Last update to this document: July 14, 2002</emphasis>
-  $Id: a1-encapsulation_ogg.xml,v 1.3 2003/10/08 01:42:20 giles Exp $
+  $Id$
  </releaseinfo>
 </appendixinfo>
 <title>Embedding Vorbis into an Ogg stream</title>
@@ -89,7 +88,7 @@ Ogg encapsulation of a Vorbis packet stream is straightforward.</para>
 <itemizedlist>
 
 <listitem><simpara>
-  The first Vorbis packet (the indentification header), which
+  The first Vorbis packet (the identification header), which
   uniquely identifies a stream as Vorbis audio, is placed alone in the
   first page of the logical Ogg stream.  This results in a first Ogg
   page of exactly 58 bytes at the very beginning of the logical stream.

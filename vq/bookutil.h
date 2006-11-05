@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.h,v 1.12 2001/12/20 01:00:39 segher Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#include "codebook.h"
+#include "localcodebook.h"
 
 extern char     *get_line(FILE *in);
 extern char     *setup_line(FILE *in);

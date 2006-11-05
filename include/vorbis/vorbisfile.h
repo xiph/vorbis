@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: stdio-based convenience library for opening/seeking/decoding
- last mod: $Id: vorbisfile.h,v 1.20 2003/08/18 05:34:01 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -27,11 +27,11 @@ extern "C"
 #include "codec.h"
 
 /* The function prototypes for the callbacks are basically the same as for
- * the stdio functions fread, fseek, fclose, ftell. 
+ * the stdio functions fread, fseek, fclose, ftell.
  * The one difference is that the FILE * arguments have been replaced with
  * a void * - this is to be used as a pointer to whatever internal data these
  * functions might need. In the stdio case, it's just a FILE * cast to a void *
- * 
+ *
  * If you use other functions, check the docs for these functions and return
  * the right values. For seek_func(), you *MUST* return -1 if the stream is
  * unseekable
@@ -54,7 +54,7 @@ typedef struct OggVorbis_File {
   int              seekable;
   ogg_int64_t      offset;
   ogg_int64_t      end;
-  ogg_sync_state   oy; 
+  ogg_sync_state   oy;
 
   /* If the FILE handle isn't seekable (eg, a pipe), only the current
      stream appears */

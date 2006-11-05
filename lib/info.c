@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: maintain the info structure, info <-> header packets
- last mod: $Id: info.c,v 1.62 2003/09/10 01:10:18 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -416,7 +416,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 }
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
-  char temp[]="AO; aoTuV b2 [20040420]  (based on Xiph.Org's 1.0.1)";
+  char temp[]="Xiph.Org libVorbis I 20040629";
   int bytes = strlen(temp);
 
   /* preamble */  

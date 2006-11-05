@@ -59,7 +59,7 @@ called to initialize the <a href="OggVorbis_File.html">OggVorbis_File</a> struct
 <tr bgcolor=#cccccc>
         <td>
 <pre><b>
-  if(ov_open(stdin,&ov,NULL,-1)<0){
+  if(ov_open(stdin,&amp;ov,NULL,-1)&gt;0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }
@@ -81,11 +81,11 @@ First we check to make sure the stream is seekable using <a href="ov_seekable.ht
 <tr bgcolor=#cccccc>
         <td>
 <pre><b>
-  if(ov_seekable(&ov)){
+  if(ov_seekable(&amp;ov)){
     printf("Input bitstream contained %ld logical bitstream section(s).\n",
-	   ov_streams(&ov));
+	   ov_streams(&amp;ov));
     printf("Total bitstream playing time: %ld seconds\n\n",
-	   (long)ov_time_total(&ov,-1));
+	   (long)ov_time_total(&amp;ov,-1));
 
   }else{
     printf("Standard input was not seekable.\n"
@@ -108,14 +108,14 @@ First we check to make sure the stream is seekable using <a href="ov_seekable.ht
 <tr bgcolor=#cccccc>
         <td>
 <pre><b>
-  for(i=0;i<ov_streams(&ov);i++){
-    vorbis_info *vi=ov_info(&ov,i);
+  for(i=0;i&lt;ov_streams(&amp;ov);i++){
+    vorbis_info *vi=ov_info(&amp;ov,i);
     printf("\tlogical bitstream section %d information:\n",i+1);
     printf("\t\t%ldHz %d channels bitrate %ldkbps serial number=%ld\n",
-	   vi->rate,vi->channels,ov_bitrate(&ov,i)/1000,
-	   ov_serialnumber(&ov,i));
-    printf("\t\tcompressed length: %ld bytes ",(long)(ov_raw_total(&ov,i)));
-    printf(" play time: %lds\n",(long)ov_time_total(&ov,i));
+	   vi-&gt;rate,vi-&gt;channels,ov_bitrate(&amp;ov,i)/1000,
+	   ov_serialnumber(&amp;ov,i));
+    printf("\t\tcompressed length: %ld bytes ",(long)(ov_raw_total(&amp;ov,i)));
+    printf(" play time: %lds\n",(long)ov_time_total(&amp;ov,i));
   } 
 </b></pre>
         </td>
@@ -129,7 +129,7 @@ When we're done with the entire physical bitstream, we need to call <a href="ov_
 <tr bgcolor=#cccccc>
         <td>
 <pre><b>
-  ov_clear(&ov);
+  ov_clear(&amp;ov);
   return 0;
 }
 </b></pre>
@@ -145,7 +145,7 @@ distribution in <a href="chaining_example_c.html">chaining_example.c</a>.
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2003 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2004 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
