@@ -188,7 +188,7 @@ The 4 octets following the RTP Header section are the Payload Header.  This head
 <t>
 Ident: 24 bits</t>
 <t>
-This 24 bit field is used to associate the Vorbis data to a decoding Configuration.
+This 24 bit field is used to associate the Vorbis data to a decoding Configuration. It is stored as network byte order integer.
 </t>
 
 <t>
@@ -243,7 +243,7 @@ Raw Vorbis packets are currently unbounded in length, application profiles will 
 </figure>
 
 <t>
-Each Vorbis payload packet starts with a two octet length header, which is used to represent the size of the following data payload, followed by the raw Vorbis data padded to the nearest byte boundary.
+Each Vorbis payload packet starts with a two octet length header, which is used to represent the size in bytes of the following data payload, followed by the raw Vorbis data padded to the nearest byte boundary. The length value is stored as network byte order integer.
 </t>
 
 <t>
