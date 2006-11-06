@@ -207,7 +207,7 @@ This field is set according to the following list
 <t>
 Vorbis Data Type (VDT): 2 bits</t>
 <t>
-This field sets the payload type for the Vorbis data in this RTP packet. There are currently three type of Vorbis payloads.
+This field specifies the kind of Vorbis data stored in this RTP packet. There are currently three different types of Vorbis payloads.
 </t>
 
 <vspace blankLines="1" />
@@ -369,13 +369,13 @@ The 24 bit Ident field is used to map which Configuration will be used to decode
 <section anchor="In-band Header Transmission" title="In-band Header Transmission">
 
 <t>
-The <xref target="Packed Configuration">Packed Configuration</xref> Payload is sent in-band with the packet type bits set to match the payload type. Clients MUST be capable of dealing with fragmentation and periodic re-transmission of the configuration headers.
+The <xref target="Packed Configuration">Packed Configuration</xref> Payload is sent in-band with the packet type bits set to match the Vorbis Data Type. Clients MUST be capable of dealing with fragmentation and periodic re-transmission of the configuration headers.
 </t>
 
 <section anchor="Packed Configuration" title="Packed Configuration">
 
 <t>
-A Vorbis Packed Configuration is indicated with the payload type field set to 1. Of the three headers, defined in the <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the identification and the setup will be packed together, the comment header is completely suppressed. Is up to the client to provide a minimal size comment header to the decoder if required by the implementation.
+A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set to 1. Of the three headers, defined in the <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the identification and the setup will be packed together, the comment header is completely suppressed. Is up to the client to provide a minimal size comment header to the decoder if required by the implementation.
 </t>
 
 <figure anchor="Packed Configuration Figure" title="Packed Configuration Figure">
@@ -627,7 +627,7 @@ The mapping between the stream and the the configuration is explicit.
 <section anchor="Comment Headers" title="Comment Headers">
 
 <t>
-With the payload type flag set to 2, this indicates that the packet contain the comment metadata, such as artist name, track title and so on. These metadata messages are not intended to be fully descriptive but to offer basic track/song information. Clients MAY ignore it completely. The details on the format of the comments can be found in the <xref target="vorbis-spec-ref">Vorbis documentation</xref>.
+With the Vorbis Data Type flag set to 2, this indicates that the packet contain the comment metadata, such as artist name, track title and so on. These metadata messages are not intended to be fully descriptive but to offer basic track/song information. Clients MAY ignore it completely. The details on the format of the comments can be found in the <xref target="vorbis-spec-ref">Vorbis documentation</xref>.
 </t>
 <figure anchor="Comment Packet Figure" title="Comment Packet">
 <artwork><![CDATA[
