@@ -78,7 +78,7 @@ in this document are to be interpreted as described in RFC 2119 <xref target="rf
 <section anchor="Payload Format" title="Payload Format">
 
 <t>
-For RTP based transport of Vorbis encoded audio the standard RTP header is followed by a 4 octets payload header, then the payload data.  The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames. The payload data contains the raw Vorbis bitstream information.
+For RTP based transport of Vorbis encoded audio the standard RTP header is followed by a 4 octets payload header, then the payload data. The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames. The payload data contains the raw Vorbis bitstream information. There are 3 types of Vorbis payload data, an RTP packet MUST contain just one of them at time.
 </t>
 
 <section anchor="RTP Header" title="RTP Header">
