@@ -32,7 +32,7 @@ This document describes an RTP payload format for transporting Vorbis encoded au
 </t>
 
 <t>
-Also included within the document are the necessary details for the use of Vorbis with MIME and Session Description Protocol (SDP).
+Also included within this memo are media type registrations, and the details necessary for the use of Vorbis with the Session Description Protocol (SDP).
 </t>
 
 </abstract>
