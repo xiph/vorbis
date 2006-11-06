@@ -608,7 +608,7 @@ Unlike the loss of raw Vorbis payload data, loss of a configuration header can l
 </t>
 
 <t>
-Loss of Configuration Packet results in the halting of stream decoding and SHOULD be reported to the client as well as a loss report sent via RTCP.
+Loss of Configuration Packet results in the halting of stream decoding
 </t>
 
 </section>
@@ -772,11 +772,7 @@ This is the last Vorbis fragment packet.  The Fragment type is set to 3 and the 
 <section anchor="Packet Loss" title="Packet Loss">
 
 <t>
-As there is no error correction within the Vorbis stream, packet loss will result in a loss of signal. Packet loss is more of an issue for fragmented Vorbis packets as the client will have to cope with the handling of the Fragment Type. In case of loss of fragments the client MUST discard all the remaining fragments and decode the incomplete packet. If we use the fragmented Vorbis packet example above and the first packet is lost the client MUST detect that the next packet has the packet count field set to 0 and the Fragment type 2 and MUST drop it. The next packet, which is the final fragmented packet, MUST be dropped in the same manner. If the missing packet is the last, the received two fragments will be kept and the incomplete vorbis packet decoded. Feedback reports on lost and dropped packets MUST be sent back via RTCP.
-</t>
-
-<t>
-If a particular multicast session has a large number of participants care must be taken to prevent an RTCP feedback implosion, <xref target="rtcp-feedback"></xref>, in the event of packet loss from a large number of participants.
+As there is no error correction within the Vorbis stream, packet loss will result in a loss of signal. Packet loss is more of an issue for fragmented Vorbis packets as the client will have to cope with the handling of the Fragment Type. In case of loss of fragments the client MUST discard all the remaining fragments and decode the incomplete packet. If we use the fragmented Vorbis packet example above and the first packet is lost the client MUST detect that the next packet has the packet count field set to 0 and the Fragment type 2 and MUST drop it. The next packet, which is the final fragmented packet, MUST be dropped in the same manner. If the missing packet is the last, the received two fragments will be kept and the incomplete vorbis packet decoded.
 </t>
 
 <t>
@@ -979,10 +975,6 @@ The offer, as described in <xref target="rfc3264">An Offer/Answer Model Session 
 Vorbis clients SHOULD send regular receiver reports detailing congestion.  A mechanism for dynamically downgrading the stream, known as bitrate peeling, will allow for a graceful backing off of the stream bitrate. This feature is not available at present so an alternative would be to redirect the client to a lower bitrate stream if one is available.
 </t>
 
-<t>
-If a particular multicast session has a large number of participants care must be taken to prevent an RTCP feedback implosion, <xref target="rtcp-feedback"></xref>, in the event of congestion.
-</t>
-
 </section> 
 
 <section anchor="Examples" title="Examples">
@@ -1115,18 +1107,6 @@ Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner, Aar
 <author initials="S." surname="Josefsson" fullname="Simon Josefsson"></author>
 </front>
 <seriesInfo name="RFC" value="3548" />
-</reference>   
-
-<reference anchor="rtcp-feedback">
-<front>
-<title>Extended RTP Profile for RTCP-based Feedback (RTP/AVPF)</title>
-<author initials="J." surname="Ott" fullname="Joerg Ott"></author>
-<author initials="S." surname="Wenger" fullname="Stephan Wenger"></author>
-<author initials="N." surname="Sato" fullname="Noriyuki Sato"></author>
-<author initials="C." surname="Burmeister" fullname="Carsten Burmeister"></author>
-<author initials="J." surname="Rey" fullname="Jose Rey"></author>
-</front>
-<seriesInfo name="Internet Draft" value="(draft-ietf-avt-rtcp-feedback-11: Work in progress)" />
 </reference>   
 
 <reference anchor="rfc1952">
