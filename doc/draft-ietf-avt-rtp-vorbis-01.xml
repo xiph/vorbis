@@ -578,27 +578,6 @@ IETF AVT Working Group</t>
 </section>
 </section>
 
-<!--
-<section anchor="Well Known Configurations" title="Well Known Configurations">
-
-<t>
-Even if the Vorbis nature prevents the creation of everlasting profiles, some combination of codebooks, bitrate, channels and samplerate are quite common.
-A client may have a list of well known configuration and MAY avoid fetching them already.
-In order to retain compatibility the server, even if all the Configurations that will be in use are Well Known, MUST provide at least another way to provide codebooks.
-Every Configuration that is available as Well Known has the Ident highest bit set. Every Well Known List MUST contain at most 2^23 items.
-</t>
-
-<t>
-This off band delivery method MUST be signaled as "out_band/wkc/list_name" using the mandated parameter delivery-method. An optional configuration-uri MAY point to a location where to fetch it. The list is in the form of <xref target="Packed Headers">Packed Headers</xref>, that MAY be compressed using <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref> as further explained in the <xref target="IANA Considerations">IANA Considerations</xref> section.
-</t>
-
-<t>
-Only one list MUST be used at time. During <xref target="rfc3264">SDP Offer/Answer</xref> client and server MAY agree on a specific list, that subject will be discussed further on the specific <xref target="Usage with the SDP Offer/Answer Mode">SDP Offer/Answer</xref> section.
-This method
-</t>
-
-</section>
--->
 </section>
 
 <section anchor="Loss of Configuration Headers" title="Loss of Configuration Headers"> 
@@ -612,15 +591,6 @@ Loss of Configuration Packet results in the halting of stream decoding
 </t>
 
 </section>
-
-<!-- <section anchor="Mapping between Configuration and Stream" title="Mapping between Configuration and Stream">
-
-<t>
-The mapping between the stream and the the configuration is explicit.
-</t>
-
-</section> -->
-
 
 </section>
 
