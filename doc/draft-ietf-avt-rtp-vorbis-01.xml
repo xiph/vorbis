@@ -769,6 +769,18 @@ Loss of any of the Configuration fragment will result in the loss of the full Co
 <vspace blankLines="1" />
 
 <list style="hanging">
+<t hangText="rate:"> indicates the RTP timestamp clock rate as described in <xraf target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
+</t>
+
+<vspace blankLines="1" />
+
+<list style="hanging">
+<t hangText="channels:"> indicates the number of audio channels as described in <xraf target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
+</t>
+
+<vspace blankLines="1" />
+
+<list style="hanging">
 <t hangText="delivery-method:"> indicates the delivery methods in use, the possible values are: inline, in_band, out_band/specific_name<vspace blankLines="0" />
 Where "specific_name" is the name of the out of band delivery method.
 
