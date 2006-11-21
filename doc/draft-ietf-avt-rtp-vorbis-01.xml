@@ -28,18 +28,23 @@
 
 <abstract>
 <t>
-This document describes an RTP payload format for transporting Vorbis encoded audio. It details the RTP encapsulation mechanism for raw Vorbis data and details the delivery mechanisms for the decoder probability model, referred to as a codebook and other setup information.
+This document describes an RTP payload format for transporting Vorbis encoded
+audio. It details the RTP encapsulation mechanism for raw Vorbis data and 
+details the delivery mechanisms for the decoder probability model, referred to
+as a codebook and other setup information.
 </t>
 
 <t>
-Also included within this memo are media type registrations, and the details necessary for the use of Vorbis with the Session Description Protocol (SDP).
+Also included within this memo are media type registrations, and the details
+necessary for the use of Vorbis with the Session Description Protocol (SDP).
 </t>
 
 </abstract>
 
 <note title="Editors Note">
 <t>
-All references to RFC XXXX are to be replaced by references to the RFC number of this memo, when published.
+All references to RFC XXXX are to be replaced by references to the RFC number
+of this memo, when published.
 </t>
 </note>
 
@@ -62,7 +67,10 @@ ambisonic, or up to 255 discrete channels).
 </t>
 
 <t>
-Vorbis encoded audio is generally encapsulated within an Ogg format bitstream <xref target="rfc3533"></xref>, which provides framing and synchronization.  For the purposes of RTP transport, this layer is unnecessary, and so raw Vorbis packets are used in the payload.
+Vorbis encoded audio is generally encapsulated within an Ogg format bitstream
+<xref target="rfc3533"></xref>, which provides framing and synchronization.
+For the purposes of RTP transport, this layer is unnecessary, and so raw Vorbis
+packets are used in the payload.
 </t>
 
 <section anchor="Terminology" title="Terminology">
@@ -78,13 +86,21 @@ in this document are to be interpreted as described in RFC 2119 <xref target="rf
 <section anchor="Payload Format" title="Payload Format">
 
 <t>
-For RTP based transport of Vorbis encoded audio the standard RTP header is followed by a 4 octets payload header, then the payload data. The payload headers are used to associate the Vorbis data with its associated decoding codebooks as well as indicating if the following packet contains fragmented Vorbis data and/or the number of whole Vorbis data frames. The payload data contains the raw Vorbis bitstream information. There are 3 types of Vorbis payload data, an RTP packet MUST contain just one of them at time.
+For RTP based transport of Vorbis encoded audio the standard RTP header is
+followed by a 4 octets payload header, then the payload data. The payload
+headers are used to associate the Vorbis data with its associated decoding
+codebooks as well as indicating if the following packet contains fragmented
+Vorbis data and/or the number of whole Vorbis data frames. The payload data
+contains the raw Vorbis bitstream information. There are 3 types of Vorbis
+payload data, an RTP packet MUST contain just one of them at time.
 </t>
 
 <section anchor="RTP Header" title="RTP Header">
 
 <t>
-The format of the RTP header is specified in <xref target="rfc3550"></xref> and shown in Figure <xref target="RTP Header Figure"/>.  This payload format uses the fields of the header in a manner consistent with that specification. 
+The format of the RTP header is specified in <xref target="rfc3550"></xref>
+and shown in Figure <xref target="RTP Header Figure"/>.  This payload format
+uses the fields of the header in a manner consistent with that specification.
 </t>
 
 <t>
@@ -107,20 +123,24 @@ The format of the RTP header is specified in <xref target="rfc3550"></xref> and 
 </t>
 
 <t>
-The RTP header begins with an octet of fields (V, P, X, and CC) to support specialized RTP uses (see <xref target="rfc3550">
-</xref> and <xref target="rfc3551"></xref> for details). For Vorbis RTP, the following values are used.
+The RTP header begins with an octet of fields (V, P, X, and CC) to support
+specialized RTP uses (see <xref target="rfc3550"></xref> and 
+<xref target="rfc3551"></xref> for details). For Vorbis RTP, the following
+values are used.
 </t>
 
 <t>
 Version (V): 2 bits</t>
 <t>
-This field identifies the version of RTP. The version used by this specification is two (2).
+This field identifies the version of RTP. The version used by this
+specification is two (2).
 </t>
 
 <t>
 Padding (P): 1 bit</t>
 <t>
-Padding MAY be used with this payload format according to section 5.1 of <xref target="rfc3550"></xref>.  
+Padding MAY be used with this payload format according to section 5.1 of
+<xref target="rfc3550"></xref>.
 </t>
 
 <t>
@@ -138,32 +158,39 @@ The CSRC count is used in accordance with <xref target="rfc3550"></xref>.
 <t>
 Marker (M): 1 bit</t>
 <t>
-Set to zero.  Audio silence suppression not used.  This conforms to section 4.1 of <xref target="vorbis-spec-ref"></xref>.
+Set to zero.  Audio silence suppression not used.  This conforms to section 4.1
+of <xref target="vorbis-spec-ref"></xref>.
 </t>
 
 <t>
 Payload Type (PT): 7 bits</t>
 <t>
-An RTP profile for a class of applications is expected to assign a payload type for this format, or a dynamically allocated payload type SHOULD be chosen which designates the payload as Vorbis.
+An RTP profile for a class of applications is expected to assign a payload type
+for this format, or a dynamically allocated payload type SHOULD be chosen which
+designates the payload as Vorbis.
 </t>
 
 <t>
 Sequence number: 16 bits</t>
 <t>
-The sequence number increments by one for each RTP data packet sent, and may be used by the receiver to detect packet loss and to restore packet sequence. This field is detailed further in <xref target="rfc3550"></xref>.
+The sequence number increments by one for each RTP data packet sent, and may be
+used by the receiver to detect packet loss and to restore packet sequence. This
+field is detailed further in <xref target="rfc3550"></xref>.
 </t>
 
 <t>
 Timestamp: 32 bits</t>
 <t>
-A timestamp representing the sampling time of the first sample of the first Vorbis packet in the RTP packet. The clock frequency 
-MUST be set to the sample rate of the encoded audio data and is conveyed out-of-band as a SDP parameter.
+A timestamp representing the sampling time of the first sample of the first
+Vorbis packet in the RTP packet. The clock frequency MUST be set to the sample
+rate of the encoded audio data and is conveyed out-of-band as a SDP parameter.
 </t>
 
 <t>
 SSRC/CSRC identifiers: </t>
 <t>
-These two fields, 32 bits each with one SSRC field and a maximum of 16 CSRC fields, are as defined in <xref target="rfc3550">
+These two fields, 32 bits each with one SSRC field and a maximum of 16 CSRC
+fields, are as defined in <xref target="rfc3550">
 </xref>.  
 </t>
 
@@ -172,7 +199,9 @@ These two fields, 32 bits each with one SSRC field and a maximum of 16 CSRC fiel
 <section anchor="Payload Header" title="Payload Header">
 
 <t>
-The 4 octets following the RTP Header section are the Payload Header.  This header is split into a number of bitfields detailing the format of the following payload data packets.
+The 4 octets following the RTP Header section are the Payload Header. This
+header is split into a number of bitfields detailing the format of the
+following payload data packets.
 </t>
 
 <figure anchor="Payload Header Figure" title="Payload Header">
@@ -188,7 +217,8 @@ The 4 octets following the RTP Header section are the Payload Header.  This head
 <t>
 Ident: 24 bits</t>
 <t>
-This 24 bit field is used to associate the Vorbis data to a decoding Configuration. It is stored as network byte order integer.
+This 24 bit field is used to associate the Vorbis data to a decoding
+Configuration. It is stored as network byte order integer.
 </t>
 
 <t>
@@ -207,7 +237,8 @@ This field is set according to the following list
 <t>
 Vorbis Data Type (VDT): 2 bits</t>
 <t>
-This field specifies the kind of Vorbis data stored in this RTP packet. There are currently three different types of Vorbis payloads.
+This field specifies the kind of Vorbis data stored in this RTP packet. There
+are currently three different types of Vorbis payloads.
 </t>
 
 <vspace blankLines="1" />
@@ -221,7 +252,9 @@ This field specifies the kind of Vorbis data stored in this RTP packet. There ar
 <t> The packets with a VDT of value 3 MUST be ignored </t>
 
 <t>
-The last 4 bits represent the number of complete packets in this payload.  This provides for a maximum number of 15 Vorbis packets in the payload. If the packet contains fragmented data the number of packets MUST be set to 0.
+The last 4 bits represent the number of complete packets in this payload. This
+provides for a maximum number of 15 Vorbis packets in the payload. If the
+packet contains fragmented data the number of packets MUST be set to 0.
 </t>
 
 </section>
@@ -229,7 +262,14 @@ The last 4 bits represent the number of complete packets in this payload.  This 
 <section anchor="Payload Data" title="Payload Data">
 
 <t>
-Raw Vorbis packets are currently unbounded in length, application profiles will likely define a practical limit. Typical Vorbis packet sizes range from very small (2-3 bytes) to quite large (8-12 kilobytes). The reference implementation <xref target="libvorbis"></xref> typically produces packets less than ~800 bytes, except for the setup header packets which are ~4-12 kilobytes. Within an RTP context, to avoid fragmentation, the Vorbis data packet size SHOULD be kept sufficiently small so that after adding the the RTP and payload headers, the complete RTP packet is smaller than the path MTU.
+Raw Vorbis packets are currently unbounded in length, application profiles will
+likely define a practical limit. Typical Vorbis packet sizes range from very
+small (2-3 bytes) to quite large (8-12 kilobytes). The reference implementation
+<xref target="libvorbis"></xref> typically produces packets less than ~800
+bytes, except for the setup header packets which are ~4-12 kilobytes. Within an
+RTP context, to avoid fragmentation, the Vorbis data packet size SHOULD be kept
+sufficiently small so that after adding the the RTP and payload headers, the
+complete RTP packet is smaller than the path MTU.
 </t>
 
 <figure anchor="Payload Data Figure" title="Payload Data Header">
@@ -769,21 +809,18 @@ Loss of any of the Configuration fragment will result in the loss of the full Co
 <vspace blankLines="1" />
 
 <list style="hanging">
-<t hangText="rate:"> indicates the RTP timestamp clock rate as described in <xraf target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
+<t hangText="rate:"> indicates the RTP timestamp clock rate as described in <xref target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
 </t>
 
 <vspace blankLines="1" />
 
-<list style="hanging">
-<t hangText="channels:"> indicates the number of audio channels as described in <xraf target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
+<t hangText="channels:"> indicates the number of audio channels as described in <xref target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
 </t>
 
 <vspace blankLines="1" />
 
-<list style="hanging">
 <t hangText="delivery-method:"> indicates the delivery methods in use, the possible values are: inline, in_band, out_band/specific_name<vspace blankLines="0" />
 Where "specific_name" is the name of the out of band delivery method.
-
 </t>
 
 <vspace blankLines="1" />
@@ -828,11 +865,9 @@ None</t>
 <t hangText="Published specification:">
 
 <vspace blankLines="1" />
-
-<t> RFC XXXX [RFC Editor: please replace by the RFC number of  this memo, when published]</t>
+RFC XXXX [RFC Editor: please replace by the RFC number of  this memo, when published]
 <vspace blankLines="1" />
-<t>Ogg Vorbis I specification:  Codec setup and packet decode. Available from the Xiph website, http://www.xiph.org</t>
-
+Ogg Vorbis I specification:  Codec setup and packet decode. Available from the Xiph website, http://www.xiph.org
 </t>
 
 <vspace blankLines="1" />
@@ -853,8 +888,8 @@ None </t>
 
 <vspace blankLines="1" />
 
-<t>Luca Barbato: &lt;lu_zero@gentoo.org&gt;</t>
-<t>IETF Audio/Video Transport Working Group</t>
+Luca Barbato: &lt;lu_zero@gentoo.org&gt;<br/>
+IETF Audio/Video Transport Working Group
 
 </t>
 
