@@ -973,9 +973,9 @@ The following examples are common usage patterns that MAY be applied in such sit
 
 <t>On join the client will receive the current Configuration necessary to decode the current stream inlined in the SDP so that the decoding will start immediately after.</t>
 
-<t>When the streamed content changes the new Configuration is sent in-band before the actual stream, and the Configuration that has to be sent inline in the SDP updated. Since the inline method is unreliable, an out of band fallback is provided.</t>
+<t>When the streamed content changes the new Configuration is sent in-band before the actual stream, and the Configuration that has to be sent inline in the SDP updated. Since the in-band method is unreliable, an out of band fallback is provided.</t>
 
-<t>The client could choose to fetch the Configuration from the alternate source as soon it discovers a Configuration packet got lost inline or use <xref target="RFC3611">selective retransmission</xref>, if the server supports the feature.</t>
+<t>The client could choose to fetch the Configuration from the alternate source as soon it discovers a Configuration packet got lost in-band or use <xref target="RFC3611">selective retransmission</xref>, if the server supports the feature.</t>
 
 <t>A serverside optimization would be to keep an hash list of the Configurations per session to avoid packing all of them and send the same Configuration with different Ident tags</t>
 
