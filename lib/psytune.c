@@ -12,9 +12,12 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id: psytune.c,v 1.20 2003/03/04 21:22:11 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
+
+/* NB: this is dead code, retained purely for doc and reference value
+       don't try to compile it */
 
 #include <stdio.h>
 #include <stdlib.h>
