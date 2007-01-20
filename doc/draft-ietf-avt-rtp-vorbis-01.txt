@@ -1,7 +1,6 @@
 
 
 
-
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                  Xiph.Org
 Expires: December 18, 2006                                 June 16, 2006
@@ -37,7 +36,7 @@ Status of this Memo
 
 Copyright Notice
 
-   Copyright (C) The Internet Society (2006).
+   Copyright (C) The IETF Trust (2006).
 
 Abstract
 
@@ -47,9 +46,9 @@ Abstract
    probability model, referred to as a codebook and other setup
    information.
 
-   Also included within the document are the necessary details for the
-   use of Vorbis with MIME and Session Description Protocol (SDP).
-
+   Also included within this memo are media type registrations, and the
+   details necessary for the use of Vorbis with the Session Description
+   Protocol (SDP).
 
 
 
@@ -77,27 +76,27 @@ Table of Contents
      3.1.  In-band Header Transmission  . . . . . . . . . . . . . . .  9
        3.1.1.  Packed Configuration . . . . . . . . . . . . . . . . .  9
      3.2.  Out of Band Transmission . . . . . . . . . . . . . . . . . 10
-       3.2.1.  Packed Headers . . . . . . . . . . . . . . . . . . . . 10
+       3.2.1.  Packed Headers . . . . . . . . . . . . . . . . . . . . 11
      3.3.  Loss of Configuration Headers  . . . . . . . . . . . . . . 13
    4.  Comment Headers  . . . . . . . . . . . . . . . . . . . . . . . 13
    5.  Frame Packetization  . . . . . . . . . . . . . . . . . . . . . 14
      5.1.  Example Fragmented Vorbis Packet . . . . . . . . . . . . . 15
      5.2.  Packet Loss  . . . . . . . . . . . . . . . . . . . . . . . 17
    6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 18
-     6.1.  Mapping MIME Parameters into SDP . . . . . . . . . . . . . 19
-       6.1.1.  SDP Example  . . . . . . . . . . . . . . . . . . . . . 20
-     6.2.  Usage with the SDP Offer/Answer Model  . . . . . . . . . . 21
-   7.  Congestion Control . . . . . . . . . . . . . . . . . . . . . . 21
-   8.  Examples . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
-     8.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 21
-   9.  Security Considerations  . . . . . . . . . . . . . . . . . . . 22
-   10. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 22
-   11. References . . . . . . . . . . . . . . . . . . . . . . . . . . 23
-     11.1. Normative References . . . . . . . . . . . . . . . . . . . 23
-     11.2. Informative References . . . . . . . . . . . . . . . . . . 23
-   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 25
-   Intellectual Property and Copyright Statements . . . . . . . . . . 26
-
+   7.  SDP related considerations . . . . . . . . . . . . . . . . . . 20
+     7.1.  Mapping MIME Parameters into SDP . . . . . . . . . . . . . 20
+       7.1.1.  SDP Example  . . . . . . . . . . . . . . . . . . . . . 20
+     7.2.  Usage with the SDP Offer/Answer Model  . . . . . . . . . . 21
+   8.  Congestion Control . . . . . . . . . . . . . . . . . . . . . . 21
+   9.  Examples . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+     9.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 22
+   10. Security Considerations  . . . . . . . . . . . . . . . . . . . 22
+   11. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 22
+   12. References . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+     12.1. Normative References . . . . . . . . . . . . . . . . . . . 23
+     12.2. Informative References . . . . . . . . . . . . . . . . . . 24
+   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 24
+   Intellectual Property and Copyright Statements . . . . . . . . . . 25
 
 
 
@@ -120,13 +119,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    maximum encoder flexibility, thus allowing it to scale competitively
    over an exceptionally wide range of bitrates.  At the high quality/
    bitrate end of the scale (CD or DAT rate stereo, 16/24 bits), it is
-   in the same league as MPEG-2 and MPC.  Similarly, the version 1.1
-   reference encoder can encode high-quality CD and DAT rate stereo at
-   below 48k bits/sec without resampling to a lower rate.  Vorbis is
-   also intended for lower and higher sample rates (from 8kHz telephony
-   to 192kHz digital masters) and a range of channel representations
-   (monaural, polyphonic, stereo, quadraphonic, 5.1, ambisonic, or up to
-   255 discrete channels).
+   in the same league as AAC.  Vorbis is also intended for lower and
+   higher sample rates (from 8kHz telephony to 192kHz digital masters)
+   and a range of channel representations (monaural, polyphonic, stereo,
+   quadraphonic, 5.1, ambisonic, or up to 255 discrete channels).
 
    Vorbis encoded audio is generally encapsulated within an Ogg format
    bitstream [1], which provides framing and synchronization.  For the
@@ -148,13 +144,16 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    its associated decoding codebooks as well as indicating if the
    following packet contains fragmented Vorbis data and/or the number of
    whole Vorbis data frames.  The payload data contains the raw Vorbis
-   bitstream information.
+   bitstream information.  There are 3 types of Vorbis payload data, an
+   RTP packet MUST contain just one of them at time.
 
 2.1.  RTP Header
 
    The format of the RTP header is specified in [3] and shown in Figure
    Figure 1.  This payload format uses the fields of the header in a
    manner consistent with that specification.
+
+
 
 
 
@@ -183,7 +182,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       |                              ...                              |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 1: RTP Header
+                           Figure 1: RTP Header
 
    The RTP header begins with an octet of fields (V, P, X, and CC) to
    support specialized RTP uses (see [3] and [4] for details).  For
@@ -210,7 +209,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    Marker (M): 1 bit
 
    Set to zero.  Audio silence suppression not used.  This conforms to
-   section 4.1 of [15].
+   section 4.1 of [14].
 
    Payload Type (PT): 7 bits
 
@@ -256,12 +255,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       |                     Ident                     | F |VDT|# pkts.|
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 2: Payload Header
+                         Figure 2: Payload Header
 
    Ident: 24 bits
 
    This 24 bit field is used to associate the Vorbis data to a decoding
-   Configuration.
+   Configuration.  It is stored as network byte order integer.
 
    Fragment type (F): 2 bits
 
@@ -282,8 +281,10 @@ Barbato                 Expires December 18, 2006               [Page 5]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
-   This field sets the payload type for the Vorbis data in this RTP
-   packet.  There are currently three type of Vorbis payloads.
+   This field specifies the kind of Vorbis data stored in this RTP
+   packet.  There are currently three different types of Vorbis
+   payloads.  Each packet MUST contain only a single type of Vorbis
+   payload.
 
       0 = Raw Vorbis payload
       1 = Vorbis Packed Configuration payload
@@ -302,7 +303,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    Raw Vorbis packets are currently unbounded in length, application
    profiles will likely define a practical limit.  Typical Vorbis packet
    sizes range from very small (2-3 bytes) to quite large (8-12
-   kilobytes).  The reference implementation [14] typically produces
+   kilobytes).  The reference implementation [13] typically produces
    packets less than ~800 bytes, except for the setup header packets
    which are ~4-12 kilobytes.  Within an RTP context, to avoid
    fragmentation, the Vorbis data packet size SHOULD be kept
@@ -315,11 +316,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       |            length             |       vorbis packet data     ..
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 3: Payload Data Header
+                       Figure 3: Payload Data Header
 
    Each Vorbis payload packet starts with a two octet length header,
-   which is used to represent the size of the following data payload,
-   followed by the raw Vorbis data padded to the nearest byte boundary.
+   which is used to represent the size in bytes of the following data
+   payload, followed by the raw Vorbis data padded to the nearest byte
+   boundary.  The length value is stored as network byte order integer.
 
    For payloads which consist of multiple Vorbis packets the payload
    data consists of the packet length followed by the packet data for
@@ -328,9 +330,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    The Vorbis packet length header is the length of the Vorbis data
    block only and does not count the length field.
 
-   The payload packing of the Vorbis data packets MUST follow the
-   guidelines set-out in [4] where the oldest packet occurs immediately
-
 
 
 Barbato                 Expires December 18, 2006               [Page 6]
@@ -338,11 +337,13 @@ Barbato                 Expires December 18, 2006               [Page 6]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
+   The payload packing of the Vorbis data packets MUST follow the
+   guidelines set-out in [4] where the oldest packet occurs immediately
    after the RTP packet header.  Subsequent packets, if any, MUST follow
    in temporal order.
 
    Channel mapping of the audio is in accordance with the Vorbis I
-   Specification [15].
+   Specification [14].
 
 2.4.  Example RTP Packet
 
@@ -363,7 +364,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       |                              ...                              |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 4: Example Packet (RTP Headers)
+                  Figure 4: Example Packet (RTP Headers)
 
    Payload Data:
 
@@ -381,11 +382,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       ..                        vorbis data                           |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 5: Example Packet (Payload Data)
+                  Figure 5: Example Packet (Payload Data)
 
    The payload data section of the RTP packet begins with the 24 bit
-   Ident field followed by the one octet bitfield header, which has the
-   number of Vorbis frames set to 2.  Each of the Vorbis data frames is
 
 
 
@@ -394,6 +393,8 @@ Barbato                 Expires December 18, 2006               [Page 7]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
+   Ident field followed by the one octet bitfield header, which has the
+   number of Vorbis frames set to 2.  Each of the Vorbis data frames is
    prefixed by the two octets length field.  The Packet Type and
    Fragment Type are set to 0.  The Configuration that will be used to
    decode the packets is the one indexed by the ident value.
@@ -410,7 +411,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    compressed data stream.  These two blocks of information are often
    referred to collectively as the "codebooks" for a Vorbis stream, and
    are nominally included as special "header" packets at the start of
-   the compressed data.  In addition, the Vorbis I specification [15]
+   the compressed data.  In addition, the Vorbis I specification [14]
    requires the presence of a comment header packet which gives simple
    metadata about the stream, but this information is not required for
    decoding the frame sequence.
@@ -435,13 +436,11 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    delivery methods that don't use RTP will not be described in this
    document.  For non chained streams, the Configuration recommended
    delivery method is inline the Packed Configuration (Section 3.1.1) in
-   the SDP as explained in the IANA considerations (Section 6.1)
+   the SDP as explained in the IANA considerations (Section 7.1)
    section.
 
    The 24 bit Ident field is used to map which Configuration will be
    used to decode a packet.  When the Ident field changes, it indicates
-   that a change in the stream has taken place.  The client application
-   MUST have in advance the correct configuration and if the client
 
 
 
@@ -450,6 +449,8 @@ Barbato                 Expires December 18, 2006               [Page 8]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
+   that a change in the stream has taken place.  The client application
+   MUST have in advance the correct configuration and if the client
    detects a change in the Ident value and does not have this
    information it MUST NOT decode the raw Vorbis data associated until
    it fetches the correct Configuration.
@@ -457,20 +458,18 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 3.1.  In-band Header Transmission
 
    The Packed Configuration (Section 3.1.1) Payload is sent in-band with
-   the packet type bits set to match the payload type.  Clients MUST be
-   capable of dealing with fragmentation and periodic re-transmission of
-   the configuration headers.
+   the packet type bits set to match the Vorbis Data Type.  Clients MUST
+   be capable of dealing with fragmentation and periodic re-transmission
+   of the configuration headers.
 
 3.1.1.  Packed Configuration
 
-   A Vorbis Packed Configuration is indicated with the payload type
+   A Vorbis Packed Configuration is indicated with the Vorbis Data Type
    field set to 1.  Of the three headers, defined in the Vorbis I
-   specification [15], the identification and the setup will be packed
+   specification [14], the identification and the setup will be packed
    together, the comment header is completely suppressed.  Is up to the
-   client provide a minimal size comment header to the decoder if
+   client to provide a minimal size comment header to the decoder if
    required by the implementation.
-
-
 
 
 
@@ -536,7 +535,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       ..                            Setup                             |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 6: Packed Configuration Figure
+                   Figure 6: Packed Configuration Figure
 
    The Ident field is set with the value that will be used by the Raw
    Payload Packets to address this Configuration.  The Fragment type is
@@ -551,9 +550,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    SHOULD be used in out-of-band delivery and MUST be used when
    Configuration is inlined in the SDP.
 
-3.2.1.  Packed Headers
 
-   As mentioned above the RECOMMENDED delivery vector for Vorbis
+
+
 
 
 
@@ -562,6 +561,9 @@ Barbato                 Expires December 18, 2006              [Page 10]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
+3.2.1.  Packed Headers
+
+   As mentioned above the RECOMMENDED delivery vector for Vorbis
    configuration data is via a retrieval method that can be performed
    using a reliable transport protocol.  As the RTP headers are not
    required for this method of delivery the structure of the
@@ -580,7 +582,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       |                          Packed header                        |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 7: Packed Headers Overview
+                     Figure 7: Packed Headers Overview
 
    Since the Configuration Ident and the Identification Header are fixed
    length there is only a 2 byte length tag to define the length of the
@@ -600,15 +602,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       ..                         Setup Header                         |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 8: Packed Headers Detail
+                      Figure 8: Packed Headers Detail
 
    The key difference between the in-band format and this one, is there
    is no need for the payload header octet.
 
-3.2.1.1.  Packed Headers IANA Considerations
 
-   The following IANA considerations MUST only be applied to the packed
-   headers.
 
 
 
@@ -618,9 +617,14 @@ Barbato                 Expires December 18, 2006              [Page 11]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
-   MIME media type name: audio
+3.2.1.1.  Packed Headers IANA Considerations
 
-   MIME subtype: vorbis-config
+   The following IANA considerations MUST only be applied to the packed
+   headers.
+
+   MIME media type name:  audio
+
+   MIME subtype:  vorbis-config
 
    Required Parameters:
 
@@ -660,11 +664,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       Luca Barbato: <lu_zero@gentoo.org>
       IETF Audio/Video Transport Working Group
 
-   Intended usage: COMMON
-
-
-
-
 
 
 
@@ -673,6 +672,8 @@ Barbato                 Expires December 18, 2006              [Page 12]
 
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
+
+   Intended usage:  COMMON
 
    Restriction on usage:
 
@@ -693,19 +694,17 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    successfully decode the stream.
 
    Loss of Configuration Packet results in the halting of stream
-   decoding and SHOULD be reported to the client as well as a loss
-   report sent via RTCP.
+   decoding.
 
 
 4.  Comment Headers
 
-   With the payload type flag set to 2, this indicates that the packet
-   contain the comment metadata, such as artist name, track title and so
-   on.  These metadata messages are not intended to be fully descriptive
-   but to offer basic track/song information.  Clients MAY ignore it
-   completely.  The details on the format of the comments can be found
-   in the Vorbis documentation [15].
-
+   With the Vorbis Data Type flag set to 2, this indicates that the
+   packet contain the comment metadata, such as artist name, track title
+   and so on.  These metadata messages are not intended to be fully
+   descriptive but to offer basic track/song information.  Clients MAY
+   ignore it completely.  The details on the format of the comments can
+   be found in the Vorbis documentation [14].
 
 
 
@@ -752,7 +751,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       ..                           Comment                            |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 9: Comment Packet
+                         Figure 9: Comment Packet
 
    The 2 bytes length field is necessary since this packet could be
    fragmented.
@@ -816,7 +815,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       ..                        vorbis data                           |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 10: Example Fragmented Packet (Packet 1)
+              Figure 10: Example Fragmented Packet (Packet 1)
 
    In this packet the initial sequence number is 1000 and the timestamp
    is xxxxx.  The Fragment type is set to 1, the number of packets field
@@ -864,7 +863,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       ..                        vorbis data                           |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 11: Example Fragmented Packet (Packet 2)
+              Figure 11: Example Fragmented Packet (Packet 2)
 
    The Fragment type field is set to 2 and the number of packets field
    is set to 0.  For large Vorbis fragments there can be several of
@@ -920,7 +919,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       ..                        vorbis data                           |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-   Figure 12: Example Fragmented Packet (Packet 3)
+              Figure 12: Example Fragmented Packet (Packet 3)
 
    This is the last Vorbis fragment packet.  The Fragment type is set to
    3 and the packet count remains set to 0.  As in the previous packets
@@ -940,12 +939,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    2 and MUST drop it.  The next packet, which is the final fragmented
    packet, MUST be dropped in the same manner.  If the missing packet is
    the last, the received two fragments will be kept and the incomplete
-   vorbis packet decoded.  Feedback reports on lost and dropped packets
-   MUST be sent back via RTCP.
+   vorbis packet decoded.
 
-   If a particular multicast session has a large number of participants
-   care must be taken to prevent an RTCP feedback implosion, [10], in
-   the event of packet loss from a large number of participants.
+   Loss of any of the Configuration fragment will result in the loss of
+   the full Configuration packet with the result detailed in the Loss of
+   Configuration Headers (Section 3.3) section.
+
 
 
 
@@ -954,49 +953,49 @@ Barbato                 Expires December 18, 2006              [Page 17]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
-   Loss of any of the Configuration fragment will result in the loss of
-   the full Configuration packet with the result detailed in the Loss of
-   Configuration Headers (Section 3.3) section.
-
-
 6.  IANA Considerations
 
-   MIME media type name: audio
+   MIME media type name:  audio
 
-   MIME subtype: vorbis
+   MIME subtype:  vorbis
 
    Required Parameters:
 
-      delivery-method: indicates the delivery methods in use, the
+      rate:  indicates the RTP timestamp clock rate as described in RTP
+         Profile for Audio and Video Conferences with Minimal Control.
+         [4]
+
+      channels:  indicates the number of audio channels as described in
+         RTP Profile for Audio and Video Conferences with Minimal
+         Control. [4]
+
+      delivery-method:  indicates the delivery methods in use, the
          possible values are: inline, in_band, out_band/specific_name
          Where "specific_name" is the name of the out of band delivery
          method.
 
-      configuration: the base16 [9] (hexadecimal) representation of the
+      configuration:  the base16 [9] (hexadecimal) representation of the
          Packed Headers (Section 3.2.1).
 
    Optional Parameters:
 
-      configuration-uri: the URI of the configuration headers in case of
-         out of band transmission.  In the form of
+      configuration-uri:  the URI of the configuration headers in case
+         of out of band transmission.  In the form of
          "protocol://path/to/resource/".  Depending on the specific
-         method the single ident packet could be retrived by their
-         number, or aggregated in a single stream, aggregates MAY be
-         compressed using bzip2 [13] or gzip [11] and an sha1 [12]
-         checksum MAY be provided in the form of
-         "protocol://path/to/resource/aggregated.bz2!sha1hash"
+         method, a single configuration packet could be retrived by its
+         number, or multiple packets could be aggregated in a single
+         stream.  Such aggregates MAY be compressed using either bzip2
+         [12] or gzip [10].  A sha1 [11] checksum MAY be provided for
+         aggregates.  In this latter case the URI will end with the
+         aggregate name, followed by its compressed extension if
+         applies, a "!" and the hexadecimal representation of the
+         sha1hash of the above mentioned compressed aggregatedas in:
+         "protocol://path/to/resource/aggregated.bz2!sha1hash".  The
+         trailing '/' discriminates which of two methods are in use.
 
    Encoding considerations:
 
       This media type is framed and contains binary data.
-
-   Security Considerations:
-
-      See Section 6 of RFC XXXX.
-
-   Interoperability considerations:
-
-      None
 
 
 
@@ -1009,6 +1008,14 @@ Barbato                 Expires December 18, 2006              [Page 18]
 
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
+
+   Security Considerations:
+
+      See Section 6 of RFC XXXX.
+
+   Interoperability considerations:
+
+      None
 
    Published specification:
 
@@ -1028,8 +1035,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
    Person & email address to contact for further information:
 
-      Luca Barbato: <lu_zero@gentoo.org>
-      IETF Audio/Video Transport Working Group
+      Luca Barbato: <lu_zero@gentoo.org> IETF Audio/Video Transport
+      Working Group
 
    Intended usage:
 
@@ -1049,14 +1056,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       IETF AVT Working Group
 
 
-6.1.  Mapping MIME Parameters into SDP
-
-   The information carried in the MIME media type specification has a
-   specific mapping to fields in the Session Description Protocol (SDP)
-   [5], which is commonly used to describe RTP sessions.  When SDP is
-   used to specify sessions the mapping are as follows:
-
-
 
 
 
@@ -1065,6 +1064,19 @@ Barbato                 Expires December 18, 2006              [Page 19]
 
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
+
+7.  SDP related considerations
+
+   The following paragraphs defines the mapping of the parameters
+   described in the IANA considerations section and their usage in the
+   Offer/Answer Model [8].
+
+7.1.  Mapping MIME Parameters into SDP
+
+   The information carried in the MIME media type specification has a
+   specific mapping to fields in the Session Description Protocol (SDP)
+   [5], which is commonly used to describe RTP sessions.  When SDP is
+   used to specify sessions the mapping are as follows:
 
    o  The MIME type ("audio") goes in SDP "m=" as the media name.
 
@@ -1095,12 +1107,20 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    specified in the rtpmap attribute MUST match the Vorbis sample rate
    value.  An example is found below.
 
-6.1.1.  SDP Example
+7.1.1.  SDP Example
 
    The following example shows a basic SDP single stream.  The first
    configuration packet is inlined in the sdp, other configurations
    could be fetched at any time from the first provided uri using or all
    the known configuration could be downloaded using the second uri.
+
+
+
+Barbato                 Expires December 18, 2006              [Page 20]
+
+Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
+
+
    The inline base16 [9] configuration string is omitted because of the
    lenght.
       c=IN IP4 192.0.0.1
@@ -1110,25 +1130,18 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
       delivery-method=out_band/rtsp;
       configuration-uri=rtsp://path/to/the/resource; delivery-
       method=out_band/http; configuration-uri=http://another/path/to/
-      resource/aggregate.bz2!sha1hash;
+      resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;
 
    Note that the payload format (encoding) names are commonly shown in
    upper case.  MIME subtypes are commonly shown in lower case.  These
-
-
-
-Barbato                 Expires December 18, 2006              [Page 20]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
-
-
    names are case-insensitive in both places.  Similarly, parameter
    names are case-insensitive both in MIME types and in the default
    mapping to the SDP a=fmtp attribute.  The exception regarding case
    sensitivity is the configuration-uri URI which MUST be regarded as
-   being case sensitive.
+   being case sensitive.  The a=fmtp line is a single line even if it is
+   presented broken because of clarity.
 
-6.2.  Usage with the SDP Offer/Answer Model
+7.2.  Usage with the SDP Offer/Answer Model
 
    The offer, as described in An Offer/Answer Model Session Description
    Protocol [8], may contain a large number of delivery methods per
@@ -1137,7 +1150,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    altered on answer otherwise.
 
 
-7.  Congestion Control
+8.  Congestion Control
 
    Vorbis clients SHOULD send regular receiver reports detailing
    congestion.  A mechanism for dynamically downgrading the stream,
@@ -1146,18 +1159,25 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    alternative would be to redirect the client to a lower bitrate stream
    if one is available.
 
-   If a particular multicast session has a large number of participants
-   care must be taken to prevent an RTCP feedback implosion, [10], in
-   the event of congestion.
 
-
-8.  Examples
+9.  Examples
 
    The following examples are common usage patterns that MAY be applied
    in such situations, the main scope of this section is to explain
    better usage of the transmission vectors.
 
-8.1.  Stream Radio
+
+
+
+
+
+
+Barbato                 Expires December 18, 2006              [Page 21]
+
+Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
+
+
+9.1.  Stream Radio
 
    This is one of the most common situation: one single server streaming
    content in multicast, the clients may start a session at random time.
@@ -1170,24 +1190,16 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
    On join the client will receive the current Configuration necessary
    to decode the current stream inlined in the SDP so that the decoding
-
-
-
-Barbato                 Expires December 18, 2006              [Page 21]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
-
-
    will start immediately after.
 
    When the streamed content changes the new Configuration is sent in-
    band before the actual stream, and the Configuration that has to be
-   sent inline in the SDP updated.  Since the inline method is
+   sent inline in the SDP updated.  Since the in-band method is
    unreliable, an out of band fallback is provided.
 
    The client could choose to fetch the Configuration from the alternate
-   source as soon it discovers a Configuration packet got lost inline or
-   use selective retransmission [17], if the server supports the
+   source as soon it discovers a Configuration packet got lost in-band
+   or use selective retransmission [15], if the server supports the
    feature.
 
    A serverside optimization would be to keep an hash list of the
@@ -1199,7 +1211,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    already known.
 
 
-9.  Security Considerations
+10.  Security Considerations
 
    RTP packets using this payload format are subject to the security
    considerations discussed in the RTP specification [3].  This implies
@@ -1210,9 +1222,17 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    taken to prevent buffer overflows in the client applications.
 
 
-10.  Acknowledgments
+11.  Acknowledgments
 
    This document is a continuation of draft-moffitt-vorbis-rtp-00.txt
+
+
+
+Barbato                 Expires December 18, 2006              [Page 22]
+
+Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
+
+
    and draft-kerr-avt-vorbis-rtp-04.txt.  The MIME type section is a
    continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 
@@ -1226,17 +1246,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 
 
+12.  References
 
-
-
-Barbato                 Expires December 18, 2006              [Page 22]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
-
-
-11.  References
-
-11.1.  Normative References
+12.1.  Normative References
 
    [1]   Pfeiffer, S., "The Ogg Encapsulation Format Version 0",
          RFC 3533.
@@ -1265,23 +1277,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
    [9]   Josefsson, S., "The Base16, Base32, and Base64 Data Encodings",
          RFC 3548.
 
-   [10]  Ott, J., Wenger, S., Sato, N., Burmeister, C., and J. Rey,
-         "Extended RTP Profile for RTCP-based Feedback (RTP/AVPF)",
-         Internet Draft (draft-ietf-avt-rtcp-feedback-11: Work in
-         progress).
-
-   [11]  Deutsch, P., "GZIP file format specification version 4.3",
+   [10]  Deutsch, P., "GZIP file format specification version 4.3",
          RFC 1952.
 
-   [12]  National Institute of Standards and Technology, "Secure Hash
-         Standard", May 1993.
-
-   [13]  Seward, J., "libbz2 and bzip2".
-
-11.2.  Informative References
-
-   [14]  "libvorbis: Available from the Xiph website,
-         http://www.xiph.org".
+   [11]  National Institute of Standards and Technology, "Secure Hash
 
 
 
@@ -1290,60 +1289,20 @@ Barbato                 Expires December 18, 2006              [Page 23]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
-   [15]  "Ogg Vorbis I specification:  Codec setup and packet decode.
-         Available from the Xiph website, http://www.xiph.org".
+         Standard", May 1993.
 
-   [16]  "Ogg Vorbis I specification:  Comment field and header
-         specification.  Available from the Xiph website,
+   [12]  Seward, J., "libbz2 and bzip2".
+
+12.2.  Informative References
+
+   [13]  "libvorbis: Available from the Xiph website,
          http://www.xiph.org".
 
-   [17]  Friedman, T., Caceres, R., and A. Clark, "RTP Control Protocol
+   [14]  "Ogg Vorbis I specification:  Codec setup and packet decode.
+         Available from the Xiph website, http://www.xiph.org".
+
+   [15]  Friedman, T., Caceres, R., and A. Clark, "RTP Control Protocol
          Extended Reports (RTCP XR)", RFC 3611, November 2003.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Barbato                 Expires December 18, 2006              [Page 24]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
 Author's Address
@@ -1381,28 +1340,29 @@ Author's Address
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Barbato                 Expires December 18, 2006              [Page 25]
+Barbato                 Expires December 18, 2006              [Page 24]
 
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
-Intellectual Property Statement
+Full Copyright Statement
+
+   Copyright (C) The IETF Trust (2006).
+
+   This document is subject to the rights, licenses and restrictions
+   contained in BCP 78, and except as set forth therein, the authors
+   retain all their rights.
+
+   This document and the information contained herein are provided on an
+   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
+   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY, THE IETF TRUST AND
+   THE INTERNET ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS
+   OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
+   THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
+   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Intellectual Property
 
    The IETF takes no position regarding the validity or scope of any
    Intellectual Property Rights or other rights that might be claimed to
@@ -1427,32 +1387,15 @@ Intellectual Property Statement
    ietf-ipr@ietf.org.
 
 
-Disclaimer of Validity
-
-   This document and the information contained herein are provided on an
-   "AS IS" basis and THE CONTRIBUTOR, THE ORGANIZATION HE/SHE REPRESENTS
-   OR IS SPONSORED BY (IF ANY), THE INTERNET SOCIETY AND THE INTERNET
-   ENGINEERING TASK FORCE DISCLAIM ALL WARRANTIES, EXPRESS OR IMPLIED,
-   INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE
-   INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
-   WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
-
-
-Copyright Statement
-
-   Copyright (C) The Internet Society (2006).  This document is subject
-   to the rights, licenses and restrictions contained in BCP 78, and
-   except as set forth therein, the authors retain all their rights.
-
-
 Acknowledgment
 
-   Funding for the RFC Editor function is currently provided by the
-   Internet Society.
+   Funding for the RFC Editor function is provided by the IETF
+   Administrative Support Activity (IASA).
 
 
 
 
-Barbato                 Expires December 18, 2006              [Page 26]
+
+Barbato                 Expires December 18, 2006              [Page 25]
 
 

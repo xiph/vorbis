@@ -238,7 +238,7 @@ This field is set according to the following list
 Vorbis Data Type (VDT): 2 bits</t>
 <t>
 This field specifies the kind of Vorbis data stored in this RTP packet. There
-are currently three different types of Vorbis payloads.
+are currently three different types of Vorbis payloads. Each packet MUST contain only a single type of Vorbis payload.
 </t>
 
 <vspace blankLines="1" />
@@ -1013,6 +1013,12 @@ This media type depends on RTP framing, and hence is only defined for transfer v
 <vspace blankLines="1" />
 
 </list>
+</section>
+
+<section anchor="SDP related considerations" title="SDP related considerations">
+<t>
+The following paragraphs defines the mapping of the parameters described in the IANA considerations section and their usage in the <xref target="rfc3264">Offer/Answer Model</xref>.
+</t>
 
 <section anchor="Mapping MIME Parameters into SDP" title="Mapping MIME Parameters into SDP"> 
 
@@ -1321,13 +1327,7 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 <title>Ogg Vorbis I specification:  Codec setup and packet decode.  Available from the Xiph website, http://www.xiph.org</title>
 </front>
 </reference>   
-  
-<reference anchor="v-comment">
-<front>
-<title>Ogg Vorbis I specification:  Comment field and header specification.  Available from the Xiph website, 
-http://www.xiph.org</title>
-</front>
-</reference>   
+
 <reference anchor="RFC3611">
 <front>
 <title>RTP Control Protocol Extended Reports (RTCP XR)</title>
