@@ -10,17 +10,17 @@ AM_LDFLAGS = -static
 LDADD = ../lib/libvorbis.la
 
 latticebuild_SOURCES = latticebuild.c vqgen.c bookutil.c\
-	vqgen.h bookutil.h
+	vqgen.h bookutil.h localcodebook.h
 latticepare_SOURCES = latticepare.c vqgen.c bookutil.c vqsplit.c\
-	vqgen.h bookutil.h
+	vqgen.h vqsplit.h bookutil.h localcodebook.h
 latticehint_SOURCES = latticehint.c bookutil.c\
-	bookutil.h
+	vqsplit.h bookutil.h localcodebook.h
 latticetune_SOURCES = latticetune.c vqgen.c bookutil.c\
-	vqgen.h bookutil.h
+	vqgen.h bookutil.h localcodebook.h
 huffbuild_SOURCES = huffbuild.c vqgen.c bookutil.c\
-	vqgen.h bookutil.h
+	vqgen.h bookutil.h localcodebook.h
 distribution_SOURCES = distribution.c bookutil.c\
-	bookutil.h
+	bookutil.h localcodebook.h
 
 EXTRA_DIST = residue_entropy auxpartition.pl
 
