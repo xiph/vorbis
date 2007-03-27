@@ -911,7 +911,7 @@ Where "specific_name" is the name of the out of band delivery method.
 
 <vspace blankLines="1" />
 
-<t hangText="configuration:"> the <xref target="rfc3548">base16</xref> (hexadecimal) representation of the <xref target="Packed Headers">Packed Headers</xref>.
+<t hangText="configuration:"> the <xref target="rfc3548">base64</xref> representation of the <xref target="Packed Headers">Packed Headers</xref>.
 </t>
 </list>
 </t>
@@ -931,9 +931,9 @@ stream. Such aggregates MAY be compressed using either
 <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref>.
 A <xref target="FIPS180">sha1</xref> checksum MAY be provided for aggregates.
 In this latter case the URI will end with the aggregate name, followed by its
-compressed extension if applies, a "!" and the hexadecimal representation of
-the sha1hash of the above mentioned compressed aggregatedas in:
-"protocol://path/to/resource/aggregated.bz2!sha1hash". The trailing '/' discriminates which of two methods are in use.</t>
+compressed extension if applies, a "!" and the <xref target="rfc3548">base64</xref> representation of the sha1hash of the above mentioned compressed aggregated
+as in: "protocol://path/to/resource/aggregated.bz2!sha1hash".
+The trailing '/' discriminates which of two methods are in use.</t>
 </list>
 </t>
 
@@ -1076,14 +1076,14 @@ below.
 configuration packet is inlined in the sdp, other configurations could be
 fetched at any time from the first provided uri using or all the known
 configuration could be downloaded using the second uri. The inline
-<xref target="rfc3548">base16</xref> configuration string is omitted because of
+<xref target="rfc3548">base64</xref> configuration string is omitted because of
 the lenght.</t>
 
 <list style="empty">
 <t>c=IN IP4 192.0.0.1</t>
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 vorbis/44100/2</t>
-<t>a=fmtp:98 delivery-method=in_band; configuration=base16string1; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
+<t>a=fmtp:98 delivery-method=in_band; configuration=base64string; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
 </list>
 </section>
 

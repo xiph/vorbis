@@ -974,8 +974,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
          Where "specific_name" is the name of the out of band delivery
          method.
 
-      configuration:  the base16 [9] (hexadecimal) representation of the
-         Packed Headers (Section 3.2.1).
+      configuration:  the base64 [9] representation of the Packed
+         Headers (Section 3.2.1).
 
    Optional Parameters:
 
@@ -988,8 +988,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
          [12] or gzip [10].  A sha1 [11] checksum MAY be provided for
          aggregates.  In this latter case the URI will end with the
          aggregate name, followed by its compressed extension if
-         applies, a "!" and the hexadecimal representation of the
-         sha1hash of the above mentioned compressed aggregatedas in:
+         applies, a "!" and the base64 [9] representation of the
+         sha1hash of the above mentioned compressed aggregated as in:
          "protocol://path/to/resource/aggregated.bz2!sha1hash".  The
          trailing '/' discriminates which of two methods are in use.
 
@@ -1121,12 +1121,12 @@ Barbato                 Expires December 18, 2006              [Page 20]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-01             June 2006
 
 
-   The inline base16 [9] configuration string is omitted because of the
+   The inline base64 [9] configuration string is omitted because of the
    lenght.
       c=IN IP4 192.0.0.1
       m=audio RTP/AVP 98
       a=rtpmap:98 vorbis/44100/2
-      a=fmtp:98 delivery-method=in_band; configuration=base16string1;
+      a=fmtp:98 delivery-method=in_band; configuration=base64string;
       delivery-method=out_band/rtsp;
       configuration-uri=rtsp://path/to/the/resource; delivery-
       method=out_band/http; configuration-uri=http://another/path/to/
