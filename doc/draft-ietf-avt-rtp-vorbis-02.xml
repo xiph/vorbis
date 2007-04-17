@@ -27,6 +27,11 @@
 <keyword>RTP</keyword>
 
 <abstract>
+
+<section title="Intended Status (To Be Removed Upon Publication)">
+<t>The intended status of this document is Proposed Standard.</t>
+</section>
+
 <t>
 This document describes an RTP payload format for transporting Vorbis encoded
 audio. It details the RTP encapsulation mechanism for raw Vorbis data and 
@@ -734,7 +739,7 @@ number of packets is defined by a 4 bit value).
 Any Vorbis data packet that is less than path MTU SHOULD be bundled in the RTP
 packet with as many Vorbis packets as will fit, up to a maximum of 15, except
 when such bundling would exceed an application's desired transmission latency.
-Path MTU is detailed in <xref target="rfc1063"></xref> and <xref target="rfc1981"></xref>.
+Path MTU is detailed in <xref target="rfc1191"></xref> and <xref target="rfc1981"></xref>.
 </t>
 
 <t>
@@ -1024,7 +1029,7 @@ The following paragraphs defines the mapping of the parameters described in the 
 
 <t>
 The information carried in the MIME media type specification has a specific
-mapping to fields in the Session Description Protocol (SDP) <xref target="rfc2327"></xref>, which is commonly used to describe RTP sessions.  When SDP is used
+mapping to fields in the <xref target="rfc4566">Session Description Protocol (SDP)</xref>, which is commonly used to describe RTP sessions.  When SDP is used
 to specify sessions the mapping are as follows:
 </t>
 
@@ -1080,7 +1085,7 @@ configuration could be downloaded using the second uri. The inline
 the lenght.</t>
 
 <list style="empty">
-<t>c=IN IP4 192.0.0.1</t>
+<t>c=IN IP4 192.0.2.1</t>
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 vorbis/44100/2</t>
 <t>a=fmtp:98 delivery-method=in_band; configuration=base64string; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
@@ -1208,14 +1213,6 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 
 <references title="Normative References">
 
-<reference anchor="rfc3533">
-<front>
-<title>The Ogg Encapsulation Format Version 0</title>
-<author initials="S." surname="Pfeiffer" fullname="Silvia Pfeiffer"></author>
-</front>
-<seriesInfo name="RFC" value="3533" />
-</reference>
-
 <reference anchor="rfc2119">
 <front>
 <title>Key words for use in RFCs to Indicate Requirement Levels </title>
@@ -1244,23 +1241,42 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 <date month="July" year="2003" />
 <seriesInfo name="RFC" value="3551" />
 </reference> 
-  
-<reference anchor="rfc2327">
+
+<reference anchor='rfc4566'>
+
 <front>
 <title>SDP: Session Description Protocol</title>
-<author initials="M." surname="Handley" fullname="Mark Handley"></author>
-<author initials="V." surname="Jacobson" fullname="Van Jacobson"></author>
+<author initials='M.' surname='Handley' fullname='M. Handley'>
+<organization /></author>
+<author initials='V.' surname='Jacobson' fullname='V. Jacobson'>
+<organization /></author>
+<author initials='C.' surname='Perkins' fullname='C. Perkins'>
+<organization /></author>
+<date year='2006' month='July' />
 </front>
-<seriesInfo name="RFC" value="2327" />
-</reference>   
 
-<reference anchor="rfc1063">
+<seriesInfo name='RFC' value='4566' />
+<format type='TXT' octets='108820' target='ftp://ftp.isi.edu/in-notes/rfc4566.txt' />
+</reference>
+
+<reference anchor='rfc1191'>
+
 <front>
-<title>Path MTU Discovery</title>
-<author initials="J." surname="Mogul et al." fullname="J. Mogul et al."></author>
+<title>Path MTU discovery</title>
+<author initials='J.' surname='Mogul' fullname='Jeffrey Mogul'>
+<organization>Digital Equipment Corporation (DEC) , Western Research Laboratory</organization>
+<address>
+<email>mogul@decwrl.dec.com</email></address></author>
+<author initials='S.' surname='Deering' fullname='Steve Deering'>
+<organization>Xerox Palo Alto Research Center</organization>
+<address>
+<email>deering@xerox.com</email></address></author>
+<date year='1990' day='1' month='November' />
 </front>
-<seriesInfo name="RFC" value="1063" />
-</reference>   
+
+<seriesInfo name='RFC' value='1191' />
+<format type='TXT' octets='47936' target='ftp://ftp.isi.edu/in-notes/rfc1191.txt' />
+</reference>
 
 <reference anchor="rfc1981">
 <front>
@@ -1285,16 +1301,7 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 <author initials="S." surname="Josefsson" fullname="Simon Josefsson"></author>
 </front>
 <seriesInfo name="RFC" value="3548" />
-</reference>   
-
-<reference anchor="rfc1952">
-<front>
-<title>GZIP file format specification version 4.3</title>
-<author initials="P" surname="Deutsch" fullname="L. Peter Deutsch"></author>
-</front>
-<seriesInfo name="RFC" value="1952" />
 </reference>
-
 <reference anchor="FIPS180">
 <front>
 <title>Secure Hash Standard</title>
@@ -1304,18 +1311,18 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 <date month="May" year="1993"/>
 </front>
 </reference>
-
-<reference anchor="BZ2">
-<front>
-<title>libbz2 and bzip2</title>
-<author initials="J" surname="Seward" fullname="Julian Seward" />
-</front>
-</reference>
-
-
 </references>
 
 <references title="Informative References">
+
+<reference anchor="rfc3533">
+<front>
+<title>The Ogg Encapsulation Format Version 0</title>
+<author initials="S." surname="Pfeiffer" fullname="Silvia Pfeiffer"></author>
+</front>
+<seriesInfo name="RFC" value="3533" />
+</reference>
+
 <reference anchor="libvorbis">
 <front>
 <title>libvorbis: Available from the Xiph website, http://www.xiph.org</title>
@@ -1328,6 +1335,14 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 </front>
 </reference>   
 
+<reference anchor="rfc1952">
+<front>
+<title>GZIP file format specification version 4.3</title>
+<author initials="P" surname="Deutsch" fullname="L. Peter Deutsch"></author>
+</front>
+<seriesInfo name="RFC" value="1952" />
+</reference>
+
 <reference anchor="RFC3611">
 <front>
 <title>RTP Control Protocol Extended Reports (RTCP XR)</title>
@@ -1337,6 +1352,13 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Juan Carlos De Martin.
 <date year="2003" month="November"/>
 </front>
 <seriesInfo name="RFC" value="3611"/>
+</reference>
+<reference anchor="BZ2">
+<front>
+
+<title>libbz2 and bzip2</title>
+<author initials="J" surname="Seward" fullname="Julian Seward" />
+</front>
 </reference>
 </references>
 </back>
