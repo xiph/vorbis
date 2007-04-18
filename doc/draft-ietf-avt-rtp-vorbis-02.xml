@@ -1078,7 +1078,7 @@ the lenght.</t>
 <t>c=IN IP4 192.0.2.1</t>
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 vorbis/44100/2</t>
-<t>a=fmtp:98 delivery-method=in_band; configuration=base64string; delivery-method=out_band/rtsp; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band/http; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
+<t>a=fmtp:98 delivery-method=in_band; configuration=base64string; delivery-method=out_band; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
 </list>
 </section>
 
@@ -1098,11 +1098,12 @@ a=fmtp line is a single line even if it is presented broken because of clarity.
 <section anchor="Usage with the SDP Offer/Answer Mode" title="Usage with the SDP Offer/Answer Model">
 
 <t>
-The offer, as described in <xref target="rfc3264">An Offer/Answer Model Session
-Description Protocol</xref>, may contain a large number of delivery methods per
-single fmtp attribute, the answerer MUST remove every delivery-method and
-configuration-uri not supported. All the parameters MUST not be altered on
-answer otherwise.
+The only paramenter negotiable is the delivery method. All the others are
+declarative: the offer, as described in <xref target="rfc3264">An Offer/Answer
+Model Session Description Protocol</xref>, may contain a large number of
+delivery methods per single fmtp attribute, the answerer MUST remove every
+delivery-method and configuration-uri not supported. All the parameters MUST
+not be altered on answer otherwise.
 </t>
 
 </section>
