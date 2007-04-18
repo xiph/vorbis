@@ -28,10 +28,6 @@
 
 <abstract>
 
-<section title="Intended Status (To Be Removed Upon Publication)">
-<t>The intended status of this document is Proposed Standard.</t>
-</section>
-
 <t>
 This document describes an RTP payload format for transporting Vorbis encoded
 audio. It details the RTP encapsulation mechanism for raw Vorbis data and 
@@ -558,115 +554,6 @@ there is only a 2 byte length tag to define the length of the packed headers.
 The key difference between the in-band format and this one, is there is no need
 for the payload header octet.
 </t>
-
-<section anchor="Packed Headers IANA Considerations" title="Packed Headers IANA Considerations"> 
-
-<t>
-The following IANA considerations MUST only be applied to the packed headers.
-</t>
-
-<vspace blankLines="1" />
-
-<list style="hanging">
-<t hangText="MIME media type name:"> audio </t>
-
-<vspace blankLines="1" />
-
-<t hangText="MIME subtype:"> vorbis-config </t>
-
-<vspace blankLines="1" />
-
-<t hangText="Required Parameters:">
-<vspace blankLines="1" />
-None
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Optional Parameters:">
-<vspace blankLines="1" />
-None
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Encoding considerations:">
-<vspace blankLines="1" />
-This media type contains binary data.
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Security Considerations:">
-<vspace blankLines="1" />
-See Section 6 of RFC XXXX.
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Interoperability considerations:">
-<vspace blankLines="1" />
-None
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Published specification:">
-<vspace blankLines="1" />
-RFC XXXX [RFC Editor: please replace by the RFC number of  this memo,
-       when published]
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Applications which use this media type:">
-<vspace blankLines="1" />
-Vorbis encoded audio, configuration data.
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Additional information:"> 
-<vspace blankLines="1" />
-None
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Person &amp; email address to contact for further information:">
-<vspace blankLines="1" />
-Luca Barbato: &lt;lu_zero@gentoo.org&gt;
-<vspace blankLines="0" />
-IETF Audio/Video Transport Working Group
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Intended usage:">
-COMMON
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Restriction on usage:">
-<vspace blankLines="1" />
-This media type doesn't depend on the transport.
-</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Author:">
-<vspace blankLines="1" />
-Luca Barbato</t>
-
-<vspace blankLines="1" />
-
-<t hangText="Change controller:">
-<vspace blankLines="1" />
-IETF AVT Working Group</t>
-</list>
-
-</section>
 </section>
 
 </section>
@@ -886,13 +773,10 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 
 <vspace blankLines="1" />
 
-<list style="hanging">
-<t hangText="MIME media type name:"> audio </t>
-
+<t hangText="Type name:"> audio </t>
 <vspace blankLines="1" />
 
-<t hangText="MIME subtype:"> vorbis </t>
-
+<t hangText="Subtype name:"> vorbis </t>
 <vspace blankLines="1" />
 
 <t hangText="Required Parameters:">
@@ -902,7 +786,6 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 <list style="hanging">
 <t hangText="rate:"> indicates the RTP timestamp clock rate as described in <xref target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
 </t>
-
 <vspace blankLines="1" />
 
 <t hangText="channels:"> indicates the number of audio channels as described in <xref target="rfc3551">RTP Profile for Audio and Video Conferences with Minimal Control.</xref>
@@ -910,8 +793,7 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 
 <vspace blankLines="1" />
 
-<t hangText="delivery-method:"> indicates the delivery methods in use, the possible values are: inline, in_band, out_band/specific_name<vspace blankLines="0" />
-Where "specific_name" is the name of the out of band delivery method.
+<t hangText="delivery-method:"> indicates the delivery methods in use, the possible values are: inline, in_band, out_band
 </t>
 
 <vspace blankLines="1" />
@@ -956,13 +838,11 @@ This media type is framed and contains binary data.
 See Section 6 of RFC XXXX.</t>
 
 <vspace blankLines="1" />
-
 <t hangText="Interoperability considerations:">
 <vspace blankLines="1" />
 None</t>
 
 <vspace blankLines="1" />
-
 <t hangText="Published specification:">
 
 <vspace blankLines="1" />
@@ -1013,11 +893,122 @@ This media type depends on RTP framing, and hence is only defined for transfer v
 
 <vspace blankLines="1" />
 
-<t hangText="Change controller:"><vspace blankLines="1"/> IETF AVT Working Group</t>
+<t hangText="Change controller:">
+<vspace blankLines="1"/>IETF AVT Working Group delegated from the IESG</t>
 
 <vspace blankLines="1" />
 
 </list>
+
+<section anchor="Packed Headers IANA Considerations" title="Packed Headers IANA Considerations"> 
+
+<t>
+The following IANA considerations MUST only be applied to the packed headers.
+</t>
+
+<vspace blankLines="1" />
+
+<list style="hanging">
+<t hangText="Type name:"> audio </t>
+
+<vspace blankLines="1" />
+
+<t hangText="Subtype name:"> vorbis-config </t>
+
+<vspace blankLines="1" />
+
+<t hangText="Required Parameters:">
+<vspace blankLines="1" />
+None
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Optional Parameters:">
+<vspace blankLines="1" />
+None
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Encoding considerations:">
+<vspace blankLines="1" />
+This media type contains binary data.
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Security Considerations:">
+<vspace blankLines="1" />
+See Section 6 of RFC XXXX.
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Interoperability considerations:">
+<vspace blankLines="1" />
+None
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Published specification:">
+<vspace blankLines="1" />
+RFC XXXX [RFC Editor: please replace by the RFC number of  this memo,
+       when published]
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Applications which use this media type:">
+<vspace blankLines="1" />
+Vorbis encoded audio, configuration data.
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Additional information:"> 
+<vspace blankLines="1" />
+None
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Person &amp; email address to contact for further information:">
+<vspace blankLines="1" />
+Luca Barbato: &lt;lu_zero@gentoo.org&gt;
+<vspace blankLines="0" />
+IETF Audio/Video Transport Working Group
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Intended usage:">
+COMMON
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Restriction on usage:">
+<vspace blankLines="1" />
+This media type doesn't depend on the transport.
+</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Author:">
+<vspace blankLines="1" />
+Luca Barbato</t>
+
+<vspace blankLines="1" />
+
+<t hangText="Change controller:">
+<vspace blankLines="1" />
+IETF AVT Working Group delegated from the IESG</t>
+</list>
+
+</section>
+
 </section>
 
 <section anchor="SDP related considerations" title="SDP related considerations">
