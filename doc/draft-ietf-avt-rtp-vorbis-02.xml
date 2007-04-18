@@ -772,14 +772,14 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 <section anchor="IANA Considerations" title="IANA Considerations"> 
 
 <vspace blankLines="1" />
-
+<list style="hanging">
 <t hangText="Type name:"> audio </t>
 <vspace blankLines="1" />
 
 <t hangText="Subtype name:"> vorbis </t>
 <vspace blankLines="1" />
 
-<t hangText="Required Parameters:">
+<t hangText="Required parameters:">
 
 <vspace blankLines="1" />
 
@@ -805,7 +805,7 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 
 <vspace blankLines="1" />
 
-<t hangText="Optional Parameters:">
+<t hangText="Optional parameters:">
 
 <vspace blankLines="1" />
 
@@ -833,9 +833,9 @@ This media type is framed and contains binary data.
 
 <vspace blankLines="1" />
 
-<t hangText="Security Considerations:">
+<t hangText="Security considerations:">
 <vspace blankLines="1" />
-See Section 6 of RFC XXXX.</t>
+See Section 10 of RFC XXXX.</t>
 
 <vspace blankLines="1" />
 <t hangText="Interoperability considerations:">
@@ -897,7 +897,6 @@ This media type depends on RTP framing, and hence is only defined for transfer v
 <vspace blankLines="1"/>IETF AVT Working Group delegated from the IESG</t>
 
 <vspace blankLines="1" />
-
 </list>
 
 <section anchor="Packed Headers IANA Considerations" title="Packed Headers IANA Considerations"> 
@@ -917,14 +916,14 @@ The following IANA considerations MUST only be applied to the packed headers.
 
 <vspace blankLines="1" />
 
-<t hangText="Required Parameters:">
+<t hangText="Required parameters:">
 <vspace blankLines="1" />
 None
 </t>
 
 <vspace blankLines="1" />
 
-<t hangText="Optional Parameters:">
+<t hangText="Optional parameters:">
 <vspace blankLines="1" />
 None
 </t>
@@ -938,9 +937,9 @@ This media type contains binary data.
 
 <vspace blankLines="1" />
 
-<t hangText="Security Considerations:">
+<t hangText="Security considerations:">
 <vspace blankLines="1" />
-See Section 6 of RFC XXXX.
+See Section 10 of RFC XXXX.
 </t>
 
 <vspace blankLines="1" />
