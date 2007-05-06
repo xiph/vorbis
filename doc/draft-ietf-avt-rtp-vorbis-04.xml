@@ -93,7 +93,7 @@ headers are used to associate the Vorbis data with its associated decoding
 codebooks as well as indicating if the following packet contains fragmented
 Vorbis data and/or the number of whole Vorbis data frames. The payload data
 contains the raw Vorbis bitstream information. There are 3 types of Vorbis
-payload data, an RTP packet MUST contain just one of them at time.
+payload data, an RTP packet MUST contain just one of them at a time.
 </t>
 
 <section anchor="RTP Header" title="RTP Header">
@@ -269,7 +269,7 @@ small (2-3 bytes) to quite large (8-12 kilobytes). The reference implementation
 <xref target="libvorbis"></xref> typically produces packets less than ~800
 bytes, except for the setup header packets which are ~4-12 kilobytes. Within an
 RTP context, to avoid fragmentation, the Vorbis data packet size SHOULD be kept
-sufficiently small so that after adding the the RTP and payload headers, the
+sufficiently small so that after adding the RTP and payload headers, the
 complete RTP packet is smaller than the path MTU.
 </t>
 
@@ -439,7 +439,7 @@ A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set
 to 1. Of the three headers, defined in the
 <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the
 identification and the setup MUST be packed together, while the comment header
-MUST be completely suppressed. Is up to the client to provide a minimal size
+MUST be completely suppressed. It is up to the client to provide a minimal size
 comment header to the decoder if required by the implementation.
 </t>
 
@@ -1145,7 +1145,7 @@ the SDP updated. Since the in-band method is unreliable, an out of band
 fallback is provided.</t>
 
 <t>The client could choose to fetch the Configuration from the alternate source
-as soon it discovers a Configuration packet got lost in-band or use
+as soon as it discovers a Configuration packet got lost in-band or use
 <xref target="RFC3611">selective retransmission</xref>, if the server supports
 the feature.</t>
 

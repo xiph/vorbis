@@ -145,7 +145,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-04              May 2007
    following packet contains fragmented Vorbis data and/or the number of
    whole Vorbis data frames.  The payload data contains the raw Vorbis
    bitstream information.  There are 3 types of Vorbis payload data, an
-   RTP packet MUST contain just one of them at time.
+   RTP packet MUST contain just one of them at a time.
 
 2.1.  RTP Header
 
@@ -308,8 +308,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-04              May 2007
    packets less than ~800 bytes, except for the setup header packets
    which are ~4-12 kilobytes.  Within an RTP context, to avoid
    fragmentation, the Vorbis data packet size SHOULD be kept
-   sufficiently small so that after adding the the RTP and payload
-   headers, the complete RTP packet is smaller than the path MTU.
+   sufficiently small so that after adding the RTP and payload headers,
+   the complete RTP packet is smaller than the path MTU.
 
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -464,8 +464,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-04              May 2007
    A Vorbis Packed Configuration is indicated with the Vorbis Data Type
    field set to 1.  Of the three headers, defined in the Vorbis I
    specification [12], the identification and the setup MUST be packed
-   together, while the comment header MUST be completely suppressed.  Is
-   up to the client to provide a minimal size comment header to the
+   together, while the comment header MUST be completely suppressed.  It
+   is up to the client to provide a minimal size comment header to the
    decoder if required by the implementation.
 
 
@@ -1211,8 +1211,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-04              May 2007
    unreliable, an out of band fallback is provided.
 
    The client could choose to fetch the Configuration from the alternate
-   source as soon it discovers a Configuration packet got lost in-band
-   or use selective retransmission [14], if the server supports the
+   source as soon as it discovers a Configuration packet got lost in-
+   band or use selective retransmission [14], if the server supports the
    feature.
 
    A serverside optimization would be to keep an hash list of the
