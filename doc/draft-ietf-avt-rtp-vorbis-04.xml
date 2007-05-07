@@ -438,9 +438,8 @@ re-transmission of the configuration headers.
 A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set
 to 1. Of the three headers, defined in the
 <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the
-identification and the setup MUST be packed together, while the comment header
-MUST be completely suppressed. It is up to the client to provide a minimal size
-comment header to the decoder if required by the implementation.
+identification and the setup MUST be packed together as they are, while the comment header MAY be replaced with a dummy one.
+The packed configuration follows a generic way to store xiph codec configurations: the first byte stores the number of following packets minus one, the next bytes represent the size of the packets, every byte set to 0xff means that the next byte has to be add to the current sum in order to have the complete size; the headers immediately follows the list of sizes. The headers are packed in the same order they are present in ogg: identification, comment, setup.
 </t>
 
 <figure anchor="Packed Configuration Figure" title="Packed Configuration Figure">
@@ -460,7 +459,9 @@ comment header to the decoder if required by the implementation.
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                      Ident                    | 0 | 1 |      1|
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |           length              |        Identification       ..
+   |           length              | n. of headers |    length1    |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |    length2    |                  Identification              ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    ..                        Identification                       ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -468,11 +469,19 @@ comment header to the decoder if required by the implementation.
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    ..                        Identification                       ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   ..              |                       Setup                  ..
+   ..               Identification                 |    Comment   ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..                            Comment                          ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..                            Comment                          ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..                            Comment                          ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..           Comment            |             Setup            ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    ..                            Setup                            ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   ..                            Setup                             |
+   ..                            Setup                            ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 ]]></artwork>
 </figure>
@@ -484,7 +493,6 @@ packet bears the full Packed configuration, the number of packet is set to 1.</t
 </section>
 
 <section anchor="Out of Band Transmission" title="Out of Band Transmission">
-
 
 <t>
 This section, as stated above, does not cover all the possible out-of-band
@@ -529,11 +537,19 @@ there is only a 2 byte length tag to define the length of the packed headers.
     0                   1                   2                   3
     0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                   Ident                       |              ..
+   |                   Ident                       |    length1    |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   ..   length     |              Identification Header           ..
+   |      0xff     |    length2    |    Identification Header     ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .................................................................
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    ..                    Identification Header                     |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                     Configuration Header                     ..
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   .................................................................
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   ..                    Configuration Header                      |
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
    |                          Setup Header                        ..
    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -543,7 +559,7 @@ there is only a 2 byte length tag to define the length of the packed headers.
 </figure>
 <t>
 The key difference between the in-band format and this one, is there is no need
-for the payload header octet.
+for the payload header octet. In this figure the comment has a size bigger than 255 bytes.
 </t>
 </section>
 
