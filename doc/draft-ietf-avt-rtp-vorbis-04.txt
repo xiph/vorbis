@@ -518,7 +518,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-04              May 2007
       |                              ...                              |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |                      Ident                    | 0 | 1 |      1|
+      |                      Ident                    | 1 | 0 |      0|
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |           length              | n. of headers |    length1    |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -620,30 +620,32 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-04              May 2007
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |                   Ident                       |    length1    |
+      |                   Ident                       |    length    ..
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |      0xff     |    length2    |    Identification Header     ..
+      ..              | n. of headers |    length1    |    length2   ..
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      .................................................................
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      ..                    Identification Header                     |
-      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      |                     Configuration Header                     ..
+      ..              |             Identification Header            ..
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       .................................................................
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-      ..                    Configuration Header                      |
+      ..              |         Comment Header                       ..
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      .................................................................
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      ..                        Comment Header                        |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |                          Setup Header                        ..
+      +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+      .................................................................
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       ..                         Setup Header                         |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
                       Figure 7: Packed Headers Detail
 
-   The key difference between the in-band format and this one, is there
-   is no need for the payload header octet.  In this figure the comment
-   has a size bigger than 127 bytes.
+   The key difference between the in-band format and this one, is that
+   there is no need for the payload header octet.  In this figure the
+   comment has a size bigger than 127 bytes.
 
 3.3.  Loss of Configuration Headers
 
@@ -663,8 +665,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-04              May 2007
    descriptive but to offer basic track/song information.  Clients MAY
    ignore it completely.  The details on the format of the comments can
    be found in the Vorbis documentation [12].
-
-
 
 
 
