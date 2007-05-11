@@ -436,10 +436,10 @@ re-transmission of the configuration headers.
 
 <t>
 A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set
-to 1. Of the three headers, defined in the
+to 1. Of the three headers defined in the
 <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the
-identification and the setup MUST be packed together as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store xiph codec configurations: The first field stores the number of following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
-The count and the length fields are encoded using the following logic: the most significant bit in the octect is used as mark, if set to 1 the value continues in the next byte; the other 7 bits are used to store the value.
+identification and the setup MUST be packed as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store xiph codec configurations: The first field stores the number of the following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
+The count and the length fields are encoded using the following logic: the most significant bit in the octect is used as mark, if set to 1 the value continues in the next byte; the other 7 bits are used to store the value. The bytes are in network order. 
 The headers are packed in the same order they are present in ogg: identification, comment, setup.</t>
 
 <figure anchor="Packed Configuration Figure" title="Packed Configuration Figure">
