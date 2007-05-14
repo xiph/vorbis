@@ -439,7 +439,8 @@ A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set
 to 1. Of the three headers defined in the
 <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the
 identification and the setup MUST be packed as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store xiph codec configurations: The first field stores the number of the following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
-The count and the length fields are encoded using the following logic: the most significant bit in the octect is used as mark, if set to 1 the value continues in the next byte; the other 7 bits are used to store the value. The bytes are in network order. 
+The count and the length fields are encoded using the following logic: the data is in network order, every byte has the most significant bit used as flag and the following 7 used to store the value. The first N bit are to be taken, where N is number of bits representing the value modulo 7, and stored in the first byte.
+If there are more bits, the flag bit is set to 1 and the subsequent 7bit are stored in the following byte, if there are remaining bits set the flag to 1 and the same procedure is repeated. The ending byte has the flag bit set to 0. In order to decode it is enough to iterate over the bytes until the flag bit set to 0, for every byte the data is added to the accumulated value multiplied by 128.
 The headers are packed in the same order they are present in ogg: identification, comment, setup.</t>
 
 <figure anchor="Packed Configuration Figure" title="Packed Configuration Figure">
