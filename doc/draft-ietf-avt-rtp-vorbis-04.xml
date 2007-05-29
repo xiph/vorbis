@@ -1028,7 +1028,7 @@ IETF AVT Working Group delegated from the IESG</t>
 The following paragraphs defines the mapping of the parameters described in the IANA considerations section and their usage in the <xref target="rfc3264">Offer/Answer Model</xref>.
 </t>
 
-<section anchor="Mapping Media Type Parameters into SDP" title="Mapping MIME Parameters into SDP"> 
+<section anchor="Mapping Media Type Parameters into SDP" title="Mapping Media Type Parameters into SDP"> 
 
 <t>
 The information carried in the Media Type media type specification has a
@@ -1056,7 +1056,7 @@ When SDP is used to specify sessions the mapping are as follows:
 included in the SDP "a=fmtp" attribute.</t>
 <vspace blankLines="1" />
 
-<t>The optional parameter "configuration-uri", when present,  MUST be included
+<t>The optional parameter "configuration-uri", when present, MUST be included
 in the SDP "a=fmtp" attribute and MUST follow the delivery-method that applies.</t>
 
 </list>
@@ -1099,9 +1099,9 @@ the length.</t>
 
 <t>
 Note that the payload format (encoding) names are commonly shown in upper case.
-MIME subtypes are commonly shown in lower case. These names are
+Media Type subtypes are commonly shown in lower case. These names are
 case-insensitive in both places.  Similarly, parameter names are
-case-insensitive both in MIME types and in the default mapping to the SDP
+case-insensitive both in Media Type types and in the default mapping to the SDP
 a=fmtp attribute. The exception regarding case sensitivity is the
 configuration-uri URI which MUST be regarded as being case sensitive. The
 a=fmtp line is a single line even if it is presented broken because of clarity.
@@ -1198,8 +1198,8 @@ buffer overflows in the client applications.
 
 <t>
 This document is a continuation of draft-moffitt-vorbis-rtp-00.txt and
-draft-kerr-avt-vorbis-rtp-04.txt.  The MIME type section is a continuation of
-draft-short-avt-rtp-vorbis-mime-00.txt.
+draft-kerr-avt-vorbis-rtp-04.txt.  The Media Type type section is a
+continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 </t>
 
 <t>
