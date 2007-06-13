@@ -1092,7 +1092,7 @@ the length.</t>
 <t>c=IN IP4 192.0.2.1</t>
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 vorbis/44100/2</t>
-<t>a=fmtp:98 delivery-method=in_band; configuration=base64string; delivery-method=out_band; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
+<t>a=fmtp:98 delivery-method=inline; configuration=base64string; delivery-method=out_band; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
 </list>
 </section>
 
