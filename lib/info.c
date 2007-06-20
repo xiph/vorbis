@@ -211,7 +211,7 @@ static int _vorbis_unpack_info(vorbis_info *vi,oggpack_buffer *opb){
   
   if(vi->rate<1)goto err_out;
   if(vi->channels<1)goto err_out;
-  if(ci->blocksizes[0]<8)goto err_out; 
+  if(ci->blocksizes[0]<64)goto err_out; 
   if(ci->blocksizes[1]<ci->blocksizes[0])goto err_out;
   
   if(oggpack_read(opb,1)!=1)goto err_out; /* EOP check */
