@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: floor backend 1 implementation
- last mod: $Id: floor1.c,v 1.27 2003/12/30 11:02:22 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -358,7 +358,7 @@ static float FLOOR1_fromdB_LOOKUP[256]={
   0.82788260F, 0.88168307F, 0.9389798F, 1.F, 
 };
 
-static void render_line(int x0,int x1,int y0,int y1,float *d){
+static void render_line(int n, int x0,int x1,int y0,int y1,float *d){
   int dy=y1-y0;
   int adx=x1-x0;
   int ady=abs(dy);
@@ -370,8 +370,12 @@ static void render_line(int x0,int x1,int y0,int y1,float *d){
 
   ady-=abs(base*adx);
 
-  d[x]*=FLOOR1_fromdB_LOOKUP[y];
-  while(++x<x1){
+  if(n>x1)n=x1;
+
+  if(x<n)
+    d[x]*=FLOOR1_fromdB_LOOKUP[y];
+
+  while(++x<n){
     err=err+ady;
     if(err>=adx){
       err-=adx;
@@ -1068,7 +1072,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
 	hy*=info->mult;
 	hx=info->postlist[current];
 	
-	render_line(lx,hx,ly,hy,out);
+	render_line(n,lx,hx,ly,hy,out);
 	
 	lx=hx;
 	ly=hy;
