@@ -113,15 +113,13 @@ Vorbis_I_spec.html: $(SPEC_PNG_BUILD) $(BUILDDIR)/Vorbis_I_spec.xml
 Vorbis_I_spec.fo: $(BUILDDIR)/Vorbis_I_spec.xml
 	cd build; xsltproc --xinclude --output $@ spec-fo.xsl Vorbis_I_spec.xml && mv $@ ..
 
-# we add the two newlines to pdfxmltex because on a number of Fedora systems
-# tex prompts for input complaining about something;
-# and surprisingly there's no way to tell tex to ignore that
-# also, --interaction doesn't seem to actually do anything different
-# if you change it
+# we add the two newlines to pdfxmltex because this entire XML
+# toolchain is built from wishful thinking and bonghits and the
+# default supplied passivetex config files are buggy.
 Vorbis_I_spec.pdf: Vorbis_I_spec.fo $(SPEC_PNG_BUILD) $(SPEC_PDF_BUILD)
 	cp $< build/spec.fo # work around a passivetex bug
-	cd build; echo -e -n "\n\n" | pdfxmltex --interaction nonstopmode spec.fo
-	cd build; echo -e -n "\n\n" | pdfxmltex --interaction nonstopmode spec.fo
+	-cd build; echo -e -n "\n\n" | pdfxmltex spec.fo
+	-cd build; echo -e -n "\n\n" | pdfxmltex spec.fo
 	rm build/spec.fo
 	mv build/spec.pdf $@
 else
