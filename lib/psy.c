@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: psychoacoustics not including preecho
- last mod: $Id: psy.c,v 1.81 2002/10/21 07:00:11 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -553,7 +553,10 @@ static void bark_noise_hybridmp(int n,const long *b,
   int i;
 
   int lo, hi;
-  float R, A, B, D;
+  float R=0.f;
+  float A=0.f;
+  float B=0.f;
+  float D=1.f;
   float w, x, y;
 
   tN = tX = tXX = tY = tXY = 0.f;

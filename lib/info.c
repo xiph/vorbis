@@ -135,8 +135,8 @@ void vorbis_comment_clear(vorbis_comment *vc){
     if(vc->user_comments)_ogg_free(vc->user_comments);
 	if(vc->comment_lengths)_ogg_free(vc->comment_lengths);
     if(vc->vendor)_ogg_free(vc->vendor);
+    memset(vc,0,sizeof(*vc));
   }
-  memset(vc,0,sizeof(*vc));
 }
 
 /* blocksize 0 is guaranteed to be short, 1 is guaranteed to be long.
@@ -600,12 +600,14 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   memset(op_comm,0,sizeof(*op_comm));
   memset(op_code,0,sizeof(*op_code));
 
-  if(b->header)_ogg_free(b->header);
-  if(b->header1)_ogg_free(b->header1);
-  if(b->header2)_ogg_free(b->header2);
-  b->header=NULL;
-  b->header1=NULL;
-  b->header2=NULL;
+  if(b){
+    if(b->header)_ogg_free(b->header);
+    if(b->header1)_ogg_free(b->header1);
+    if(b->header2)_ogg_free(b->header2);
+    b->header=NULL;
+    b->header1=NULL;
+    b->header2=NULL;
+  }
   return(ret);
 }
 
