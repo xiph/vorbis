@@ -821,18 +821,20 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 <vspace blankLines="1" />
 
 <list style="hanging">
-<t hangText="configuration-uri:"> the URI of the configuration headers in case
-of out of band transmission. In the form of "protocol://path/to/resource/".
-Depending on the specific method, a single configuration packet could be
-retrived by its number, or multiple packets could be aggregated in a single
-stream. Such aggregates MAY be compressed using either
+<t hangText="configuration-uri:"> the <xref target="rfc3986">URI</xref> of
+the configuration headers in case of out of band transmission.
+In the form of "protocol://path/to/resource/", depending on the specific
+method, a single configuration packet could be retrived by its Ident number, or
+multiple packets could be aggregated in a single stream. 
+Such aggregates MAY be compressed using either
 <xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref>.
 A <xref target="FIPS180">sha1</xref> checksum MAY be provided for aggregates.
 In this latter case the URI will end with the aggregate name, followed by its
 compressed extension if applies, a "!" and the <xref target="rfc3548">base64</xref> representation of the sha1hash of the above mentioned compressed aggregated
 as in: "protocol://path/to/resource/aggregated.bz2!sha1hash".
 The trailing '/' discriminates which of two methods are in use.
-It MUST follow the associated delivery method parameter (either "in_band" or "out_band").
+The configuration-uri MUST follow the associated delivery method parameter ("out_band").
+Non hierarchical protocols and protocols using for special purposes the '!' separator MAY point just to a resource aggregate using their specific syntax.
 </t>
 </list>
 </t>
@@ -1248,6 +1250,20 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <date month="July" year="2003" />
 <seriesInfo name="RFC" value="3551" />
 </reference> 
+
+<reference anchor='rfc3986'>
+<front>
+<title abbrev='URI Generic Syntax'>Uniform Resource Identifier (URI): Generic Syntax</title>
+<author initials='T.' surname='Berners-Lee' fullname='Tim Berners-Lee'>
+</author>
+<author initials='R.' surname='Fielding' fullname='Roy T. Fielding'>
+</author>
+<author initials='L.' surname='Masinter' fullname='Larry Masinter'>
+</author>
+</front>
+<date year='2005' month='January' />
+<seriesInfo name='RFC' value='3986' />
+</reference>
 
 <reference anchor='rfc4566'>
 
