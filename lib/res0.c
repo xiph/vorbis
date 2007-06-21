@@ -847,14 +847,14 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
   int partitions_per_word=look->phrasebook->dim;
-  int end=(info->end<vb->pcmend/2?info->end:vb->pcmend/2);
-  int n=end-info->begin;
+  int max=(vb->pcmend*ch)>>1;
+  int end=(info->end<max?info->end:max);
+  int n=info->end-info->begin;
 
   if(n>0){
     int partvals=n/samples_per_partition;
     int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
     int **partword=_vorbis_block_alloc(vb,partwords*sizeof(*partword));
-    
     
     for(i=0;i<ch;i++)if(nonzero[i])break;
     if(i==ch)return(0); /* no nonzero vectors */
