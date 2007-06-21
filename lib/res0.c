@@ -849,7 +849,7 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
   int partitions_per_word=look->phrasebook->dim;
   int max=(vb->pcmend*ch)>>1;
   int end=(info->end<max?info->end:max);
-  int n=info->end-info->begin;
+  int n=end-info->begin;
 
   if(n>0){
     int partvals=n/samples_per_partition;
