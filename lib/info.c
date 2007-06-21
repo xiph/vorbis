@@ -139,7 +139,7 @@ void vorbis_comment_clear(vorbis_comment *vc){
   memset(vc,0,sizeof(*vc));
 }
 
-/* blocksize 0 is guaranteed to be short, 1 is guarantted to be long.
+/* blocksize 0 is guaranteed to be short, 1 is guaranteed to be long.
    They may be equal, but short will never ge greater than long */
 int vorbis_info_blocksize(vorbis_info *vi,int zo){
   codec_setup_info *ci = vi->codec_setup;
@@ -162,14 +162,23 @@ void vorbis_info_clear(vorbis_info *vi){
       if(ci->mode_param[i])_ogg_free(ci->mode_param[i]);
 
     for(i=0;i<ci->maps;i++) /* unpack does the range checking */
-      _mapping_P[ci->map_type[i]]->free_info(ci->map_param[i]);
+      if(ci->map_param[i]) /* this may be cleaning up an aborted
+			      unpack, in which case the below type
+			      cannot be trusted */
+	_mapping_P[ci->map_type[i]]->free_info(ci->map_param[i]);
 
     for(i=0;i<ci->floors;i++) /* unpack does the range checking */
-      _floor_P[ci->floor_type[i]]->free_info(ci->floor_param[i]);
+      if(ci->floor_param[i]) /* this may be cleaning up an aborted
+				unpack, in which case the below type
+				cannot be trusted */
+	_floor_P[ci->floor_type[i]]->free_info(ci->floor_param[i]);
     
     for(i=0;i<ci->residues;i++) /* unpack does the range checking */
-      _residue_P[ci->residue_type[i]]->free_info(ci->residue_param[i]);
-
+      if(ci->residue_param[i]) /* this may be cleaning up an aborted
+				  unpack, in which case the below type
+				  cannot be trusted */
+	_residue_P[ci->residue_type[i]]->free_info(ci->residue_param[i]);
+    
     for(i=0;i<ci->books;i++){
       if(ci->book_param[i]){
 	/* knows if the book was not alloced */
@@ -416,7 +425,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 }
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
-  char temp[]="Xiph.Org libVorbis I 20050304";
+  char temp[]="Xiph.Org libVorbis I 20070621";
   int bytes = strlen(temp);
 
   /* preamble */  
