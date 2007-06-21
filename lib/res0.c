@@ -375,7 +375,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
   int possible_partitions=info->partitions;
-  int end=(info->end<vb->pcmend?info->end:vb->pcmend);
+  int end=(info->end<vb->pcmend/2?info->end:vb->pcmend/2);
   int n=end-info->begin;
   
   if(n>0){
@@ -446,7 +446,7 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
   int possible_partitions=info->partitions;
-  int end=(info->end<vb->pcmend?info->end:vb->pcmend);
+  int end=(info->end<vb->pcmend/2?info->end:vb->pcmend/2);
   int n=end-info->begin;
 
   if(n>0){
@@ -512,7 +512,7 @@ static int _01forward(oggpack_buffer *opb,
   int samples_per_partition=info->grouping;
   int possible_partitions=info->partitions;
   int partitions_per_word=look->phrasebook->dim;
-  int end=(info->end<vb->pcmend?info->end:vb->pcmend);
+  int end=(info->end<vb->pcmend/2?info->end:vb->pcmend/2);
   int n=end-info->begin;
 
   if(n>0){
@@ -628,7 +628,7 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
   int partitions_per_word=look->phrasebook->dim;
-  int end=(info->end<vb->pcmend?info->end:vb->pcmend);
+  int end=(info->end<vb->pcmend/2?info->end:vb->pcmend/2);
   int n=end-info->begin;
   
   if(n>0){
@@ -847,7 +847,7 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
   int partitions_per_word=look->phrasebook->dim;
-  int end=(info->end<vb->pcmend?info->end:vb->pcmend);
+  int end=(info->end<vb->pcmend/2?info->end:vb->pcmend/2);
   int n=end-info->begin;
 
   if(n>0){
