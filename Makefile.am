@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-AUTOMAKE_OPTIONS = 1.6 foreign dist-zip
+AUTOMAKE_OPTIONS = 1.6 foreign dist-zip dist-bzip2
 
 SUBDIRS = lib include doc examples vq
 
@@ -19,6 +19,7 @@ EXTRA_DIST = \
 	vorbis-uninstalled.pc.in \
 	vorbisenc-uninstalled.pc.in \
 	vorbisfile-uninstalled.pc.in \
+	doc examples symbian vq \
 	macos macosx win32
 
 
