@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: 22kHz settings 
- last mod: $Id: setup_22.h,v 1.3 2002/07/11 10:02:29 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -44,7 +44,7 @@ ve_setup_data_template ve_setup_22_stereo={
   _vp_tonemask_adj_16,
   _vp_tonemask_adj_16,
 
-  _psy_noiseguards_8,
+  _psy_noiseguards_16,
   _psy_noisebias_16_impulse,
   _psy_noisebias_16_short,
   _psy_noisebias_16_short,
