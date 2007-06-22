@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.39 2002/06/28 22:19:35 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -255,6 +255,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
 
 /* returns the number of bits ************************************************/
 int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b){
+  if(a<0 || a>=book->c->entries)return(0);
   oggpack_write(b,book->codelist[a],book->c->lengthlist[a]);
   return(book->c->lengthlist[a]);
 }

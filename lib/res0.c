@@ -336,7 +336,7 @@ static int local_book_besterror(codebook *book,float *a){
     }
   }
 
-  {
+  if(best>-1){
     float *ptr=book->valuelist+best*dim;
     for(i=0;i<dim;i++)
       *a++ -= *ptr++;
@@ -355,10 +355,12 @@ static int _encodepart(oggpack_buffer *opb,float *vec, int n,
     int entry=local_book_besterror(book,vec+i*dim);
 
 #ifdef TRAIN_RES
-    acc[entry]++;
+    if(entry>0)
+      acc[entry]++;
 #endif
-
+      
     bits+=vorbis_book_encode(book,entry,opb);
+  
   }
 
   return(bits);
