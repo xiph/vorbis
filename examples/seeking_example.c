@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: illustrate seeking, and test it too
- last mod: $Id: seeking_example.c,v 1.15 2002/07/11 06:40:47 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -25,14 +25,15 @@
 # include <fcntl.h>
 #endif
 
-void _verify(OggVorbis_File *ov,ogg_int64_t pos,
-	     ogg_int64_t val,ogg_int64_t pcmval,
+void _verify(OggVorbis_File *ov,
+	     ogg_int64_t val,ogg_int64_t pcmval,double timeval,
 	     ogg_int64_t pcmlength,
 	     char *bigassbuffer){
   int j;
   long bread;
   char buffer[4096];
   int dummy;
+  ogg_int64_t pos;
 
   /* verify the raw position, the pcm position and position decode */
   if(val!=-1 && ov_raw_tell(ov)<val){
@@ -43,6 +44,11 @@ void _verify(OggVorbis_File *ov,ogg_int64_t pos,
   if(pcmval!=-1 && ov_pcm_tell(ov)>pcmval){
     printf("pcm position out of tolerance: requested %ld, got %ld\n",
 	   (long)pcmval,(long)ov_pcm_tell(ov));
+    exit(1);
+  }
+  if(timeval!=-1 && ov_time_tell(ov)>timeval){
+    printf("time position out of tolerance: requested %f, got %f\n",
+	   timeval,ov_time_tell(ov));
     exit(1);
   }
   pos=ov_pcm_tell(ov);
@@ -73,6 +79,7 @@ int main(){
   OggVorbis_File ov;
   int i,ret;
   ogg_int64_t pcmlength;
+  double timelength;
   char *bigassbuffer;
   int dummy;
 
@@ -106,6 +113,7 @@ int main(){
        does what it claimed, decode the entire file into memory */
     fflush(stdout);
     pcmlength=ov_pcm_total(&ov,-1);
+    timelength=ov_time_total(&ov,-1);
     bigassbuffer=malloc(pcmlength*2); /* w00t */
     i=0;
     while(i<pcmlength*2){
@@ -120,9 +128,6 @@ int main(){
 	      (long)(pcmlength*2-i));
     }
     
-    /* Exercise all the real seeking cases; ov_raw_seek,
-       ov_pcm_seek_page and ov_pcm_seek.  time seek is just a wrapper
-       on pcm_seek */
     {
       ogg_int64_t length=ov.end;
       printf("\rtesting raw seeking to random places in %ld bytes....\n",
@@ -130,7 +135,6 @@ int main(){
     
       for(i=0;i<1000;i++){
 	ogg_int64_t val=(double)rand()/RAND_MAX*length;
-	ogg_int64_t pos;
 	printf("\r\t%d [raw position %ld]...     ",i,(long)val);
 	fflush(stdout);
 	ret=ov_raw_seek(&ov,val);
@@ -139,7 +143,7 @@ int main(){
 	  exit(1);
 	}
 
-	_verify(&ov,pos,val,-1,pcmlength,bigassbuffer);
+	_verify(&ov,val,-1,-1.,pcmlength,bigassbuffer);
 
       }
     }
@@ -151,7 +155,6 @@ int main(){
     
       for(i=0;i<1000;i++){
 	ogg_int64_t val=(double)rand()/RAND_MAX*pcmlength;
-	ogg_int64_t pos;
 	printf("\r\t%d [pcm position %ld]...     ",i,(long)val);
 	fflush(stdout);
 	ret=ov_pcm_seek_page(&ov,val);
@@ -160,20 +163,18 @@ int main(){
 	  exit(1);
 	}
 
-	_verify(&ov,pos,-1,val,pcmlength,bigassbuffer);
+	_verify(&ov,-1,val,-1.,pcmlength,bigassbuffer);
 
       }
     }
     
     printf("\r");
     {
-      ogg_int64_t length=ov.end;
       printf("testing pcm exact seeking to random places in %ld samples....\n",
 	     (long)pcmlength);
     
       for(i=0;i<1000;i++){
 	ogg_int64_t val=(double)rand()/RAND_MAX*pcmlength;
-	ogg_int64_t pos;
 	printf("\r\t%d [pcm position %ld]...     ",i,(long)val);
 	fflush(stdout);
 	ret=ov_pcm_seek(&ov,val);
@@ -187,7 +188,52 @@ int main(){
 	  exit(1);
 	}
 
-	_verify(&ov,pos,-1,val,pcmlength,bigassbuffer);
+	_verify(&ov,-1,val,-1.,pcmlength,bigassbuffer);
+
+      }
+    }
+
+    printf("\r");
+    {
+      printf("testing time page seeking to random places in %f seconds....\n",
+	     timelength);
+    
+      for(i=0;i<1000;i++){
+	double val=(double)rand()/RAND_MAX*timelength;
+	printf("\r\t%d [time position %f]...     ",i,val);
+	fflush(stdout);
+	ret=ov_time_seek_page(&ov,val);
+	if(ret<0){
+	  printf("seek failed: %d\n",ret);
+	  exit(1);
+	}
+
+	_verify(&ov,-1,-1,val,pcmlength,bigassbuffer);
+
+      }
+    }
+
+    printf("\r");
+    {
+      printf("testing time exact seeking to random places in %f seconds....\n",
+	     timelength);
+    
+      for(i=0;i<1000;i++){
+	double val=(double)rand()/RAND_MAX*timelength;
+	printf("\r\t%d [time position %f]...     ",i,val);
+	fflush(stdout);
+	ret=ov_time_seek(&ov,val);
+	if(ret<0){
+	  printf("seek failed: %d\n",ret);
+	  exit(1);
+	}
+	if(ov_time_tell(&ov)<val-1 || ov_time_tell(&ov)>val+1){
+	  printf("Declared position didn't perfectly match request: %f != %f\n",
+		 val,ov_time_tell(&ov));
+	  exit(1);
+	}
+
+	_verify(&ov,-1,-1,val,pcmlength,bigassbuffer);
 
       }
     }

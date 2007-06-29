@@ -1360,19 +1360,22 @@ int ov_time_seek(OggVorbis_File *vf,double seconds){
   /* translate time to PCM position and call ov_pcm_seek */
 
   int link=-1;
-  ogg_int64_t pcm_total=ov_pcm_total(vf,-1);
-  double time_total=ov_time_total(vf,-1);
+  ogg_int64_t pcm_total=0;
+  double time_total=0.;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
   if(!vf->seekable)return(OV_ENOSEEK);
-  if(seconds<0 || seconds>time_total)return(OV_EINVAL);
+  if(seconds<0)return(OV_EINVAL);
   
   /* which bitstream section does this time offset occur in? */
-  for(link=vf->links-1;link>=0;link--){
-    pcm_total-=vf->pcmlengths[link*2+1];
-    time_total-=ov_time_total(vf,link);
-    if(seconds>=time_total)break;
+  for(link=0;link<vf->links;link++){
+    double addsec = ov_time_total(vf,link);
+    if(seconds<time_total+addsec)break;
+    time_total+=addsec;
+    pcm_total+=vf->pcmlengths[link*2+1];
   }
+
+  if(link==vf->links)return(OV_EINVAL);
 
   /* enough information to convert time offset to pcm offset */
   {
@@ -1387,19 +1390,22 @@ int ov_time_seek_page(OggVorbis_File *vf,double seconds){
   /* translate time to PCM position and call ov_pcm_seek */
 
   int link=-1;
-  ogg_int64_t pcm_total=ov_pcm_total(vf,-1);
-  double time_total=ov_time_total(vf,-1);
+  ogg_int64_t pcm_total=0;
+  double time_total=0.;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
   if(!vf->seekable)return(OV_ENOSEEK);
-  if(seconds<0 || seconds>time_total)return(OV_EINVAL);
+  if(seconds<0)return(OV_EINVAL);
   
   /* which bitstream section does this time offset occur in? */
-  for(link=vf->links-1;link>=0;link--){
-    pcm_total-=vf->pcmlengths[link*2+1];
-    time_total-=ov_time_total(vf,link);
-    if(seconds>=time_total)break;
+  for(link=0;link<vf->links;link++){
+    double addsec = ov_time_total(vf,link);
+    if(seconds<time_total+addsec)break;
+    time_total+=addsec;
+    pcm_total+=vf->pcmlengths[link*2+1];
   }
+
+  if(link==vf->links)return(OV_EINVAL);
 
   /* enough information to convert time offset to pcm offset */
   {
