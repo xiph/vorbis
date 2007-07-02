@@ -414,7 +414,10 @@ static int _open_seekable2(OggVorbis_File *vf){
   /* we can seek, so set out learning all about this file */
   (vf->callbacks.seek_func)(vf->datasource,0,SEEK_END);
   vf->offset=vf->end=(vf->callbacks.tell_func)(vf->datasource);
-  
+
+  /* If seek_func is implemented, tell_func must also be implemented */
+  if(vf->end==-1) return(OV_EINVAL);
+
   /* We get the offset for the last page of the physical bitstream.
      Most OggVorbis files will contain a single logical bitstream */
   end=_get_prev_page(vf,&og);
