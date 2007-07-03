@@ -1330,8 +1330,14 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	    if(result) goto seek_error;
 	  }
 	}else{
-	  ogg_int64_t granulepos=ogg_page_granulepos(&og);
+	  ogg_int64_t granulepos;
+
+	  if(ogg_page_serialno(&og)!=vf->serialnos[link])
+	    continue;
+
+	  granulepos=ogg_page_granulepos(&og);
 	  if(granulepos==-1)continue;
+	  
 	  if(granulepos<target){
 	    best=result;  /* raw offset of packet with granulepos */ 
 	    begin=vf->offset; /* raw offset of next page */
@@ -1378,7 +1384,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	_decode_clear(vf);  
 	
 	vf->current_link=link;
-	vf->current_serialno=ogg_page_serialno(&og);
+	vf->current_serialno=vf->serialnos[link];
 	vf->ready_state=STREAMSET;
 	
       }else{
@@ -1403,8 +1409,9 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 	  while(1){
 	    result=_get_prev_page(vf,&og);
 	    if(result<0) goto seek_error;
-	    if(ogg_page_granulepos(&og)>-1 ||
-	       !ogg_page_continued(&og)){
+	    if(ogg_page_serialno(&og)==vf->current_serialno &&
+	       (ogg_page_granulepos(&og)>-1 ||
+		!ogg_page_continued(&og))){
 	      return ov_raw_seek(vf,result);
 	    }
 	    vf->offset=result;
@@ -1495,19 +1502,20 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
       
       /* suck in a new page */
       if(_get_next_page(vf,&og,-1)<0)break;
-      if(vf->current_serialno!=ogg_page_serialno(&og))_decode_clear(vf);
+      if(ogg_page_bos(&og))_decode_clear(vf);
       
       if(vf->ready_state<STREAMSET){
+	long serialno=ogg_page_serialno(&og);
 	int link;
 	
-	vf->current_serialno=ogg_page_serialno(&og);
 	for(link=0;link<vf->links;link++)
-	  if(vf->serialnos[link]==vf->current_serialno)break;
-	if(link==vf->links)return(OV_EBADLINK);
+	  if(vf->serialnos[link]==serialno)break;
+	if(link==vf->links) continue; 
 	vf->current_link=link;
 	
-	ogg_stream_reset_serialno(&vf->os,vf->current_serialno); 
 	vf->ready_state=STREAMSET;      
+	vf->current_serialno=ogg_page_serialno(&og);
+	ogg_stream_reset_serialno(&vf->os,serialno); 
 	ret=_make_decode_ready(vf);
 	if(ret)return ret;
 	lastblock=0;
