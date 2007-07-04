@@ -511,12 +511,11 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
 	    vorbis_comment_clear(vf->vc+i);
 	    break;
 	  }
-	  if(ogg_page_serialno(&og)!=vf->serialnos[i])
-	    continue;
-
-	  if(ogg_page_granulepos(&og)!=-1){
-	    vf->pcmlengths[i*2+1]=ogg_page_granulepos(&og)-vf->pcmlengths[i*2];
-	    break;
+	  if(ogg_page_serialno(&og)==vf->serialnos[i]){
+	    if(ogg_page_granulepos(&og)!=-1){
+	      vf->pcmlengths[i*2+1]=ogg_page_granulepos(&og)-vf->pcmlengths[i*2];
+	      break;
+	    }
 	  }
 	  vf->offset=ret;
 	}
@@ -1356,7 +1355,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
 		result=_seek_helper(vf,bisect);
 		if(result) goto seek_error;
 	      }else{
-		end=result;
+		end=bisect;
 		endtime=granulepos;
 		break;
 	      }
