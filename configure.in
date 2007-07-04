@@ -11,7 +11,7 @@ AC_CANONICAL_TARGET
 
 AM_CONFIG_HEADER([config.h])
 
-AM_INIT_AUTOMAKE(libvorbis,1.1.3svn)
+AM_INIT_AUTOMAKE(libvorbis,1.2.0svn)
 AM_MAINTAINER_MODE
 
 dnl Library versioning
