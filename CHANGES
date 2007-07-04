@@ -1,5 +1,6 @@
-libvorbis 1.1.3 (unreleased) -- "Xiph.org libVorbis I 20050304"
+libvorbis 1.2.0 (unreleased) -- "Xiph.org libVorbis I 20050304"
 
+ * libvorbisfile now handles multiplexed streams
  * improve robustness to corrupt input streams
  * updated RTP draft
  * build system updates
