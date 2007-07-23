@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
  * by the XIPHOPHORUS Company http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -62,6 +62,7 @@
 
 static long _get_data(OggVorbis_File *vf){
   errno=0;
+  if(!(vf->callbacks.read_func))return(-1);
   if(vf->datasource){
     char *buffer=ogg_sync_buffer(&vf->oy,CHUNKSIZE);
     long bytes=(vf->callbacks.read_func)(buffer,1,CHUNKSIZE,vf->datasource);
@@ -75,7 +76,8 @@ static long _get_data(OggVorbis_File *vf){
 /* save a tiny smidge of verbosity to make the code more readable */
 static int _seek_helper(OggVorbis_File *vf,ogg_int64_t offset){
   if(vf->datasource){ 
-    if((vf->callbacks.seek_func)(vf->datasource, offset, SEEK_SET) == -1)
+    if(!(vf->callbacks.seek_func)||
+       (vf->callbacks.seek_func)(vf->datasource, offset, SEEK_SET) == -1)
       return OV_EREAD;
     vf->offset=offset;
     ogg_sync_reset(&vf->oy);
@@ -551,8 +553,12 @@ static int _open_seekable2(OggVorbis_File *vf){
   /* we're partially open and have a first link header state in
      storage in vf */
   /* we can seek, so set out learning all about this file */
-  (vf->callbacks.seek_func)(vf->datasource,0,SEEK_END);
-  vf->offset=vf->end=(vf->callbacks.tell_func)(vf->datasource);
+  if(vf->callbacks.seek_func){
+    (vf->callbacks.seek_func)(vf->datasource,0,SEEK_END);
+    vf->offset=vf->end=(vf->callbacks.tell_func)(vf->datasource);
+  }else{
+    vf->offset=vf->end=-1;
+  }
 
   /* If seek_func is implemented, tell_func must also be implemented */
   if(vf->end==-1) return(OV_EINVAL);
@@ -796,7 +802,7 @@ static int _fseek64_wrap(FILE *f,ogg_int64_t off,int whence){
 
 static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
 		     long ibytes, ov_callbacks callbacks){
-  int offsettest=(f?callbacks.seek_func(f,0,SEEK_CUR):-1);
+  int offsettest=((f && callbacks.seek_func)?callbacks.seek_func(f,0,SEEK_CUR):-1);
   int ret;
   
   memset(vf,0,sizeof(*vf));
@@ -873,7 +879,8 @@ int ov_clear(OggVorbis_File *vf){
     if(vf->serialnos)_ogg_free(vf->serialnos);
     if(vf->offsets)_ogg_free(vf->offsets);
     ogg_sync_clear(&vf->oy);
-    if(vf->datasource)(vf->callbacks.close_func)(vf->datasource);
+    if(vf->datasource && vf->callbacks.close_func)
+      (vf->callbacks.close_func)(vf->datasource);
     memset(vf,0,sizeof(*vf));
   }
 #ifdef DEBUG_LEAKS
@@ -907,6 +914,17 @@ int ov_open(FILE *f,OggVorbis_File *vf,char *initial,long ibytes){
 
   return ov_open_callbacks((void *)f, vf, initial, ibytes, callbacks);
 }
+
+int ov_fopen(char *path,OggVorbis_File *vf){
+  int ret;
+  FILE *f = fopen(path,"rb");
+  if(!f) return -1;
+
+  ret = ov_open(f,vf,NULL,0);
+  if(ret) fclose(f);
+  return ret;
+}
+
  
 /* cheap hack for game usage where downsampling is desirable; there's
    no need for SRC as we can just do it cheaply in libvorbis. */
@@ -1130,7 +1148,7 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
   vorbis_synthesis_restart(&vf->vd);
     
   ret=_seek_helper(vf,pos);
-  if(ret)return(ret);
+  if(ret)goto seek_error;
 
   /* we need to make sure the pcm_offset is set, but we don't want to
      advance the raw cursor past good packets just to get to the first

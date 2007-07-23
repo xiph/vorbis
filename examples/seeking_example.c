@@ -37,29 +37,29 @@ void _verify(OggVorbis_File *ov,
 
   /* verify the raw position, the pcm position and position decode */
   if(val!=-1 && ov_raw_tell(ov)<val){
-    printf("raw position out of tolerance: requested %ld, got %ld\n",
+    fprintf(stderr,"raw position out of tolerance: requested %ld, got %ld\n",
 	   (long)val,(long)ov_raw_tell(ov));
     exit(1);
   }
   if(pcmval!=-1 && ov_pcm_tell(ov)>pcmval){
-    printf("pcm position out of tolerance: requested %ld, got %ld\n",
+    fprintf(stderr,"pcm position out of tolerance: requested %ld, got %ld\n",
 	   (long)pcmval,(long)ov_pcm_tell(ov));
     exit(1);
   }
   if(timeval!=-1 && ov_time_tell(ov)>timeval){
-    printf("time position out of tolerance: requested %f, got %f\n",
+    fprintf(stderr,"time position out of tolerance: requested %f, got %f\n",
 	   timeval,ov_time_tell(ov));
     exit(1);
   }
   pos=ov_pcm_tell(ov);
   if(pos<0 || pos>pcmlength){
-    printf("pcm position out of bounds: got %ld\n",(long)pos);
+    fprintf(stderr,"pcm position out of bounds: got %ld\n",(long)pos);
     exit(1);
   }
   bread=ov_read(ov,buffer,4096,1,1,1,&dummy);
   for(j=0;j<bread;j++){
     if(buffer[j]!=bigassbuffer[j+pos*2]){
-      printf("data position after seek doesn't match pcm position\n");
+      fprintf(stderr,"data position after seek doesn't match pcm position\n");
 
       {
 	FILE *f=fopen("a.m","w");
@@ -85,13 +85,12 @@ int main(){
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
   _setmode( _fileno( stdin ), _O_BINARY );
-  _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
 
   /* open the file/pipe on stdin */
-  if(ov_open(stdin,&ov,NULL,-1)<0){
-    printf("Could not open input as an OggVorbis file.\n\n");
+  if(ov_open_callbacks(stdin,&ov,NULL,-1,OV_CALLBACKS_NOCLOSE)<0){
+    fprintf(stderr,"Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }
 
@@ -103,7 +102,7 @@ int main(){
     for(i=0;i<ov.links;i++){
       vorbis_info *vi=ov_info(&ov,i);
       if(vi->channels!=2){
-	printf("Sorry; right now seeking_test can only use Vorbis files\n"
+	fprintf(stderr,"Sorry; right now seeking_test can only use Vorbis files\n"
 	       "that are entirely stereo.\n\n");
 	exit(1);
       }
@@ -111,7 +110,6 @@ int main(){
     
     /* because we want to do sample-level verification that the seek
        does what it claimed, decode the entire file into memory */
-    fflush(stdout);
     pcmlength=ov_pcm_total(&ov,-1);
     timelength=ov_time_total(&ov,-1);
     bigassbuffer=malloc(pcmlength*2); /* w00t */
@@ -130,16 +128,15 @@ int main(){
     
     {
       ogg_int64_t length=ov.end;
-      printf("\rtesting raw seeking to random places in %ld bytes....\n",
+      fprintf(stderr,"\rtesting raw seeking to random places in %ld bytes....\n",
 	     (long)length);
     
       for(i=0;i<1000;i++){
 	ogg_int64_t val=(double)rand()/RAND_MAX*length;
-	printf("\r\t%d [raw position %ld]...     ",i,(long)val);
-	fflush(stdout);
+	fprintf(stderr,"\r\t%d [raw position %ld]...     ",i,(long)val);
 	ret=ov_raw_seek(&ov,val);
 	if(ret<0){
-	  printf("seek failed: %d\n",ret);
+	  fprintf(stderr,"seek failed: %d\n",ret);
 	  exit(1);
 	}
 
@@ -148,18 +145,17 @@ int main(){
       }
     }
 
-    printf("\r");
+    fprintf(stderr,"\r");
     {
-      printf("testing pcm page seeking to random places in %ld samples....\n",
+      fprintf(stderr,"testing pcm page seeking to random places in %ld samples....\n",
 	     (long)pcmlength);
     
       for(i=0;i<1000;i++){
 	ogg_int64_t val=(double)rand()/RAND_MAX*pcmlength;
-	printf("\r\t%d [pcm position %ld]...     ",i,(long)val);
-	fflush(stdout);
+	fprintf(stderr,"\r\t%d [pcm position %ld]...     ",i,(long)val);
 	ret=ov_pcm_seek_page(&ov,val);
 	if(ret<0){
-	  printf("seek failed: %d\n",ret);
+	  fprintf(stderr,"seek failed: %d\n",ret);
 	  exit(1);
 	}
 
@@ -168,22 +164,21 @@ int main(){
       }
     }
     
-    printf("\r");
+    fprintf(stderr,"\r");
     {
-      printf("testing pcm exact seeking to random places in %ld samples....\n",
+      fprintf(stderr,"testing pcm exact seeking to random places in %ld samples....\n",
 	     (long)pcmlength);
     
       for(i=0;i<1000;i++){
 	ogg_int64_t val=(double)rand()/RAND_MAX*pcmlength;
-	printf("\r\t%d [pcm position %ld]...     ",i,(long)val);
-	fflush(stdout);
+	fprintf(stderr,"\r\t%d [pcm position %ld]...     ",i,(long)val);
 	ret=ov_pcm_seek(&ov,val);
 	if(ret<0){
-	  printf("seek failed: %d\n",ret);
+	  fprintf(stderr,"seek failed: %d\n",ret);
 	  exit(1);
 	}
 	if(ov_pcm_tell(&ov)!=val){
-	  printf("Declared position didn't perfectly match request: %ld != %ld\n",
+	  fprintf(stderr,"Declared position didn't perfectly match request: %ld != %ld\n",
 		 (long)val,(long)ov_pcm_tell(&ov));
 	  exit(1);
 	}
@@ -193,18 +188,17 @@ int main(){
       }
     }
 
-    printf("\r");
+    fprintf(stderr,"\r");
     {
-      printf("testing time page seeking to random places in %f seconds....\n",
+      fprintf(stderr,"testing time page seeking to random places in %f seconds....\n",
 	     timelength);
     
       for(i=0;i<1000;i++){
 	double val=(double)rand()/RAND_MAX*timelength;
-	printf("\r\t%d [time position %f]...     ",i,val);
-	fflush(stdout);
+	fprintf(stderr,"\r\t%d [time position %f]...     ",i,val);
 	ret=ov_time_seek_page(&ov,val);
 	if(ret<0){
-	  printf("seek failed: %d\n",ret);
+	  fprintf(stderr,"seek failed: %d\n",ret);
 	  exit(1);
 	}
 
@@ -213,22 +207,21 @@ int main(){
       }
     }
 
-    printf("\r");
+    fprintf(stderr,"\r");
     {
-      printf("testing time exact seeking to random places in %f seconds....\n",
+      fprintf(stderr,"testing time exact seeking to random places in %f seconds....\n",
 	     timelength);
     
       for(i=0;i<1000;i++){
 	double val=(double)rand()/RAND_MAX*timelength;
-	printf("\r\t%d [time position %f]...     ",i,val);
-	fflush(stdout);
+	fprintf(stderr,"\r\t%d [time position %f]...     ",i,val);
 	ret=ov_time_seek(&ov,val);
 	if(ret<0){
-	  printf("seek failed: %d\n",ret);
+	  fprintf(stderr,"seek failed: %d\n",ret);
 	  exit(1);
 	}
 	if(ov_time_tell(&ov)<val-1 || ov_time_tell(&ov)>val+1){
-	  printf("Declared position didn't perfectly match request: %f != %f\n",
+	  fprintf(stderr,"Declared position didn't perfectly match request: %f != %f\n",
 		 val,ov_time_tell(&ov));
 	  exit(1);
 	}
@@ -238,11 +231,11 @@ int main(){
       }
     }
     
-    printf("\r                                           \nOK.\n\n");
+    fprintf(stderr,"\r                                           \nOK.\n\n");
 
 
   }else{
-    printf("Standard input was not seekable.\n");
+    fprintf(stderr,"Standard input was not seekable.\n");
   }
 
   ov_clear(&ov);

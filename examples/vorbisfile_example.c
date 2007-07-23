@@ -11,7 +11,7 @@
  ********************************************************************
 
  function: simple example decoder using vorbisfile
- last mod: $Id: vorbisfile_example.c,v 1.10 2002/07/11 06:40:47 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -44,7 +44,7 @@ int main(){
   _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
-  if(ov_open(stdin, &vf, NULL, 0) < 0) {
+  if(ov_open_callbacks(stdin, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0) {
       fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
       exit(1);
   }
