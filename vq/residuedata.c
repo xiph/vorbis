@@ -6,12 +6,12 @@
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: metrics and quantization code for residue VQ codebooks
- last mod: $Id: residuedata.c,v 1.10 2001/12/20 01:00:39 segher Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

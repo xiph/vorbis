@@ -6,12 +6,12 @@
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: prototypes for extermal metrics specific to data type
- last mod: $Id: vqext.h,v 1.14 2001/12/20 01:00:40 segher Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

@@ -9,7 +9,7 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 
@@ -87,16 +87,19 @@ int main(int argc, char **argv){
 </tr>
 </table>
 
-<p><a href="ov_open.html">ov_open()</a> must be
-called to initialize the <b>OggVorbis_File</b> structure with default values.  
-<a href="ov_open.html">ov_open()</a> also checks to ensure that we're reading Vorbis format and not something else.
+<p>We call <a href="ov_open_callbacks.html">ov_open_callbacks()</a> to
+initialize the <b>OggVorbis_File</b> structure with default values.
+<a href="ov_open_callbacks.html">ov_open_callbacks()</a> also checks
+to ensure that we're reading Vorbis format and not something else. The
+OV_CALLBACKS_NOCLOSE callbacks instruct libvorbisfile not to close
+stdin later during cleanup.
 
 <br><br>
 <table border=0 width=100% color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
         <td>
 <pre><b>
-  if(ov_open(stdin, &vf, NULL, 0) < 0) {
+  if(ov_open_callbacks(stdin, &vf, NULL, 0, OV_CALLBACKS_NOCLOSE) < 0) {
       fprintf(stderr,"Input does not appear to be an Ogg bitstream.\n");
       exit(1);
   }
@@ -192,11 +195,11 @@ Now that we've finished playing, we can pack up and go home.  It's important to 
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2003 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2007 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 

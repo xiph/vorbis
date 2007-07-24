@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: masking curve data for psychoacoustics
- last mod: $Id: masking.h,v 1.24 2002/07/01 11:20:11 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

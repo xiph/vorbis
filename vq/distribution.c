@@ -6,12 +6,12 @@
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: utility for finding the distribution in a data set
- last mod: $Id: distribution.c,v 1.9 2001/12/20 01:00:39 segher Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

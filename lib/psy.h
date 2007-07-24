@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: random psychoacoustics (not including preecho)
- last mod: $Id: psy.h,v 1.32 2002/07/13 06:12:47 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: toplevel residue templates for 32/44.1/48kHz
- last mod: $Id: residue_44.h,v 1.16 2002/07/11 06:41:04 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

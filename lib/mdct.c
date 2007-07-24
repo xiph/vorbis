@@ -5,14 +5,14 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: normalized modified discrete cosine transform
            power of two length transform only [64 <= n ]
- last mod: $Id: mdct.c,v 1.32 2002/10/16 02:43:48 xiphmont Exp $
+ last mod: $Id$
 
  Original algorithm adapted long ago from _The use of multirate filter
  banks for coding of high quality digital audio_, by T. Sporer,

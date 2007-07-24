@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id: chaining_example.c,v 1.18 2002/10/11 11:14:41 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -28,15 +28,14 @@ int main(){
   OggVorbis_File ov;
   int i;
 
-#ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
+#ifdef _WIN32 /* We need to set stdin to binary mode. Damn windows. */
   /* Beware the evil ifdef. We avoid these where we can, but this one we 
      cannot. Don't add any more, you'll probably go to hell if you do. */
   _setmode( _fileno( stdin ), _O_BINARY );
-  _setmode( _fileno( stdout ), _O_BINARY );
 #endif
 
   /* open the file/pipe on stdin */
-  if(ov_open(stdin,&ov,NULL,-1)<0){
+  if(ov_open_callbacks(stdin,&ov,NULL,-1,OV_CALLBACKS_NOCLOSE)<0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }

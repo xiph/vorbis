@@ -6,12 +6,12 @@
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: function call to do simple data cascading
- last mod: $Id: cascade.c,v 1.13 2001/12/20 01:00:39 segher Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

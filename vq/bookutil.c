@@ -6,12 +6,12 @@
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: utility functions for loading .vqh and .vqd files
- last mod: $Id: bookutil.c,v 1.27 2002/06/28 22:19:56 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 

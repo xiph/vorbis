@@ -6,12 +6,12 @@
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
  * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: metrics and quantization code for LSP VQ codebooks
- last mod: $Id: lspdata.c,v 1.19 2001/12/20 01:00:39 segher Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
