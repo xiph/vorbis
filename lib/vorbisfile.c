@@ -553,7 +553,7 @@ static int _open_seekable2(OggVorbis_File *vf){
   /* we're partially open and have a first link header state in
      storage in vf */
   /* we can seek, so set out learning all about this file */
-  if(vf->callbacks.seek_func){
+  if(vf->callbacks.seek_func && vf->callbacks.tell_func){
     (vf->callbacks.seek_func)(vf->datasource,0,SEEK_END);
     vf->offset=vf->end=(vf->callbacks.tell_func)(vf->datasource);
   }else{
