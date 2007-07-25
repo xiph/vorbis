@@ -1,3 +1,7 @@
+libvorbis 1.2.1 (unreleased) -- "Xiph.Org libVorbis I 20070622"
+
+ * no changes recorded
+
 libvorbis 1.2.0 (2007-07-25) -- "Xiph.Org libVorbis I 20070622"
 
  * new ov_fopen() convenience call that avoids the common
