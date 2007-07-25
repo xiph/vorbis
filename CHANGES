@@ -1,5 +1,7 @@
-libvorbis 1.2.0 (unreleased) -- "Xiph.Org libVorbis I 20070622"
+libvorbis 1.2.0 (2007-07-25) -- "Xiph.Org libVorbis I 20070622"
 
+ * new ov_fopen() convenience call that avoids the common
+   stdio conflicts with ov_open() and MSVC runtimes.
  * libvorbisfile now handles multiplexed streams
  * improve robustness to corrupt input streams
  * fix a minor encoder bug
