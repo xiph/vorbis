@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="vorbisenc"
 	ProjectGUID="{E48B6A8B-F7FE-4DA8-8248-E64DBAC4F56C}"
 	Keyword="Win32Proj"
@@ -63,8 +63,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\debug;..\debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/vorbisenc.pdb"
 				SubSystem="1"
@@ -148,9 +150,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="true"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\release;..\release"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -236,9 +240,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="true"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\release;..\release"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -324,9 +330,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="1"
-				GenerateDebugInformation="true"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\release;..\release"
+				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
