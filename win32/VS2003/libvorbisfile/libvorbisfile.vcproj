@@ -12,7 +12,7 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
+			OutputDirectory="..\debug"
 			IntermediateDirectory="Debug"
 			ConfigurationType="2"
 			CharacterSet="2">
@@ -32,8 +32,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/libvorbisfile.dll"
 				LinkIncremental="2"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\debug;..\debug"
 				ModuleDefinitionFile="libvorbisfile.def"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/libvorbisfile.pdb"
@@ -63,7 +65,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="Release"
+			OutputDirectory="..\release"
 			IntermediateDirectory="Release"
 			ConfigurationType="2"
 			CharacterSet="2">
@@ -80,10 +82,12 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/libvorbisfile.dll"
 				LinkIncremental="1"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\release;..\release"
 				ModuleDefinitionFile="libvorbisfile.def"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="FALSE"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
