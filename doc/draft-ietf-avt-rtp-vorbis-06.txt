@@ -125,7 +125,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    quadraphonic, 5.1, ambisonic, or up to 255 discrete channels).
 
    Vorbis encoded audio is generally encapsulated within an Ogg format
-   bitstream [11], which provides framing and synchronization.  For the
+   bitstream [14], which provides framing and synchronization.  For the
    purposes of RTP transport, this layer is unnecessary, and so raw
    Vorbis packets are used in the payload.
 
@@ -209,7 +209,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    Marker (M): 1 bit
 
    Set to zero.  Audio silence suppression not used.  This conforms to
-   section 4.1 of [13].
+   section 4.1 of [12].
 
    Payload Type (PT): 7 bits
 
@@ -304,7 +304,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    Raw Vorbis packets are currently unbounded in length, application
    profiles will likely define a practical limit.  Typical Vorbis packet
    sizes range from very small (2-3 bytes) to quite large (8-12
-   kilobytes).  The reference implementation [12] typically produces
+   kilobytes).  The reference implementation [15] typically produces
    packets less than ~800 bytes, except for the setup header packets
    which are ~4-12 kilobytes.  Within an RTP context, to avoid
    fragmentation, the Vorbis data packet size SHOULD be kept
@@ -322,7 +322,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    Each Vorbis payload packet starts with a two octet length header,
    which is used to represent the size in bytes of the following data
    payload, followed by the raw Vorbis data padded to the nearest byte
-   boundary, as explained by the vorbis specification [13].  The length
+   boundary, as explained by the vorbis specification [12].  The length
    value is stored as network byte order integer.
 
    For payloads which consist of multiple Vorbis packets the payload
@@ -346,7 +346,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    in temporal order.
 
    Channel mapping of the audio is in accordance with the Vorbis I
-   Specification [13].
+   Specification [12].
 
 2.4.  Example RTP Packet
 
@@ -410,7 +410,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    blocks of information are often referred to collectively as the
    "codebooks" for a Vorbis stream, and are nominally included as
    special "header" packets at the start of the compressed data.  In
-   addition, the Vorbis I specification [13] requires the presence of a
+   addition, the Vorbis I specification [12] requires the presence of a
    comment header packet which gives simple metadata about the stream,
    but this information is not required for decoding the frame sequence.
 
@@ -457,13 +457,13 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    The Packed Configuration (Section 3.1.1) Payload is sent in-band with
    the packet type bits set to match the Vorbis Data Type.  Clients MUST
    be capable of dealing with fragmentation and periodic re-transmission
-   of [16] the configuration headers.
+   of [17] the configuration headers.
 
 3.1.1.  Packed Configuration
 
    A Vorbis Packed Configuration is indicated with the Vorbis Data Type
    field set to 1.  Of the three headers defined in the Vorbis I
-   specification [13], the identification and the setup MUST be packed
+   specification [12], the identification and the setup MUST be packed
    as they are, while the comment header MAY be replaced with a dummy
    one.  The packed configuration follows a generic way to store xiph
    codec configurations: The first field stores the number of the
@@ -664,7 +664,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    and so on.  These metadata messages are not intended to be fully
    descriptive but to offer basic track/song information.  Clients MAY
    ignore it completely.  The details on the format of the comments can
-   be found in the Vorbis documentation [13].
+   be found in the Vorbis documentation [12].
 
 
 
@@ -929,7 +929,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
          method, a single configuration packet could be retrived by its
          Ident number, or multiple packets could be aggregated in a
          single stream.  Such aggregates MAY be compressed using either
-         bzip2 [17] or gzip [14].  A sha1 [10] checksum MAY be provided
+         bzip2 [11] or gzip [13].  A sha1 [10] checksum MAY be provided
          for aggregates.  In this latter case the URI will end with the
          aggregate name, followed by its compressed extension if
          applies, a "!" and the base64 [9] representation of the
@@ -1215,7 +1215,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
    The client could choose to fetch the Configuration from the alternate
    source as soon as it discovers a Configuration packet got lost in-
-   band or use selective retransmission [15], if the server supports the
+   band or use selective retransmission [16], if the server supports the
    feature.
 
    A serverside optimization would be to keep an hash list of the
@@ -1306,27 +1306,27 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    [10]  National Institute of Standards and Technology, "Secure Hash
          Standard", May 1993.
 
-12.2.  Informative References
+   [11]  Seward, J., "libbz2 and bzip2".
 
-   [11]  Pfeiffer, S., "The Ogg Encapsulation Format Version 0",
-         RFC 3533.
-
-   [12]  "libvorbis: Available from the Xiph website,
-         http://www.xiph.org".
-
-   [13]  "Ogg Vorbis I specification:  Codec setup and packet decode.
+   [12]  "Ogg Vorbis I specification:  Codec setup and packet decode.
          Available from the Xiph website, http://www.xiph.org".
 
-   [14]  Deutsch, P., "GZIP file format specification version 4.3",
+   [13]  Deutsch, P., "GZIP file format specification version 4.3",
          RFC 1952.
 
-   [15]  Friedman, T., Caceres, R., and A. Clark, "RTP Control Protocol
+12.2.  Informative References
+
+   [14]  Pfeiffer, S., "The Ogg Encapsulation Format Version 0",
+         RFC 3533.
+
+   [15]  "libvorbis: Available from the Xiph website,
+         http://www.xiph.org".
+
+   [16]  Friedman, T., Caceres, R., and A. Clark, "RTP Control Protocol
          Extended Reports (RTCP XR)", RFC 3611, November 2003.
 
-   [16]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R. Hakenberg,
+   [17]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R. Hakenberg,
          "RTP Retransmission Payload Format", RFC 4588, July 2006.
-
-   [17]  Seward, J., "libbz2 and bzip2".
 
 
 Author's Address

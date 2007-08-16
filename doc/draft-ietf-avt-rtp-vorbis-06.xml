@@ -1334,6 +1334,25 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <date month="May" year="1993"/>
 </front>
 </reference>
+<reference anchor="BZ2">
+<front>
+<title>libbz2 and bzip2</title>
+<author initials="J" surname="Seward" fullname="Julian Seward" />
+</front>
+</reference>
+<reference anchor="vorbis-spec-ref">
+<front>
+<title>Ogg Vorbis I specification:  Codec setup and packet decode.  Available from the Xiph website, http://www.xiph.org</title>
+</front>
+</reference>   
+
+<reference anchor="rfc1952">
+<front>
+<title>GZIP file format specification version 4.3</title>
+<author initials="P" surname="Deutsch" fullname="L. Peter Deutsch"></author>
+</front>
+<seriesInfo name="RFC" value="1952" />
+</reference>
 </references>
 
 <references title="Informative References">
@@ -1351,20 +1370,6 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <title>libvorbis: Available from the Xiph website, http://www.xiph.org</title>
 </front>
 </reference>   
-
-<reference anchor="vorbis-spec-ref">
-<front>
-<title>Ogg Vorbis I specification:  Codec setup and packet decode.  Available from the Xiph website, http://www.xiph.org</title>
-</front>
-</reference>   
-
-<reference anchor="rfc1952">
-<front>
-<title>GZIP file format specification version 4.3</title>
-<author initials="P" surname="Deutsch" fullname="L. Peter Deutsch"></author>
-</front>
-<seriesInfo name="RFC" value="1952" />
-</reference>
 
 <reference anchor="RFC3611">
 <front>
@@ -1393,12 +1398,6 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 </front>
 <seriesInfo name='RFC' value='4588' />
 <format type='TXT' octets='76630' target='ftp://ftp.isi.edu/in-notes/rfc4588.txt' />
-</reference>
-<reference anchor="BZ2">
-<front>
-<title>libbz2 and bzip2</title>
-<author initials="J" surname="Seward" fullname="Julian Seward" />
-</front>
 </reference>
 </references>
 </back>
