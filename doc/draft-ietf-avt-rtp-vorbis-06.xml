@@ -429,7 +429,7 @@ associated until it fetches the correct Configuration.
 The <xref target="Packed Configuration">Packed Configuration</xref> Payload is
 sent in-band with the packet type bits set to match the Vorbis Data Type.
 Clients MUST be capable of dealing with fragmentation and periodic
-re-transmission of the configuration headers.
+<xref target="rfc4588">re-transmission of</xref> the configuration headers.
 </t>
 
 <section anchor="Packed Configuration" title="Packed Configuration">
@@ -1376,9 +1376,26 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 </front>
 <seriesInfo name="RFC" value="3611"/>
 </reference>
+<reference anchor='rfc4588'>
+<front>
+<title>RTP Retransmission Payload Format</title>
+<author initials='J.' surname='Rey' fullname='J. Rey'>
+<organization /></author>
+<author initials='D.' surname='Leon' fullname='D. Leon'>
+<organization /></author>
+<author initials='A.' surname='Miyazaki' fullname='A. Miyazaki'>
+<organization /></author>
+<author initials='V.' surname='Varsa' fullname='V. Varsa'>
+<organization /></author>
+<author initials='R.' surname='Hakenberg' fullname='R. Hakenberg'>
+<organization /></author>
+<date year='2006' month='July' />
+</front>
+<seriesInfo name='RFC' value='4588' />
+<format type='TXT' octets='76630' target='ftp://ftp.isi.edu/in-notes/rfc4588.txt' />
+</reference>
 <reference anchor="BZ2">
 <front>
-
 <title>libbz2 and bzip2</title>
 <author initials="J" surname="Seward" fullname="Julian Seward" />
 </front>

@@ -457,7 +457,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    The Packed Configuration (Section 3.1.1) Payload is sent in-band with
    the packet type bits set to match the Vorbis Data Type.  Clients MUST
    be capable of dealing with fragmentation and periodic re-transmission
-   of the configuration headers.
+   of [16] the configuration headers.
 
 3.1.1.  Packed Configuration
 
@@ -929,7 +929,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
          method, a single configuration packet could be retrived by its
          Ident number, or multiple packets could be aggregated in a
          single stream.  Such aggregates MAY be compressed using either
-         bzip2 [16] or gzip [14].  A sha1 [10] checksum MAY be provided
+         bzip2 [17] or gzip [14].  A sha1 [10] checksum MAY be provided
          for aggregates.  In this latter case the URI will end with the
          aggregate name, followed by its compressed extension if
          applies, a "!" and the base64 [9] representation of the
@@ -1323,7 +1323,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    [15]  Friedman, T., Caceres, R., and A. Clark, "RTP Control Protocol
          Extended Reports (RTCP XR)", RFC 3611, November 2003.
 
-   [16]  Seward, J., "libbz2 and bzip2".
+   [16]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R. Hakenberg,
+         "RTP Retransmission Payload Format", RFC 4588, July 2006.
+
+   [17]  Seward, J., "libbz2 and bzip2".
 
 
 Author's Address
@@ -1333,9 +1336,6 @@ Author's Address
 
    Email: lu_zero@gentoo.org
    URI:   http://www.xiph.org/
-
-
-
 
 
 
