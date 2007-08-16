@@ -826,15 +826,8 @@ the configuration headers in case of out of band transmission.
 In the form of "protocol://path/to/resource/", depending on the specific
 method, a single configuration packet could be retrived by its Ident number, or
 multiple packets could be aggregated in a single stream. 
-Such aggregates MAY be compressed using either
-<xref target="BZ2">bzip2</xref> or <xref target="rfc1952">gzip</xref>.
-A <xref target="FIPS180">sha1</xref> checksum MAY be provided for aggregates.
-In this latter case the URI will end with the aggregate name, followed by its
-compressed extension if applies, a "!" and the <xref target="rfc3548">base64</xref> representation of the sha1hash of the above mentioned compressed aggregated
-as in: "protocol://path/to/resource/aggregated.bz2!sha1hash".
-The trailing '/' discriminates which of two methods are in use.
-The configuration-uri MUST follow the associated delivery method parameter ("out_band").
-Non hierarchical protocols and protocols using for special purposes the '!' separator MAY point just to a resource aggregate using their specific syntax.
+Non hierarchical protocols MAY point to a resource using their specific
+syntax.
 </t>
 </list>
 </t>
@@ -1266,7 +1259,6 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 </reference>
 
 <reference anchor='rfc4566'>
-
 <front>
 <title>SDP: Session Description Protocol</title>
 <author initials='M.' surname='Handley' fullname='M. Handley'>
@@ -1277,13 +1269,11 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <organization /></author>
 <date year='2006' month='July' />
 </front>
-
 <seriesInfo name='RFC' value='4566' />
 <format type='TXT' octets='108820' target='ftp://ftp.isi.edu/in-notes/rfc4566.txt' />
 </reference>
 
 <reference anchor='rfc1191'>
-
 <front>
 <title>Path MTU discovery</title>
 <author initials='J.' surname='Mogul' fullname='Jeffrey Mogul'>
@@ -1296,7 +1286,6 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <email>deering@xerox.com</email></address></author>
 <date year='1990' day='1' month='November' />
 </front>
-
 <seriesInfo name='RFC' value='1191' />
 <format type='TXT' octets='47936' target='ftp://ftp.isi.edu/in-notes/rfc1191.txt' />
 </reference>
@@ -1325,34 +1314,13 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 </front>
 <seriesInfo name="RFC" value="3548" />
 </reference>
-<reference anchor="FIPS180">
-<front>
-<title>Secure Hash Standard</title>
-<author>
-<organization>National Institute of Standards and Technology</organization>
-</author>
-<date month="May" year="1993"/>
-</front>
-</reference>
-<reference anchor="BZ2">
-<front>
-<title>libbz2 and bzip2</title>
-<author initials="J" surname="Seward" fullname="Julian Seward" />
-</front>
-</reference>
+
 <reference anchor="vorbis-spec-ref">
 <front>
 <title>Ogg Vorbis I specification:  Codec setup and packet decode.  Available from the Xiph website, http://www.xiph.org</title>
 </front>
-</reference>   
-
-<reference anchor="rfc1952">
-<front>
-<title>GZIP file format specification version 4.3</title>
-<author initials="P" surname="Deutsch" fullname="L. Peter Deutsch"></author>
-</front>
-<seriesInfo name="RFC" value="1952" />
 </reference>
+
 </references>
 
 <references title="Informative References">
