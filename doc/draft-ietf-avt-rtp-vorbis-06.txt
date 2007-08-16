@@ -1140,16 +1140,17 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    configuration packet is inlined in the sdp, other configurations
    could be fetched at any time from the first provided uri using or all
    the known configuration could be downloaded using the second uri.
-   The inline base64 [9] configuration string is omitted because of the
+   The inline base64 [9] configuration string is trimmed because of the
    length.
       c=IN IP4 192.0.2.1
       m=audio RTP/AVP 98
       a=rtpmap:98 vorbis/44100/2
-      a=fmtp:98 delivery-method=inline; configuration=base64string;
-      delivery-method=out_band;
-      configuration-uri=rtsp://path/to/the/resource; delivery-
-      method=out_band; configuration-uri=http://another/path/to/
-      resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;
+      a=fmtp:98 delivery-method=inline;
+      configuration=AAAAAZ2f4g9NAh4aAXZvcmJpcwA...; delivery-
+      method=out_band; configuration-uri=rtsp://path/to/the/resource;
+      delivery-method=out_band; configuration-uri=http://another/path/
+      to/resource/
+      aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;
 
    Note that the payload format (encoding) names are commonly shown in
    upper case.  Media Type subtypes are commonly shown in lower case.
@@ -1168,7 +1169,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    delivery methods per single fmtp attribute, the answerer MUST remove
    every delivery-method and configuration-uri not supported.  All the
    parameters MUST not be altered on answer otherwise.
-
 
 
 
