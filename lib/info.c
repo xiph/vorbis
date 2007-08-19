@@ -59,7 +59,7 @@ void vorbis_comment_init(vorbis_comment *vc){
   memset(vc,0,sizeof(*vc));
 }
 
-void vorbis_comment_add(vorbis_comment *vc,char *comment){
+void vorbis_comment_add(vorbis_comment *vc,const char *comment){
   vc->user_comments=_ogg_realloc(vc->user_comments,
 			    (vc->comments+2)*sizeof(*vc->user_comments));
   vc->comment_lengths=_ogg_realloc(vc->comment_lengths,
@@ -71,7 +71,7 @@ void vorbis_comment_add(vorbis_comment *vc,char *comment){
   vc->user_comments[vc->comments]=NULL;
 }
 
-void vorbis_comment_add_tag(vorbis_comment *vc, char *tag, char *contents){
+void vorbis_comment_add_tag(vorbis_comment *vc, const char *tag, const char *contents){
   char *comment=alloca(strlen(tag)+strlen(contents)+2); /* +2 for = and \0 */
   strcpy(comment, tag);
   strcat(comment, "=");
@@ -91,7 +91,7 @@ static int tagcompare(const char *s1, const char *s2, int n){
   return 0;
 }
 
-char *vorbis_comment_query(vorbis_comment *vc, char *tag, int count){
+char *vorbis_comment_query(vorbis_comment *vc, const char *tag, int count){
   long i;
   int found = 0;
   int taglen = strlen(tag)+1; /* +1 for the = we append */
@@ -112,7 +112,7 @@ char *vorbis_comment_query(vorbis_comment *vc, char *tag, int count){
   return NULL; /* didn't find anything */
 }
 
-int vorbis_comment_query_count(vorbis_comment *vc, char *tag){
+int vorbis_comment_query_count(vorbis_comment *vc, const char *tag){
   int i,count=0;
   int taglen = strlen(tag)+1; /* +1 for the = we append */
   char *fulltag = alloca(taglen+1);
