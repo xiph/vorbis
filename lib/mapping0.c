@@ -229,16 +229,6 @@ static float FLOOR1_fromdB_LOOKUP[256]={
 
 #endif 
 
-extern int *floor1_fit(vorbis_block *vb,vorbis_look_floor *look,
-		       const float *logmdct,   /* in */
-		       const float *logmask);
-extern int *floor1_interpolate_fit(vorbis_block *vb,vorbis_look_floor *look,
-				   int *A,int *B,
-				   int del);
-extern int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
-			 vorbis_look_floor *look,
-			 int *post,int *ilogmask);
-
 
 static int mapping0_forward(vorbis_block *vb){
   vorbis_dsp_state      *vd=vb->vd;

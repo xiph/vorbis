@@ -30,24 +30,6 @@
 
 #define floor1_rangedB 140 /* floor 1 fixed at -140dB to 0dB range */
 
-typedef struct {
-  int sorted_index[VIF_POSIT+2];
-  int forward_index[VIF_POSIT+2];
-  int reverse_index[VIF_POSIT+2];
-  
-  int hineighbor[VIF_POSIT];
-  int loneighbor[VIF_POSIT];
-  int posts;
-
-  int n;
-  int quant_q;
-  vorbis_info_floor1 *vi;
-
-  long phrasebits;
-  long postbits;
-  long frames;
-} vorbis_look_floor1;
-
 typedef struct lsfit_acc{
   long x0;
   long x1;
