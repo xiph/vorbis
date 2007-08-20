@@ -321,10 +321,6 @@ Channel mapping of the audio is in accordance with the
 Here is an example RTP packet containing two Vorbis packets.
 </t>
 
-<t>
-RTP Packet Header:
-</t>
-
 <figure anchor="Example Raw Vorbis Packet" title="Example Raw Vorbis Packet">
 <artwork><![CDATA[
     0                   1                   2                   3
@@ -1087,7 +1083,7 @@ the length.</t>
 <t>c=IN IP4 192.0.2.1</t>
 <t>m=audio  RTP/AVP 98</t>
 <t>a=rtpmap:98 vorbis/44100/2</t>
-<t>a=fmtp:98 delivery-method=inline; configuration=AAAAAZ2f4g9NAh4aAXZvcmJpcwA...; delivery-method=out_band; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band; configuration-uri=http://another/path/to/resource/aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;</t>
+<t>a=fmtp:98 delivery-method=inline; configuration=AAAAAZ2f4g9NAh4aAXZvcmJpcwA...; delivery-method=out_band; configuration-uri=rtsp://path/to/the/resource; delivery-method=out_band; configuration-uri=http://another/path/to/resource/;</t>
 </list>
 </section>
 
@@ -1155,11 +1151,11 @@ decode the current stream inlined in the SDP so that the decoding will start
 immediately after.</t>
 
 <t>When the streamed content changes the new Configuration is sent in-band
-before the actual stream, and the Configuration that has to be sent inline in
+before the actual stream and the Configuration that has to be sent inline in
 the SDP updated. Since the in-band method is unreliable, an out of band
 fallback is provided.</t>
 
-<t>The client could choose to fetch the Configuration from the alternate source
+<t>The client MAY choose to fetch the Configuration from the alternate source
 as soon as it discovers a Configuration packet got lost in-band or use
 <xref target="RFC3611">selective retransmission</xref>, if the server supports
 the feature.</t>
@@ -1201,7 +1197,7 @@ continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner,
 Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph
 Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher
-Montgomery,  Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks,
+Montgomery, Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks,
 Magnus Westerlund, David Barrett, Silvia Pfeiffer, Stefan Ehmann, Alessandro
 Salvatori. Politecnico di Torino (LS)³/IMG Group in particular Federico
 Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Martin.

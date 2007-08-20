@@ -91,7 +91,7 @@ Table of Contents
    8.  Congestion Control . . . . . . . . . . . . . . . . . . . . . . 21
    9.  Examples . . . . . . . . . . . . . . . . . . . . . . . . . . . 22
      9.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 22
-   10. Security Considerations  . . . . . . . . . . . . . . . . . . . 23
+   10. Security Considerations  . . . . . . . . . . . . . . . . . . . 22
    11. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 23
    12. References . . . . . . . . . . . . . . . . . . . . . . . . . . 23
      12.1. Normative References . . . . . . . . . . . . . . . . . . . 23
@@ -352,8 +352,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
    Here is an example RTP packet containing two Vorbis packets.
 
-   RTP Packet Header:
-
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
@@ -385,6 +383,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    The payload data section of the RTP packet begins with the 24 bit
    Ident field followed by the one octet bitfield header, which has the
    number of Vorbis frames set to 2.  Each of the Vorbis data frames is
+   prefixed by the two octets length field.  The Packet Type and
+   Fragment Type are set to 0.  The Configuration that will be used to
 
 
 
@@ -393,8 +393,6 @@ Barbato                 Expires December 27, 2007               [Page 7]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
 
-   prefixed by the two octets length field.  The Packet Type and
-   Fragment Type are set to 0.  The Configuration that will be used to
    decode the packets is the one indexed by the ident value.
 
 
@@ -441,6 +439,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    that a change in the stream has taken place.  The client application
    MUST have in advance the correct configuration and if the client
    detects a change in the Ident value and does not have this
+   information it MUST NOT decode the raw Vorbis data associated until
+   it fetches the correct Configuration.
 
 
 
@@ -448,9 +448,6 @@ Barbato                 Expires December 27, 2007               [Page 8]
 
 Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
-
-   information it MUST NOT decode the raw Vorbis data associated until
-   it fetches the correct Configuration.
 
 3.1.  In-band Header Transmission
 
@@ -483,6 +480,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    the data is added to the accumulated value multiplied by 128.  The
    headers are packed in the same order they are present in ogg:
    identification, comment, setup.
+
+
+
 
 
 
@@ -1142,9 +1142,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
       a=fmtp:98 delivery-method=inline;
       configuration=AAAAAZ2f4g9NAh4aAXZvcmJpcwA...; delivery-
       method=out_band; configuration-uri=rtsp://path/to/the/resource;
-      delivery-method=out_band; configuration-uri=http://another/path/
-      to/resource/
-      aggregate.bz2!8b6237eb5154a0ea12811a94e8e2697b3312bc6c;
+      delivery-method=out_band;
+      configuration-uri=http://another/path/to/resource/;
 
    Note that the payload format (encoding) names are commonly shown in
    upper case.  Media Type subtypes are commonly shown in lower case.
@@ -1169,6 +1168,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
    Vorbis clients SHOULD send regular receiver reports detailing
    congestion.  A mechanism for dynamically downgrading the stream,
+   known as bitrate peeling, will allow for a graceful backing off of
 
 
 
@@ -1177,7 +1177,6 @@ Barbato                 Expires December 27, 2007              [Page 21]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
 
-   known as bitrate peeling, will allow for a graceful backing off of
    the stream bitrate.  This feature is not available at present so an
    alternative would be to redirect the client to a lower bitrate stream
    if one is available.
@@ -1205,11 +1204,11 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    will start immediately after.
 
    When the streamed content changes the new Configuration is sent in-
-   band before the actual stream, and the Configuration that has to be
+   band before the actual stream and the Configuration that has to be
    sent inline in the SDP updated.  Since the in-band method is
    unreliable, an out of band fallback is provided.
 
-   The client could choose to fetch the Configuration from the alternate
+   The client MAY choose to fetch the Configuration from the alternate
    source as soon as it discovers a Configuration packet got lost in-
    band or use selective retransmission [13], if the server supports the
    feature.
@@ -1223,8 +1222,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
    already known.
 
 
+10.  Security Considerations
 
-
+   RTP packets using this payload format are subject to the security
 
 
 
@@ -1233,9 +1233,6 @@ Barbato                 Expires December 27, 2007              [Page 22]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
 
-10.  Security Considerations
-
-   RTP packets using this payload format are subject to the security
    considerations discussed in the RTP specification [2].  This implies
    that the confidentiality of the media stream is achieved by using
    encryption.  Because the data compression used with this payload
@@ -1281,6 +1278,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
          Resource Identifier (URI): Generic Syntax", RFC 3986.
 
    [5]   Handley, M., Jacobson, V., and C. Perkins, "SDP: Session
+         Description Protocol", RFC 4566, July 2006.
+
+   [6]   Mogul, J. and S. Deering, "Path MTU discovery", RFC 1191,
 
 
 
@@ -1289,9 +1289,6 @@ Barbato                 Expires December 27, 2007              [Page 23]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-06              Jun 2007
 
 
-         Description Protocol", RFC 4566, July 2006.
-
-   [6]   Mogul, J. and S. Deering, "Path MTU discovery", RFC 1191,
          November 1990.
 
    [7]   McCann et al., J., "Path MTU Discovery for IP version 6",
@@ -1328,6 +1325,9 @@ Author's Address
 
    Email: lu_zero@gentoo.org
    URI:   http://www.xiph.org/
+
+
+
 
 
 
