@@ -372,7 +372,6 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
   vorbis_info           *vi=vb->vd->vi;
-  codec_setup_info      *ci=vi->codec_setup;
 
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
