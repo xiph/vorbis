@@ -6,7 +6,7 @@
 <rfc ipr="full3978" docName="RTP Payload Format for Vorbis Encoded Audio">
 
 <front>
-<title>draft-ietf-avt-rtp-vorbis-06</title>
+<title>draft-ietf-avt-rtp-vorbis-07</title>
 
 <author initials="L" surname="Barbato" fullname="Luca Barbato">
 <organization>Xiph.Org</organization>
@@ -16,7 +16,7 @@
 </address>
 </author>
 
-<date day="25" month="Jun" year="2007" />
+<date day="23" month="Aug" year="2007" />
 
 <area>General</area>
 <workgroup>AVT Working Group</workgroup>
