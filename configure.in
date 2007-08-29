@@ -237,6 +237,7 @@ lib/books/floor/Makefile
 doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile
 include/Makefile include/vorbis/Makefile
 examples/Makefile
+test/Makefile
 vq/Makefile
 libvorbis.spec
 vorbis.pc
