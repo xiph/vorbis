@@ -116,7 +116,7 @@ ve_setup_data_template ve_setup_16_uncoupled={
   _vp_tonemask_adj_16,
   _vp_tonemask_adj_16,
 
-  _psy_noiseguards_8,
+  _psy_noiseguards_16,
   _psy_noisebias_16_impulse,
   _psy_noisebias_16_short,
   _psy_noisebias_16_short,
