@@ -49,6 +49,7 @@ CFLAGS="$cflags_save"
 AC_C_INLINE
 
 AM_PROG_LIBTOOL
+AM_PROG_CC_C_O
 
 dnl docbook xml transform and processing tools
 AC_ARG_ENABLE(docs,
