@@ -24,7 +24,7 @@
 #include <vorbis/codec.h>
 #include <vorbis/vorbisenc.h>
 
-/* Why oh why, oh why is it so difficult to read and write Ogg/Vorbis files. */
+#include "write_read.h"
 
 /* The following function is basically a hacked version of the code in
  * examples/encoder_example.c */
@@ -40,12 +40,12 @@ write_vorbis_data_or_die (const char *filename, int srate, const float * data, i
   vorbis_dsp_state vd;
   vorbis_block     vb;
 
+  int eos = 0, ret;
+
   if ((file = fopen (filename, "wb")) == NULL) {
     printf("\n\nError : fopen failed : %s\n", strerror (errno)) ;
     exit (1) ;
   }
-
-  int eos = 0, ret;
 
   /********** Encode setup ************/
 
