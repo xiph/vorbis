@@ -3,10 +3,10 @@
 
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                  Xiph.Org
-Expires: February 24, 2008                                  Aug 23, 2007
+Expires: April 30, 2008                                     Oct 28, 2007
 
 
-                      draft-ietf-avt-rtp-vorbis-07
+                      draft-ietf-avt-rtp-vorbis-08
               RTP Payload Format for Vorbis Encoded Audio
 
 Status of this Memo
@@ -32,7 +32,7 @@ Status of this Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on February 24, 2008.
+   This Internet-Draft will expire on April 30, 2008.
 
 Copyright Notice
 
@@ -52,9 +52,9 @@ Abstract
 
 
 
-Barbato                 Expires February 24, 2008               [Page 1]
+Barbato                  Expires April 30, 2008                 [Page 1]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
 Editors Note
@@ -108,9 +108,9 @@ Table of Contents
 
 
 
-Barbato                 Expires February 24, 2008               [Page 2]
+Barbato                  Expires April 30, 2008                 [Page 2]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
 1.  Introduction
@@ -164,9 +164,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008               [Page 3]
+Barbato                  Expires April 30, 2008                 [Page 3]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
        0                   1                   2                   3
@@ -220,9 +220,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008               [Page 4]
+Barbato                  Expires April 30, 2008                 [Page 4]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    Sequence number: 16 bits
@@ -236,7 +236,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
    A timestamp representing the sampling time of the first sample of the
    first Vorbis packet in the RTP packet.  The clock frequency MUST be
    set to the sample rate of the encoded audio data and is conveyed out-
-   of-band (e.g. as a SDP parameter).
+   of-band (e.g. as an SDP parameter).
 
    SSRC/CSRC identifiers:
 
@@ -276,9 +276,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008               [Page 5]
+Barbato                  Expires April 30, 2008                 [Page 5]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    This field specifies the kind of Vorbis data stored in this RTP
@@ -332,9 +332,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008               [Page 6]
+Barbato                  Expires April 30, 2008                 [Page 6]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    The Vorbis packet length header is the length of the Vorbis data
@@ -388,9 +388,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008               [Page 7]
+Barbato                  Expires April 30, 2008                 [Page 7]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    decode the packets is the one indexed by the ident value.
@@ -430,7 +430,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
    delivery methods MAY be advertised for the same session.  The in-band
    Configuration delivery SHOULD be considered as baseline, out-of-band
    delivery methods that don't use RTP will not be described in this
-   document.  For non chained streams, the Configuration recommended
+   document.  For non chained streams, the recommended Configuration
    delivery method is inline the Packed Configuration (Section 3.1.1) in
    the SDP as explained in the IANA considerations (Section 7.1).
 
@@ -444,9 +444,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008               [Page 8]
+Barbato                  Expires April 30, 2008                 [Page 8]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
 3.1.  In-band Header Transmission
@@ -460,7 +460,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
    A Vorbis Packed Configuration is indicated with the Vorbis Data Type
    field set to 1.  Of the three headers defined in the Vorbis I
-   specification [10], the identification and the setup MUST be packed
+   specification [10], the Identification and the Setup MUST be packed
    as they are, while the comment header MAY be replaced with a dummy
    one.  The packed configuration follows a generic way to store xiph
    codec configurations: The first field stores the number of the
@@ -471,15 +471,15 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
    following logic: the data is in network order, every byte has the
    most significant bit used as flag and the following 7 used to store
    the value.  The first N bit are to be taken, where N is number of
-   bits representing the value modulo 7, and stored in the first byte.
-   If there are more bits, the flag bit is set to 1 and the subsequent
-   7bit are stored in the following byte, if there are remaining bits
-   set the flag to 1 and the same procedure is repeated.  The ending
-   byte has the flag bit set to 0.  In order to decode it is enough to
-   iterate over the bytes until the flag bit set to 0, for every byte
-   the data is added to the accumulated value multiplied by 128.  The
-   headers are packed in the same order they are present in ogg:
-   identification, comment, setup.
+   bits needed to represent the value, taken modulo 7, and stored in the
+   first byte.  If there are more bits, the flag bit is set to 1 and the
+   subsequent 7bit are stored in the following byte, if there are
+   remaining bits set the flag to 1 and the same procedure is repeated.
+   The ending byte has the flag bit set to 0.  In order to decode it is
+   enough to iterate over the bytes until the flag bit set to 0, for
+   every byte the data is added to the accumulated value multiplied by
+   128.  The headers are packed in the same order they are present in
+   ogg: Identification, Comment, Setup.
 
 
 
@@ -500,9 +500,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008               [Page 9]
+Barbato                  Expires April 30, 2008                 [Page 9]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
        0                   1                   2                   3
@@ -556,9 +556,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 10]
+Barbato                  Expires April 30, 2008                [Page 10]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
 3.2.  Out of Band Transmission
@@ -612,9 +612,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 11]
+Barbato                  Expires April 30, 2008                [Page 11]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
        0                   1                   2                   3
@@ -653,7 +653,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
    header can lead to a situation where it will not be possible to
    successfully decode the stream.
 
-   Loss of Configuration Packet results in the halting of stream
+   Loss of Configuration Packets results in the halting of stream
    decoding.
 
 
@@ -668,9 +668,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 12]
+Barbato                  Expires April 30, 2008                [Page 12]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
        0                   1                   2                   3
@@ -724,9 +724,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 13]
+Barbato                  Expires April 30, 2008                [Page 13]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    packets.  The length field shows the fragment length.
@@ -780,9 +780,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 14]
+Barbato                  Expires April 30, 2008                [Page 14]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
       Packet 2:
@@ -836,9 +836,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 15]
+Barbato                  Expires April 30, 2008                [Page 15]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
       Packet 3:
@@ -892,9 +892,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 16]
+Barbato                  Expires April 30, 2008                [Page 16]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
 6.  IANA Considerations
@@ -948,9 +948,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 17]
+Barbato                  Expires April 30, 2008                [Page 17]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    Published specification:
@@ -1004,9 +1004,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 18]
+Barbato                  Expires April 30, 2008                [Page 18]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    Type name:  audio
@@ -1060,9 +1060,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 19]
+Barbato                  Expires April 30, 2008                [Page 19]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    Restriction on usage:
@@ -1080,16 +1080,16 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 7.  SDP related considerations
 
-   The following paragraphs defines the mapping of the parameters
+   The following paragraphs define the mapping of the parameters
    described in the IANA considerations section and their usage in the
    Offer/Answer Model [8].
 
 7.1.  Mapping Media Type Parameters into SDP
 
-   The information carried in the Media Type media type specification
-   has a specific mapping to fields in the Session Description Protocol
-   (SDP) [5], which is commonly used to describe RTP sessions.  When SDP
-   is used to specify sessions the mapping are as follows:
+   The information carried in the Media Type specification has a
+   specific mapping to fields in the Session Description Protocol (SDP)
+   [5], which is commonly used to describe RTP sessions.  When SDP is
+   used to specify sessions the mapping are as follows:
 
    o  The type name ("audio") goes in SDP "m=" as the media name.
 
@@ -1116,9 +1116,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 20]
+Barbato                  Expires April 30, 2008                [Page 20]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    of the session reside.
@@ -1172,9 +1172,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 21]
+Barbato                  Expires April 30, 2008                [Page 21]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    the stream bitrate.  This feature is not available at present so an
@@ -1228,9 +1228,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 22]
+Barbato                  Expires April 30, 2008                [Page 22]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    considerations discussed in the RTP specification [2].  This implies
@@ -1246,7 +1246,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 11.  Acknowledgments
 
    This document is a continuation of draft-moffitt-vorbis-rtp-00.txt
-   and draft-kerr-avt-vorbis-rtp-04.txt.  The Media Type type section is
+   and draft-kerr-avt-vorbis-rtp-04.txt.  The Media Type declaration is
    a continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 
    Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve
@@ -1268,14 +1268,14 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
          Levels", RFC 2119.
 
    [2]   Schulzrinne, H., Casner, S., Frederick, R., and V. Jacobson,
-         "RTP: A Transport Protocol for real-time applications",
+         "RTP: A Transport Protocol for real-time applications", STD 64,
          RFC 3550.
 
    [3]   Schulzrinne, H. and S. Casner, "RTP Profile for Audio and Video
-         Conferences with Minimal Control.", RFC 3551.
+         Conferences with Minimal Control.", STD 65, RFC 3551.
 
    [4]   Berners-Lee, T., Fielding, R., and L. Masinter, "Uniform
-         Resource Identifier (URI): Generic Syntax", RFC 3986.
+         Resource Identifier (URI): Generic Syntax", STD 66, RFC 3986.
 
    [5]   Handley, M., Jacobson, V., and C. Perkins, "SDP: Session
          Description Protocol", RFC 4566, July 2006.
@@ -1284,9 +1284,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
 
 
 
-Barbato                 Expires February 24, 2008              [Page 23]
+Barbato                  Expires April 30, 2008                [Page 23]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
          November 1990.
@@ -1340,9 +1340,9 @@ Author's Address
 
 
 
-Barbato                 Expires February 24, 2008              [Page 24]
+Barbato                  Expires April 30, 2008                [Page 24]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-07              Aug 2007
+Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
 Full Copyright Statement
@@ -1396,6 +1396,6 @@ Acknowledgment
 
 
 
-Barbato                 Expires February 24, 2008              [Page 25]
+Barbato                  Expires April 30, 2008                [Page 25]
 
 

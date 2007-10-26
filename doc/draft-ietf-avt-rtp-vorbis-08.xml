@@ -6,7 +6,7 @@
 <rfc ipr="full3978" docName="RTP Payload Format for Vorbis Encoded Audio">
 
 <front>
-<title>draft-ietf-avt-rtp-vorbis-07</title>
+<title>draft-ietf-avt-rtp-vorbis-08</title>
 
 <author initials="L" surname="Barbato" fullname="Luca Barbato">
 <organization>Xiph.Org</organization>
@@ -16,7 +16,7 @@
 </address>
 </author>
 
-<date day="23" month="Aug" year="2007" />
+<date day="28" month="Oct" year="2007" />
 
 <area>General</area>
 <workgroup>AVT Working Group</workgroup>
@@ -184,7 +184,7 @@ Timestamp: 32 bits</t>
 <t>
 A timestamp representing the sampling time of the first sample of the first
 Vorbis packet in the RTP packet. The clock frequency MUST be set to the sample
-rate of the encoded audio data and is conveyed out-of-band (e.g. as a SDP parameter).
+rate of the encoded audio data and is conveyed out-of-band (e.g. as an SDP parameter).
 </t>
 
 <t>
@@ -406,7 +406,7 @@ method and the optional URI where the Vorbis
 be fetched. Different delivery methods MAY be advertised for the same session.
 The in-band Configuration delivery SHOULD be considered as baseline,
 out-of-band delivery methods that don't use RTP will not be described in this
-document. For non chained streams, the Configuration recommended delivery
+document. For non chained streams, the recommended Configuration delivery
 method is inline the <xref target="Packed Configuration">Packed Configuration</xref> in the SDP as explained in the <xref target="Mapping Media Type Parameters into SDP"> IANA considerations</xref>.
 </t>
 
@@ -434,10 +434,11 @@ Clients MUST be capable of dealing with fragmentation and periodic
 A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set
 to 1. Of the three headers defined in the
 <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the
-identification and the setup MUST be packed as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store xiph codec configurations: The first field stores the number of the following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
-The count and the length fields are encoded using the following logic: the data is in network order, every byte has the most significant bit used as flag and the following 7 used to store the value. The first N bit are to be taken, where N is number of bits representing the value modulo 7, and stored in the first byte.
+Identification and the Setup MUST be packed as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store xiph codec configurations: The first field stores the number of the following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
+The count and the length fields are encoded using the following logic: the data is in network order, every byte has the most significant bit used as flag and the following 7 used to store the value. The first N bit are to be taken, where N is number of bits needed to represent the value, taken modulo 7, and stored in
+the first byte.
 If there are more bits, the flag bit is set to 1 and the subsequent 7bit are stored in the following byte, if there are remaining bits set the flag to 1 and the same procedure is repeated. The ending byte has the flag bit set to 0. In order to decode it is enough to iterate over the bytes until the flag bit set to 0, for every byte the data is added to the accumulated value multiplied by 128.
-The headers are packed in the same order they are present in ogg: identification, comment, setup.</t>
+The headers are packed in the same order they are present in ogg: Identification, Comment, Setup.</t>
 
 <figure anchor="Packed Configuration Figure" title="Packed Configuration Figure">
 <artwork><![CDATA[
@@ -574,7 +575,7 @@ stream.
 </t>
 
 <t>
-Loss of Configuration Packet results in the halting of stream decoding.
+Loss of Configuration Packets results in the halting of stream decoding.
 </t>
 
 </section>
@@ -1016,13 +1017,13 @@ IETF AVT Working Group delegated from the IESG</t>
 
 <section anchor="SDP related considerations" title="SDP related considerations">
 <t>
-The following paragraphs defines the mapping of the parameters described in the IANA considerations section and their usage in the <xref target="rfc3264">Offer/Answer Model</xref>.
+The following paragraphs define the mapping of the parameters described in the IANA considerations section and their usage in the <xref target="rfc3264">Offer/Answer Model</xref>.
 </t>
 
 <section anchor="Mapping Media Type Parameters into SDP" title="Mapping Media Type Parameters into SDP"> 
 
 <t>
-The information carried in the Media Type media type specification has a
+The information carried in the Media Type specification has a
 specific mapping to fields in the <xref target="rfc4566">Session Description
 Protocol (SDP)</xref>, which is commonly used to describe RTP sessions.
 When SDP is used to specify sessions the mapping are as follows:
@@ -1189,7 +1190,7 @@ buffer overflows in the client applications.
 
 <t>
 This document is a continuation of draft-moffitt-vorbis-rtp-00.txt and
-draft-kerr-avt-vorbis-rtp-04.txt.  The Media Type type section is a
+draft-kerr-avt-vorbis-rtp-04.txt.  The Media Type declaration is a
 continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 </t>
 
@@ -1227,6 +1228,7 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <author initials="R." surname="Frederick" fullname=""></author>
 <author initials="V." surname="Jacobson" fullname=""></author>
 </front>
+<seriesInfo name="STD" value="64"/>
 <seriesInfo name="RFC" value="3550" />
 </reference> 
 
@@ -1237,6 +1239,7 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <author initials="S." surname="Casner" fullname=""></author>
 </front>
 <date month="July" year="2003" />
+<seriesInfo name="STD" value="65"/>
 <seriesInfo name="RFC" value="3551" />
 </reference> 
 
@@ -1251,6 +1254,7 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 </author>
 </front>
 <date year='2005' month='January' />
+<seriesInfo name="STD" value="66"/>
 <seriesInfo name='RFC' value='3986' />
 </reference>
 
