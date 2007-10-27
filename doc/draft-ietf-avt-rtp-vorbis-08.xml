@@ -60,7 +60,7 @@ Vorbis is a general purpose perceptual audio codec intended to allow
 maximum encoder flexibility, thus allowing it to scale competitively 
 over an exceptionally wide range of bitrates. At the high 
 quality/bitrate end of the scale (CD or DAT rate stereo, 16/24 bits), it 
-is in the same league as AAC.
+is in the same league as MPEG-4 AAC.
 Vorbis is also intended for lower and higher sample rates (from 
 8kHz telephony to 192kHz digital masters) and a range of channel 
 representations (monaural, polyphonic, stereo, quadraphonic, 5.1, 
@@ -239,7 +239,7 @@ This field is set according to the following list
 Vorbis Data Type (VDT): 2 bits</t>
 <t>
 This field specifies the kind of Vorbis data stored in this RTP packet. There
-are currently three different types of Vorbis payloads. Each packet MUST contain only a single type of Vorbis payload (e.g. you MUST not aggregate configuration and comment payload in the same packet)
+are currently three different types of Vorbis payloads. Each packet MUST contain only a single type of Vorbis payload (e.g. you must not aggregate configuration and comment payload in the same packet)
 </t>
 
 <vspace blankLines="1" />
@@ -298,13 +298,13 @@ in the payload.
 
 <t>
 The Vorbis packet length header is the length of the Vorbis data block only and
-does not count the length field.
+does not include the length field.
 </t>
 
 <t>
 The payload packing of the Vorbis data packets MUST follow the guidelines
-set-out in <xref target="rfc3551"></xref> where the oldest packet occurs
-immediately after the RTP packet header. Subsequent packets, if any, MUST
+set-out in <xref target="rfc3551"></xref> where the oldest Vorbis packet occurs
+immediately after the RTP packet header. Subsequent Vorbis packets, if any, MUST
 follow in temporal order.
 </t>
 
@@ -435,7 +435,7 @@ A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set
 to 1. Of the three headers defined in the
 <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the
 Identification and the Setup MUST be packed as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store xiph codec configurations: The first field stores the number of the following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
-The count and the length fields are encoded using the following logic: the data is in network order, every byte has the most significant bit used as flag and the following 7 used to store the value. The first N bit are to be taken, where N is number of bits needed to represent the value, taken modulo 7, and stored in
+The count and the length fields are encoded using the following logic: the data is in network byte order, every byte has the most significant bit used as flag and the following 7 used to store the value. The first N bit are to be taken, where N is number of bits needed to represent the value, taken modulo 7, and stored in
 the first byte.
 If there are more bits, the flag bit is set to 1 and the subsequent 7bit are stored in the following byte, if there are remaining bits set the flag to 1 and the same procedure is repeated. The ending byte has the flag bit set to 0. In order to decode it is enough to iterate over the bytes until the flag bit set to 0, for every byte the data is added to the accumulated value multiplied by 128.
 The headers are packed in the same order they are present in ogg: Identification, Comment, Setup.</t>
@@ -506,7 +506,7 @@ As mentioned above the RECOMMENDED delivery vector for Vorbis configuration
 data is via a retrieval method that can be performed using a reliable transport
 protocol. As the RTP headers are not required for this method of delivery the
 structure of the configuration data is slightly different. The packed header
-starts with a 32 bit (network ordered) count field which details the number of
+starts with a 32 bit (network byte ordered) count field which details the number of
 packed headers that are contained in the bundle. Next is the Packed header
 payload for each chained Vorbis stream.
 </t>
@@ -715,7 +715,7 @@ the payload is raw Vorbis data the VDT field is set to 0.
 
 <t>
 The Fragment type field is set to 2 and the number of packets field is set to 0.
-For large Vorbis fragments there can be several of these type of payload 
+For large Vorbis fragments there can be several of this type of payload 
 packets. The maximum packet size SHOULD be no greater than the path MTU,
 including all RTP and payload headers. The sequence number has been incremented
 by one but the timestamp field remains the same as the initial packet.
@@ -762,12 +762,14 @@ As there is no error correction within the Vorbis stream, packet loss will
 result in a loss of signal. Packet loss is more of an issue for fragmented
 Vorbis packets as the client will have to cope with the handling of the
 Fragment Type. In case of loss of fragments the client MUST discard all the
-remaining fragments and decode the incomplete packet. If we use the fragmented
-Vorbis packet example above and the first packet is lost the client MUST detect
-that the next packet has the packet count field set to 0 and the Fragment type
-2 and MUST drop it. The next packet, which is the final fragmented packet, MUST
-be dropped in the same manner. If the missing packet is the last, the received
-two fragments will be kept and the incomplete vorbis packet decoded.
+remaining Vorbis fragments and decode the incomplete packet. If we use the
+fragmented Vorbis packet example above and the first RTP packet is lost the
+client MUST detect that the next RTP packet has the packet count field set
+to 0 and the Fragment type 2 and MUST drop it.
+The next RTP packet, which is the final fragmented packet, MUST be dropped in
+the same manner.
+If the missing RTP packet is the last, the received two fragments will be kept
+and the incomplete Vorbis packet decoded.
 </t>
 
 <t>
@@ -820,7 +822,7 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 <list style="hanging">
 <t hangText="configuration-uri:"> the <xref target="rfc3986">URI</xref> of
 the configuration headers in case of out of band transmission.
-In the form of "protocol://path/to/resource/", depending on the specific
+In the form of "scheme://path/to/resource/", depending on the specific
 method, a single configuration packet could be retrived by its Ident number, or
 multiple packets could be aggregated in a single stream. 
 Non hierarchical protocols MAY point to a resource using their specific
@@ -1074,11 +1076,10 @@ below.
 
 <section anchor="SDP Example" title="SDP Example">
 <t>The following example shows a basic SDP single stream. The first
-configuration packet is inlined in the sdp, other configurations could be
-fetched at any time from the first provided uri using or all the known
-configuration could be downloaded using the second uri. The inline
-<xref target="rfc3548">base64</xref> configuration string is trimmed because of
-the length.</t>
+configuration packet is inlined in the SDP, other configurations could be
+fetched at any time from the URIs provided. The inline
+<xref target="rfc3548">base64</xref> configuration string is folded in this
+example due to RFC line length limitations.</t>
 
 <list style="empty">
 <t>c=IN IP4 192.0.2.1</t>
@@ -1096,7 +1097,8 @@ case-insensitive in both places.  Similarly, parameter names are
 case-insensitive both in Media Type types and in the default mapping to the SDP
 a=fmtp attribute. The exception regarding case sensitivity is the
 configuration-uri URI which MUST be regarded as being case sensitive. The
-a=fmtp line is a single line even if it is presented broken because of clarity.
+a=fmtp line is a single line even if it is shown as multiple lines in this
+document for clarity.
 </t>
 
 </section>
@@ -1104,7 +1106,7 @@ a=fmtp line is a single line even if it is presented broken because of clarity.
 <section anchor="Usage with the SDP Offer/Answer Mode" title="Usage with the SDP Offer/Answer Model">
 
 <t>
-The only paramenter negotiable is the delivery method. All the others are
+The only parameter negotiable is the delivery method. All the others are
 declarative: the offer, as described in <xref target="rfc3264">An Offer/Answer
 Model Session Description Protocol</xref>, may contain a large number of
 delivery methods per single fmtp attribute, the answerer MUST remove every
@@ -1140,7 +1142,7 @@ transmission vectors.
 
 <t>This is one of the most common situation: one single server streaming
 content in multicast, the clients may start a session at random time. The
-content itself could be a mix of live stream, as the wj's voice, and stored
+content itself could be a mix of live stream, as the webjockey's voice, and stored
 streams as the music she plays.</t>
 
 <t>In this situation we don't know in advance how many codebooks we will use.

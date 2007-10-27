@@ -119,10 +119,11 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    maximum encoder flexibility, thus allowing it to scale competitively
    over an exceptionally wide range of bitrates.  At the high quality/
    bitrate end of the scale (CD or DAT rate stereo, 16/24 bits), it is
-   in the same league as AAC.  Vorbis is also intended for lower and
-   higher sample rates (from 8kHz telephony to 192kHz digital masters)
-   and a range of channel representations (monaural, polyphonic, stereo,
-   quadraphonic, 5.1, ambisonic, or up to 255 discrete channels).
+   in the same league as MPEG-4 AAC.  Vorbis is also intended for lower
+   and higher sample rates (from 8kHz telephony to 192kHz digital
+   masters) and a range of channel representations (monaural,
+   polyphonic, stereo, quadraphonic, 5.1, ambisonic, or up to 255
+   discrete channels).
 
    Vorbis encoded audio is generally encapsulated within an Ogg format
    bitstream [11], which provides framing and synchronization.  For the
@@ -152,7 +153,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    The format of the RTP header is specified in [2] and shown in Figure
    Figure 1.  This payload format uses the fields of the header in a
    manner consistent with that specification.
-
 
 
 
@@ -284,7 +284,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    This field specifies the kind of Vorbis data stored in this RTP
    packet.  There are currently three different types of Vorbis
    payloads.  Each packet MUST contain only a single type of Vorbis
-   payload (e.g. you MUST not aggregate configuration and comment
+   payload (e.g. you must not aggregate configuration and comment
    payload in the same packet)
 
       0 = Raw Vorbis payload
@@ -338,12 +338,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
    The Vorbis packet length header is the length of the Vorbis data
-   block only and does not count the length field.
+   block only and does not include the length field.
 
    The payload packing of the Vorbis data packets MUST follow the
-   guidelines set-out in [3] where the oldest packet occurs immediately
-   after the RTP packet header.  Subsequent packets, if any, MUST follow
-   in temporal order.
+   guidelines set-out in [3] where the oldest Vorbis packet occurs
+   immediately after the RTP packet header.  Subsequent Vorbis packets,
+   if any, MUST follow in temporal order.
 
    Channel mapping of the audio is in accordance with the Vorbis I
    Specification [10].
@@ -468,12 +468,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    the size of the headers (length fields), the headers immediately
    follow the list of length fields.  The size of the last header is
    implicit.  The count and the length fields are encoded using the
-   following logic: the data is in network order, every byte has the
-   most significant bit used as flag and the following 7 used to store
-   the value.  The first N bit are to be taken, where N is number of
-   bits needed to represent the value, taken modulo 7, and stored in the
-   first byte.  If there are more bits, the flag bit is set to 1 and the
-   subsequent 7bit are stored in the following byte, if there are
+   following logic: the data is in network byte order, every byte has
+   the most significant bit used as flag and the following 7 used to
+   store the value.  The first N bit are to be taken, where N is number
+   of bits needed to represent the value, taken modulo 7, and stored in
+   the first byte.  If there are more bits, the flag bit is set to 1 and
+   the subsequent 7bit are stored in the following byte, if there are
    remaining bits set the flag to 1 and the same procedure is repeated.
    The ending byte has the flag bit set to 0.  In order to decode it is
    enough to iterate over the bytes until the flag bit set to 0, for
@@ -576,9 +576,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    using a reliable transport protocol.  As the RTP headers are not
    required for this method of delivery the structure of the
    configuration data is slightly different.  The packed header starts
-   with a 32 bit (network ordered) count field which details the number
-   of packed headers that are contained in the bundle.  Next is the
-   Packed header payload for each chained Vorbis stream.
+   with a 32 bit (network byte ordered) count field which details the
+   number of packed headers that are contained in the bundle.  Next is
+   the Packed header payload for each chained Vorbis stream.
 
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
       |                     Number of packed headers                  |
@@ -810,8 +810,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
               Figure 10: Example Fragmented Packet (Packet 2)
 
    The Fragment type field is set to 2 and the number of packets field
-   is set to 0.  For large Vorbis fragments there can be several of
-   these type of payload packets.  The maximum packet size SHOULD be no
+   is set to 0.  For large Vorbis fragments there can be several of this
+   type of payload packets.  The maximum packet size SHOULD be no
    greater than the path MTU, including all RTP and payload headers.
    The sequence number has been incremented by one but the timestamp
    field remains the same as the initial packet.
@@ -876,14 +876,14 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    will result in a loss of signal.  Packet loss is more of an issue for
    fragmented Vorbis packets as the client will have to cope with the
    handling of the Fragment Type.  In case of loss of fragments the
-   client MUST discard all the remaining fragments and decode the
+   client MUST discard all the remaining Vorbis fragments and decode the
    incomplete packet.  If we use the fragmented Vorbis packet example
-   above and the first packet is lost the client MUST detect that the
-   next packet has the packet count field set to 0 and the Fragment type
-   2 and MUST drop it.  The next packet, which is the final fragmented
-   packet, MUST be dropped in the same manner.  If the missing packet is
-   the last, the received two fragments will be kept and the incomplete
-   vorbis packet decoded.
+   above and the first RTP packet is lost the client MUST detect that
+   the next RTP packet has the packet count field set to 0 and the
+   Fragment type 2 and MUST drop it.  The next RTP packet, which is the
+   final fragmented packet, MUST be dropped in the same manner.  If the
+   missing RTP packet is the last, the received two fragments will be
+   kept and the incomplete Vorbis packet decoded.
 
    Loss of any of the Configuration fragment will result in the loss of
    the full Configuration packet with the result detailed in the Loss of
@@ -925,11 +925,11 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
       configuration-uri:  the URI [4] of the configuration headers in
          case of out of band transmission.  In the form of
-         "protocol://path/to/resource/", depending on the specific
-         method, a single configuration packet could be retrived by its
-         Ident number, or multiple packets could be aggregated in a
-         single stream.  Non hierarchical protocols MAY point to a
-         resource using their specific syntax.
+         "scheme://path/to/resource/", depending on the specific method,
+         a single configuration packet could be retrived by its Ident
+         number, or multiple packets could be aggregated in a single
+         stream.  Non hierarchical protocols MAY point to a resource
+         using their specific syntax.
 
    Encoding considerations:
 
@@ -1131,11 +1131,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 7.1.1.  SDP Example
 
    The following example shows a basic SDP single stream.  The first
-   configuration packet is inlined in the sdp, other configurations
-   could be fetched at any time from the first provided uri using or all
-   the known configuration could be downloaded using the second uri.
-   The inline base64 [9] configuration string is trimmed because of the
-   length.
+   configuration packet is inlined in the SDP, other configurations
+   could be fetched at any time from the URIs provided.  The inline
+   base64 [9] configuration string is folded in this example due to RFC
+   line length limitations.
       c=IN IP4 192.0.2.1
       m=audio RTP/AVP 98
       a=rtpmap:98 vorbis/44100/2
@@ -1152,13 +1151,13 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    the default mapping to the SDP a=fmtp attribute.  The exception
    regarding case sensitivity is the configuration-uri URI which MUST be
    regarded as being case sensitive.  The a=fmtp line is a single line
-   even if it is presented broken because of clarity.
+   even if it is shown as multiple lines in this document for clarity.
 
 7.2.  Usage with the SDP Offer/Answer Model
 
-   The only paramenter negotiable is the delivery method.  All the
-   others are declarative: the offer, as described in An Offer/Answer
-   Model Session Description Protocol [8], may contain a large number of
+   The only parameter negotiable is the delivery method.  All the others
+   are declarative: the offer, as described in An Offer/Answer Model
+   Session Description Protocol [8], may contain a large number of
    delivery methods per single fmtp attribute, the answerer MUST remove
    every delivery-method and configuration-uri not supported.  All the
    parameters MUST not be altered on answer otherwise.
@@ -1169,6 +1168,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    Vorbis clients SHOULD send regular receiver reports detailing
    congestion.  A mechanism for dynamically downgrading the stream,
    known as bitrate peeling, will allow for a graceful backing off of
+   the stream bitrate.  This feature is not available at present so an
 
 
 
@@ -1177,7 +1177,6 @@ Barbato                  Expires April 30, 2008                [Page 21]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
-   the stream bitrate.  This feature is not available at present so an
    alternative would be to redirect the client to a lower bitrate stream
    if one is available.
 
@@ -1192,8 +1191,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
    This is one of the most common situation: one single server streaming
    content in multicast, the clients may start a session at random time.
-   The content itself could be a mix of live stream, as the wj's voice,
-   and stored streams as the music she plays.
+   The content itself could be a mix of live stream, as the webjockey's
+   voice, and stored streams as the music she plays.
 
    In this situation we don't know in advance how many codebooks we will
    use.  The clients can join anytime and users expect to start
@@ -1225,6 +1224,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 10.  Security Considerations
 
    RTP packets using this payload format are subject to the security
+   considerations discussed in the RTP specification [2].  This implies
 
 
 
@@ -1233,7 +1233,6 @@ Barbato                  Expires April 30, 2008                [Page 22]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
-   considerations discussed in the RTP specification [2].  This implies
    that the confidentiality of the media stream is achieved by using
    encryption.  Because the data compression used with this payload
    format is applied end-to-end, encryption may be performed on the
@@ -1281,6 +1280,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
          Description Protocol", RFC 4566, July 2006.
 
    [6]   Mogul, J. and S. Deering, "Path MTU discovery", RFC 1191,
+         November 1990.
 
 
 
@@ -1288,8 +1288,6 @@ Barbato                  Expires April 30, 2008                [Page 23]
 
 Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
-
-         November 1990.
 
    [7]   McCann et al., J., "Path MTU Discovery for IP version 6",
          RFC 1981.
@@ -1325,6 +1323,8 @@ Author's Address
 
    Email: lu_zero@gentoo.org
    URI:   http://www.xiph.org/
+
+
 
 
 
