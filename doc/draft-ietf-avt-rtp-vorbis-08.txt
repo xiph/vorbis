@@ -145,8 +145,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    its associated decoding codebooks as well as indicating if the
    following packet contains fragmented Vorbis data and/or the number of
    whole Vorbis data frames.  The payload data contains the raw Vorbis
-   bitstream information.  There are 3 types of Vorbis payload data, an
-   RTP packet MUST contain just one of them at a time.
+   bitstream information.  There are 3 types of Vorbis data, an RTP
+   payload MUST contain just one of them at a time.
 
 2.1.  RTP Header
 
@@ -234,7 +234,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    Timestamp: 32 bits
 
    A timestamp representing the sampling time of the first sample of the
-   first Vorbis packet in the RTP packet.  The clock frequency MUST be
+   first Vorbis packet in the RTP payload.  The clock frequency MUST be
    set to the sample rate of the encoded audio data and is conveyed out-
    of-band (e.g. as an SDP parameter).
 
@@ -284,8 +284,8 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    This field specifies the kind of Vorbis data stored in this RTP
    packet.  There are currently three different types of Vorbis
    payloads.  Each packet MUST contain only a single type of Vorbis
-   payload (e.g. you must not aggregate configuration and comment
-   payload in the same packet)
+   packet (e.g. you must not aggregate configuration and comment packets
+   in the same RTP payload)
 
       0 = Raw Vorbis payload
       1 = Vorbis Packed Configuration payload
@@ -296,7 +296,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
    The last 4 bits represent the number of complete packets in this
    payload.  This provides for a maximum number of 15 Vorbis packets in
-   the payload.  If the packet contains fragmented data the number of
+   the payload.  If the payload contains fragmented data the number of
    packets MUST be set to 0.
 
 2.3.  Payload Data
@@ -350,7 +350,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 2.4.  Example RTP Packet
 
-   Here is an example RTP packet containing two Vorbis packets.
+   Here is an example RTP payload containing two Vorbis packets.
 
        0                   1                   2                   3
        0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -703,12 +703,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 5.  Frame Packetization
 
-   Each RTP packet contains either one Vorbis packet fragment, or an
+   Each RTP payload contains either one Vorbis packet fragment, or an
    integer number of complete Vorbis packets (up to a maximum of 15
    packets, since the number of packets is defined by a 4 bit value).
 
    Any Vorbis data packet that is less than path MTU SHOULD be bundled
-   in the RTP packet with as many Vorbis packets as will fit, up to a
+   in the RTP payload with as many Vorbis packets as will fit, up to a
    maximum of 15, except when such bundling would exceed an
    application's desired transmission latency.  Path MTU is detailed in
    [6] and [7].
@@ -716,7 +716,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    A fragmented packet has a zero in the last four bits of the payload
    header.  The first fragment will set the Fragment type to 1.  Each
    fragment after the first will set the Fragment type to 2 in the
-   payload header.  The RTP packet containing the last fragment of the
+   payload header.  The RTP payload containing the last fragment of the
    Vorbis packet will have the Fragment type set to 3.  To maintain the
    correct sequence for fragmented packet reception the timestamp field
    of fragmented packets MUST be the same as the first packet sent, with
@@ -729,12 +729,12 @@ Barbato                  Expires April 30, 2008                [Page 13]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
-   packets.  The length field shows the fragment length.
+   payloads.  The length field shows the fragment length.
 
 5.1.  Example Fragmented Vorbis Packet
 
    Here is an example fragmented Vorbis packet split over three RTP
-   packets.  Each packet contains the standard RTP headers as well as
+   payloads.  Each of them contains the standard RTP headers as well as
    the 4 octets Vorbis headers.
 
       Packet 1:
@@ -761,7 +761,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
               Figure 9: Example Fragmented Packet (Packet 1)
 
-   In this packet the initial sequence number is 1000 and the timestamp
+   In this payload the initial sequence number is 1000 and the timestamp
    is 12345.  The Fragment type is set to 1, the number of packets field
    is set to 0, and as the payload is raw Vorbis data the VDT field is
    set to 0.
@@ -811,10 +811,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
    The Fragment type field is set to 2 and the number of packets field
    is set to 0.  For large Vorbis fragments there can be several of this
-   type of payload packets.  The maximum packet size SHOULD be no
-   greater than the path MTU, including all RTP and payload headers.
-   The sequence number has been incremented by one but the timestamp
-   field remains the same as the initial packet.
+   type of payloads.  The maximum packet size SHOULD be no greater than
+   the path MTU, including all RTP and payload headers.  The sequence
+   number has been incremented by one but the timestamp field remains
+   the same as the initial payload.
 
 
 
@@ -865,10 +865,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
               Figure 11: Example Fragmented Packet (Packet 3)
 
-   This is the last Vorbis fragment packet.  The Fragment type is set to
-   3 and the packet count remains set to 0.  As in the previous packets
-   the timestamp remains set to the first packet in the sequence and the
-   sequence number has been incremented.
+   This is the last Vorbis fragment payload.  The Fragment type is set
+   to 3 and the packet count remains set to 0.  As in the previous
+   payloads the timestamp remains set to the first payload timestamp in
+   the sequence and the sequence number has been incremented.
 
 5.2.  Packet Loss
 
@@ -878,11 +878,11 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
    handling of the Fragment Type.  In case of loss of fragments the
    client MUST discard all the remaining Vorbis fragments and decode the
    incomplete packet.  If we use the fragmented Vorbis packet example
-   above and the first RTP packet is lost the client MUST detect that
-   the next RTP packet has the packet count field set to 0 and the
-   Fragment type 2 and MUST drop it.  The next RTP packet, which is the
+   above and the first RTP payload is lost the client MUST detect that
+   the next RTP payload has the packet count field set to 0 and the
+   Fragment type 2 and MUST drop it.  The next RTP payload, which is the
    final fragmented packet, MUST be dropped in the same manner.  If the
-   missing RTP packet is the last, the received two fragments will be
+   missing RTP payload is the last, the received two fragments will be
    kept and the incomplete Vorbis packet decoded.
 
    Loss of any of the Configuration fragment will result in the loss of
@@ -1233,7 +1233,7 @@ Barbato                  Expires April 30, 2008                [Page 22]
 Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Oct 2007
 
 
-   that the confidentiality of the media stream is achieved by using
+   that the confidentiality of the media stream is archieved by using
    encryption.  Because the data compression used with this payload
    format is applied end-to-end, encryption may be performed on the
    compressed data.  Additional care MAY be needed for delivery methods
