@@ -802,7 +802,7 @@ Configuration packet with the result detailed in the <xref target="Loss of Confi
 
 <vspace blankLines="1" />
 
-<t hangText="delivery-method:"> indicates the delivery methods in use, the possible values are: inline, in_band, out_band, MAY be included multiple times
+<t hangText="delivery-method:"> indicates the delivery methods in use, the possible values are: inline, in_band, out_band. The parameter MAY be included multiple time, followed by the configuration or configuration-uri parameter associated.
 </t>
 
 <vspace blankLines="1" />
@@ -1162,9 +1162,12 @@ per session and don't process configuration packets already known.</t>
 
 <section anchor="Security Considerations" title="Security Considerations"> 
 <t>
-RTP packets using this payload format are subject to the security
-considerations discussed in the RTP specification 
-<xref target="rfc3550"></xref>.  This implies that the confidentiality of the
+RTP packets using this payload format are subject to the security 
+considerations discussed in the 
+<xref target="rfc3550">RTP specification</xref>, the
+<xref target="rfc3548">base64 specification</xref> and the
+<xref target="rfc3986">URI Generic syntax specification</xref>.
+Among other considerations, this implies that the confidentiality of the
 media stream is archieved by using encryption. Because the data compression used
 with this payload format is applied end-to-end, encryption may be performed on
 the compressed data. Additional care MAY be needed for delivery methods that
