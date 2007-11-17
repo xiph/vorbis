@@ -14,6 +14,9 @@ AM_CONFIG_HEADER([config.h])
 AM_INIT_AUTOMAKE(libvorbis,1.2.1svn)
 AM_MAINTAINER_MODE
 
+dnl Add parameters for aclocal
+AC_SUBST(ACLOCAL_AMFLAGS, "-I m4")
+
 dnl Library versioning
 
 V_LIB_CURRENT=4
@@ -171,6 +174,8 @@ else
 		CFLAGS="-O20 -Wall -Wextra -D__NO_MATH_INLINES -fsigned-char"
 		PROFILE="-O20 -g -pg -D__NO_MATH_INLINES -fsigned-char" ;;
         esac
+
+        AC_ADD_CFLAGS([-Wdeclaration-after-statement])
 fi
 CFLAGS="$CFLAGS $cflags_save"
 
@@ -229,6 +234,7 @@ AC_SUBST(pthread_lib)
 
 AC_OUTPUT([
 Makefile
+m4/Makefile
 lib/Makefile
 lib/modes/Makefile
 lib/books/Makefile

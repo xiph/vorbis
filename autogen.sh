@@ -4,6 +4,8 @@
 
 package="vorbis"
 
+ACLOCAL_FLAGS="-I m4"
+
 olddir=`pwd`
 srcdir=`dirname $0`
 test -z "$srcdir" && srcdir=.
