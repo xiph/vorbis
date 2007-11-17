@@ -426,6 +426,7 @@ The <xref target="Packed Configuration">Packed Configuration</xref> Payload is
 sent in-band with the packet type bits set to match the Vorbis Data Type.
 Clients MUST be capable of dealing with fragmentation and periodic
 <xref target="rfc4588">re-transmission of</xref> the configuration headers.
+The RTP timestamp value MUST reflect the transmission time of the next data packet.
 </t>
 
 <section anchor="Packed Configuration" title="Packed Configuration">
@@ -640,12 +641,14 @@ Path MTU is detailed in <xref target="rfc1191"></xref> and <xref target="rfc1981
 <t>
 A fragmented packet has a zero in the last four bits of the payload header.
 The first fragment will set the Fragment type to 1. Each fragment after the
-first will set the Fragment type to 2 in the payload header.  The RTP payload
-containing the last fragment of the Vorbis packet will have the Fragment type
-set to 3.  To maintain the correct sequence for fragmented packet reception
-the timestamp field of fragmented packets MUST be the same as the first packet
-sent, with the sequence number incremented as normal for the subsequent RTP
-payloads. The length field shows the fragment length.
+first will set the Fragment type to 2 in the payload header. The consecutive
+fragments MUST be sent without any other payloads being sent between the first
+and the last fragment. The RTP payload containing the last fragment of the
+Vorbis packet will have the Fragment type set to 3. To maintain the correct
+sequence for fragmented packet reception the timestamp field of fragmented
+packets MUST be the same as the first packet sent, with the sequence number
+incremented as normal for the subsequent RTP payloads, this will affect the RTCP jitter measurement. The length field shows
+the fragment length.
 </t>
 
 <section anchor="Example Fragmented Vorbis Packet" title="Example Fragmented Vorbis Packet">
@@ -909,7 +912,7 @@ This media type depends on RTP framing, and hence is only defined for transfer v
 <section anchor="Packed Headers IANA Considerations" title="Packed Headers IANA Considerations"> 
 
 <t>
-The following IANA considerations MUST only be applied to the packed headers.
+The following IANA considerations MUST only be applied to the <xref target="Packed Headers">Packed Headers</xref>.
 </t>
 
 <vspace blankLines="1" />
@@ -1118,18 +1121,6 @@ not be altered on answer otherwise.
 
 </section>
 
-<section anchor="Congestion Control" title="Congestion Control"> 
-
-<t>
-Vorbis clients SHOULD send regular receiver reports detailing congestion. A
-mechanism for dynamically downgrading the stream, known as bitrate peeling,
-will allow for a graceful backing off of the stream bitrate. This feature is
-not available at present so an alternative would be to redirect the client to
-a lower bitrate stream if one is available.
-</t>
-
-</section> 
-
 <section anchor="Examples" title="Examples">
 
 <t>
@@ -1142,8 +1133,8 @@ transmission vectors.
 
 <t>This is one of the most common situation: one single server streaming
 content in multicast, the clients may start a session at random time. The
-content itself could be a mix of live stream, as the webjockey's voice, and stored
-streams as the music she plays.</t>
+content itself could be a mix of live stream, as the webjockey's voice,
+and stored streams as the music she plays.</t>
 
 <t>In this situation we don't know in advance how many codebooks we will use.
 The clients can join anytime and users expect to start listening to the content
