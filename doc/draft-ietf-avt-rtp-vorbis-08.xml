@@ -567,16 +567,12 @@ than 127 bytes.
 
 </section>
 
-<section anchor="Loss of Configuration Headers" title="Loss of Configuration Headers"> 
+<section anchor="Loss of Configuration Headers" title="Loss of Configuration Headers">
 
 <t>
-Unlike the loss of raw Vorbis payload data, loss of a configuration header can
+Unlike the loss of raw Vorbis payload data, loss of a configuration header
 lead to a situation where it will not be possible to successfully decode the
-stream.
-</t>
-
-<t>
-Loss of Configuration Packets results in the halting of stream decoding.
+stream. Implementations MAY try to use recover from error requesting again the missing Configuration, the baseline reaction SHOULD be either reset or end the connection.
 </t>
 
 </section>
@@ -769,10 +765,10 @@ remaining Vorbis fragments and decode the incomplete packet. If we use the
 fragmented Vorbis packet example above and the first RTP payload is lost the
 client MUST detect that the next RTP payload has the packet count field set
 to 0 and the Fragment type 2 and MUST drop it.
-The next RTP payload, which is the final fragmented packet, MUST be dropped in
-the same manner.
-If the missing RTP payload is the last, the received two fragments will be kept
-and the incomplete Vorbis packet decoded.
+The next RTP payload, which is the final fragmented packet, MUST be dropped
+in the same manner.
+If the missing RTP payload is the last, the received two fragments will be
+kept and the incomplete Vorbis packet decoded.
 </t>
 
 <t>
