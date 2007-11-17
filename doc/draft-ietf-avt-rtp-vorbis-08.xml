@@ -572,7 +572,7 @@ than 127 bytes.
 <t>
 Unlike the loss of raw Vorbis payload data, loss of a configuration header
 lead to a situation where it will not be possible to successfully decode the
-stream. Implementations MAY try to use recover from error requesting again the missing Configuration, the baseline reaction SHOULD be either reset or end the connection.
+stream. Implementations MAY try to recover from error requesting again the missing Configuration, the baseline reaction SHOULD be either reset or end the connection.
 </t>
 
 </section>
