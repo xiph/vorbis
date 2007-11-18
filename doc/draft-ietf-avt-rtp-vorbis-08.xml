@@ -1,18 +1,19 @@
-<?xml version='1.0'?>
-<!DOCTYPE rfc SYSTEM 'rfc2629.dtd'>
+<?xml version="1.0"?>
+<!DOCTYPE rfc SYSTEM "rfc2629.dtd">
 <?rfc toc="yes" ?>
-<?rfc compact='yes'?>
+<?rfc compact="yes" ?>
+<?rfc rfcedstyle="yes" ?>
 
-<rfc ipr="full3978" docName="RTP Payload Format for Vorbis Encoded Audio">
+<rfc ipr="full3978" docName="draft-ietf-avt-rtp-vorbis-08">
 
 <front>
-<title>draft-ietf-avt-rtp-vorbis-08</title>
+<title>RTP Payload Format for Vorbis Encoded Audio</title>
 
 <author initials="L" surname="Barbato" fullname="Luca Barbato">
-<organization>Xiph.Org</organization>
+<organization abbrev="Xiph">Xiph.Org Foundation</organization>
 <address>
 <email>lu_zero@gentoo.org</email>
-<uri>http://www.xiph.org/</uri>
+<uri>http://xiph.org/</uri>
 </address>
 </author>
 
@@ -74,12 +75,11 @@ For the purposes of RTP transport, this layer is unnecessary, and so raw Vorbis
 packets are used in the payload.
 </t>
 
-<section anchor="Terminology" title="Terminology">
+<section anchor="Terminology" title="Conformance and Document Conventions">
 
-<t>
-The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" 
-in this document are to be interpreted as described in RFC 2119 <xref target="rfc2119"></xref>.
-</t>
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14, <xref target="RFC2119"/> and indicate requirement levels for compliant implementations.  Requirements apply to all implementations unless otherwise stated.</t>
+<t>An implementation is a software module that supports one of the media types defined in this document.  Software modules may support multiple media types, but conformance is considered individually for each type.</t>
+<t>Implementations that fail to satisfy one or more "MUST" requirements are considered non-compliant.  Implementations that satisfy all "MUST" requirements, but fail to satisfy one or more "SHOULD" requirements, are said to be "conditionally compliant".  All other implementations are "unconditionally compliant".</t>
 
 </section>
 </section>
@@ -435,7 +435,7 @@ The RTP timestamp value MUST reflect the transmission time of the next data pack
 A Vorbis Packed Configuration is indicated with the Vorbis Data Type field set
 to 1. Of the three headers defined in the
 <xref target="vorbis-spec-ref">Vorbis I specification</xref>, the
-Identification and the Setup MUST be packed as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store xiph codec configurations: The first field stores the number of the following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
+Identification and the Setup MUST be packed as they are, while the comment header MAY be replaced with a dummy one. The packed configuration follows a generic way to store Xiph codec configurations: The first field stores the number of the following packets minus one (count field), the next ones represent the size of the headers (length fields), the headers immediately follow the list of length fields. The size of the last header is implicit.
 The count and the length fields are encoded using the following logic: the data is in network byte order, every byte has the most significant bit used as flag and the following 7 used to store the value. The first N bit are to be taken, where N is number of bits needed to represent the value, taken modulo 7, and stored in
 the first byte.
 If there are more bits, the flag bit is set to 1 and the subsequent 7bit are stored in the following byte, if there are remaining bits set the flag to 1 and the same procedure is repeated. The ending byte has the flag bit set to 0. In order to decode it is enough to iterate over the bytes until the flag bit set to 0, for every byte the data is added to the accumulated value multiplied by 128.
@@ -854,7 +854,7 @@ None</t>
 <vspace blankLines="1" />
 RFC XXXX [RFC Editor: please replace by the RFC number of  this memo, when published]
 <vspace blankLines="1" />
-Ogg Vorbis I specification:  Codec setup and packet decode. Available from the Xiph website, http://www.xiph.org
+Ogg Vorbis I specification: Codec setup and packet decode.  Available from the Xiph website, http://xiph.org
 </t>
 
 <vspace blankLines="1" />
@@ -1187,7 +1187,7 @@ continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 </t>
 
 <t>
-Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve Casner,
+Thanks to the AVT, Vorbis Communities / Xiph.Org Foundation including Steve Casner,
 Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal Hennequin, Ralph
 Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro, Jack Moffitt, Christopher
 Montgomery, Colin Perkins, Barry Short, Mike Smith, Phil Kerr, Michael Sparks,
@@ -1210,7 +1210,7 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <author initials="S." surname="Bradner" fullname="Scott Bradner"></author>
 </front>
 <seriesInfo name="RFC" value="2119" />
-</reference>   
+</reference>
 
 <reference anchor="rfc3550">
 <front>
@@ -1235,51 +1235,51 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <seriesInfo name="RFC" value="3551" />
 </reference> 
 
-<reference anchor='rfc3986'>
+<reference anchor="rfc3986">
 <front>
-<title abbrev='URI Generic Syntax'>Uniform Resource Identifier (URI): Generic Syntax</title>
-<author initials='T.' surname='Berners-Lee' fullname='Tim Berners-Lee'>
+<title abbrev="URI Generic Syntax">Uniform Resource Identifier (URI): Generic Syntax</title>
+<author initials="T." surname="Berners-Lee" fullname="Tim Berners-Lee">
 </author>
-<author initials='R.' surname='Fielding' fullname='Roy T. Fielding'>
+<author initials="R." surname="Fielding" fullname="Roy T. Fielding">
 </author>
-<author initials='L.' surname='Masinter' fullname='Larry Masinter'>
+<author initials="L." surname="Masinter" fullname="Larry Masinter">
 </author>
 </front>
-<date year='2005' month='January' />
+<date year="2005" month="January" />
 <seriesInfo name="STD" value="66"/>
-<seriesInfo name='RFC' value='3986' />
+<seriesInfo name="RFC" value="3986" />
 </reference>
 
-<reference anchor='rfc4566'>
+<reference anchor="rfc4566">
 <front>
 <title>SDP: Session Description Protocol</title>
-<author initials='M.' surname='Handley' fullname='M. Handley'>
+<author initials="M." surname="Handley" fullname="M. Handley">
 <organization /></author>
-<author initials='V.' surname='Jacobson' fullname='V. Jacobson'>
+<author initials="V." surname="Jacobson" fullname="V. Jacobson">
 <organization /></author>
-<author initials='C.' surname='Perkins' fullname='C. Perkins'>
+<author initials="C." surname="Perkins" fullname="C. Perkins">
 <organization /></author>
-<date year='2006' month='July' />
+<date year="2006" month="July" />
 </front>
-<seriesInfo name='RFC' value='4566' />
-<format type='TXT' octets='108820' target='ftp://ftp.isi.edu/in-notes/rfc4566.txt' />
+<seriesInfo name="RFC" value="4566" />
+<format type="TXT" octets="108820" target="ftp://ftp.isi.edu/in-notes/rfc4566.txt" />
 </reference>
 
-<reference anchor='rfc1191'>
+<reference anchor="rfc1191">
 <front>
 <title>Path MTU discovery</title>
-<author initials='J.' surname='Mogul' fullname='Jeffrey Mogul'>
+<author initials="J." surname="Mogul" fullname="Jeffrey Mogul">
 <organization>Digital Equipment Corporation (DEC) , Western Research Laboratory</organization>
 <address>
 <email>mogul@decwrl.dec.com</email></address></author>
-<author initials='S.' surname='Deering' fullname='Steve Deering'>
+<author initials="S." surname="Deering" fullname="Steve Deering">
 <organization>Xerox Palo Alto Research Center</organization>
 <address>
 <email>deering@xerox.com</email></address></author>
-<date year='1990' day='1' month='November' />
+<date year="1990" day="1" month="November" />
 </front>
-<seriesInfo name='RFC' value='1191' />
-<format type='TXT' octets='47936' target='ftp://ftp.isi.edu/in-notes/rfc1191.txt' />
+<seriesInfo name="RFC" value="1191" />
+<format type="TXT" octets="47936" target="ftp://ftp.isi.edu/in-notes/rfc1191.txt" />
 </reference>
 
 <reference anchor="rfc1981">
@@ -1297,7 +1297,7 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 <author initials="H." surname="Schulzrinne" fullname="Henning Schulzrinne"></author>
 </front>
 <seriesInfo name="RFC" value="3264" />
-</reference>   
+</reference>
 
 <reference anchor="rfc3548">
 <front>
@@ -1327,9 +1327,9 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 
 <reference anchor="libvorbis">
 <front>
-<title>libvorbis: Available from the dedicated website, http://www.vorbis.com</title>
+<title>libvorbis: Available from the dedicated website, http://vorbis.com</title>
 </front>
-</reference>   
+</reference>
 
 <reference anchor="RFC3611">
 <front>
@@ -1341,23 +1341,23 @@ Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan Carlos De Mar
 </front>
 <seriesInfo name="RFC" value="3611"/>
 </reference>
-<reference anchor='rfc4588'>
+<reference anchor="rfc4588">
 <front>
 <title>RTP Retransmission Payload Format</title>
-<author initials='J.' surname='Rey' fullname='J. Rey'>
+<author initials="J." surname="Rey" fullname="J. Rey">
 <organization /></author>
-<author initials='D.' surname='Leon' fullname='D. Leon'>
+<author initials="D." surname="Leon" fullname="D. Leon">
 <organization /></author>
-<author initials='A.' surname='Miyazaki' fullname='A. Miyazaki'>
+<author initials="A." surname="Miyazaki" fullname="A. Miyazaki">
 <organization /></author>
-<author initials='V.' surname='Varsa' fullname='V. Varsa'>
+<author initials="V." surname="Varsa" fullname="V. Varsa">
 <organization /></author>
-<author initials='R.' surname='Hakenberg' fullname='R. Hakenberg'>
+<author initials="R." surname="Hakenberg" fullname="R. Hakenberg">
 <organization /></author>
-<date year='2006' month='July' />
+<date year="2006" month="July" />
 </front>
-<seriesInfo name='RFC' value='4588' />
-<format type='TXT' octets='76630' target='ftp://ftp.isi.edu/in-notes/rfc4588.txt' />
+<seriesInfo name="RFC" value="4588" />
+<format type="TXT" octets="76630" target="ftp://ftp.isi.edu/in-notes/rfc4588.txt" />
 </reference>
 </references>
 </back>
