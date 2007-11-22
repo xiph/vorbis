@@ -2,7 +2,7 @@
 
 AUTOMAKE_OPTIONS = 1.6 foreign dist-zip dist-bzip2
 
-SUBDIRS = m4 include vq lib examples doc
+SUBDIRS = m4 include vq lib examples test doc
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = vorbis.m4
@@ -19,7 +19,7 @@ EXTRA_DIST = \
 	vorbis-uninstalled.pc.in \
 	vorbisenc-uninstalled.pc.in \
 	vorbisfile-uninstalled.pc.in \
-	doc examples symbian vq \
+	symbian \
 	macos macosx win32
 
 

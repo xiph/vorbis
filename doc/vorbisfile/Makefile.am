@@ -7,6 +7,7 @@ doc_DATA = OggVorbis_File.html callbacks.html chaining_example_c.html\
 	example.html exampleindex.html fileinfo.html index.html\
 	initialization.html ov_bitrate.html ov_bitrate_instant.html\
 	ov_callbacks.html ov_clear.html ov_comment.html ov_crosslap.html\
+	ov_fopen.html\
 	ov_info.html ov_open.html ov_open_callbacks.html ov_pcm_seek.html\
 	ov_pcm_seek_lap.html ov_pcm_seek_page.html ov_pcm_seek_page_lap.html\
 	ov_pcm_tell.html ov_pcm_total.html ov_raw_seek.html\

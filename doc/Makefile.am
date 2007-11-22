@@ -10,6 +10,7 @@ static_docs = \
 	draft-ietf-avt-rtp-vorbis-08.txt \
 	eightphase.png \
 	evenlsp.png \
+	fish_xiph_org.png \
 	floor1_inverse_dB_table.html \
 	floorval.png \
 	fourphase.png \
@@ -75,6 +76,7 @@ doc_sources = xml/Vorbis_I_spec.xml \
 	xml/08-residue.xml \
 	xml/09-helper.xml \
 	xml/10-tables.xml \
+	xml/TODO \
 	xml/a1-encapsulation_ogg.xml \
 	xml/a2-encapsulation_rtp.xml \
 	xml/footer.xml \
