@@ -1134,12 +1134,12 @@ not be altered on answer otherwise.
 
 </section>
 
-<section anchor="Examples" title="Examples">
+<section anchor="Example" title="Example">
 
 <t>
-The following examples are common usage patterns that MAY be applied in such
-situations, the main scope of this section is to explain better usage of the
-transmission vectors.
+The following example shows a common usage pattern that MAY be applied in
+such situation, the main scope of this section is to explain better usage
+of the transmission vectors.
 </t>
 
 <section anchor="Stream Radio" title="Stream Radio">
@@ -1162,7 +1162,7 @@ before the actual stream and the Configuration that has to be sent inline in
 the SDP updated. Since the in-band method is unreliable, an out of band
 fallback is provided.</t>
 
-<t>The client MAY choose to fetch the Configuration from the alternate source
+<t>The client may choose to fetch the Configuration from the alternate source
 as soon as it discovers a Configuration packet got lost in-band or use
 <xref target="RFC3611">selective retransmission</xref>, if the server supports
 the feature.</t>
