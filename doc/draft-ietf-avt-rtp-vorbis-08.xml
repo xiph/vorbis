@@ -396,7 +396,7 @@ different methods for delivering this configuration data to a
 client, both in-band and out-of-band which is detailed below. SDP 
 delivery is typically used to set up an initial state for the client 
 application. The changes may be due to different codebooks as well as 
-different bitrates of the stream.
+different bitrates of the RTP stream.
 </t>
 
 <t>
@@ -589,7 +589,10 @@ than 127 bytes.
 <t>
 Unlike the loss of raw Vorbis payload data, loss of a configuration header
 lead to a situation where it will not be possible to successfully decode the
-stream. Implementations MAY try to recover from error requesting again the missing Configuration, the baseline reaction SHOULD be either reset or end the connection.
+stream. Implementations MAY try to recover from error requesting again the
+missing Configuration or, if the delivery method is in-band, buffer the
+payloads waiting for the Configuration needed to decode them.
+The baseline reaction SHOULD be either reset or end the RTP session.
 </t>
 
 </section>
@@ -1085,9 +1088,12 @@ reside.
 
 <t>
 The port value is specified by the server application bound to the address
-specified in the c= line. The bitrate value and channels specified in the
-rtpmap attribute MUST match the Vorbis sample rate value.  An example is found
-below.
+specified in the c= line. The sample rate and channel count value specified
+in the rtpmap attribute SHOULD match the current Vorbis stream or considered
+the maximum number of channels to be expected and the least common multiple
+for the session. The Configuration payload delivers the exact information,
+thus the SDP information SHOULD be considered as hint.
+An example is found below.
 </t>
 
 <section anchor="SDP Example" title="SDP Example">
