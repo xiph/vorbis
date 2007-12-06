@@ -589,8 +589,8 @@ than 127 bytes.
 <t>
 Unlike the loss of raw Vorbis payload data, loss of a configuration header
 lead to a situation where it will not be possible to successfully decode the
-stream. Implementations MAY try to recover from error requesting again the
-missing Configuration or, if the delivery method is in-band, buffer the
+stream. Implementations MAY try to recover from error by requesting again the
+missing Configuration or, if the delivery method is in-band, by buffering the
 payloads waiting for the Configuration needed to decode them.
 The baseline reaction SHOULD be either reset or end the RTP session.
 </t>
@@ -1092,7 +1092,7 @@ specified in the c= line. The sample rate and channel count value specified
 in the rtpmap attribute SHOULD match the current Vorbis stream or considered
 the maximum number of channels to be expected and the least common multiple
 for the session. The Configuration payload delivers the exact information,
-thus the SDP information SHOULD be considered as hint.
+thus the SDP information SHOULD be considered as a hint.
 An example is found below.
 </t>
 
