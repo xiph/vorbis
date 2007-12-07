@@ -103,7 +103,7 @@ $(BUILDDIR)/Vorbis_I_spec.xml: $(doc_sources)
 	@mkdir -p $(BUILDDIR)
 	@for file in $(doc_sources); do cp $(srcdir)/$$file $(BUILDDIR); done
 # translate the draft rtp.txt to .xml in the BUILDDIR
-$(BUILDDIR)/draft-rtp.xml: draft-ietf-avt-rtp-vorbis-05.txt
+$(BUILDDIR)/draft-rtp.xml: draft-ietf-avt-rtp-vorbis-08.txt
 	cat $< | sed 's///g' > $@
 # cat $< | sed 's///g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' > $@
 
