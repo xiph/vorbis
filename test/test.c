@@ -43,7 +43,7 @@ main(void){
 
   for (k = 0 ; k < ARRAY_LEN (sample_rates); k ++) {
 	char filename [64] ;
-	snprintf (filename, sizeof (filename), "vorbis_%u.oga", sample_rates [k]);
+	snprintf (filename, sizeof (filename), "vorbis_%u.ogg", sample_rates [k]);
 
 	printf ("    %-20s : ", filename);
 	fflush (stdout);
