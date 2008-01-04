@@ -2,14 +2,14 @@
 
 
 AVT Working Group                                             L. Barbato
-Internet-Draft                                                  Xiph.Org
-Expires: May 20, 2008                                       Nov 17, 2007
+Internet-Draft                                                      Xiph
+Expires: July 8, 2008                                       Jan 05, 2008
 
 
-                      draft-ietf-avt-rtp-vorbis-08
               RTP Payload Format for Vorbis Encoded Audio
+                      draft-ietf-avt-rtp-vorbis-08
 
-Status of this Memo
+Status of This Memo
 
    By submitting this Internet-Draft, each author represents that any
    applicable patent or other IPR claims of which he or she is aware
@@ -32,11 +32,11 @@ Status of this Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on May 20, 2008.
+   This Internet-Draft will expire on July 8, 2008.
 
 Copyright Notice
 
-   Copyright (C) The IETF Trust (2007).
+   Copyright (C) The IETF Trust (2008).
 
 Abstract
 
@@ -52,9 +52,9 @@ Abstract
 
 
 
-Barbato                   Expires May 20, 2008                  [Page 1]
+Barbato                   Expires July 8, 2008                  [Page 1]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 Editors Note
@@ -62,13 +62,12 @@ Editors Note
    All references to RFC XXXX are to be replaced by references to the
    RFC number of this memo, when published.
 
-
 Table of Contents
 
    1.  Introduction . . . . . . . . . . . . . . . . . . . . . . . . .  3
-     1.1.  Terminology  . . . . . . . . . . . . . . . . . . . . . . .  3
+     1.1.  Conformance and Document Conventions . . . . . . . . . . .  3
    2.  Payload Format . . . . . . . . . . . . . . . . . . . . . . . .  3
-     2.1.  RTP Header . . . . . . . . . . . . . . . . . . . . . . . .  3
+     2.1.  RTP Header . . . . . . . . . . . . . . . . . . . . . . . .  4
      2.2.  Payload Header . . . . . . . . . . . . . . . . . . . . . .  5
      2.3.  Payload Data . . . . . . . . . . . . . . . . . . . . . . .  6
      2.4.  Example RTP Packet . . . . . . . . . . . . . . . . . . . .  7
@@ -88,15 +87,14 @@ Table of Contents
      7.1.  Mapping Media Type Parameters into SDP . . . . . . . . . . 20
        7.1.1.  SDP Example  . . . . . . . . . . . . . . . . . . . . . 21
      7.2.  Usage with the SDP Offer/Answer Model  . . . . . . . . . . 21
-   8.  Examples . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+   8.  Example  . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
      8.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 22
    9.  Security Considerations  . . . . . . . . . . . . . . . . . . . 22
-   10. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 23
-   11. References . . . . . . . . . . . . . . . . . . . . . . . . . . 23
-     11.1. Normative References . . . . . . . . . . . . . . . . . . . 23
-     11.2. Informative References . . . . . . . . . . . . . . . . . . 24
-   Author's Address . . . . . . . . . . . . . . . . . . . . . . . . . 24
-   Intellectual Property and Copyright Statements . . . . . . . . . . 25
+   10. Copying Conditions . . . . . . . . . . . . . . . . . . . . . . 23
+   11. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 23
+   12. References . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+     12.1. Normative References . . . . . . . . . . . . . . . . . . . 23
+     12.2. Informative References . . . . . . . . . . . . . . . . . . 24
 
 
 
@@ -108,9 +106,11 @@ Table of Contents
 
 
 
-Barbato                   Expires May 20, 2008                  [Page 2]
+
+
+Barbato                   Expires July 8, 2008                  [Page 2]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 1.  Introduction
@@ -130,12 +130,24 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    purposes of RTP transport, this layer is unnecessary, and so raw
    Vorbis packets are used in the payload.
 
-1.1.  Terminology
+1.1.  Conformance and Document Conventions
 
    The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
    "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
-   document are to be interpreted as described in RFC 2119 [1].
+   document are to be interpreted as described in BCP 14, [1] and
+   indicate requirement levels for compliant implementations.
+   Requirements apply to all implementations unless otherwise stated.
 
+   An implementation is a software module that supports one of the media
+   types defined in this document.  Software modules may support
+   multiple media types, but conformance is considered individually for
+   each type.
+
+   Implementations that fail to satisfy one or more "MUST" requirements
+   are considered non-compliant.  Implementations that satisfy all
+   "MUST" requirements, but fail to satisfy one or more "SHOULD"
+   requirements, are said to be "conditionally compliant".  All other
+   implementations are "unconditionally compliant".
 
 2.  Payload Format
 
@@ -148,25 +160,20 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    bitstream information.  There are 3 types of Vorbis data, an RTP
    payload MUST contain just one of them at a time.
 
+
+
+
+
+Barbato                   Expires July 8, 2008                  [Page 3]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
 2.1.  RTP Header
 
    The format of the RTP header is specified in [2] and shown in Figure
    Figure 1.  This payload format uses the fields of the header in a
    manner consistent with that specification.
-
-
-
-
-
-
-
-
-
-
-
-Barbato                   Expires May 20, 2008                  [Page 3]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
        0                   1                   2                   3
@@ -211,19 +218,18 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    Set to zero.  Audio silence suppression not used.  This conforms to
    section 4.1 of [10].
 
+
+
+Barbato                   Expires July 8, 2008                  [Page 4]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
    Payload Type (PT): 7 bits
 
    An RTP profile for a class of applications is expected to assign a
    payload type for this format, or a dynamically allocated payload type
    SHOULD be chosen which designates the payload as Vorbis.
-
-
-
-
-Barbato                   Expires May 20, 2008                  [Page 4]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
 
    Sequence number: 16 bits
 
@@ -266,20 +272,21 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
    This field is set according to the following list
 
+
+
+
+
+Barbato                   Expires July 8, 2008                  [Page 5]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
       0 = Not Fragmented
       1 = Start Fragment
       2 = Continuation Fragment
       3 = End Fragment
 
    Vorbis Data Type (VDT): 2 bits
-
-
-
-
-Barbato                   Expires May 20, 2008                  [Page 5]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
 
    This field specifies the kind of Vorbis data stored in this RTP
    packet.  There are currently three different types of Vorbis
@@ -322,20 +329,20 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    Each Vorbis payload packet starts with a two octet length header,
    which is used to represent the size in bytes of the following data
    payload, followed by the raw Vorbis data padded to the nearest byte
+
+
+
+Barbato                   Expires July 8, 2008                  [Page 6]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
    boundary, as explained by the vorbis specification [10].  The length
    value is stored as network byte order integer.
 
    For payloads which consist of multiple Vorbis packets the payload
    data consists of the packet length followed by the packet data for
    each of the Vorbis packets in the payload.
-
-
-
-
-Barbato                   Expires May 20, 2008                  [Page 6]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
 
    The Vorbis packet length header is the length of the Vorbis data
    block only and does not include the length field.
@@ -378,6 +385,14 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
       ..               vorbis data                    |
       +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
+
+
+
+Barbato                   Expires July 8, 2008                  [Page 7]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
                     Figure 4: Example Raw Vorbis Packet
 
    The payload data section of the RTP packet begins with the 24 bit
@@ -385,16 +400,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    number of Vorbis frames set to 2.  Each of the Vorbis data frames is
    prefixed by the two octets length field.  The Packet Type and
    Fragment Type are set to 0.  The Configuration that will be used to
-
-
-
-Barbato                   Expires May 20, 2008                  [Page 7]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
-
    decode the packets is the one indexed by the ident value.
-
 
 3.  Configuration Headers
 
@@ -422,7 +428,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    both in-band and out-of-band which is detailed below.  SDP delivery
    is typically used to set up an initial state for the client
    application.  The changes may be due to different codebooks as well
-   as different bitrates of the stream.
+   as different bitrates of the RTP stream.
 
    The delivery vectors in use can be specified by an SDP attribute to
    indicate the method and the optional URI where the Vorbis Packed
@@ -435,19 +441,20 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    the SDP as explained in the IANA considerations (Section 7.1).
 
    The 24 bit Ident field is used to map which Configuration will be
+
+
+
+Barbato                   Expires July 8, 2008                  [Page 8]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
    used to decode a packet.  When the Ident field changes, it indicates
    that a change in the stream has taken place.  The client application
    MUST have in advance the correct configuration and if the client
    detects a change in the Ident value and does not have this
    information it MUST NOT decode the raw Vorbis data associated until
    it fetches the correct Configuration.
-
-
-
-Barbato                   Expires May 20, 2008                  [Page 8]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
 
 3.1.  In-band Header Transmission
 
@@ -463,46 +470,39 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    field set to 1.  Of the three headers defined in the Vorbis I
    specification [10], the Identification and the Setup MUST be packed
    as they are, while the comment header MAY be replaced with a dummy
-   one.  The packed configuration follows a generic way to store xiph
-   codec configurations: The first field stores the number of the
-   following packets minus one (count field), the next ones represent
-   the size of the headers (length fields), the headers immediately
-   follow the list of length fields.  The size of the last header is
-   implicit.  The count and the length fields are encoded using the
-   following logic: the data is in network byte order, every byte has
-   the most significant bit used as flag and the following 7 used to
-   store the value.  The first N bit are to be taken, where N is number
-   of bits needed to represent the value, taken modulo 7, and stored in
-   the first byte.  If there are more bits, the flag bit is set to 1 and
-   the subsequent 7bit are stored in the following byte, if there are
+   one.
+
+   The packed configuration follows a generic way to store Xiph codec
+   configurations: The first field stores the number of the following
+   packets minus one (count field), the next ones represent the size of
+   the headers (length fields), the headers immediately follow the list
+   of length fields.  The size of the last header is implicit.
+
+   The count and the length fields are encoded using the following
+   logic: the data is in network byte order, every byte has the most
+   significant bit used as flag and the following 7 used to store the
+   value.  The first N bit are to be taken, where N is number of bits
+   needed to represent the value, taken modulo 7, and stored in the
+   first byte.  If there are more bits, the flag bit is set to 1 and the
+   subsequent 7bit are stored in the following byte, if there are
    remaining bits set the flag to 1 and the same procedure is repeated.
    The ending byte has the flag bit set to 0.  In order to decode it is
    enough to iterate over the bytes until the flag bit set to 0, for
    every byte the data is added to the accumulated value multiplied by
-   128.  The headers are packed in the same order they are present in
-   ogg: Identification, Comment, Setup.
+   128.
+
+   The headers are packed in the same order they are present in ogg:
+   Identification, Comment, Setup.
+
+   The 2 byte length tag defines the length of the packed headers as the
+   sum of the Configuration, Comment and Setup lengths.
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Barbato                   Expires May 20, 2008                  [Page 9]
+Barbato                   Expires July 8, 2008                  [Page 9]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
        0                   1                   2                   3
@@ -556,9 +556,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 10]
+Barbato                   Expires July 8, 2008                 [Page 10]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 3.2.  Out of Band Transmission
@@ -592,9 +592,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
                      Figure 6: Packed Headers Overview
 
-   Since the Configuration Ident and the Identification Header are fixed
-   length there is only a 2 byte length tag to define the length of the
-   packed headers.
 
 
 
@@ -612,9 +609,12 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 11]
+
+
+
+Barbato                   Expires July 8, 2008                 [Page 11]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
        0                   1                   2                   3
@@ -652,9 +652,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    Unlike the loss of raw Vorbis payload data, loss of a configuration
    header lead to a situation where it will not be possible to
    successfully decode the stream.  Implementations MAY try to recover
-   from error requesting again the missing Configuration, the baseline
-   reaction SHOULD be either reset or end the connection.
-
+   from error by requesting again the missing Configuration or, if the
+   delivery method is in-band, by buffering the payloads waiting for the
+   Configuration needed to decode them.  The baseline reaction SHOULD be
+   either reset or end the RTP session.
 
 4.  Comment Headers
 
@@ -667,10 +668,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-
-Barbato                   Expires May 20, 2008                 [Page 12]
+Barbato                   Expires July 8, 2008                 [Page 12]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
        0                   1                   2                   3
@@ -700,7 +700,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    The 2 bytes length field is necessary since this packet could be
    fragmented.
 
-
 5.  Frame Packetization
 
    Each RTP payload contains either one Vorbis packet fragment, or an
@@ -721,15 +720,15 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    The RTP payload containing the last fragment of the Vorbis packet
    will have the Fragment type set to 3.  To maintain the correct
    sequence for fragmented packet reception the timestamp field of
-
-
-
-Barbato                   Expires May 20, 2008                 [Page 13]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
-
    fragmented packets MUST be the same as the first packet sent, with
+
+
+
+Barbato                   Expires July 8, 2008                 [Page 13]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
    the sequence number incremented as normal for the subsequent RTP
    payloads, this will affect the RTCP jitter measurement.  The length
    field shows the fragment length.
@@ -780,9 +779,10 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 14]
+
+Barbato                   Expires July 8, 2008                 [Page 14]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
       Packet 2:
@@ -836,9 +836,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 15]
+Barbato                   Expires July 8, 2008                 [Page 15]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
       Packet 3:
@@ -892,9 +892,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 16]
+Barbato                   Expires July 8, 2008                 [Page 16]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 6.  IANA Considerations
@@ -948,9 +948,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 17]
+Barbato                   Expires July 8, 2008                 [Page 17]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
    Published specification:
@@ -959,7 +959,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
       memo, when published]
 
       Ogg Vorbis I specification: Codec setup and packet decode.
-      Available from the Xiph website, http://www.xiph.org
+      Available from the Xiph website, http://xiph.org
 
    Applications which use this media type:
 
@@ -1004,9 +1004,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 18]
+Barbato                   Expires July 8, 2008                 [Page 18]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
    Type name:  audio
@@ -1060,9 +1060,9 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 19]
+Barbato                   Expires July 8, 2008                 [Page 19]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
    Restriction on usage:
@@ -1076,7 +1076,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    Change controller:
 
       IETF AVT Working Group delegated from the IESG
-
 
 7.  SDP related considerations
 
@@ -1113,20 +1112,23 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
    The URI specified in the configuration-uri attribute MUST point to a
    location where all of the Configuration Packets needed for the life
-
-
-
-Barbato                   Expires May 20, 2008                 [Page 20]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
-
    of the session reside.
 
+
+
+Barbato                   Expires July 8, 2008                 [Page 20]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
    The port value is specified by the server application bound to the
-   address specified in the c= line.  The bitrate value and channels
-   specified in the rtpmap attribute MUST match the Vorbis sample rate
-   value.  An example is found below.
+   address specified in the c= line.  The sample rate and channel count
+   value specified in the rtpmap attribute SHOULD match the current
+   Vorbis stream or considered the maximum number of channels to be
+   expected and the least common multiple for the session.  The
+   Configuration payload delivers the exact information, thus the SDP
+   information SHOULD be considered as a hint.  An example is found
+   below.
 
 7.1.1.  SDP Example
 
@@ -1162,19 +1164,17 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    every delivery-method and configuration-uri not supported.  All the
    parameters MUST not be altered on answer otherwise.
 
+8.  Example
 
-8.  Examples
-
-   The following examples are common usage patterns that MAY be applied
-   in such situations, the main scope of this section is to explain
-   better usage of the transmission vectors.
-
+   The following example shows a common usage pattern that MAY be
+   applied in such situation, the main scope of this section is to
+   explain better usage of the transmission vectors.
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 21]
+Barbato                   Expires July 8, 2008                 [Page 21]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 8.1.  Stream Radio
@@ -1197,7 +1197,7 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    sent inline in the SDP updated.  Since the in-band method is
    unreliable, an out of band fallback is provided.
 
-   The client MAY choose to fetch the Configuration from the alternate
+   The client may choose to fetch the Configuration from the alternate
    source as soon as it discovers a Configuration packet got lost in-
    band or use selective retransmission [13], if the server supports the
    feature.
@@ -1209,7 +1209,6 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    A clientside optimization would be to keep a tag list of the
    Configurations per session and don't process configuration packets
    already known.
-
 
 9.  Security Considerations
 
@@ -1228,31 +1227,39 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 22]
+
+Barbato                   Expires July 8, 2008                 [Page 22]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
-10.  Acknowledgments
+10.  Copying Conditions
+
+   The authors agree to grant third parties the irrevocable right to
+   copy, use and distribute the work, with or without modification, in
+   any medium, without royalty, provided that, unless separate
+   permission is granted, redistributed modified works do not contain
+   misleading author, version, name of work, or endorsement information.
+
+11.  Acknowledgments
 
    This document is a continuation of draft-moffitt-vorbis-rtp-00.txt
    and draft-kerr-avt-vorbis-rtp-04.txt.  The Media Type declaration is
    a continuation of draft-short-avt-rtp-vorbis-mime-00.txt.
 
-   Thanks to the AVT, Ogg Vorbis Communities / Xiph.org including Steve
-   Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia, Pascal
-   Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John Lazzaro,
-   Jack Moffitt, Christopher Montgomery, Colin Perkins, Barry Short,
-   Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund, David
-   Barrett, Silvia Pfeiffer, Stefan Ehmann, Alessandro Salvatori.
+   Thanks to the AVT, Vorbis Communities / Xiph.Org Foundation including
+   Steve Casner, Aaron Colwell, Ross Finlayson, Fluendo, Ramon Garcia,
+   Pascal Hennequin, Ralph Giles, Tor-Einar Jarnbjo, Colin Law, John
+   Lazzaro, Jack Moffitt, Christopher Montgomery, Colin Perkins, Barry
+   Short, Mike Smith, Phil Kerr, Michael Sparks, Magnus Westerlund,
+   David Barrett, Silvia Pfeiffer, Stefan Ehmann, Alessandro Salvatori.
    Politecnico di Torino (LS)^3/IMG Group in particular Federico
    Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan
    Carlos De Martin.
 
+12.  References
 
-11.  References
-
-11.1.  Normative References
+12.1.  Normative References
 
    [1]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
          Levels", RFC 2119.
@@ -1274,6 +1281,14 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
          November 1990.
 
    [7]   McCann et al., J., "Path MTU Discovery for IP version 6",
+
+
+
+Barbato                   Expires July 8, 2008                 [Page 23]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
          RFC 1981.
 
    [8]   Rosenberg, J. and H. Schulzrinne, "An Offer/Answer Model with
@@ -1282,24 +1297,17 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    [9]   Josefsson, S., "The Base16, Base32, and Base64 Data Encodings",
          RFC 3548.
 
-
-
-Barbato                   Expires May 20, 2008                 [Page 23]
-
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
-
-
    [10]  "Ogg Vorbis I specification:  Codec setup and packet decode.
          Available from the Xiph website,
          http://xiph.org/vorbis/doc/Vorbis_I_spec.html".
 
-11.2.  Informative References
+12.2.  Informative References
 
    [11]  Pfeiffer, S., "The Ogg Encapsulation Format Version 0",
          RFC 3533.
 
    [12]  "libvorbis: Available from the dedicated website,
-         http://www.vorbis.com".
+         http://vorbis.com".
 
    [13]  Friedman, T., Caceres, R., and A. Clark, "RTP Control Protocol
          Extended Reports (RTCP XR)", RFC 3611, November 2003.
@@ -1307,16 +1315,13 @@ Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
    [14]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R. Hakenberg,
          "RTP Retransmission Payload Format", RFC 4588, July 2006.
 
-
 Author's Address
 
    Luca Barbato
-   Xiph.Org
+   Xiph.Org Foundation
 
-   Email: lu_zero@gentoo.org
-   URI:   http://www.xiph.org/
-
-
+   EMail: lu_zero@gentoo.org
+   URI:   http://xiph.org/
 
 
 
@@ -1335,19 +1340,14 @@ Author's Address
 
 
 
-
-
-
-
-
-Barbato                   Expires May 20, 2008                 [Page 24]
+Barbato                   Expires July 8, 2008                 [Page 24]
 
-Internet-Draft        draft-ietf-avt-rtp-vorbis-08              Nov 2007
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 Full Copyright Statement
 
-   Copyright (C) The IETF Trust (2007).
+   Copyright (C) The IETF Trust (2008).
 
    This document is subject to the rights, licenses and restrictions
    contained in BCP 78, and except as set forth therein, the authors
@@ -1360,7 +1360,6 @@ Full Copyright Statement
    OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF
    THE INFORMATION HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED
    WARRANTIES OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
-
 
 Intellectual Property
 
@@ -1386,8 +1385,7 @@ Intellectual Property
    this standard.  Please address the information to the IETF at
    ietf-ipr@ietf.org.
 
-
-Acknowledgment
+Acknowledgement
 
    Funding for the RFC Editor function is provided by the IETF
    Administrative Support Activity (IASA).
@@ -1396,6 +1394,8 @@ Acknowledgment
 
 
 
-Barbato                   Expires May 20, 2008                 [Page 25]
+
+
+Barbato                   Expires July 8, 2008                 [Page 25]
 
 

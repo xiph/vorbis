@@ -7,7 +7,7 @@
 <rfc ipr="full3978" docName="draft-ietf-avt-rtp-vorbis-08">
 
 <front>
-<title>RTP Payload Format for Vorbis Encoded Audio</title>
+<title abbrev="Vorbis RTP Payload Format">RTP Payload Format for Vorbis Encoded Audio</title>
 
 <author initials="L" surname="Barbato" fullname="Luca Barbato">
 <organization abbrev="Xiph">Xiph.Org Foundation</organization>
@@ -17,7 +17,7 @@
 </address>
 </author>
 
-<date day="28" month="Oct" year="2007" />
+<date day="05" month="Jan" year="2008" />
 
 <area>General</area>
 <workgroup>AVT Working Group</workgroup>
@@ -77,7 +77,7 @@ packets are used in the payload.
 
 <section anchor="Terminology" title="Conformance and Document Conventions">
 
-<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14, <xref target="RFC2119"/> and indicate requirement levels for compliant implementations.  Requirements apply to all implementations unless otherwise stated.</t>
+<t>The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in BCP 14, <xref target="rfc2119"/> and indicate requirement levels for compliant implementations.  Requirements apply to all implementations unless otherwise stated.</t>
 <t>An implementation is a software module that supports one of the media types defined in this document.  Software modules may support multiple media types, but conformance is considered individually for each type.</t>
 <t>Implementations that fail to satisfy one or more "MUST" requirements are considered non-compliant.  Implementations that satisfy all "MUST" requirements, but fail to satisfy one or more "SHOULD" requirements, are said to be "conditionally compliant".  All other implementations are "unconditionally compliant".</t>
 
