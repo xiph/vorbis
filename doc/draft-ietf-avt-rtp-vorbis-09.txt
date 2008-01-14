@@ -3,11 +3,11 @@
 
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                      Xiph
-Expires: July 8, 2008                                       Jan 05, 2008
+Expires: July 17, 2008                                      Jan 14, 2008
 
 
               RTP Payload Format for Vorbis Encoded Audio
-                      draft-ietf-avt-rtp-vorbis-08
+                      draft-ietf-avt-rtp-vorbis-09
 
 Status of This Memo
 
@@ -32,7 +32,7 @@ Status of This Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on July 8, 2008.
+   This Internet-Draft will expire on July 17, 2008.
 
 Copyright Notice
 
@@ -52,7 +52,7 @@ Abstract
 
 
 
-Barbato                   Expires July 8, 2008                  [Page 1]
+Barbato                   Expires July 17, 2008                 [Page 1]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -83,18 +83,19 @@ Table of Contents
      5.2.  Packet Loss  . . . . . . . . . . . . . . . . . . . . . . . 16
    6.  IANA Considerations  . . . . . . . . . . . . . . . . . . . . . 17
      6.1.  Packed Headers IANA Considerations . . . . . . . . . . . . 18
-   7.  SDP related considerations . . . . . . . . . . . . . . . . . . 20
+   7.  SDP related considerations . . . . . . . . . . . . . . . . . . 19
      7.1.  Mapping Media Type Parameters into SDP . . . . . . . . . . 20
-       7.1.1.  SDP Example  . . . . . . . . . . . . . . . . . . . . . 21
+       7.1.1.  SDP Example  . . . . . . . . . . . . . . . . . . . . . 20
      7.2.  Usage with the SDP Offer/Answer Model  . . . . . . . . . . 21
-   8.  Example  . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
-     8.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 22
-   9.  Security Considerations  . . . . . . . . . . . . . . . . . . . 22
-   10. Copying Conditions . . . . . . . . . . . . . . . . . . . . . . 23
-   11. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 23
-   12. References . . . . . . . . . . . . . . . . . . . . . . . . . . 23
-     12.1. Normative References . . . . . . . . . . . . . . . . . . . 23
-     12.2. Informative References . . . . . . . . . . . . . . . . . . 24
+   8.  Congestion Control . . . . . . . . . . . . . . . . . . . . . . 21
+   9.  Example  . . . . . . . . . . . . . . . . . . . . . . . . . . . 21
+     9.1.  Stream Radio . . . . . . . . . . . . . . . . . . . . . . . 21
+   10. Security Considerations  . . . . . . . . . . . . . . . . . . . 22
+   11. Copying Conditions . . . . . . . . . . . . . . . . . . . . . . 22
+   12. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 22
+   13. References . . . . . . . . . . . . . . . . . . . . . . . . . . 22
+     13.1. Normative References . . . . . . . . . . . . . . . . . . . 22
+     13.2. Informative References . . . . . . . . . . . . . . . . . . 23
 
 
 
@@ -107,8 +108,7 @@ Table of Contents
 
 
 
-
-Barbato                   Expires July 8, 2008                  [Page 2]
+Barbato                   Expires July 17, 2008                 [Page 2]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -164,7 +164,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                  [Page 3]
+Barbato                   Expires July 17, 2008                 [Page 3]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -220,7 +220,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                  [Page 4]
+Barbato                   Expires July 17, 2008                 [Page 4]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -276,7 +276,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                  [Page 5]
+Barbato                   Expires July 17, 2008                 [Page 5]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -332,7 +332,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                  [Page 6]
+Barbato                   Expires July 17, 2008                 [Page 6]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -388,7 +388,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                  [Page 7]
+Barbato                   Expires July 17, 2008                 [Page 7]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -430,25 +430,11 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    application.  The changes may be due to different codebooks as well
    as different bitrates of the RTP stream.
 
-   The delivery vectors in use can be specified by an SDP attribute to
-   indicate the method and the optional URI where the Vorbis Packed
-   Configuration (Section 3.1.1) Packets could be fetched.  Different
-   delivery methods MAY be advertised for the same session.  The in-band
-   Configuration delivery SHOULD be considered as baseline, out-of-band
-   delivery methods that don't use RTP will not be described in this
-   document.  For non chained streams, the recommended Configuration
-   delivery method is inline the Packed Configuration (Section 3.1.1) in
-   the SDP as explained in the IANA considerations (Section 7.1).
+   For non chained streams, the recommended Configuration delivery
+   method is inline the Packed Configuration (Section 3.1.1) in the SDP
+   as explained in the IANA considerations (Section 7.1).
 
    The 24 bit Ident field is used to map which Configuration will be
-
-
-
-Barbato                   Expires July 8, 2008                  [Page 8]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
-
    used to decode a packet.  When the Ident field changes, it indicates
    that a change in the stream has taken place.  The client application
    MUST have in advance the correct configuration and if the client
@@ -456,13 +442,21 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    information it MUST NOT decode the raw Vorbis data associated until
    it fetches the correct Configuration.
 
+
+
+Barbato                   Expires July 17, 2008                 [Page 8]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
 3.1.  In-band Header Transmission
 
    The Packed Configuration (Section 3.1.1) Payload is sent in-band with
    the packet type bits set to match the Vorbis Data Type.  Clients MUST
    be capable of dealing with fragmentation and periodic re-transmission
    of [14] the configuration headers.  The RTP timestamp value MUST
-   reflect the transmission time of the next data packet.
+   reflect the transmission time of the first data packet for which this
+   configuration applies.
 
 3.1.1.  Packed Configuration
 
@@ -500,7 +494,13 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                  [Page 9]
+
+
+
+
+
+
+Barbato                   Expires July 17, 2008                 [Page 9]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -556,18 +556,15 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 10]
+Barbato                   Expires July 17, 2008                [Page 10]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 3.2.  Out of Band Transmission
 
-   This section, as stated above, does not cover all the possible out-
-   of-band delivery methods since they rely on different protocols and
-   are linked to specific applications.  The following packet definition
-   SHOULD be used in out-of-band delivery and MUST be used when
-   Configuration is inlined in the SDP.
+   The following packet definition MUST be used when Configuration is
+   inlined in the SDP.
 
 3.2.1.  Packed Headers
 
@@ -612,7 +609,10 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 11]
+
+
+
+Barbato                   Expires July 17, 2008                [Page 11]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -668,7 +668,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 12]
+Barbato                   Expires July 17, 2008                [Page 12]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -724,7 +724,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 13]
+Barbato                   Expires July 17, 2008                [Page 13]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -780,7 +780,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 14]
+Barbato                   Expires July 17, 2008                [Page 14]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -836,7 +836,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 15]
+Barbato                   Expires July 17, 2008                [Page 15]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -892,7 +892,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 16]
+Barbato                   Expires July 17, 2008                [Page 16]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -913,24 +913,8 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
          RTP Profile for Audio and Video Conferences with Minimal
          Control. [3]
 
-      delivery-method:  indicates the delivery methods in use, the
-         possible values are: inline, in_band, out_band.  The parameter
-         MAY be included multiple time, followed by the configuration or
-         configuration-uri parameter associated.
-
       configuration:  the base64 [9] representation of the Packed
-         Headers (Section 3.2.1).  It MUST follow the associated
-         delivery-method parameter ("inline").
-
-   Optional parameters:
-
-      configuration-uri:  the URI [4] of the configuration headers in
-         case of out of band transmission.  In the form of
-         "scheme://path/to/resource/", depending on the specific method,
-         a single configuration packet could be retrived by its Ident
-         number, or multiple packets could be aggregated in a single
-         stream.  Non hierarchical protocols MAY point to a resource
-         using their specific syntax.
+         Headers (Section 3.2.1).
 
    Encoding considerations:
 
@@ -943,15 +927,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    Interoperability considerations:
 
       None
-
-
-
-
-
-Barbato                   Expires July 8, 2008                 [Page 17]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
 
    Published specification:
 
@@ -968,6 +943,15 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    Additional information:
 
       None
+
+
+
+
+
+Barbato                   Expires July 17, 2008                [Page 17]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
 
    Person & email address to contact for further information:
 
@@ -994,20 +978,8 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 6.1.  Packed Headers IANA Considerations
 
-   The following IANA considerations MUST only be applied to the Packed
-   Headers (Section 3.2.1).
-
-
-
-
-
-
-
-
-Barbato                   Expires July 8, 2008                 [Page 18]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
+   The following IANA considerations refers to the split configuration
+   Packed Headers (Section 3.2.1) used within RFC XXXX.
 
    Type name:  audio
 
@@ -1024,6 +996,18 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    Encoding considerations:
 
       This media type contains binary data.
+
+
+
+
+
+
+
+
+Barbato                   Expires July 17, 2008                [Page 18]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
 
    Security considerations:
 
@@ -1053,18 +1037,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    Intended usage:  COMMON
 
-
-
-
-
-
-
-
-Barbato                   Expires July 8, 2008                 [Page 19]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
-
    Restriction on usage:
 
       This media type doesn't depend on the transport.
@@ -1081,7 +1053,17 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    The following paragraphs define the mapping of the parameters
    described in the IANA considerations section and their usage in the
-   Offer/Answer Model [8].
+   Offer/Answer Model [8].  In order to be forward compatible the
+   implementation MUST ignore unknown parameters.
+
+
+
+
+
+Barbato                   Expires July 17, 2008                [Page 19]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
 
 7.1.  Mapping Media Type Parameters into SDP
 
@@ -1099,35 +1081,21 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    o  The parameter "channels" also goes in "a=rtpmap" as channel count.
 
-   o  The mandated parameters "delivery-method" and "configuration" MUST
-      be included in the SDP "a=fmtp" attribute.
+   o  The mandated parameters "configuration" MUST be included in the
+      SDP "a=fmtp" attribute.
 
-   o  The optional parameter "configuration-uri", when present, MUST be
-      included in the SDP "a=fmtp" attribute and MUST follow the
-      delivery-method that applies.
 
    If the stream comprises chained Vorbis files and all of them are
    known in advance, the Configuration Packet for each file SHOULD be
    passed to the client using the configuration attribute.
 
-   The URI specified in the configuration-uri attribute MUST point to a
-   location where all of the Configuration Packets needed for the life
-   of the session reside.
-
-
-
-Barbato                   Expires July 8, 2008                 [Page 20]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
-
    The port value is specified by the server application bound to the
    address specified in the c= line.  The sample rate and channel count
    value specified in the rtpmap attribute SHOULD match the current
    Vorbis stream or considered the maximum number of channels to be
-   expected and the least common multiple for the session.  The
-   Configuration payload delivers the exact information, thus the SDP
-   information SHOULD be considered as a hint.  An example is found
+   expected and the least common multiple sample rate for the session.
+   The Configuration payload delivers the exact information, thus the
+   SDP information SHOULD be considered as a hint.  An example is found
    below.
 
 7.1.1.  SDP Example
@@ -1140,44 +1108,41 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
       c=IN IP4 192.0.2.1
       m=audio RTP/AVP 98
       a=rtpmap:98 vorbis/44100/2
-      a=fmtp:98 delivery-method=inline;
-      configuration=AAAAAZ2f4g9NAh4aAXZvcmJpcwA...; delivery-
-      method=out_band; configuration-uri=rtsp://path/to/the/resource;
-      delivery-method=out_band;
-      configuration-uri=http://another/path/to/resource/;
+      a=fmtp:98 configuration=AAAAAZ2f4g9NAh4aAXZvcmJpcwA...;
 
    Note that the payload format (encoding) names are commonly shown in
    upper case.  Media Type subtypes are commonly shown in lower case.
    These names are case-insensitive in both places.  Similarly,
+
+
+
+Barbato                   Expires July 17, 2008                [Page 20]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
    parameter names are case-insensitive both in Media Type types and in
-   the default mapping to the SDP a=fmtp attribute.  The exception
-   regarding case sensitivity is the configuration-uri URI which MUST be
-   regarded as being case sensitive.  The a=fmtp line is a single line
-   even if it is shown as multiple lines in this document for clarity.
+   the default mapping to the SDP a=fmtp attribute.  The a=fmtp line is
+   a single line even if it is shown as multiple lines in this document
+   for clarity.
 
 7.2.  Usage with the SDP Offer/Answer Model
 
-   The only parameter negotiable is the delivery method.  All the others
-   are declarative: the offer, as described in An Offer/Answer Model
-   Session Description Protocol [8], may contain a large number of
-   delivery methods per single fmtp attribute, the answerer MUST remove
-   every delivery-method and configuration-uri not supported.  All the
-   parameters MUST not be altered on answer otherwise.
+   The are no negotiable parameters.  All the of them are declarative.
 
-8.  Example
+8.  Congestion Control
+
+   Vorbis clients SHOULD send regular receiver reports detailing
+   congestion.  A way to handle bandwidth changes MAY be redirect the
+   client to a lower bitrate stream if one is available.
+
+9.  Example
 
    The following example shows a common usage pattern that MAY be
    applied in such situation, the main scope of this section is to
    explain better usage of the transmission vectors.
 
-
-
-Barbato                   Expires July 8, 2008                 [Page 21]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
-
-8.1.  Stream Radio
+9.1.  Stream Radio
 
    This is one of the most common situation: one single server streaming
    content in multicast, the clients may start a session at random time.
@@ -1204,13 +1169,21 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    A serverside optimization would be to keep an hash list of the
    Configurations per session to avoid packing all of them and send the
+
+
+
+Barbato                   Expires July 17, 2008                [Page 21]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
    same Configuration with different Ident tags
 
    A clientside optimization would be to keep a tag list of the
    Configurations per session and don't process configuration packets
    already known.
 
-9.  Security Considerations
+10.  Security Considerations
 
    RTP packets using this payload format are subject to the security
    considerations discussed in the RTP specification [2], the base64
@@ -1218,22 +1191,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    Among other considerations, this implies that the confidentiality of
    the media stream is archieved by using encryption.  Because the data
    compression used with this payload format is applied end-to-end,
-   encryption may be performed on the compressed data.  Additional care
-   MAY be needed for delivery methods that point to external resources,
-   using secure protocols to fetch the configuration payloads.  Where
-   the size of a data block is set, care MUST be taken to prevent buffer
-   overflows in the client applications.
+   encryption may be performed on the compressed data.
 
-
-
-
-
-Barbato                   Expires July 8, 2008                 [Page 22]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
-
-10.  Copying Conditions
+11.  Copying Conditions
 
    The authors agree to grant third parties the irrevocable right to
    copy, use and distribute the work, with or without modification, in
@@ -1241,7 +1201,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    permission is granted, redistributed modified works do not contain
    misleading author, version, name of work, or endorsement information.
 
-11.  Acknowledgments
+12.  Acknowledgments
 
    This document is a continuation of draft-moffitt-vorbis-rtp-00.txt
    and draft-kerr-avt-vorbis-rtp-04.txt.  The Media Type declaration is
@@ -1257,14 +1217,22 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    Ridolfo, Francesco Varano, Giampaolo Mancini, Dario Gallucci, Juan
    Carlos De Martin.
 
-12.  References
+13.  References
 
-12.1.  Normative References
+13.1.  Normative References
 
    [1]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
          Levels", RFC 2119.
 
    [2]   Schulzrinne, H., Casner, S., Frederick, R., and V. Jacobson,
+
+
+
+Barbato                   Expires July 17, 2008                [Page 22]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
+
          "RTP: A Transport Protocol for real-time applications", STD 64,
          RFC 3550.
 
@@ -1281,14 +1249,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
          November 1990.
 
    [7]   McCann et al., J., "Path MTU Discovery for IP version 6",
-
-
-
-Barbato                   Expires July 8, 2008                 [Page 23]
-
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
-
-
          RFC 1981.
 
    [8]   Rosenberg, J. and H. Schulzrinne, "An Offer/Answer Model with
@@ -1301,7 +1261,7 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
          Available from the Xiph website,
          http://xiph.org/vorbis/doc/Vorbis_I_spec.html".
 
-12.2.  Informative References
+13.2.  Informative References
 
    [11]  Pfeiffer, S., "The Ogg Encapsulation Format Version 0",
          RFC 3533.
@@ -1314,6 +1274,20 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    [14]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R. Hakenberg,
          "RTP Retransmission Payload Format", RFC 4588, July 2006.
+
+
+
+
+
+
+
+
+
+
+Barbato                   Expires July 17, 2008                [Page 23]
+
+Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+
 
 Author's Address
 
@@ -1340,7 +1314,33 @@ Author's Address
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 24]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Barbato                   Expires July 17, 2008                [Page 24]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
@@ -1396,6 +1396,6 @@ Acknowledgement
 
 
 
-Barbato                   Expires July 8, 2008                 [Page 25]
+Barbato                   Expires July 17, 2008                [Page 25]
 
 

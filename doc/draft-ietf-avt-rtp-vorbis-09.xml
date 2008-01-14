@@ -4,7 +4,7 @@
 <?rfc compact="yes" ?>
 <?rfc rfcedstyle="yes" ?>
 
-<rfc ipr="full3978" docName="draft-ietf-avt-rtp-vorbis-08">
+<rfc ipr="full3978" docName="draft-ietf-avt-rtp-vorbis-09">
 
 <front>
 <title abbrev="Vorbis RTP Payload Format">RTP Payload Format for Vorbis Encoded Audio</title>
