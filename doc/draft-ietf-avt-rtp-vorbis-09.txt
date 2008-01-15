@@ -93,8 +93,8 @@ Table of Contents
    10. Security Considerations  . . . . . . . . . . . . . . . . . . . 22
    11. Copying Conditions . . . . . . . . . . . . . . . . . . . . . . 22
    12. Acknowledgments  . . . . . . . . . . . . . . . . . . . . . . . 22
-   13. References . . . . . . . . . . . . . . . . . . . . . . . . . . 22
-     13.1. Normative References . . . . . . . . . . . . . . . . . . . 22
+   13. References . . . . . . . . . . . . . . . . . . . . . . . . . . 23
+     13.1. Normative References . . . . . . . . . . . . . . . . . . . 23
      13.2. Informative References . . . . . . . . . . . . . . . . . . 23
 
 
@@ -425,10 +425,14 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    Since this information must be transmitted reliably and, as the RTP
    stream may change certain configuration data mid-session, there are
    different methods for delivering this configuration data to a client,
-   both in-band and out-of-band which is detailed below.  SDP delivery
-   is typically used to set up an initial state for the client
-   application.  The changes may be due to different codebooks as well
-   as different bitrates of the RTP stream.
+   both in-band and out-of-band which is detailed below.  In order to
+   set up an initial state for the client application the configuration
+   MUST be inlined in the session setup informations.  Changes to the
+   configuration MAY be communicated via a re-invite, conveying new SDP,
+   or sent in-band in the RTP channel.  Implementations MUST support in-
+   band delivery of updated codebooks, and SHOULD support out-of-band
+   codebook update using a new SDP file.  The changes may be due to
+   different codebooks as well as different bitrates of the RTP stream.
 
    For non chained streams, the recommended Configuration delivery
    method is inline the Packed Configuration (Section 3.1.1) in the SDP
@@ -437,10 +441,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    The 24 bit Ident field is used to map which Configuration will be
    used to decode a packet.  When the Ident field changes, it indicates
    that a change in the stream has taken place.  The client application
-   MUST have in advance the correct configuration and if the client
-   detects a change in the Ident value and does not have this
-   information it MUST NOT decode the raw Vorbis data associated until
-   it fetches the correct Configuration.
 
 
 
@@ -448,6 +448,11 @@ Barbato                   Expires July 17, 2008                 [Page 8]
 
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
+
+   MUST have in advance the correct configuration and if the client
+   detects a change in the Ident value and does not have this
+   information it MUST NOT decode the raw Vorbis data associated until
+   it fetches the correct Configuration.
 
 3.1.  In-band Header Transmission
 
@@ -490,11 +495,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    The 2 byte length tag defines the length of the packed headers as the
    sum of the Configuration, Comment and Setup lengths.
-
-
-
-
-
 
 
 
@@ -1132,9 +1132,13 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 8.  Congestion Control
 
-   Vorbis clients SHOULD send regular receiver reports detailing
-   congestion.  A way to handle bandwidth changes MAY be redirect the
-   client to a lower bitrate stream if one is available.
+   The general congestion control considerations for transporting RTP
+   data apply to vorbis audio over RTP as well.  See the RTP
+   specification [2] and any applicable RTP profile (e.g., [3]).  Audio
+   data can be encoded using a range of different bit rates, so it is
+   possible to adapt network bandwidth by adjusting the encoder bit rate
+   in real time or by having multiple copies of content encoded at
+   different bit rates.
 
 9.  Example
 
@@ -1165,10 +1169,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    The client may choose to fetch the Configuration from the alternate
    source as soon as it discovers a Configuration packet got lost in-
    band or use selective retransmission [13], if the server supports the
-   feature.
-
-   A serverside optimization would be to keep an hash list of the
-   Configurations per session to avoid packing all of them and send the
 
 
 
@@ -1177,6 +1177,10 @@ Barbato                   Expires July 17, 2008                [Page 21]
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
+   feature.
+
+   A serverside optimization would be to keep an hash list of the
+   Configurations per session to avoid packing all of them and send the
    same Configuration with different Ident tags
 
    A clientside optimization would be to keep a tag list of the
@@ -1219,12 +1223,8 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 13.  References
 
-13.1.  Normative References
 
-   [1]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
-         Levels", RFC 2119.
 
-   [2]   Schulzrinne, H., Casner, S., Frederick, R., and V. Jacobson,
 
 
 
@@ -1233,6 +1233,12 @@ Barbato                   Expires July 17, 2008                [Page 22]
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
+13.1.  Normative References
+
+   [1]   Bradner, S., "Key words for use in RFCs to Indicate Requirement
+         Levels", RFC 2119.
+
+   [2]   Schulzrinne, H., Casner, S., Frederick, R., and V. Jacobson,
          "RTP: A Transport Protocol for real-time applications", STD 64,
          RFC 3550.
 
@@ -1274,12 +1280,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    [14]  Rey, J., Leon, D., Miyazaki, A., Varsa, V., and R. Hakenberg,
          "RTP Retransmission Payload Format", RFC 4588, July 2006.
-
-
-
-
-
-
 
 
 

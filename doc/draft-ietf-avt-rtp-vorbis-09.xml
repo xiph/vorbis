@@ -393,19 +393,17 @@ which is often used over unreliable transports.
 Since this information must be transmitted reliably and, as the RTP 
 stream may change certain configuration data mid-session, there are 
 different methods for delivering this configuration data to a 
-client, both in-band and out-of-band which is detailed below. SDP 
-delivery is typically used to set up an initial state for the client 
-application. The changes may be due to different codebooks as well as 
+client, both in-band and out-of-band which is detailed below.
+In order to set up an initial state for the client application the
+configuration MUST be inlined in the session setup informations.
+Changes to the configuration MAY be communicated via a re-invite,
+conveying new SDP, or sent in-band in the RTP channel.
+Implementations MUST support in-band delivery of updated codebooks,
+and SHOULD support out-of-band codebook update using a new SDP file.
+The changes may be due to different codebooks as well as 
 different bitrates of the RTP stream.
 </t>
 
-<!--
-<t>
-The delivery vectors in use can be specified by an SDP attribute to indicate the
-method and the optional URI where the Vorbis
-<xref target="Packed Configuration">Packed Configuration</xref> Packets could
-be fetched.
--->
 <t>For non chained streams, the recommended Configuration delivery
 method is inline the <xref target="Packed Configuration">Packed Configuration</xref> in the SDP as explained in the <xref target="Mapping Media Type Parameters into SDP"> IANA considerations</xref>.
 </t>
@@ -1097,9 +1095,13 @@ The are no negotiable parameters. All the of them are declarative.
 </section>
 <section anchor="Congestion Control" title="Congestion Control">
 <t>
-   Vorbis clients SHOULD send regular receiver reports detailing
-   congestion. A way to handle bandwidth changes MAY be redirect
-   the client to a lower bitrate stream if one is available.
+The general congestion control considerations for transporting RTP
+data apply to vorbis audio over RTP as well.  See the RTP specification
+<xref target="rfc3550" /> and any applicable RTP profile (e.g., <xref target="rfc3551" />).
+Audio data can be encoded using a range of different bit rates, so
+it is possible to adapt network bandwidth by adjusting the encoder
+bit rate in real time or by having multiple copies of content encoded
+ at different bit rates.
 </t>
 </section>
 <section anchor="Example" title="Example">
