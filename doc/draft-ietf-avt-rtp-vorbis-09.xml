@@ -395,7 +395,10 @@ stream may change certain configuration data mid-session, there are
 different methods for delivering this configuration data to a 
 client, both in-band and out-of-band which is detailed below.
 In order to set up an initial state for the client application the
-configuration MUST be inlined in the session setup informations.
+configuration MUST be conveyed via the signalling channel used to setup
+the session. One example of such signalling is
+<xref target="rfc4566">SDP</xref> with the
+<xref target="rfc3264">Offer/Answer Model</xref>.
 Changes to the configuration MAY be communicated via a re-invite,
 conveying new SDP, or sent in-band in the RTP channel.
 Implementations MUST support in-band delivery of updated codebooks,

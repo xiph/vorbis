@@ -427,20 +427,20 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    different methods for delivering this configuration data to a client,
    both in-band and out-of-band which is detailed below.  In order to
    set up an initial state for the client application the configuration
-   MUST be inlined in the session setup informations.  Changes to the
-   configuration MAY be communicated via a re-invite, conveying new SDP,
-   or sent in-band in the RTP channel.  Implementations MUST support in-
-   band delivery of updated codebooks, and SHOULD support out-of-band
-   codebook update using a new SDP file.  The changes may be due to
-   different codebooks as well as different bitrates of the RTP stream.
+   MUST be conveyed via the signalling channel used to setup the
+   session.  One example of such signalling is SDP [5] with the Offer/
+   Answer Model [8].  Changes to the configuration MAY be communicated
+   via a re-invite, conveying new SDP, or sent in-band in the RTP
+   channel.  Implementations MUST support in-band delivery of updated
+   codebooks, and SHOULD support out-of-band codebook update using a new
+   SDP file.  The changes may be due to different codebooks as well as
+   different bitrates of the RTP stream.
 
    For non chained streams, the recommended Configuration delivery
    method is inline the Packed Configuration (Section 3.1.1) in the SDP
    as explained in the IANA considerations (Section 7.1).
 
    The 24 bit Ident field is used to map which Configuration will be
-   used to decode a packet.  When the Ident field changes, it indicates
-   that a change in the stream has taken place.  The client application
 
 
 
@@ -449,6 +449,8 @@ Barbato                   Expires July 17, 2008                 [Page 8]
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
+   used to decode a packet.  When the Ident field changes, it indicates
+   that a change in the stream has taken place.  The client application
    MUST have in advance the correct configuration and if the client
    detects a change in the Ident value and does not have this
    information it MUST NOT decode the raw Vorbis data associated until
@@ -495,8 +497,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    The 2 byte length tag defines the length of the packed headers as the
    sum of the Configuration, Comment and Setup lengths.
-
-
 
 
 
