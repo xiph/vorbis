@@ -10,7 +10,7 @@ AC_DEFUN([XIPH_PATH_VORBIS],
 [dnl 
 dnl Get the cflags and libraries
 dnl
-AC_ARG_WITH(vorbis,AC_HELP_STRING([--with-vorbis=PFX],[Prefix where libvorbis is installed (optional)]), ogg_prefix="$withval", vorbis_prefix="")
+AC_ARG_WITH(vorbis,AC_HELP_STRING([--with-vorbis=PFX],[Prefix where libvorbis is installed (optional)]), vorbis_prefix="$withval", vorbis_prefix="")
 AC_ARG_WITH(vorbis-libraries,AC_HELP_STRING([--with-vorbis-libraries=DIR],[Directory where libvorbis library is installed (optional)]), vorbis_libraries="$withval", vorbis_libraries="")
 AC_ARG_WITH(vorbis-includes,AC_HELP_STRING([--with-vorbis-includes=DIR],[Directory where libvorbis header files are installed (optional)]), vorbis_includes="$withval", vorbis_includes="")
 AC_ARG_ENABLE(vorbistest,AC_HELP_STRING([--disable-vorbistest],[Do not try to compile and run a test Vorbis program]),, enable_vorbistest=yes)
@@ -25,7 +25,7 @@ AC_ARG_ENABLE(vorbistest,AC_HELP_STRING([--disable-vorbistest],[Do not try to co
     VORBIS_LIBS="-L$prefix/lib"
   fi
 
-  if test "x$ogg_prefix" != "xno" ; then
+  if test "x$vorbis_prefix" != "xno" ; then
     VORBIS_LIBS="$VORBIS_LIBS -lvorbis -lm"
   fi
   VORBISFILE_LIBS="-lvorbisfile"
