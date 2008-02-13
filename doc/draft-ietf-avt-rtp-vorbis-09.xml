@@ -1054,12 +1054,13 @@ using the configuration attribute.
 
 <t>
 The port value is specified by the server application bound to the address
-specified in the c= line. The sample rate and channel count value specified
-in the rtpmap attribute SHOULD match the current Vorbis stream or considered
-the maximum number of channels to be expected and the least common multiple
-sample rate for the session. The Configuration payload delivers the exact
-information, thus the SDP information SHOULD be considered as a hint.
-An example is found below.
+specified in the c= line. The channel count value specified in the rtpmap
+attribute SHOULD match the current Vorbis stream or considered the maximum
+number of channels to be expected. The timestamp clock rate MUST be a multiple
+of the sample rate, different payload number MUST be used if the clock rate
+changes. The Configuration payload delivers the exact information, thus the
+SDP information SHOULD be considered as a hint.
+An example is found below. 
 </t>
 
 <section anchor="SDP Example" title="SDP Example">

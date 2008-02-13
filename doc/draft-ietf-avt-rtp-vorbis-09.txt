@@ -1090,12 +1090,13 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    passed to the client using the configuration attribute.
 
    The port value is specified by the server application bound to the
-   address specified in the c= line.  The sample rate and channel count
-   value specified in the rtpmap attribute SHOULD match the current
-   Vorbis stream or considered the maximum number of channels to be
-   expected and the least common multiple sample rate for the session.
-   The Configuration payload delivers the exact information, thus the
-   SDP information SHOULD be considered as a hint.  An example is found
+   address specified in the c= line.  The channel count value specified
+   in the rtpmap attribute SHOULD match the current Vorbis stream or
+   considered the maximum number of channels to be expected.  The
+   timestamp clock rate MUST be a multiple of the sample rate, different
+   payload number MUST be used if the clock rate changes.  The
+   Configuration payload delivers the exact information, thus the SDP
+   information SHOULD be considered as a hint.  An example is found
    below.
 
 7.1.1.  SDP Example
@@ -1112,7 +1113,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    Note that the payload format (encoding) names are commonly shown in
    upper case.  Media Type subtypes are commonly shown in lower case.
-   These names are case-insensitive in both places.  Similarly,
 
 
 
@@ -1121,6 +1121,7 @@ Barbato                   Expires July 17, 2008                [Page 20]
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
+   These names are case-insensitive in both places.  Similarly,
    parameter names are case-insensitive both in Media Type types and in
    the default mapping to the SDP a=fmtp attribute.  The a=fmtp line is
    a single line even if it is shown as multiple lines in this document
@@ -1168,7 +1169,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
    The client may choose to fetch the Configuration from the alternate
    source as soon as it discovers a Configuration packet got lost in-
-   band or use selective retransmission [13], if the server supports the
 
 
 
@@ -1177,6 +1177,7 @@ Barbato                   Expires July 17, 2008                [Page 21]
 Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
+   band or use selective retransmission [13], if the server supports the
    feature.
 
    A serverside optimization would be to keep an hash list of the
@@ -1222,7 +1223,6 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
    Carlos De Martin.
 
 13.  References
-
 
 
 
