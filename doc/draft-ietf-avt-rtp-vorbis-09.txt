@@ -3,7 +3,7 @@
 
 AVT Working Group                                             L. Barbato
 Internet-Draft                                                      Xiph
-Expires: July 17, 2008                                      Jan 14, 2008
+Expires: August 20, 2008                                    Feb 17, 2008
 
 
               RTP Payload Format for Vorbis Encoded Audio
@@ -32,7 +32,7 @@ Status of This Memo
    The list of Internet-Draft Shadow Directories can be accessed at
    http://www.ietf.org/shadow.html.
 
-   This Internet-Draft will expire on July 17, 2008.
+   This Internet-Draft will expire on August 20, 2008.
 
 Copyright Notice
 
@@ -52,9 +52,9 @@ Abstract
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 1]
+Barbato                  Expires August 20, 2008                [Page 1]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 Editors Note
@@ -108,9 +108,9 @@ Table of Contents
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 2]
+Barbato                  Expires August 20, 2008                [Page 2]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 1.  Introduction
@@ -164,9 +164,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 3]
+Barbato                  Expires August 20, 2008                [Page 3]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 2.1.  RTP Header
@@ -220,9 +220,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 4]
+Barbato                  Expires August 20, 2008                [Page 4]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    Payload Type (PT): 7 bits
@@ -276,9 +276,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 5]
+Barbato                  Expires August 20, 2008                [Page 5]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
       0 = Not Fragmented
@@ -332,9 +332,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 6]
+Barbato                  Expires August 20, 2008                [Page 6]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    boundary, as explained by the vorbis specification [10].  The length
@@ -388,9 +388,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 7]
+Barbato                  Expires August 20, 2008                [Page 7]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
                     Figure 4: Example Raw Vorbis Packet
@@ -444,9 +444,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 8]
+Barbato                  Expires August 20, 2008                [Page 8]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    used to decode a packet.  When the Ident field changes, it indicates
@@ -500,9 +500,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                 [Page 9]
+Barbato                  Expires August 20, 2008                [Page 9]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
        0                   1                   2                   3
@@ -556,9 +556,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 10]
+Barbato                  Expires August 20, 2008               [Page 10]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 3.2.  Out of Band Transmission
@@ -612,9 +612,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 11]
+Barbato                  Expires August 20, 2008               [Page 11]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
        0                   1                   2                   3
@@ -668,9 +668,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 12]
+Barbato                  Expires August 20, 2008               [Page 12]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
        0                   1                   2                   3
@@ -724,9 +724,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 13]
+Barbato                  Expires August 20, 2008               [Page 13]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    the sequence number incremented as normal for the subsequent RTP
@@ -780,9 +780,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 14]
+Barbato                  Expires August 20, 2008               [Page 14]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
       Packet 2:
@@ -836,9 +836,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 15]
+Barbato                  Expires August 20, 2008               [Page 15]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
       Packet 3:
@@ -892,9 +892,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 16]
+Barbato                  Expires August 20, 2008               [Page 16]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 6.  IANA Considerations
@@ -948,9 +948,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 17]
+Barbato                  Expires August 20, 2008               [Page 17]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    Person & email address to contact for further information:
@@ -1004,9 +1004,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 18]
+Barbato                  Expires August 20, 2008               [Page 18]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    Security considerations:
@@ -1060,9 +1060,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 19]
+Barbato                  Expires August 20, 2008               [Page 19]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 7.1.  Mapping Media Type Parameters into SDP
@@ -1116,9 +1116,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 20]
+Barbato                  Expires August 20, 2008               [Page 20]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    These names are case-insensitive in both places.  Similarly,
@@ -1172,9 +1172,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 21]
+Barbato                  Expires August 20, 2008               [Page 21]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
    band or use selective retransmission [13], if the server supports the
@@ -1228,9 +1228,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 22]
+Barbato                  Expires August 20, 2008               [Page 22]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 13.1.  Normative References
@@ -1284,9 +1284,9 @@ Internet-Draft          Vorbis RTP Payload Format               Jan 2008
 
 
 
-Barbato                   Expires July 17, 2008                [Page 23]
+Barbato                  Expires August 20, 2008               [Page 23]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 Author's Address
@@ -1340,9 +1340,9 @@ Author's Address
 
 
 
-Barbato                   Expires July 17, 2008                [Page 24]
+Barbato                  Expires August 20, 2008               [Page 24]
 
-Internet-Draft          Vorbis RTP Payload Format               Jan 2008
+Internet-Draft          Vorbis RTP Payload Format               Feb 2008
 
 
 Full Copyright Statement
@@ -1396,6 +1396,6 @@ Acknowledgement
 
 
 
-Barbato                   Expires July 17, 2008                [Page 25]
+Barbato                  Expires August 20, 2008               [Page 25]
 
 
