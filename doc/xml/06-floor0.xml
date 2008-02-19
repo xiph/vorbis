@@ -183,6 +183,7 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
 
 <orderedlist>
  <listitem><simpara> <varname>[i]</varname> = 0 </simpara></listitem>
+ <listitem><simpara> <varname>[&#969;]</varname> = &#960; * map element <varname>[i]</varname> / <varname>[floor0_bark_map_size]</varname></simpara></listitem>
  <listitem><para>if ( <varname>[floor0_order]</varname> is odd ) {
   <orderedlist>
    <listitem><para>calculate <varname>[p]</varname> and <varname>[q]</varname> according to:
