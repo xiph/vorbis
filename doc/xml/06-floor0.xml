@@ -49,9 +49,7 @@ follows:</para>
   4) [floor0_amplitude_bits] = read an unsigned integer of six bits
   5) [floor0_amplitude_offset] = read an unsigned integer of eight bits
   6) [floor0_number_of_books] = read an unsigned integer of four bits and add 1
-  7) if any of [floor0_order], [floor0_rate], [floor0_bark_map_size], [floor0_amplitude_bits],
-     [floor0_amplitude_offset] or [floor0_number_of_books] are less than zero, the stream is not decodable
-  8) array [floor0_book_list] = read a list of [floor0_number_of_books] unsigned integers of eight bits each;
+  7) array [floor0_book_list] = read a list of [floor0_number_of_books] unsigned integers of eight bits each;
 </screen>
 
 <para>
