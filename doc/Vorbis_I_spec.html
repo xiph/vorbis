@@ -1254,7 +1254,7 @@ bitstream octet first):
 </p><p>
 This is actually somewhat easier to describe in code; implementation of the above can be found in <code class="filename">vorbis/lib/info.c</code>, <code class="function">_vorbis_pack_comment()</code> and <code class="function">_vorbis_unpack_comment()</code>.
 </p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="vorbis-spec-floor0"></a>6. Floor type 0 setup and decode</h2></div><div><p class="releaseinfo">
-  $Id: 06-floor0.xml 10424 2005-11-23 08:44:18Z xiphmont $
+  $Id: 06-floor0.xml 14529 2008-02-19 10:15:13Z xiphmont $
 </p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id306375"></a>6.1. Overview</h3></div></div></div><p>
 Vorbis floor type zero uses Line Spectral Pair (LSP, also alternately
 known as Line Spectral Frequency or LSF) representation to encode a
@@ -2215,13 +2215,21 @@ Ogg encapsulation of a Vorbis packet stream is straightforward.</p><div class="i
   The granule position of pages containing Vorbis audio is in units
   of PCM audio samples (per channel; a stereo stream's granule position
   does not increment at twice the speed of a mono stream).
-</li><li>
-  The granule position of a page represents the end PCM sample
-  position of the last packet <span class="emphasis"><em>completed</em></span> on that page.
-  A page that is entirely spanned by a single packet (that completes on a
-  subsequent page) has no granule position, and the granule position is
-  set to '-1'.
 </li><li><p>
+  The granule position of a page represents the end PCM sample
+  position of the last packet <span class="emphasis"><em>completed</em></span> on that
+  page.  The 'last PCM sample' is the last complete sample returned by
+  decode, not an internal sample awaiting lapping with a
+  subsequent block.  A page that is entirely spanned by a single
+  packet (that completes on a subsequent page) has no granule
+  position, and the granule position is set to '-1'.  </p><p>
+  Note that the last decoded (fully lapped) PCM sample from a packet
+  is not necessarily the middle sample from that block. If, eg, the
+  current Vorbis packet encodes a "long block" and the next Vorbis
+  packet encodes a "short block", the last decodable sample from the
+  current packet be at position (3*long_block_length/4) -
+  (short_block_length/4).
+</p></li><li><p>
     The granule (PCM) position of the first page need not indicate
     that the stream started at position zero.  Although the granule
     position belongs to the last completed packet on the page and a 

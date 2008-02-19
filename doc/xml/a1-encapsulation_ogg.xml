@@ -134,11 +134,23 @@ Ogg encapsulation of a Vorbis packet stream is straightforward.</para>
 
 <listitem><simpara>
   The granule position of a page represents the end PCM sample
-  position of the last packet <emphasis>completed</emphasis> on that page.
-  A page that is entirely spanned by a single packet (that completes on a
-  subsequent page) has no granule position, and the granule position is
-  set to '-1'.
-</simpara></listitem>
+  position of the last packet <emphasis>completed</emphasis> on that
+  page.  The 'last PCM sample' is the last complete sample returned by
+  decode, not an internal sample awaiting lapping with a
+  subsequent block.  A page that is entirely spanned by a single
+  packet (that completes on a subsequent page) has no granule
+  position, and the granule position is set to '-1'.  </simpara>
+
+<simpara>
+  Note that the last decoded (fully lapped) PCM sample from a packet
+  is not necessarily the middle sample from that block. If, eg, the
+  current Vorbis packet encodes a "long block" and the next Vorbis
+  packet encodes a "short block", the last decodable sample from the
+  current packet be at position (3*long_block_length/4) -
+  (short_block_length/4).
+</simpara>
+
+</listitem>
 
 <listitem>
   <simpara>
