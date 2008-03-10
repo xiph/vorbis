@@ -367,6 +367,10 @@
 		</Configuration>
 	</Configurations>
 	<References>
+		<ProjectReference
+			ReferencedProjectIdentifier="{3A214E06-B95E-4D61-A291-1F8DF2EC10FD}"
+			RelativePathToProject=".\libvorbis\libvorbis.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
