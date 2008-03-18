@@ -19,8 +19,6 @@
 #define _V_RANDOM_H_
 #include "vorbis/codec.h"
 
-#define DEBUG_MALLOC
-
 extern int analysis_noisy;
 
 extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
