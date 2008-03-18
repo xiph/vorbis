@@ -163,7 +163,11 @@ int main(){
 	      fprintf(stderr,"Corrupt secondary header.  Exiting.\n");
 	      exit(1);
 	    }
-	    vorbis_synthesis_headerin(&vi,&vc,&op);
+	    result=vorbis_synthesis_headerin(&vi,&vc,&op);
+	    if(result<0){
+	      fprintf(stderr,"Corrupt secondary header.  Exiting.\n");
+	      exit(1);
+	    }
 	    i++;
 	  }
 	}
