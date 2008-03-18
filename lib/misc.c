@@ -190,7 +190,10 @@ void _VDBG_dump(void){
   pthread_mutex_unlock(&memlock);
 }
 
-extern void *_VDBG_malloc(void *ptr,long bytes,char *file,long line){
+void *_VDBG_malloc(void *ptr,long bytes,char *file,long line){
+  if(bytes<=0)
+    fprintf(stderr,"bad malloc request (%ld bytes) from %s:%ld\n",bytes,file,line);
+
   bytes+=HEAD_ALIGN;
   if(ptr){
     ptr-=HEAD_ALIGN;
@@ -203,7 +206,7 @@ extern void *_VDBG_malloc(void *ptr,long bytes,char *file,long line){
   return _insert(ptr,bytes,file,line);
 }
 
-extern void _VDBG_free(void *ptr,char *file,long line){
+void _VDBG_free(void *ptr,char *file,long line){
   if(ptr){
     ptr-=HEAD_ALIGN;
     _ripremove(ptr);

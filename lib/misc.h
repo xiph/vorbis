@@ -19,6 +19,8 @@
 #define _V_RANDOM_H_
 #include "vorbis/codec.h"
 
+#define DEBUG_MALLOC
+
 extern int analysis_noisy;
 
 extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
@@ -29,6 +31,7 @@ extern void _analysis_output(char *base,int i,float *v,int n,int bark,int dB,
 #ifdef DEBUG_MALLOC
 
 #define _VDBG_GRAPHFILE "malloc.m"
+#undef _VDBG_GRAPHFILE
 extern void *_VDBG_malloc(void *ptr,long bytes,char *file,long line); 
 extern void _VDBG_free(void *ptr,char *file,long line); 
 

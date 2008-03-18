@@ -199,21 +199,29 @@ Header decode for all three residue types is identical.</para>
 </programlisting>
 
 <para>
-<varname>[residue_begin]</varname> and <varname>[residue_end]</varname> select the specific
-sub-portion of each vector that is actually coded; it implements akin
-to a bandpass where, for coding purposes, the vector effectively
-begins at element <varname>[residue_begin]</varname> and ends at
-<varname>[residue_end]</varname>.  Preceding and following values in the unpacked
-vectors are zeroed.  Note that for residue type 2, these values as
-well as <varname>[residue_partition_size]</varname>apply to the interleaved
-vector, not the individual vectors before interleave.
+<varname>[residue_begin]</varname> and
+<varname>[residue_end]</varname> select the specific sub-portion of
+each vector that is actually coded; it implements akin to a bandpass
+where, for coding purposes, the vector effectively begins at element
+<varname>[residue_begin]</varname> and ends at
+<varname>[residue_end]</varname>.  Preceding and following values in
+the unpacked vectors are zeroed.  Note that for residue type 2, these
+values as well as <varname>[residue_partition_size]</varname>apply to
+the interleaved vector, not the individual vectors before interleave.
 <varname>[residue_partition_size]</varname> is as explained above,
 <varname>[residue_classifications]</varname> is the number of possible
 classification to which a partition can belong and
-<varname>[residue_classbook]</varname> is the codebook number used to code
-classification codewords.  The number of dimensions in book
-<varname>[residue_classbook]</varname> determines how many classification values
-are grouped into a single classification codeword.</para>
+<varname>[residue_classbook]</varname> is the codebook number used to
+code classification codewords.  The number of dimensions in book
+<varname>[residue_classbook]</varname> determines how many
+classification values are grouped into a single classification
+codeword.  Note that the number of entries and dimensions in book
+<varname>[residue_classbook]</varname>, along with
+<varname>[residue_classifications]</varname>, overdetermines to
+possible number of classification codewords.  If
+<varname>[residue_classifications]</varname>^<varname>[residue_classbook]</varname>.dimensions
+does not equal <varname>[residue_classbook]</varname>.entries, the
+bitstream should be regarded to be undecodable. </para>
 
 <para>
 Next we read a bitmap pattern that specifies which partition classes
