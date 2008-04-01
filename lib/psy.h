@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -119,12 +119,17 @@ typedef struct {
   int tonecomp_endp; /* for M4 */
   int min_nn_lp; /* for M6 */
   float tonecomp_thres; /* for M4 */
+  float nn_mec_s; /* minimum energy complement for noise normalization [stereo] */
+  float nn_mec_m; /* minimum energy complement for noise normalization [mono] */
   float m_val; /* masking compensation value */
   
   int st_freqlimit; /* for M6 */
-  int n25p;
-  int n33p;
-  int n75p;
+  int n25p; /* mdct n(25%) */
+  int n33p; /* mdct n(33%) */
+  int n75p; /* mdct n(75%) */
+  int nn75pt; /* 75 % partition for noise  normalization */
+  int nn50pt; /* half partition for noise normalization */
+  int nn25pt; /* quarter partition for noise normalization */
 
 } vorbis_look_psy;
 
@@ -157,6 +162,7 @@ extern void _vp_offset_and_mix(vorbis_look_psy *p,
 			       float *noise,
 			       float *tone,
 			       int offset_select,
+			       int bit_managed,
 			       float *logmask,
 			       float *mdct,
 			       float *logmdct,
@@ -165,7 +171,7 @@ extern void _vp_offset_and_mix(vorbis_look_psy *p,
 			       int end_block,
 			       int blocktype, int modenumber,
 			       int nW_modenumber,
-			       int lW_blocktype, int lW_modenumber, int lW_no);
+			       int lW_blocktype, int lW_modenumber, int lW_no, int padnum);
 
 extern float _vp_ampmax_decay(float amp,vorbis_dsp_state *vd);
 
@@ -185,10 +191,12 @@ extern void _vp_couple(int blobno,
 		       int   **ifloor,
 		       int   *nonzero,
 		       int   sliding_lowpass,
+		       int blocktype, int modenumber,
 		       float **mdct, float **res_org);
 
 extern void _vp_noise_normalize(vorbis_look_psy *p,
-				float *in,float *out,int *sortedindex);
+				float *in,float *out,int *sortedindex,
+				int blocktype, int modenumber);
 
 extern void _vp_noise_normalize_sort(vorbis_look_psy *p,
 				     float *magnitudes,int *sortedindex);

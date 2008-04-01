@@ -45,6 +45,7 @@ vorbis_synthesis_read
 vorbis_packet_blocksize
 vorbis_synthesis_halfrate
 vorbis_synthesis_halfrate_p
+vorbis_synthesis_idheader
 ;
 vorbis_window
 _analysis_output_always

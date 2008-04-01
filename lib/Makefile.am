@@ -14,7 +14,8 @@ libvorbis_la_SOURCES = mdct.c smallft.c block.c envelope.c window.c lsp.c \
 			envelope.h lpc.h lsp.h codebook.h misc.h psy.h\
 			masking.h os.h mdct.h smallft.h highlevel.h\
 			registry.h scales.h window.h lookup.h lookup_data.h\
-			codec_internal.h backends.h bitrate.h 
+			codec_internal.h backends.h bitrate.h\
+			psy_table.h 
 libvorbis_la_LDFLAGS = -no-undefined -version-info @V_LIB_CURRENT@:@V_LIB_REVISION@:@V_LIB_AGE@
 libvorbis_la_LIBADD = @OGG_LIBS@ @VORBIS_LIBS@
 

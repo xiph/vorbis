@@ -1,4 +1,4 @@
-aoTuV Beta 5
+aoTuV Beta 5.5
 
 "aoTuV" tunes up Xiph.Org's libvorbis uniquely. 
 A license is taken as "BSD-style license" as well as original libvorbis. 
@@ -14,8 +14,8 @@ A license is taken as "BSD-style license" as well as original libvorbis.
 
 aoTuV based on <Xiph.Org libvorbis>
 
-Copyright (c) 2002-2005 Xiph.Org Foundation
-Copyright (c) 2003-2006 Aoyumi
+Copyright (c) 2002-2007 Xiph.Org Foundation
+Copyright (c) 2003-2008 Aoyumi
 
 
 AUTHOR : aoyumi <aoyumi@gmail.com>

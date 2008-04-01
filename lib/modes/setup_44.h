@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -37,7 +37,7 @@ static int blocksize_long_44[12]={
 };
 
 static double _psy_compand_short_mapping[13]={
-  1., 1., 1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.
+  0., 0., 1., 1., 1.3, 1.6, 2., 2., 2., 2., 2., 2., 2.
 };
 static double _psy_compand_long_mapping[13]={
   4., 4., 4., 4., 4.3, 4.6, 5., 5., 5., 5., 5., 5., 5.
@@ -54,7 +54,7 @@ static int _floor_short_mapping_44[12]={
   1,1,0,0,2,2,4,5,5,5,5,5
 };
 static int _floor_long_mapping_44[12]={
-  8,8,7,7,7,7,7,7,7,7,7,7
+  11,11,10,10,10,7,7,7,7,7,7,7
 };
 
 ve_setup_data_template ve_setup_44_stereo={
@@ -73,7 +73,7 @@ ve_setup_data_template ve_setup_44_stereo={
   _psy_tone_0dB,
   _psy_tone_suppress,
 
-  _vp_tonemask_adj_otherblock,
+  _vp_tonemask_adj_otherblock, // impulse
   _vp_tonemask_adj_longblock,
   _vp_tonemask_adj_otherblock,
 

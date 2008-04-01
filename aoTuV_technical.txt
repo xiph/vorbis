@@ -1,3 +1,30 @@
+aoTuV beta5.5 technical information
+
+
+The differences from the aoTuV beta 5...
+
+  1.  The frequency domain width of M6 was revised.
+
+  2.  For q-1/-2, a pre-echo reduction code was applied (M3).  In addition,
+  the M3 code was improved.
+
+  3.  The floor setup parameters in the low bit-rate was changed.
+
+  4.  The part including bug of noise normalization was rewritten.
+
+  5.  libvorbis 1.2.0 were merged. Furthermore, a revision of Bug #300 and
+  #1229 was applied.
+
+  6.  The ATH curve of the high frequency area (more than 32kHz) was revised. 
+
+...and I tune up many parameters. 
+
+
+2008/03/30
+Aoyumi
+
+----------------------------------------------------------------------------
+
 aoTuV beta5 technical information
 
 
@@ -17,7 +44,8 @@ The differences from the aoTuV beta 4.51...
   5.   In order to decrease artifact by collapse of audio energy, noise 
   normalization processing of point stereo was extended. [32/44.1/48kHz only] 
 
-  6.   The threshold of channel coupling (lossless <=> point) is changed dynamically. This is a method based on a certain idea. [M6] 
+  6.   The threshold of channel coupling (lossless <=> point) is changed 
+  dynamically. This is a method based on a certain idea. [M6] 
 
 ...and I tune up many parameters. 
 

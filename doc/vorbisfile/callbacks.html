@@ -9,7 +9,7 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 
@@ -50,9 +50,13 @@ The following behaviors are also expected:<p>
 
 The seek-like function provided in the <tt>seek_func</tt> field is
 used to request non-sequential data access by libvorbisfile, moving
-the access cursor to the requested position.<p>
+the access cursor to the requested position. The seek function is
+optional; if callbacks are only to handle non-seeking (streaming) data
+or the application wishes to force streaming behavior,
+<tt>seek_func</tt> and <tt>tell_func</tt> should be set to NULL. If
+the seek function is non-NULL, libvorbisfile mandates the following
+behavior:
 
-libvorbisfile expects the following behavior:
 <ul>
 <li>The seek function must always return -1 (failure) if the given
 data abstraction is not seekable.  It may choose to always return -1
@@ -73,15 +77,17 @@ one past the last byte of accessible data, as would stdio
 
 The close function should deallocate any access state used by the
 passed in instance of the data access abstraction and invalidate the
-instance handle.  The close function is assumed to succeed.<p>
+instance handle.  The close function is assumed to succeed; its return
+code is not checked.<p>
 
-One common use of callbacks and the close function is to change the
-behavior of libvorbisfile with respect to file closure for applications
-that <em>must</em> <tt>fclose</tt> data files themselves. By passing
-the normal stdio calls as callback functions, but passing a
-<tt>close_func</tt> that does nothing, an application may call <a
-href="ov_clear.html">ov_clear()</a> and then <tt>fclose()</tt> the
-file originally passed to libvorbisfile.
+The <tt>close_func</tt> may be set to NULL to indicate that libvorbis
+should not attempt to close the file/data handle in <a
+href="ov_clear.html">ov_clear</a> but allow the application to handle
+file/data access cleanup itself. For example, by passing the normal
+stdio calls as callback functions, but passing a <tt>close_func</tt>
+that is NULL or does nothing (as in the case of OV_CALLBACKS_NOCLOSE), an
+application may call <a href="ov_clear.html">ov_clear()</a> and then
+later <tt>fclose()</tt> the file originally passed to libvorbisfile.
 
 <h2>Tell function</h2> 
 
@@ -94,17 +100,19 @@ function must return the data position (and thus the total file size),
 not an error.<p>
 
 The tell function need not be provided if the data IO abstraction is
-not seekable.<p>
+not seekable, or the application wishes to force streaming
+behavior. In this case, the <tt>tell_func</tt> and <tt>seek_func</tt>
+fields should be set to NULL.<p>
 
 <br><br>
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2003 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2007 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 

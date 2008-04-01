@@ -5,13 +5,13 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: basic codebook pack/unpack/code/decode operations
- last mod: $Id: codebook.c,v 1.39 2002/06/28 22:19:35 xiphmont Exp $
+ last mod: $Id$
 
  ********************************************************************/
 
@@ -255,6 +255,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
 
 /* returns the number of bits ************************************************/
 int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b){
+  if(a<0 || a>=book->c->entries)return(0);
   oggpack_write(b,book->codelist[a],book->c->lengthlist[a]);
   return(book->c->lengthlist[a]);
 }
@@ -310,7 +311,7 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
   int  read=book->dec_maxlength;
   long lo,hi;
   long lok = oggpack_look(b,book->dec_firsttablen);
- 
+  
   if (lok >= 0) {
     long entry = book->dec_firsttable[lok];
     if(entry&0x80000000UL){
@@ -324,24 +325,24 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
     lo=0;
     hi=book->used_entries;
   }
-
+  
   lok = oggpack_look(b, read);
-
+  
   while(lok<0 && read>1)
     lok = oggpack_look(b, --read);
   if(lok<0)return -1;
-
+  
   /* bisect search for the codeword in the ordered list */
   {
     ogg_uint32_t testword=bitreverse((ogg_uint32_t)lok);
-
+    
     while(hi-lo>1){
       long p=(hi-lo)>>1;
       long test=book->codelist[lo+p]>testword;    
       lo+=p&(test-1);
       hi-=p&(-test);
-    }
-
+      }
+    
     if(book->dec_codelengths[lo]<=read){
       oggpack_adv(b, book->dec_codelengths[lo]);
       return(lo);
@@ -349,6 +350,7 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
   }
   
   oggpack_adv(b, read);
+
   return(-1);
 }
 
@@ -368,104 +370,121 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
 
 /* returns the [original, not compacted] entry number or -1 on eof *********/
 long vorbis_book_decode(codebook *book, oggpack_buffer *b){
-  long packed_entry=decode_packed_entry_number(book,b);
-  if(packed_entry>=0)
-    return(book->dec_index[packed_entry]);
-  
+  if(book->used_entries>0){
+    long packed_entry=decode_packed_entry_number(book,b);
+    if(packed_entry>=0)
+      return(book->dec_index[packed_entry]);
+  }
+
   /* if there's no dec_index, the codebook unpacking isn't collapsed */
-  return(packed_entry);
+  return(-1);
 }
 
 /* returns 0 on OK or -1 on eof *************************************/
 long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
-  int step=n/book->dim;
-  long *entry = alloca(sizeof(*entry)*step);
-  float **t = alloca(sizeof(*t)*step);
-  int i,j,o;
-
-  for (i = 0; i < step; i++) {
-    entry[i]=decode_packed_entry_number(book,b);
-    if(entry[i]==-1)return(-1);
-    t[i] = book->valuelist+entry[i]*book->dim;
+  if(book->used_entries>0){
+    int step=n/book->dim;
+    long *entry = alloca(sizeof(*entry)*step);
+    float **t = alloca(sizeof(*t)*step);
+    int i,j,o;
+    
+    for (i = 0; i < step; i++) {
+      entry[i]=decode_packed_entry_number(book,b);
+      if(entry[i]==-1)return(-1);
+      t[i] = book->valuelist+entry[i]*book->dim;
+    }
+    for(i=0,o=0;i<book->dim;i++,o+=step)
+      for (j=0;j<step;j++)
+	a[o+j]+=t[j][i];
   }
-  for(i=0,o=0;i<book->dim;i++,o+=step)
-    for (j=0;j<step;j++)
-      a[o+j]+=t[j][i];
   return(0);
 }
 
 long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
-  int i,j,entry;
-  float *t;
+  if(book->used_entries>0){
+    int i,j,entry;
+    float *t;
+    
+    if(book->dim>8){
+      for(i=0;i<n;){
+	entry = decode_packed_entry_number(book,b);
+	if(entry==-1)return(-1);
+	t     = book->valuelist+entry*book->dim;
+	for (j=0;j<book->dim;)
+	  a[i++]+=t[j++];
+      }
+    }else{
+      for(i=0;i<n;){
+	entry = decode_packed_entry_number(book,b);
+	if(entry==-1)return(-1);
+	t     = book->valuelist+entry*book->dim;
+	j=0;
+	switch((int)book->dim){
+	case 8:
+	  a[i++]+=t[j++];
+	case 7:
+	  a[i++]+=t[j++];
+	case 6:
+	  a[i++]+=t[j++];
+	case 5:
+	  a[i++]+=t[j++];
+	case 4:
+	  a[i++]+=t[j++];
+	case 3:
+	  a[i++]+=t[j++];
+	case 2:
+	  a[i++]+=t[j++];
+	case 1:
+	  a[i++]+=t[j++];
+	case 0:
+	  break;
+	}
+      }
+    }    
+  }
+  return(0);
+}
 
-  if(book->dim>8){
+long vorbis_book_decodev_set(codebook *book,float *a,oggpack_buffer *b,int n){
+  if(book->used_entries>0){
+    int i,j,entry;
+    float *t;
+    
     for(i=0;i<n;){
       entry = decode_packed_entry_number(book,b);
       if(entry==-1)return(-1);
       t     = book->valuelist+entry*book->dim;
       for (j=0;j<book->dim;)
-	a[i++]+=t[j++];
+	a[i++]=t[j++];
     }
   }else{
+    int i,j;
+    
     for(i=0;i<n;){
-      entry = decode_packed_entry_number(book,b);
-      if(entry==-1)return(-1);
-      t     = book->valuelist+entry*book->dim;
-      j=0;
-      switch((int)book->dim){
-      case 8:
-	a[i++]+=t[j++];
-      case 7:
-	a[i++]+=t[j++];
-      case 6:
-	a[i++]+=t[j++];
-      case 5:
-	a[i++]+=t[j++];
-      case 4:
-	a[i++]+=t[j++];
-      case 3:
-	a[i++]+=t[j++];
-      case 2:
-	a[i++]+=t[j++];
-      case 1:
-	a[i++]+=t[j++];
-      case 0:
-	break;
-      }
+      for (j=0;j<book->dim;)
+	a[i++]=0.f;
     }
-  }    
-  return(0);
-}
-
-long vorbis_book_decodev_set(codebook *book,float *a,oggpack_buffer *b,int n){
-  int i,j,entry;
-  float *t;
-
-  for(i=0;i<n;){
-    entry = decode_packed_entry_number(book,b);
-    if(entry==-1)return(-1);
-    t     = book->valuelist+entry*book->dim;
-    for (j=0;j<book->dim;)
-      a[i++]=t[j++];
   }
   return(0);
 }
 
 long vorbis_book_decodevv_add(codebook *book,float **a,long offset,int ch,
 			      oggpack_buffer *b,int n){
+
   long i,j,entry;
   int chptr=0;
-
-  for(i=offset/ch;i<(offset+n)/ch;){
-    entry = decode_packed_entry_number(book,b);
-    if(entry==-1)return(-1);
-    {
-      const float *t = book->valuelist+entry*book->dim;
-      for (j=0;j<book->dim;j++){
-	a[chptr++][i]+=t[j];
-	if(chptr==ch){
-	  chptr=0;
-	  i++;
+  if(book->used_entries>0){
+    for(i=offset/ch;i<(offset+n)/ch;){
+      entry = decode_packed_entry_number(book,b);
+      if(entry==-1)return(-1);
+      {
+	const float *t = book->valuelist+entry*book->dim;
+	for (j=0;j<book->dim;j++){
+	  a[chptr++][i]+=t[j];
+	  if(chptr==ch){
+	    chptr=0;
+	    i++;
+	  }
 	}
       }
     }

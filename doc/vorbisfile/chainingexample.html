@@ -9,7 +9,7 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 
@@ -50,16 +50,33 @@ int main(){
 </tr>
 </table>
 
-<p><a href="ov_open.html">ov_open()</a> must be
-called to initialize the <a href="OggVorbis_File.html">OggVorbis_File</a> structure with default values.  
-<a href="ov_open.html">ov_open()</a> also checks to ensure that we're reading Vorbis format and not something else.
+<p>This example takes its input on stdin which is in 'text' mode by default under Windows; this will corrupt the input data unless set to binary mode.  This applies only to Windows.
+<br><br>
+<table border=0 width=100% color=black cellspacing=0 cellpadding=7>
+<tr bgcolor=#cccccc>
+        <td>
+<pre><b>
+#ifdef _WIN32 /* We need to set stdin to binary mode under Windows */
+  _setmode( _fileno( stdin ), _O_BINARY );
+#endif
+</b></pre>
+        </td>
+</tr>
+</table>
+
+<p>We call <a href="ov_open_callbacks.html">ov_open_callbacks()</a> to
+initialize the <a href="OggVorbis_File.html">OggVorbis_File</a>
+structure.  <a href="ov_open_callbacks.html">ov_open_callbacks()</a>
+also checks to ensure that we're reading Vorbis format and not
+something else. The OV_CALLBACKS_NOCLOSE callbacks instruct
+libvorbisfile not to close stdin later during cleanup.<p>
 
 <br><br>
 <table border=0 width=100% color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
         <td>
 <pre><b>
-  if(ov_open(stdin,&amp;ov,NULL,-1)&gt;0){
+  if(ov_open_callbacks(stdin,&ov,NULL,-1,OV_CALLBACKS_NOCLOSE)<0){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }
@@ -145,11 +162,11 @@ distribution in <a href="chaining_example_c.html">chaining_example.c</a>.
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2004 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2007 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 

@@ -9,7 +9,7 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 
@@ -17,8 +17,8 @@
 
 <p><i>declared in "vorbis/vorbisfile.h";</i></p>
 
-<p> After a bitstream has been opened using <a href="ov_open.html">ov_open()</a>/<a href="ov_open_callbacks.html">ov_open_callbacks()</a> and decoding is complete, the application must call <tt>ov_clear()</tt> to clear
-the decoder's buffers.  <tt>ov_clear()</tt> will also close the file.<p>
+<p> After a bitstream has been opened using <a href="ov_fopen.html">ov_fopen()</a>/<a href="ov_open.html">ov_open()</a>/<a href="ov_open_callbacks.html">ov_open_callbacks()</a> and decoding is complete, the application must call <tt>ov_clear()</tt> to clear
+the decoder's buffers.  <tt>ov_clear()</tt> will also close the file unless it was opened using <a href="ov_open_callbacks.html">ov_open_callbacks()</a> with the <tt>close_func</tt> callback set to NULL.<p>
 
 <tt>ov_clear()</tt> must also be called after a successful call to <a href="ov_test.html">ov_test()</a> or <a href="ov_test_callbacks.html">ov_test_callbacks()</a>.<p>
 
@@ -37,7 +37,7 @@ int ov_clear(OggVorbis_File *vf);
 <dl>
 <dt><i>vf</i></dt>
 <dd>A pointer to the OggVorbis_File structure--this is used for ALL the externally visible libvorbisfile
-functions.  After <tt>ov_clear</tt> has been called, the structure is deallocated and can no longer be used.</dd>
+functions.  After <tt>ov_clear</tt> has been called, the contents of this structure are deallocated, and it can no longer be used without being reinitialized by a call to <a href="ov_fopen.html">ov_fopen()</a>, <a href="ov_open.html">ov_open()</a> or <a href="ov_open_callbacks.html">ov_open_callbacks()</a>.</dd>
 </dl>
 
 
@@ -51,11 +51,11 @@ functions.  After <tt>ov_clear</tt> has been called, the structure is deallocate
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2003 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2007 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/">Ogg Vorbis</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 

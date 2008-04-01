@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -91,6 +91,7 @@ typedef struct private_state {
   int lW_blocktype; /* last window block type */
   int lW_modenumber; /* last window mode number (0=short, 1=long) */
   int lW_no; /* the number of continuous window blocks (last window) */
+  int padnum; /* padding block number (impulse-padding-impulse case) for M3 */
 } private_state;
 
 /* codec_setup_info contains all the setup information specific to the

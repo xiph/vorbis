@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2003             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -287,10 +287,11 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   b=v->backend_state;
   b->psy_g_look=_vp_global_look(vi);
 
-  /* added by aoyumi */
-  b->nblock = _ogg_calloc((128*vi->channels), sizeof(*b->nblock));
-  b->tblock = _ogg_calloc((128*vi->channels), sizeof(*b->tblock));
+  /* Init (added by aoyumi) */
+  b->nblock = _ogg_calloc((256*vi->channels), sizeof(*b->nblock));
+  b->tblock = _ogg_calloc((256*vi->channels), sizeof(*b->tblock));
   b->lownoise_compand_level = _ogg_calloc(vi->channels, sizeof(*b->lownoise_compand_level));
+  b->padnum = 0;
   
   /* Initialize the envelope state storage */
   b->ve=_ogg_calloc(1,sizeof(*b->ve));
@@ -331,20 +332,23 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
       }
 
       if(b->flr){
-	for(i=0;i<ci->floors;i++)
-	  _floor_P[ci->floor_type[i]]->
-	    free_look(b->flr[i]);
+	if(ci)
+	  for(i=0;i<ci->floors;i++)
+	    _floor_P[ci->floor_type[i]]->
+	      free_look(b->flr[i]);
 	_ogg_free(b->flr);
       }
       if(b->residue){
-	for(i=0;i<ci->residues;i++)
-	  _residue_P[ci->residue_type[i]]->
-	    free_look(b->residue[i]);
+	if(ci)
+	  for(i=0;i<ci->residues;i++)
+	    _residue_P[ci->residue_type[i]]->
+	      free_look(b->residue[i]);
 	_ogg_free(b->residue);
       }
       if(b->psy){
-	for(i=0;i<ci->psys;i++)
-	  _vp_psy_clear(b->psy+i);
+	if(ci)
+	  for(i=0;i<ci->psys;i++)
+	    _vp_psy_clear(b->psy+i);
 	_ogg_free(b->psy);
       }
 
@@ -362,8 +366,9 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
     }
     
     if(v->pcm){
-      for(i=0;i<vi->channels;i++)
-	if(v->pcm[i])_ogg_free(v->pcm[i]);
+      if(vi)
+	for(i=0;i<vi->channels;i++)
+	  if(v->pcm[i])_ogg_free(v->pcm[i]);
       _ogg_free(v->pcm);
       if(v->pcmret)_ogg_free(v->pcmret);
     }
@@ -409,7 +414,7 @@ float **vorbis_analysis_buffer(vorbis_dsp_state *v, int vals){
 
 static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
-  int order=32;
+  int order=16;
   float *lpc=alloca(order*sizeof(*lpc));
   float *work=alloca(v->pcm_current*sizeof(*work));
   long j;
@@ -424,6 +429,17 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
       /* prime as above */
       vorbis_lpc_from_data(work,lpc,v->pcm_current-v->centerW,order);
       
+#if 0
+      if(v->vi->channels==2){
+	if(i==0)
+	  _analysis_output("predataL",0,work,v->pcm_current-v->centerW,0,0,0);
+	else
+	  _analysis_output("predataR",0,work,v->pcm_current-v->centerW,0,0,0);
+      }else{
+	_analysis_output("predata",0,work,v->pcm_current-v->centerW,0,0,0);
+      }
+#endif 
+
       /* run the predictor filter */
       vorbis_lpc_predict(lpc,work+v->pcm_current-v->centerW-order,
 			 order,

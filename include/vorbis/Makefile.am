@@ -1,7 +1,7 @@
 ## Process this file with automake to produce Makefile.in
 
-includedir = $(prefix)/include/vorbis
+vorbisincludedir = $(includedir)/vorbis
 
-include_HEADERS = codec.h vorbisfile.h vorbisenc.h
+vorbisinclude_HEADERS = codec.h vorbisfile.h vorbisenc.h
 
 

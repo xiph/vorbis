@@ -9,7 +9,7 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 
@@ -31,8 +31,12 @@ The example program source:
   OggVorbis_File ov;
   int i;
 
+<font color="#A020F0">#ifdef _WIN32</font> <font color="#B22222">/* We need to set stdin to binary mode on windows. */</font>
+  _setmode( _fileno( stdin ), _O_BINARY );
+<font color="#A020F0">#endif</font>
+
   <font color="#B22222">/* open the file/pipe on stdin */</font>
-  <font color="#4169E1">if</font>(ov_open(stdin,&amp;ov,NULL,-1)&lt;0){
+  <font color="#4169E1">if</font>(ov_open_callbacks(stdin,&amp;ov,NULL,-1,OV_CALLBACKS_NOCLOSE)&lt;0){
     printf(<font color="#666666">"Could not open input as an OggVorbis file.\n\n"</font>);
     exit(1);
   }
@@ -73,11 +77,11 @@ The example program source:
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2004 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2007 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 

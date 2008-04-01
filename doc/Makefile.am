@@ -6,7 +6,8 @@ docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 
 ### all of the static docs, commited to SVN and included as is
 static_docs = \
-	draft-kerr-avt-vorbis-rtp-03.txt \
+	draft-ietf-avt-rtp-vorbis-06.xml \
+	draft-ietf-avt-rtp-vorbis-06.txt \
 	eightphase.png \
 	evenlsp.png \
 	floor1_inverse_dB_table.html \
@@ -100,7 +101,7 @@ $(BUILDDIR)/Vorbis_I_spec.xml: $(doc_sources)
 	@mkdir -p $(BUILDDIR)
 	@for file in $(doc_sources); do cp $(srcdir)/$$file $(BUILDDIR); done
 # translate the draft rtp.txt to .xml in the BUILDDIR
-$(BUILDDIR)/draft-rtp.xml: draft-kerr-avt-vorbis-rtp-03.txt
+$(BUILDDIR)/draft-rtp.xml: draft-ietf-avt-rtp-vorbis-05.txt
 	cat $< | sed 's///g' > $@
 # cat $< | sed 's///g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' > $@
 
@@ -112,15 +113,13 @@ Vorbis_I_spec.html: $(SPEC_PNG_BUILD) $(BUILDDIR)/Vorbis_I_spec.xml
 Vorbis_I_spec.fo: $(BUILDDIR)/Vorbis_I_spec.xml
 	cd build; xsltproc --xinclude --output $@ spec-fo.xsl Vorbis_I_spec.xml && mv $@ ..
 
-# we add the two newlines to pdfxmltex because on a number of Fedora systems
-# tex prompts for input complaining about something;
-# and surprisingly there's no way to tell tex to ignore that
-# also, --interaction doesn't seem to actually do anything different
-# if you change it
+# we add the two newlines to pdfxmltex because this entire XML
+# toolchain is built from wishful thinking and bonghits and the
+# default supplied passivetex config files are buggy.
 Vorbis_I_spec.pdf: Vorbis_I_spec.fo $(SPEC_PNG_BUILD) $(SPEC_PDF_BUILD)
 	cp $< build/spec.fo # work around a passivetex bug
-	cd build; echo -e -n "\n\n" | pdfxmltex --interaction nonstopmode spec.fo
-	cd build; echo -e -n "\n\n" | pdfxmltex --interaction nonstopmode spec.fo
+	-cd build; echo -e -n "\n\n" | pdfxmltex spec.fo
+	-cd build; echo -e -n "\n\n" | pdfxmltex spec.fo
 	rm build/spec.fo
 	mv build/spec.pdf $@
 else

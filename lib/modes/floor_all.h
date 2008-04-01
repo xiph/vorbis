@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -145,7 +145,7 @@ static static_codebook *_floor_512x17_books[]={
   &_huff_book_line_512x17_3sub3, 
 };
 
-static static_codebook **_floor_books[10]={
+static static_codebook **_floor_books[13]={
   _floor_128x4_books,
   _floor_256x4_books,
   _floor_128x7_books,
@@ -156,9 +156,12 @@ static static_codebook **_floor_books[10]={
   _floor_1024x27_books,
   _floor_2048x27_books,
   _floor_512x17_books,
+  _floor_1024x27_books,
+  _floor_2048x27_books,
+  _floor_256x4low_books,
 };
 
-static vorbis_info_floor1 _floor[10]={
+static vorbis_info_floor1 _floor[13]={
   /* 128 x 4 */
   {
     1,{0},{4},{2},{0},
@@ -243,6 +246,31 @@ static vorbis_info_floor1 _floor[10]={
     
     60,30,500,    1,18.,  -1 /* lowpass! */
   },
+  /* 1024 x 27 (44.1/48kHz low bitrate) */
+  {
+    8,{0,1,2,2,3,3,4,4},{3,4,3,4,3},{0,1,1,2,2},{-1,0,1,2,3},
+    {{4},{5,6},{7,8},{-1,9,10,11},{-1,12,13,14}},
+    2,{0,1024,   93,23,358, 6,46,186,750,  14,33,65, 130,260,485,
+       3,10,18,28,  39,55,79,111,  158,220,306,  418,650,560},
+    
+    60,30,500,    3,18.,  -1 /* lowpass */
+  },
+  /* 2048 x 27 (44.1/48kHz) */
+  {
+    8,{0,1,2,2,3,3,4,4},{3,4,3,4,3},{0,1,1,2,2},{-1,0,1,2,3},
+    {{4},{5,6},{7,8},{-1,9,10,11},{-1,12,13,14}},
+    2,{0,2048,   186,46,716, 12,92,372,1500,  28,66,130, 260,520,970,
+       6,20,36,56,  78,110,158,222,  316,440,612,  836,1300,1120},
+    
+    60,30,500,    3,18.,  -1 /* lowpass */
+  },
+  /* 512 x 4 (256 x 4) */
+  {
+    1,{0},{4},{2},{0},
+    {{1,2,3,4}},
+    4,{0,512, 132,32,64,280},
 
+    60,30,500,   1.,18.,  -1
+  },
 };
 

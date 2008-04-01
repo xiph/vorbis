@@ -9,7 +9,7 @@
 <table border=0 width=100%>
 <tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 
@@ -28,14 +28,17 @@ The example program source:
 #include <stdio.h>
 #include "vorbis/codec.h"
 #include "vorbis/vorbisfile.h"
-#include "../lib/misc.h"
 
 int main(){
   OggVorbis_File ov;
   int i;
 
+#ifdef _WIN32 /* We need to set stdin to binary mode under Windows */
+  _setmode( _fileno( stdin ), _O_BINARY );
+#endif
+
   /* open the file/pipe on stdin */
-  if(ov_open(stdin,&ov,NULL,-1)==-1){
+  if(ov_open_callbacks(stdin,&ov,NULL,-1,OV_CALLBACKS_NOCLOSE)==-1){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }
@@ -70,11 +73,11 @@ int main(){
 <hr noshade>
 <table border=0 width=100%>
 <tr valign=top>
-<td><p class=tiny>copyright &copy; 2003 Xiph.org</p></td>
+<td><p class=tiny>copyright &copy; 2007 Xiph.org</p></td>
 <td align=right><p class=tiny><a href="http://www.xiph.org/ogg/vorbis/index.html">Ogg Vorbis</a><br><a href="mailto:team@vorbis.org">team@vorbis.org</a></p></td>
 </tr><tr>
 <td><p class=tiny>Vorbisfile documentation</p></td>
-<td align=right><p class=tiny>vorbisfile version 1.68 - 20030307</p></td>
+<td align=right><p class=tiny>vorbisfile version 1.2.0 - 20070723</p></td>
 </tr>
 </table>
 

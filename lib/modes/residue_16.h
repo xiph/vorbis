@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -21,7 +21,7 @@ static static_bookblock _resbook_16s_0={
   {
     {0},
     {0,0,&_16c0_s_p1_0},
-    {0,0,&_16c0_s_p2_0},
+    {0},
     {0,0,&_16c0_s_p3_0},
     {0,0,&_16c0_s_p4_0},
     {0,0,&_16c0_s_p5_0},
@@ -35,7 +35,7 @@ static static_bookblock _resbook_16s_1={
   {
     {0},
     {0,0,&_16c1_s_p1_0},
-    {0,0,&_16c1_s_p2_0},
+    {0},
     {0,0,&_16c1_s_p3_0},
     {0,0,&_16c1_s_p4_0},
     {0,0,&_16c1_s_p5_0},

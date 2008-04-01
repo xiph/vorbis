@@ -5,8 +5,8 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
- * by the XIPHOPHORUS Company http://www.xiph.org/                  *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
@@ -295,22 +295,28 @@ static int mapping0_forward(vorbis_block *vb){
                                      next major model upgrade. */
 
 #if 0
-    if(vi->channels==2)
+    if(vi->channels==2){
       if(i==0)
 	_analysis_output("pcmL",seq,pcm,n,0,0,total-n/2);
       else
 	_analysis_output("pcmR",seq,pcm,n,0,0,total-n/2);
+    }else{
+      _analysis_output("pcm",seq,pcm,n,0,0,total-n/2);
+    }
 #endif
   
     /* window the PCM data */
     _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
 
 #if 0
-    if(vi->channels==2)
+    if(vi->channels==2){
       if(i==0)
 	_analysis_output("windowedL",seq,pcm,n,0,0,total-n/2);
       else
 	_analysis_output("windowedR",seq,pcm,n,0,0,total-n/2);
+    }else{
+      _analysis_output("windowed",seq,pcm,n,0,0,total-n/2);
+    }
 #endif
 
     /* transform the PCM data */
@@ -365,6 +371,8 @@ static int mapping0_forward(vorbis_block *vb){
       }else{
 	_analysis_output("fftR",seq,logfft,n/2,1,0,0);
       }
+    }else{
+      _analysis_output("fft",seq,logfft,n/2,1,0,0);
     }
 #endif
 
@@ -387,8 +395,8 @@ static int mapping0_forward(vorbis_block *vb){
       float *logmdct =logfft+n/2;
       float *logmask =logfft;
       
-      float *lastmdct = b->nblock+i*128;
-      float *tempmdct = b->tblock+i*128;
+      float *lastmdct = b->nblock+i*256;
+      float *tempmdct = b->tblock+i*256;
       
       float *lowcomp = b->lownoise_compand_level+i;
 
@@ -448,6 +456,8 @@ static int mapping0_forward(vorbis_block *vb){
 	  _analysis_output("noiseL",seq,noise,n/2,1,0,0);
 	else
 	  _analysis_output("noiseR",seq,noise,n/2,1,0,0);
+      }else{
+	_analysis_output("noise",seq,noise,n/2,1,0,0);
       }
 #endif
 
@@ -467,6 +477,8 @@ static int mapping0_forward(vorbis_block *vb){
 	  _analysis_output("toneL",seq,tone,n/2,1,0,0);
 	else
 	  _analysis_output("toneR",seq,tone,n/2,1,0,0);
+      }else{
+	_analysis_output("tone",seq,tone,n/2,1,0,0);
       }
 #endif
 
@@ -484,6 +496,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   noise,
 			   tone,
 			   1,
+			   vorbis_bitrate_managed(vb),
 			   logmask,
 			   mdct,
 			   logmdct,
@@ -492,7 +505,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   vif->n,
 			   blocktype, modenumber,
 			   vb->nW,
-			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
+			   b->lW_blocktype, b->lW_modenumber, b->lW_no, b->padnum);
 	
 #if 0
 	if(vi->channels==2){
@@ -500,6 +513,8 @@ static int mapping0_forward(vorbis_block *vb){
 	    _analysis_output("aotuvM1_L",seq,aotuv,psy_look->n,1,1,0);
 	  else
 	    _analysis_output("aotuvM1_R",seq,aotuv,psy_look->n,1,1,0);
+	}else{
+	  _analysis_output("aotuvM1",seq,aotuv,psy_look->n,1,1,0);
 	}
       }
 #endif
@@ -511,6 +526,8 @@ static int mapping0_forward(vorbis_block *vb){
 	  _analysis_output("mask1L",seq,logmask,n/2,1,0,0);
 	else
 	  _analysis_output("mask1R",seq,logmask,n/2,1,0,0);
+      }else{
+	_analysis_output("mask1",seq,logmask,n/2,1,0,0);
       }
 #endif
 
@@ -524,6 +541,7 @@ static int mapping0_forward(vorbis_block *vb){
 		   logmdct,
 		   logmask);
       
+      
       /* are we managing bitrate?  If so, perform two more fits for
          later rate tweaking (fits represent hi/lo) */
       if(vorbis_bitrate_managed(vb) && floor_posts[i][PACKETBLOBS/2]){
@@ -533,6 +551,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   noise,
 			   tone,
 			   2,
+			   vorbis_bitrate_managed(vb),
 			   logmask,
 			   mdct,
 			   logmdct,
@@ -541,7 +560,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   vif->n,
 			   blocktype, modenumber,
 			   vb->nW,
-			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
+			   b->lW_blocktype, b->lW_modenumber, b->lW_no, b->padnum);
 
 #if 0
 	if(vi->channels==2){
@@ -549,6 +568,8 @@ static int mapping0_forward(vorbis_block *vb){
 	    _analysis_output("mask2L",seq,logmask,n/2,1,0,0);
 	  else
 	    _analysis_output("mask2R",seq,logmask,n/2,1,0,0);
+	}else{
+	  _analysis_output("mask2",seq,logmask,n/2,1,0,0);
 	}
 #endif
 	
@@ -562,6 +583,7 @@ static int mapping0_forward(vorbis_block *vb){
 			   noise,
 			   tone,
 			   0,
+			   vorbis_bitrate_managed(vb),
 			   logmask,
 			   mdct,
 			   logmdct,
@@ -570,14 +592,17 @@ static int mapping0_forward(vorbis_block *vb){
 			   vif->n,
 			   blocktype, modenumber,
 			   vb->nW,
-			   b->lW_blocktype, b->lW_modenumber, b->lW_no);
+			   b->lW_blocktype, b->lW_modenumber, b->lW_no, b->padnum);
 
 #if 0
-	if(vi->channels==2)
+	if(vi->channels==2){
 	  if(i==0)
 	    _analysis_output("mask0L",seq,logmask,n/2,1,0,0);
 	  else
 	    _analysis_output("mask0R",seq,logmask,n/2,1,0,0);
+	}else{
+	  _analysis_output("mask0",seq,logmask,n/2,1,0,0);
+	}
 #endif
 
 	floor_posts[i][0]=
@@ -701,7 +726,8 @@ static int mapping0_forward(vorbis_block *vb){
 			 ci->psy_g_param.sliding_lowpass[vb->W][k]);
 		 
 
-	_vp_noise_normalize(psy_look,res,res+n/2,sortindex[i]);
+	_vp_noise_normalize(psy_look,res,res+n/2,sortindex[i],
+				blocktype, modenumber);
 
 	
 #if 0
@@ -734,6 +760,7 @@ static int mapping0_forward(vorbis_block *vb){
 		   ilogmaskch,
 		   nonzero,
 		   ci->psy_g_param.sliding_lowpass[vb->W][k],
+		   blocktype, modenumber,
 		   gmdct, res_org);
       }
       
@@ -761,11 +788,22 @@ static int mapping0_forward(vorbis_block *vb){
       }
       
       /* set last-window type & number */
+      // if (last window == impulse) && (present window == padding) padnum=1
+      if(!b->lW_modenumber && !b->lW_blocktype && !modenumber && blocktype) b->padnum=1;
+      else if(b->padnum) b->padnum++;
+      if(modenumber) b->padnum=0; // if (present window == (long or trans.) ) padnum=0 [reset]
+      // if (current block type == last block type) lW_no++
       if((blocktype == b->lW_blocktype) && (modenumber == b->lW_modenumber)) b->lW_no++;
       else b->lW_no = 1;
       b->lW_blocktype = blocktype;
       b->lW_modenumber = modenumber;
       /* ok, done encoding.  Next protopacket. */
+      
+      // block type
+      /*if(modenumber && blocktype)printf("[L]\n");
+      else if(modenumber && !blocktype)printf("[T]\n");
+      else if(!modenumber && blocktype)printf("[P]\n");
+      else if(!modenumber && !blocktype)printf("[I]\n");*/
     }
     
   }
