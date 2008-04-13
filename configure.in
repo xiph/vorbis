@@ -4,15 +4,15 @@ dnl ------------------------------------------------
 dnl Initialization and Versioning
 dnl ------------------------------------------------
 
-AC_INIT(lib/mdct.c)
 
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
+AC_INIT([libvorbis],[1.2.1svn],[vorbis-dev@xiph.org])
 
+AC_CONFIG_SRCDIR([lib/mdct.c])
+
+AC_CANONICAL_TARGET([])
+
+AM_INIT_AUTOMAKE($PACKAGE_NAME,$PACKAGE_VERSION)
 AM_CONFIG_HEADER([config.h])
-
-AM_INIT_AUTOMAKE(libvorbis,1.2.1svn)
-AM_MAINTAINER_MODE
 
 dnl Add parameters for aclocal
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4")
@@ -231,6 +231,10 @@ AC_SUBST(VORBIS_LIBS)
 AC_SUBST(DEBUG)
 AC_SUBST(PROFILE)
 AC_SUBST(pthread_lib)
+
+dnl The following line causes the libtool distributed with the source
+dnl to be replaced if the build system has a more recent version.
+AC_SUBST(LIBTOOL_DEPS)
 
 AC_OUTPUT([
 Makefile
