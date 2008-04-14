@@ -4,9 +4,10 @@ AUTOMAKE_OPTIONS = foreign
 
 INCLUDES = -I$(top_srcdir)/include @OGG_CFLAGS@
 
-TESTS = test
-
 noinst_PROGRAMS = test
+
+check: $(noinst_PROGRAMS)
+	./test$(EXEEXT)
 
 test_SOURCES = util.c util.h write_read.c write_read.h test.c
 test_LDADD = ../lib/libvorbisenc.la ../lib/libvorbis.la @OGG_LIBS@

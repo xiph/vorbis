@@ -42,11 +42,13 @@ EXTRA_DIST = lookups.pl
 #vorbis_selftests = test_codebook test_sharedbook
 vorbis_selftests = test_sharedbook
 
-TESTS = $(vorbis_selftests)
 noinst_PROGRAMS = $(vorbis_selftests)
 
-test_codebook_SOURCES = codebook.c
-test_codebook_CFLAGS = -D_V_SELFTEST
+check: $(noinst_PROGRAMS)
+	./test_sharedbook$(EXEEXT)
+
+#test_codebook_SOURCES = codebook.c
+#test_codebook_CFLAGS = -D_V_SELFTEST
 
 test_sharedbook_SOURCES = sharedbook.c
 test_sharedbook_CFLAGS = -D_V_SELFTEST
