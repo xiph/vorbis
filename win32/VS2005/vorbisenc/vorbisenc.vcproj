@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="Debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -66,7 +66,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\debug;..\debug"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\libogg\win32\VS2005\$(ConfigurationName)&quot;;&quot;..\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/vorbisenc.pdb"
 				SubSystem="1"
@@ -100,7 +100,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
-			IntermediateDirectory="Release"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -153,7 +153,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\release;..\release"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\libogg\win32\VS2005\$(ConfigurationName)&quot;;&quot;..\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -188,7 +188,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release_SSE|Win32"
-			OutputDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
@@ -243,7 +243,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\release;..\release"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\libogg\win32\VS2005\$(ConfigurationName)&quot;;&quot;..\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -278,7 +278,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release_SSE2|Win32"
-			OutputDirectory="$(ConfigurationName)"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
@@ -333,7 +333,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisenc.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2005\release;..\release"
+				AdditionalLibraryDirectories="&quot;..\..\..\..\libogg\win32\VS2005\$(ConfigurationName)&quot;;&quot;..\$(ConfigurationName)&quot;"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				OptimizeReferences="2"
