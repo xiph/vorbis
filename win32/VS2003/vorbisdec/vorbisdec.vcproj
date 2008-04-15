@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\debug"
-			IntermediateDirectory="Debug"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			WholeProgramOptimization="FALSE">
@@ -37,7 +37,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisdec.exe"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\debug;..\debug"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\$(ConfigurationName);..\$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/vorbisdec.pdb"
 				SubSystem="1"
@@ -65,8 +65,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\release"
-			IntermediateDirectory="Release"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
 			WholeProgramOptimization="TRUE">
@@ -96,7 +96,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisdec.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\release;..\release"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\$(ConfigurationName);..\$(ConfigurationName)"
 				GenerateDebugInformation="FALSE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -126,7 +126,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release_SSE|Win32"
-			OutputDirectory="..\release"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
@@ -158,7 +158,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisdec.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\release;..\release"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\$(ConfigurationName);..\$(ConfigurationName)"
 				GenerateDebugInformation="FALSE"
 				SubSystem="1"
 				OptimizeReferences="2"
@@ -188,7 +188,7 @@
 		</Configuration>
 		<Configuration
 			Name="Release_SSE2|Win32"
-			OutputDirectory="..\release"
+			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			CharacterSet="2"
@@ -220,7 +220,7 @@
 				AdditionalDependencies="libogg.lib libvorbis.lib"
 				OutputFile="$(OutDir)/vorbisdec.exe"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\release;..\release"
+				AdditionalLibraryDirectories="..\..\..\..\libogg\win32\VS2003\$(ConfigurationName);..\$(ConfigurationName)"
 				GenerateDebugInformation="FALSE"
 				SubSystem="1"
 				OptimizeReferences="2"
