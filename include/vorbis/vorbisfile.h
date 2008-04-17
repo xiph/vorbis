@@ -176,6 +176,9 @@ extern vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
 
 extern long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int samples,
 			  int *bitstream);
+extern long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
+			  int bigendianp,int word,int sgned,int *bitstream,
+			  void (*filter)(float **pcm,long channels,long samples,void *filter_param),void *filter_param);
 extern long ov_read(OggVorbis_File *vf,char *buffer,int length,
 		    int bigendianp,int word,int sgned,int *bitstream);
 extern int ov_crosslap(OggVorbis_File *vf1,OggVorbis_File *vf2);

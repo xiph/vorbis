@@ -1721,6 +1721,11 @@ static int host_is_big_endian() {
    index within the physical bitstream.  Note that the accessor
    functions above are aware of this dichotomy).
 
+   ov_read_filter is exactly the same as ov_read except that it processes
+   the decoded audio data through a filter before packing it into the
+   requested format. This gives greater accuracy than applying a filter
+   after the audio has been converted into integral PCM.
+
    input values: buffer) a buffer to hold packed PCM data for return
 		 length) the byte length requested to be placed into buffer
 		 bigendianp) should the data be packed LSB first (0) or
@@ -1737,8 +1742,9 @@ static int host_is_big_endian() {
 
 	    *section) set to the logical bitstream number */
 
-long ov_read(OggVorbis_File *vf,char *buffer,int length,
-		    int bigendianp,int word,int sgned,int *bitstream){
+long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
+		    int bigendianp,int word,int sgned,int *bitstream,
+		    void (*filter)(float **pcm,long channels,long samples,void *filter_param),void *filter_param){
   int i,j;
   int host_endian = host_is_big_endian();
 
@@ -1776,6 +1782,10 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
     if(samples <= 0)
       return OV_EINVAL;
     
+    /* Here. */
+    if(filter)
+      filter(pcm,channels,samples,filter_param);
+
     /* a tight loop to pack each size */
     {
       int val;
@@ -1866,6 +1876,11 @@ long ov_read(OggVorbis_File *vf,char *buffer,int length,
   }else{
     return(samples);
   }
+}
+
+long ov_read(OggVorbis_File *vf,char *buffer,int length,
+	     int bigendianp,int word,int sgned,int *bitstream){
+  return ov_read_filter(vf, buffer, length, bigendianp, word, sgned, bitstream, NULL, NULL);
 }
 
 /* input values: pcm_channels) a float vector per channel of output

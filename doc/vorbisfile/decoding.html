@@ -20,9 +20,10 @@ All libvorbisfile decoding routines are declared in "vorbis/vorbisfile.h".
 <p>
 
 After <a href="initialization.html">initialization</a>, decoding audio
-is as simple as calling <a href="ov_read.html">ov_read()</a>. This
-function works similarly to reading from a normal file using
-<tt>read()</tt>.<p>
+is as simple as calling <a href="ov_read.html">ov_read()</a> (or the
+similar functions <a href="ov_read_float.html">ov_read_float()</a> and
+<a href="ov_read_filter.html">ov_read_filter</a>). This function works
+similarly to reading from a normal file using <tt>read()</tt>.<p>
 
 However, a few differences are worth noting:
 
@@ -67,6 +68,10 @@ or <a href="ov_open_callbacks.html"><tt>ov_open_callbacks()</tt></a>.</td>
 <tr valign=top>
         <td><a href="ov_read_float.html">ov_read_float</a></td>
         <td>This function decodes to floats instead of integer samples.</td>
+</tr>
+<tr valign=top>
+        <td><a href="ov_read_filter.html">ov_read_filter</a></td>
+        <td>This function works like <a href="ov_read.html">ov_read</a>, but passes the PCM data through the provided filter before converting to integer sample data.</td>
 </tr>
 </table>
 
