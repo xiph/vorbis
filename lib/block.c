@@ -235,7 +235,8 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
     if(!ci->fullbooks){
       ci->fullbooks=_ogg_calloc(ci->books,sizeof(*ci->fullbooks));
       for(i=0;i<ci->books;i++){
-	vorbis_book_init_decode(ci->fullbooks+i,ci->book_param[i]);
+	if(vorbis_book_init_decode(ci->fullbooks+i,ci->book_param[i]))
+	  return -1;
 	/* decode codebooks are now standalone after init */
 	vorbis_staticbook_destroy(ci->book_param[i]);
 	ci->book_param[i]=NULL;
@@ -694,9 +695,11 @@ int vorbis_synthesis_restart(vorbis_dsp_state *v){
 }
 
 int vorbis_synthesis_init(vorbis_dsp_state *v,vorbis_info *vi){
-  if(_vds_shared_init(v,vi,0)) return 1;
+  if(_vds_shared_init(v,vi,0)){
+    vorbis_dsp_clear(v);
+    return 1;
+  }
   vorbis_synthesis_restart(v);
-
   return 0;
 }
 
