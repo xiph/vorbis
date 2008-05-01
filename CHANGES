@@ -1,6 +1,14 @@
 libvorbis 1.2.1 (unreleased) -- "Xiph.Org libVorbis I 20070622"
 
- * no changes recorded
+ * improved robustness with corrupt streams
+ * new ov_read_filter() vorbisfile call allows filtering decoded
+   audio as floats before converting to integer samples.
+ * Updated RTP payload format draft.
+ * Bare bones self test under 'make check'
+ * Fix a problem encoding some streams between 14 and 28 kHz.
+ * Fix a numerical instability in the edge extrapolation filter.
+ * Build system improvements.
+ * Specification correction.
 
 libvorbis 1.2.0 (2007-07-25) -- "Xiph.Org libVorbis I 20070622"
 
