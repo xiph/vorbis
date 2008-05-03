@@ -48,7 +48,7 @@ if test -r Makefile.am; then
     majneeded=`echo $AM_NEEDED | $VERSIONMKMAJ`
     minneeded=`echo $AM_NEEDED | $VERSIONMKMIN`
     for am in automake-$AM_NEEDED automake$AM_NEEDED \
-	automake automake-1.7 automake-1.8 automake-1.9 automake-1.10; do
+	automake-1.10 automake-1.9 automake-1.8 automake-1.7 automake; do
       ($am --version < /dev/null > /dev/null 2>&1) || continue
       ver=`$am --version < /dev/null | head -n 1 | $VERSIONGREP`
       maj=`echo $ver | $VERSIONMKMAJ`
