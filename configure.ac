@@ -203,13 +203,7 @@ AC_CHECK_LIB(m, cos, VORBIS_LIBS="-lm", VORBIS_LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
 HAVE_OGG=no
-dnl first check through pkg-config
-dnl check for pkg-config itself so we don't try the m4 macro without pkg-config
-AC_CHECK_PROG(HAVE_PKG_CONFIG, pkg-config, yes)
-if test "x$HAVE_PKG_CONFIG" = "xyes"
-then
-  PKG_CHECK_MODULES(OGG, ogg >= 1.0, HAVE_OGG=yes, HAVE_OGG=no)
-fi
+PKG_CHECK_MODULES(OGG, ogg >= 1.0, HAVE_OGG=yes, HAVE_OGG=no)
 if test "x$HAVE_OGG" = "xno"
 then
   dnl fall back to the old school test
