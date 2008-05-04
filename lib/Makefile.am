@@ -20,11 +20,11 @@ libvorbis_la_LIBADD = @OGG_LIBS@ @VORBIS_LIBS@
 
 libvorbisfile_la_SOURCES = vorbisfile.c
 libvorbisfile_la_LDFLAGS = -no-undefined -version-info @VF_LIB_CURRENT@:@VF_LIB_REVISION@:@VF_LIB_AGE@
-libvorbisfile_la_LIBADD = libvorbis.la
+libvorbisfile_la_LIBADD = @OGG_LIBS@ libvorbis.la
 
 libvorbisenc_la_SOURCES = vorbisenc.c 
 libvorbisenc_la_LDFLAGS = -no-undefined -version-info @VE_LIB_CURRENT@:@VE_LIB_REVISION@:@VE_LIB_AGE@
-libvorbisenc_la_LIBADD = libvorbis.la
+libvorbisenc_la_LIBADD = @OGG_LIBS@ libvorbis.la
 
 EXTRA_PROGRAMS = barkmel tone psytune
 CLEANFILES = $(EXTRA_PROGRAMS)
