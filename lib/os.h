@@ -116,7 +116,9 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
 #endif
 
 
-#if defined(_WIN32) && !defined(__GNUC__) && !defined(__BORLANDC__)
+/* MSVC inline assembly. 32 bit only; inline ASM isn't implemented in the 64 bit
+ * compiler */
+#if defined(_MSC_VER) && !defined(_WIN64)
 #  define VORBIS_FPU_CONTROL
 
 typedef ogg_int16_t vorbis_fpu_control;
