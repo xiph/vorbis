@@ -1,4 +1,4 @@
-<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Vorbis I specification</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="id209753"></a>Vorbis I specification</h1></div><div><h3 class="corpauthor">Xiph.org Foundation</h3></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#vorbis-spec-intro">1. Introduction and Description</a></span></dt><dd><dl><dt><span class="section"><a href="#id322780">1.1. Overview</a></span></dt><dt><span class="section"><a href="#id256749">1.2. Decoder Configuration</a></span></dt><dt><span class="section"><a href="#id257049">1.3. High-level Decode Process</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-bitpacking">2. Bitpacking Convention</a></span></dt><dd><dl><dt><span class="section"><a href="#id316853">2.1. Overview</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-codebook">3. Probability Model and Codebooks</a></span></dt><dd><dl><dt><span class="section"><a href="#id326636">3.1. Overview</a></span></dt><dt><span class="section"><a href="#id329366">3.2. Packed codebook format</a></span></dt><dt><span class="section"><a href="#id320654">3.3. Use of the codebook abstraction</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-codec">4. Codec Setup and Packet Decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id332455">4.1. Overview</a></span></dt><dt><span class="section"><a href="#id332825">4.2. Header decode and decode setup</a></span></dt><dt><span class="section"><a href="#id341314">4.3. Audio packet decode and synthesis</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-comment">5. comment field and header specification</a></span></dt><dd><dl><dt><span class="section"><a href="#id333629">5.1. Overview</a></span></dt><dt><span class="section"><a href="#id333657">5.2. Comment encoding</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-floor0">6. Floor type 0 setup and decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id331401">6.1. Overview</a></span></dt><dt><span class="section"><a href="#id336955">6.2. Floor 0 format</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-floor1">7. Floor type 1 setup and decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id315995">7.1. Overview</a></span></dt><dt><span class="section"><a href="#id313615">7.2. Floor 1 format</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-residue">8. Residue setup and decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id312917">8.1. Overview</a></span></dt><dt><span class="section"><a href="#id336796">8.2. Residue format</a></span></dt><dt><span class="section"><a href="#id309374">8.3. residue 0</a></span></dt><dt><span class="section"><a href="#id343072">8.4. residue 1</a></span></dt><dt><span class="section"><a href="#id343097">8.5. residue 2</a></span></dt><dt><span class="section"><a href="#id343146">8.6. Residue decode</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-helper">9. Helper equations</a></span></dt><dd><dl><dt><span class="section"><a href="#id308612">9.1. Overview</a></span></dt><dt><span class="section"><a href="#id320333">9.2. Functions</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-tables">10. Tables</a></span></dt><dd><dl><dt><span class="section"><a href="#vorbis-spec-floor1_inverse_dB_table">10.1. floor1_inverse_dB_table</a></span></dt></dl></dd><dt><span class="appendix"><a href="#vorbis-over-ogg">1. Embedding Vorbis into an Ogg stream</a></span></dt><dd><dl><dt><span class="section"><a href="#id321543">1.1. Overview</a></span></dt><dd><dl><dt><span class="section"><a href="#id315128">1.1.1. Restrictions</a></span></dt><dt><span class="section"><a href="#id302634">1.1.2. MIME type</a></span></dt></dl></dd><dt><span class="section"><a href="#id319135">1.2. Encapsulation</a></span></dt></dl></dd><dt><span class="appendix"><a href="#vorbis-over-rtp">2. Vorbis encapsulation in RTP</a></span></dt><dt><span class="appendix"><a href="#footer">3. Colophon</a></span></dt></dl></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="vorbis-spec-intro"></a>1. Introduction and Description</h2></div><div><p class="releaseinfo">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>Vorbis I specification</title><meta name="generator" content="DocBook XSL Stylesheets V1.72.0"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="article" lang="en"><div class="titlepage"><div><div><h1 class="title"><a name="id209753"></a>Vorbis I specification</h1></div><div><h3 class="corpauthor">Xiph.org Foundation</h3></div></div><hr></div><div class="toc"><p><b>Table of Contents</b></p><dl><dt><span class="section"><a href="#vorbis-spec-intro">1. Introduction and Description</a></span></dt><dd><dl><dt><span class="section"><a href="#id322780">1.1. Overview</a></span></dt><dt><span class="section"><a href="#id256749">1.2. Decoder Configuration</a></span></dt><dt><span class="section"><a href="#id257049">1.3. High-level Decode Process</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-bitpacking">2. Bitpacking Convention</a></span></dt><dd><dl><dt><span class="section"><a href="#id316853">2.1. Overview</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-codebook">3. Probability Model and Codebooks</a></span></dt><dd><dl><dt><span class="section"><a href="#id326636">3.1. Overview</a></span></dt><dt><span class="section"><a href="#id329366">3.2. Packed codebook format</a></span></dt><dt><span class="section"><a href="#id320654">3.3. Use of the codebook abstraction</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-codec">4. Codec Setup and Packet Decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id332455">4.1. Overview</a></span></dt><dt><span class="section"><a href="#id332825">4.2. Header decode and decode setup</a></span></dt><dt><span class="section"><a href="#id341314">4.3. Audio packet decode and synthesis</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-comment">5. comment field and header specification</a></span></dt><dd><dl><dt><span class="section"><a href="#id333629">5.1. Overview</a></span></dt><dt><span class="section"><a href="#id333657">5.2. Comment encoding</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-floor0">6. Floor type 0 setup and decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id320318">6.1. Overview</a></span></dt><dt><span class="section"><a href="#id324407">6.2. Floor 0 format</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-floor1">7. Floor type 1 setup and decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id321969">7.1. Overview</a></span></dt><dt><span class="section"><a href="#id315653">7.2. Floor 1 format</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-residue">8. Residue setup and decode</a></span></dt><dd><dl><dt><span class="section"><a href="#id333002">8.1. Overview</a></span></dt><dt><span class="section"><a href="#id327769">8.2. Residue format</a></span></dt><dt><span class="section"><a href="#id318469">8.3. residue 0</a></span></dt><dt><span class="section"><a href="#id343071">8.4. residue 1</a></span></dt><dt><span class="section"><a href="#id343096">8.5. residue 2</a></span></dt><dt><span class="section"><a href="#id343145">8.6. Residue decode</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-helper">9. Helper equations</a></span></dt><dd><dl><dt><span class="section"><a href="#id325073">9.1. Overview</a></span></dt><dt><span class="section"><a href="#id306980">9.2. Functions</a></span></dt></dl></dd><dt><span class="section"><a href="#vorbis-spec-tables">10. Tables</a></span></dt><dd><dl><dt><span class="section"><a href="#vorbis-spec-floor1_inverse_dB_table">10.1. floor1_inverse_dB_table</a></span></dt></dl></dd><dt><span class="appendix"><a href="#vorbis-over-ogg">1. Embedding Vorbis into an Ogg stream</a></span></dt><dd><dl><dt><span class="section"><a href="#id312362">1.1. Overview</a></span></dt><dd><dl><dt><span class="section"><a href="#id336032">1.1.1. Restrictions</a></span></dt><dt><span class="section"><a href="#id319459">1.1.2. MIME type</a></span></dt></dl></dd><dt><span class="section"><a href="#id317588">1.2. Encapsulation</a></span></dt></dl></dd><dt><span class="appendix"><a href="#vorbis-over-rtp">2. Vorbis encapsulation in RTP</a></span></dt><dt><span class="appendix"><a href="#footer">3. Colophon</a></span></dt></dl></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="vorbis-spec-intro"></a>1. Introduction and Description</h2></div><div><p class="releaseinfo">
  $Id: 01-introduction.xml 7186 2004-07-20 07:19:25Z xiphmont $
 </p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id322780"></a>1.1. Overview</h3></div></div></div><p>
 This document provides a high level description of the Vorbis codec's
@@ -1204,7 +1204,7 @@ the 'record label')
 </dd><dt><span class="term">ISRC</span></dt><dd>International Standard Recording Code for the
 track; see <a href="http://www.ifpi.org/isrc/" target="_top">the ISRC
 intro page</a> for more information on ISRC numbers.
-</dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a name="id311699"></a>5.2.2.2. Implications</h5></div></div></div><p>Field names should not be 'internationalized'; this is a
+</dd></dl></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h5 class="title"><a name="id311698"></a>5.2.2.2. Implications</h5></div></div></div><p>Field names should not be 'internationalized'; this is a
 concession to simplicity not an attempt to exclude the majority of
 the world that doesn't speak English. Field <span class="emphasis"><em>contents</em></span>,
 however, use the UTF-8 character encoding to allow easy representation 
@@ -1225,7 +1225,7 @@ ARTIST=Sonny Rollins
 ARTIST=Sonny Stitt 
 </pre></blockquote></div><p>
 
-</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id301001"></a>5.2.3. Encoding</h4></div></div></div><p>
+</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id301005"></a>5.2.3. Encoding</h4></div></div></div><p>
 The comment header comprises the entirety of the second bitstream
 header packet.  Unlike the first bitstream header packet, it is not
 generally the only packet on the second page and may not be restricted
@@ -1255,17 +1255,17 @@ bitstream octet first):
 This is actually somewhat easier to describe in code; implementation of the above can be found in <code class="filename">vorbis/lib/info.c</code>, <code class="function">_vorbis_pack_comment()</code> and <code class="function">_vorbis_unpack_comment()</code>.
 </p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="vorbis-spec-floor0"></a>6. Floor type 0 setup and decode</h2></div><div><p class="releaseinfo">
   $Id: 06-floor0.xml 14529 2008-02-19 10:15:13Z xiphmont $
-</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id331401"></a>6.1. Overview</h3></div></div></div><p>
+</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id320318"></a>6.1. Overview</h3></div></div></div><p>
 Vorbis floor type zero uses Line Spectral Pair (LSP, also alternately
 known as Line Spectral Frequency or LSF) representation to encode a
 smooth spectral envelope curve as the frequency response of the LSP
 filter.  This representation is equivalent to a traditional all-pole
 infinite impulse response filter as would be used in linear predictive
 coding; LSP representation may be converted to LPC representation and
-vice-versa.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id336955"></a>6.2. Floor 0 format</h3></div></div></div><p>
+vice-versa.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id324407"></a>6.2. Floor 0 format</h3></div></div></div><p>
 Floor zero configuration consists of six integer fields and a list of
 VQ codebooks for use in coding/decoding the LSP filter coefficient
-values used by each frame. </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id311350"></a>6.2.1. header decode</h4></div></div></div><p>
+values used by each frame. </p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id322051"></a>6.2.1. header decode</h4></div></div></div><p>
 Configuration information for instances of floor zero decodes from the
 codec setup header (third packet).  configuration decode proceeds as
 follows:</p><pre class="screen">
@@ -1349,12 +1349,12 @@ Similarly, the below calculation synthesizes the output LSP curve <code class="v
      </p><div class="informalequation"><div class="mediaobject"><img src="floorval.png" alt="[expression for floorval]"></div></div><p>
  </p></li><li><code class="varname">[iteration_condition]</code> = map element <code class="varname">[i]</code></li><li><code class="varname">[output]</code> element <code class="varname">[i]</code> = <code class="varname">[linear_floor_value]</code></li><li>increment <code class="varname">[i]</code></li><li>if ( map element <code class="varname">[i]</code> is equal to <code class="varname">[iteration_condition]</code> ) continue at step 5</li><li>if ( <code class="varname">[i]</code> is less than <code class="varname">[n]</code> ) continue at step 2</li><li>done</li></ol></div></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="vorbis-spec-floor1"></a>7. Floor type 1 setup and decode</h2></div><div><p class="releaseinfo">
  $Id: 07-floor1.xml 10466 2005-11-28 00:34:44Z giles $
-</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id315995"></a>7.1. Overview</h3></div></div></div><p>
+</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id321969"></a>7.1. Overview</h3></div></div></div><p>
 Vorbis floor type one uses a piecewise straight-line representation to
 encode a spectral envelope curve. The representation plots this curve
 mechanically on a linear frequency axis and a logarithmic (dB)
 amplitude axis. The integer plotting algorithm used is similar to
-Bresenham's algorithm.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id313615"></a>7.2. Floor 1 format</h3></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id324208"></a>7.2.1. model</h4></div></div></div><p>
+Bresenham's algorithm.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id315653"></a>7.2. Floor 1 format</h3></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id317058"></a>7.2.1. model</h4></div></div></div><p>
 Floor type one represents a spectral curve as a series of
 line segments.  Synthesis constructs a floor curve using iterative
 prediction in a process roughly equivalent to the following simplified
@@ -1390,7 +1390,7 @@ A more efficient algorithm with carefully defined integer rounding
 behavior is used for actual decode, as described later.  The actual
 algorithm splits Y value computation and line plotting into two steps
 with modifications to the above algorithm to eliminate noise
-accumulation through integer roundoff/truncation. </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id313851"></a>7.2.2. header decode</h4></div></div></div><p>
+accumulation through integer roundoff/truncation. </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id334215"></a>7.2.2. header decode</h4></div></div></div><p>
 A list of floor X values is stored in the packet header in interleaved
 format (used in list order during packet decode and synthesis).  This
 list is split into partitions, and each partition is assigned to a
@@ -1522,7 +1522,7 @@ Skipping zero-difference values allows a smoother line fit.  </p><p>
 Although some aspects of the below algorithm look like inconsequential
 optimizations, implementors are warned to follow the details closely.
 Deviation from implementing a strictly equivalent algorithm can result
-in serious decoding errors.</p><div class="section" lang="en"><div class="titlepage"><div><div><h6 class="title"><a name="id321632"></a>7.2.2.2.1. step 1: amplitude value synthesis</h6></div></div></div><p>
+in serious decoding errors.</p><div class="section" lang="en"><div class="titlepage"><div><div><h6 class="title"><a name="id309087"></a>7.2.2.2.1. step 1: amplitude value synthesis</h6></div></div></div><p>
 Unwrap the always-positive-or-zero values read from the packet into
 +/- difference values, then apply to line prediction.</p><pre class="screen">
   1) [range] = vector { 256, 128, 86, 64 } element ([floor1_multiplier]-1)
@@ -1598,7 +1598,7 @@ Unwrap the always-positive-or-zero values read from the packet into
 
  29) done
 
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h6 class="title"><a name="id308173"></a>7.2.2.2.2. step 2: curve synthesis</h6></div></div></div><p>
+</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h6 class="title"><a name="id309123"></a>7.2.2.2.2. step 2: curve synthesis</h6></div></div></div><p>
 Curve synthesis generates a return vector <code class="varname">[floor]</code> of length
 <code class="varname">[n]</code> (where <code class="varname">[n]</code> is provided by the decode process
 calling to floor decode).  Floor 1 curve synthesis makes use of the
@@ -1649,7 +1649,7 @@ Then compute the final curve in one pass:</p><pre class="screen">
 
 </pre></div></div></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="vorbis-spec-residue"></a>8. Residue setup and decode</h2></div><div><p class="releaseinfo">
   $Id: 08-residue.xml 14598 2008-03-18 15:39:43Z xiphmont $
- </p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id312917"></a>8.1. Overview</h3></div></div></div><p>
+ </p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id333002"></a>8.1. Overview</h3></div></div></div><p>
 A residue vector represents the fine detail of the audio spectrum of
 one channel in an audio frame after the encoder subtracts the floor
 curve and performs any channel coupling.  A residue vector may
@@ -1660,7 +1660,7 @@ Whatever the exact qualities, the Vorbis residue abstraction codes the
 residue vectors into the bitstream packet, and then reconstructs the
 vectors during decode.  Vorbis makes use of three different encoding
 variants (numbered 0, 1 and 2) of the same basic vector encoding
-abstraction.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id336796"></a>8.2. Residue format</h3></div></div></div><p>
+abstraction.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id327769"></a>8.2. Residue format</h3></div></div></div><p>
 Residue format partitions each vector in the vector bundle into chunks,
 classifies each chunk, encodes the chunk classifications and finally
 encodes the chunks themselves using the the specific VQ arrangement
@@ -1695,7 +1695,7 @@ VQ codebook.  Thus, each residue value potentially accumulates values
 from multiple decode passes.  The classification value associated with
 a partition is the same in each pass, thus the classification codeword
 is coded only in the first pass.</p></li></ul></div><p>
-</p><div class="mediaobject"><img src="residue-pack.png" alt="[illustration of residue vector format]"></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id309374"></a>8.3. residue 0</h3></div></div></div><p>
+</p><div class="mediaobject"><img src="residue-pack.png" alt="[illustration of residue vector format]"></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id318469"></a>8.3. residue 0</h3></div></div></div><p>
 Residue 0 and 1 differ only in the way the values within a residue
 partition are interleaved during partition encoding (visually treated
 as a black box--or cyan box or brown box--in the above figure).</p><p>
@@ -1719,7 +1719,7 @@ codebook dimensions = 1  encoded as: [ 0 ], [ 1 ], [ 2 ], [ 3 ], [ 4 ], [ 5 ], [
 
 </pre><p>
 It is worth mentioning at this point that no configurable value in the
-residue coding setup is restricted to a power of two.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id343072"></a>8.4. residue 1</h3></div></div></div><p>
+residue coding setup is restricted to a power of two.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id343071"></a>8.4. residue 1</h3></div></div></div><p>
 Residue 1 does not interleave VQ encoding.  It represents partition
 vector scalars in order.  As with residue 0, however, partition length
 must be an integer multiple of the codebook dimension, although
@@ -1737,14 +1737,14 @@ codebook dimensions = 2  encoded as: [ 0 1 ], [ 2 3 ], [ 4 5 ], [ 6 7 ]
 
 codebook dimensions = 1  encoded as: [ 0 ], [ 1 ], [ 2 ], [ 3 ], [ 4 ], [ 5 ], [ 6 ], [ 7 ]
 
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id343097"></a>8.5. residue 2</h3></div></div></div><p>
+</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id343096"></a>8.5. residue 2</h3></div></div></div><p>
 Residue type two can be thought of as a variant of residue type 1.
 Rather than encoding multiple passed-in vectors as in residue type 1,
 the <span class="emphasis"><em>ch</em></span> passed in vectors of length <span class="emphasis"><em>n</em></span> are first
 interleaved and flattened into a single vector of length
 <span class="emphasis"><em>ch</em></span>*<span class="emphasis"><em>n</em></span>.  Encoding then proceeds as in type 1. Decoding is
 as in type 1 with decode interleave reversed. If operating on a single
-vector to begin with, residue type 1 and type 2 are equivalent.</p><div class="mediaobject"><img src="residue2.png" alt="[illustration of residue type 2]"></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id343146"></a>8.6. Residue decode</h3></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id343152"></a>8.6.1. header decode</h4></div></div></div><p>
+vector to begin with, residue type 1 and type 2 are equivalent.</p><div class="mediaobject"><img src="residue2.png" alt="[illustration of residue type 2]"></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id343145"></a>8.6. Residue decode</h3></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id343151"></a>8.6.1. header decode</h4></div></div></div><p>
 Header decode for all three residue types is identical.</p><pre class="programlisting">
   1) [residue_begin] = read 24 bits as unsigned integer
   2) [residue_end] = read 24 bits as unsigned integer
@@ -1907,7 +1907,7 @@ Packet decode proceeds as follows, matching the description offered earlier in t
 </pre><p>
 An end-of-packet condition during packet decode is to be considered a
 nominal occurrence.  Decode returns the result of vector decode up to
-that point.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id315244"></a>8.6.3. format 0 specifics</h4></div></div></div><p>
+that point.</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id326098"></a>8.6.3. format 0 specifics</h4></div></div></div><p>
 Format zero decodes partitions exactly as described earlier in the
 'Residue Format: residue 0' section.  The following pseudocode
 presents the same algorithm. Assume:</p><p>
@@ -1929,7 +1929,7 @@ presents the same algorithm. Assume:</p><p>
 
   6) done
 
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id299210"></a>8.6.4. format 1 specifics</h4></div></div></div><p>
+</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id307089"></a>8.6.4. format 1 specifics</h4></div></div></div><p>
 Format 1 decodes partitions exactly as described earlier in the
 'Residue Format: residue 1' section.  The following pseudocode
 presents the same algorithm. Assume:</p><p>
@@ -1949,7 +1949,7 @@ presents the same algorithm. Assume:</p><p>
  
   6) if ( [i] is less than [n] ) continue at step 2
   7) done
-</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id299262"></a>8.6.5. format 2 specifics</h4></div></div></div><p>
+</pre></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id307141"></a>8.6.5. format 2 specifics</h4></div></div></div><p>
 Format 2 is reducible to format 1.  It may be implemented as an additional step prior to and an additional post-decode step after a normal format 1 decode.
 </p><p>
 Format 2 handles 'do not decode' vectors differently than residue 0 or
@@ -1972,11 +1972,11 @@ channel.  After decode, deinterleave the vector into independent vectors, one fo
   </pre><p>
  </p></li></ol></div></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a name="vorbis-spec-helper"></a>9. Helper equations</h2></div><div><p class="releaseinfo">
  $Id: 09-helper.xml 7186 2004-07-20 07:19:25Z xiphmont $
-</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id308612"></a>9.1. Overview</h3></div></div></div><p>
+</p></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id325073"></a>9.1. Overview</h3></div></div></div><p>
 The equations below are used in multiple places by the Vorbis codec
 specification.  Rather than cluttering up the main specification
 documents, they are defined here and referenced where appropriate.
-</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id320333"></a>9.2. Functions</h3></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="vorbis-spec-ilog"></a>9.2.1. ilog</h4></div></div></div><p>
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id306980"></a>9.2. Functions</h3></div></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="vorbis-spec-ilog"></a>9.2.1. ilog</h4></div></div></div><p>
 The "ilog(x)" function returns the position number (1 through n) of the highest set bit in the two's complement integer value
 <code class="varname">[x]</code>.  Values of <code class="varname">[x]</code> less than zero are defined to return zero.</p><pre class="programlisting">
   1) [return_value] = 0;
@@ -2157,7 +2157,7 @@ then top to bottom):</p><pre class="screen">
   0.50028648,    0.53279791,    0.56742212,    0.60429640, 
   0.64356699,    0.68538959,    0.72993007,    0.77736504, 
   0.82788260,    0.88168307,    0.9389798,     1.
-</pre></div></div><div class="appendix" lang="en"><h2 class="title" style="clear: both"><a name="vorbis-over-ogg"></a>1. Embedding Vorbis into an Ogg stream</h2><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id321543"></a>1.1. Overview</h3></div></div></div><p>
+</pre></div></div><div class="appendix" lang="en"><h2 class="title" style="clear: both"><a name="vorbis-over-ogg"></a>1. Embedding Vorbis into an Ogg stream</h2><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id312362"></a>1.1. Overview</h3></div></div></div><p>
 This document describes using Ogg logical and physical transport
 streams to encapsulate Vorbis compressed audio packet data into file
 form.</p><p>
@@ -2168,7 +2168,7 @@ bitstream overview</a> and <a href="framing.html" target="_top">Ogg logical
 bitstream and framing spec</a> provide detailed descriptions of Ogg
 transport streams. This specification document assumes a working
 knowledge of the concepts covered in these named backround
-documents.  Please read them first.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id315128"></a>1.1.1. Restrictions</h4></div></div></div><p>
+documents.  Please read them first.</p><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id336032"></a>1.1.1. Restrictions</h4></div></div></div><p>
 The Ogg/Vorbis I specification currently dictates that Ogg/Vorbis
 streams use Ogg transport streams in degenerate, unmultiplexed
 form only. That is:
@@ -2191,11 +2191,11 @@ audio player' is not required to implement Ogg support beyond the
 specific support of Vorbis within a degenrate ogg stream (naturally,
 application authors are encouraged to support full multiplexed Ogg
 handling).
-</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id302634"></a>1.1.2. MIME type</h4></div></div></div><p>
+</p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id319459"></a>1.1.2. MIME type</h4></div></div></div><p>
 The correct MIME type of any Ogg file is <code class="literal">application/ogg</code>.
 However, if a file is a Vorbis I audio file (which implies a
 degenerate Ogg stream including only unmultiplexed Vorbis audio), the
-mime type <code class="literal">audio/x-vorbis</code> is also allowed.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id319135"></a>1.2. Encapsulation</h3></div></div></div><p>
+mime type <code class="literal">audio/x-vorbis</code> is also allowed.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id317588"></a>1.2. Encapsulation</h3></div></div></div><p>
 Ogg encapsulation of a Vorbis packet stream is straightforward.</p><div class="itemizedlist"><ul type="disc"><li>
   The first Vorbis packet (the identification header), which
   uniquely identifies a stream as Vorbis audio, is placed alone in the
