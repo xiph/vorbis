@@ -173,7 +173,12 @@ else
 		DEBUG="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O0 -fsigned-char"
 		CFLAGS="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O4 -ffast-math -fsigned-char"
 		PROFILE="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -pg -O4 -ffast-math -fsigned-char";;
-	*)
+	*-*-os2*)
+		# Use -W instead of -Wextra because gcc on OS/2 is an old version.
+		DEBUG="-g -Wall -W -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
+		CFLAGS="-O20 -Wall -W -ffast-math -D_REENTRANT -fsigned-char"
+		PROFILE="-pg -g -O20 -ffast-math -D_REENTRANT -fsigned-char";;
+ 	*)
 		DEBUG="-g -Wall -Wextra -D__NO_MATH_INLINES -fsigned-char"
 		CFLAGS="-O20 -Wall -Wextra -D__NO_MATH_INLINES -fsigned-char"
 		PROFILE="-O20 -g -pg -D__NO_MATH_INLINES -fsigned-char" ;;
