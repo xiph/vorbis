@@ -50,6 +50,12 @@ list, there is a single vector for vendor name (also 8 bit clean,
 length encoded in 32 bits). For example, the 1.0 release of libvorbis 
 set the vendor string to "Xiph.Org libVorbis I 20020717".</para>
 
+<para>
+The vector lengths and number of vectors are stored lsb first, according 
+to the bit packing conventions of the vorbis codec. However, since data 
+in the comment header is octet-aligned, they can simply be read as 
+unaligned 32 bit little endian unsigned integers.
+ 
 <para>The comment header is decoded as follows:
 
 <programlisting>
