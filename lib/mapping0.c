@@ -722,7 +722,15 @@ static int mapping0_forward(vorbis_block *vb){
 	
 	classifications=_residue_P[ci->residue_type[resnum]]->
 	  class(vb,b->residue[resnum],couple_bundle,zerobundle,ch_in_bundle);
-	
+
+	/* couple_bundle is destructively overwritten by
+	   the class function if some but not all of the channels are
+	   marked as silence; build a fresh copy */
+	ch_in_bundle=0;	
+	for(j=0;j<vi->channels;j++)
+	  if(info->chmuxlist[j]==i)
+	    couple_bundle[ch_in_bundle++]=vb->pcm[j]+n/2;
+
 	_residue_P[ci->residue_type[resnum]]->
 	  forward(opb,vb,b->residue[resnum],
 		  couple_bundle,NULL,zerobundle,ch_in_bundle,classifications);
