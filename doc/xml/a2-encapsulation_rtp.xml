@@ -20,7 +20,7 @@ fileref="draft-rtp.xml"/></textobject> -->
 <xi:include xmlns:xi="http://www.w3.org/2001/XInclude"
       href="draft-rtp.xml" parse="text">
   <xi:fallback xmlns:xi="http://www.w3.org/2001/XInclude">
-    <para>Please consult the internet draft <citetitle>RTP Payload Format for Vorbis Encoded
+    <para>Please consult RFC 5215 <citetitle>RTP Payload Format for Vorbis Encoded
     Audio</citetitle> for description of how to embed Vorbis audio in an RTP stream.</para>
   </xi:fallback>
 </xi:include>
