@@ -54,7 +54,7 @@ set the vendor string to "Xiph.Org libVorbis I 20020717".</para>
 The vector lengths and number of vectors are stored lsb first, according 
 to the bit packing conventions of the vorbis codec. However, since data 
 in the comment header is octet-aligned, they can simply be read as 
-unaligned 32 bit little endian unsigned integers.
+unaligned 32 bit little endian unsigned integers.</para>
  
 <para>The comment header is decoded as follows:
 
