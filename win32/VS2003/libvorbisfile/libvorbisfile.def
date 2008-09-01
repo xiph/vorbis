@@ -3,6 +3,7 @@ EXPORTS
 ov_clear
 ov_open
 ov_open_callbacks
+ov_fopen
 ;
 ov_test
 ov_test_callbacks
