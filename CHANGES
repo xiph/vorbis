@@ -9,7 +9,6 @@ libvorbis 1.2.1 (unreleased) -- "Xiph.Org libVorbis I 20080501"
  * Fix a numerical instability in the edge extrapolation filter.
  * Build system improvements.
  * Specification correction.
- * Added VS2008 build files.
 
 libvorbis 1.2.0 (2007-07-25) -- "Xiph.Org libVorbis I 20070622"
 
