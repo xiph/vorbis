@@ -55,7 +55,8 @@ CFLAGS="$cflags_save"
 
 AC_C_INLINE
 
-AM_PROG_LIBTOOL
+AC_LIBTOOL_WIN32_DLL
+AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
 
 dnl docbook xml transform and processing tools
