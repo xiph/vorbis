@@ -79,6 +79,8 @@ void *_alloca(size_t size);
 #  define max(x,y)  ((x)<(y)?(y):(x))
 #endif
 
+
+/* Special i386 GCC implementation */
 #if defined(__i386__) && defined(__GNUC__) && !defined(__BEOS__)
 #  define VORBIS_FPU_CONTROL
 /* both GCC and MSVC are kinda stupid about rounding/casting to int.
@@ -113,11 +115,11 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
   __asm__("fistl %0": "=m"(i) : "t"(f));
   return(i);
 }
-#endif
+#endif /* Special i386 GCC implementation */
 
 
-/* MSVC inline assembly. 32 bit only; inline ASM isn't implemented in the 64 bit
- * compiler */
+/* MSVC inline assembly. 32 bit only; inline ASM isn't implemented in the
+ * 64 bit compiler */
 #if defined(_MSC_VER) && !defined(_WIN64)
 #  define VORBIS_FPU_CONTROL
 
@@ -138,21 +140,47 @@ static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
 static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
 }
 
-#endif
+#endif /* Special MSVC 32 bit implementation */
 
 
+/* MSVC optimized code path for x64 builds. Uses SSE2 intrinsics. This can be
+   done safely because any x64 CPU supports SSE2. */
+#if defined(_MSC_VER) && defined(_WIN64)
+#  define VORBIS_FPU_CONTROL
+
+typedef ogg_int16_t vorbis_fpu_control;
+
+#include <emmintrin.h>
+static __inline int vorbis_ftoi(double f){
+        return _mm_cvtsd_si32(_mm_load_sd(&f));
+}
+
+static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
+}
+
+static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
+}
+
+#endif /* Special MSVC x64 implementation */
+
+
+/* If no special implementation was found for the current compiler / platform,
+   use the default implementation here: */
 #ifndef VORBIS_FPU_CONTROL
 
 typedef int vorbis_fpu_control;
 
 static int vorbis_ftoi(double f){
-  return (int)(f+.5);
+        /* Note: MSVC and GCC (at least on some systems) round towards zero, thus,
+           the floor() call is required to ensure correct roudning of
+           negative numbers */
+        return (int)floor(f+.5);
 }
 
 /* We don't have special code for this compiler/arch, so do it the slow way */
 #  define vorbis_fpu_setround(vorbis_fpu_control) {}
 #  define vorbis_fpu_restore(vorbis_fpu_control) {}
 
-#endif
+#endif /* default implementation */
 
 #endif /* _OS_H */
