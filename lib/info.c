@@ -31,6 +31,9 @@
 #include "misc.h"
 #include "os.h"
 
+#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.2.1"
+#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20080501"
+
 /* helpers */
 static int ilog2(unsigned int v){
   int ret=0;
@@ -457,8 +460,7 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
 }
 
 static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
-  char temp[]="Xiph.Org libVorbis I 20080501";
-  int bytes = strlen(temp);
+  int bytes = strlen(ENCODE_VENDOR_STRING);
 
   /* preamble */  
   oggpack_write(opb,0x03,8);
@@ -466,8 +468,8 @@ static int _vorbis_pack_comment(oggpack_buffer *opb,vorbis_comment *vc){
 
   /* vendor */
   oggpack_write(opb,bytes,32);
-  _v_writestring(opb,temp, bytes);
-  
+  _v_writestring(opb,ENCODE_VENDOR_STRING, bytes);
+
   /* comments */
 
   oggpack_write(opb,vc->comments,32);
@@ -647,4 +649,8 @@ double vorbis_granule_time(vorbis_dsp_state *v,ogg_int64_t granulepos){
   if(granulepos>=0)
     return((double)granulepos/v->vi->rate);
   return(-1);
+}
+
+const char *vorbis_version_string(void){
+  return GENERAL_VENDOR_STRING;
 }
