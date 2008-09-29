@@ -143,9 +143,9 @@ static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
 #endif /* Special MSVC 32 bit implementation */
 
 
-/* MSVC optimized code path for x64 builds. Uses SSE2 intrinsics. This can be
-   done safely because any x64 CPU supports SSE2. */
-#if defined(_MSC_VER) && defined(_WIN64)
+/* Optimized code path for x86_64 builds. Uses SSE2 intrinsics. This can be
+   done safely because all x86_64 CPUs supports SSE2. */
+#if (defined(_MSC_VER) && defined(_WIN64)) || (defined(__GNUC__) && defined (__x86_64__))
 #  define VORBIS_FPU_CONTROL
 
 typedef ogg_int16_t vorbis_fpu_control;
