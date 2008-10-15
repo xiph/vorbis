@@ -103,7 +103,7 @@ $(BUILDDIR)/Vorbis_I_spec.xml: $(doc_sources)
 	@mkdir -p $(BUILDDIR)
 	@for file in $(doc_sources); do cp $(srcdir)/$$file $(BUILDDIR); done
 # translate rfc5215.txt to .xml in the BUILDDIR
-$(BUILDDIR)/draft-rtp.xml: rfc5215.txt
+$(BUILDDIR)/rfc5215.xml: rfc5215.txt
 	cat $< | sed 's///g' > $@
 # cat $< | sed 's///g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' > $@
 
