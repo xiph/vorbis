@@ -113,9 +113,8 @@ typedef struct vorbis_info_residue0{
   int    secondstages[64]; /* expanded out to pointers in lookup */
   int    booklist[256];    /* list of second stage books */
 
-  float  classmetric1[64];  
-  float  classmetric2[64];  
-
+  const float classmetric1[64];  
+  const float classmetric2[64];  
 } vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/

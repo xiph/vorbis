@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
     
     /* first, the static vectors, then the book structure to tie it together. */
     /* lengthlist */
-    fprintf(file,"static long _huff_lengthlist_%s[] = {\n",base);
+    fprintf(file,"static const long _huff_lengthlist_%s[] = {\n",base);
     for(j=0;j<vals;){
       fprintf(file,"\t");
       for(k=0;k<16 && j<vals;k++,j++)
@@ -172,9 +172,9 @@ int main(int argc, char *argv[]){
     fprintf(file,"};\n\n");
     
     /* the toplevel book */
-    fprintf(file,"static static_codebook _huff_book_%s = {\n",base);
+    fprintf(file,"static const static_codebook _huff_book_%s = {\n",base);
     fprintf(file,"\t%d, %ld,\n",subn,vals);
-    fprintf(file,"\t_huff_lengthlist_%s,\n",base);
+    fprintf(file,"\t(long *)_huff_lengthlist_%s,\n",base);
     fprintf(file,"\t0, 0, 0, 0, 0,\n");
     fprintf(file,"\tNULL,\n");
 

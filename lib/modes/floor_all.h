@@ -19,21 +19,21 @@
 #include "backends.h"
 #include "books/floor/floor_books.h"
 
-static static_codebook *_floor_128x4_books[]={
+static const static_codebook*const _floor_128x4_books[]={
   &_huff_book_line_128x4_class0,
   &_huff_book_line_128x4_0sub0,
   &_huff_book_line_128x4_0sub1,
   &_huff_book_line_128x4_0sub2,
   &_huff_book_line_128x4_0sub3,
 };
-static static_codebook *_floor_256x4_books[]={
+static const static_codebook*const _floor_256x4_books[]={
   &_huff_book_line_256x4_class0,
   &_huff_book_line_256x4_0sub0,
   &_huff_book_line_256x4_0sub1,
   &_huff_book_line_256x4_0sub2,
   &_huff_book_line_256x4_0sub3,
 };
-static static_codebook *_floor_128x7_books[]={
+static const static_codebook*const _floor_128x7_books[]={
   &_huff_book_line_128x7_class0,
   &_huff_book_line_128x7_class1,
   
@@ -44,7 +44,7 @@ static static_codebook *_floor_128x7_books[]={
   &_huff_book_line_128x7_1sub2,
   &_huff_book_line_128x7_1sub3, 
 };
-static static_codebook *_floor_256x7_books[]={
+static const static_codebook*const _floor_256x7_books[]={
   &_huff_book_line_256x7_class0,
   &_huff_book_line_256x7_class1,
   
@@ -55,7 +55,7 @@ static static_codebook *_floor_256x7_books[]={
   &_huff_book_line_256x7_1sub2,
   &_huff_book_line_256x7_1sub3, 
 };
-static static_codebook *_floor_128x11_books[]={
+static const static_codebook*const _floor_128x11_books[]={
   &_huff_book_line_128x11_class1,
   &_huff_book_line_128x11_class2,
   &_huff_book_line_128x11_class3,
@@ -70,7 +70,7 @@ static static_codebook *_floor_128x11_books[]={
   &_huff_book_line_128x11_3sub2,
   &_huff_book_line_128x11_3sub3, 
 };
-static static_codebook *_floor_128x17_books[]={
+static const static_codebook*const _floor_128x17_books[]={
   &_huff_book_line_128x17_class1,
   &_huff_book_line_128x17_class2,
   &_huff_book_line_128x17_class3,
@@ -85,14 +85,14 @@ static static_codebook *_floor_128x17_books[]={
   &_huff_book_line_128x17_3sub2,
   &_huff_book_line_128x17_3sub3, 
 };
-static static_codebook *_floor_256x4low_books[]={
+static const static_codebook*const _floor_256x4low_books[]={
   &_huff_book_line_256x4low_class0,
   &_huff_book_line_256x4low_0sub0,
   &_huff_book_line_256x4low_0sub1,
   &_huff_book_line_256x4low_0sub2,
   &_huff_book_line_256x4low_0sub3,
 };
-static static_codebook *_floor_1024x27_books[]={
+static const static_codebook*const _floor_1024x27_books[]={
   &_huff_book_line_1024x27_class1,
   &_huff_book_line_1024x27_class2,
   &_huff_book_line_1024x27_class3,
@@ -110,7 +110,7 @@ static static_codebook *_floor_1024x27_books[]={
   &_huff_book_line_1024x27_4sub2,
   &_huff_book_line_1024x27_4sub3,
 };
-static static_codebook *_floor_2048x27_books[]={
+static const static_codebook*const _floor_2048x27_books[]={
   &_huff_book_line_2048x27_class1,
   &_huff_book_line_2048x27_class2,
   &_huff_book_line_2048x27_class3,
@@ -129,7 +129,7 @@ static static_codebook *_floor_2048x27_books[]={
   &_huff_book_line_2048x27_4sub3,
 };
 
-static static_codebook *_floor_512x17_books[]={
+static const static_codebook*const _floor_512x17_books[]={
   &_huff_book_line_512x17_class1,
   &_huff_book_line_512x17_class2,
   &_huff_book_line_512x17_class3,
@@ -145,7 +145,7 @@ static static_codebook *_floor_512x17_books[]={
   &_huff_book_line_512x17_3sub3, 
 };
 
-static static_codebook **_floor_books[10]={
+static const static_codebook*const *const _floor_books[10]={
   _floor_128x4_books,
   _floor_256x4_books,
   _floor_128x7_books,
@@ -158,7 +158,7 @@ static static_codebook **_floor_books[10]={
   _floor_512x17_books,
 };
 
-static vorbis_info_floor1 _floor[10]={
+static const vorbis_info_floor1 _floor[10]={
   /* 128 x 4 */
   {
     1,{0},{4},{2},{0},

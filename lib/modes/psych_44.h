@@ -18,7 +18,7 @@
 
 /* preecho trigger settings *****************************************/
 
-static vorbis_info_psy_global _psy_global_44[5]={
+static const vorbis_info_psy_global _psy_global_44[5]={
 
   {8,   /* lines per eighth octave */
    {20.f,14.f,12.f,12.f,12.f,12.f,12.f}, 
@@ -53,7 +53,7 @@ static vorbis_info_psy_global _psy_global_44[5]={
 };
 
 /* noise compander lookups * low, mid, high quality ****************/
-static compandblock _psy_compand_44[6]={
+static const compandblock _psy_compand_44[6]={
   /* sub-mode Z short */
   {{
     0, 1, 2, 3, 4, 5, 6,  7,     /* 7dB */
@@ -106,7 +106,7 @@ static compandblock _psy_compand_44[6]={
 
 /* tonal masking curve level adjustments *************************/
 
-static vp_adjblock _vp_tonemask_adj_longblock[12]={
+static const vp_adjblock _vp_tonemask_adj_longblock[12]={
 
    /* 63     125     250     500       1       2       4       8      16 */
 
@@ -146,7 +146,7 @@ static vp_adjblock _vp_tonemask_adj_longblock[12]={
    {{-16,-16,-16,-16,-16,-16,-16,-15,-14,-14,-14,-12, -9, -4, -2, -2,  0}}, /* 10 */
 };
 
-static vp_adjblock _vp_tonemask_adj_otherblock[12]={
+static const vp_adjblock _vp_tonemask_adj_otherblock[12]={
    /* 63     125     250     500       1       2       4       8      16 */
 
    {{ -3, -8,-13,-15,-10,-10, -9, -9, -9, -9, -9,  1,  1,  1,  1,  1,  1}}, /* -1 */
@@ -186,7 +186,7 @@ static vp_adjblock _vp_tonemask_adj_otherblock[12]={
 };
 
 /* noise bias (transition block) */
-static noise3 _psy_noisebias_trans[12]={
+static const noise3 _psy_noisebias_trans[12]={
   /*  63     125     250     500      1k       2k      4k      8k     16k*/
   /* -1 */
   {{{-10,-10,-10,-10,-10, -4,  0,  0,  4,  8,  8,  8,  8, 10, 12, 14, 20},
@@ -269,7 +269,7 @@ static noise3 _psy_noisebias_trans[12]={
 };
 
 /*  noise bias (long block) */
-static noise3 _psy_noisebias_long[12]={
+static const noise3 _psy_noisebias_long[12]={
   /*63     125     250     500      1k       2k      4k      8k     16k*/
   /* -1 */
   {{{-10,-10,-10,-10,-10, -4,  0,  0,  0,  6,  6,  6,  6, 10, 10, 12,  20},
@@ -344,7 +344,7 @@ static noise3 _psy_noisebias_long[12]={
 };
 
 /* noise bias (impulse block) */
-static noise3 _psy_noisebias_impulse[12]={
+static const noise3 _psy_noisebias_impulse[12]={
   /*  63     125     250     500      1k      2k      4k      8k     16k*/
   /* -1 */
   {{{-10,-10,-10,-10,-10, -4,  0,  0,  4,  8,  8,  8,  8, 10, 12, 14, 20},
@@ -413,7 +413,7 @@ static noise3 _psy_noisebias_impulse[12]={
 };
 
 /* noise bias (padding block) */
-static noise3 _psy_noisebias_padding[12]={
+static const noise3 _psy_noisebias_padding[12]={
   /*  63     125     250     500      1k       2k      4k      8k     16k*/
   
   /* -1 */
@@ -471,24 +471,24 @@ static noise3 _psy_noisebias_padding[12]={
 };
 
 
-static noiseguard _psy_noiseguards_44[4]={
+static const noiseguard _psy_noiseguards_44[4]={
   {3,3,15},
   {3,3,15},
   {10,10,100},
   {10,10,100},
 };
 
-static int _psy_tone_suppress[12]={
+static const int _psy_tone_suppress[12]={
   -20,-20,-20,-20,-20,-24,-30,-40,-40,-45,-45,-45,
 };
-static int _psy_tone_0dB[12]={
+static const int _psy_tone_0dB[12]={
   90,90,95,95,95,95,105,105,105,105,105,105,
 };
-static int _psy_noise_suppress[12]={
+static const int _psy_noise_suppress[12]={
   -20,-20,-24,-24,-24,-24,-30,-40,-40,-45,-45,-45,
 };
 
-static vorbis_info_psy _psy_info_template={
+static const vorbis_info_psy _psy_info_template={
   /* blockflag */
   -1,
   /* ath_adjatt, ath_maxatt */
@@ -506,10 +506,10 @@ static vorbis_info_psy _psy_info_template={
 
 /* ath ****************/
 
-static int _psy_ath_floater[12]={
+static const int _psy_ath_floater[12]={
   -100,-100,-100,-100,-100,-100,-105,-105,-105,-105,-110,-120,
 };
-static int _psy_ath_abs[12]={
+static const int _psy_ath_abs[12]={
   -130,-130,-130,-130,-140,-140,-140,-140,-140,-140,-140,-150,
 };
 
@@ -522,7 +522,7 @@ static int _psy_ath_abs[12]={
 /* various stereo possibilities */
 
 /* stereo mode by base quality level */
-static adj_stereo _psy_stereo_modes_44[12]={
+static const adj_stereo _psy_stereo_modes_44[12]={
   /*  0   1   2   3   4   5   6   7   8   9  10  11  12  13  14         -1  */
   {{  4,  4,  4,  4,  4,  4,  4,  3,  2,  2,  1,  0,  0,  0,  0},
    {  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  8,  5,  4,  3},
@@ -615,7 +615,7 @@ static adj_stereo _psy_stereo_modes_44[12]={
 };
 
 /* tone master attenuation by base quality mode and bitrate tweak */
-static att3 _psy_tone_masteratt_44[12]={
+static const att3 _psy_tone_masteratt_44[12]={
   {{ 35,  21,   9},  0,    0}, /* -1 */
   {{ 30,  20,   8}, -2, 1.25}, /* 0 */
   /*  {{ 25,  14,   4},  0,    0}, *//* 1 */
@@ -633,34 +633,34 @@ static att3 _psy_tone_masteratt_44[12]={
 };
 
 /* lowpass by mode **************/
-static double _psy_lowpass_44[12]={
+static const double _psy_lowpass_44[12]={
   /*  15.1,15.8,16.5,17.9,20.5,48.,999.,999.,999.,999.,999. */
   13.9,15.1,15.8,16.5,17.2,18.9,20.1,48.,999.,999.,999.,999.
 };
 
 /* noise normalization **********/
 
-static int _noise_start_short_44[11]={
+static const int _noise_start_short_44[11]={
   /*  16,16,16,16,32,32,9999,9999,9999,9999 */
   32,16,16,16,32,9999,9999,9999,9999,9999,9999
 };
-static int _noise_start_long_44[11]={
+static const int _noise_start_long_44[11]={
   /*  128,128,128,256,512,512,9999,9999,9999,9999 */
   256,128,128,256,512,9999,9999,9999,9999,9999,9999
 };
 
-static int _noise_part_short_44[11]={
+static const int _noise_part_short_44[11]={
     8,8,8,8,8,8,8,8,8,8,8
 };
-static int _noise_part_long_44[11]={
+static const int _noise_part_long_44[11]={
     32,32,32,32,32,32,32,32,32,32,32
 };
 
-static double _noise_thresh_44[11]={
+static const double _noise_thresh_44[11]={
   /*  .2,.2,.3,.4,.5,.5,9999.,9999.,9999.,9999., */
    .2,.2,.2,.4,.6,9999.,9999.,9999.,9999.,9999.,9999.,
 };
 
-static double _noise_thresh_5only[2]={
+static const double _noise_thresh_5only[2]={
  .5,.5,
 };

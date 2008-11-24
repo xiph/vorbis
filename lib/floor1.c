@@ -1061,7 +1061,7 @@ static int floor1_inverse2(vorbis_block *vb,vorbis_look_floor *in,void *memo,
 }
 
 /* export hooks */
-vorbis_func_floor floor1_exportbundle={
+const vorbis_func_floor floor1_exportbundle={
   &floor1_pack,&floor1_unpack,&floor1_look,&floor1_free_info,
   &floor1_free_look,&floor1_inverse1,&floor1_inverse2
 };

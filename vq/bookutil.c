@@ -191,7 +191,7 @@ codebook *codebook_load(char *filename){
   }
 
   /* find the codebook struct */
-  find_seek_to(in,"static static_codebook ");
+  find_seek_to(in,"static const static_codebook ");
 
   /* get the major important values */
   line=get_line(in);
@@ -210,7 +210,7 @@ codebook *codebook_load(char *filename){
   }
   
   /* find the auxiliary encode struct[s] (if any) */
-  if(find_seek_to(in,"static encode_aux_nearestmatch _vq_aux")){
+  if(find_seek_to(in,"static const encode_aux_nearestmatch _vq_aux")){
     /* how big? */
     c->nearest_tree=a=_ogg_calloc(1,sizeof(encode_aux_nearestmatch));
     line=get_line(in);
@@ -224,7 +224,7 @@ codebook *codebook_load(char *filename){
     }
 
     /* load ptr0 */
-    find_seek_to(in,"static long _vq_ptr0");
+    find_seek_to(in,"static const long _vq_ptr0");
     reset_next_value();
     a->ptr0=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
@@ -234,7 +234,7 @@ codebook *codebook_load(char *filename){
       }
     
     /* load ptr1 */
-    find_seek_to(in,"static long _vq_ptr1");
+    find_seek_to(in,"static const long _vq_ptr1");
     reset_next_value();
     a->ptr1=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
@@ -245,7 +245,7 @@ codebook *codebook_load(char *filename){
     
     
     /* load p */
-    find_seek_to(in,"static long _vq_p_");
+    find_seek_to(in,"static const long _vq_p_");
     reset_next_value();
     a->p=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
@@ -255,7 +255,7 @@ codebook *codebook_load(char *filename){
       }
     
     /* load q */
-    find_seek_to(in,"static long _vq_q_");
+    find_seek_to(in,"static const long _vq_q_");
     reset_next_value();
     a->q=_ogg_malloc(sizeof(long)*a->aux);
     for(i=0;i<a->aux;i++)
@@ -265,7 +265,7 @@ codebook *codebook_load(char *filename){
       }    
   }
   
-  if(find_seek_to(in,"static encode_aux_threshmatch _vq_aux")){
+  if(find_seek_to(in,"static const encode_aux_threshmatch _vq_aux")){
     /* how big? */
     c->thresh_tree=t=_ogg_calloc(1,sizeof(encode_aux_threshmatch));
     line=get_line(in);
@@ -281,7 +281,7 @@ codebook *codebook_load(char *filename){
       exit(1);
     }
     /* load quantthresh */
-    find_seek_to(in,"static float _vq_quantthresh_");
+    find_seek_to(in,"static const float _vq_quantthresh_");
     reset_next_value();
     t->quantthresh=_ogg_malloc(sizeof(float)*t->threshvals);
     for(i=0;i<t->threshvals-1;i++)
@@ -290,7 +290,7 @@ codebook *codebook_load(char *filename){
 	exit(1);
       }    
     /* load quantmap */
-    find_seek_to(in,"static long _vq_quantmap_");
+    find_seek_to(in,"static const long _vq_quantmap_");
     reset_next_value();
     t->quantmap=_ogg_malloc(sizeof(long)*t->threshvals);
     for(i=0;i<t->threshvals;i++)
@@ -300,7 +300,7 @@ codebook *codebook_load(char *filename){
       }    
   }
     
-  if(find_seek_to(in,"static encode_aux_pigeonhole _vq_aux")){
+  if(find_seek_to(in,"static const encode_aux_pigeonhole _vq_aux")){
     int pigeons=1,i;
     /* how big? */
     c->pigeon_tree=p=_ogg_calloc(1,sizeof(encode_aux_pigeonhole));
@@ -317,7 +317,7 @@ codebook *codebook_load(char *filename){
       exit(1);
     }
     /* load pigeonmap */
-    find_seek_to(in,"static long _vq_pigeonmap_");
+    find_seek_to(in,"static const long _vq_pigeonmap_");
     reset_next_value();
     p->pigeonmap=_ogg_malloc(sizeof(long)*p->mapentries);
     for(i=0;i<p->mapentries;i++)
@@ -326,7 +326,7 @@ codebook *codebook_load(char *filename){
 	exit(1);
       }    
     /* load fitlist */
-    find_seek_to(in,"static long _vq_fitlist_");
+    find_seek_to(in,"static const long _vq_fitlist_");
     reset_next_value();
     p->fitlist=_ogg_malloc(sizeof(long)*p->fittotal);
     for(i=0;i<p->fittotal;i++)
@@ -335,7 +335,7 @@ codebook *codebook_load(char *filename){
 	exit(1);
       }    
     /* load fitmap */
-    find_seek_to(in,"static long _vq_fitmap_");
+    find_seek_to(in,"static const long _vq_fitmap_");
     reset_next_value();
     for(i=0;i<c->dim;i++)pigeons*=p->quantvals;
     p->fitmap=_ogg_malloc(sizeof(long)*pigeons);
@@ -346,7 +346,7 @@ codebook *codebook_load(char *filename){
       }    
  
     /* load fitlength */
-    find_seek_to(in,"static long _vq_fitlength_");
+    find_seek_to(in,"static const long _vq_fitlength_");
     reset_next_value();
     p->fitlength=_ogg_malloc(sizeof(long)*pigeons);
     for(i=0;i<pigeons;i++)
@@ -369,7 +369,7 @@ codebook *codebook_load(char *filename){
   }
     
   /* load the quantized entries */
-  find_seek_to(in,"static long _vq_quantlist_");
+  find_seek_to(in,"static const long _vq_quantlist_");
   reset_next_value();
   c->quantlist=_ogg_malloc(sizeof(long)*quant_to_read);
   for(i=0;i<quant_to_read;i++)
@@ -539,7 +539,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
   /* quantlist */
   if(c->quantlist){
     long vals=(c->maptype==1?_book_maptype1_quantvals(c):c->entries*c->dim);
-    fprintf(out,"static long _vq_quantlist_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_quantlist_%s[] = {\n",name);
     for(j=0;j<vals;j++){
       fprintf(out,"\t%ld,\n",c->quantlist[j]);
     }
@@ -547,7 +547,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
   }
 
   /* lengthlist */
-  fprintf(out,"static long _vq_lengthlist_%s[] = {\n",name);
+  fprintf(out,"static const long _vq_lengthlist_%s[] = {\n",name);
   for(j=0;j<c->entries;){
     fprintf(out,"\t");
     for(k=0;k<16 && j<c->entries;k++,j++)
@@ -558,7 +558,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
 
   if(t){
     /* quantthresh */
-    fprintf(out,"static float _vq_quantthresh_%s[] = {\n",name);
+    fprintf(out,"static const float _vq_quantthresh_%s[] = {\n",name);
     for(j=0;j<t->threshvals-1;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<t->threshvals-1;k++,j++)
@@ -568,7 +568,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     fprintf(out,"};\n\n");
 
     /* quantmap */
-    fprintf(out,"static long _vq_quantmap_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_quantmap_%s[] = {\n",name);
     for(j=0;j<t->threshvals;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<t->threshvals;k++,j++)
@@ -577,9 +577,9 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     }
     fprintf(out,"};\n\n");  
 
-    fprintf(out,"static encode_aux_threshmatch _vq_auxt_%s = {\n",name);
-    fprintf(out,"\t_vq_quantthresh_%s,\n",name);
-    fprintf(out,"\t_vq_quantmap_%s,\n",name);
+    fprintf(out,"static const encode_aux_threshmatch _vq_auxt_%s = {\n",name);
+    fprintf(out,"\t(float *)_vq_quantthresh_%s,\n",name);
+    fprintf(out,"\t(long *)_vq_quantmap_%s,\n",name);
     fprintf(out,"\t%d,\n",t->quantvals);
     fprintf(out,"\t%d\n};\n\n",t->threshvals);
   }
@@ -589,7 +589,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     for(i=0;i<c->dim;i++)pigeons*=p->quantvals;
 
     /* pigeonmap */
-    fprintf(out,"static long _vq_pigeonmap_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_pigeonmap_%s[] = {\n",name);
     for(j=0;j<p->mapentries;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<p->mapentries;k++,j++)
@@ -598,7 +598,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     }
     fprintf(out,"};\n\n");
     /* fitlist */
-    fprintf(out,"static long _vq_fitlist_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_fitlist_%s[] = {\n",name);
     for(j=0;j<p->fittotal;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<p->fittotal;k++,j++)
@@ -607,7 +607,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     }
     fprintf(out,"};\n\n");
     /* fitmap */
-    fprintf(out,"static long _vq_fitmap_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_fitmap_%s[] = {\n",name);
     for(j=0;j<pigeons;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<pigeons;k++,j++)
@@ -616,7 +616,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     }
     fprintf(out,"};\n\n");
     /* fitlength */
-    fprintf(out,"static long _vq_fitlength_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_fitlength_%s[] = {\n",name);
     for(j=0;j<pigeons;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<pigeons;k++,j++)
@@ -625,22 +625,22 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     }
     fprintf(out,"};\n\n");
 
-    fprintf(out,"static encode_aux_pigeonhole _vq_auxp_%s = {\n",name);
+    fprintf(out,"static const encode_aux_pigeonhole _vq_auxp_%s = {\n",name);
     fprintf(out,"\t%g, %g, %d, %d,\n",
 	    p->min,p->del,p->mapentries,p->quantvals);
 
     fprintf(out,"\t_vq_pigeonmap_%s,\n",name);
 
     fprintf(out,"\t%ld,\n",p->fittotal);
-    fprintf(out,"\t_vq_fitlist_%s,\n",name);
-    fprintf(out,"\t_vq_fitmap_%s,\n",name);
-    fprintf(out,"\t_vq_fitlength_%s\n};\n\n",name);
+    fprintf(out,"\t(long *)_vq_fitlist_%s,\n",name);
+    fprintf(out,"\t(long *)_vq_fitmap_%s,\n",name);
+    fprintf(out,"\t(long *)_vq_fitlength_%s\n};\n\n",name);
   }
 
   if(n){
     
     /* ptr0 */
-    fprintf(out,"static long _vq_ptr0_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_ptr0_%s[] = {\n",name);
     for(j=0;j<n->aux;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<n->aux;k++,j++)
@@ -650,7 +650,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     fprintf(out,"};\n\n");
     
     /* ptr1 */
-    fprintf(out,"static long _vq_ptr1_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_ptr1_%s[] = {\n",name);
     for(j=0;j<n->aux;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<n->aux;k++,j++)
@@ -660,7 +660,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     fprintf(out,"};\n\n");
     
     /* p */
-    fprintf(out,"static long _vq_p_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_p_%s[] = {\n",name);
     for(j=0;j<n->aux;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<n->aux;k++,j++)
@@ -670,7 +670,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     fprintf(out,"};\n\n");
     
     /* q */
-    fprintf(out,"static long _vq_q_%s[] = {\n",name);
+    fprintf(out,"static const long _vq_q_%s[] = {\n",name);
     for(j=0;j<n->aux;){
       fprintf(out,"\t");
       for(k=0;k<8 && j<n->aux;k++,j++)
@@ -679,37 +679,37 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
     }
     fprintf(out,"};\n\n");
   
-    fprintf(out,"static encode_aux_nearestmatch _vq_auxn_%s = {\n",name);
-    fprintf(out,"\t_vq_ptr0_%s,\n",name);
-    fprintf(out,"\t_vq_ptr1_%s,\n",name);
-    fprintf(out,"\t_vq_p_%s,\n",name);
-    fprintf(out,"\t_vq_q_%s,\n",name);
+    fprintf(out,"static const encode_aux_nearestmatch _vq_auxn_%s = {\n",name);
+    fprintf(out,"\t(long *)_vq_ptr0_%s,\n",name);
+    fprintf(out,"\t(long *)_vq_ptr1_%s,\n",name);
+    fprintf(out,"\t(long *)_vq_p_%s,\n",name);
+    fprintf(out,"\t(long *)_vq_q_%s,\n",name);
     fprintf(out,"\t%ld, %ld\n};\n\n",n->aux,n->aux);
   }
 
   /* tie it all together */
   
-  fprintf(out,"static static_codebook %s = {\n",name);
+  fprintf(out,"static const static_codebook %s = {\n",name);
   
   fprintf(out,"\t%ld, %ld,\n",c->dim,c->entries);
-  fprintf(out,"\t_vq_lengthlist_%s,\n",name);
+  fprintf(out,"\t(long *)_vq_lengthlist_%s,\n",name);
   fprintf(out,"\t%d, %ld, %ld, %d, %d,\n",
           c->maptype,c->q_min,c->q_delta,c->q_quant,c->q_sequencep);
   if(c->quantlist)
-    fprintf(out,"\t_vq_quantlist_%s,\n",name);
+    fprintf(out,"\t(long *)_vq_quantlist_%s,\n",name);
   else
     fprintf(out,"\tNULL,\n");
 
   if(n)
-    fprintf(out,"\t&_vq_auxn_%s,\n",name);
+    fprintf(out,"\t(encode_aux_nearestmatch *)&_vq_auxn_%s,\n",name);
   else
     fprintf(out,"\tNULL,\n");
   if(t)
-    fprintf(out,"\t&_vq_auxt_%s,\n",name);
+    fprintf(out,"\t(encode_aux_threshmatch *)&_vq_auxt_%s,\n",name);
   else
     fprintf(out,"\tNULL,\n");
   if(p)
-    fprintf(out,"\t&_vq_auxp_%s,\n",name);
+    fprintf(out,"\t(encode_aux_pigeonhole *)&_vq_auxp_%s,\n",name);
   else
     fprintf(out,"\tNULL,\n");
 

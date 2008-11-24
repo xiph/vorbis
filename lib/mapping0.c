@@ -852,7 +852,7 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_info_mapping *l){
 }
 
 /* export hooks */
-vorbis_func_mapping mapping0_exportbundle={
+const vorbis_func_mapping mapping0_exportbundle={
   &mapping0_pack,
   &mapping0_unpack,
   &mapping0_free_info,

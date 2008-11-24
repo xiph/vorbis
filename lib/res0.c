@@ -894,7 +894,7 @@ int res2_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 
-vorbis_func_residue residue0_exportbundle={
+const vorbis_func_residue residue0_exportbundle={
   NULL,
   &res0_unpack,
   &res0_look,
@@ -905,7 +905,7 @@ vorbis_func_residue residue0_exportbundle={
   &res0_inverse
 };
 
-vorbis_func_residue residue1_exportbundle={
+const vorbis_func_residue residue1_exportbundle={
   &res0_pack,
   &res0_unpack,
   &res0_look,
@@ -916,7 +916,7 @@ vorbis_func_residue residue1_exportbundle={
   &res1_inverse
 };
 
-vorbis_func_residue residue2_exportbundle={
+const vorbis_func_residue residue2_exportbundle={
   &res0_pack,
   &res0_unpack,
   &res0_look,
