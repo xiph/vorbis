@@ -276,7 +276,10 @@ vorbis_look_residue *res0_look(vorbis_dsp_state *vd,
     }
   }
 
-  look->partvals=look->phrasebook->entries;
+  look->partvals=1;
+  for(j=0;j<dim;j++)
+      look->partvals*=look->parts;
+
   look->stages=maxstage;
   look->decodemap=_ogg_malloc(look->partvals*sizeof(*look->decodemap));
   for(j=0;j<look->partvals;j++){
