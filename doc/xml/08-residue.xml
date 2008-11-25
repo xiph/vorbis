@@ -220,7 +220,7 @@ codeword.  Note that the number of entries and dimensions in book
 <varname>[residue_classifications]</varname>, overdetermines to
 possible number of classification codewords.  If
 <varname>[residue_classifications]</varname>^<varname>[residue_classbook]</varname>.dimensions
-does not equal <varname>[residue_classbook]</varname>.entries, the
+exceeds <varname>[residue_classbook]</varname>.entries, the
 bitstream should be regarded to be undecodable. </para>
 
 <para>
