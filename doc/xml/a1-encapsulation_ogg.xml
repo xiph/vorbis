@@ -56,11 +56,11 @@ form only. That is:
 This is not to say that it is not currently possible to multiplex
 Vorbis with other media types into a multi-stream Ogg file.  At the
 time this document was written, Ogg was becoming a popular container
-for low-bitrate movies consisting of DiVX video and Vorbis audio.
+for low-bitrate movies consisting of DivX video and Vorbis audio.
 However, a 'Vorbis I audio file' is taken to imply Vorbis audio
 existing alone within a degenerate Ogg stream.  A compliant 'Vorbis
 audio player' is not required to implement Ogg support beyond the
-specific support of Vorbis within a degenrate ogg stream (naturally,
+specific support of Vorbis within a degenrate Ogg stream (naturally,
 application authors are encouraged to support full multiplexed Ogg
 handling).
 </para>
@@ -70,10 +70,13 @@ handling).
 <section><title>MIME type</title>
 
 <para>
-The correct MIME type of any Ogg file is <literal>application/ogg</literal>.
-However, if a file is a Vorbis I audio file (which implies a
-degenerate Ogg stream including only unmultiplexed Vorbis audio), the
-mime type <literal>audio/x-vorbis</literal> is also allowed.</para>
+The MIME type of Ogg files depend on the context.  Specifically, complex
+multimedia and applications should use <literal>application/ogg</literal>,
+while visual media should use <literal>video/ogg</literal>, and audio
+<literal>audio/ogg</literal>.  Vorbis data encapsulated in Ogg may appear
+in any of those types.  RTP encapsulated Vorbis should use
+<literal>audio/vorbis</literal> + <literal>audio/vorbis-config<literal>.
+</para>
 
 </section>
 

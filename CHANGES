@@ -1,3 +1,10 @@
+libvorbis 1.2.2 (unreleased) -- "Xiph.Org libVorbis I 20081127"
+
+ * define VENDOR and ENCODER strings
+ * seek correctly in files bigger than 2 GB (Windows)
+ * fix regression from CVE-2008-1420; 1.0b1 files work again
+ * mark all tables as constant to reduce memory occupation
+
 libvorbis 1.2.1 (unreleased) -- "Xiph.Org libVorbis I 20080501"
 
  * Improved robustness with corrupt streams.

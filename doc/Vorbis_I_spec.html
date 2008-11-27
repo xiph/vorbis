@@ -2184,18 +2184,20 @@ form only. That is:
 This is not to say that it is not currently possible to multiplex
 Vorbis with other media types into a multi-stream Ogg file.  At the
 time this document was written, Ogg was becoming a popular container
-for low-bitrate movies consisting of DiVX video and Vorbis audio.
+for low-bitrate movies consisting of DivX video and Vorbis audio.
 However, a 'Vorbis I audio file' is taken to imply Vorbis audio
 existing alone within a degenerate Ogg stream.  A compliant 'Vorbis
 audio player' is not required to implement Ogg support beyond the
-specific support of Vorbis within a degenrate ogg stream (naturally,
+specific support of Vorbis within a degenrate Ogg stream (naturally,
 application authors are encouraged to support full multiplexed Ogg
 handling).
 </p></div><div class="section" lang="en"><div class="titlepage"><div><div><h4 class="title"><a name="id319459"></a>1.1.2. MIME type</h4></div></div></div><p>
-The correct MIME type of any Ogg file is <code class="literal">application/ogg</code>.
-However, if a file is a Vorbis I audio file (which implies a
-degenerate Ogg stream including only unmultiplexed Vorbis audio), the
-mime type <code class="literal">audio/x-vorbis</code> is also allowed.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id317588"></a>1.2. Encapsulation</h3></div></div></div><p>
+The MIME type of Ogg files depend on the context.  Specifically, complex
+multimedia and applications should use <code class="literal">application/ogg</code>,
+while visual media should use <code class="literal">video/ogg</code>, and audio
+<code class="literal">audio/ogg</code>.  Vorbis data encapsulated in Ogg may appear
+in any of those types.  RTP encapsulated Vorbis should use
+<code class="literal">audio/vorbis</code> + <code class="literal">audio/vorbis-config</code>.</p></div></div><div class="section" lang="en"><div class="titlepage"><div><div><h3 class="title"><a name="id317588"></a>1.2. Encapsulation</h3></div></div></div><p>
 Ogg encapsulation of a Vorbis packet stream is straightforward.</p><div class="itemizedlist"><ul type="disc"><li>
   The first Vorbis packet (the identification header), which
   uniquely identifies a stream as Vorbis audio, is placed alone in the
