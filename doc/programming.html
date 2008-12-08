@@ -490,9 +490,9 @@ int    ogg_sync_destroy(ogg_sync_state *oy);
 buffer, then frees the storage associated with the pointer
 <tt>oy</tt>.</p>
 
-<p><tt>ogg_sync_clear</tt> does not call <tt>free()</tt> on the pointer
-<tt>oy</tt>, allowing use of that call on stream structures in static
-or automatic storage.</p>
+<p>An alternative function,<tt>ogg_sync_clear</tt>, does not call
+<tt>free()</tt> on the pointer <tt>oy</tt>, allowing use of that call on
+stream structures in static or automatic storage.</p>
 
 <p>Returns zero on success and non-zero on failure. This function always
 succeeds.</p>
