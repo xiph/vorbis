@@ -39,3 +39,4 @@ ov_test_open
 ov_crosslap
 ov_halfrate
 ov_halfrate_p
+ov_fopen
