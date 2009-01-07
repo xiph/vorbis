@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\ogg\include" /I "..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_IEEE_FLOAT32" /D "_USE_NON_INTEL_COMPILER" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "..\..\ogg\include" /I "..\..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_IEEE_FLOAT32" /D "_USE_NON_INTEL_COMPILER" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "VORBIS_DYNAMIC_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\ogg\include" /I "..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "..\..\ogg\include" /I "..\..\include" /I "..\win32\src" /I "..\..\vorbis\lib" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /FD /GZ /c
 # SUBTRACT CPP /Fr /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -94,87 +94,87 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\lib\analysis.c
+SOURCE=..\..\lib\analysis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bitrate.c
+SOURCE=..\..\lib\bitrate.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\block.c
+SOURCE=..\..\lib\block.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\codebook.c
+SOURCE=..\..\lib\codebook.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\envelope.c
+SOURCE=..\..\lib\envelope.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\floor0.c
+SOURCE=..\..\lib\floor0.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\floor1.c
+SOURCE=..\..\lib\floor1.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\info.c
+SOURCE=..\..\lib\info.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\lookup.c
+SOURCE=..\..\lib\lookup.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\lpc.c
+SOURCE=..\..\lib\lpc.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\lsp.c
+SOURCE=..\..\lib\lsp.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\mapping0.c
+SOURCE=..\..\lib\mapping0.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\mdct.c
+SOURCE=..\..\lib\mdct.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\psy.c
+SOURCE=..\..\lib\psy.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\registry.c
+SOURCE=..\..\lib\registry.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\res0.c
+SOURCE=..\..\lib\res0.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\sharedbook.c
+SOURCE=..\..\lib\sharedbook.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\smallft.c
+SOURCE=..\..\lib\smallft.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\synthesis.c
+SOURCE=..\..\lib\synthesis.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\vorbisenc.c
+SOURCE=..\..\lib\vorbisenc.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\window.c
+SOURCE=..\..\lib\window.c
 # End Source File
 # End Group
 # Begin Group "Header Files"
@@ -182,87 +182,87 @@ SOURCE=..\lib\window.c
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
 # Begin Source File
 
-SOURCE=..\lib\backends.h
+SOURCE=..\..\lib\backends.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bitbuffer.h
+SOURCE=..\..\lib\bitbuffer.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\bitrate.h
+SOURCE=..\..\lib\bitrate.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\codebook.h
+SOURCE=..\..\lib\codebook.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\include\vorbis\codec.h
+SOURCE=..\..\include\vorbis\codec.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\codec_internal.h
+SOURCE=..\..\lib\codec_internal.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\envelope.h
+SOURCE=..\..\lib\envelope.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\highlevel.h
+SOURCE=..\..\lib\highlevel.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\lookup.h
+SOURCE=..\..\lib\lookup.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\lookup_data.h
+SOURCE=..\..\lib\lookup_data.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\lpc.h
+SOURCE=..\..\lib\lpc.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\lsp.h
+SOURCE=..\..\lib\lsp.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\masking.h
+SOURCE=..\..\lib\masking.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\mdct.h
+SOURCE=..\..\lib\mdct.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\misc.h
+SOURCE=..\..\lib\misc.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\os.h
+SOURCE=..\..\lib\os.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\psy.h
+SOURCE=..\..\lib\psy.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\registry.h
+SOURCE=..\..\lib\registry.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\scales.h
+SOURCE=..\..\lib\scales.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\smallft.h
+SOURCE=..\..\lib\smallft.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\lib\window.h
+SOURCE=..\..\lib\window.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"
@@ -274,7 +274,7 @@ SOURCE=..\lib\window.h
 # PROP Default_Filter ".def"
 # Begin Source File
 
-SOURCE=.\vorbis.def
+SOURCE=..\vorbis.def
 # End Source File
 # End Group
 # End Target
