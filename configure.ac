@@ -61,24 +61,19 @@ AM_PROG_CC_C_O
 
 dnl docbook xml transform and processing tools
 AC_ARG_ENABLE(docs,
-  [  --enable-docs           build the documentation],
-  [case "${enableval}" in
-    yes) build_docs=true;;
-    no)  build_docs=false;;
-    *)   AC_MSG_ERROR(unknown value ${enableval} for --enable-docs);;
-  esac],[build_docs=false])
+	AC_HELP_STRING([--enable-docs], [build the documentation]))
 
 dnl ideally we'd look for other tools and support them
-if test x$build_docs = xtrue; then
+if test x$enable_docs = xyes; then
   AC_CHECK_PROGS([XSLTPROC], xsltproc, [/bin/false])
   AC_CHECK_PROGS([PDFXMLTEX], pdfxmltex, [/bin/false])
   if test "x$XSLTPROC" = "x/bin/false" || test "x$PDFXMLTEX" = "x/bin/false"; then
-    build_docs=false
+    enable_docs=no
     AC_MSG_WARN([Documentation will not be built!])
   fi
 fi
 
-AM_CONDITIONAL(BUILD_DOCS, [test x$build_docs = xtrue])
+AM_CONDITIONAL(BUILD_DOCS, [test x$enable_docs = xyes])
 
 dnl --------------------------------------------------
 dnl Set build flags based on environment
