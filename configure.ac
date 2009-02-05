@@ -203,8 +203,13 @@ dnl --------------------------------------------------
 AC_CHECK_LIB(m, cos, VORBIS_LIBS="-lm", VORBIS_LIBS="")
 AC_CHECK_LIB(pthread, pthread_create, pthread_lib="-lpthread", :)
 
+PKG_PROG_PKG_CONFIG
+
 HAVE_OGG=no
-PKG_CHECK_MODULES(OGG, ogg >= 1.0, HAVE_OGG=yes, HAVE_OGG=no)
+if test "x$PKG_CONFIG" != "x"
+then
+  PKG_CHECK_MODULES(OGG, ogg >= 1.0, HAVE_OGG=yes, HAVE_OGG=no)
+fi
 if test "x$HAVE_OGG" = "xno"
 then
   dnl fall back to the old school test
