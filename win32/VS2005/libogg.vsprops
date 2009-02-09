@@ -6,7 +6,7 @@
 	>
 	<Tool
 		Name="VCCLCompilerTool"
-		AdditionalIncludeDirectories="&quot;..\..\..\..\libogg-$(LIBOGG_VERSION)\include&quot;;..\..\..\..\ogg\include;..\..\..\..\..\..\..\core\ogg\libogg\include\"
+		AdditionalIncludeDirectories="&quot;..\..\..\..\libogg-$(LIBOGG_VERSION)\include&quot;;..\..\..\..\ogg\include;..\..\..\..\..\..\..\core\ogg\libogg\include"
 	/>
 	<Tool
 		Name="VCLinkerTool"
