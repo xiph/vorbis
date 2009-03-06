@@ -91,6 +91,8 @@ CLEANFILES = $(SPEC_TEX:%.tex=%.aux) \
 	     Vorbis_I_spec.toc Vorbis_I_spec.xref \
 	     Vorbis_I_spec*.png \
 	     zzVorbis_I_spec.ps xifish.png
+DISTCLEANFILES = $(built_docs)
+
 
 # explicit rules for generating docs
 if BUILD_DOCS
