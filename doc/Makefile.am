@@ -103,6 +103,7 @@ Vorbis_I_spec.html Vorbis_I_spec.css: $(SPEC_TEX) $(SPEC_PNG) xifish.png
 Vorbis_I_spec.pdf: $(SPEC_TEX) $(SPEC_PNG) xifish.png
 	pdflatex $<
 	pdflatex $<
+	pdflatex $<
 else
 Vorbis_I_spec.html: NO_DOCS_ERROR
 Vorbis_I_spec.pdf: NO_DOCS_ERROR
