@@ -59,21 +59,20 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
 
-dnl docbook xml transform and processing tools
+dnl latex tools for the specification document
 AC_ARG_ENABLE(docs,
 	AC_HELP_STRING([--enable-docs], [build the documentation]))
 
-dnl ideally we'd look for other tools and support them
-if test x$enable_docs = xyes; then
-  AC_CHECK_PROGS([XSLTPROC], xsltproc, [/bin/false])
-  AC_CHECK_PROGS([PDFXMLTEX], pdfxmltex, [/bin/false])
-  if test "x$XSLTPROC" = "x/bin/false" || test "x$PDFXMLTEX" = "x/bin/false"; then
+if test "x$enable_docs" = xyes; then
+  AC_CHECK_PROGS([PDFLATEX], pdflatex, [/bin/false])
+  AC_CHECK_PROGS([HTLATEX], htlatex, [/bin/false])
+  if test "x$PDFLATEX" = x/bin/false || test "x$HTLATEX" = x/bin/false; then
     enable_docs=no
     AC_MSG_WARN([Documentation will not be built!])
   fi
 fi
 
-AM_CONDITIONAL(BUILD_DOCS, [test x$enable_docs = xyes])
+AM_CONDITIONAL(BUILD_DOCS, [test "x$enable_docs" = xyes])
 
 dnl --------------------------------------------------
 dnl Set build flags based on environment
