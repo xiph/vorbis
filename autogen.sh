@@ -62,7 +62,7 @@ if test -r Makefile.am; then
     test -z $AUTOMAKE &&  echo "no"
     echo -n "checking for aclocal $AM_NEEDED or later... "
     for ac in aclocal-$AM_NEEDED aclocal$AM_NEEDED \
-	aclocal aclocal-1.7 aclocal-1.8 aclocal-1.9 aclocal-1.10; do
+	aclocal-1.10 aclocal-1.9 aclocal-1.8 aclocal-1.7 aclocal; do
       ($ac --version < /dev/null > /dev/null 2>&1) || continue
       ver=`$ac --version < /dev/null | head -n 1 | $VERSIONGREP`
       maj=`echo $ver | $VERSIONMKMAJ`
