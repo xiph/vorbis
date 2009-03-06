@@ -34,7 +34,7 @@ static_docs = \
 	white-ogg.png \
 	white-xifish.png
 
-### FIXME: bits needed by the spec which lives in xml
+# bits needed by the spec
 SPEC_PNG = \
 	components.png \
 	floor1-1.png \
@@ -53,77 +53,56 @@ SPEC_PDF = xifish.pdf
 # FIXME: also needed here
 #	white-xifish.png 
 
-built_docs = Vorbis_I_spec.html Vorbis_I_spec.pdf
+SPEC_TEX = \
+	Vorbis_I_spec.tex \
+	01-introduction.tex \
+	02-bitpacking.tex \
+	03-codebook.tex \
+	04-codec.tex   \
+	05-comment.tex \
+	06-floor0.tex  \
+	07-floor1.tex  \
+	08-residue.tex \
+	09-helper.tex  \
+	10-tables.tex  \
+	a1-encapsulation-ogg.tex \
+	a2-encapsulation-rtp.tex \
+	footer.tex
+
+built_docs = Vorbis_I_spec.pdf Vorbis_I_spec.html Vorbis_I_spec.css
 
 # conditionally make the generated documentation
 if BUILD_DOCS
 doc_DATA = $(static_docs) $(SPEC_PNG) $(built_docs)
 else
-doc_DATA = $(static_docs) $(SPEC_PNG)
+doc_DATA = $(static_docs)
 endif
 
-EXTRA_DIST = $(static_docs) $(doc_sources) \
-	$(SPEC_PNG) $(SPEC_PDF) $(built_docs)
-
-doc_sources = xml/Vorbis_I_spec.xml \
-	xml/01-introduction.xml \
-	xml/02-bitpacking.xml \
-	xml/03-codebook.xml \
-	xml/04-codec.xml \
-	xml/05-comment.xml \
-	xml/06-floor0.xml \
-	xml/07-floor1.xml \
-	xml/08-residue.xml \
-	xml/09-helper.xml \
-	xml/10-tables.xml \
-	xml/TODO \
-	xml/a1-encapsulation_ogg.xml \
-	xml/a2-encapsulation_rtp.xml \
-	xml/footer.xml \
-	xml/spec-common.xsl \
-	xml/spec-fo.xsl \
-	xml/spec-html.xsl
+EXTRA_DIST = $(static_docs) $(built_docs) \
+	$(SPEC_TEX) $(SPEC_PNG) $(SPEC_PDF) Vorbis_I_spec.cfg
 
 # these are expensive; only remove if we have to
-DISTCLEANFILES = $(built_docs)
-CLEANFILES = Vorbis_I_spec.fo spec.aux spec.log spec.out
-
-# rules for temporary build dir for spec
-BUILDDIR = build
-# how to copy images to build dir
-SPEC_PNG_BUILD = $(foreach file, $(SPEC_PNG), $(BUILDDIR)/$(file))
-SPEC_PDF_BUILD = $(foreach file, $(SPEC_PDF), $(BUILDDIR)/$(file))
-$(BUILDDIR)/%: $(srcdir)/%
-	@echo "Copying $< to $@"
-	@mkdir -p $(BUILDDIR)
-	@cp $< $@
-
-# how to copy the xml to build dir; cheat by only targeting the main one
-$(BUILDDIR)/Vorbis_I_spec.xml: $(doc_sources)
-	@mkdir -p $(BUILDDIR)
-	@for file in $(doc_sources); do cp $(srcdir)/$$file $(BUILDDIR); done
-# translate rfc5215.txt to .xml in the BUILDDIR
-$(BUILDDIR)/rfc5215.xml: rfc5215.txt
-	cat $< | sed 's///g' > $@
-# cat $< | sed 's///g' | sed 's/</\&lt;/g' | sed 's/>/\&gt;/g' > $@
+MAINTAINERCLEANFILES = $(built_docs)
+CLEANFILES = $(SPEC_TEX:%.tex=%.aux) \
+	     Vorbis_I_spec.4ct Vorbis_I_spec.4tc \
+	     Vorbis_I_spec.dvi Vorbis_I_spec.idv \
+	     Vorbis_I_spec.lg  Vorbis_I_spec.log \
+	     Vorbis_I_spec.out Vorbis_I_spec.tmp \
+	     Vorbis_I_spec.toc Vorbis_I_spec.xref \
+	     Vorbis_I_spec*.png \
+	     zzVorbis_I_spec.ps xifish.png
 
 # explicit rules for generating docs
 if BUILD_DOCS
-Vorbis_I_spec.html: $(SPEC_PNG_BUILD) $(BUILDDIR)/Vorbis_I_spec.xml
-	cd build; xsltproc --xinclude --output Vorbis_I_spec.html spec-html.xsl Vorbis_I_spec.xml && mv $@ ..
+xifish.png: white-xifish.png
+	cp $< $@
 
-Vorbis_I_spec.fo: $(BUILDDIR)/Vorbis_I_spec.xml
-	cd build; xsltproc --xinclude --output $@ spec-fo.xsl Vorbis_I_spec.xml && mv $@ ..
+Vorbis_I_spec.html Vorbis_I_spec.css: $(SPEC_TEX) $(SPEC_PNG) xifish.png
+	htlatex $<
 
-# we add the two newlines to pdfxmltex because this entire XML
-# toolchain is built from wishful thinking and bonghits and the
-# default supplied passivetex config files are buggy.
-Vorbis_I_spec.pdf: Vorbis_I_spec.fo $(SPEC_PNG_BUILD) $(SPEC_PDF_BUILD)
-	cp $< build/spec.fo # work around a passivetex bug
-	-cd build; echo -e -n "\n\n" | pdfxmltex spec.fo
-	-cd build; echo -e -n "\n\n" | pdfxmltex spec.fo
-	rm build/spec.fo
-	mv build/spec.pdf $@
+Vorbis_I_spec.pdf: $(SPEC_TEX) $(SPEC_PNG) xifish.png
+	pdflatex $<
+	pdflatex $<
 else
 Vorbis_I_spec.html: NO_DOCS_ERROR
 Vorbis_I_spec.pdf: NO_DOCS_ERROR
@@ -133,7 +112,3 @@ NO_DOCS_ERROR:
 	@echo "Try re-running after passing --enable-docs to configure."
 	@echo
 endif
-
-# clean up build dir
-clean-local:
-	-$(RM) -r $(BUILDDIR)
