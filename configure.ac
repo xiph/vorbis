@@ -162,9 +162,18 @@ else
 		CFLAGS="-O20 -Wall -Wextra -ffast-math -D_REENTRANT -fsigned-char"
 		PROFILE="-pg -g -O20 -ffast-math -D_REENTRANT -fsigned-char";;
 	sparc-sun-*)
-		DEBUG="-g -Wall -Wextra -D__NO_MATH_INLINES -fsigned-char -mv8"
-		CFLAGS="-O20 -Wall -Wextra -ffast-math -D__NO_MATH_INLINES -fsigned-char -mv8"
-		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char -mv8" ;;
+		sparc_cpu=""
+		AC_MSG_CHECKING([if gcc supports -mv8])
+		old_cflags="$CFLAGS"
+		CFLAGS="$CFLAGS -mv8"
+		AC_TRY_COMPILE(, [return 0;], [
+			AC_MSG_RESULT([yes])
+			sparc_cpu="-mv8"
+		])
+		CFLAGS="$old_cflags"
+		DEBUG="-g -Wall -Wextra -D__NO_MATH_INLINES -fsigned-char $sparc_cpu"
+		CFLAGS="-O20 -Wall -Wextra -ffast-math -D__NO_MATH_INLINES -fsigned-char $sparc_cpu"
+		PROFILE="-pg -g -O20 -D__NO_MATH_INLINES -fsigned-char $sparc_cpu" ;;
 	*-*-darwin*)
 		DEBUG="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O0 -fsigned-char"
 		CFLAGS="-DDARWIN -fno-common -force_cpusubtype_ALL -Wall -g -O4 -ffast-math -fsigned-char"
