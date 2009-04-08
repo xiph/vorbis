@@ -304,6 +304,10 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     }
   }
 
+  for(;j<n;j++){
+    p->ath[j]=p->ath[j-1];
+  }
+
   for(i=0;i<n;i++){
     float bark=toBARK(rate/(2*n)*i); 
 
