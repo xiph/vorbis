@@ -31,7 +31,6 @@ static_docs = \
 	vorbis.html \
 	vorbisword2.png \
 	wait.png \
-	white-ogg.png \
 	white-xifish.png
 
 # bits needed by the spec
