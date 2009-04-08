@@ -153,13 +153,6 @@ Similarly, the below calculation synthesizes the output LSP curve \varname{[outp
  \item if ( \varname{[floor0_order]} is odd ) {
   \begin{enumerate}
    \item calculate \varname{[p]} and \varname{[q]} according to:
-\TODO{the following is generated from the TeX code embedded into the DocBook files:}
-           \begin{eqnarray*}
-             p & = & (1 - \cos^2\omega)\prod_{j=0}^{(\mathtt{order}-3)/2} 4 (\cos c_{2j+1} - \cos \omega)^2 \\
-             q & = & \frac{1}{4} \prod_{j=0}^{(\mathtt{order}-1)/2} 4 (\cos c_{2j+1} - \cos \omega)^2
-           \end{eqnarray*}
-
-\TODO{the following is what oddlsp.png contains:}
            \begin{eqnarray*}
              p & = & (1 - \cos^2\omega)\prod_{j=0}^{\frac{\mathtt{floor0\_order}-3}{2}} 4 (\cos([\mathtt{coefficients}]_{2j+1}) - \cos \omega)^2 \\
              q & = & \frac{1}{4} \prod_{j=0}^{\frac{\mathtt{floor0\_order}-1}{2}} 4 (\cos([\mathtt{coefficients}]_{2j}) - \cos \omega)^2
@@ -169,13 +162,6 @@ Similarly, the below calculation synthesizes the output LSP curve \varname{[outp
   } else \varname{[floor0_order]} is even {
   \begin{enumerate}
    \item calculate \varname{[p]} and \varname{[q]} according to:
-\TODO{the following is generated from the TeX code embedded into the DocBook files:}
-           \begin{eqnarray*}
-             p & = & \frac{(1 - \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2 \\
-             q & = & \frac{(1 + \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2
-           \end{eqnarray*}
-
-\TODO{the following is what oddlsp.png contains:}
            \begin{eqnarray*}
              p & = & \frac{(1 - \cos^2\omega)}{2} \prod_{j=0}^{\frac{\mathtt{floor0\_order}-2}{2}} 4 (\cos([\mathtt{coefficients}]_{2j+1}) - \cos \omega)^2 \\
              q & = & \frac{(1 + \cos^2\omega)}{2} \prod_{j=0}^{\frac{\mathtt{floor0\_order}-2}{2}} 4 (\cos([\mathtt{coefficients}]_{2j}) - \cos \omega)^2

@@ -13,14 +13,12 @@
 .cmtt-10x-x-109{font-family: monospace;}
 .cmtt-10x-x-109{font-family: monospace;}
 .cmbx-10x-x-109{ font-weight: bold;}
-.cmbx-10x-x-109{ font-weight: bold;}
 .cmti-10x-x-109{ font-style: italic;}
 .cmr-8{font-size:72%;}
 .cmr-6{font-size:54%;}
 .cmmi-10x-x-109{font-style: italic;}
 .cmmi-8{font-size:72%;font-style: italic;}
 .cmsy-10x-x-109{}
-.cmsy-8{font-size:72%;}
 .cmsy-6{font-size:54%;}
 .cmtt-10{font-size:90%;font-family: monospace;}
 .cmtt-10{font-family: monospace;}
@@ -34,8 +32,6 @@
 .cmtt-8x-x-75{font-family: monospace;}
 .cmtt-8x-x-75{font-family: monospace;}
 .cmtt-8x-x-75{font-family: monospace;}
-.cmbx-10{font-size:90%; font-weight: bold;}
-.cmbx-10{ font-weight: bold;}
 p.noindent { text-indent: 0em }
 td p.noindent { text-indent: 0em; margin-top:0em; }
 p.nopar { text-indent: 0em; }
@@ -63,7 +59,7 @@ div.verbatim {font-family: monospace; white-space: nowrap; text-align:left; clea
 .fbox {padding-left:3.0pt; padding-right:3.0pt; text-indent:0pt; border:solid black 0.4pt; }
 div.fbox {display:table}
 div.center div.fbox {text-align:center; clear:both; padding-left:3.0pt; padding-right:3.0pt; text-indent:0pt; border:solid black 0.4pt; }
-table.minipage{width:100%;}
+div.minipage{width:100%;}
 div.center, div.center div.center {text-align: center; margin-left:1em; margin-right:1em;}
 div.center div {text-align: left;}
 div.flushright, div.flushright div.flushright {text-align: right;}
@@ -117,6 +113,7 @@ div.pmatrix {text-align:center;}
 table.pmatrix {width:100%;}
 img.cdots{vertical-align:middle;}
 .partToc a, .partToc, .likepartToc a, .likepartToc {line-height: 200%; font-weight:bold; font-size:110%;}
+.chapterToc a, .chapterToc, .likechapterToc a, .likechapterToc, .appendixToc a, .appendixToc {line-height: 200%; font-weight:bold;}
 .index-item, .index-subitem, .index-subsubitem {display:block}
 .caption td.id{font-weight: bold; white-space: nowrap; }
 table.caption {text-align:center;}
@@ -135,14 +132,10 @@ div.thanks{text-align:left; margin-left:10%; font-size:85%; font-style:italic; }
 div.author{white-space: nowrap;}
 .quotation {margin-bottom:0.25em; margin-top:0.25em; margin-left:1em; }
 .abstract p {margin-left:5%; margin-right:5%;}
-table.abstract {width:100%;}
+div.abstract {width:100%;}
 span.footnote-mark sup.textsuperscript, span.footnote-mark a sup.textsuperscript{ font-size:80%; }
 .figure img.graphics {margin-left:10%;}
 div.verbatiminput {font-family: monospace; white-space: nowrap; }
 P.fancyvrb {white-space: nowrap; margin:0em;}
-span#textcolor1{color:#FF0000}
-span#textcolor2{color:#FF0000}
-span#textcolor3{color:#FF0000}
-span#textcolor4{color:#FF0000}
 /* end css.sty */
 
