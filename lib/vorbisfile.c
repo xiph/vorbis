@@ -219,8 +219,7 @@ static ogg_int64_t _get_prev_page_serial(OggVorbis_File *vf,int *serialno, ogg_i
 	if(ret_serialno == *serialno){
 	  prefoffset=ret;
 	  *granpos=ret_gran;
-	}
-	
+	}	
       }
     }
   }
@@ -626,7 +625,7 @@ static int _open_seekable2(OggVorbis_File *vf){
   if(end<0)return(end);
 
   /* now determine bitstream structure recursively */
-  if(_bisect_forward_serialno(vf,0,dataoffset,end+1,endgran,endserial,
+  if(_bisect_forward_serialno(vf,0,dataoffset,vf->offset,endgran,endserial,
 			      vf->serialnos+2,vf->serialnos[1],0)<0)return(OV_EREAD);  
 
   vf->offsets[0]=0;
