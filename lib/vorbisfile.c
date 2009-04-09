@@ -154,6 +154,7 @@ static ogg_int64_t _get_prev_page(OggVorbis_File *vf,ogg_page *og){
     if(ret)return(ret);
 
     while(vf->offset<end){
+      memset(og,0,sizeof(*og));
       ret=_get_next_page(vf,og,end-vf->offset);
       if(ret==OV_EREAD)return(OV_EREAD);
       if(ret<0){
@@ -164,14 +165,18 @@ static ogg_int64_t _get_prev_page(OggVorbis_File *vf,ogg_page *og){
     }
   }
 
-  /* we have the offset.  Actually snork and hold the page now */
-  ret=_seek_helper(vf,offset);
-  if(ret)return(ret);
+  /* In a fully compliant, non-multiplexed stream, we'll still be
+     holding the last page.  In multiplexed (or noncompliant streams),
+     we may need to re-read the last page we saw */
+  if(og->header_len==0){
+    ret=_seek_helper(vf,offset);
+    if(ret)return(ret);
 
-  ret=_get_next_page(vf,og,CHUNKSIZE);
-  if(ret<0)
-    /* this shouldn't be possible */
-    return(OV_EFAULT);
+    ret=_get_next_page(vf,og,CHUNKSIZE);
+    if(ret<0)
+      /* this shouldn't be possible */
+      return(OV_EFAULT);
+  }
 
   return(offset);
 }
