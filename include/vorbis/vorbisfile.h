@@ -48,11 +48,8 @@ typedef struct {
  * ov_open() to avoid problems with incompatable crt.o version linking
  * issues. */
 
-#include <stdio.h>
 static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
   if(f==NULL)return(-1);
-
-  fprintf(stderr,"seek: %s %ld\n",(whence==SEEK_END?"END":(whence==SEEK_SET?"SET":"CUR")), (long)off);
 
 #ifdef __MINGW32__
   return fseeko64(f,off,whence);

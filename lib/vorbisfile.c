@@ -181,13 +181,44 @@ static ogg_int64_t _get_prev_page(OggVorbis_File *vf,ogg_page *og){
   return(offset);
 }
 
+static void _add_serialno(ogg_page *og,long **serialno_list, int *n){
+  long s = ogg_page_serialno(og);
+  (*n)++;
+
+  if(serialno_list){
+    *serialno_list = _ogg_realloc(*serialno_list, sizeof(*serialno_list)*(*n));
+  }else{
+    *serialno_list = _ogg_malloc(sizeof(**serialno_list));
+  }
+  
+  (*serialno_list)[(*n)-1] = s;
+}
+
+/* returns nonzero if found */
+static int _lookup_serialno(long s, long *serialno_list, int n){
+  if(serialno_list){
+    while(n--){
+      if(*serialno_list == s) return 1;
+      serialno_list++;
+    }
+  }
+  return 0;
+}
+
+static int _lookup_page_serialno(ogg_page *og, long *serialno_list, int n){
+  long s = ogg_page_serialno(og);
+  return _lookup_serialno(s,serialno_list,n);
+}
+
 /* performs the same search as _get_prev_page, but prefers pages of
    the specified serial number. If a page of the specified serialno is
    spotted during the seek-back-and-read-forward, it will return the
    info of last page of the matching serial number instead of the very
    last page.  If no page of the specified serialno is seen, it will
    return the info of last page and alter *serialno.  */
-static ogg_int64_t _get_prev_page_serial(OggVorbis_File *vf,int *serialno, ogg_int64_t *granpos){
+static ogg_int64_t _get_prev_page_serial(OggVorbis_File *vf,
+					 long *serial_list, int serial_n,
+					 int *serialno, ogg_int64_t *granpos){
   ogg_page og;
   ogg_int64_t begin=vf->offset;
   ogg_int64_t end=begin;
@@ -220,6 +251,14 @@ static ogg_int64_t _get_prev_page_serial(OggVorbis_File *vf,int *serialno, ogg_i
 	  prefoffset=ret;
 	  *granpos=ret_gran;
 	}	
+
+	if(!_lookup_serialno(ret_serialno,serial_list,serial_n)){
+	  /* we fell off the end of the link, which means we seeked
+	     back too far and shouldn't have been looking in that link
+	     to begin with.  If we found the preferred serial number,
+	     forget that we saw it. */
+	  prefoffset=-1;
+	}
       }
     }
   }
@@ -231,35 +270,6 @@ static ogg_int64_t _get_prev_page_serial(OggVorbis_File *vf,int *serialno, ogg_i
   *granpos = ret_gran;
   return(offset);
 
-}
-
-static void _add_serialno(ogg_page *og,long **serialno_list, int *n){
-  long s = ogg_page_serialno(og);
-  (*n)++;
-
-  if(serialno_list){
-    *serialno_list = _ogg_realloc(*serialno_list, sizeof(*serialno_list)*(*n));
-  }else{
-    *serialno_list = _ogg_malloc(sizeof(**serialno_list));
-  }
-  
-  (*serialno_list)[(*n)-1] = s;
-}
-
-/* returns nonzero if found */
-static int _lookup_serialno(long s, long *serialno_list, int n){
-  if(serialno_list){
-    while(n--){
-      if(*serialno_list == s) return 1;
-      serialno_list++;
-    }
-  }
-  return 0;
-}
-
-static int _lookup_page_serialno(ogg_page *og, long *serialno_list, int n){
-  long s = ogg_page_serialno(og);
-  return _lookup_serialno(s,serialno_list,n);
 }
 
 /* uses the local ogg_stream storage in vf; this is important for
@@ -482,7 +492,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
     
     while(endserial != serialno){
       endserial = serialno;
-      vf->offset=_get_prev_page_serial(vf,&endserial,&endgran);
+      vf->offset=_get_prev_page_serial(vf,currentno_list,currentnos,&endserial,&endgran);
     }
 
     vf->links=m+1;
@@ -540,7 +550,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
       vf->offset = next;
       while(testserial != serialno){
 	testserial = serialno;
-	vf->offset=_get_prev_page_serial(vf,&testserial,&searchgran);
+	vf->offset=_get_prev_page_serial(vf,currentno_list,currentnos,&testserial,&searchgran);
       }
     }
 
@@ -621,7 +631,7 @@ static int _open_seekable2(OggVorbis_File *vf){
   /* Get the offset of the last page of the physical bitstream, or, if
      we're lucky the last vorbis page of this link as most OggVorbis
      files will contain a single logical bitstream */
-  end=_get_prev_page_serial(vf,&endserial,&endgran);
+  end=_get_prev_page_serial(vf,vf->serialnos+2,vf->serialnos[1],&endserial,&endgran);
   if(end<0)return(end);
 
   /* now determine bitstream structure recursively */
