@@ -301,7 +301,8 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
 /* uses the local ogg_stream storage in vf; this is important for
    non-streaming input sources */
 static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
-			  long *serialno,ogg_page *og_ptr){
+			  long *serialno, long **serialno_list, int *serialno_n,
+                          ogg_page *og_ptr){
   ogg_page og;
   ogg_packet op;
   int i,ret;
@@ -317,85 +318,114 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
   vorbis_info_init(vi);
   vorbis_comment_init(vc);
 
-  /* extract the first set of vorbis headers we see in the headerset */
+  /* extract the serialnos of all BOS pages + the first set of vorbis
+     headers we see in the link */
+
+  while(ogg_page_bos(og_ptr)){
+    if(serialno_list){
+      if(_lookup_serialno(og_ptr,*serialno_list,*serialno_n)){
+        /* a dupe serialnumber in an initial header packet set == invalid stream */
+        if(*serialno_list)_ogg_free(*serialno_list);
+        *serialno_list=0;
+        *serialno_n=0;
+        ret=OV_EBADHEADER;
+        goto bail_header;
+      }
+      
+      _add_serialno(og_ptr,serialno_list,serialno_n);
+    }
+
+    if(vf->ready_state<STREAMSET){
+      /* we don't have a vorbis stream in this link yet, so begin
+         prospective stream setup. We need a stream to get packets */
+      ogg_stream_reset_serialno(&vf->os,ogg_page_serialno(og_ptr));
+      ogg_stream_pagein(&vf->os,og_ptr);
+
+      if(ogg_stream_packetout(&vf->os,&op) > 0 &&
+         vorbis_synthesis_idheader(&op)){
+        /* vorbis header; continue setup */
+        if(serialno)*serialno=vf->os.serialno;
+        vf->ready_state=STREAMSET;
+        if((ret=vorbis_synthesis_headerin(vi,vc,&op))){
+          ret=OV_EBADHEADER;
+          goto bail_header;
+        }
+      }
+    }
+
+    /* get next page */
+    {
+      ogg_int64_t llret=_get_next_page(vf,og_ptr,CHUNKSIZE);
+      if(llret==OV_EREAD){
+        ret=OV_EREAD;
+        goto bail_header;
+      }
+      if(llret<0){
+        ret=OV_ENOTVORBIS;
+        goto bail_header;
+      }
+
+      /* if this page also belongs to our vorbis stream, submit it and break */
+      if(vf->ready_state==STREAMSET && 
+         vf->os.serialno == ogg_page_serialno(og_ptr)){
+        ogg_stream_pagein(&vf->os,og_ptr);
+        break;
+      } 
+    } 
+  }
+
+  if(vf->ready_state!=STREAMSET){
+    ret = OV_ENOTVORBIS;
+    goto bail_header;
+  }
 
   while(1){
   
-    /* if we're past the ID headers, we won't be finding a Vorbis
-       stream in this link */
-    if(!ogg_page_bos(og_ptr)){
-      ret = OV_ENOTVORBIS;
-      goto bail_header;
-    }
-
-    /* prospective stream setup; we need a stream to get packets */
-    ogg_stream_reset_serialno(&vf->os,ogg_page_serialno(og_ptr));
-    ogg_stream_pagein(&vf->os,og_ptr);
-
-    if(ogg_stream_packetout(&vf->os,&op) > 0 &&
-       vorbis_synthesis_idheader(&op)){
-
-      /* continue Vorbis header load; past this point, any error will
-	 render this link useless (we won't continue looking for more
-	 Vorbis streams */
-      if(serialno)*serialno=vf->os.serialno;
-      vf->ready_state=STREAMSET;
-      if((ret=vorbis_synthesis_headerin(vi,vc,&op)))
-	goto bail_header;
-
-      i=0;
-      while(i<2){ /* get a page loop */
+    i=0;
+    while(i<2){ /* get a page loop */
+      
+      while(i<2){ /* get a packet loop */
+        
+        int result=ogg_stream_packetout(&vf->os,&op);
+        if(result==0)break;
+        if(result==-1){
+          ret=OV_EBADHEADER;
+          goto bail_header;
+        }
 	
-	while(i<2){ /* get a packet loop */
-
-	  int result=ogg_stream_packetout(&vf->os,&op);
-	  if(result==0)break;
-	  if(result==-1){
-	    ret=OV_EBADHEADER;
-	    goto bail_header;
-	  }
-	
-	  if((ret=vorbis_synthesis_headerin(vi,vc,&op)))
-	    goto bail_header;
-
-	  i++;
-	}
-
-	while(i<2){
-	  if(_get_next_page(vf,og_ptr,CHUNKSIZE)<0){
-	    ret=OV_EBADHEADER;
-	    goto bail_header;
-	  }
-
-	  /* if this page belongs to the correct stream, go parse it */
-	  if(vf->os.serialno == ogg_page_serialno(og_ptr)){
-	    ogg_stream_pagein(&vf->os,og_ptr);
-	    break;
-	  }
-
-	  /* if we never see the final vorbis headers before the link
-	     ends, abort */
-	  if(ogg_page_bos(og_ptr)){
-	    if(allbos){
-	      ret = OV_EBADHEADER;
-	      goto bail_header;
-	    }else
-	      allbos=1;
-	  }
-
-	  /* otherwise, keep looking */
-	}
+        if((ret=vorbis_synthesis_headerin(vi,vc,&op)))
+          goto bail_header;
+        
+        i++;
       }
-
-      return 0; 
+      
+      while(i<2){
+        if(_get_next_page(vf,og_ptr,CHUNKSIZE)<0){
+          ret=OV_EBADHEADER;
+          goto bail_header;
+        }
+        
+        /* if this page belongs to the correct stream, go parse it */
+        if(vf->os.serialno == ogg_page_serialno(og_ptr)){
+          ogg_stream_pagein(&vf->os,og_ptr);
+          break;
+        }
+        
+        /* if we never see the final vorbis headers before the link
+           ends, abort */
+        if(ogg_page_bos(og_ptr)){
+          if(allbos){
+            ret = OV_EBADHEADER;
+            goto bail_header;
+          }else
+            allbos=1;
+        }
+        
+        /* otherwise, keep looking */
+      }
     }
-
-    /* this wasn't vorbis, get next page, try again */
-    {
-      ogg_int64_t llret=_get_next_page(vf,og_ptr,CHUNKSIZE);
-      if(llret==OV_EREAD)return(OV_EREAD);
-      if(llret<0)return(OV_ENOTVORBIS);
-    } 
+    
+    return 0; 
   }
 
  bail_header:
@@ -420,6 +450,9 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
   int i;
   ogg_int64_t ret;
 
+  /* release any overloaded vf->serialnos state */
+  if(vf->serialnos)_ogg_free(vf->serialnos);
+
   vf->vi=_ogg_realloc(vf->vi,vf->links*sizeof(*vf->vi));
   vf->vc=_ogg_realloc(vf->vc,vf->links*sizeof(*vf->vc));
   vf->serialnos=_ogg_malloc(vf->links*sizeof(*vf->serialnos));
@@ -443,7 +476,7 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
       if(ret){
 	vf->dataoffsets[i]=-1;
       }else{
-	if(_fetch_headers(vf,vf->vi+i,vf->vc+i,vf->serialnos+i,NULL)<0){
+	if(_fetch_headers(vf,vf->vi+i,vf->vc+i,vf->serialnos+i,NULL,NULL,NULL)<0){
 	  vf->dataoffsets[i]=-1;
 	}else{
 	  vf->dataoffsets[i]=vf->offset;
@@ -550,9 +583,6 @@ static int _make_decode_ready(OggVorbis_File *vf){
 
 static int _open_seekable2(OggVorbis_File *vf){
   ogg_int64_t dataoffset=vf->offset,end;
-  long *serialno_list=NULL;
-  int serialnos=0;
-  int ret;
   ogg_page og;
 
   /* we're partially open and have a first link header state in
@@ -573,15 +603,8 @@ static int _open_seekable2(OggVorbis_File *vf){
   end=_get_prev_page(vf,&og);
   if(end<0)return(end);
 
-  /* back to beginning, learn all serialnos of first link */
-  ret=_seek_helper(vf,0);
-  if(ret)return(ret);
-  ret=_get_serialnos(vf,&serialno_list,&serialnos);
-  if(ret)return(ret);
-
   /* now determine bitstream structure recursively */
-  if(_bisect_forward_serialno(vf,0,0,end+1,serialno_list,serialnos,0)<0)return(OV_EREAD);  
-  if(serialno_list)_ogg_free(serialno_list);
+  if(_bisect_forward_serialno(vf,0,0,end+1,vf->serialnos+2,vf->serialnos[1],0)<0)return(OV_EREAD);  
 
   /* the initial header memory is referenced by vf after; don't free it */
   _prefetch_all_headers(vf,dataoffset);
@@ -778,7 +801,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 	  /* we're streaming */
 	  /* fetch the three header packets, build the info struct */
 	  
-	  int ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,&og);
+	  int ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,NULL,NULL,&og);
 	  if(ret)return(ret);
 	  vf->current_link++;
 	  link=0;
@@ -808,6 +831,8 @@ static int _fseek64_wrap(FILE *f,ogg_int64_t off,int whence){
 static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
 		     long ibytes, ov_callbacks callbacks){
   int offsettest=((f && callbacks.seek_func)?callbacks.seek_func(f,0,SEEK_CUR):-1);
+  long *serialno_list=NULL;
+  int serialno_list_size=0;
   int ret;
   
   memset(vf,0,sizeof(*vf));
@@ -819,8 +844,8 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
 
   /* perhaps some data was previously read into a buffer for testing
      against other stream types.  Allow initialization from this
-     previously read data (as we may be reading from a non-seekable
-     stream) */
+     previously read data (especially as we may be reading from a
+     non-seekable stream) */
   if(initial){
     char *buffer=ogg_sync_buffer(&vf->oy,ibytes);
     memcpy(buffer,initial,ibytes);
@@ -837,12 +862,25 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
   vf->vc=_ogg_calloc(vf->links,sizeof(*vf->vc));
   ogg_stream_init(&vf->os,-1); /* fill in the serialno later */
 
-  /* Try to fetch the headers, maintaining all the storage */
-  if((ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,NULL))<0){
+  /* Fetch all BOS pages, store the vorbis header and all seen serial
+     numbers, load subsequent vorbis setup headers */
+  if((ret=_fetch_headers(vf,vf->vi,vf->vc,&vf->current_serialno,
+                         &serialno_list,&serialno_list_size,
+                         NULL))<0){
     vf->datasource=NULL;
     ov_clear(vf);
-  }else 
+  }else{
+    /* serial number list for first link needs to be held somewhere
+       for second stage of seekable stream open; this saves having to
+       seek/reread first link's serialnumber data then. */
+    vf->serialnos=_ogg_calloc(serialno_list_size+2,sizeof(*vf->serialnos));
+    vf->serialnos[0]=vf->current_serialno;
+    vf->serialnos[1]=serialno_list_size;
+    memcpy(vf->serialnos+2,serialno_list,serialno_list_size*sizeof(*vf->serialnos));
+
     vf->ready_state=PARTOPEN;
+  }
+  if(serialno_list)_ogg_free(serialno_list);
   return(ret);
 }
 
