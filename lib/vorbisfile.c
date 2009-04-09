@@ -284,6 +284,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
     
     if(searched>=end || next_serialnos==0){
       vf->links=m+1;
+      if(vf->offsets)_ogg_free(vf->offsets);
       vf->offsets=_ogg_malloc((vf->links+1)*sizeof(*vf->offsets));
       vf->offsets[m+1]=searched;
     }else{
@@ -450,8 +451,8 @@ static void _prefetch_all_headers(OggVorbis_File *vf, ogg_int64_t dataoffset){
   int i;
   ogg_int64_t ret;
 
-  /* release any overloaded vf->serialnos state */
   if(vf->serialnos)_ogg_free(vf->serialnos);
+  if(vf->dataoffsets)_ogg_free(vf->dataoffsets);
 
   vf->vi=_ogg_realloc(vf->vi,vf->links*sizeof(*vf->vi));
   vf->vc=_ogg_realloc(vf->vc,vf->links*sizeof(*vf->vc));
@@ -582,7 +583,7 @@ static int _make_decode_ready(OggVorbis_File *vf){
 }
 
 static int _open_seekable2(OggVorbis_File *vf){
-  ogg_int64_t dataoffset=vf->offset,end;
+  ogg_int64_t dataoffset=vf->dataoffsets[0],end;
   ogg_page og;
 
   /* we're partially open and have a first link header state in
@@ -608,7 +609,7 @@ static int _open_seekable2(OggVorbis_File *vf){
 
   /* the initial header memory is referenced by vf after; don't free it */
   _prefetch_all_headers(vf,dataoffset);
-  return(ov_raw_seek(vf,0));
+  return(ov_raw_seek(vf,dataoffset));
 }
 
 /* clear out the current logical bitstream decoder */ 
@@ -737,7 +738,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 	    
 	    /* two possibilities: 
 	       1) our decoding just traversed a bitstream boundary
-	       2) another stream is multiplexed into this logical section? */
+	       2) another stream is multiplexed into this logical section */
 	    
 	    if(ogg_page_bos(&og)){
 	      /* boundary case */
@@ -877,6 +878,11 @@ static int _ov_open1(void *f,OggVorbis_File *vf,char *initial,
     vf->serialnos[0]=vf->current_serialno;
     vf->serialnos[1]=serialno_list_size;
     memcpy(vf->serialnos+2,serialno_list,serialno_list_size*sizeof(*vf->serialnos));
+    
+    vf->offsets=_ogg_calloc(1,sizeof(*vf->offsets));
+    vf->dataoffsets=_ogg_calloc(1,sizeof(*vf->dataoffsets));
+    vf->offsets[0]=0;
+    vf->dataoffsets[0]=vf->offset;
 
     vf->ready_state=PARTOPEN;
   }
