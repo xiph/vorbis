@@ -30,8 +30,8 @@
 #include "misc.h"
 
 #define NEGINF -9999.f
-static double stereo_threshholds[]={0.0, .5, 1.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
-static double stereo_threshholds_limited[]={0.0, .5, 1.0, 1.5, 2.0, 2.5, 4.5, 8.5, 9e10};
+static const double stereo_threshholds[]={0.0, .5, 1.0, 1.5, 2.5, 4.5, 8.5, 16.5, 9e10};
+static const double stereo_threshholds_limited[]={0.0, .5, 1.0, 1.5, 2.0, 2.5, 4.5, 8.5, 9e10};
 
 vorbis_look_psy_global *_vp_global_look(vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
@@ -696,7 +696,7 @@ static void bark_noise_hybridmp(int n,const long *b,
   }
 }
 
-static float FLOOR1_fromdB_INV_LOOKUP[256]={
+static const float FLOOR1_fromdB_INV_LOOKUP[256]={
   0.F, 8.81683e+06F, 8.27882e+06F, 7.77365e+06F, 
   7.29930e+06F, 6.85389e+06F, 6.43567e+06F, 6.04296e+06F, 
   5.67422e+06F, 5.32798e+06F, 5.00286e+06F, 4.69759e+06F, 
@@ -946,7 +946,7 @@ static void couple_lossless(float A, float B,
   }
 }
 
-static float hypot_lookup[32]={
+static const float hypot_lookup[32]={
   -0.009935, -0.011245, -0.012726, -0.014397, 
   -0.016282, -0.018407, -0.020800, -0.023494, 
   -0.026522, -0.029923, -0.033737, -0.038010, 

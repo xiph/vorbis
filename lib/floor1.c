@@ -273,7 +273,7 @@ static int vorbis_dBquant(const float *x){
   return i;
 }
 
-static float FLOOR1_fromdB_LOOKUP[256]={
+static const float FLOOR1_fromdB_LOOKUP[256]={
   1.0649863e-07F, 1.1341951e-07F, 1.2079015e-07F, 1.2863978e-07F, 
   1.3699951e-07F, 1.4590251e-07F, 1.5538408e-07F, 1.6548181e-07F, 
   1.7623575e-07F, 1.8768855e-07F, 1.9988561e-07F, 2.128753e-07F, 
