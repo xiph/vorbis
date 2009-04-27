@@ -185,8 +185,8 @@ static void _add_serialno(ogg_page *og,long **serialno_list, int *n){
   long s = ogg_page_serialno(og);
   (*n)++;
 
-  if(serialno_list){
-    *serialno_list = _ogg_realloc(*serialno_list, sizeof(*serialno_list)*(*n));
+  if(*serialno_list){
+    *serialno_list = _ogg_realloc(*serialno_list, sizeof(**serialno_list)*(*n));
   }else{
     *serialno_list = _ogg_malloc(sizeof(**serialno_list));
   }
