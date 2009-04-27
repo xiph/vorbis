@@ -450,7 +450,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
   return(na);
 }
 
-static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
+static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
   long x=0,y=0,x2=0,y2=0,xy=0,an=0,i;
   long x0=a[0].x0;
   long x1=a[fits-1].x1;
@@ -482,27 +482,33 @@ static void fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     an++;
   }
 
-  if(an){
+  {
     /* need 64 bit multiplies, which C doesn't give portably as int */
     double fx=x;
-    double fy=y;
     double fx2=x2;
-    double fxy=xy;
-    double denom=1./(an*fx2-fx*fx);
-    double a=(fy*fx2-fxy*fx)*denom;
-    double b=(an*fxy-fx*fy)*denom;
-    *y0=rint(a+b*x0);
-    *y1=rint(a+b*x1);
+    double denom=(an*fx2-fx*fx);
 
-    /* limit to our range! */
-    if(*y0>1023)*y0=1023;
-    if(*y1>1023)*y1=1023;
-    if(*y0<0)*y0=0;
-    if(*y1<0)*y1=0;
+    if(denom>0.){
+      double fy=y;
+      double fxy=xy;
 
-  }else{
-    *y0=0;
-    *y1=0;
+      double a=(fy*fx2-fxy*fx)/denom;
+      double b=(an*fxy-fx*fy)/denom;
+      *y0=rint(a+b*x0);
+      *y1=rint(a+b*x1);
+
+      /* limit to our range! */
+      if(*y0>1023)*y0=1023;
+      if(*y1>1023)*y1=1023;
+      if(*y0<0)*y0=0;
+      if(*y1<0)*y1=0;
+      
+      return 0;
+    }else{
+      *y0=0;
+      *y1=0;
+      return 1;
+    }
   }
 }
 
@@ -654,33 +660,45 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
 	    int ly1=-200;
 	    int hy0=-200;
 	    int hy1=-200;
-	    fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-	    fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+	    int ret0=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
+	    int ret1=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
 
-	    /* store new edge values */
-	    fit_valueB[ln]=ly0;
-	    if(ln==0)fit_valueA[ln]=ly0;
-	    fit_valueA[i]=ly1;
-	    fit_valueB[i]=hy0;
-	    fit_valueA[hn]=hy1;
-	    if(hn==1)fit_valueB[hn]=hy1;
+            if(ret0){
+              ly0=ly;
+              ly1=hy0;
+            }
+            if(ret1){
+              hy0=ly1;
+              hy1=hy;
+            }
 
-	    if(ly1>=0 || hy0>=0){
-	      /* store new neighbor values */
-	      for(j=sortpos-1;j>=0;j--)
-		if(hineighbor[j]==hn)
-		  hineighbor[j]=i;
-		else
-		  break;
-	      for(j=sortpos+1;j<posts;j++)
-		if(loneighbor[j]==ln)
-		  loneighbor[j]=i;
-		else
-		  break;
-
+            if(ret0 && ret1){
+              fit_valueA[i]=-200;
+              fit_valueB[i]=-200;
+            }else{
+              /* store new edge values */
+              fit_valueB[ln]=ly0;
+              if(ln==0)fit_valueA[ln]=ly0;
+              fit_valueA[i]=ly1;
+              fit_valueB[i]=hy0;
+              fit_valueA[hn]=hy1;
+              if(hn==1)fit_valueB[hn]=hy1;
+              
+              if(ly1>=0 || hy0>=0){
+                /* store new neighbor values */
+                for(j=sortpos-1;j>=0;j--)
+                  if(hineighbor[j]==hn)
+                    hineighbor[j]=i;
+                  else
+                    break;
+                for(j=sortpos+1;j<posts;j++)
+                  if(loneighbor[j]==ln)
+                    loneighbor[j]=i;
+                  else
+                    break;
+              }
 	    }
 	  }else{
-
 	    fit_valueA[i]=-200;
 	    fit_valueB[i]=-200;
 	  }
@@ -730,6 +748,7 @@ int *floor1_interpolate_fit(vorbis_block *vb,vorbis_look_floor1 *look,
   if(A && B){
     output=_vorbis_block_alloc(vb,sizeof(*output)*posts);
 
+    /* overly simpleminded--- look again post 1.2 */
     for(i=0;i<posts;i++){
       output[i]=((65536-del)*(A[i]&0x7fff)+del*(B[i]&0x7fff)+32768)>>16;
       if(A[i]&0x8000 && B[i]&0x8000)output[i]|=0x8000;
