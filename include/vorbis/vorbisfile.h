@@ -63,11 +63,14 @@ static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
 /* These structs below (OV_CALLBACKS_DEFAULT etc) are defined here as
  * static data. That means that every file which includes this header
  * will get its own copy of these structs whether it uses them or
- * not. This is essential on platforms such as Windows on which
- * several different versions of stdio support may be linked to by
- * different DLLs, and we need to be certain we know which one we're
- * using (the same one as the main application).
+ * not unless it #defines OV_EXCLUDE_STATIC_CALLBACKS.
+ * These static symbols are essential on platforms such as Windows on
+ * which several different versions of stdio support may be linked to
+ * by different DLLs, and we need to be certain we know which one
+ * we're using (the same one as the main application).
  */
+
+#ifndef OV_EXCLUDE_STATIC_CALLBACKS
 
 static ov_callbacks OV_CALLBACKS_DEFAULT = {
   (size_t (*)(void *, size_t, size_t, void *))  fread,
@@ -96,6 +99,8 @@ static ov_callbacks OV_CALLBACKS_STREAMONLY_NOCLOSE = {
   (int (*)(void *))                             NULL,
   (long (*)(void *))                            NULL
 };
+
+#endif
 
 #define  NOTOPEN   0
 #define  PARTOPEN  1
