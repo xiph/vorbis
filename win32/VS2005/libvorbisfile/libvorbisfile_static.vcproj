@@ -174,6 +174,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS"
 				RuntimeLibrary="0"
@@ -237,6 +238,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS"
 				RuntimeLibrary="0"
@@ -299,6 +301,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS"
 				RuntimeLibrary="0"
@@ -363,6 +366,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS"
 				RuntimeLibrary="0"
@@ -426,6 +430,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS"
 				RuntimeLibrary="0"
@@ -490,6 +495,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS"
 				RuntimeLibrary="0"
@@ -532,6 +538,7 @@
 	<References>
 		<ProjectReference
 			ReferencedProjectIdentifier="{3A214E06-B95E-4D61-A291-1F8DF2EC10FD}"
+			RelativePathToProject=".\libvorbis\libvorbis_static.vcproj"
 		/>
 	</References>
 	<Files>
