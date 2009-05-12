@@ -16,8 +16,8 @@
  ********************************************************************/
 
 /* Takes a vorbis bitstream from stdin and writes raw stereo PCM to
-   stdout.  Decodes simple and chained OggVorbis files from beginning
-   to end.  Vorbisfile.a is somewhat more complex than the code below.  */
+   stdout. Decodes simple and chained OggVorbis files from beginning
+   to end. Vorbisfile.a is somewhat more complex than the code below.  */
 
 /* Note that this is POSIX, not ANSI code */
 
@@ -44,7 +44,7 @@ int main(){
   ogg_sync_state   oy; /* sync and verify incoming physical bitstream */
   ogg_stream_state os; /* take physical pages, weld into a logical
 			  stream of packets */
-  ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
+  ogg_page         og; /* one Ogg bitstream page. Vorbis packets are inside */
   ogg_packet       op; /* one raw packet of data for decode */
   
   vorbis_info      vi; /* struct that stores all the static vorbis bitstream
@@ -80,7 +80,7 @@ int main(){
     int eos=0;
     int i;
 
-    /* grab some data at the head of the stream.  We want the first page
+    /* grab some data at the head of the stream. We want the first page
        (which is guaranteed to be small and only contain the Vorbis
        stream initial header) We need the first page to get the stream
        serialno. */
@@ -133,14 +133,14 @@ int main(){
       exit(1);
     }
     
-    /* At this point, we're sure we're Vorbis.  We've set up the logical
-       (Ogg) bitstream decoder.  Get the comment and codebook headers and
+    /* At this point, we're sure we're Vorbis. We've set up the logical
+       (Ogg) bitstream decoder. Get the comment and codebook headers and
        set up the Vorbis decoder */
     
     /* The next two packets in order are the comment and codebook headers.
-       They're likely large and may span multiple pages.  Thus we reead
-       and submit data until we get our two pacakets, watching that no
-       pages are missing.  If a page is missing, error out; losing a
+       They're likely large and may span multiple pages. Thus we read
+       and submit data until we get our two packets, watching that no
+       pages are missing. If a page is missing, error out; losing a
        header page is the only place where missing data is fatal. */
     
     i=0;
@@ -148,7 +148,7 @@ int main(){
       while(i<2){
 	int result=ogg_sync_pageout(&oy,&og);
 	if(result==0)break; /* Need more data */
-	/* Don't complain about missing or corrupt data yet.  We'll
+	/* Don't complain about missing or corrupt data yet. We'll
 	   catch it at the packet output phase */
 	if(result==1){
 	  ogg_stream_pagein(&os,&og); /* we can ignore any errors here
@@ -201,7 +201,7 @@ int main(){
     if(vorbis_synthesis_init(&vd,&vi)==0){ /* central decode state */
       vorbis_block_init(&vd,&vb);          /* local state for most of the decode
 					      so multiple block decodes can
-					      proceed in parallel.  We could init
+					      proceed in parallel. We could init
 					      multiple vorbis_block structures
 					      for vd here */
       
