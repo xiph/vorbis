@@ -65,20 +65,20 @@ int main(int argc,char *argv[]){
     if(*argv[0]=='-'){
       /* option */
       if(argv[0][1]=='s'){
-	/* subvector */
-	if(sscanf(argv[1],"%d,%d",&start,&num)!=2){
-	  num= -1;
-	  if(sscanf(argv[1],"%d",&start)!=1){
-	    fprintf(stderr,"Syntax error using -s\n");
-	    exit(1);
-	  }
-	}
-	argv+=2;
+        /* subvector */
+        if(sscanf(argv[1],"%d,%d",&start,&num)!=2){
+          num= -1;
+          if(sscanf(argv[1],"%d",&start)!=1){
+            fprintf(stderr,"Syntax error using -s\n");
+            exit(1);
+          }
+        }
+        argv+=2;
       }
       if(argv[0][1]=='i'){
-	/* interleave */
-	interleave=1;
-	argv+=1;
+        /* interleave */
+        interleave=1;
+        argv+=1;
       }
     }else{
       /* input file.  What kind? */
@@ -87,82 +87,82 @@ int main(int argc,char *argv[]){
       char *name=strdup(*argv++);
       dot=strrchr(name,'.');
       if(dot)
-	ext=dot+1;
+        ext=dot+1;
       else
-	ext="";
+        ext="";
 
       /* codebook */
       if(!strcmp(ext,"vqh")){
-	int multp=0;
-	if(input){
-	  fprintf(stderr,"specify all input data (.vqd) files following\n"
-		  "codebook header (.vqh) files\n");
-	  exit(1);
-	}
-	/* is it additive or multiplicative? */
-	if(name[0]=='*'){
-	  multp=1;
-	  name++;
-	}
-	if(name[0]=='+')name++;
+        int multp=0;
+        if(input){
+          fprintf(stderr,"specify all input data (.vqd) files following\n"
+                  "codebook header (.vqh) files\n");
+          exit(1);
+        }
+        /* is it additive or multiplicative? */
+        if(name[0]=='*'){
+          multp=1;
+          name++;
+        }
+        if(name[0]=='+')name++;
 
-	basename=strrchr(name,'/');
-	if(basename)
-	  basename=strdup(basename)+1;
-	else
-	  basename=strdup(name);
-	dot=strrchr(basename,'.');
-	if(dot)*dot='\0';
+        basename=strrchr(name,'/');
+        if(basename)
+          basename=strdup(basename)+1;
+        else
+          basename=strdup(name);
+        dot=strrchr(basename,'.');
+        if(dot)*dot='\0';
 
-	b=_ogg_realloc(b,sizeof(codebook *)*(books+2));
-	b[books]=codebook_load(name);
-	addmul=_ogg_realloc(addmul,sizeof(int)*(books+1));
-	addmul[books++]=multp;
-	b[books]=NULL;
+        b=_ogg_realloc(b,sizeof(codebook *)*(books+2));
+        b[books]=codebook_load(name);
+        addmul=_ogg_realloc(addmul,sizeof(int)*(books+1));
+        addmul[books++]=multp;
+        b[books]=NULL;
       }
 
       /* data file */
       if(!strcmp(ext,"vqd")){
-	int cols;
-	long lines=0;
-	char *line;
-	float *vec;
-	FILE *in=fopen(name,"r");
-	if(!in){
-	  fprintf(stderr,"Could not open input file %s\n",name);
-	  exit(1);
-	}
+        int cols;
+        long lines=0;
+        char *line;
+        float *vec;
+        FILE *in=fopen(name,"r");
+        if(!in){
+          fprintf(stderr,"Could not open input file %s\n",name);
+          exit(1);
+        }
 
-	if(!input){
-	  process_preprocess(b,basename);
-	  input++;
-	}
+        if(!input){
+          process_preprocess(b,basename);
+          input++;
+        }
 
-	reset_next_value();
-	line=setup_line(in);
-	/* count cols before we start reading */
-	{
-	  char *temp=line;
-	  while(*temp==' ')temp++;
-	  for(cols=0;*temp;cols++){
-	    while(*temp>32)temp++;
-	    while(*temp==' ')temp++;
-	  }
-	}
-	vec=alloca(cols*sizeof(float));
-	while(line){
-	  lines++;
-	  for(j=0;j<cols;j++)
-	    if(get_line_value(in,vec+j)){
-	      fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
-	      exit(1);
-	    }
-	  /* ignores -s for now */
-	  process_vector(b,addmul,interleave,vec,cols);
+        reset_next_value();
+        line=setup_line(in);
+        /* count cols before we start reading */
+        {
+          char *temp=line;
+          while(*temp==' ')temp++;
+          for(cols=0;*temp;cols++){
+            while(*temp>32)temp++;
+            while(*temp==' ')temp++;
+          }
+        }
+        vec=alloca(cols*sizeof(float));
+        while(line){
+          lines++;
+          for(j=0;j<cols;j++)
+            if(get_line_value(in,vec+j)){
+              fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
+              exit(1);
+            }
+          /* ignores -s for now */
+          process_vector(b,addmul,interleave,vec,cols);
 
-	  line=setup_line(in);
-	}
-	fclose(in);
+          line=setup_line(in);
+        }
+        fclose(in);
       }
     }
   }
@@ -180,32 +180,32 @@ int main(int argc,char *argv[]){
       long lines=0;
       float *vec;
       if(!input){
-	process_preprocess(b,basename);
-	input++;
+        process_preprocess(b,basename);
+        input++;
       }
       
       line=setup_line(stdin);
       /* count cols before we start reading */
       {
-	char *temp=line;
-	while(*temp==' ')temp++;
-	for(cols=0;*temp;cols++){
-	  while(*temp>32)temp++;
-	  while(*temp==' ')temp++;
-	}
+        char *temp=line;
+        while(*temp==' ')temp++;
+        for(cols=0;*temp;cols++){
+          while(*temp>32)temp++;
+          while(*temp==' ')temp++;
+        }
       }
       vec=alloca(cols*sizeof(float));
       while(line){
-	lines++;
-	for(j=0;j<cols;j++)
-	  if(get_line_value(stdin,vec+j)){
-	    fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
-	    exit(1);
-	  }
-	/* ignores -s for now */
-	process_vector(b,addmul,interleave,vec,cols);
-	
-	line=setup_line(stdin);
+        lines++;
+        for(j=0;j<cols;j++)
+          if(get_line_value(stdin,vec+j)){
+            fprintf(stderr,"Too few columns on line %ld in data file\n",lines);
+            exit(1);
+          }
+        /* ignores -s for now */
+        process_vector(b,addmul,interleave,vec,cols);
+        
+        line=setup_line(stdin);
       }
     }
   }

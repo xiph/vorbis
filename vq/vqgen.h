@@ -67,9 +67,9 @@ static inline float *_now(vqgen *v,long ptr){
 }
 
 extern void vqgen_init(vqgen *v,
-		       int elements,int aux,int entries,float mindist,
-		       float  (*metric)(vqgen *,float *, float *),
-		       float *(*weight)(vqgen *,float *),int centroid);
+                       int elements,int aux,int entries,float mindist,
+                       float  (*metric)(vqgen *,float *, float *),
+                       float *(*weight)(vqgen *,float *),int centroid);
 extern void vqgen_addpoint(vqgen *v, float *p,float *aux);
 
 extern float vqgen_iterate(vqgen *v,int biasp);

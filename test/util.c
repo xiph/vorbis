@@ -46,8 +46,8 @@ gen_windowed_sine (float *data, int len, float maximum)
 
 void
 set_data_in (float * data, unsigned len, float value)
-{	unsigned k ;
+{        unsigned k ;
 
-	for (k = 0 ; k < len ; k++)
-		data [k] = value ;
+        for (k = 0 ; k < len ; k++)
+                data [k] = value ;
 }

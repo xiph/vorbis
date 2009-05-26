@@ -96,10 +96,10 @@ static inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
   ogg_int16_t ret;
   ogg_int16_t temp;
   __asm__ __volatile__("fnstcw %0\n\t"
-	  "movw %0,%%dx\n\t"
-	  "orw $62463,%%dx\n\t"
-	  "movw %%dx,%1\n\t"
-	  "fldcw %1\n\t":"=m"(ret):"m"(temp): "dx");
+          "movw %0,%%dx\n\t"
+          "orw $62463,%%dx\n\t"
+          "movw %%dx,%1\n\t"
+          "fldcw %1\n\t":"=m"(ret):"m"(temp): "dx");
   *fpu=ret;
 }
 
@@ -126,12 +126,12 @@ static inline int vorbis_ftoi(double f){  /* yes, double!  Otherwise,
 typedef ogg_int16_t vorbis_fpu_control;
 
 static __inline int vorbis_ftoi(double f){
-	int i;
-	__asm{
-		fld f
-		fistp i
-	}
-	return i;
+        int i;
+        __asm{
+                fld f
+                fistp i
+        }
+        return i;
 }
 
 static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){

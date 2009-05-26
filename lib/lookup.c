@@ -88,7 +88,7 @@ long vorbis_coslook_i(long a){
   int i=a>>COS_LOOKUP_I_SHIFT;
   int d=a&COS_LOOKUP_I_MASK;
   return COS_LOOKUP_I[i]- ((d*(COS_LOOKUP_I[i]-COS_LOOKUP_I[i+1]))>>
-			   COS_LOOKUP_I_SHIFT);
+                           COS_LOOKUP_I_SHIFT);
 }
 
 #endif

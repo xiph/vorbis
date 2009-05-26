@@ -65,7 +65,7 @@ static FILE **or;
    will need to change in the future when we get real multichannel
    mappings */
 int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts, int subn, 
-	     int *class){
+             int *class){
   long i,j,part=0;
   int aux;
 
@@ -80,9 +80,9 @@ int quantaux(float *res,int n,float *ebound,float *mbound,int *subgrp,int parts,
 
     for(j=0;j<parts-1;j++)
       if(lentropy<=ebound[j] &&
-	 max<=mbound[j] &&
-	 part<subgrp[j])
-	break;
+         max<=mbound[j] &&
+         part<subgrp[j])
+        break;
     class[part]=aux=j;
     
     fprintf(of,"%d, ",aux);
@@ -132,14 +132,14 @@ static int getline(FILE *in,float *vec,int begin,int n){
 
 static void usage(){
   fprintf(stderr,
-	  "usage:\n" 
-	  "residuesplit <res> [<res>] <begin,n,group> <baseout> <ent,peak,sub> [<ent,peak,sub>]...\n"
-	  "   where begin,n,group is first scalar, \n"
-	  "                          number of scalars of each in line,\n"
-	  "                          number of scalars in a group\n"
-	  "         ent is the maximum entropy value allowed for membership in a group\n"
-	  "         peak is the maximum amplitude value allowed for membership in a group\n"
-	  "         subn is the maximum subpartiton number allowed in the group\n\n");
+          "usage:\n" 
+          "residuesplit <res> [<res>] <begin,n,group> <baseout> <ent,peak,sub> [<ent,peak,sub>]...\n"
+          "   where begin,n,group is first scalar, \n"
+          "                          number of scalars of each in line,\n"
+          "                          number of scalars in a group\n"
+          "         ent is the maximum entropy value allowed for membership in a group\n"
+          "         peak is the maximum amplitude value allowed for membership in a group\n"
+          "         subn is the maximum subpartiton number allowed in the group\n\n");
   exit(1);
 }
 
@@ -206,13 +206,13 @@ int main(int argc, char *argv[]){
       mbound[i]=1e50f;
     }else{
       if(*(pos+1)==',')
-	mbound[i]=1e50f;
+        mbound[i]=1e50f;
       else
-	mbound[i]=atof(pos+1);
+        mbound[i]=atof(pos+1);
       pos=strchr(pos+1,',');
       
        if(pos)
-	 subgrp[i]=atoi(pos+1);
+         subgrp[i]=atoi(pos+1);
        
     }
     if(subgrp[i]<=0)subgrp[i]=99999;
@@ -235,8 +235,8 @@ int main(int argc, char *argv[]){
       sprintf(buffer,"%s_%d%c.vqd",base,i,j+65);
       or[i+j*parts]=fopen(buffer,"w");
       if(!or[i+j*parts]){
-	fprintf(stderr,"Could not open file %s for writing\n",buffer);
-	exit(1);
+        fprintf(stderr,"Could not open file %s for writing\n",buffer);
+        exit(1);
       }
     }
   }
@@ -250,12 +250,12 @@ int main(int argc, char *argv[]){
       quantwrite(vec,n,subn,class,0);
 
       for(i=1;i<resfiles;i++){
-	if(getline(res[i],vec,begin,n)){
-	  quantwrite(vec,n,subn,class,parts*i);
-	}else{
-	  fprintf(stderr,"Getline loss of sync (%d).\n\n",i);
-	  exit(1);
-	}
+        if(getline(res[i],vec,begin,n)){
+          quantwrite(vec,n,subn,class,parts*i);
+        }else{
+          fprintf(stderr,"Getline loss of sync (%d).\n\n",i);
+          exit(1);
+        }
       }
     }else{
       if(feof(res[0]))break;

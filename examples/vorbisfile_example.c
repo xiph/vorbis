@@ -60,7 +60,7 @@ int main(){
     }
     fprintf(stderr,"\nBitstream is %d channel, %ldHz\n",vi->channels,vi->rate);
     fprintf(stderr,"\nDecoded length: %ld samples\n",
-	    (long)ov_pcm_total(&vf,-1));
+            (long)ov_pcm_total(&vf,-1));
     fprintf(stderr,"Encoded by: %s\n\n",ov_comment(&vf,-1)->vendor);
   }
   
@@ -71,10 +71,10 @@ int main(){
       eof=1;
     } else if (ret < 0) {
       /* error in the stream.  Not a problem, just reporting it in
-	 case we (the app) cares.  In this case, we don't. */
+         case we (the app) cares.  In this case, we don't. */
     } else {
       /* we don't bother dealing with sample rate changes, etc, but
-	 you'll have to*/
+         you'll have to*/
       fwrite(pcmout,1,ret,stdout);
     }
   }

@@ -49,13 +49,13 @@ static int getval(FILE *in,int begin,int n,int group,int max){
 
 static void usage(){
   fprintf(stderr,
-	  "usage:\n" 
-	  "huffbuild <input>.vqd <begin,n,group>|<lorange-hirange> [noguard]\n"
-	  "   where begin,n,group is first scalar, \n"
-	  "                          number of scalars of each in line,\n"
-	  "                          number of scalars in a group\n"
-	  "eg: huffbuild reslongaux.vqd 0,1024,4\n"
-	  "produces reslongaux.vqh\n\n");
+          "usage:\n" 
+          "huffbuild <input>.vqd <begin,n,group>|<lorange-hirange> [noguard]\n"
+          "   where begin,n,group is first scalar, \n"
+          "                          number of scalars of each in line,\n"
+          "                          number of scalars in a group\n"
+          "eg: huffbuild reslongaux.vqd 0,1024,4\n"
+          "produces reslongaux.vqh\n\n");
   exit(1);
 }
 
@@ -86,17 +86,17 @@ int main(int argc, char *argv[]){
     }else{
       begin=atoi(argv[2]);
       if(!pos)
-	usage();
+        usage();
       else
-	n=atoi(pos+1);
+        n=atoi(pos+1);
       pos=strchr(pos+1,',');
       if(!pos)
-	usage();
+        usage();
       else
-	subn=atoi(pos+1);
+        subn=atoi(pos+1);
       if(n/subn*subn != n){
-	fprintf(stderr,"n must be divisible by group\n");
-	exit(1);
+        fprintf(stderr,"n must be divisible by group\n");
+        exit(1);
       }
     }
   }
@@ -136,10 +136,10 @@ int main(int argc, char *argv[]){
       reset_next_value();
       i/=subn;
       while(!feof(file)){
-	long val=getval(file,begin,n,subn,maxval);
-	if(val==-1 || val>=vals)break;
-	hist[val]++;
-	if(!(i--&0xff))spinnit("loading... ",i*subn);
+        long val=getval(file,begin,n,subn,maxval);
+        if(val==-1 || val>=vals)break;
+        hist[val]++;
+        if(!(i--&0xff))spinnit("loading... ",i*subn);
       }
       fclose(file);
     }
@@ -155,8 +155,8 @@ int main(int argc, char *argv[]){
       strcat(buffer,".vqh");
       file=fopen(buffer,"w");
       if(!file){
-	fprintf(stderr,"Could not open file %s\n",buffer);
-	exit(1);
+        fprintf(stderr,"Could not open file %s\n",buffer);
+        exit(1);
       }
     }
     
@@ -166,7 +166,7 @@ int main(int argc, char *argv[]){
     for(j=0;j<vals;){
       fprintf(file,"\t");
       for(k=0;k<16 && j<vals;k++,j++)
-	fprintf(file,"%2ld,",lengths[j]);
+        fprintf(file,"%2ld,",lengths[j]);
       fprintf(file,"\n");
     }
     fprintf(file,"};\n\n");

@@ -35,7 +35,7 @@ void process_postprocess(codebook **b,char *basename){
 }
 
 float process_one(codebook *b,float *a,int dim,int step,int addmul,
-		   float base){
+                   float base){
   int j;
 
   if(b->c->q_sequencep){
@@ -63,10 +63,10 @@ void process_vector(codebook **bs,int *addmul,int inter,float *a,int n){
     
     if(inter){
       for(i=0;i<n/dim;i++)
-	base=process_one(b,a+i,dim,n/dim,addmul[bi],base);
+        base=process_one(b,a+i,dim,n/dim,addmul[bi],base);
     }else{
       for(i=0;i<=n-dim;i+=dim)
-	base=process_one(b,a+i,dim,1,addmul[bi],base);
+        base=process_one(b,a+i,dim,1,addmul[bi],base);
     }
 
     bs++;
@@ -83,9 +83,9 @@ void process_vector(codebook **bs,int *addmul,int inter,float *a,int n){
 
 void process_usage(void){
   fprintf(stderr,
-	  "usage: vqcascade [-i] +|*<codebook>.vqh [ +|*<codebook.vqh> ]... \n"
-	  "                 datafile.vqd [datafile.vqd]...\n\n"
-	  "       data can be taken on stdin.  residual error data sent to\n"
-	  "       stdout.\n\n");
+          "usage: vqcascade [-i] +|*<codebook>.vqh [ +|*<codebook.vqh> ]... \n"
+          "                 datafile.vqd [datafile.vqd]...\n\n"
+          "       data can be taken on stdin.  residual error data sent to\n"
+          "       stdout.\n\n");
 
 }

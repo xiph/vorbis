@@ -41,12 +41,12 @@ signed char readbuffer[READ*4+44]; /* out of the data segment, not the stack */
 
 int main(){
   ogg_stream_state os; /* take physical pages, weld into a logical
-			  stream of packets */
+                          stream of packets */
   ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
   ogg_packet       op; /* one raw packet of data for decode */
   
   vorbis_info      vi; /* struct that stores all the static vorbis bitstream
-			  settings */
+                          settings */
   vorbis_comment   vc; /* struct that stores all the user comments */
 
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
@@ -84,17 +84,16 @@ int main(){
   for (i=0, founddata=0; i<30 && ! feof(stdin) && ! ferror(stdin); i++)
   {
     fread(readbuffer,1,2,stdin);
-
-    if ( ! strncmp((char*)readbuffer, "da", 2) )
-    {
+    
+    if ( ! strncmp((char*)readbuffer, "da", 2) ){
       founddata = 1;
       fread(readbuffer,1,6,stdin);
       break;
     }
   }
-
+  
   /********** Encode setup ************/
-
+  
   vorbis_info_init(&vi);
 
   /* choose an encoding mode.  A few possibilities commented out, one
@@ -162,20 +161,20 @@ int main(){
 
     vorbis_analysis_headerout(&vd,&vc,&header,&header_comm,&header_code);
     ogg_stream_packetin(&os,&header); /* automatically placed in its own
-					 page */
+                                         page */
     ogg_stream_packetin(&os,&header_comm);
     ogg_stream_packetin(&os,&header_code);
 
-	/* This ensures the actual
-	 * audio data will start on a new page, as per spec
-	 */
-	while(!eos){
-		int result=ogg_stream_flush(&os,&og);
-		if(result==0)break;
-		fwrite(og.header,1,og.header_len,stdout);
-		fwrite(og.body,1,og.body_len,stdout);
-	}
-
+    /* This ensures the actual
+     * audio data will start on a new page, as per spec
+     */
+    while(!eos){
+      int result=ogg_stream_flush(&os,&og);
+      if(result==0)break;
+      fwrite(og.header,1,og.header_len,stdout);
+      fwrite(og.body,1,og.body_len,stdout);
+    }
+    
   }
   
   while(!eos){
@@ -188,7 +187,7 @@ int main(){
          Tell the library we're at end of stream so that it can handle
          the last frame and mark end of stream in the output properly */
       vorbis_analysis_wrote(&vd,0);
-
+      
     }else{
       /* data to encode */
 
@@ -197,10 +196,10 @@ int main(){
       
       /* uninterleave samples */
       for(i=0;i<bytes/4;i++){
-	buffer[0][i]=((readbuffer[i*4+1]<<8)|
-		      (0x00ff&(int)readbuffer[i*4]))/32768.f;
-	buffer[1][i]=((readbuffer[i*4+3]<<8)|
-		      (0x00ff&(int)readbuffer[i*4+2]))/32768.f;
+        buffer[0][i]=((readbuffer[i*4+1]<<8)|
+                      (0x00ff&(int)readbuffer[i*4]))/32768.f;
+        buffer[1][i]=((readbuffer[i*4+3]<<8)|
+                      (0x00ff&(int)readbuffer[i*4+2]))/32768.f;
       }
     
       /* tell the library how much we actually submitted */
@@ -217,22 +216,22 @@ int main(){
       vorbis_bitrate_addblock(&vb);
 
       while(vorbis_bitrate_flushpacket(&vd,&op)){
-	
-	/* weld the packet into the bitstream */
-	ogg_stream_packetin(&os,&op);
-	
-	/* write out pages (if any) */
-	while(!eos){
-	  int result=ogg_stream_pageout(&os,&og);
-	  if(result==0)break;
-	  fwrite(og.header,1,og.header_len,stdout);
-	  fwrite(og.body,1,og.body_len,stdout);
-	  
-	  /* this could be set above, but for illustrative purposes, I do
-	     it here (to show that vorbis does know where the stream ends) */
-	  
-	  if(ogg_page_eos(&og))eos=1;
-	}
+        
+        /* weld the packet into the bitstream */
+        ogg_stream_packetin(&os,&op);
+        
+        /* write out pages (if any) */
+        while(!eos){
+          int result=ogg_stream_pageout(&os,&og);
+          if(result==0)break;
+          fwrite(og.header,1,og.header_len,stdout);
+          fwrite(og.body,1,og.body_len,stdout);
+          
+          /* this could be set above, but for illustrative purposes, I do
+             it here (to show that vorbis does know where the stream ends) */
+          
+          if(ogg_page_eos(&og))eos=1;
+        }
       }
     }
   }

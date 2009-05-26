@@ -22,9 +22,9 @@
 #include "util.h"
 #include "write_read.h"
 
-#define DATA_LEN	2048
+#define DATA_LEN        2048
 
-#define MAX(a,b)	((a) > (b) ? (a) : (b))
+#define MAX(a,b)        ((a) > (b) ? (a) : (b))
 
 
 static int check_output (const float * data_in, unsigned len);
@@ -42,24 +42,24 @@ main(void){
   gen_windowed_sine (data_out, ARRAY_LEN (data_out), 0.95);
 
   for (k = 0 ; k < ARRAY_LEN (sample_rates); k ++) {
-	char filename [64] ;
-	snprintf (filename, sizeof (filename), "vorbis_%u.ogg", sample_rates [k]);
+        char filename [64] ;
+        snprintf (filename, sizeof (filename), "vorbis_%u.ogg", sample_rates [k]);
 
-	printf ("    %-20s : ", filename);
-	fflush (stdout);
+        printf ("    %-20s : ", filename);
+        fflush (stdout);
 
-	/* Set to know value. */
-	set_data_in (data_in, ARRAY_LEN (data_in), 3.141);
+        /* Set to know value. */
+        set_data_in (data_in, ARRAY_LEN (data_in), 3.141);
 
-	write_vorbis_data_or_die (filename, sample_rates [k], data_out, ARRAY_LEN (data_out));
-	read_vorbis_data_or_die (filename, sample_rates [k], data_in, ARRAY_LEN (data_in));
+        write_vorbis_data_or_die (filename, sample_rates [k], data_out, ARRAY_LEN (data_out));
+        read_vorbis_data_or_die (filename, sample_rates [k], data_in, ARRAY_LEN (data_in));
 
-	if (check_output (data_in, ARRAY_LEN (data_in)) != 0)
-	  errors ++ ;
-	else {
-	  puts ("ok");
+        if (check_output (data_in, ARRAY_LEN (data_in)) != 0)
+          errors ++ ;
+        else {
+          puts ("ok");
       remove (filename);
-	}
+        }
   }
 
   if (errors)
@@ -78,7 +78,7 @@ check_output (const float * data_in, unsigned len)
     float temp = fabs (data_in [k]);
     max_abs = MAX (max_abs, temp);
   }
-	
+        
   if (max_abs < 0.9) {
     printf ("Error : max_abs (%f) too small.\n", max_abs);
     return 1 ;

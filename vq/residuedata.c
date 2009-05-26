@@ -60,12 +60,12 @@ void vqext_quantize(vqgen *v,quant_meta *q){
     /* allow move only if unoccupied */
     if(quant_save){
       for(k=0;k<n;k++)
-	if(j!=k && memcmp(test,quant_save+dim*k,dim*sizeof(float))==0)
-	  break;
+        if(j!=k && memcmp(test,quant_save+dim*k,dim*sizeof(float))==0)
+          break;
       if(k==n){
-	if(memcmp(test,quant_save+dim*j,dim*sizeof(float)))	
-	  moved++;
-	memcpy(quant_save+dim*j,test,sizeof(float)*dim);
+        if(memcmp(test,quant_save+dim*j,dim*sizeof(float)))        
+          moved++;
+        memcpy(quant_save+dim*j,test,sizeof(float)*dim);
       }
     }else{
       memcpy(_now(v,j),test,sizeof(float)*dim);
@@ -117,7 +117,7 @@ void vqext_preprocess(vqgen *v){
   for(k=0;k<v->entries;k++){
     for(l=0;l<k;l++){
       if(memcmp(_now(v,k),_now(v,l),sizeof(float)*v->elements)==0)
-	break;
+        break;
     }
     if(l<k)break;
   }
@@ -130,19 +130,19 @@ void vqext_preprocess(vqgen *v){
     
     for(i=0,j=0;i<v->points && j<v->entries;i++){
       for(k=0;k<v->elements;k++){
-	float val=_point(v,i)[k];
-	test[k]=rint(val/scalequant)*scalequant;
+        float val=_point(v,i)[k];
+        test[k]=rint(val/scalequant)*scalequant;
       }
       
       for(l=0;l<j;l++){
-	for(k=0;k<v->elements;k++)
-	  if(test[k]!=_now(v,l)[k])
-	    break;
-	if(k==v->elements)break;
+        for(k=0;k<v->elements;k++)
+          if(test[k]!=_now(v,l)[k])
+            break;
+        if(k==v->elements)break;
       }
       if(l==j){
-	memcpy(_now(v,j),test,v->elements*sizeof(float));
-	j++;
+        memcpy(_now(v,j),test,v->elements*sizeof(float));
+        j++;
       }
     }
     

@@ -80,23 +80,23 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg
     
     for(j=0;j<n;j++){
       if(bark){
-	float b=toBARK((4000.f*j/n)+.25);
-	fprintf(of,"%f ",b);
+        float b=toBARK((4000.f*j/n)+.25);
+        fprintf(of,"%f ",b);
       }else
-	if(off!=0)
-	  fprintf(of,"%f ",(double)(j+off)/8000.);
-	else
-	  fprintf(of,"%f ",(double)j);
+        if(off!=0)
+          fprintf(of,"%f ",(double)(j+off)/8000.);
+        else
+          fprintf(of,"%f ",(double)j);
       
       if(dB){
-	float val;
-	if(v[j]==0.)
-	  val=-140.;
-	else
-	  val=todB(v+j);
-	fprintf(of,"%f\n",val);
+        float val;
+        if(v[j]==0.)
+          val=-140.;
+        else
+          val=todB(v+j);
+        fprintf(of,"%f\n",val);
       }else{
-	fprintf(of,"%f\n",v[j]);
+        fprintf(of,"%f\n",v[j]);
       }
     }
     fclose(of);
@@ -105,7 +105,7 @@ void _analysis_output_always(char *base,int i,float *v,int n,int bark,int dB,ogg
 }
 
 void _analysis_output(char *base,int i,float *v,int n,int bark,int dB,
-		      ogg_int64_t off){
+                      ogg_int64_t off){
   if(analysis_noisy)_analysis_output_always(base,i,v,n,bark,dB,off);
 }
 

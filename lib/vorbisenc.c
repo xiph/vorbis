@@ -197,9 +197,9 @@ static int vorbis_encode_toplevel_setup(vorbis_info *vi,int ch,long rate){
 }
 
 static void vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
-				     const static_codebook *const *const *const books, 
-				     const vorbis_info_floor1 *in, 
-				     const int *x){
+                                     const static_codebook *const *const *const books, 
+                                     const vorbis_info_floor1 *in, 
+                                     const int *x){
   int i,k,is=s;
   vorbis_info_floor1 *f=_ogg_calloc(1,sizeof(*f));
   codec_setup_info *ci=vi->codec_setup;
@@ -219,8 +219,8 @@ static void vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
       if(f->class_book[i]>maxbook)maxbook=f->class_book[i];
       f->class_book[i]+=ci->books;
       for(k=0;k<(1<<f->class_subs[i]);k++){
-	if(f->class_subbook[i][k]>maxbook)maxbook=f->class_subbook[i][k];
-	if(f->class_subbook[i][k]>=0)f->class_subbook[i][k]+=ci->books;
+        if(f->class_subbook[i][k]>maxbook)maxbook=f->class_subbook[i][k];
+        if(f->class_subbook[i][k]>=0)f->class_subbook[i][k]+=ci->books;
       }
     }
 
@@ -237,8 +237,8 @@ static void vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
 }
 
 static void vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
-					    const vorbis_info_psy_global *in, 
-					    const double *x){
+                                            const vorbis_info_psy_global *in, 
+                                            const double *x){
   int i,is=s;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
@@ -264,8 +264,8 @@ static void vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
 }
 
 static void vorbis_encode_global_stereo(vorbis_info *vi,
-					const highlevel_encode_setup *const hi,
-					const adj_stereo *p){
+                                        const highlevel_encode_setup *const hi,
+                                        const adj_stereo *p){
   float s=hi->stereo_point_setting;
   int i,is=s;
   double ds=s-is;
@@ -279,28 +279,28 @@ static void vorbis_encode_global_stereo(vorbis_info *vi,
     if(hi->managed){
       /* interpolate the kHz threshholds */
       for(i=0;i<PACKETBLOBS;i++){
-	float kHz=p[is].kHz[i]*(1.-ds)+p[is+1].kHz[i]*ds;
-	g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-	g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
-	g->coupling_pkHz[i]=kHz;
-	
-	kHz=p[is].lowpasskHz[i]*(1.-ds)+p[is+1].lowpasskHz[i]*ds;
-	g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-	g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
-	
+        float kHz=p[is].kHz[i]*(1.-ds)+p[is+1].kHz[i]*ds;
+        g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+        g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+        g->coupling_pkHz[i]=kHz;
+        
+        kHz=p[is].lowpasskHz[i]*(1.-ds)+p[is+1].lowpasskHz[i]*ds;
+        g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+        g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+        
       }
     }else{
       float kHz=p[is].kHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].kHz[PACKETBLOBS/2]*ds;
       for(i=0;i<PACKETBLOBS;i++){
-	g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-	g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
-	g->coupling_pkHz[i]=kHz;
+        g->coupling_pointlimit[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+        g->coupling_pointlimit[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+        g->coupling_pkHz[i]=kHz;
       }
       
       kHz=p[is].lowpasskHz[PACKETBLOBS/2]*(1.-ds)+p[is+1].lowpasskHz[PACKETBLOBS/2]*ds;
       for(i=0;i<PACKETBLOBS;i++){
-	g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
-	g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
+        g->sliding_lowpass[0][i]=kHz*1000./vi->rate*ci->blocksizes[0];
+        g->sliding_lowpass[1][i]=kHz*1000./vi->rate*ci->blocksizes[1];
       }
     }
   }else{
@@ -313,10 +313,10 @@ static void vorbis_encode_global_stereo(vorbis_info *vi,
 }
 
 static void vorbis_encode_psyset_setup(vorbis_info *vi,double s,
-				       const int *nn_start,
-				       const int *nn_partition,
-				       const double *nn_thresh,
-				       int block){
+                                       const int *nn_start,
+                                       const int *nn_partition,
+                                       const double *nn_thresh,
+                                       int block){
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
   highlevel_encode_setup *hi=&ci->hi;
@@ -344,9 +344,9 @@ static void vorbis_encode_psyset_setup(vorbis_info *vi,double s,
 }
 
 static void vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
-					 const att3 *att,
-					 const int  *max,
-					 const vp_adjblock *in){
+                                         const att3 *att,
+                                         const int  *max,
+                                         const vp_adjblock *in){
   int i,is=s;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
@@ -369,8 +369,8 @@ static void vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
 
 
 static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
-					const compandblock *in, 
-					const double *x){
+                                        const compandblock *in, 
+                                        const double *x){
   int i,is=s;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
@@ -391,7 +391,7 @@ static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
 }
 
 static void vorbis_encode_peak_setup(vorbis_info *vi,double s,int block,
-				    const int *suppress){
+                                    const int *suppress){
   int is=s;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
@@ -403,10 +403,10 @@ static void vorbis_encode_peak_setup(vorbis_info *vi,double s,int block,
 }
 
 static void vorbis_encode_noisebias_setup(vorbis_info *vi,double s,int block,
-					 const int *suppress,
-					 const noise3 *in,
-					 const noiseguard *guard,
-					 double userbias){
+                                         const int *suppress,
+                                         const noise3 *in,
+                                         const noiseguard *guard,
+                                         double userbias){
   int i,is=s,j;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
@@ -453,7 +453,7 @@ static int book_dup_or_new(codec_setup_info *ci,const static_codebook *book){
 }
 
 static void vorbis_encode_blocksize_setup(vorbis_info *vi,double s,
-					 const int *shortb,const int *longb){
+                                         const int *shortb,const int *longb){
 
   codec_setup_info *ci=vi->codec_setup;
   int is=s;
@@ -466,8 +466,8 @@ static void vorbis_encode_blocksize_setup(vorbis_info *vi,double s,
 }
 
 static void vorbis_encode_residue_setup(vorbis_info *vi,
-					int number, int block,
-					const vorbis_residue_template *res){
+                                        int number, int block,
+                                        const vorbis_residue_template *res){
 
   codec_setup_info *ci=vi->codec_setup;
   int i,n;
@@ -499,41 +499,41 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
     
     if(ci->hi.managed){
       for(i=0;i<r->partitions;i++)
-	for(k=0;k<3;k++)
-	  if(res->books_base_managed->books[i][k])
-	    r->secondstages[i]|=(1<<k);
+        for(k=0;k<3;k++)
+          if(res->books_base_managed->books[i][k])
+            r->secondstages[i]|=(1<<k);
 
       r->groupbook=book_dup_or_new(ci,res->book_aux_managed);
       ci->book_param[r->groupbook]=(static_codebook *)res->book_aux_managed;      
     
       for(i=0;i<r->partitions;i++){
-	for(k=0;k<3;k++){
-	  if(res->books_base_managed->books[i][k]){
-	    int bookid=book_dup_or_new(ci,res->books_base_managed->books[i][k]);
-	    r->booklist[booklist++]=bookid;
-	    ci->book_param[bookid]=(static_codebook *)res->books_base_managed->books[i][k];
-	  }
-	}
+        for(k=0;k<3;k++){
+          if(res->books_base_managed->books[i][k]){
+            int bookid=book_dup_or_new(ci,res->books_base_managed->books[i][k]);
+            r->booklist[booklist++]=bookid;
+            ci->book_param[bookid]=(static_codebook *)res->books_base_managed->books[i][k];
+          }
+        }
       }
 
     }else{
 
       for(i=0;i<r->partitions;i++)
-	for(k=0;k<3;k++)
-	  if(res->books_base->books[i][k])
-	    r->secondstages[i]|=(1<<k);
+        for(k=0;k<3;k++)
+          if(res->books_base->books[i][k])
+            r->secondstages[i]|=(1<<k);
   
       r->groupbook=book_dup_or_new(ci,res->book_aux);
       ci->book_param[r->groupbook]=(static_codebook *)res->book_aux;
       
       for(i=0;i<r->partitions;i++){
-	for(k=0;k<3;k++){
-	  if(res->books_base->books[i][k]){
-	    int bookid=book_dup_or_new(ci,res->books_base->books[i][k]);
-	    r->booklist[booklist++]=bookid;
-	    ci->book_param[bookid]=(static_codebook *)res->books_base->books[i][k];
-	  }
-	}
+        for(k=0;k<3;k++){
+          if(res->books_base->books[i][k]){
+            int bookid=book_dup_or_new(ci,res->books_base->books[i][k]);
+            r->booklist[booklist++]=bookid;
+            ci->book_param[bookid]=(static_codebook *)res->books_base->books[i][k];
+          }
+        }
       }
     }
   }
@@ -556,9 +556,9 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
        not the lowpass. the floor is always lowpass limited. */
     if(res->limit_type){
       if(ci->hi.managed)
-	freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS-1]*1000.;
+        freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS-1]*1000.;
       else
-	freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS/2]*1000.;
+        freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS/2]*1000.;
       if(freq>nyq)freq=nyq;
     }
     
@@ -568,16 +568,16 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
        previous boundary in encode/decode */
     if(ci->residue_type[block]==2)
       r->end=(int)((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
-	r->grouping;
+        r->grouping;
     else
       r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
-	r->grouping;
+        r->grouping;
   }
 }      
 
 /* we assume two maps in this encoder */
 static void vorbis_encode_map_n_res_setup(vorbis_info *vi,double s,
-					  const vorbis_mapping_template *maps){
+                                          const vorbis_mapping_template *maps){
 
   codec_setup_info *ci=vi->codec_setup;
   int i,j,is=s,modes=2;
@@ -601,7 +601,7 @@ static void vorbis_encode_map_n_res_setup(vorbis_info *vi,double s,
     
     for(j=0;j<map[i].submaps;j++)
       vorbis_encode_residue_setup(vi,map[i].residuesubmap[j],i
-				  ,res+map[i].residuesubmap[j]);
+                                  ,res+map[i].residuesubmap[j]);
   }
 }
 
@@ -621,8 +621,8 @@ static double setting_to_approx_bitrate(vorbis_info *vi){
 }
 
 static void get_setup_template(vorbis_info *vi,
-			       long ch,long srate,
-			       double req,int q_or_bitrate){
+                               long ch,long srate,
+                               double req,int q_or_bitrate){
   int i=0,j;
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
@@ -632,30 +632,30 @@ static void get_setup_template(vorbis_info *vi,
     if(setup_list[i]->coupling_restriction==-1 ||
        setup_list[i]->coupling_restriction==ch){
       if(srate>=setup_list[i]->samplerate_min_restriction &&
-	 srate<=setup_list[i]->samplerate_max_restriction){
-	int mappings=setup_list[i]->mappings;
-	const double *map=(q_or_bitrate?
-		     setup_list[i]->rate_mapping:
-		     setup_list[i]->quality_mapping);
+         srate<=setup_list[i]->samplerate_max_restriction){
+        int mappings=setup_list[i]->mappings;
+        const double *map=(q_or_bitrate?
+                     setup_list[i]->rate_mapping:
+                     setup_list[i]->quality_mapping);
 
-	/* the template matches.  Does the requested quality mode
-	   fall within this template's modes? */
-	if(req<map[0]){++i;continue;}
-	if(req>map[setup_list[i]->mappings]){++i;continue;}
-	for(j=0;j<mappings;j++)
-	  if(req>=map[j] && req<map[j+1])break;
-	/* an all-points match */
-	hi->setup=setup_list[i];
-	if(j==mappings)
-	  hi->base_setting=j-.001;
-	else{
-	  float low=map[j];
-	  float high=map[j+1];
-	  float del=(req-low)/(high-low);
-	  hi->base_setting=j+del;
-	}
+        /* the template matches.  Does the requested quality mode
+           fall within this template's modes? */
+        if(req<map[0]){++i;continue;}
+        if(req>map[setup_list[i]->mappings]){++i;continue;}
+        for(j=0;j<mappings;j++)
+          if(req>=map[j] && req<map[j+1])break;
+        /* an all-points match */
+        hi->setup=setup_list[i];
+        if(j==mappings)
+          hi->base_setting=j-.001;
+        else{
+          float low=map[j];
+          float high=map[j+1];
+          float del=(req-low)/(high-low);
+          hi->base_setting=j+del;
+        }
 
-	return;
+        return;
       }
     }
     i++;
@@ -700,119 +700,119 @@ int vorbis_encode_setup_init(vorbis_info *vi){
      short and long blocks are the same length, we set long_block_p
      and unset short_block_p */
   vorbis_encode_blocksize_setup(vi,hi->base_setting,
-				setup->blocksize_short,
-				setup->blocksize_long);
+                                setup->blocksize_short,
+                                setup->blocksize_long);
   if(ci->blocksizes[0]==ci->blocksizes[1])singleblock=1;
   
   /* floor setup; choose proper floor params.  Allocated on the floor
      stack in order; if we alloc only long floor, it's 0 */
   vorbis_encode_floor_setup(vi,hi->short_setting,0,
-			    setup->floor_books,
-			    setup->floor_params,
-			    setup->floor_short_mapping);
+                            setup->floor_books,
+                            setup->floor_params,
+                            setup->floor_short_mapping);
   if(!singleblock)
     vorbis_encode_floor_setup(vi,hi->long_setting,1,
-			      setup->floor_books,
-			      setup->floor_params,
-			      setup->floor_long_mapping);
+                              setup->floor_books,
+                              setup->floor_params,
+                              setup->floor_long_mapping);
   
   /* setup of [mostly] short block detection and stereo*/
   vorbis_encode_global_psych_setup(vi,hi->trigger_setting,
-				   setup->global_params,
-				   setup->global_mapping);
+                                   setup->global_params,
+                                   setup->global_mapping);
   vorbis_encode_global_stereo(vi,hi,setup->stereo_modes);
 
   /* basic psych setup and noise normalization */
   vorbis_encode_psyset_setup(vi,hi->short_setting,
-			     setup->psy_noise_normal_start[0],
-			     setup->psy_noise_normal_partition[0],  
-			     setup->psy_noise_normal_thresh,  
-			     0);
+                             setup->psy_noise_normal_start[0],
+                             setup->psy_noise_normal_partition[0],  
+                             setup->psy_noise_normal_thresh,  
+                             0);
   vorbis_encode_psyset_setup(vi,hi->short_setting,
-			     setup->psy_noise_normal_start[0],
-			     setup->psy_noise_normal_partition[0],  
-			     setup->psy_noise_normal_thresh,  
-			     1);
+                             setup->psy_noise_normal_start[0],
+                             setup->psy_noise_normal_partition[0],  
+                             setup->psy_noise_normal_thresh,  
+                             1);
   if(!singleblock){
     vorbis_encode_psyset_setup(vi,hi->long_setting,
-			       setup->psy_noise_normal_start[1],
-			       setup->psy_noise_normal_partition[1],  
-				    setup->psy_noise_normal_thresh,  
-			       2);
+                               setup->psy_noise_normal_start[1],
+                               setup->psy_noise_normal_partition[1],  
+                                    setup->psy_noise_normal_thresh,  
+                               2);
     vorbis_encode_psyset_setup(vi,hi->long_setting,
-			       setup->psy_noise_normal_start[1],
-			       setup->psy_noise_normal_partition[1],  
-			       setup->psy_noise_normal_thresh,  
-			       3);
+                               setup->psy_noise_normal_start[1],
+                               setup->psy_noise_normal_partition[1],  
+                               setup->psy_noise_normal_thresh,  
+                               3);
   }
 
   /* tone masking setup */
   vorbis_encode_tonemask_setup(vi,hi->block[i0].tone_mask_setting,0,
-			       setup->psy_tone_masteratt,
-			       setup->psy_tone_0dB,
-			       setup->psy_tone_adj_impulse);
+                               setup->psy_tone_masteratt,
+                               setup->psy_tone_0dB,
+                               setup->psy_tone_adj_impulse);
   vorbis_encode_tonemask_setup(vi,hi->block[1].tone_mask_setting,1,
-			       setup->psy_tone_masteratt,
-			       setup->psy_tone_0dB,
-			       setup->psy_tone_adj_other);
+                               setup->psy_tone_masteratt,
+                               setup->psy_tone_0dB,
+                               setup->psy_tone_adj_other);
   if(!singleblock){
     vorbis_encode_tonemask_setup(vi,hi->block[2].tone_mask_setting,2,
-				 setup->psy_tone_masteratt,
-				 setup->psy_tone_0dB,
-				 setup->psy_tone_adj_other);
+                                 setup->psy_tone_masteratt,
+                                 setup->psy_tone_0dB,
+                                 setup->psy_tone_adj_other);
     vorbis_encode_tonemask_setup(vi,hi->block[3].tone_mask_setting,3,
-				 setup->psy_tone_masteratt,
-				 setup->psy_tone_0dB,
-				 setup->psy_tone_adj_long);
+                                 setup->psy_tone_masteratt,
+                                 setup->psy_tone_0dB,
+                                 setup->psy_tone_adj_long);
   }
 
   /* noise companding setup */
   vorbis_encode_compand_setup(vi,hi->block[i0].noise_compand_setting,0,
-			      setup->psy_noise_compand,
-			      setup->psy_noise_compand_short_mapping);
+                              setup->psy_noise_compand,
+                              setup->psy_noise_compand_short_mapping);
   vorbis_encode_compand_setup(vi,hi->block[1].noise_compand_setting,1,
-			      setup->psy_noise_compand,
-			      setup->psy_noise_compand_short_mapping);
+                              setup->psy_noise_compand,
+                              setup->psy_noise_compand_short_mapping);
   if(!singleblock){
     vorbis_encode_compand_setup(vi,hi->block[2].noise_compand_setting,2,
-				setup->psy_noise_compand,
-				setup->psy_noise_compand_long_mapping);
+                                setup->psy_noise_compand,
+                                setup->psy_noise_compand_long_mapping);
     vorbis_encode_compand_setup(vi,hi->block[3].noise_compand_setting,3,
-				setup->psy_noise_compand,
-				setup->psy_noise_compand_long_mapping);
+                                setup->psy_noise_compand,
+                                setup->psy_noise_compand_long_mapping);
   }
 
   /* peak guarding setup  */
   vorbis_encode_peak_setup(vi,hi->block[i0].tone_peaklimit_setting,0,
-			   setup->psy_tone_dBsuppress);
+                           setup->psy_tone_dBsuppress);
   vorbis_encode_peak_setup(vi,hi->block[1].tone_peaklimit_setting,1,
-			   setup->psy_tone_dBsuppress);
+                           setup->psy_tone_dBsuppress);
   if(!singleblock){
     vorbis_encode_peak_setup(vi,hi->block[2].tone_peaklimit_setting,2,
-			     setup->psy_tone_dBsuppress);
+                             setup->psy_tone_dBsuppress);
     vorbis_encode_peak_setup(vi,hi->block[3].tone_peaklimit_setting,3,
-			     setup->psy_tone_dBsuppress);
+                             setup->psy_tone_dBsuppress);
   }
 
   /* noise bias setup */
   vorbis_encode_noisebias_setup(vi,hi->block[i0].noise_bias_setting,0,
-				setup->psy_noise_dBsuppress,
-				setup->psy_noise_bias_impulse,
-				setup->psy_noiseguards,
-				(i0==0?hi->impulse_noisetune:0.));
+                                setup->psy_noise_dBsuppress,
+                                setup->psy_noise_bias_impulse,
+                                setup->psy_noiseguards,
+                                (i0==0?hi->impulse_noisetune:0.));
   vorbis_encode_noisebias_setup(vi,hi->block[1].noise_bias_setting,1,
-				setup->psy_noise_dBsuppress,
-				setup->psy_noise_bias_padding,
-				setup->psy_noiseguards,0.);
+                                setup->psy_noise_dBsuppress,
+                                setup->psy_noise_bias_padding,
+                                setup->psy_noiseguards,0.);
   if(!singleblock){
     vorbis_encode_noisebias_setup(vi,hi->block[2].noise_bias_setting,2,
-				  setup->psy_noise_dBsuppress,
-				  setup->psy_noise_bias_trans,
-				  setup->psy_noiseguards,0.);
+                                  setup->psy_noise_dBsuppress,
+                                  setup->psy_noise_bias_trans,
+                                  setup->psy_noiseguards,0.);
     vorbis_encode_noisebias_setup(vi,hi->block[3].noise_bias_setting,3,
-				  setup->psy_noise_dBsuppress,
-				  setup->psy_noise_bias_long,
-				  setup->psy_noiseguards,0.);
+                                  setup->psy_noise_dBsuppress,
+                                  setup->psy_noise_bias_long,
+                                  setup->psy_noiseguards,0.);
   }
 
   vorbis_encode_ath_setup(vi,0);
@@ -856,8 +856,8 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 }
 
 static int vorbis_encode_setup_setting(vorbis_info *vi,
-				       long  channels,
-				       long  rate){
+                                       long  channels,
+                                       long  rate){
   int ret=0,i,is;
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
@@ -901,9 +901,9 @@ static int vorbis_encode_setup_setting(vorbis_info *vi,
 }
 
 int vorbis_encode_setup_vbr(vorbis_info *vi,
-			    long  channels,
-			    long  rate,			    
-			    float quality){
+                            long  channels,
+                            long  rate,                            
+                            float quality){
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
 
@@ -917,11 +917,11 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
 }
 
 int vorbis_encode_init_vbr(vorbis_info *vi,
-			   long channels,
-			   long rate,
-			   
-			   float base_quality /* 0. to 1. */
-			   ){
+                           long channels,
+                           long rate,
+                           
+                           float base_quality /* 0. to 1. */
+                           ){
   int ret=0;
 
   ret=vorbis_encode_setup_vbr(vi,channels,rate,base_quality);
@@ -937,12 +937,12 @@ int vorbis_encode_init_vbr(vorbis_info *vi,
 }
 
 int vorbis_encode_setup_managed(vorbis_info *vi,
-				long channels,
-				long rate,
-				
-				long max_bitrate,
-				long nominal_bitrate,
-				long min_bitrate){
+                                long channels,
+                                long rate,
+                                
+                                long max_bitrate,
+                                long nominal_bitrate,
+                                long min_bitrate){
 
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
@@ -952,14 +952,14 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
   if(nominal_bitrate<=0.){
     if(max_bitrate>0.){
       if(min_bitrate>0.)
-	nominal_bitrate=(max_bitrate+min_bitrate)*.5;
+        nominal_bitrate=(max_bitrate+min_bitrate)*.5;
       else
-	nominal_bitrate=max_bitrate*.875;
+        nominal_bitrate=max_bitrate*.875;
     }else{
       if(min_bitrate>0.){
-	nominal_bitrate=min_bitrate;
+        nominal_bitrate=min_bitrate;
       }else{
-	return(OV_EINVAL);
+        return(OV_EINVAL);
       }
     }
   }
@@ -987,17 +987,17 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
 }
 
 int vorbis_encode_init(vorbis_info *vi,
-		       long channels,
-		       long rate,
+                       long channels,
+                       long rate,
 
-		       long max_bitrate,
-		       long nominal_bitrate,
-		       long min_bitrate){
+                       long max_bitrate,
+                       long nominal_bitrate,
+                       long min_bitrate){
 
   int ret=vorbis_encode_setup_managed(vi,channels,rate,
-				      max_bitrate,
-				      nominal_bitrate,
-				      min_bitrate);
+                                      max_bitrate,
+                                      nominal_bitrate,
+                                      min_bitrate);
   if(ret){
     vorbis_info_clear(vi);
     return(ret);
@@ -1022,158 +1022,158 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
     /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_GET:
       {
-	
-	struct ovectl_ratemanage_arg *ai=
-	  (struct ovectl_ratemanage_arg *)arg;
-	
-	ai->management_active=hi->managed;
-	ai->bitrate_hard_window=ai->bitrate_av_window=
-	  (double)hi->bitrate_reservoir/vi->rate;
-	ai->bitrate_av_window_center=1.;
-	ai->bitrate_hard_min=hi->bitrate_min;
-	ai->bitrate_hard_max=hi->bitrate_max;
-	ai->bitrate_av_lo=hi->bitrate_av;
-	ai->bitrate_av_hi=hi->bitrate_av;
-	
+        
+        struct ovectl_ratemanage_arg *ai=
+          (struct ovectl_ratemanage_arg *)arg;
+        
+        ai->management_active=hi->managed;
+        ai->bitrate_hard_window=ai->bitrate_av_window=
+          (double)hi->bitrate_reservoir/vi->rate;
+        ai->bitrate_av_window_center=1.;
+        ai->bitrate_hard_min=hi->bitrate_min;
+        ai->bitrate_hard_max=hi->bitrate_max;
+        ai->bitrate_av_lo=hi->bitrate_av;
+        ai->bitrate_av_hi=hi->bitrate_av;
+        
       }
       return(0);
     
     /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_SET:
       {
-	struct ovectl_ratemanage_arg *ai=
-	  (struct ovectl_ratemanage_arg *)arg;
-	if(ai==NULL){
-	  hi->managed=0;
-	}else{
-	  hi->managed=ai->management_active;
-	  vorbis_encode_ctl(vi,OV_ECTL_RATEMANAGE_AVG,arg);
-	  vorbis_encode_ctl(vi,OV_ECTL_RATEMANAGE_HARD,arg);
-	}
+        struct ovectl_ratemanage_arg *ai=
+          (struct ovectl_ratemanage_arg *)arg;
+        if(ai==NULL){
+          hi->managed=0;
+        }else{
+          hi->managed=ai->management_active;
+          vorbis_encode_ctl(vi,OV_ECTL_RATEMANAGE_AVG,arg);
+          vorbis_encode_ctl(vi,OV_ECTL_RATEMANAGE_HARD,arg);
+        }
       }
       return 0;
 
     /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_AVG:
       {
-	struct ovectl_ratemanage_arg *ai=
-	  (struct ovectl_ratemanage_arg *)arg;
-	if(ai==NULL){
-	  hi->bitrate_av=0;
-	}else{
-	  hi->bitrate_av=(ai->bitrate_av_lo+ai->bitrate_av_hi)*.5;
-	}
+        struct ovectl_ratemanage_arg *ai=
+          (struct ovectl_ratemanage_arg *)arg;
+        if(ai==NULL){
+          hi->bitrate_av=0;
+        }else{
+          hi->bitrate_av=(ai->bitrate_av_lo+ai->bitrate_av_hi)*.5;
+        }
       }
       return(0);
     /* now deprecated *****************/
     case OV_ECTL_RATEMANAGE_HARD:
       {
-	struct ovectl_ratemanage_arg *ai=
-	  (struct ovectl_ratemanage_arg *)arg;
-	if(ai==NULL){
-	  hi->bitrate_min=0;
-	  hi->bitrate_max=0;
-	}else{
-	  hi->bitrate_min=ai->bitrate_hard_min;
-	  hi->bitrate_max=ai->bitrate_hard_max;
-	  hi->bitrate_reservoir=ai->bitrate_hard_window*
-	    (hi->bitrate_max+hi->bitrate_min)*.5;
-	}
-	if(hi->bitrate_reservoir<128.)
-	  hi->bitrate_reservoir=128.;
+        struct ovectl_ratemanage_arg *ai=
+          (struct ovectl_ratemanage_arg *)arg;
+        if(ai==NULL){
+          hi->bitrate_min=0;
+          hi->bitrate_max=0;
+        }else{
+          hi->bitrate_min=ai->bitrate_hard_min;
+          hi->bitrate_max=ai->bitrate_hard_max;
+          hi->bitrate_reservoir=ai->bitrate_hard_window*
+            (hi->bitrate_max+hi->bitrate_min)*.5;
+        }
+        if(hi->bitrate_reservoir<128.)
+          hi->bitrate_reservoir=128.;
       }   
       return(0);
 
       /* replacement ratemanage interface */
     case OV_ECTL_RATEMANAGE2_GET:
       {
-	struct ovectl_ratemanage2_arg *ai=
-	  (struct ovectl_ratemanage2_arg *)arg;
-	if(ai==NULL)return OV_EINVAL;
-	
-	ai->management_active=hi->managed;
-	ai->bitrate_limit_min_kbps=hi->bitrate_min/1000;
-	ai->bitrate_limit_max_kbps=hi->bitrate_max/1000;
-	ai->bitrate_average_kbps=hi->bitrate_av/1000;
-	ai->bitrate_average_damping=hi->bitrate_av_damp;
-	ai->bitrate_limit_reservoir_bits=hi->bitrate_reservoir;
-	ai->bitrate_limit_reservoir_bias=hi->bitrate_reservoir_bias;
+        struct ovectl_ratemanage2_arg *ai=
+          (struct ovectl_ratemanage2_arg *)arg;
+        if(ai==NULL)return OV_EINVAL;
+        
+        ai->management_active=hi->managed;
+        ai->bitrate_limit_min_kbps=hi->bitrate_min/1000;
+        ai->bitrate_limit_max_kbps=hi->bitrate_max/1000;
+        ai->bitrate_average_kbps=hi->bitrate_av/1000;
+        ai->bitrate_average_damping=hi->bitrate_av_damp;
+        ai->bitrate_limit_reservoir_bits=hi->bitrate_reservoir;
+        ai->bitrate_limit_reservoir_bias=hi->bitrate_reservoir_bias;
       }
       return (0);
     case OV_ECTL_RATEMANAGE2_SET:
       {
-	struct ovectl_ratemanage2_arg *ai=
-	  (struct ovectl_ratemanage2_arg *)arg;
-	if(ai==NULL){
-	  hi->managed=0;
-	}else{
-	  /* sanity check; only catch invariant violations */
-	  if(ai->bitrate_limit_min_kbps>0 &&
-	     ai->bitrate_average_kbps>0 &&
-	     ai->bitrate_limit_min_kbps>ai->bitrate_average_kbps)
-	    return OV_EINVAL;
+        struct ovectl_ratemanage2_arg *ai=
+          (struct ovectl_ratemanage2_arg *)arg;
+        if(ai==NULL){
+          hi->managed=0;
+        }else{
+          /* sanity check; only catch invariant violations */
+          if(ai->bitrate_limit_min_kbps>0 &&
+             ai->bitrate_average_kbps>0 &&
+             ai->bitrate_limit_min_kbps>ai->bitrate_average_kbps)
+            return OV_EINVAL;
 
-	  if(ai->bitrate_limit_max_kbps>0 &&
-	     ai->bitrate_average_kbps>0 &&
-	     ai->bitrate_limit_max_kbps<ai->bitrate_average_kbps)
-	    return OV_EINVAL;
+          if(ai->bitrate_limit_max_kbps>0 &&
+             ai->bitrate_average_kbps>0 &&
+             ai->bitrate_limit_max_kbps<ai->bitrate_average_kbps)
+            return OV_EINVAL;
 
-	  if(ai->bitrate_limit_min_kbps>0 &&
-	     ai->bitrate_limit_max_kbps>0 &&
-	     ai->bitrate_limit_min_kbps>ai->bitrate_limit_max_kbps)
-	    return OV_EINVAL;
+          if(ai->bitrate_limit_min_kbps>0 &&
+             ai->bitrate_limit_max_kbps>0 &&
+             ai->bitrate_limit_min_kbps>ai->bitrate_limit_max_kbps)
+            return OV_EINVAL;
 
-	  if(ai->bitrate_average_damping <= 0.)
-	    return OV_EINVAL;
+          if(ai->bitrate_average_damping <= 0.)
+            return OV_EINVAL;
 
-	  if(ai->bitrate_limit_reservoir_bits < 0)
-	    return OV_EINVAL;
+          if(ai->bitrate_limit_reservoir_bits < 0)
+            return OV_EINVAL;
 
-	  if(ai->bitrate_limit_reservoir_bias < 0.)
-	    return OV_EINVAL;
+          if(ai->bitrate_limit_reservoir_bias < 0.)
+            return OV_EINVAL;
 
-	  if(ai->bitrate_limit_reservoir_bias > 1.)
-	    return OV_EINVAL;
+          if(ai->bitrate_limit_reservoir_bias > 1.)
+            return OV_EINVAL;
 
-	  hi->managed=ai->management_active;
-	  hi->bitrate_min=ai->bitrate_limit_min_kbps * 1000;
-	  hi->bitrate_max=ai->bitrate_limit_max_kbps * 1000;
-	  hi->bitrate_av=ai->bitrate_average_kbps * 1000;
-	  hi->bitrate_av_damp=ai->bitrate_average_damping;
-	  hi->bitrate_reservoir=ai->bitrate_limit_reservoir_bits;
-	  hi->bitrate_reservoir_bias=ai->bitrate_limit_reservoir_bias;
-	}
+          hi->managed=ai->management_active;
+          hi->bitrate_min=ai->bitrate_limit_min_kbps * 1000;
+          hi->bitrate_max=ai->bitrate_limit_max_kbps * 1000;
+          hi->bitrate_av=ai->bitrate_average_kbps * 1000;
+          hi->bitrate_av_damp=ai->bitrate_average_damping;
+          hi->bitrate_reservoir=ai->bitrate_limit_reservoir_bits;
+          hi->bitrate_reservoir_bias=ai->bitrate_limit_reservoir_bias;
+        }
       }
       return 0;
       
     case OV_ECTL_LOWPASS_GET:
       {
-	double *farg=(double *)arg;
-	*farg=hi->lowpass_kHz;
+        double *farg=(double *)arg;
+        *farg=hi->lowpass_kHz;
       }
       return(0);
     case OV_ECTL_LOWPASS_SET:
       {
-	double *farg=(double *)arg;
-	hi->lowpass_kHz=*farg;
+        double *farg=(double *)arg;
+        hi->lowpass_kHz=*farg;
 
-	if(hi->lowpass_kHz<2.)hi->lowpass_kHz=2.;
-	if(hi->lowpass_kHz>99.)hi->lowpass_kHz=99.;
+        if(hi->lowpass_kHz<2.)hi->lowpass_kHz=2.;
+        if(hi->lowpass_kHz>99.)hi->lowpass_kHz=99.;
       }
       return(0);
     case OV_ECTL_IBLOCK_GET:
       {
-	double *farg=(double *)arg;
-	*farg=hi->impulse_noisetune;
+        double *farg=(double *)arg;
+        *farg=hi->impulse_noisetune;
       }
       return(0);
     case OV_ECTL_IBLOCK_SET:
       {
-	double *farg=(double *)arg;
-	hi->impulse_noisetune=*farg;
+        double *farg=(double *)arg;
+        hi->impulse_noisetune=*farg;
 
-	if(hi->impulse_noisetune>0.)hi->impulse_noisetune=0.;
-	if(hi->impulse_noisetune<-15.)hi->impulse_noisetune=-15.;
+        if(hi->impulse_noisetune>0.)hi->impulse_noisetune=0.;
+        if(hi->impulse_noisetune<-15.)hi->impulse_noisetune=-15.;
       }
       return(0);      
     }

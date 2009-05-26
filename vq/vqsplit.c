@@ -82,12 +82,12 @@ static float _Ndist(int el,float *a, float *b){
 
 /* goes through the split, but just counts it and returns a metric*/
 int vqsp_count(float *entrylist,float *pointlist,int dim,
-	       long *membership,long *reventry,
-	       long *entryindex,long entries, 
-	       long *pointindex,long points,int splitp,
-	       long *entryA,long *entryB,
-	       long besti,long bestj,
-	       long *entriesA,long *entriesB,long *entriesC){
+               long *membership,long *reventry,
+               long *entryindex,long entries, 
+               long *pointindex,long points,int splitp,
+               long *entryA,long *entryB,
+               long besti,long bestj,
+               long *entriesA,long *entriesB,long *entriesC){
   long i,j;
   long A=0,B=0,C=0;
   long pointsA=0;
@@ -124,11 +124,11 @@ int vqsp_count(float *entrylist,float *pointlist,int dim,
       float distA=_Ndist(dim,ppt,_Nnow(besti));
       float distB=_Ndist(dim,ppt,_Nnow(bestj));
       if(distA<distB){
-	entryA[reventry[firstentry]]=1;
-	if(splitp)temppointsA[pointsA++]=pointindex[i];
+        entryA[reventry[firstentry]]=1;
+        if(splitp)temppointsA[pointsA++]=pointindex[i];
       }else{
-	entryB[reventry[firstentry]]=1;
-	if(splitp)temppointsB[pointsB++]=pointindex[i];
+        entryB[reventry[firstentry]]=1;
+        if(splitp)temppointsB[pointsB++]=pointindex[i];
       }
     }
   }
@@ -155,11 +155,11 @@ int vqsp_count(float *entrylist,float *pointlist,int dim,
 }
 
 int lp_split(float *pointlist,long totalpoints,
-	     codebook *b,
-	     long *entryindex,long entries, 
-	     long *pointindex,long points,
-	     long *membership,long *reventry,
-	     long depth, long *pointsofar){
+             codebook *b,
+             long *entryindex,long entries, 
+             long *pointindex,long points,
+             long *membership,long *reventry,
+             long depth, long *pointsofar){
 
   encode_aux_nearestmatch *t=b->c->nearest_tree;
 
@@ -202,29 +202,29 @@ int lp_split(float *pointlist,long totalpoints,
     float this;
     for(i=0;i<entries-1;i++){
       for(j=i+1;j<entries;j++){
-	spinnit(spinbuf,entries-i);
-	vqsp_count(b->valuelist,pointlist,dim,
-		   membership,reventry,
-		   entryindex,entries, 
-		   pointindex,points,0,
-		   entryA,entryB,
-		   entryindex[i],entryindex[j],
-		   &entriesA,&entriesB,&entriesC);
-	this=(entriesA-entriesC)*(entriesB-entriesC);
+        spinnit(spinbuf,entries-i);
+        vqsp_count(b->valuelist,pointlist,dim,
+                   membership,reventry,
+                   entryindex,entries, 
+                   pointindex,points,0,
+                   entryA,entryB,
+                   entryindex[i],entryindex[j],
+                   &entriesA,&entriesB,&entriesC);
+        this=(entriesA-entriesC)*(entriesB-entriesC);
 
-	/* when choosing best, we also want some form of stability to
+        /* when choosing best, we also want some form of stability to
            make sure more branches are pared later; secondary
            weighting isn;t needed as the entry lists are in ascending
            order, and we always try p/q in the same sequence */
-	
-	if( (besti==-1) ||
-	    (this>best) ){
-	  
-	  best=this;
-	  besti=entryindex[i];
-	  bestj=entryindex[j];
+        
+        if( (besti==-1) ||
+            (this>best) ){
+          
+          best=this;
+          besti=entryindex[i];
+          bestj=entryindex[j];
 
-	}
+        }
       }
     }
   }else{
@@ -241,7 +241,7 @@ int lp_split(float *pointlist,long totalpoints,
       
       p[k]=0.f;
       for(j=0;j<entries;j++)
-	p[k]+=b->valuelist[entryindex[j]*dim+k];
+        p[k]+=b->valuelist[entryindex[j]*dim+k];
       p[k]/=entries;
 
     }
@@ -258,38 +258,38 @@ int lp_split(float *pointlist,long totalpoints,
       spinnit(spinbuf,entries-i);
       
       for(k=0;k<dim;k++)
-	q[k]=2*p[k]-ppi[k];
+        q[k]=2*p[k]-ppi[k];
 
       for(j=0;j<entries;j++){
-	if(j!=i){
-	  float this=_Ndist(dim,q,_Nnow(entryindex[j]));
-	  if(ref_j==-1 || this<=ref_best){ /* <=, not <; very important */
-	    ref_best=this;
-	    ref_j=entryindex[j];
-	  }
-	}
+        if(j!=i){
+          float this=_Ndist(dim,q,_Nnow(entryindex[j]));
+          if(ref_j==-1 || this<=ref_best){ /* <=, not <; very important */
+            ref_best=this;
+            ref_j=entryindex[j];
+          }
+        }
       }
 
       vqsp_count(b->valuelist,pointlist,dim,
-		 membership,reventry,
-		 entryindex,entries, 
-		 pointindex,points,0,
-		 entryA,entryB,
-		 entryindex[i],ref_j,
-		 &entriesA,&entriesB,&entriesC);
+                 membership,reventry,
+                 entryindex,entries, 
+                 pointindex,points,0,
+                 entryA,entryB,
+                 entryindex[i],ref_j,
+                 &entriesA,&entriesB,&entriesC);
       this=(entriesA-entriesC)*(entriesB-entriesC);
 
-	/* when choosing best, we also want some form of stability to
+        /* when choosing best, we also want some form of stability to
            make sure more branches are pared later; secondary
            weighting isn;t needed as the entry lists are in ascending
            order, and we always try p/q in the same sequence */
-	
+        
       if( (besti==-1) ||
-	  (this>best) ){
-	
-	best=this;
-	besti=entryindex[i];
-	bestj=ref_j;
+          (this>best) ){
+        
+        best=this;
+        besti=entryindex[i];
+        bestj=ref_j;
 
       }
     }
@@ -305,12 +305,12 @@ int lp_split(float *pointlist,long totalpoints,
   /* count A/B points */
 
   pointsA=vqsp_count(b->valuelist,pointlist,dim,
-		     membership,reventry,
-		     entryindex,entries, 
-		     pointindex,points,1,
-		     entryA,entryB,
-		     besti,bestj,
-		     &entriesA,&entriesB,&entriesC);
+                     membership,reventry,
+                     entryindex,entries, 
+                     pointindex,points,1,
+                     entryA,entryB,
+                     besti,bestj,
+                     &entriesA,&entriesB,&entriesC);
 
   /*  fprintf(stderr,"split: total=%ld depth=%ld set A=%ld:%ld:%ld=B\n",
       entries,depth,entriesA-entriesC,entriesC,entriesB-entriesC);*/
@@ -334,7 +334,7 @@ int lp_split(float *pointlist,long totalpoints,
     }else{
       t->ptr0[thisaux]= -t->aux;
       ret=lp_split(pointlist,totalpoints,b,entryA,entriesA,pointindex,pointsA,
-		   membership,reventry,depth+1,pointsofar); 
+                   membership,reventry,depth+1,pointsofar); 
     }
     if(entriesB==1){
       ret++;
@@ -343,8 +343,8 @@ int lp_split(float *pointlist,long totalpoints,
     }else{
       t->ptr1[thisaux]= -t->aux;
       ret+=lp_split(pointlist,totalpoints,b,entryB,entriesB,pointindex+pointsA,
-		    points-pointsA,membership,reventry,
-		    depth+1,pointsofar); 
+                    points-pointsA,membership,reventry,
+                    depth+1,pointsofar); 
     }
   }
   free(entryA);
@@ -386,12 +386,12 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     /* duplicate? if so, eliminate */
     for(j=0;j<i;j++){
       if(_Ndist(v->elements,_now(v,i),_now(v,j))==0.f){
-	fprintf(stderr,"found a duplicate entry!  removing...\n");
-	v->entries--;
-	memcpy(_now(v,i),_now(v,v->entries),sizeof(float)*v->elements);
-	memcpy(quantlist+i*v->elements,quantlist+v->entries*v->elements,
-	       sizeof(long)*v->elements);
-	break;
+        fprintf(stderr,"found a duplicate entry!  removing...\n");
+        v->entries--;
+        memcpy(_now(v,i),_now(v,v->entries),sizeof(float)*v->elements);
+        memcpy(quantlist+i*v->elements,quantlist+v->entries*v->elements,
+               sizeof(long)*v->elements);
+        break;
       }
     }
     if(j==i)i++;
@@ -407,11 +407,11 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
       if(!(i&0xff))spinnit("checking... ",v->points-i);
 
       for(j=0;j<v->entries;j++){
-	float thismetric=_Ndist(v->elements,_now(v,j),ppt);
-	if(thismetric<firstmetric){
-	  firstmetric=thismetric;
-	  firstentry=j;
-	}
+        float thismetric=_Ndist(v->elements,_now(v,j),ppt);
+        if(thismetric<firstmetric){
+          firstmetric=thismetric;
+          firstentry=j;
+        }
       }
       
       v->assigned[firstentry]++;
@@ -419,13 +419,13 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
 
     for(j=0;j<v->entries;){
       if(v->assigned[j]==0){
-	fprintf(stderr,"found an unused entry!  removing...\n");
-	v->entries--;
-	memcpy(_now(v,j),_now(v,v->entries),sizeof(float)*v->elements);
-	v->assigned[j]=v->assigned[v->elements];
-	memcpy(quantlist+j*v->elements,quantlist+v->entries*v->elements,
-	       sizeof(long)*v->elements);
-	continue;
+        fprintf(stderr,"found an unused entry!  removing...\n");
+        v->entries--;
+        memcpy(_now(v,j),_now(v,v->entries),sizeof(float)*v->elements);
+        v->assigned[j]=v->assigned[v->elements];
+        memcpy(quantlist+j*v->elements,quantlist+v->entries*v->elements,
+               sizeof(long)*v->elements);
+        continue;
       }
       j++;
     }
@@ -465,24 +465,24 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
       if(!(i&0xff))spinnit("assigning... ",v->points-i);
 
       for(j=1;j<v->entries;j++){
-	if(v->assigned[j]!=-1){
-	  float thismetric=_Ndist(v->elements,_now(v,j),ppt);
-	  if(thismetric<=firstmetric){
-	    firstmetric=thismetric;
-	    firstentry=j;
-	  }
-	}
+        if(v->assigned[j]!=-1){
+          float thismetric=_Ndist(v->elements,_now(v,j),ppt);
+          if(thismetric<=firstmetric){
+            firstmetric=thismetric;
+            firstentry=j;
+          }
+        }
       }
       
       membership[i]=firstentry;
     }
 
     fprintf(stderr,"Leaves added: %d              \n",
-	    lp_split(v->pointlist,v->points,
-		     b,entryindex,v->entries,
-		     pointindex,v->points,
-		     membership,reventry,
-		     0,&pointssofar));
+            lp_split(v->pointlist,v->points,
+                     b,entryindex,v->entries,
+                     pointindex,v->points,
+                     membership,reventry,
+                     0,&pointssofar));
       
     free(pointindex);
     free(membership);
@@ -495,47 +495,47 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
       int changedflag=1;
       
       while(changedflag){
-	changedflag=0;
-	
-	/* span the tree node by node; list unique decision nodes and
-	   short circuit redundant branches */
-	
-	for(i=0;i<t->aux;){
-	  int k;
-	  
-	  /* check list of unique decisions */
-	  for(j=0;j<i;j++)
-	    if(_node_eq(t,i,j))break;
-	  
-	  if(j<i){
-	    /* a redundant entry; find all higher nodes referencing it and
-	       short circuit them to the previously noted unique entry */
-	    changedflag=1;
-	    for(k=0;k<t->aux;k++){
-	      if(t->ptr0[k]==-i)t->ptr0[k]=-j;
-	      if(t->ptr1[k]==-i)t->ptr1[k]=-j;
-	    }
-	    
-	    /* Now, we need to fill in the hole from this redundant
-	       entry in the listing.  Insert the last entry in the list.
-	       Fix the forward pointers to that last entry */
-	    t->aux--;
-	    t->ptr0[i]=t->ptr0[t->aux];
-	    t->ptr1[i]=t->ptr1[t->aux];
-	    t->p[i]=t->p[t->aux];
-	    t->q[i]=t->q[t->aux];
-	    for(k=0;k<t->aux;k++){
-	      if(t->ptr0[k]==-t->aux)t->ptr0[k]=-i;
-	      if(t->ptr1[k]==-t->aux)t->ptr1[k]=-i;
-	    }
-	    /* hole plugged */
-	    
-	  }else
-	    i++;
-	}
-	
-	fprintf(stderr,"\rParing/rerouting redundant branches... "
-		"%ld remaining   ",t->aux);
+        changedflag=0;
+        
+        /* span the tree node by node; list unique decision nodes and
+           short circuit redundant branches */
+        
+        for(i=0;i<t->aux;){
+          int k;
+          
+          /* check list of unique decisions */
+          for(j=0;j<i;j++)
+            if(_node_eq(t,i,j))break;
+          
+          if(j<i){
+            /* a redundant entry; find all higher nodes referencing it and
+               short circuit them to the previously noted unique entry */
+            changedflag=1;
+            for(k=0;k<t->aux;k++){
+              if(t->ptr0[k]==-i)t->ptr0[k]=-j;
+              if(t->ptr1[k]==-i)t->ptr1[k]=-j;
+            }
+            
+            /* Now, we need to fill in the hole from this redundant
+               entry in the listing.  Insert the last entry in the list.
+               Fix the forward pointers to that last entry */
+            t->aux--;
+            t->ptr0[i]=t->ptr0[t->aux];
+            t->ptr1[i]=t->ptr1[t->aux];
+            t->p[i]=t->p[t->aux];
+            t->q[i]=t->q[t->aux];
+            for(k=0;k<t->aux;k++){
+              if(t->ptr0[k]==-t->aux)t->ptr0[k]=-i;
+              if(t->ptr1[k]==-t->aux)t->ptr1[k]=-i;
+            }
+            /* hole plugged */
+            
+          }else
+            i++;
+        }
+        
+        fprintf(stderr,"\rParing/rerouting redundant branches... "
+                "%ld remaining   ",t->aux);
       }
       fprintf(stderr,"\n");
     }
@@ -598,8 +598,8 @@ void vqsp_book(vqgen *v, codebook *b, long *quantlist){
     for(i=0;i<c->entries;i++){
       long e=index[i];
       for(k=0;k<c->dim;k++){
-	b->valuelist[i*c->dim+k]=v->entrylist[e*c->dim+k];
-	c->quantlist[i*c->dim+k]=quantlist[e*c->dim+k];
+        b->valuelist[i*c->dim+k]=v->entrylist[e*c->dim+k];
+        c->quantlist[i*c->dim+k]=quantlist[e*c->dim+k];
       }
       c->lengthlist[i]=wordlen[e];
     }

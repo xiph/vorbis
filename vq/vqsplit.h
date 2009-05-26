@@ -23,11 +23,11 @@
 extern void vqsp_book(vqgen *v,codebook *b,long *quantlist);
 extern int vqenc_entry(codebook *b,float *val);
 extern int lp_split(float *pointlist,long totalpoints,
-		    codebook *b,
-		    long *entryindex,long entries, 
-		    long *pointindex,long points,
-		    long *membership,long *reventry,
-		    long depth, long *pointsofar);
+                    codebook *b,
+                    long *entryindex,long entries, 
+                    long *pointindex,long points,
+                    long *membership,long *reventry,
+                    long depth, long *pointsofar);
 
 #endif
 

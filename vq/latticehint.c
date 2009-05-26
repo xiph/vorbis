@@ -56,7 +56,7 @@ static int addtosearch(int entry,long **tempstack,long *tempcount,int add){
     while(i--)
       if(*ptr++==add)return(0);
     tempstack[entry]=_ogg_realloc(tempstack[entry],
-			     (tempcount[entry]+1)*sizeof(long));
+                             (tempcount[entry]+1)*sizeof(long));
   }else{
     tempstack[entry]=_ogg_malloc(sizeof(long));
   }
@@ -66,8 +66,8 @@ static int addtosearch(int entry,long **tempstack,long *tempcount,int add){
 }
 
 static void setvals(int dim,encode_aux_pigeonhole *p,
-		    long *temptrack,float *tempmin,float *tempmax,
-		    int seqp){
+                    long *temptrack,float *tempmin,float *tempmax,
+                    int seqp){
   int i;
   float last=0.f;
   for(i=0;i<dim;i++){
@@ -82,7 +82,7 @@ static void setvals(int dim,encode_aux_pigeonhole *p,
    can ignore the <0 and >=n boundary cases in min/max error */
 
 static float minerror(int dim,float *a,encode_aux_pigeonhole *p,
-		       long *temptrack,float *tempmin,float *tempmax){
+                       long *temptrack,float *tempmin,float *tempmax){
   int i;
   float err=0.f;
   for(i=0;i<dim;i++){
@@ -98,7 +98,7 @@ static float minerror(int dim,float *a,encode_aux_pigeonhole *p,
 }
 
 static float maxerror(int dim,float *a,encode_aux_pigeonhole *p,
-		       long *temptrack,float *tempmin,float *tempmax){
+                       long *temptrack,float *tempmin,float *tempmax){
   int i;
   float err=0.f,eval;
   for(i=0;i<dim;i++){
@@ -171,12 +171,12 @@ int main(int argc,char *argv[]){
     if(argv[2]){
       char *ptr=strdup(argv[2]);
       suggestions=alloca(sizeof(float)*quantvals);
-			 
+                         
       for(suggcount=0;ptr && suggcount<quantvals;suggcount++){
-	char *ptr2=strchr(ptr,',');
-	if(ptr2)*ptr2++='\0';
-	suggestions[suggcount]=atof(ptr);
-	ptr=ptr2;
+        char *ptr2=strchr(ptr,',');
+        if(ptr2)*ptr2++='\0';
+        suggestions[suggcount]=atof(ptr);
+        ptr=ptr2;
       }
     }
 
@@ -197,13 +197,13 @@ int main(int argc,char *argv[]){
       float v2=*(quantsort[i+1])*del+min;
       
       for(j=0;j<suggcount;j++)
-	if(v1<suggestions[j] && suggestions[j]<v2){
-	  t->quantthresh[i]=suggestions[j];
-	  break;
-	}
+        if(v1<suggestions[j] && suggestions[j]<v2){
+          t->quantthresh[i]=suggestions[j];
+          break;
+        }
       
       if(j==suggcount){
-	t->quantthresh[i]=(v1+v2)*.5;
+        t->quantthresh[i]=(v1+v2)*.5;
       }
     }
   }
@@ -259,11 +259,11 @@ int main(int argc,char *argv[]){
       int quant=0;
       float err=fabs(c->quantlist[0]*del+min-thisval);
       for(j=1;j<quantvals;j++){
-	float thiserr=fabs(c->quantlist[j]*del+min-thisval);
-	if(thiserr<err){
-	  quant=j/factor;
-	  err=thiserr;
-	}
+        float thiserr=fabs(c->quantlist[j]*del+min-thisval);
+        if(thiserr<err){
+          quant=j/factor;
+          err=thiserr;
+        }
       }
       p->pigeonmap[i]=quant;
     }
@@ -306,35 +306,35 @@ int main(int argc,char *argv[]){
       /* Search all entries to find the one with the minimum possible
          maximum error.  Record that error */
       for(i=0;i<entries;i++){
-	if(c->lengthlist[i]>0){
-	  float this=maxerror(dim,b->valuelist+i*dim,p,
-			       temptrack,tempmin,tempmax);
-	  if(errorpost==-1 || this<errorpost)errorpost=this;
-	  spinnit(buffer,subpigeons);
-	}
+        if(c->lengthlist[i]>0){
+          float this=maxerror(dim,b->valuelist+i*dim,p,
+                               temptrack,tempmin,tempmax);
+          if(errorpost==-1 || this<errorpost)errorpost=this;
+          spinnit(buffer,subpigeons);
+        }
       }
 
       /* Our search list will contain all entries with a minimum
          possible error <= our errorpost */
       for(i=0;i<entries;i++)
-	if(c->lengthlist[i]>0){
-	  spinnit(buffer,subpigeons);
-	  if(minerror(dim,b->valuelist+i*dim,p,
-		      temptrack,tempmin,tempmax)<errorpost)
-	    totalstack+=addtosearch(entry,tempstack,tempcount,i);
-	}
+        if(c->lengthlist[i]>0){
+          spinnit(buffer,subpigeons);
+          if(minerror(dim,b->valuelist+i*dim,p,
+                      temptrack,tempmin,tempmax)<errorpost)
+            totalstack+=addtosearch(entry,tempstack,tempcount,i);
+        }
 
       for(i=0;i<dim;i++){
-	temptrack[i]++;
-	if(temptrack[i]<p->mapentries)break;
-	temptrack[i]=0;
+        temptrack[i]++;
+        if(temptrack[i]<p->mapentries)break;
+        temptrack[i]=0;
       }
       if(i==dim)break;
       subpigeons--;
     }
 
     fprintf(stderr,"\r                                                     "
-	    "\rTotal search list size (all entries): %ld\n",totalstack);
+            "\rTotal search list size (all entries): %ld\n",totalstack);
 
     /* pare the index of lists for improbable quantizations (where
        improbable is determined by c->lengthlist; we assume that
@@ -342,8 +342,8 @@ int main(int argc,char *argv[]){
     /*for(i=0;i<entries;i++){
       float probability= 1.f/(1<<c->lengthlist[i]);
       if(c->lengthlist[i]==0 || probability*entries<cutoff){
-	totalstack-=tempcount[i];
-	tempcount[i]=0;
+        totalstack-=tempcount[i];
+        tempcount[i]=0;
       }
       }*/
 
@@ -356,46 +356,46 @@ int main(int argc,char *argv[]){
       changep=0;
 
       for(i=0;i<pigeons;i++){
-	if(p->fitmap[i]<0 && tempcount[i]){
-	  for(j=i+1;j<pigeons;j++){
-	    if(p->fitmap[j]<0 && tempcount[j]){
-	      /* is one list a superset, or are they sufficiently similar? */
-	      int amiss=0,bmiss=0,ii,jj;
-	      for(ii=0;ii<tempcount[i];ii++){
-		for(jj=0;jj<tempcount[j];jj++)
-		  if(tempstack[i][ii]==tempstack[j][jj])break;
-		if(jj==tempcount[j])amiss++;
-	      }
-	      for(jj=0;jj<tempcount[j];jj++){
-		for(ii=0;ii<tempcount[i];ii++)
-		  if(tempstack[i][ii]==tempstack[j][jj])break;
-		if(ii==tempcount[i])bmiss++;
-	      }
-	      if(amiss==0 ||
-		 bmiss==0 ||
-		 (amiss*2<tempcount[i] && bmiss*2<tempcount[j] &&
-		 tempcount[i]+bmiss<entries/30)){
+        if(p->fitmap[i]<0 && tempcount[i]){
+          for(j=i+1;j<pigeons;j++){
+            if(p->fitmap[j]<0 && tempcount[j]){
+              /* is one list a superset, or are they sufficiently similar? */
+              int amiss=0,bmiss=0,ii,jj;
+              for(ii=0;ii<tempcount[i];ii++){
+                for(jj=0;jj<tempcount[j];jj++)
+                  if(tempstack[i][ii]==tempstack[j][jj])break;
+                if(jj==tempcount[j])amiss++;
+              }
+              for(jj=0;jj<tempcount[j];jj++){
+                for(ii=0;ii<tempcount[i];ii++)
+                  if(tempstack[i][ii]==tempstack[j][jj])break;
+                if(ii==tempcount[i])bmiss++;
+              }
+              if(amiss==0 ||
+                 bmiss==0 ||
+                 (amiss*2<tempcount[i] && bmiss*2<tempcount[j] &&
+                 tempcount[i]+bmiss<entries/30)){
 
-		/*superset/similar  Add all of one to the other. */
-		for(jj=0;jj<tempcount[j];jj++)
-		  totalstack+=addtosearch(i,tempstack,tempcount,
-					  tempstack[j][jj]);
-		totalstack-=tempcount[j];
-		p->fitmap[j]=i;
-		changep=1;
-	      }
-	    }
-	  }
-	  sprintf(buffer,"Consolidating [%ld total, %s]... ",totalstack,
-		  changep?"reit":"nochange");
-	  spinnit(buffer,pigeons-i);
-	}
+                /*superset/similar  Add all of one to the other. */
+                for(jj=0;jj<tempcount[j];jj++)
+                  totalstack+=addtosearch(i,tempstack,tempcount,
+                                          tempstack[j][jj]);
+                totalstack-=tempcount[j];
+                p->fitmap[j]=i;
+                changep=1;
+              }
+            }
+          }
+          sprintf(buffer,"Consolidating [%ld total, %s]... ",totalstack,
+                  changep?"reit":"nochange");
+          spinnit(buffer,pigeons-i);
+        }
       }
     }
 
     /* repack the temp stack in final form */
     fprintf(stderr,"\r                                                       "
-	    "\rFinal total list size: %ld\n",totalstack);
+            "\rFinal total list size: %ld\n",totalstack);
     
 
     p->fittotal=totalstack;
@@ -404,20 +404,20 @@ int main(int argc,char *argv[]){
     {
       long usage=0;
       for(i=0;i<pigeons;i++){
-	if(p->fitmap[i]==-1){
-	  if(tempcount[i])
-	    memcpy(p->fitlist+usage,tempstack[i],tempcount[i]*sizeof(long));
-	  p->fitmap[i]=usage;
-	  p->fitlength[i]=tempcount[i];
-	  usage+=tempcount[i];
-	  if(usage>totalstack){
-	    fprintf(stderr,"Internal error; usage>totalstack\n");
-	    exit(1);
-	  }
-	}else{
-	  p->fitlength[i]=p->fitlength[p->fitmap[i]];
-	  p->fitmap[i]=p->fitmap[p->fitmap[i]];
-	}
+        if(p->fitmap[i]==-1){
+          if(tempcount[i])
+            memcpy(p->fitlist+usage,tempstack[i],tempcount[i]*sizeof(long));
+          p->fitmap[i]=usage;
+          p->fitlength[i]=tempcount[i];
+          usage+=tempcount[i];
+          if(usage>totalstack){
+            fprintf(stderr,"Internal error; usage>totalstack\n");
+            exit(1);
+          }
+        }else{
+          p->fitlength[i]=p->fitlength[p->fitmap[i]];
+          p->fitmap[i]=p->fitmap[p->fitmap[i]];
+        }
       }
     }
   }
@@ -425,6 +425,6 @@ int main(int argc,char *argv[]){
 
   write_codebook(stdout,name,c); 
   fprintf(stderr,"\r                                                     "
-	  "\nDone.\n");
+          "\nDone.\n");
   exit(0);
 }

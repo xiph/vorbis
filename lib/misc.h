@@ -24,7 +24,7 @@ extern int analysis_noisy;
 extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
 extern void _vorbis_block_ripcord(vorbis_block *vb);
 extern void _analysis_output(char *base,int i,float *v,int n,int bark,int dB,
-			     ogg_int64_t off);
+                             ogg_int64_t off);
 
 #ifdef DEBUG_MALLOC
 

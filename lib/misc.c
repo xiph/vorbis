@@ -23,7 +23,7 @@
 static pthread_mutex_t memlock=PTHREAD_MUTEX_INITIALIZER;
 static void **pointers=NULL;
 static long *insertlist=NULL; /* We can't embed this in the pointer list;
-			  a pointer can have any value... */
+                          a pointer can have any value... */
 
 static char **files=NULL;
 static long *file_bytes=NULL;
@@ -83,11 +83,11 @@ static void *_insert(void *ptr,long bytes,char *file,long line){
     if(i==filecount){
       filecount++;
       if(!files){
-	files=malloc(filecount*sizeof(*files));
-	file_bytes=malloc(filecount*sizeof(*file_bytes));
+        files=malloc(filecount*sizeof(*files));
+        file_bytes=malloc(filecount*sizeof(*file_bytes));
       }else{
-	files=realloc(files,filecount*sizeof(*files));
-	file_bytes=realloc(file_bytes,filecount*sizeof(*file_bytes));
+        files=realloc(files,filecount*sizeof(*files));
+        file_bytes=realloc(file_bytes,filecount*sizeof(*file_bytes));
       }
       files[i]=strdup(file);
       file_bytes[i]=0;
@@ -100,17 +100,17 @@ static void *_insert(void *ptr,long bytes,char *file,long line){
     snprintf(buffer,80,"%s%s",file,_VDBG_GRAPHFILE);
     out=fopen(buffer,"a");
     fprintf(out,"%ld, %ld\n",-start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    file_bytes[i]-(bytes-HEAD_ALIGN));
+            file_bytes[i]-(bytes-HEAD_ALIGN));
     fprintf(out,"%ld, %ld # FILE %s LINE %ld\n",
-	    -start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    file_bytes[i],file,line);
+            -start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
+            file_bytes[i],file,line);
     fclose(out);
 
     out=fopen(_VDBG_GRAPHFILE,"a");
     fprintf(out,"%ld, %ld\n",-start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    global_bytes);
+            global_bytes);
     fprintf(out,"%ld, %ld\n",-start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    global_bytes+(bytes-HEAD_ALIGN));
+            global_bytes+(bytes-HEAD_ALIGN));
     fclose(out);
   }
 #endif
@@ -137,9 +137,9 @@ static void _ripremove(void *ptr){
 
     gettimeofday(&tv,&tz);
     fprintf(out,"%ld, %ld\n",-start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    global_bytes);
+            global_bytes);
     fprintf(out,"%ld, %ld\n",-start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    global_bytes-((head *)ptr)->bytes);
+            global_bytes-((head *)ptr)->bytes);
     fclose(out);
 
     for(i=0;i<filecount;i++)
@@ -148,9 +148,9 @@ static void _ripremove(void *ptr){
     snprintf(buffer,80,"%s%s",file,_VDBG_GRAPHFILE);
     out=fopen(buffer,"a");
     fprintf(out,"%ld, %ld\n",-start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    file_bytes[i]);
+            file_bytes[i]);
     fprintf(out,"%ld, %ld\n",-start_time+(tv.tv_sec*1000)+(tv.tv_usec/1000),
-	    file_bytes[i]-bytes);
+            file_bytes[i]-bytes);
     fclose(out);
 
     file_bytes[i]-=bytes;
@@ -184,7 +184,7 @@ void _VDBG_dump(void){
     head *ptr=pointers[i];
     if(ptr)
       fprintf(stderr,"unfreed bytes from %s:%ld\n",
-	      ptr->file,ptr->line);
+              ptr->file,ptr->line);
   }
 
   pthread_mutex_unlock(&memlock);

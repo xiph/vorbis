@@ -54,15 +54,15 @@ void vqext_quantize(vqgen *v,quant_meta *q){
       
       _now(v,j)[k]=now;
       if(now<0){
-	/* be paranoid; this should be impossible */
-	fprintf(stderr,"fault; quantized value<0\n");
-	exit(1);
+        /* be paranoid; this should be impossible */
+        fprintf(stderr,"fault; quantized value<0\n");
+        exit(1);
       }
 
       if(now>maxquant){
-	/* be paranoid; this should be impossible */
-	fprintf(stderr,"fault; quantized value>max\n");
-	exit(1);
+        /* be paranoid; this should be impossible */
+        fprintf(stderr,"fault; quantized value>max\n");
+        exit(1);
       }
       last=(now*delta)+mindel+last;
     }

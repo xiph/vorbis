@@ -36,26 +36,26 @@ static char *rline(FILE *in,FILE *out){
 
     while(!gotline){
       if(sofar>=lbufsize){
-	if(!lbufsize){	
-	  lbufsize=1024;
-	  linebuffer=_ogg_malloc(lbufsize);
-	}else{
-	  lbufsize*=2;
-	  linebuffer=_ogg_realloc(linebuffer,lbufsize);
-	}
+        if(!lbufsize){        
+          lbufsize=1024;
+          linebuffer=_ogg_malloc(lbufsize);
+        }else{
+          lbufsize*=2;
+          linebuffer=_ogg_realloc(linebuffer,lbufsize);
+        }
       }
       {
-	long c=fgetc(in);
-	switch(c){
-	case '\n':
-	case EOF:
-	  gotline=1;
-	  break;
-	default:
-	  linebuffer[sofar++]=c;
-	  linebuffer[sofar]='\0';
-	  break;
-	}
+        long c=fgetc(in);
+        switch(c){
+        case '\n':
+        case EOF:
+          gotline=1;
+          break;
+        default:
+          linebuffer[sofar++]=c;
+          linebuffer[sofar]='\0';
+          break;
+        }
       }
     }
     
@@ -135,7 +135,7 @@ int main(int argc,char *argv[]){
   /* quant */
   line=rline(in,out);
   if(sscanf(line,"%ld %ld %d %d",&q.min,&q.delta,
-	    &q.quant,&q.sequencep)!=4){
+            &q.quant,&q.sequencep)!=4){
     fprintf(stderr,"Syntax error reading book file\n");
     exit(1);
   }
@@ -167,9 +167,9 @@ int main(int argc,char *argv[]){
     v.entries=0; /* hack to avoid reseeding */
     while(1){
       for(k=0;k<dim+aux;k++){
-	line=rline(in,out);
-	if(!line)break;
-	sscanf(line,"%f",b+k);
+        line=rline(in,out);
+        if(!line)break;
+        sscanf(line,"%f",b+k);
       }
       if(feof(in))break;
       vqgen_addpoint(&v,b,NULL);
