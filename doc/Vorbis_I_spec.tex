@@ -1,8 +1,5 @@
 % $Id$
-% latex2html -show_section_numbers -split 0 -html_version 4.0 Vorbis_I_spec.tex
-%\documentclass[a4paper]{article}
-\documentclass[a4paper]{scrartcl}
-%\documentclass[twoside,idxtotoc,bibtotoc,a4paper,12pt,BCOR12mm,DIV13]{scrbook}
+\documentclass[12pt,paper=a4]{scrartcl}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Packages
@@ -11,9 +8,6 @@
 % ...
 %\usepackage[margin=3cm]{geometry}
 \usepackage{a4wide}
-
-% ...
-\usepackage{enumitem}
 
 % ...
 \usepackage[english]{babel}
@@ -31,73 +25,72 @@
 % Hyperref enriches the generated PDF with clickable links,
 % and provides many other useful features.
 \usepackage{nameref}
-%\usepackage{hyperref}
 \usepackage[colorlinks]{hyperref}
-%\usepackage[pdfborder={0 0 0}]{hyperref}
 \def\sectionautorefname{Section}	% Write section with capital 'S'
 \def\subsectionautorefname{Subsection}	% Write subsection with capital 'S'
 
-
-% provides the 'comment' env, which is useful to temporarily comment out a block of code
-\usepackage{verbatim}
-
-% ...
-%\usepackage{listings}
-%\lstset{language=Pascal} 
 
 % The fancyvrb package provides the "Verbatim" environment, which,
 % unlike the built-in "verbatim", allows embedding TeX commands, as
 % well as tons of other neat stuff (line numbers, formatting adjustments, ...)
 \usepackage{fancyvrb}
-%\fvset{tabsize=4,fontsize=\scriptsize,numbers=left}
-\fvset{tabsize=4,fontsize=\small}
-%\fvset{tabsize=4}
+\fvset{tabsize=4,fontsize=\scriptsize,numbers=left}
 
-% ...
-\usepackage{color}      % Colored text, used for \TODO macro
-
-% ...
+% Normally, one can not use the underscore character in LaTeX without
+% escaping it (\_ instead of _). Since the Vorbis specs use it a lot,
+% we use the underscore package to change this default behavior.
 \usepackage[nohyphen]{underscore}
 
-% ...
+% In LaTeX, pictures are normally put into floating environments, and it is
+% left to the typesetting engine to place them in the "optimal" spot. These
+% docs however expect pictures to be placed in a *specific* position. So we
+% don't use \begin{figure}...\end{figure}, but rather a center environment.
+% To still be able to use captions, we use the capt-of package.
 \usepackage{capt-of}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Custom commands
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Custom ref command, using hyperrefs autoref & nameref, to simulate the 
-% behavior of DocBooks's 'xref'.
+% behavior of DocBook's '<xref>'.
 \newcommand{\xref}[1]{\autoref{#1}, ``\nameref{#1}''}
 
-%...
+% Emulat DocBook's '<link>'.
 \newcommand{\link}[2]{\hyperref[#1]{#2}}
 
-% Redefine \~ to generate something that looks more appropriate when used in text.
-\renewcommand{\~}{$\sim$}
-
-% ...
+% Simple 'Note' environment. Can be customized later on.
 \newenvironment{note}{\subparagraph*{Note:}}{}
 
-% ...
+% Map DocBook's <programlisting> to fancyvrb's Verbatim environment
 \let\programlisting\Verbatim
 \let\endprogramlisting\endVerbatim
 
-% ...
+% Fake some more DocBook elements
 \newcommand{\function}[1]{\texttt{#1}}
 \newcommand{\filename}[1]{\texttt{#1}}
 \newcommand{\varname}[1]{\texttt{#1}}
 \newcommand{\literal}[1]{\texttt{#1}}
 
-% ...
+% Redefine \~ to generate something that looks more appropriate when used in text.
+\renewcommand{\~}{$\sim$}
+
+% Useful helper macro that inserts TODO comments very visibly into the generated
+% file. Helps you to not forget to resolve those TODOs... :)
 \newcommand{\TODO}[1]{\textcolor{red}{*** #1 ***}}
-\newcommand{\NOTE}[1]{\textcolor{blue}{*** #1 ***}}
 
-\DeclareGraphicsExtensions{.pdf,.png}
+% Configure graphics formats: Prefer PDF, fall back to PNG or JPG, as available.
+\DeclareGraphicsExtensions{.pdf,.png,.jpg,.jpeg}
 
 
-% TODO/FIXME: Things to watch out for:
-% - Translate some chars: ~ -> $\sim$,  % -> \%, & -> \&, ...
+% NOTE: Things to watch out for: Some chars are reserved in LaTeX. You need to translate them...
+%   ~ -> $\sim$ (or \~ which we defined above)
+%   % -> \%
+%   & -> \&
+%   < -> $<$
+%   > -> $>$
+% and others. Refer to any of the many LaTeX refs out there if in doubt!
 
 \begin{document}
 
