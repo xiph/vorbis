@@ -266,7 +266,10 @@ eliminated, it's clear that the tree is unfinished:
 Similarly, in the original codebook, it's clear that the tree is fully
 populated and a ninth codeword is impossible.  Both underspecified and
 overspecified trees are an error condition rendering the stream
-undecodable.
+undecodable. Take special care that a codebook with a single used
+entry is handled properly; it consists of a single codework of zero
+bits and 'reading' a value out of such a codebook always returns the
+single used value and sinks zero bits.  
 
 Codebook entries marked 'unused' are simply skipped in the assigning
 process.  They have no codeword and do not appear in the decision

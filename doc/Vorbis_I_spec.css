@@ -1,35 +1,26 @@
  
 /* start css.sty */
-.cmex-10{font-size:90%;}
-.cmsy-10{font-size:90%;}
-.cmr-10x-x-109{}
-.cmssbx-10x-x-109{ font-family: sans-serif; font-weight: bold;}
-.cmssbx-10x-x-109{ font-family: sans-serif; font-weight: bold;}
-.cmssbx-10x-x-207{font-size:188%; font-family: sans-serif; font-weight: bold;}
-.cmssbx-10x-x-207{ font-family: sans-serif; font-weight: bold;}
-.cmr-12x-x-120{font-size:130%;}
-.cmtt-10x-x-109{font-family: monospace;}
-.cmtt-10x-x-109{font-family: monospace;}
-.cmtt-10x-x-109{font-family: monospace;}
-.cmtt-10x-x-109{font-family: monospace;}
-.cmbx-10x-x-109{ font-weight: bold;}
-.cmti-10x-x-109{ font-style: italic;}
-.cmr-8{font-size:72%;}
-.cmr-6{font-size:54%;}
-.cmmi-10x-x-109{font-style: italic;}
-.cmmi-8{font-size:72%;font-style: italic;}
-.cmsy-10x-x-109{}
-.cmsy-6{font-size:54%;}
-.cmtt-10{font-size:90%;font-family: monospace;}
-.cmtt-10{font-family: monospace;}
-.cmtt-10{font-family: monospace;}
-.cmtt-10{font-family: monospace;}
-.cmtt-8{font-size:72%;font-family: monospace;}
+.cmex-10{font-size:83%;}
+.cmssbx-10x-x-120{ font-family: sans-serif; font-weight: bold;}
+.cmssbx-10x-x-120{ font-family: sans-serif; font-weight: bold;}
+.cmssbx-10x-x-248{font-size:206%; font-family: sans-serif; font-weight: bold;}
+.cmssbx-10x-x-248{ font-family: sans-serif; font-weight: bold;}
+.cmr-17{font-size:141%;}
+.cmmi-12{font-style: italic;}
+.cmtt-12{font-family: monospace;}
+.cmtt-12{font-family: monospace;}
+.cmtt-12{font-family: monospace;}
+.cmbx-12{ font-weight: bold;}
+.cmti-12{ font-style: italic;}
+.cmr-8{font-size:66%;}
+.cmr-6{font-size:50%;}
+.cmmi-8{font-size:66%;font-style: italic;}
+.cmsy-8{font-size:66%;}
+.cmsy-6{font-size:50%;}
+.cmtt-8{font-size:66%;font-family: monospace;}
 .cmtt-8{font-family: monospace;}
 .cmtt-8{font-family: monospace;}
-.cmtt-8{font-family: monospace;}
-.cmtt-8x-x-75{font-size:54%;font-family: monospace;}
-.cmtt-8x-x-75{font-family: monospace;}
+.cmtt-8x-x-75{font-size:50%;font-family: monospace;}
 .cmtt-8x-x-75{font-family: monospace;}
 .cmtt-8x-x-75{font-family: monospace;}
 p.noindent { text-indent: 0em }
@@ -135,7 +126,6 @@ div.author{white-space: nowrap;}
 div.abstract {width:100%;}
 span.footnote-mark sup.textsuperscript, span.footnote-mark a sup.textsuperscript{ font-size:80%; }
 .figure img.graphics {margin-left:10%;}
-div.verbatiminput {font-family: monospace; white-space: nowrap; }
 P.fancyvrb {white-space: nowrap; margin:0em;}
 /* end css.sty */
 
