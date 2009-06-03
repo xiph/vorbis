@@ -32,7 +32,7 @@
 #include "os.h"
 
 #define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.2.2rc1"
-#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20090514"
+#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20090604"
 
 /* helpers */
 static int ilog2(unsigned int v){
