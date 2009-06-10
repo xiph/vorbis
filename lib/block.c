@@ -91,7 +91,7 @@ int vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb){
   vb->vd=v;
   vb->localalloc=0;
   vb->localstore=NULL;
-  if(v->analysisp){
+  if(v->analysisp>0){
     vorbis_block_internal *vbi=
       vb->internal=_ogg_calloc(1,sizeof(vorbis_block_internal));
     vbi->ampmax=-9999;

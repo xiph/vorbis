@@ -26,7 +26,7 @@ extern "C"
 #include <ogg/ogg.h>
 
 typedef struct vorbis_info{
-  int version;
+  int version;  /* < 0 indicates error state */
   int channels;
   long rate;
 
@@ -161,9 +161,10 @@ typedef struct vorbis_comment{
    and the streaming layer is not used */
 
 /* Vorbis PRIMITIVES: general ***************************************/
-
+  
 extern void     vorbis_info_init(vorbis_info *vi);
 extern void     vorbis_info_clear(vorbis_info *vi);
+extern int      vorbis_info_check(vorbis_info *vi);
 extern int      vorbis_info_blocksize(vorbis_info *vi,int zo);
 extern void     vorbis_comment_init(vorbis_comment *vc);
 extern void     vorbis_comment_add(vorbis_comment *vc, const char *comment);
@@ -172,6 +173,7 @@ extern void     vorbis_comment_add_tag(vorbis_comment *vc,
 extern char    *vorbis_comment_query(vorbis_comment *vc, const char *tag, int count);
 extern int      vorbis_comment_query_count(vorbis_comment *vc, const char *tag);
 extern void     vorbis_comment_clear(vorbis_comment *vc);
+  extern int      vorbis_comment_check(vorbis_comment *vc);
 
 extern int      vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
 extern int      vorbis_block_clear(vorbis_block *vb);
@@ -234,6 +236,8 @@ extern int      vorbis_synthesis_halfrate_p(vorbis_info *v);
 #define OV_EBADPACKET -136
 #define OV_EBADLINK   -137
 #define OV_ENOSEEK    -138
+#define OV_ESTACK     -139
+#define OV_EHEAP      -140
 
 #ifdef __cplusplus
 }
