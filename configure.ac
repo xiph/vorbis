@@ -5,7 +5,7 @@ dnl Initialization and Versioning
 dnl ------------------------------------------------
 
 
-AC_INIT([libvorbis],[1.2.2rc1],[vorbis-dev@xiph.org])
+AC_INIT([libvorbis],[1.2.2],[vorbis-dev@xiph.org])
 
 AC_CONFIG_SRCDIR([lib/mdct.c])
 
