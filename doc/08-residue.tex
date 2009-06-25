@@ -231,7 +231,10 @@ bitmap being eight bits):
 An end-of-packet condition at any point in header decode renders the
 stream undecodable.  In addition, any codebook number greater than the
 maximum numbered codebook set up in this stream also renders the
-stream undecodable.
+stream undecodable. All codebooks in array [residue_books] are
+required to have a value mapping.  The presence of codebook in array
+[residue_books] without a value mapping (maptype equals zero) renders
+the stream undecodable.
 
 
 

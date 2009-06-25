@@ -156,11 +156,13 @@ context.
 \end{Verbatim}
 
 An end-of-packet condition while reading any aspect of a floor 1
-configuration during setup renders a stream undecodable.  In
-addition, a \varname{[floor1_class_masterbooks]} or
+configuration during setup renders a stream undecodable.  In addition,
+a \varname{[floor1_class_masterbooks]} or
 \varname{[floor1_subclass_books]} scalar element greater than the
 highest numbered codebook configured in this stream is an error
-condition that renders the stream undecodable.
+condition that renders the stream undecodable.  All vector
+[floor1_x_list] element values must be unique within the vector; a
+non-unique value renders the stream undecodable.
 
 \paragraph{packet decode} \label{vorbis:spec:floor1-decode}
 
