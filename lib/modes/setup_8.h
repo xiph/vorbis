@@ -5,12 +5,12 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
- function: 8kHz settings 
+ function: 8kHz settings
  last mod: $Id$
 
  ********************************************************************/
@@ -49,7 +49,7 @@ static const ve_setup_data_template ve_setup_8_stereo={
   2,
   8000,
   9000,
-  
+
   blocksize_8,
   blocksize_8,
 
@@ -67,7 +67,7 @@ static const ve_setup_data_template ve_setup_8_stereo={
   NULL,
   NULL,
   _psy_noise_suppress,
-  
+
   _psy_compand_8,
   _psy_compand_8_mapping,
   NULL,
@@ -78,7 +78,7 @@ static const ve_setup_data_template ve_setup_8_stereo={
 
   _psy_ath_floater_8,
   _psy_ath_abs_8,
-  
+
   _psy_lowpass_8,
 
   _psy_global_44,
@@ -100,7 +100,7 @@ static const ve_setup_data_template ve_setup_8_uncoupled={
   -1,
   8000,
   9000,
-  
+
   blocksize_8,
   blocksize_8,
 
@@ -118,7 +118,7 @@ static const ve_setup_data_template ve_setup_8_uncoupled={
   NULL,
   NULL,
   _psy_noise_suppress,
-  
+
   _psy_compand_8,
   _psy_compand_8_mapping,
   NULL,
@@ -129,7 +129,7 @@ static const ve_setup_data_template ve_setup_8_uncoupled={
 
   _psy_ath_floater_8,
   _psy_ath_abs_8,
-  
+
   _psy_lowpass_8,
 
   _psy_global_44,
@@ -143,4 +143,3 @@ static const ve_setup_data_template ve_setup_8_uncoupled={
 
   _mapres_template_8_uncoupled
 };
-

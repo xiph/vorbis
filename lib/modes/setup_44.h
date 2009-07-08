@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -61,7 +61,7 @@ static const ve_setup_data_template ve_setup_44_stereo={
   2,
   40000,
   50000,
-  
+
   blocksize_short_44,
   blocksize_long_44,
 
@@ -79,7 +79,7 @@ static const ve_setup_data_template ve_setup_44_stereo={
   _psy_noisebias_trans,
   _psy_noisebias_long,
   _psy_noise_suppress,
-  
+
   _psy_compand_44,
   _psy_compand_short_mapping,
   _psy_compand_long_mapping,
@@ -90,7 +90,7 @@ static const ve_setup_data_template ve_setup_44_stereo={
 
   _psy_ath_floater,
   _psy_ath_abs,
-  
+
   _psy_lowpass_44,
 
   _psy_global_44,
@@ -104,4 +104,3 @@ static const ve_setup_data_template ve_setup_44_stereo={
 
   _mapres_template_44_stereo
 };
-

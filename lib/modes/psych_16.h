@@ -5,12 +5,12 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
- function: 16kHz settings 
+ function: 16kHz settings
  last mod: $Id$
 
  ********************************************************************/
@@ -131,6 +131,3 @@ static const int _psy_ath_floater_16[4]={
 static const int _psy_ath_abs_16[4]={
   -130,-130,-130,-140,
 };
-
-
-

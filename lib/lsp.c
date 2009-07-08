@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -67,7 +67,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
   int i;
   float wdel=M_PI/ln;
   vorbis_fpu_control fpu;
-  
+
   vorbis_fpu_setround(&fpu);
   for(i=0;i<m;i++)lsp[i]=vorbis_coslook(lsp[i]);
 
@@ -100,9 +100,9 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
     }
 
     q=frexp(p+q,&qexp);
-    q=vorbis_fromdBlook(amp*             
+    q=vorbis_fromdBlook(amp*
                         vorbis_invsqlook(q)*
-                        vorbis_invsq2explook(qexp+m)- 
+                        vorbis_invsq2explook(qexp+m)-
                         ampoffset);
 
     do{
@@ -184,7 +184,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
       if(!(shift=MLOOP_1[(pi|qi)>>25]))
         if(!(shift=MLOOP_2[(pi|qi)>>19]))
           shift=MLOOP_3[(pi|qi)>>16];
-      
+
       pi>>=shift;
       qi>>=shift;
       qexp+=shift-14*((m+1)>>1);
@@ -201,7 +201,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
 
       /* p*=p(1-w), q*=q(1+w), let normalization drift because it isn't
          worth tracking step by step */
-      
+
       pi>>=shift;
       qi>>=shift;
       qexp+=shift-7*m;
@@ -209,27 +209,27 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
       pi=((pi*pi)>>16);
       qi=((qi*qi)>>16);
       qexp=qexp*2+m;
-      
+
       pi*=(1<<14)-wi;
       qi*=(1<<14)+wi;
       qi=(qi+pi)>>14;
-      
+
     }
-    
+
 
     /* we've let the normalization drift because it wasn't important;
        however, for the lookup, things must be normalized again.  We
        need at most one right shift or a number of left shifts */
 
     if(qi&0xffff0000){ /* checks for 1.xxxxxxxxxxxxxxxx */
-      qi>>=1; qexp++; 
+      qi>>=1; qexp++;
     }else
       while(qi && !(qi&0x8000)){ /* checks for 0.0xxxxxxxxxxxxxxx or less*/
-        qi<<=1; qexp--; 
+        qi<<=1; qexp--;
       }
 
     amp=vorbis_fromdBlook_i(ampi*                     /*  n.4         */
-                            vorbis_invsqlook_i(qi,qexp)- 
+                            vorbis_invsqlook_i(qi,qexp)-
                                                       /*  m.8, m+n<=8 */
                             ampoffseti);              /*  8.12[0]     */
 
@@ -238,7 +238,7 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
   }
 }
 
-#else 
+#else
 
 /* old, nonoptimized but simple version for any poor sap who needs to
    figure out what the hell this code does, or wants the other
@@ -290,7 +290,7 @@ static void cheby(float *g, int ord) {
   for(i=2; i<= ord; i++) {
     for(j=ord; j >= i; j--) {
       g[j-2] -= g[j];
-      g[j] += g[j]; 
+      g[j] += g[j];
     }
   }
 }
@@ -319,14 +319,14 @@ static int Laguerre_With_Deflation(float *a,int ord,float *r){
     /* iterate a root */
     while(1){
       double p=defl[m],pp=0.f,ppp=0.f,denom;
-      
+
       /* eval the polynomial and its first two derivatives */
       for(i=m;i>0;i--){
         ppp = new*ppp + pp;
         pp  = new*pp  + p;
         p   = new*p   + defl[i-1];
       }
-      
+
       /* Laguerre's method */
       denom=(m-1) * ((m-1)*pp*pp - m*p*ppp);
       if(denom<0)
@@ -345,14 +345,14 @@ static int Laguerre_With_Deflation(float *a,int ord,float *r){
 
       if(delta<0.f)delta*=-1;
 
-      if(fabs(delta/new)<10e-12)break; 
+      if(fabs(delta/new)<10e-12)break;
       lastdelta=delta;
     }
 
     r[m-1]=new;
 
     /* forward deflation */
-    
+
     for(i=m;i>0;i--)
       defl[i-1]+=new*defl[i];
     defl++;
@@ -369,10 +369,10 @@ static int Newton_Raphson(float *a,int ord,float *r){
   double *root=alloca(ord*sizeof(*root));
 
   for(i=0; i<ord;i++) root[i] = r[i];
-  
+
   while(error>1e-20){
     error=0;
-    
+
     for(i=0; i<ord; i++) { /* Update each point. */
       double pp=0.,delta;
       double rooti=root[i];
@@ -387,9 +387,9 @@ static int Newton_Raphson(float *a,int ord,float *r){
       root[i] -= delta;
       error+= delta*delta;
     }
-    
+
     if(count>40)return(-1);
-     
+
     count++;
   }
 
@@ -419,12 +419,12 @@ int vorbis_lpc_to_lsp(float *lpc,float *lsp,int m){
   /* Compute the first half of K & R F1 & F2 polynomials. */
   /* Compute half of the symmetric and antisymmetric polynomials. */
   /* Remove the roots at +1 and -1. */
-  
+
   g1[g1_order] = 1.f;
   for(i=1;i<=g1_order;i++) g1[g1_order-i] = lpc[i-1]+lpc[m-i];
   g2[g2_order] = 1.f;
   for(i=1;i<=g2_order;i++) g2[g2_order-i] = lpc[i-1]-lpc[m-i];
-  
+
   if(g1_order>g2_order){
     for(i=2; i<=g2_order;i++) g2[g2_order-i] += g2[g2_order-i+2];
   }else{

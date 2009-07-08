@@ -5,12 +5,12 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
- function: 16kHz settings 
+ function: 16kHz settings
  last mod: $Id$
 
  ********************************************************************/
@@ -53,7 +53,7 @@ static const ve_setup_data_template ve_setup_16_stereo={
   2,
   15000,
   19000,
-  
+
   blocksize_16_short,
   blocksize_16_long,
 
@@ -71,7 +71,7 @@ static const ve_setup_data_template ve_setup_16_stereo={
   _psy_noisebias_16_short,
   _psy_noisebias_16,
   _psy_noise_suppress,
-  
+
   _psy_compand_8,
   _psy_compand_16_mapping,
   _psy_compand_16_mapping,
@@ -82,7 +82,7 @@ static const ve_setup_data_template ve_setup_16_stereo={
 
   _psy_ath_floater_16,
   _psy_ath_abs_16,
-  
+
   _psy_lowpass_16,
 
   _psy_global_44,
@@ -104,7 +104,7 @@ static const ve_setup_data_template ve_setup_16_uncoupled={
   -1,
   15000,
   19000,
-  
+
   blocksize_16_short,
   blocksize_16_long,
 
@@ -122,7 +122,7 @@ static const ve_setup_data_template ve_setup_16_uncoupled={
   _psy_noisebias_16_short,
   _psy_noisebias_16,
   _psy_noise_suppress,
-  
+
   _psy_compand_8,
   _psy_compand_16_mapping,
   _psy_compand_16_mapping,
@@ -133,7 +133,7 @@ static const ve_setup_data_template ve_setup_16_uncoupled={
 
   _psy_ath_floater_16,
   _psy_ath_abs_16,
-  
+
   _psy_lowpass_16,
 
   _psy_global_44,
