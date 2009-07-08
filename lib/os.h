@@ -97,7 +97,7 @@ static inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
   ogg_int16_t temp;
   __asm__ __volatile__("fnstcw %0\n\t"
           "movw %0,%%dx\n\t"
-          "orw $62463,%%dx\n\t"
+          "andw $62463,%%dx\n\t"
           "movw %%dx,%1\n\t"
           "fldcw %1\n\t":"=m"(ret):"m"(temp): "dx");
   *fpu=ret;
