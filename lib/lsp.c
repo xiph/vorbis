@@ -51,9 +51,10 @@
    work on a fully fixed point implementation for processors like the
    ARM family. */
 
-/* undefine both for the 'old' but more precise implementation */
-#define   FLOAT_LOOKUP
-#undef    INT_LOOKUP
+/* define either of these (preferably FLOAT_LOOKUP) to have faster
+   but less precise implementation. */
+#undef FLOAT_LOOKUP
+#undef INT_LOOKUP
 
 #ifdef FLOAT_LOOKUP
 #include "lookup.c" /* catch this in the build system; we #include for
