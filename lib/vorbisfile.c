@@ -675,8 +675,13 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
   /* extract packets from page */
   while(1){
 
-    /* process a packet if we can.  If the machine isn't loaded,
-       neither is a page */
+    if(vf->ready_state==STREAMSET){
+      int ret=_make_decode_ready(vf);
+      if(ret<0)return ret;
+    }
+
+    /* process a packet if we can. */
+
     if(vf->ready_state==INITSET){
       while(1) {
               ogg_packet op;
@@ -843,11 +848,6 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
           vf->current_link++;
           link=0;
         }
-      }
-
-      {
-        int ret=_make_decode_ready(vf);
-        if(ret<0)return ret;
       }
     }
 
@@ -1255,7 +1255,9 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
     int lastblock=0;
     int accblock=0;
     int thisblock=0;
-    int eosflag=0;
+    int lastflag=0;
+    int firstflag=0;
+    ogg_int64_t pagepos=-1;
 
     ogg_stream_init(&work_os,vf->current_serialno); /* get the memory ready */
     ogg_stream_reset(&work_os); /* eliminate the spurious OV_HOLE
@@ -1276,7 +1278,14 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
               thisblock=0;
             }else{
 
-              if(eosflag)
+              /* We can't get a guaranteed correct pcm position out of the
+                 last page in a stream because it might have a 'short'
+                 granpos, which can only be detected in the presence of a
+                 preceeding page.  However, if the last page is also the first
+                 page, the granpos rules of a first page take precedence.  Not
+                 only that, but for first==last, the EOS page must be treated
+                 as if its a normal first page for the stream to open/play. */
+              if(lastflag && !firstflag)
                 ogg_stream_packetout(&vf->os,NULL);
               else
                 if(lastblock)accblock+=(lastblock+thisblock)>>2;
@@ -1290,6 +1299,7 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
               for(i=0;i<link;i++)
                 granulepos+=vf->pcmlengths[i*2+1];
               vf->pcm_offset=granulepos-accblock;
+              if(vf->pcm_offset<0)vf->pcm_offset=0;
               break;
             }
             lastblock=thisblock;
@@ -1300,7 +1310,8 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
       }
 
       if(!lastblock){
-        if(_get_next_page(vf,&og,-1)<0){
+        pagepos=_get_next_page(vf,&og,-1);
+        if(pagepos<0){
           vf->pcm_offset=ov_pcm_total(vf,-1);
           break;
         }
@@ -1341,12 +1352,13 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
         ogg_stream_reset_serialno(&vf->os,serialno);
         ogg_stream_reset_serialno(&work_os,serialno);
         vf->ready_state=STREAMSET;
-
+        firstflag=(pagepos<=vf->dataoffsets[link]);
       }
 
       ogg_stream_pagein(&vf->os,&og);
       ogg_stream_pagein(&work_os,&og);
-      eosflag=ogg_page_eos(&og);
+      lastflag=ogg_page_eos(&og);
+
     }
   }
 
