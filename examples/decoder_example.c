@@ -248,7 +248,7 @@ int main(){
                     float  *mono=pcm[i];
                     for(j=0;j<bout;j++){
 #if 1
-                      int val=mono[j]*32767.f;
+                      int val=floor(mono[j]*32767.f+.5f);
 #else /* optional dither */
                       int val=mono[j]*32767.f+drand48()-0.5f;
 #endif
