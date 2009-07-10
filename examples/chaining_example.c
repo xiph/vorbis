@@ -29,7 +29,7 @@ int main(){
   int i;
 
 #ifdef _WIN32 /* We need to set stdin to binary mode. Damn windows. */
-  /* Beware the evil ifdef. We avoid these where we can, but this one we 
+  /* Beware the evil ifdef. We avoid these where we can, but this one we
      cannot. Don't add any more, you'll probably go to hell if you do. */
   _setmode( _fileno( stdin ), _O_BINARY );
 #endif
@@ -39,7 +39,7 @@ int main(){
     printf("Could not open input as an OggVorbis file.\n\n");
     exit(1);
   }
-  
+
   /* print details about each logical bitstream in the input */
   if(ov_seekable(&ov)){
     printf("Input bitstream contained %ld logical bitstream section(s).\n",

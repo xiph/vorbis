@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2007             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -46,18 +46,18 @@ int main(){
                           stream of packets */
   ogg_page         og; /* one Ogg bitstream page. Vorbis packets are inside */
   ogg_packet       op; /* one raw packet of data for decode */
-  
+
   vorbis_info      vi; /* struct that stores all the static vorbis bitstream
                           settings */
   vorbis_comment   vc; /* struct that stores all the bitstream user comments */
   vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
   vorbis_block     vb; /* local working space for packet->PCM decode */
-  
+
   char *buffer;
   int  bytes;
 
 #ifdef _WIN32 /* We need to set stdin/stdout to binary mode. Damn windows. */
-  /* Beware the evil ifdef. We avoid these where we can, but this one we 
+  /* Beware the evil ifdef. We avoid these where we can, but this one we
      cannot. Don't add any more, you'll probably go to hell if you do. */
   _setmode( _fileno( stdin ), _O_BINARY );
   _setmode( _fileno( stdout ), _O_BINARY );

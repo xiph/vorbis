@@ -43,6 +43,8 @@ typedef struct {
   long   (*tell_func)  (void *datasource);
 } ov_callbacks;
 
+#ifndef OV_EXCLUDE_STATIC_CALLBACKS
+
 /* a few sets of convenient callbacks, especially for use under
  * Windows where ov_open_callbacks() should always be used instead of
  * ov_open() to avoid problems with incompatable crt.o version linking
@@ -69,8 +71,6 @@ static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
  * by different DLLs, and we need to be certain we know which one
  * we're using (the same one as the main application).
  */
-
-#ifndef OV_EXCLUDE_STATIC_CALLBACKS
 
 static ov_callbacks OV_CALLBACKS_DEFAULT = {
   (size_t (*)(void *, size_t, size_t, void *))  fread,
