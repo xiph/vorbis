@@ -116,7 +116,10 @@ int main(){
     i=0;
     while(i<pcmlength*2){
       int ret=ov_read(&ov,bigassbuffer+i,pcmlength*2-i,1,1,1,&dummy);
-      if(ret<0)continue;
+      if(ret<0){
+        fprintf(stderr,"Error reading file.\n");
+        exit(1);
+      }
       if(ret){
         i+=ret;
       }else{
