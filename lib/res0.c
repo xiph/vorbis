@@ -247,6 +247,7 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
       if(partvals > entries) goto errout;
       dim--;
     }
+    if(partvals < entries) goto errout;
   }
 
   return(info);
