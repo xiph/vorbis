@@ -23,7 +23,7 @@
 
 
 static const vorbis_info_residue0 _residue_44_low_un={
-  0,-1, -1, 8,-1,
+  0,-1, -1, 8,-1,-1,
   {0},
   {-1},
   {  .5,  1.5,  1.5,  2.5,  2.5,  4.5, 28.5},
@@ -31,7 +31,7 @@ static const vorbis_info_residue0 _residue_44_low_un={
 };
 
 static const vorbis_info_residue0 _residue_44_mid_un={
-  0,-1, -1, 10,-1,
+  0,-1, -1, 10,-1,-1,
   /*  0     1     2     3     4     5     6     7     8     9 */
   {0},
   {-1},
@@ -40,7 +40,7 @@ static const vorbis_info_residue0 _residue_44_mid_un={
 };
 
 static const vorbis_info_residue0 _residue_44_hi_un={
-  0,-1, -1, 10,-1,
+  0,-1, -1, 10,-1,-1,
   /*  0     1     2     3     4     5     6     7     8     9 */
   {0},
   {-1},
