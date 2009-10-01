@@ -198,6 +198,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
       for(i=0;i<s->entries;){
         long num=oggpack_read(opb,_ilog(s->entries-i));
         if(num==-1)goto _eofout;
+        if(length>32)goto _errout;
         for(j=0;j<num && i<s->entries;j++,i++)
           s->lengthlist[i]=length;
         length++;
