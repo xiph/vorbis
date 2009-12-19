@@ -22,6 +22,11 @@ Call this after writing new audio into the buffer array returned by
 vorbis_analysis_buffer().
 </p>
 
+<p>
+Call with the <i>vals</i> parameter set to zero to signal the end
+of the input data.
+</p>
+
 <table border=0 color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
 	<td>
@@ -38,7 +43,9 @@ extern int      vorbis_analysis_wrote(vorbis_dsp_state *v,int vals);
 <dd>Pointer to the vorbis_dsp_state representing the encoder.</dd>
 <dt><i>vals</i></dt>
 <dd>Number of samples successfully written. This must be less than
-or equal to the value passed to vorbis_analysis_buffer().</dd>
+or equal to the value passed to vorbis_analysis_buffer(). A value
+of zero means all input data has been provided and the compressed
+stream should be finalized.</dd>
 </dl>
 
 

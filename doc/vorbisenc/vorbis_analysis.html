@@ -22,7 +22,7 @@ function is called on each block. It looks up the encoding mode and
 dispatches the block to the forward transform provided by that mode.
 </p>
 <p>When using a basic encoding mode, with no bitrate management,
-an ogg_packet pointer can be given, and an the coded block is returned
+an ogg_packet pointer can be given, and the coded block is returned
 directly through that structure and can be placed in the output stream.
 </p>
 <p>Otherwise, NULL should be passed for the ogg_packet pointer. In
@@ -46,9 +46,9 @@ extern int      vorbis_analysis(vorbis_block *vb,ogg_packet *op);
 <dt><i>vb</i></dt>
 <dd>Pointer to the vorbis_block to be encoded.</dd>
 <dt><i>op</i></dt>
-<dd>Optional pointer to an ogg_packet. This should normally NULL,
-and the final output obtained by passing <i>vb</i> though the
-vorbis_bitrate_*() interface to perform any further refinement.
+<dd>Optional pointer to an ogg_packet. This is normally NULL,
+and the final output is obtained by passing <i>vb</i> though the
+vorbis_bitrate_*() interface to perform further refinement.
 However, when not using a bitrate managed encoding mode, it
 is possible to skip that step by providing an ogg_packet pointer
 here, obtaining the compressed data directly.</dd>

@@ -17,9 +17,9 @@
 
 <p><i>declared in "vorbis/codec.h";</i></p>
 
-<p>This function returns the next available packet from the bitrate
-management engine. It should be called in a loop after any calls to
-vorbis_bitrate_addblock() until it returns either 0 (more data needed)
+<p>This function returns the next available completed packet from the
+bitrate management engine. It should be called in a loop after any call
+to vorbis_bitrate_addblock() until it returns either 0 (more data needed)
 or a negative value (error).
 </p>
 

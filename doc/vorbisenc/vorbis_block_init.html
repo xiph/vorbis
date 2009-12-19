@@ -17,9 +17,9 @@
 
 <p><i>declared in "vorbis/codec.h";</i></p>
 
-<p>This function allocates and initializes internal state associated
-with dividing the input into blocks for further analysis, stored inside
-a vorbis_block structure.
+<p>This function initializes a vorbis_block structure and allocates its
+internal storage. A vorbis_block is used to represent a particular block
+of input audio which can be analyzed and coded as a unit.
 </p>
 
 <table border=0 color=black cellspacing=0 cellpadding=7>
@@ -36,7 +36,7 @@ extern int      vorbis_block_init(vorbis_dsp_state *v, vorbis_block *vb);
 <dl>
 <dt><i>v</i</dt>
 <dd>Pointer to an initialized vorbis_dsp_state with which to associate the new block.</dd>
-<dt><i>vi</i></dt>
+<dt><i>vb</i></dt>
 <dd>Pointer to a vorbis_block struct to be initialized.</dd>
 </dl>
 

@@ -17,9 +17,9 @@
 
 <p><i>declared in "vorbis/codec.h";</i></p>
 
-<p>This fuction examines the available encoder and tries to break it
-into appropriate sized blocks. It should be called in a loop after
-adding new data with vorbis_analysis_buffer()/vorbis_analysis_wrote()
+<p>This fuction examines the available uncompressed data and tries to
+break it into appropriate sized blocks. It should be called in a loop
+after adding new data with vorbis_analysis_buffer()/vorbis_analysis_wrote()
 until it returns zero (need more data) or an negative value (error).
 </p>
 <p>
@@ -42,7 +42,7 @@ extern int      vorbis_analysis_blockout(vorbis_dsp_state *v,vorbis_block *vb);
 <dt><i>v</i></dt>
 <dd>Pointer to the vorbis_dsp_state representing the encoder.</dd>
 <dt><i>vb</i></dt>
-<dd>Pointer to a previously initialize vorbis_block object to store the
+<dd>Pointer to a previously initialized vorbis_block object to hold the
 returned data.
 </dl>
 

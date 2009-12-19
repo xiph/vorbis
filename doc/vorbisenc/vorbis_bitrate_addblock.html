@@ -18,9 +18,9 @@
 <p><i>declared in "vorbis/codec.h";</i></p>
 
 <p>This fuction submits a transformed block to the bitrate management
-engine for final encoding. Packets are submitted and, depending on the
-encoding mode, buffered and the packet boundaries adjusted and padded
-to meet the target bitrate.</p>
+engine for final encoding. Packets are buffered and the packet boundaries
+adjusted and padded to meet the target bitrate, if any.</p>
+
 <p>After calling vorbis_bitrate_addblock(), the passed vorbis_block
 structure can be reused in another call to vorbis_analysis_blockout().
 Call vorbis_bitrate_flushpacket() to obtain the final compressed data.
@@ -38,7 +38,7 @@ extern int      vorbis_bitrate_addblock(vorbis_block *vb);
 
 <h3>Parameters</h3>
 <dl>
-<dt><i>v</i></dt>
+<dt><i>vb</i></dt>
 <dd>Pointer to the vorbis_block to be submitted.</dd>
 </dl>
 
