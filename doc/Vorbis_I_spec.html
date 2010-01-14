@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
 <!-- html --> 
 <meta name="src" content="Vorbis_I_spec.tex"> 
-<meta name="date" content="2009-06-02 19:28:00"> 
+<meta name="date" content="2010-01-13 21:33:00"> 
 <link rel="stylesheet" type="text/css" href="Vorbis_I_spec.css"> 
 </head><body 
 >
@@ -24,7 +24,7 @@
 class="cmr-17">Xiph.org Foundation</span></div>
 <br />
 <div class="date" ><span 
-class="cmr-17">June 2, 2009</span></div>
+class="cmr-17">January 13, 2010</span></div>
 </div>
 <h3 class="likesectionHead"><a 
  id="x1-1000"></a>Contents</h3>
@@ -250,7 +250,7 @@ href="#x1-132000B" id="QQ2-1-144">Vorbis encapsulation in RTP</a></span>
  id="x1-30001.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >This document provides a high level description of the Vorbis codec&#8217;s construction. A bit-by-bit
 specification appears beginning in <a 
-href="#x1-580004">Section&#x00A0;4<!--tex4ht:ref: vorbis:spec:codec --></a>, &#8220;<a 
+href="#x1-580004">Section&#x00A0;4</a>, &#8220;<a 
 href="#x1-580004">Codec Setup and Packet Decode<!--tex4ht:ref: vorbis:spec:codec --></a>&#8221;. The later
 sections assume a high-level understanding of the Vorbis decode process, which is provided
 here.
@@ -303,7 +303,7 @@ document, we will assume that Vorbis is to be embedded in an Ogg stream specific
 although this is by no means a requirement or fundamental assumption in the Vorbis
 design.
 <!--l. 72--><p class="noindent" >The specification for embedding Vorbis into an Ogg transport stream is in <a 
-href="#x1-126000A">Section&#x00A0;A<!--tex4ht:ref: vorbis:over:ogg --></a>,
+href="#x1-126000A">Section&#x00A0;A</a>,
 &#8220;<a 
 href="#x1-126000A">Embedding Vorbis into an Ogg stream<!--tex4ht:ref: vorbis:over:ogg --></a>&#8221;.
 <!--l. 77--><p class="noindent" >
@@ -369,9 +369,9 @@ arrangement is roughly as follows:
 <!--l. 142--><p class="noindent" ><img 
 src="components.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;1: </td><td  
-class="content">decoder pipeline configuration</td></tr></table><!--tex4ht:label?: x1-110011 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;1: </span><span  
+class="content">decoder pipeline configuration</span></div><!--tex4ht:label?: x1-110011 -->
 </div>
 <!--l. 146--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">1.2.1  </span> <a 
@@ -493,7 +493,7 @@ class="cmbx-12">Comment Header</span></span>
 The comment header includes user text comments (&#8220;tags&#8221;) and a vendor string for the
 application/library that produced the bitstream. The encoding and proper use of the comment
 header is described in <a 
-href="#x1-810005">Section&#x00A0;5<!--tex4ht:ref: vorbis:spec:comment --></a>, &#8220;<a 
+href="#x1-810005">Section&#x00A0;5</a>, &#8220;<a 
 href="#x1-810005">comment field and header specification<!--tex4ht:ref: vorbis:spec:comment --></a>&#8221;.
 <!--l. 284--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-220001.3.1"></a><span 
@@ -592,9 +592,9 @@ added. The window shape assures seamless reconstruction.
 <!--l. 357--><p class="noindent" ><img 
 src="window1.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;2: </td><td  
-class="content">overlap of two equal-sized windows</td></tr></table><!--tex4ht:label?: x1-260012 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;2: </span><span  
+class="content">overlap of two equal-sized windows</span></div><!--tex4ht:label?: x1-260012 -->
 </div>
 <!--l. 361--><p class="noindent" >And slightly more complex in the case of overlapping unequal sized windows:
 <div class="center" 
@@ -604,9 +604,9 @@ class="content">overlap of two equal-sized windows</td></tr></table><!--tex4ht:l
 <!--l. 365--><p class="noindent" ><img 
 src="window2.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;3: </td><td  
-class="content">overlap of a long and a short window</td></tr></table><!--tex4ht:label?: x1-260023 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;3: </span><span  
+class="content">overlap of a long and a short window</span></div><!--tex4ht:label?: x1-260023 -->
 </div>
 <!--l. 369--><p class="noindent" >In the unequal-sized window case, the window shape of the long window must be modified for
 seamless lapping as above. It is possible to correctly infer window shape to be applied to the
@@ -622,7 +622,7 @@ href="#XSporer/Brandenburg/Edler">1</a>]</span>.
 Vorbis windows all use the slope function
 <center class="math-display" >
 <img 
-src="Vorbis_I_spec0x.png" alt="y = sin (.5 * &#x03C0; sin2((x + .5)&#x2215;n * &#x03C0;)).
+src="Vorbis_I_spec0x.png" alt="y = sin (.5 &lowast; &pi; sin2((x + .5)&#x2215;n &lowast; &pi;)).
                                                                                         
 
                                                                                         
@@ -685,17 +685,17 @@ residue and direct multiplication of the vectors is sufficient for acceptable sp
 in all cases because it happens to mostly work with the current Xiph.Org reference
 encoder.
 <!--l. 462--><p class="noindent" >However, floor vector values can span <span 
-class="cmsy-10x-x-120">~</span>140dB (<span 
-class="cmsy-10x-x-120">~</span>24 bits unsigned), and the audio spectrum
+class="cmsy-10x-x-120">&sim;</span>140dB (<span 
+class="cmsy-10x-x-120">&sim;</span>24 bits unsigned), and the audio spectrum
 vector should represent a minimum of 120dB (<span 
-class="cmsy-10x-x-120">~</span>21 bits with sign), even when output is to a 16
+class="cmsy-10x-x-120">&sim;</span>21 bits with sign), even when output is to a 16
 bit PCM device. For the residue vector to represent full scale if the floor is nailed
 to <span 
-class="cmsy-10x-x-120">-</span>140dB, it must be able to span 0 to +140dB. For the residue vector to reach
+class="cmsy-10x-x-120">&minus;</span>140dB, it must be able to span 0 to +140dB. For the residue vector to reach
 full scale if the floor is nailed at 0dB, it must be able to represent <span 
-class="cmsy-10x-x-120">-</span>140dB to +0dB.
+class="cmsy-10x-x-120">&minus;</span>140dB to +0dB.
 Thus, in order to handle full range dynamics, a residue vector may span <span 
-class="cmsy-10x-x-120">-</span>140dB to
+class="cmsy-10x-x-120">&minus;</span>140dB to
 +140dB entirely within spec. A 280dB range is approximately 48 bits with sign; thus the
 residue vector must be able to represent a 48 bit range and the dot product must
 be able to handle an effective 48 bit times 24 bit multiplication. This range may be
@@ -1839,14 +1839,14 @@ to a given compressed codeword.
 <!--l. 19--><p class="noindent" >The codebook mechanism is built on top of the vorbis bitpacker. Both the codebooks themselves
 and the codewords they decode are unrolled from a packet as a series of arbitrary-width values
 read from the stream according to <a 
-href="#x1-360002">Section&#x00A0;2<!--tex4ht:ref: vorbis:spec:bitpacking --></a>, &#8220;<a 
+href="#x1-360002">Section&#x00A0;2</a>, &#8220;<a 
 href="#x1-360002">Bitpacking Convention<!--tex4ht:ref: vorbis:spec:bitpacking --></a>&#8221;.
 <!--l. 27--><p class="noindent" >
 <h4 class="subsectionHead"><span class="titlemark">3.2  </span> <a 
  id="x1-500003.2"></a>Packed codebook format</h4>
 <!--l. 29--><p class="noindent" >For purposes of the examples below, we assume that the storage system&#8217;s native byte width is
 eight bits. This is not universally true; see <a 
-href="#x1-360002">Section&#x00A0;2<!--tex4ht:ref: vorbis:spec:bitpacking --></a>, &#8220;<a 
+href="#x1-360002">Section&#x00A0;2</a>, &#8220;<a 
 href="#x1-360002">Bitpacking Convention<!--tex4ht:ref: vorbis:spec:bitpacking --></a>&#8221; for discussion
 relating to non-eight-bit bytes.
                                                                                         
@@ -3018,9 +3018,9 @@ numbers equivalent to the leaves numbered left-to-right:
 <!--l. 248--><p class="noindent" ><img 
 src="hufftree.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;4: </td><td  
-class="content">huffman tree illustration</td></tr></table><!--tex4ht:label?: x1-530014 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;4: </span><span  
+class="content">huffman tree illustration</span></div><!--tex4ht:label?: x1-530014 -->
 </div>
 <!--l. 253--><p class="noindent" >As we assign codewords in order, we see that each choice constructs a new leaf in the leftmost
 possible position.
@@ -3034,9 +3034,9 @@ unfinished:
 <!--l. 261--><p class="noindent" ><img 
 src="hufftree-under.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;5: </td><td  
-class="content">underspecified huffman tree illustration</td></tr></table><!--tex4ht:label?: x1-530025 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;5: </span><span  
+class="content">underspecified huffman tree illustration</span></div><!--tex4ht:label?: x1-530025 -->
 </div>
 <!--l. 266--><p class="noindent" >Similarly, in the original codebook, it&#8217;s clear that the tree is fully populated and a ninth
 codeword is impossible. Both underspecified and overspecified trees are an error condition
@@ -3618,9 +3618,9 @@ offset.
 <!--l. 8--><p class="noindent" >This document serves as the top-level reference document for the bit-by-bit decode specification
 of Vorbis I. This document assumes a high-level understanding of the Vorbis decode
 process, which is provided in <a 
-href="#x1-20001">Section&#x00A0;1<!--tex4ht:ref: vorbis:spec:intro --></a>, &#8220;<a 
+href="#x1-20001">Section&#x00A0;1</a>, &#8220;<a 
 href="#x1-20001">Introduction and Description<!--tex4ht:ref: vorbis:spec:intro --></a>&#8221;. <a 
-href="#x1-360002">Section&#x00A0;2<!--tex4ht:ref: vorbis:spec:bitpacking --></a>,
+href="#x1-360002">Section&#x00A0;2</a>,
 &#8220;<a 
 href="#x1-360002">Bitpacking Convention<!--tex4ht:ref: vorbis:spec:bitpacking --></a>&#8221; covers reading and writing bit fields from and to bitstream
 packets.
@@ -3842,7 +3842,7 @@ zero.
 <h5 class="subsubsectionHead"><span class="titlemark">4.2.3  </span> <a 
  id="x1-630004.2.3"></a>Comment header</h5>
 <!--l. 85--><p class="noindent" >Comment header decode and data specification is covered in <a 
-href="#x1-810005">Section&#x00A0;5<!--tex4ht:ref: vorbis:spec:comment --></a>, &#8220;<a 
+href="#x1-810005">Section&#x00A0;5</a>, &#8220;<a 
 href="#x1-810005">comment field and
 header specification<!--tex4ht:ref: vorbis:spec:comment --></a>&#8221;.
 <!--l. 89--><p class="noindent" >
@@ -3856,9 +3856,9 @@ header specification<!--tex4ht:ref: vorbis:spec:comment --></a>&#8221;.
 <!--l. 94--><p class="noindent" ><img 
 src="components.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;6: </td><td  
-class="content">decoder pipeline configuration</td></tr></table><!--tex4ht:label?: x1-640016 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;6: </span><span  
+class="content">decoder pipeline configuration</span></div><!--tex4ht:label?: x1-640016 -->
 </div>
 <!--l. 99--><p class="noindent" >The setup header contains the bulk of the codec setup information needed for decode. The setup
 header contains, in order, the lists of codebook configurations, time-domain transform
@@ -3879,7 +3879,7 @@ class="cmtt-12">[vorbis_codebook_count] </span>= read eight bits as unsigned int
       <li 
   class="enumerate" id="x1-65004x2">Decode  <span 
 class="cmtt-12">[vorbis_codebook_count] </span>codebooks  in  order  as  defined  in  <a 
-href="#x1-470003">Section&#x00A0;3<!--tex4ht:ref: vorbis:spec:codebook --></a>,
+href="#x1-470003">Section&#x00A0;3</a>,
       &#8220;<a 
 href="#x1-470003">Probability Model and Codebooks<!--tex4ht:ref: vorbis:spec:codebook --></a>&#8221;. Save each configuration, in order, in an array
       of codebook configurations <span 
@@ -3923,7 +3923,7 @@ class="cmtt-12">[i] </span>= read 16 bits
            </li>
            <li 
   class="enumerate" id="x1-67008x2">If the floor type is zero, decode the floor configuration as defined in <a 
-href="#x1-890006">Section&#x00A0;6<!--tex4ht:ref: vorbis:spec:floor0 --></a>,
+href="#x1-890006">Section&#x00A0;6</a>,
            &#8220;<a 
 href="#x1-890006">Floor type 0 setup and decode<!--tex4ht:ref: vorbis:spec:floor0 --></a>&#8221;; save this configuration in slot <span 
 class="cmtt-12">[i] </span>of the floor
@@ -3935,7 +3935,7 @@ class="cmtt-12">[vorbis_floor_configurations]</span>.
            </li>
            <li 
   class="enumerate" id="x1-67010x3">If the floor type is one, decode the floor configuration as defined in <a 
-href="#x1-950007">Section&#x00A0;7<!--tex4ht:ref: vorbis:spec:floor1 --></a>,
+href="#x1-950007">Section&#x00A0;7</a>,
            &#8220;<a 
 href="#x1-950007">Floor type 1 setup and decode<!--tex4ht:ref: vorbis:spec:floor1 --></a>&#8221;; save this configuration in slot <span 
 class="cmtt-12">[i] </span>of the floor
@@ -3969,7 +3969,7 @@ class="cmtt-12">[i] </span>= read 16
            <li 
   class="enumerate" id="x1-68008x2">If the residue type is zero, one or two, decode the residue configuration as defined
            in <a 
-href="#x1-1020008">Section&#x00A0;8<!--tex4ht:ref: vorbis:spec:residue --></a>, &#8220;<a 
+href="#x1-1020008">Section&#x00A0;8</a>, &#8220;<a 
 href="#x1-1020008">Residue setup and decode<!--tex4ht:ref: vorbis:spec:residue --></a>&#8221;; save this configuration in slot <span 
 class="cmtt-12">[i] </span>of
            the residue configuration array <span 
@@ -4235,7 +4235,8 @@ class="cmtt-12">[next_window_flag]</span>
   class="enumerate" id="x1-72016x3">if  <span 
 class="cmtt-12">[previous_window_flag] </span>is not set, the left half of the window will
                be a hybrid window for lapping with a short block. See <a 
-href="#x1-260001.3.2">paragraph&#x00A0;1.3.2<!--tex4ht:ref: vorbis:spec:window --></a>,
+href="#paragraph.1" >paragraph&#x00A0;<a 
+href="#x1-260001.3.2">1.3.2</a></a>,
                &#8220;<a 
 href="#x1-260001.3.2">Window  shape  decode  (long  windows  only)<!--tex4ht:ref: vorbis:spec:window --></a>&#8221;  for  an  illustration  of
                overlapping dissimilar windows. Else, the left half window will have normal
@@ -4245,7 +4246,7 @@ href="#x1-260001.3.2">Window  shape  decode  (long  windows  only)<!--tex4ht:ref
   class="enumerate" id="x1-72018x4">if  <span 
 class="cmtt-12">[next_window_flag] </span>is not set, the right half of the window will be
                a  hybrid  window  for  lapping  with  a  short  block.  See  <a 
-href="#x1-260001.3.2">paragraph&#x00A0;1.3.2<!--tex4ht:ref: vorbis:spec:window --></a>,
+href="#x1-260001.3.2">paragraph&#x00A0;1.3.2</a>,
                &#8220;<a 
 href="#x1-260001.3.2">Window  shape  decode  (long  windows  only)<!--tex4ht:ref: vorbis:spec:window --></a>&#8221;  for  an  illustration  of
                overlapping dissimilar windows. Else, the left right window will have normal
@@ -4257,20 +4258,20 @@ href="#x1-260001.3.2">Window  shape  decode  (long  windows  only)<!--tex4ht:ref
       </li></ol>
 <!--l. 320--><p class="noindent" >Vorbis windows all use the slope function <span 
 class="cmmi-12">y </span>= sin(<img 
-src="Vorbis_I_spec1x.png" alt="&#x03C0;2"  class="frac" align="middle"> <span 
-class="cmsy-10x-x-120">*</span> sin <sup><span 
+src="Vorbis_I_spec1x.png" alt="&pi;2"  class="frac" align="middle"> <span 
+class="cmsy-10x-x-120">&lowast;</span> sin <sup><span 
 class="cmr-8">2</span></sup>((<span 
 class="cmmi-12">x </span>+ 0<span 
 class="cmmi-12">.</span>5)<span 
 class="cmmi-12">&#x2215;n </span><span 
-class="cmsy-10x-x-120">* </span><span 
-class="cmmi-12">&#x03C0;</span>)), where <span 
+class="cmsy-10x-x-120">&lowast; </span><span 
+class="cmmi-12">&pi;</span>)), where <span 
 class="cmmi-12">n </span>is window
 size and <span 
 class="cmmi-12">x </span>ranges 0<span 
-class="cmmi-12">&#x2026;</span><span 
+class="cmmi-12">&hellip;</span><span 
 class="cmmi-12">n</span><span 
-class="cmsy-10x-x-120">- </span>1, but dissimilar lapping requirements can affect overall shape. Window
+class="cmsy-10x-x-120">&minus; </span>1, but dissimilar lapping requirements can affect overall shape. Window
 generation proceeds as follows:
 <!--l. 325--><p class="noindent" >
       <ol  class="enumerate1" >
@@ -4369,15 +4370,15 @@ class="cmtt-12">[left_window_start] </span>... <span
 class="cmtt-12">[left_window_end]</span>-1, window(<span 
 class="cmtt-12">[i]</span>) =
       sin(<img 
-src="Vorbis_I_spec2x.png" alt="&#x03C0;
+src="Vorbis_I_spec2x.png" alt="&pi;
 2"  class="frac" align="middle"> <span 
-class="cmsy-10x-x-120">*</span> sin <sup><span 
+class="cmsy-10x-x-120">&lowast;</span> sin <sup><span 
 class="cmr-8">2</span></sup>( (<span 
 class="cmtt-12">[i]</span>-<span 
 class="cmtt-12">[left_window_start]</span>+0.5) / <span 
 class="cmtt-12">[left_n] </span><span 
-class="cmsy-10x-x-120">*</span><img 
-src="Vorbis_I_spec3x.png" alt="&#x03C0;
+class="cmsy-10x-x-120">&lowast;</span><img 
+src="Vorbis_I_spec3x.png" alt="&pi;
 2"  class="frac" align="middle">) )
       </li>
       <li 
@@ -4393,17 +4394,17 @@ class="cmtt-12">[right_window_start] </span>... <span
 class="cmtt-12">[right_window_end]</span>-1, window(<span 
 class="cmtt-12">[i]</span>) =
       sin(<img 
-src="Vorbis_I_spec4x.png" alt="&#x03C0;
+src="Vorbis_I_spec4x.png" alt="&pi;
 2"  class="frac" align="middle"> <span 
-class="cmsy-10x-x-120">*</span> sin <sup><span 
+class="cmsy-10x-x-120">&lowast;</span> sin <sup><span 
 class="cmr-8">2</span></sup>( (<span 
 class="cmtt-12">[i]</span>-<span 
 class="cmtt-12">[right_window_start]</span>+0.5) / <span 
 class="cmtt-12">[right_n] </span><span 
-class="cmsy-10x-x-120">*</span><img 
-src="Vorbis_I_spec5x.png" alt="&#x03C0;
+class="cmsy-10x-x-120">&lowast;</span><img 
+src="Vorbis_I_spec5x.png" alt="&pi;
 2"  class="frac" align="middle"> + <img 
-src="Vorbis_I_spec6x.png" alt="&#x03C0;
+src="Vorbis_I_spec6x.png" alt="&pi;
 2"  class="frac" align="middle">) )
       </li>
       <li 
@@ -4449,14 +4450,14 @@ class="cmtt-12">[vorbis_floor_types] </span>element <span
 class="cmtt-12">[floor_number]</span>) is zero then decode the floor for
       channel <span 
 class="cmtt-12">[i] </span>according to the <a 
-href="#x1-930006.2.2">subsubsection&#x00A0;6.2.2<!--tex4ht:ref: vorbis:spec:floor0-decode --></a>, &#8220;<a 
+href="#x1-930006.2.2">subsubsection&#x00A0;6.2.2</a>, &#8220;<a 
 href="#x1-930006.2.2">packet decode<!--tex4ht:ref: vorbis:spec:floor0-decode --></a>&#8221;
       </li>
       <li 
   class="enumerate" id="x1-73008x4">if the type of this floor is one then decode the floor for channel <span 
 class="cmtt-12">[i] </span>according to the
       <a 
-href="#x1-1000007.2.2">paragraph&#x00A0;7.2.2<!--tex4ht:ref: vorbis:spec:floor1-decode --></a>, &#8220;<a 
+href="#x1-1000007.2.2">paragraph&#x00A0;7.2.2</a>, &#8220;<a 
 href="#x1-1000007.2.2">packet decode<!--tex4ht:ref: vorbis:spec:floor1-decode --></a>&#8221;
       </li>
       <li 
@@ -4725,17 +4726,17 @@ residue and direct multiplication of the vectors is sufficient for acceptable sp
 in all cases because it happens to mostly work with the current Xiph.Org reference
 encoder.
 <!--l. 549--><p class="noindent" >However, floor vector values can span <span 
-class="cmsy-10x-x-120">~</span>140dB (<span 
-class="cmsy-10x-x-120">~</span>24 bits unsigned), and the audio spectrum
+class="cmsy-10x-x-120">&sim;</span>140dB (<span 
+class="cmsy-10x-x-120">&sim;</span>24 bits unsigned), and the audio spectrum
 vector should represent a minimum of 120dB (<span 
-class="cmsy-10x-x-120">~</span>21 bits with sign), even when output is to a 16
+class="cmsy-10x-x-120">&sim;</span>21 bits with sign), even when output is to a 16
 bit PCM device. For the residue vector to represent full scale if the floor is nailed
 to <span 
-class="cmsy-10x-x-120">-</span>140dB, it must be able to span 0 to +140dB. For the residue vector to reach
+class="cmsy-10x-x-120">&minus;</span>140dB, it must be able to span 0 to +140dB. For the residue vector to reach
 full scale if the floor is nailed at 0dB, it must be able to represent <span 
-class="cmsy-10x-x-120">-</span>140dB to +0dB.
+class="cmsy-10x-x-120">&minus;</span>140dB to +0dB.
 Thus, in order to handle full range dynamics, a residue vector may span <span 
-class="cmsy-10x-x-120">-</span>140dB to
+class="cmsy-10x-x-120">&minus;</span>140dB to
 +140dB entirely within spec. A 280dB range is approximately 48 bits with sign; thus the
 residue vector must be able to represent a 48 bit range and the dot product must
 be able to handle an effective 48 bit times 24 bit multiplication. This range may be
@@ -4758,7 +4759,7 @@ earlier.
 <!--l. 577--><p class="noindent" >Windowed MDCT output is overlapped and added with the right hand data of the previous
 window such that the 3/4 point of the previous window is aligned with the 1/4 point of the
 current window (as illustrated in <a 
-href="#x1-260001.3.2">paragraph&#x00A0;1.3.2<!--tex4ht:ref: vorbis:spec:window --></a>, &#8220;<a 
+href="#x1-260001.3.2">paragraph&#x00A0;1.3.2</a>, &#8220;<a 
 href="#x1-260001.3.2">Window shape decode (long windows
 only)<!--tex4ht:ref: vorbis:spec:window --></a>&#8221;). The overlapped portion produced from overlapping the previous and current frame data
 is finished data to be returned by the decoder. This data spans from the center of
@@ -4785,14 +4786,16 @@ PCM output offset is &#8217;0&#8217; (as no data has been returned yet).
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.9  </span> <a 
  id="x1-800004.3.9"></a>output channel order</h5>
 <!--l. 607--><p class="noindent" >Vorbis I specifies only a channel mapping type 0. In mapping type 0, channel mapping is
-implicitly defined as follows for standard audio applications:
-<!--l. 611--><p class="noindent" >
+implicitly defined as follows for standard audio applications. As of revision 16781 (20100113), the
+specification adds defined channel locations for 6.1 and 7.1 surround. Ordering/location for
                                                                                         
 
                                                                                         
+greater-than-eight channels remains &#8217;left to the implementation&#8217;.
+<!--l. 613--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
-class="cmssbx-10x-x-120">three channels</span> </dt><dd 
+class="cmssbx-10x-x-120">one channel</span> </dt><dd 
 class="description">the stream is monophonic
       </dd><dt class="description">
 <span 
@@ -4810,19 +4813,29 @@ class="description">the stream is quadraphonic surround. channel order: front le
       </dd><dt class="description">
 <span 
 class="cmssbx-10x-x-120">five channels</span> </dt><dd 
-class="description">the stream is five-channel surround. channel order: front left, front center,
-      front right, rear left, rear right
+class="description">the stream is five-channel surround. channel order: front left, center, front
+      right, surround rear left, surround rear right
       </dd><dt class="description">
 <span 
 class="cmssbx-10x-x-120">six channels</span> </dt><dd 
-class="description">the stream is 5.1 surround. channel order: front left, front center, front right,
-      rear left, rear right, LFE
+class="description">the  stream  is  5.1  surround.  channel  order:  front  left,  center,  front  right,
+      surround rear left, surround rear right, LFE
       </dd><dt class="description">
 <span 
-class="cmssbx-10x-x-120">greater than six channels</span> </dt><dd 
+class="cmssbx-10x-x-120">seven channels</span> </dt><dd 
+class="description">the stream is 6.1 surround. channel order: front left, center, front right,
+      surround left, surround right, surround (center) rear, LFE
+      </dd><dt class="description">
+<span 
+class="cmssbx-10x-x-120">eight channels</span> </dt><dd 
+class="description">the stream is 7.1 surround. channel order: front left, center, front right,
+      surround left, surround right, surround rear left, surround rear right, LFE
+      </dd><dt class="description">
+<span 
+class="cmssbx-10x-x-120">greater than eight channels</span> </dt><dd 
 class="description">channel use and order is defined by the application
       </dd></dl>
-<!--l. 639--><p class="noindent" >Applications using Vorbis for dedicated purposes may define channel mapping as seen fit. Future
+<!--l. 650--><p class="noindent" >Applications using Vorbis for dedicated purposes may define channel mapping as seen fit. Future
 channel mappings (such as three and four channel <a 
 href="http://www.ambisonic.net/" >Ambisonics</a>) will make use of channel
 mappings other than mapping 0.
@@ -4860,9 +4873,9 @@ class="cmti-12">&#8220;I&#8217;m Still Around&#8221;</span>, opening
 <!--l. 33--><p class="noindent" >The comment header is logically a list of eight-bit-clean vectors; the number of vectors is
 bounded to 2<sup><span 
 class="cmr-8">32</span></sup> <span 
-class="cmsy-10x-x-120">- </span>1 and the length of each vector is limited to 2<sup><span 
+class="cmsy-10x-x-120">&minus; </span>1 and the length of each vector is limited to 2<sup><span 
 class="cmr-8">32</span></sup> <span 
-class="cmsy-10x-x-120">- </span>1 bytes. The vector length is
+class="cmsy-10x-x-120">&minus; </span>1 bytes. The vector length is
                                                                                         
 
                                                                                         
@@ -5732,16 +5745,16 @@ synthesized:
 <center class="par-math-display" >
 <img 
 src="Vorbis_I_spec7x.png" alt="        {
-          min (floor0xbarkxmapxsize    - 1,f oobar)  for i &#x2208; [0, n - 1]
-mapi =    - 1                                        for i = n
+          min (floor0xbarkxmapxsize    &minus; 1,foobar )  for i &isin; [0,n &minus; 1 ]
+mapi =    &minus; 1                                        for i = n
 " class="par-math-display" ></center>
 <!--l. 128--><p class="nopar" >
 <!--l. 130--><p class="noindent" >where
 <center class="par-math-display" >
 <img 
-src="Vorbis_I_spec8x.png" alt="          &#x230A;                                                 &#x230B;
-                (floor0xrate   &#x22C5; i) floor0xbarkxmapxsize
-foobar =   bark  -------2n-------  &#x22C5;-bark(.5 &#x22C5;-floor0xrate-)
+src="Vorbis_I_spec8x.png" alt="          &lfloor;                                                 &rfloor;
+                (floor0xrate   &sdot; i) floor0xbarkxmapxsize
+foobar =   bark  -------2n-------  &sdot;-bark(.5 &sdot; floor0xrate-)
 " class="par-math-display" ></center>
                                                                                         
 
@@ -5768,9 +5781,9 @@ class="cmtt-12">[i] </span>= 0
       <li 
   class="enumerate" id="x1-94004x2"><span 
 class="cmtt-12">[</span><span 
-class="cmmi-12">&#x03C9;</span><span 
+class="cmmi-12">&omega;</span><span 
 class="cmtt-12">] </span>= <span 
-class="cmmi-12">&#x03C0; </span>* map element <span 
+class="cmmi-12">&pi; </span>* map element <span 
 class="cmtt-12">[i] </span>/ <span 
 class="cmtt-12">[floor0_bark_map_size]</span>
       </li>
@@ -5784,12 +5797,12 @@ class="cmtt-12">[p] </span>and <span
 class="cmtt-12">[q] </span>according to: <div class="eqnarray">
            <center class="math-display" >
            <img 
-src="Vorbis_I_spec10x.png" alt="                   floor0xorder-3
-               2      &#x220F;2                                       2
-p  =   (1 - cos &#x03C9;)           4(cos([coefficients  ]2j+1) - cos&#x03C9; )
+src="Vorbis_I_spec10x.png" alt="                   floor0xorder&minus;3
+               2      &prod;2                                       2
+p  =   (1 &minus; cos &omega;)           4(cos([coefficients  ]2j+1) &minus; cos&omega; )
                       j=0
-         floor0x&#x220F;or2der-1
-q  =   1-          4(cos([coefficients  ]2j) - cos&#x03C9; )2
+         floor0x&prod;or2der&minus;1
+q  =   1-          4(cos([coefficients  ]2j) &minus; cos&omega; )2
        4    j=0
                                                                                         
 
@@ -5806,12 +5819,12 @@ class="cmtt-12">[p] </span>and <span
 class="cmtt-12">[q] </span>according to: <div class="eqnarray">
            <center class="math-display" >
            <img 
-src="Vorbis_I_spec11x.png" alt="                   floor0xorder-2
-       (1 - cos2&#x03C9;)     &#x220F;2                                       2
-p  =   -----2------          4(cos([coefficients  ]2j+1) - cos&#x03C9; )
+src="Vorbis_I_spec11x.png" alt="                   floor0xorder&minus;2
+       (1 &minus; cos2&omega;)     &prod;2                                       2
+p  =   -----2------          4(cos([coefficients  ]2j+1) &minus; cos&omega; )
                        j=0
-               2   floor0xor2der-2
-q  =   (1 +-cos-&#x03C9;)-    &#x220F;     4(cos([coefficients  ] ) - cos&#x03C9; )2
+               2   floor0xor2der&minus;2
+q  =   (1 +-cos-&omega;)-    &prod;     4(cos([coefficients  ] ) &minus; cos&omega; )2
             2         j=0                          2j
            " class="math-display" ></center>
            </div>
@@ -5823,8 +5836,8 @@ class="cmtt-12">[linear_floor_value] </span>according to:
       <center class="math-display" >
       <img 
 src="Vorbis_I_spec12x.png" alt="    (           (                                                                      ))
-                 amplitude---&#x22C5; floor0xamplitutexoffset---
-exp   .11512925       (2floor0xamplitudexbits - 1)&#x221A; p + q     - floor0xamplitudexoffset
+                 amplitude---&sdot; floor0xamplitutexoffset---
+exp   .11512925       (2floor0xamplitudexbits &minus; 1)&radic; p + q     &minus; floor0xamplitudexoffset
       " class="math-display" ></center>
       <!--l. 177--><p class="nopar" >
       </li>
@@ -5918,9 +5931,9 @@ way, beginning with the first line:
 <!--l. 60--><p class="noindent" ><img 
 src="floor1-1.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;7: </td><td  
-class="content">graph of example floor</td></tr></table><!--tex4ht:label?: x1-980017 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;7: </span><span  
+class="content">graph of example floor</span></div><!--tex4ht:label?: x1-980017 -->
 </div>
 <!--l. 64--><p class="noindent" >We now draw new logical lines to reflect the correction to new&#x02D9;Y, and iterate for X positions 32
 and 96:
@@ -5931,9 +5944,9 @@ and 96:
 <!--l. 68--><p class="noindent" ><img 
 src="floor1-2.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;8: </td><td  
-class="content">graph of example floor</td></tr></table><!--tex4ht:label?: x1-980028 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;8: </span><span  
+class="content">graph of example floor</span></div><!--tex4ht:label?: x1-980028 -->
 </div>
 <!--l. 72--><p class="noindent" >Although the new Y value at X position 96 is unchanged, it is still used later as an endpoint for
 further refinement. From here on, the pattern should be clear; we complete the floor computation
@@ -5948,9 +5961,9 @@ as follows:
 <!--l. 77--><p class="noindent" ><img 
 src="floor1-3.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;9: </td><td  
-class="content">graph of example floor</td></tr></table><!--tex4ht:label?: x1-980039 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;9: </span><span  
+class="content">graph of example floor</span></div><!--tex4ht:label?: x1-980039 -->
 </div>
 <div class="center" 
 >
@@ -5959,9 +5972,9 @@ class="content">graph of example floor</td></tr></table><!--tex4ht:label?: x1-98
 <!--l. 82--><p class="noindent" ><img 
 src="floor1-4.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;10: </td><td  
-class="content">graph of example floor</td></tr></table><!--tex4ht:label?: x1-9800410 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;10: </span><span  
+class="content">graph of example floor</span></div><!--tex4ht:label?: x1-9800410 -->
 </div>
 <!--l. 86--><p class="noindent" >A more efficient algorithm with carefully defined integer rounding behavior is used for actual
 decode, as described later. The actual algorithm splits Y value computation and line plotting
@@ -6616,16 +6629,18 @@ setup renders a stream undecodable. In addition, a <span
 class="cmtt-12">[floor1_class_masterbooks] </span>or
 <span 
 class="cmtt-12">[floor1_subclass_books] </span>scalar element greater than the highest numbered codebook
-configured in this stream is an error condition that renders the stream undecodable.
-<!--l. 165--><p class="noindent" ><span class="paragraphHead"><a 
+configured in this stream is an error condition that renders the stream undecodable. All vector
+[floor1&#x02D9;x&#x02D9;list] element values must be unique within the vector; a non-unique value renders the
+stream undecodable.
+<!--l. 167--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-1000007.2.2"></a><span 
 class="cmbx-12">packet decode</span></span>
-Packet decode begins by checking the <span 
-class="cmtt-12">[nonzero] </span>flag:
                                                                                         
 
                                                                                         
-<!--l. 169--><p class="noindent" >
+Packet decode begins by checking the <span 
+class="cmtt-12">[nonzero] </span>flag:
+<!--l. 171--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb29">
 <a 
  id="x1-100002r1"></a><span 
@@ -6642,15 +6657,15 @@ class="cmtt-8">&#x00A0;bit</span><span
 class="cmtt-8">&#x00A0;as</span><span 
 class="cmtt-8">&#x00A0;boolean</span>
 </div>
-<!--l. 173--><p class="noindent" >If <span 
+<!--l. 175--><p class="noindent" >If <span 
 class="cmtt-12">[nonzero] </span>is unset, that indicates this channel contained no audio energy in this frame.
 Decode immediately returns a status indicating this floor curve (and thus this channel) is unused
 this frame. (A return status of &#8217;unused&#8217; is different from decoding a floor that has all
 points set to minimum representation amplitude, which happens to be approximately
 -140dB).
-<!--l. 181--><p class="noindent" >Assuming <span 
+<!--l. 183--><p class="noindent" >Assuming <span 
 class="cmtt-12">[nonzero] </span>is set, decode proceeds as follows:
-<!--l. 183--><p class="noindent" >
+<!--l. 185--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb30">
 <a 
  id="x1-100004r1"></a><span 
@@ -7254,16 +7269,16 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;20)</span><span 
 class="cmtt-8">&#x00A0;done</span>
 </div>
-<!--l. 224--><p class="noindent" >An end-of-packet condition during curve decode should be considered a nominal occurrence; if
                                                                                         
 
                                                                                         
+<!--l. 226--><p class="noindent" >An end-of-packet condition during curve decode should be considered a nominal occurrence; if
 end-of-packet is reached during any read operation above, floor decode is to return &#8217;unused&#8217;
 status as if the <span 
 class="cmtt-12">[nonzero] </span>flag had been unset at the beginning of decode.
-<!--l. 230--><p class="noindent" >Vector <span 
+<!--l. 232--><p class="noindent" >Vector <span 
 class="cmtt-12">[floor1_Y] </span>contains the values from packet decode needed for floor 1 synthesis.
-<!--l. 235--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 237--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-1010007.2.2"></a><span 
 class="cmbx-12">curve computation</span></span>
 Curve computation is split into two logical steps; the first step derives final Y amplitude values
@@ -7272,17 +7287,17 @@ plots the curve lines. Also, although zero-difference values are used in the ite
 prediction to find final Y values, these points are conditionally skipped during final
 line computation in step two. Skipping zero-difference values allows a smoother line
 fit.
-<!--l. 245--><p class="noindent" >Although some aspects of the below algorithm look like inconsequential optimizations,
+<!--l. 247--><p class="noindent" >Although some aspects of the below algorithm look like inconsequential optimizations,
 implementors are warned to follow the details closely. Deviation from implementing a strictly
 equivalent algorithm can result in serious decoding errors.
-<!--l. 250--><p class="noindent" >
+<!--l. 252--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
 class="cmssbx-10x-x-120">step 1: amplitude value synthesis</span> </dt><dd 
 class="description">
-      <!--l. 253--><p class="noindent" >Unwrap the always-positive-or-zero values read from the packet into +/- difference
+      <!--l. 255--><p class="noindent" >Unwrap the always-positive-or-zero values read from the packet into +/- difference
       values, then apply to line prediction.
-      <!--l. 256--><p class="noindent" >
+      <!--l. 258--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb31">
 <a 
  id="x1-101002r1"></a><span 
@@ -7669,14 +7684,14 @@ class="cmtt-8">&#x00A0;=</span><span
 class="cmtt-8">&#x00A0;[highroom]</span><span 
 class="cmtt-8">&#x00A0;*</span><span 
 class="cmtt-8">&#x00A0;2</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-101046r23"></a><span 
 class="cmr-6">23</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
-                                                                                        
-
-                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-101048r24"></a><span 
 class="cmr-6">24</span><span 
@@ -8516,7 +8531,7 @@ class="cmtt-8">&#x00A0;</span>
 <span 
 class="cmssbx-10x-x-120">step 2: curve synthesis</span> </dt><dd 
 class="description">
-      <!--l. 336--><p class="noindent" >Curve synthesis generates a return vector <span 
+      <!--l. 338--><p class="noindent" >Curve synthesis generates a return vector <span 
 class="cmtt-12">[floor] </span>of length <span 
 class="cmtt-12">[n] </span>(where <span 
 class="cmtt-12">[n] </span>is provided by
@@ -8526,12 +8541,12 @@ class="cmtt-12">[floor1_X_list]</span>, <span
 class="cmtt-12">[floor1_final_Y] </span>and <span 
 class="cmtt-12">[floor1_step2_flag] </span>vectors, as well as
       [floor1&#x02D9;multiplier] and [floor1&#x02D9;values] values.
-      <!--l. 343--><p class="noindent" >Decode begins by sorting the scalars from vectors <span 
-class="cmtt-12">[floor1_X_list]</span>, <span 
-class="cmtt-12">[floor1_final_Y] </span>and
                                                                                         
 
                                                                                         
+      <!--l. 345--><p class="noindent" >Decode begins by sorting the scalars from vectors <span 
+class="cmtt-12">[floor1_X_list]</span>, <span 
+class="cmtt-12">[floor1_final_Y] </span>and
       <span 
 class="cmtt-12">[floor1_step2_flag] </span>together into new vectors <span 
 class="cmtt-12">[floor1_X_list]&#8217;</span>, <span 
@@ -8543,8 +8558,8 @@ class="cmtt-12">[floor1_X_list]</span>. That is, sort the values of <span
 class="cmtt-12">[floor1_X_list] </span>and then apply the same
       permutation to elements of the other two vectors so that the X, Y and step2&#x02D9;flag values still
       match.
-      <!--l. 353--><p class="noindent" >Then compute the final curve in one pass:
-      <!--l. 355--><p class="noindent" >
+      <!--l. 355--><p class="noindent" >Then compute the final curve in one pass:
+      <!--l. 357--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb32">
 <a 
  id="x1-101148r1"></a><span 
@@ -8986,7 +9001,7 @@ follows:
       <li class="itemize">Each vector is partitioned into multiple equal sized chunks according to configuration
       specified. If we have a vector size of <span 
 class="cmti-12">n</span>, a partition size <span 
-class="cmti-12">residue&#x02d9;partition&#x02d9;size</span>, and
+class="cmti-12">residue&#x02D9;partition&#x02D9;size</span>, and
       a  total  of  <span 
 class="cmti-12">ch  </span>residue  vectors,  the  total  number  of  partitioned  chunks  coded  is
                                                                                         
@@ -8994,10 +9009,10 @@ class="cmti-12">ch  </span>residue  vectors,  the  total  number  of  partitione
                                                                                         
       <span 
 class="cmti-12">n</span>/<span 
-class="cmti-12">residue&#x02d9;partition&#x02d9;size</span>*<span 
+class="cmti-12">residue&#x02D9;partition&#x02D9;size</span>*<span 
 class="cmti-12">ch</span>. It is important to note that the integer division truncates.
       In the below example, we assume an example <span 
-class="cmti-12">residue&#x02d9;partition&#x02d9;size </span>of 8.
+class="cmti-12">residue&#x02D9;partition&#x02D9;size </span>of 8.
       </li>
       <li class="itemize">Each partition in each vector has a classification number that specifies which of
       multiple configured VQ codebook setups are used to decode that partition. The
@@ -9022,9 +9037,9 @@ class="cmti-12">residue&#x02d9;partition&#x02d9;size </span>of 8.
 <!--l. 71--><p class="noindent" ><img 
 src="residue-pack.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;11: </td><td  
-class="content">illustration of residue vector format</td></tr></table><!--tex4ht:label?: x1-10400111 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;11: </span><span  
+class="content">illustration of residue vector format</span></div><!--tex4ht:label?: x1-10400111 -->
 </div>
 <!--l. 77--><p class="noindent" >
 <h4 class="subsectionHead"><span class="titlemark">8.3  </span> <a 
@@ -9409,9 +9424,9 @@ residue type 1 and type 2 are equivalent.
 <!--l. 148--><p class="noindent" ><img 
 src="residue2.png" alt="PIC"  
 >
-<br /> <table class="caption" 
-><tr style="vertical-align:baseline;" class="caption"><td class="id">Figure&#x00A0;12: </td><td  
-class="content">illustration of residue type 2</td></tr></table><!--tex4ht:label?: x1-10700112 -->
+<br /> <div class="caption" 
+><span class="id">Figure&#x00A0;12: </span><span  
+class="content">illustration of residue type 2</span></div><!--tex4ht:label?: x1-10700112 -->
 </div>
 <!--l. 153--><p class="noindent" >
 <h4 class="subsectionHead"><span class="titlemark">8.6  </span> <a 
@@ -9929,21 +9944,24 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;6)</span><span 
 class="cmtt-8">&#x00A0;done</span>
 </div>
-<!--l. 231--><p class="noindent" >An end-of-packet condition at any point in header decode renders the stream undecodable. In
-addition, any codebook number greater than the maximum numbered codebook set up in this
-stream also renders the stream undecodable.
-<!--l. 238--><p class="noindent" >
+<!--l. 231--><p class="noindent" >An end-of-packet condition at any point in header decode renders the stream undecodable.
+In addition, any codebook number greater than the maximum numbered codebook
+set up in this stream also renders the stream undecodable. All codebooks in array
+[residue&#x02D9;books] are required to have a value mapping. The presence of codebook in array
+[residue&#x02D9;books] without a value mapping (maptype equals zero) renders the stream
+undecodable.
+<!--l. 241--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">8.6.2  </span> <a 
  id="x1-1100008.6.2"></a>packet decode</h5>
-<!--l. 240--><p class="noindent" >Format 0 and 1 packet decode is identical except for specific partition interleave. Format 2 packet
+<!--l. 243--><p class="noindent" >Format 0 and 1 packet decode is identical except for specific partition interleave. Format 2 packet
 decode can be built out of the format 1 decode process. Thus we describe first the decode
 infrastructure identical to all three formats.
-<!--l. 245--><p class="noindent" >In addition to configuration information, the residue decode process is passed the number of
+<!--l. 248--><p class="noindent" >In addition to configuration information, the residue decode process is passed the number of
 vectors in the submap bundle and a vector of flags indicating if any of the vectors are not to be
 decoded. If the passed in number of vectors is 3 and vector number 1 is marked &#8217;do not decode&#8217;,
 decode skips vector 1 during the decode loop. However, even &#8217;do not decode&#8217; vectors are
 allocated and zeroed.
-<!--l. 252--><p class="noindent" >Depending on the values of <span 
+<!--l. 255--><p class="noindent" >Depending on the values of <span 
 class="cmtt-12">[residue_begin] </span>and <span 
 class="cmtt-12">[residue_end]</span>, it is obvious that the
 encoded portion of a residue vector may be the entire possible residue vector or some other strict
@@ -9958,7 +9976,7 @@ class="cmtt-12">[residue_end] </span>to the maximum possible vector size as foll
 the number of vectors being encoded, <span 
 class="cmtt-12">[ch] </span>is provided by the higher level decoding
 process.
-<!--l. 266--><p class="noindent" >
+<!--l. 269--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb38">
 <a 
  id="x1-110002r1"></a><span 
@@ -10001,6 +10019,9 @@ class="cmtt-8">&#x00A0;=</span><span
 class="cmtt-8">&#x00A0;[actual_size]</span><span 
 class="cmtt-8">&#x00A0;*</span><span 
 class="cmtt-8">&#x00A0;[ch];</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-110008r4"></a><span 
 class="cmr-6">4</span><span 
@@ -10026,11 +10047,8 @@ class="cmtt-8">&#x00A0;maximum</span><span
 class="cmtt-8">&#x00A0;of</span><span 
 class="cmtt-8">&#x00A0;([residue_end],[actual_size]);</span>
 </div>
-                                                                                        
-
-                                                                                        
-<!--l. 274--><p class="noindent" >The following convenience values are conceptually useful to clarifying the decode process:
-<!--l. 277--><p class="noindent" >
+<!--l. 277--><p class="noindent" >The following convenience values are conceptually useful to clarifying the decode process:
+<!--l. 280--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb39">
 <a 
  id="x1-110012r1"></a><span 
@@ -10071,7 +10089,7 @@ class="cmtt-8">&#x00A0;[n_to_read]</span><span
 class="cmtt-8">&#x00A0;/</span><span 
 class="cmtt-8">&#x00A0;[residue_partition_size]</span>
 </div>
-<!--l. 283--><p class="noindent" >Packet decode proceeds as follows, matching the description offered earlier in the document.
+<!--l. 286--><p class="noindent" >Packet decode proceeds as follows, matching the description offered earlier in the document.
 <div class="fancyvrb" id="fancyvrb40">
 <a 
  id="x1-110018r1"></a><span 
@@ -11050,6 +11068,9 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;}</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-110106r45"></a><span 
 class="cmr-6">45</span><span 
@@ -11132,9 +11153,6 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;}</span>
-                                                                                        
-
-                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-110116r50"></a><span 
 class="cmr-6">50</span><span 
@@ -11178,12 +11196,12 @@ class="cmr-6">54</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 </div>
-<!--l. 341--><p class="noindent" >An end-of-packet condition during packet decode is to be considered a nominal occurrence.
+<!--l. 344--><p class="noindent" >An end-of-packet condition during packet decode is to be considered a nominal occurrence.
 Decode returns the result of vector decode up to that point.
-<!--l. 347--><p class="noindent" >
+<!--l. 350--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">8.6.3  </span> <a 
  id="x1-1110008.6.3"></a>format 0 specifics</h5>
-<!--l. 349--><p class="noindent" >Format zero decodes partitions exactly as described earlier in the &#8217;Residue Format: residue 0&#8217;
+<!--l. 352--><p class="noindent" >Format zero decodes partitions exactly as described earlier in the &#8217;Residue Format: residue 0&#8217;
 section. The following pseudocode presents the same algorithm. Assume:
       <ul class="itemize1">
       <li class="itemize"><span 
@@ -11195,7 +11213,7 @@ class="cmtt-12">[v] </span>is the residue vector
       </li>
       <li class="itemize"><span 
 class="cmtt-12">[offset] </span>is the beginning read offset in [v]</li></ul>
-<!--l. 360--><p class="noindent" >
+<!--l. 363--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb41">
 <a 
  id="x1-111002r1"></a><span 
@@ -11390,14 +11408,14 @@ class="cmtt-8">&#x00A0;done</span>
 class="cmr-6">16</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
-</div>
                                                                                         
 
                                                                                         
-<!--l. 381--><p class="noindent" >
+</div>
+<!--l. 384--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">8.6.4  </span> <a 
  id="x1-1120008.6.4"></a>format 1 specifics</h5>
-<!--l. 383--><p class="noindent" >Format 1 decodes partitions exactly as described earlier in the &#8217;Residue Format: residue 1&#8217;
+<!--l. 386--><p class="noindent" >Format 1 decodes partitions exactly as described earlier in the &#8217;Residue Format: residue 1&#8217;
 section. The following pseudocode presents the same algorithm. Assume:
       <ul class="itemize1">
       <li class="itemize"><span 
@@ -11409,7 +11427,7 @@ class="cmtt-12">[v] </span>is the residue vector
       </li>
       <li class="itemize"><span 
 class="cmtt-12">[offset] </span>is the beginning read offset in [v]</li></ul>
-<!--l. 395--><p class="noindent" >
+<!--l. 398--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb42">
 <a 
  id="x1-112002r1"></a><span 
@@ -11564,21 +11582,21 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;7)</span><span 
 class="cmtt-8">&#x00A0;done</span>
 </div>
-<!--l. 413--><p class="noindent" >
+<!--l. 416--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">8.6.5  </span> <a 
  id="x1-1130008.6.5"></a>format 2 specifics</h5>
-<!--l. 415--><p class="noindent" >Format 2 is reducible to format 1. It may be implemented as an additional step prior to and an
+<!--l. 418--><p class="noindent" >Format 2 is reducible to format 1. It may be implemented as an additional step prior to and an
 additional post-decode step after a normal format 1 decode.
-<!--l. 418--><p class="noindent" >Format 2 handles &#8217;do not decode&#8217; vectors differently than residue 0 or 1; if all vectors are marked
+                                                                                        
+
+                                                                                        
+<!--l. 421--><p class="noindent" >Format 2 handles &#8217;do not decode&#8217; vectors differently than residue 0 or 1; if all vectors are marked
 &#8217;do not decode&#8217;, no decode occurrs. However, if at least one vector is to be decoded, all
 the vectors are decoded. We then request normal format 1 to decode a single vector
 representing all output channels, rather than a vector for each channel. After decode,
 deinterleave the vector into independent vectors, one for each output channel. That
-                                                                                        
-
-                                                                                        
 is:
-<!--l. 425--><p class="noindent" >
+<!--l. 428--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-113002x1">If all vectors 0 through <span 
@@ -13511,7 +13529,7 @@ class="cmtt-8">&#x00A0;1.</span>
 <!--l. 8--><p class="noindent" >This document describes using Ogg logical and physical transport streams to encapsulate Vorbis
 compressed audio packet data into file form.
 <!--l. 12--><p class="noindent" >The <a 
-href="#x1-20001">Section&#x00A0;1<!--tex4ht:ref: vorbis:spec:intro --></a>, &#8220;<a 
+href="#x1-20001">Section&#x00A0;1</a>, &#8220;<a 
 href="#x1-20001">Introduction and Description<!--tex4ht:ref: vorbis:spec:intro --></a>&#8221; provides an overview of the construction of
 Vorbis audio packets.
 <!--l. 15--><p class="noindent" >The <a 

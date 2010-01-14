@@ -659,7 +659,9 @@ offset is '0' (as no data has been returned yet).</para>
 <para>
 Vorbis I specifies only a channel mapping type 0.  In mapping type 0,
 channel mapping is implicitly defined as follows for standard audio
-applications:</para>
+applications.  As of revision 16781 (20100113), the specification adds
+defined channel locations for 6.1 and 7.1 surround, rather than
+declaring the channel ordering 'left to the implementation'.</para>
 
 <variablelist>
  <varlistentry>
@@ -684,15 +686,26 @@ front right, rear left, rear right</simpara>
  </varlistentry><varlistentry>
   <term>five channels</term><listitem>
    <simpara>the stream is five-channel surround.  channel order: front left,
-front center, front right, rear left, rear right</simpara>
+center, front right, surround rear left, surround rear right</simpara>
   </listitem>
  </varlistentry><varlistentry>
   <term>six channels</term><listitem>
-   <simpara>the stream is 5.1 surround.  channel order: front left, front
-center, front right, rear left, rear right, LFE</simpara>
+   <simpara>the stream is 5.1 surround.  channel order: front left, center, 
+front right, surround rear left, surround rear right, LFE</simpara>
   </listitem>
  </varlistentry><varlistentry>
-  <term>greater than six channels</term><listitem>
+  <term>seven channels</term><listitem>
+   <simpara>the stream is 6.1 surround.  channel order: front left, center, 
+front right, surround left, surround right, surround (center) rear, LFE</simpara>
+  </listitem>
+ </varlistentry><varlistentry>
+  <term>eight channels</term><listitem>
+   <simpara>the stream is 7.1 surround.  channel order: front left, center, 
+front right, surround left, surround right, surround rear left, surround rear right, 
+LFE</simpara>
+  </listitem>
+ </varlistentry><varlistentry>
+  <term>greater than eight channels</term><listitem>
    <simpara>channel use and order is defined by the application</simpara>
   </listitem>
  </varlistentry>
