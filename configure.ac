@@ -63,6 +63,15 @@ AC_LIBTOOL_WIN32_DLL
 AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
 
+dnl Check for doxygen
+if test "x$enable_docs" = xyes; then
+  AC_CHECK_PROG(HAVE_DOXYGEN, doxygen, true, false)
+  AM_CONDITIONAL(HAVE_DOXYGEN,$HAVE_DOXYGEN)
+  if test $HAVE_DOXYGEN = "false"; then
+    AC_MSG_WARN([*** doxygen not found, API documentation will not be built])
+  fi
+fi
+
 dnl latex tools for the specification document
 AC_ARG_ENABLE(docs,
 	AC_HELP_STRING([--enable-docs], [build the documentation]))
@@ -262,6 +271,7 @@ lib/books/coupled/Makefile
 lib/books/uncoupled/Makefile
 lib/books/floor/Makefile
 doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile
+doc/Doxyfile
 include/Makefile include/vorbis/Makefile
 examples/Makefile
 test/Makefile
