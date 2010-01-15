@@ -64,13 +64,14 @@ AC_PROG_LIBTOOL
 AM_PROG_CC_C_O
 
 dnl Check for doxygen
+HAVE_DOXYGEN=false
 if test "x$enable_docs" = xyes; then
   AC_CHECK_PROG(HAVE_DOXYGEN, doxygen, true, false)
-  AM_CONDITIONAL(HAVE_DOXYGEN,$HAVE_DOXYGEN)
   if test $HAVE_DOXYGEN = "false"; then
     AC_MSG_WARN([*** doxygen not found, API documentation will not be built])
   fi
 fi
+AM_CONDITIONAL(HAVE_DOXYGEN,$HAVE_DOXYGEN)
 
 dnl latex tools for the specification document
 AC_ARG_ENABLE(docs,
