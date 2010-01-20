@@ -130,7 +130,7 @@ extern int vorbis_encode_setup_vbr(vorbis_info *vi,
                                   long channels,
                                   long rate,
 
-                                  float quality /* quality level from 0. (lo) to 1. (hi) */
+                                  float quality
                                   );
 
 /**
@@ -159,7 +159,7 @@ extern int vorbis_encode_init_vbr(vorbis_info *vi,
                                   long channels,
                                   long rate,
 
-                                  float base_quality /* quality level from 0. (lo) to 1. (hi) */
+                                  float base_quality
                                   );
 
 /**
