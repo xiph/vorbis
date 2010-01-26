@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
 <!-- html --> 
 <meta name="src" content="Vorbis_I_spec.tex"> 
-<meta name="date" content="2010-01-13 21:33:00"> 
+<meta name="date" content="2010-01-25 21:28:00"> 
 <link rel="stylesheet" type="text/css" href="Vorbis_I_spec.css"> 
 </head><body 
 >
@@ -24,7 +24,7 @@
 class="cmr-17">Xiph.org Foundation</span></div>
 <br />
 <div class="date" ><span 
-class="cmr-17">January 13, 2010</span></div>
+class="cmr-17">January 25, 2010</span></div>
 </div>
 <h3 class="likesectionHead"><a 
  id="x1-1000"></a>Contents</h3>
@@ -3612,10 +3612,10 @@ offset.
                                                                                         
 <h3 class="sectionHead"><span class="titlemark">4  </span> <a 
  id="x1-580004"></a>Codec Setup and Packet Decode</h3>
-<!--l. 6--><p class="noindent" >
+<!--l. 7--><p class="noindent" >
 <h4 class="subsectionHead"><span class="titlemark">4.1  </span> <a 
  id="x1-590004.1"></a>Overview</h4>
-<!--l. 8--><p class="noindent" >This document serves as the top-level reference document for the bit-by-bit decode specification
+<!--l. 9--><p class="noindent" >This document serves as the top-level reference document for the bit-by-bit decode specification
 of Vorbis I. This document assumes a high-level understanding of the Vorbis decode
 process, which is provided in <a 
 href="#x1-20001">Section&#x00A0;1</a>, &#8220;<a 
@@ -3624,19 +3624,19 @@ href="#x1-360002">Section&#x00A0;2</a>,
 &#8220;<a 
 href="#x1-360002">Bitpacking Convention<!--tex4ht:ref: vorbis:spec:bitpacking --></a>&#8221; covers reading and writing bit fields from and to bitstream
 packets.
-<!--l. 16--><p class="noindent" >
+<!--l. 17--><p class="noindent" >
 <h4 class="subsectionHead"><span class="titlemark">4.2  </span> <a 
  id="x1-600004.2"></a>Header decode and decode setup</h4>
-<!--l. 18--><p class="noindent" >A Vorbis bitstream begins with three header packets. The header packets are, in order, the
+<!--l. 19--><p class="noindent" >A Vorbis bitstream begins with three header packets. The header packets are, in order, the
 identification header, the comments header, and the setup header. All are required for decode
 compliance. An end-of-packet condition during decoding the first or third header packet renders
 the stream undecodable. End-of-packet decoding the comment header is a non-fatal error
 condition.
-<!--l. 25--><p class="noindent" >
+<!--l. 26--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.2.1  </span> <a 
  id="x1-610004.2.1"></a>Common header decode</h5>
-<!--l. 27--><p class="noindent" >Each header packet begins with the same header fields.
-<!--l. 30--><p class="noindent" >
+<!--l. 28--><p class="noindent" >Each header packet begins with the same header fields.
+<!--l. 31--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb20">
 <a 
  id="x1-61002r1"></a><span 
@@ -3673,17 +3673,17 @@ class="cmtt-8">&#x00A0;octets</span>
                                                                                         
 
                                                                                         
-<!--l. 35--><p class="noindent" >Decode continues according to packet type; the identification header is type 1, the comment
+<!--l. 36--><p class="noindent" >Decode continues according to packet type; the identification header is type 1, the comment
 header type 3 and the setup header type 5 (these types are all odd as a packet with a leading
 single bit of &#8217;0&#8217; is an audio packet). The packets must occur in the order of identification,
 comment, setup.
-<!--l. 43--><p class="noindent" >
+<!--l. 44--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.2.2  </span> <a 
  id="x1-620004.2.2"></a>Identification header</h5>
-<!--l. 45--><p class="noindent" >The identification header is a short header of only a few fields used to declare the stream
+<!--l. 46--><p class="noindent" >The identification header is a short header of only a few fields used to declare the stream
 definitively as Vorbis, and provide a few externally relevant pieces of information about the audio
 stream. The identification header is coded as follows:
-<!--l. 50--><p class="noindent" >
+<!--l. 51--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb21">
 <a 
  id="x1-62002r1"></a><span 
@@ -3813,7 +3813,7 @@ class="cmtt-8">&#x00A0;read</span><span
 class="cmtt-8">&#x00A0;one</span><span 
 class="cmtt-8">&#x00A0;bit</span>
 </div>
-<!--l. 62--><p class="noindent" ><span 
+<!--l. 63--><p class="noindent" ><span 
 class="cmtt-12">[vorbis_version] </span>is to read &#8217;0&#8217; in order to be compatible with this document. Both
 <span 
 class="cmtt-12">[audio_channels] </span>and <span 
@@ -3823,7 +3823,7 @@ class="cmtt-12">[blocksize_0]</span>
 must be less than or equal to <span 
 class="cmtt-12">[blocksize_1]</span>. The framing bit must be nonzero. Failure to meet
 any of these conditions renders a stream undecodable.
-<!--l. 70--><p class="noindent" >The bitrate fields above are used only as hints. The nominal bitrate field especially may be
+<!--l. 71--><p class="noindent" >The bitrate fields above are used only as hints. The nominal bitrate field especially may be
 considerably off in purely VBR streams. The fields are meaningful only when greater than
 zero.
       <ul class="itemize1">
@@ -3838,34 +3838,34 @@ zero.
       <li class="itemize">Maximum and or minimum set implies a VBR bitstream that obeys the bitrate limits
       </li>
       <li class="itemize">None set indicates the encoder does not care to speculate.</li></ul>
-<!--l. 84--><p class="noindent" >
+<!--l. 85--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.2.3  </span> <a 
  id="x1-630004.2.3"></a>Comment header</h5>
-<!--l. 85--><p class="noindent" >Comment header decode and data specification is covered in <a 
+<!--l. 86--><p class="noindent" >Comment header decode and data specification is covered in <a 
 href="#x1-810005">Section&#x00A0;5</a>, &#8220;<a 
 href="#x1-810005">comment field and
 header specification<!--tex4ht:ref: vorbis:spec:comment --></a>&#8221;.
-<!--l. 89--><p class="noindent" >
+<!--l. 90--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.2.4  </span> <a 
  id="x1-640004.2.4"></a>Setup header</h5>
-<!--l. 91--><p class="noindent" >Vorbis codec setup is configurable to an extreme degree:
+<!--l. 92--><p class="noindent" >Vorbis codec setup is configurable to an extreme degree:
 <div class="center" 
 >
-<!--l. 93--><p class="noindent" >
+<!--l. 94--><p class="noindent" >
 
-<!--l. 94--><p class="noindent" ><img 
+<!--l. 95--><p class="noindent" ><img 
 src="components.png" alt="PIC"  
 >
 <br /> <div class="caption" 
 ><span class="id">Figure&#x00A0;6: </span><span  
 class="content">decoder pipeline configuration</span></div><!--tex4ht:label?: x1-640016 -->
 </div>
-<!--l. 99--><p class="noindent" >The setup header contains the bulk of the codec setup information needed for decode. The setup
+<!--l. 100--><p class="noindent" >The setup header contains the bulk of the codec setup information needed for decode. The setup
 header contains, in order, the lists of codebook configurations, time-domain transform
 configurations (placeholders in Vorbis I), floor configurations, residue configurations, channel
 mapping configurations and mode configurations. It finishes with a framing bit of &#8217;1&#8217;. Header
 decode proceeds in the following order:
-<!--l. 107--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 108--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-650004.2.4"></a><span 
 class="cmbx-12">Codebooks</span></span>
                                                                                         
@@ -3884,12 +3884,12 @@ href="#x1-470003">Section&#x00A0;3</a>,
 href="#x1-470003">Probability Model and Codebooks<!--tex4ht:ref: vorbis:spec:codebook --></a>&#8221;. Save each configuration, in order, in an array
       of codebook configurations <span 
 class="cmtt-12">[vorbis_codebook_configurations]</span>.</li></ol>
-<!--l. 119--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 120--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-660004.2.4"></a><span 
 class="cmbx-12">Time domain transforms</span></span>
 These hooks are placeholders in Vorbis I. Nevertheless, the configuration placeholder values must
 be read to maintain bitstream sync.
-<!--l. 125--><p class="noindent" >
+<!--l. 126--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-66002x1"><span 
@@ -3899,12 +3899,12 @@ class="cmtt-12">[vorbis_time_count] </span>= read 6 bits as unsigned integer and
   class="enumerate" id="x1-66004x2">read <span 
 class="cmtt-12">[vorbis_time_count] </span>16 bit values; each value should be zero. If any value is
       nonzero, this is an error condition and the stream is undecodable.</li></ol>
-<!--l. 132--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 133--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-670004.2.4"></a><span 
 class="cmbx-12">Floors</span></span>
 Vorbis uses two floor types; header decode is handed to the decode abstraction of the appropriate
 type.
-<!--l. 137--><p class="noindent" >
+<!--l. 138--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-67002x1"><span 
@@ -3946,11 +3946,11 @@ class="cmtt-12">[vorbis_floor_configurations]</span>.
   class="enumerate" id="x1-67012x4">If the the floor type is greater than one, this stream is undecodable; ERROR
            CONDITION</li></ol>
       </li></ol>
-<!--l. 156--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 157--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-680004.2.4"></a><span 
 class="cmbx-12">Residues</span></span>
 Vorbis uses three residue types; header decode of each type is identical.
-<!--l. 161--><p class="noindent" >
+<!--l. 162--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-68002x1"><span 
@@ -3979,7 +3979,7 @@ class="cmtt-12">[vorbis_residue_configurations]</span>.
   class="enumerate" id="x1-68010x3">If the the residue type is greater than two, this stream is undecodable; ERROR
            CONDITION</li></ol>
       </li></ol>
-<!--l. 176--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 177--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-690004.2.4"></a><span 
 class="cmbx-12">Mappings</span></span>
 Mappings are used to set up specific pipelines for encoding multichannel audio with varying
@@ -3988,7 +3988,7 @@ channel mappings.
                                                                                         
 
                                                                                         
-<!--l. 186--><p class="noindent" >
+<!--l. 187--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-69002x1"><span 
@@ -4128,7 +4128,7 @@ class="cmtt-12">[i] </span>of the mapping configuration array
 class="cmtt-12">[vorbis_mapping_configurations]</span>.</li></ol>
            </li></ol>
       </li></ol>
-<!--l. 246--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 247--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-700004.2.4"></a><span 
 class="cmbx-12">Modes</span></span>
       <ol  class="enumerate1" >
@@ -4177,21 +4177,21 @@ class="cmtt-12">[vorbis_mode_configurations]</span>.</li></ol>
                                                                                         
 
                                                                                         
-<!--l. 267--><p class="noindent" >After reading mode descriptions, setup header decode is complete.
-<!--l. 276--><p class="noindent" >
+<!--l. 268--><p class="noindent" >After reading mode descriptions, setup header decode is complete.
+<!--l. 277--><p class="noindent" >
 <h4 class="subsectionHead"><span class="titlemark">4.3  </span> <a 
  id="x1-710004.3"></a>Audio packet decode and synthesis</h4>
-<!--l. 278--><p class="noindent" >Following the three header packets, all packets in a Vorbis I stream are audio. The first step of
+<!--l. 279--><p class="noindent" >Following the three header packets, all packets in a Vorbis I stream are audio. The first step of
 audio packet decode is to read and verify the packet type. <span 
 class="cmti-12">A non-audio packet when audio is</span>
 <span 
 class="cmti-12">expected indicates stream corruption or a non-compliant stream. The decoder must ignore the</span>
 <span 
 class="cmti-12">packet and not attempt decoding it to audio</span>.
-<!--l. 285--><p class="noindent" >
+<!--l. 286--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.1  </span> <a 
  id="x1-720004.3.1"></a>packet type, mode and window decode</h5>
-<!--l. 287--><p class="noindent" >
+<!--l. 288--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-72002x1">read 1 bit <span 
@@ -4256,7 +4256,7 @@ href="#x1-260001.3.2">Window  shape  decode  (long  windows  only)<!--tex4ht:ref
   class="enumerate" id="x1-72020x2">if this is a short window, the window is always the same short-window
            shape.</li></ol>
       </li></ol>
-<!--l. 320--><p class="noindent" >Vorbis windows all use the slope function <span 
+<!--l. 321--><p class="noindent" >Vorbis windows all use the slope function <span 
 class="cmmi-12">y </span>= sin(<img 
 src="Vorbis_I_spec1x.png" alt="&pi;2"  class="frac" align="middle"> <span 
 class="cmsy-10x-x-120">&lowast;</span> sin <sup><span 
@@ -4273,7 +4273,7 @@ class="cmmi-12">&hellip;</span><span
 class="cmmi-12">n</span><span 
 class="cmsy-10x-x-120">&minus; </span>1, but dissimilar lapping requirements can affect overall shape. Window
 generation proceeds as follows:
-<!--l. 325--><p class="noindent" >
+<!--l. 326--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-72022x1"><span 
@@ -4302,7 +4302,7 @@ class="cmtt-12">[blocksize_0]</span>/4
   class="enumerate" id="x1-72030x3"><span 
 class="cmtt-12">[left_n] </span>= <span 
 class="cmtt-12">[blocksize_0]</span>/2</li></ol>
-      <!--l. 335--><p class="noindent" >else
+      <!--l. 336--><p class="noindent" >else
            <ol  class="enumerate2" >
            <li 
   class="enumerate" id="x1-72032x1"><span 
@@ -4342,7 +4342,7 @@ class="cmtt-12">[blocksize_0]</span>/4
   class="enumerate" id="x1-72044x3"><span 
 class="cmtt-12">[right_n] </span>= <span 
 class="cmtt-12">[blocksize_0]</span>/2</li></ol>
-      <!--l. 351--><p class="noindent" >else
+      <!--l. 352--><p class="noindent" >else
            <ol  class="enumerate2" >
            <li 
   class="enumerate" id="x1-72046x1"><span 
@@ -4411,16 +4411,16 @@ src="Vorbis_I_spec6x.png" alt="&pi;
   class="enumerate" id="x1-72060x8">window from range <span 
 class="cmtt-12">[right_window_start] </span>... <span 
 class="cmtt-12">[n]</span>-1 is zero</li></ol>
-<!--l. 367--><p class="noindent" >An end-of-packet condition up to this point should be considered an error that discards this
+<!--l. 368--><p class="noindent" >An end-of-packet condition up to this point should be considered an error that discards this
 packet from the stream. An end of packet condition past this point is to be considered a possible
 nominal occurrence.
                                                                                         
 
                                                                                         
-<!--l. 374--><p class="noindent" >
+<!--l. 375--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.2  </span> <a 
  id="x1-730004.3.2"></a>floor curve decode</h5>
-<!--l. 376--><p class="noindent" >From this point on, we assume out decode context is using mode number <span 
+<!--l. 377--><p class="noindent" >From this point on, we assume out decode context is using mode number <span 
 class="cmtt-12">[mode_number]</span>
 from configuration array <span 
 class="cmtt-12">[vorbis_mode_configurations] </span>and the map number
@@ -4428,8 +4428,8 @@ class="cmtt-12">[vorbis_mode_configurations] </span>and the map number
 class="cmtt-12">[vorbis_mode_mapping] </span>(specified by the current mode) taken from the mapping configuration
 array <span 
 class="cmtt-12">[vorbis_mapping_configurations]</span>.
-<!--l. 383--><p class="noindent" >Floor curves are decoded one-by-one in channel order.
-<!--l. 385--><p class="noindent" >For each floor <span 
+<!--l. 384--><p class="noindent" >Floor curves are decoded one-by-one in channel order.
+<!--l. 386--><p class="noindent" >For each floor <span 
 class="cmtt-12">[i] </span>of <span 
 class="cmtt-12">[audio_channels]</span>
       <ol  class="enumerate1" >
@@ -4470,12 +4470,12 @@ class="cmtt-12">[i] </span>to true,
       else set vector <span 
 class="cmtt-12">[no_residue] </span>element <span 
 class="cmtt-12">[i] </span>to false</li></ol>
-<!--l. 405--><p class="noindent" >An end-of-packet condition during floor decode shall result in packet decode zeroing all channel
+<!--l. 406--><p class="noindent" >An end-of-packet condition during floor decode shall result in packet decode zeroing all channel
 output vectors and skipping to the add/overlap output stage.
-<!--l. 411--><p class="noindent" >
+<!--l. 412--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.3  </span> <a 
  id="x1-740004.3.3"></a>nonzero vector propagate</h5>
-<!--l. 413--><p class="noindent" >A possible result of floor decode is that a specific vector is marked &#8217;unused&#8217; which indicates that
+<!--l. 414--><p class="noindent" >A possible result of floor decode is that a specific vector is marked &#8217;unused&#8217; which indicates that
 that final output vector is all-zero values (and the floor is zero). The residue for that vector is not
 coded in the stream, save for one complication. If some vectors are used and some are not,
                                                                                         
@@ -4483,10 +4483,10 @@ coded in the stream, save for one complication. If some vectors are used and som
                                                                                         
 channel coupling could result in mixing a zeroed and nonzeroed vector to produce two nonzeroed
 vectors.
-<!--l. 420--><p class="noindent" >for each <span 
+<!--l. 421--><p class="noindent" >for each <span 
 class="cmtt-12">[i] </span>from 0 ... <span 
 class="cmtt-12">[vorbis_mapping_coupling_steps]</span>-1
-<!--l. 422--><p class="noindent" >
+<!--l. 423--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-74002x1">if either <span 
@@ -4498,15 +4498,15 @@ class="cmtt-12">[vorbis_mapping_angle] </span>element <span
 class="cmtt-12">[i]</span>) are set to false, then both
       must be set to false. Note that an &#8217;unused&#8217; floor has no decoded floor information; it
       is important that this is remembered at floor curve synthesis time.</li></ol>
-<!--l. 435--><p class="noindent" >
+<!--l. 436--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.4  </span> <a 
  id="x1-750004.3.4"></a>residue decode</h5>
-<!--l. 437--><p class="noindent" >Unlike floors, which are decoded in channel order, the residue vectors are decoded in submap
+<!--l. 438--><p class="noindent" >Unlike floors, which are decoded in channel order, the residue vectors are decoded in submap
 order.
-<!--l. 440--><p class="noindent" >for each submap <span 
+<!--l. 441--><p class="noindent" >for each submap <span 
 class="cmtt-12">[i] </span>in order from 0 ... <span 
 class="cmtt-12">[vorbis_mapping_submaps]</span>-1
-<!--l. 442--><p class="noindent" >
+<!--l. 443--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-75002x1"><span 
@@ -4535,7 +4535,7 @@ class="cmtt-12">[j] </span>is true
   class="enumerate" id="x1-75010x1">vector <span 
 class="cmtt-12">[do_not_decode_flag] </span>element <span 
 class="cmtt-12">[ch] </span>is set</li></ol>
-               <!--l. 452--><p class="noindent" >else
+               <!--l. 453--><p class="noindent" >else
                    <ol  class="enumerate4" >
                    <li 
   class="enumerate" id="x1-75012x1">vector <span 
@@ -4600,13 +4600,13 @@ class="cmtt-12">[ch]</span>
 class="cmtt-12">[ch]</span></li></ol>
            </li></ol>
       </li></ol>
-<!--l. 479--><p class="noindent" >
+<!--l. 480--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.5  </span> <a 
  id="x1-760004.3.5"></a>inverse coupling</h5>
-<!--l. 481--><p class="noindent" >for each <span 
+<!--l. 482--><p class="noindent" >for each <span 
 class="cmtt-12">[i] </span>from <span 
 class="cmtt-12">[vorbis_mapping_coupling_steps]</span>-1 descending to 0
-<!--l. 483--><p class="noindent" >
+<!--l. 484--><p class="noindent" >
       <ol  class="enumerate1" >
       <li 
   class="enumerate" id="x1-76002x1"><span 
@@ -4651,7 +4651,7 @@ class="cmtt-12">[M]</span>
 class="cmtt-12">[new_A] </span>= <span 
 class="cmtt-12">[M]</span>-<span 
 class="cmtt-12">[A]</span></li></ol>
-               <!--l. 497--><p class="noindent" >else
+               <!--l. 498--><p class="noindent" >else
                    <ol  class="enumerate4" >
                    <li 
   class="enumerate" id="x1-76016x1"><span 
@@ -4664,7 +4664,7 @@ class="cmtt-12">[new_M] </span>= <span
 class="cmtt-12">[M]</span>+<span 
 class="cmtt-12">[A]</span></li></ol>
                </li></ol>
-           <!--l. 504--><p class="noindent" >else
+           <!--l. 505--><p class="noindent" >else
                <ol  class="enumerate3" >
                <li 
   class="enumerate" id="x1-76020x1">if (<span 
@@ -4680,7 +4680,7 @@ class="cmtt-12">[M]</span>
 class="cmtt-12">[new_A] </span>= <span 
 class="cmtt-12">[M]</span>+<span 
 class="cmtt-12">[A]</span></li></ol>
-               <!--l. 511--><p class="noindent" >else
+               <!--l. 512--><p class="noindent" >else
                    <ol  class="enumerate4" >
                    <li 
   class="enumerate" id="x1-76026x1"><span 
@@ -4709,23 +4709,23 @@ class="cmtt-12">[A] </span>in vector <span
 class="cmtt-12">[angle_vector] </span>to <span 
 class="cmtt-12">[new_A]</span></li></ol>
       </li></ol>
-<!--l. 528--><p class="noindent" >
+<!--l. 529--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.6  </span> <a 
  id="x1-770004.3.6"></a>dot product</h5>
-<!--l. 530--><p class="noindent" >For each channel, synthesize the floor curve from the decoded floor information, according to
+<!--l. 531--><p class="noindent" >For each channel, synthesize the floor curve from the decoded floor information, according to
 packet type. Note that the vector synthesis length for floor computation is <span 
 class="cmtt-12">[n]</span>/2.
-<!--l. 534--><p class="noindent" >For each channel, multiply each element of the floor curve by each element of that
+<!--l. 535--><p class="noindent" >For each channel, multiply each element of the floor curve by each element of that
 channel&#8217;s residue vector. The result is the dot product of the floor and residue vectors for
 each channel; the produced vectors are the length <span 
 class="cmtt-12">[n]</span>/2 audio spectrum for each
 channel.
-<!--l. 542--><p class="noindent" >One point is worth mentioning about this dot product; a common mistake in a fixed point
+<!--l. 543--><p class="noindent" >One point is worth mentioning about this dot product; a common mistake in a fixed point
 implementation might be to assume that a 32 bit fixed-point representation for floor and
 residue and direct multiplication of the vectors is sufficient for acceptable spectral depth
 in all cases because it happens to mostly work with the current Xiph.Org reference
 encoder.
-<!--l. 549--><p class="noindent" >However, floor vector values can span <span 
+<!--l. 550--><p class="noindent" >However, floor vector values can span <span 
 class="cmsy-10x-x-120">&sim;</span>140dB (<span 
 class="cmsy-10x-x-120">&sim;</span>24 bits unsigned), and the audio spectrum
 vector should represent a minimum of 120dB (<span 
@@ -4742,10 +4742,10 @@ residue vector must be able to represent a 48 bit range and the dot product must
 be able to handle an effective 48 bit times 24 bit multiplication. This range may be
 achieved using large (64 bit or larger) integers, or implementing a movable binary point
 representation.
-<!--l. 566--><p class="noindent" >
+<!--l. 567--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.7  </span> <a 
  id="x1-780004.3.7"></a>inverse MDCT</h5>
-<!--l. 568--><p class="noindent" >Convert the audio spectrum vector of each channel back into time domain PCM audio via an
+<!--l. 569--><p class="noindent" >Convert the audio spectrum vector of each channel back into time domain PCM audio via an
                                                                                         
 
                                                                                         
@@ -4753,10 +4753,10 @@ inverse Modified Discrete Cosine Transform (MDCT). A detailed description of the
 available in <span class="cite">[<a 
 href="#XSporer/Brandenburg/Edler">1</a>]</span>. The window function used for the MDCT is the function described
 earlier.
-<!--l. 575--><p class="noindent" >
+<!--l. 576--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.8  </span> <a 
  id="x1-790004.3.8"></a>overlap&#x02D9;add</h5>
-<!--l. 577--><p class="noindent" >Windowed MDCT output is overlapped and added with the right hand data of the previous
+<!--l. 578--><p class="noindent" >Windowed MDCT output is overlapped and added with the right hand data of the previous
 window such that the 3/4 point of the previous window is aligned with the 1/4 point of the
 current window (as illustrated in <a 
 href="#x1-260001.3.2">paragraph&#x00A0;1.3.2</a>, &#8220;<a 
@@ -4769,7 +4769,7 @@ overlapped portions. When overlapping a short and long window, much of the retur
 range does not actually overlap. This does not damage transform orthogonality. Pay
 attention however to returning the correct data range; the amount of data to be returned
 is:
-<!--l. 591--><p class="noindent" >
+<!--l. 592--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb22">
 <a 
  id="x1-79002r1"></a><span 
@@ -4777,22 +4777,25 @@ class="cmr-6">1</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;window_blocksize(previous_window)/4+window_blocksize(current_window)/4</span>
 </div>
-<!--l. 595--><p class="noindent" >from the center (element windowsize/2) of the previous window to the center (element
+<!--l. 596--><p class="noindent" >from the center (element windowsize/2) of the previous window to the center (element
 windowsize/2-1, inclusive) of the current window.
-<!--l. 598--><p class="noindent" >Data is not returned from the first frame; it must be used to &#8217;prime&#8217; the decode engine. The
+<!--l. 599--><p class="noindent" >Data is not returned from the first frame; it must be used to &#8217;prime&#8217; the decode engine. The
 encoder accounts for this priming when calculating PCM offsets; after the first frame, the proper
 PCM output offset is &#8217;0&#8217; (as no data has been returned yet).
-<!--l. 605--><p class="noindent" >
+<!--l. 606--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.9  </span> <a 
  id="x1-800004.3.9"></a>output channel order</h5>
-<!--l. 607--><p class="noindent" >Vorbis I specifies only a channel mapping type 0. In mapping type 0, channel mapping is
+<!--l. 608--><p class="noindent" >Vorbis I specifies only a channel mapping type 0. In mapping type 0, channel mapping is
 implicitly defined as follows for standard audio applications. As of revision 16781 (20100113), the
 specification adds defined channel locations for 6.1 and 7.1 surround. Ordering/location for
                                                                                         
 
                                                                                         
 greater-than-eight channels remains &#8217;left to the implementation&#8217;.
-<!--l. 613--><p class="noindent" >
+<!--l. 614--><p class="noindent" >These channel orderings refer to order within the encoded stream. It is naturally possible for a
+decoder to produce output with channels in any order. Any such decoder should explicitly
+document channel reordering behavior.
+<!--l. 619--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
 class="cmssbx-10x-x-120">one channel</span> </dt><dd 
@@ -4814,28 +4817,28 @@ class="description">the stream is quadraphonic surround. channel order: front le
 <span 
 class="cmssbx-10x-x-120">five channels</span> </dt><dd 
 class="description">the stream is five-channel surround. channel order: front left, center, front
-      right, surround rear left, surround rear right
+      right, rear left, rear right
       </dd><dt class="description">
 <span 
 class="cmssbx-10x-x-120">six channels</span> </dt><dd 
-class="description">the  stream  is  5.1  surround.  channel  order:  front  left,  center,  front  right,
-      surround rear left, surround rear right, LFE
+class="description">the stream is 5.1 surround. channel order: front left, center, front right, rear
+      left, rear right, LFE
       </dd><dt class="description">
 <span 
 class="cmssbx-10x-x-120">seven channels</span> </dt><dd 
 class="description">the stream is 6.1 surround. channel order: front left, center, front right,
-      surround left, surround right, surround (center) rear, LFE
+      side left, side right, rear center, LFE
       </dd><dt class="description">
 <span 
 class="cmssbx-10x-x-120">eight channels</span> </dt><dd 
 class="description">the stream is 7.1 surround. channel order: front left, center, front right,
-      surround left, surround right, surround rear left, surround rear right, LFE
+      side left, side right, rear left, rear right, LFE
       </dd><dt class="description">
 <span 
 class="cmssbx-10x-x-120">greater than eight channels</span> </dt><dd 
 class="description">channel use and order is defined by the application
       </dd></dl>
-<!--l. 650--><p class="noindent" >Applications using Vorbis for dedicated purposes may define channel mapping as seen fit. Future
+<!--l. 656--><p class="noindent" >Applications using Vorbis for dedicated purposes may define channel mapping as seen fit. Future
 channel mappings (such as three and four channel <a 
 href="http://www.ambisonic.net/" >Ambisonics</a>) will make use of channel
 mappings other than mapping 0.

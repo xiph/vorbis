@@ -1,3 +1,4 @@
+
 % -*- mode: latex; TeX-master: "Vorbis_I_spec"; -*-
 %!TEX root = Vorbis_I_spec.tex
 % $Id$
@@ -610,6 +611,11 @@ applications. As of revision 16781 (20100113), the specification adds
 defined channel locations for 6.1 and 7.1 surround.  Ordering/location
 for greater-than-eight channels remains 'left to the implementation'.
 
+These channel orderings refer to order within the encoded stream.  It
+is naturally possible for a decoder to produce output with channels in
+any order. Any such decoder should explicitly document channel
+reordering behavior.
+
 \begin{description} %[style=nextline]
  \item[one channel]
 	the stream is monophonic
@@ -627,19 +633,19 @@ front right, rear left, rear right
 
 \item[five channels]
 	the stream is five-channel surround.  channel order: front left,
-center, front right, surround rear left, surround rear right
+center, front right, rear left, rear right
 
 \item[six channels]
 	the stream is 5.1 surround.  channel order: front left, center, 
-front right, surround rear left, surround rear right, LFE
+front right, rear left, rear right, LFE
 
 \item[seven channels]
         the stream is 6.1 surround.  channel order: front left, center, 
-front right, surround left, surround right, surround (center) rear, LFE
+front right, side left, side right, rear center, LFE
 
 \item[eight channels]
         the stream is 7.1 surround.  channel order: front left, center, 
-front right, surround left, surround right, surround rear left, surround rear right, 
+front right, side left, side right, rear left, rear right, 
 LFE
 
 \item[greater than eight channels]
