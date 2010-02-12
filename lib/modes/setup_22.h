@@ -70,7 +70,7 @@ static const ve_setup_data_template ve_setup_22_stereo={
 
   _floor_books,
   _floor,
-  _floor_mapping_16_short,
+  2,
   _floor_mapping_16,
 
   _mapres_template_16_stereo
@@ -121,7 +121,7 @@ static const ve_setup_data_template ve_setup_22_uncoupled={
 
   _floor_books,
   _floor,
-  _floor_mapping_16_short,
+  2,
   _floor_mapping_16,
 
   _mapres_template_16_uncoupled

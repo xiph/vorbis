@@ -27,8 +27,6 @@ typedef struct highlevel_encode_setup {
   int   set_in_stone;
 
   double base_setting;
-  double long_setting;
-  double short_setting;
   double impulse_noisetune;
 
   int    managed;

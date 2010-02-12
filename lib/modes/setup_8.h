@@ -22,8 +22,12 @@ static const int blocksize_8[2]={
   512,512
 };
 
-static const int _floor_mapping_8[2]={
-  6,6,
+static const int _floor_mapping_8a[]={
+  6,6
+};
+
+static const int *_floor_mapping_8[]={
+  _floor_mapping_8a
 };
 
 static const double rate_mapping_8[3]={
@@ -87,8 +91,8 @@ static const ve_setup_data_template ve_setup_8_stereo={
 
   _floor_books,
   _floor,
+  1,
   _floor_mapping_8,
-  NULL,
 
   _mapres_template_8_stereo
 };
@@ -138,8 +142,8 @@ static const ve_setup_data_template ve_setup_8_uncoupled={
 
   _floor_books,
   _floor,
+  1,
   _floor_mapping_8,
-  NULL,
 
   _mapres_template_8_uncoupled
 };

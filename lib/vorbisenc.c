@@ -134,8 +134,8 @@ typedef struct {
 
   const static_codebook *const *const *const floor_books;
   const vorbis_info_floor1 *floor_params;
-  const int *floor_short_mapping;
-  const int *floor_long_mapping;
+  const int floor_mappings;
+  const int **floor_mapping_list;
 
   const vorbis_mapping_template *maps;
 } ve_setup_data_template;
@@ -196,7 +196,7 @@ static int vorbis_encode_toplevel_setup(vorbis_info *vi,int ch,long rate){
   return(OV_EINVAL);
 }
 
-static void vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
+static void vorbis_encode_floor_setup(vorbis_info *vi,int s,
                                      const static_codebook *const *const *const books,
                                      const vorbis_info_floor1 *in,
                                      const int *x){
@@ -205,8 +205,6 @@ static void vorbis_encode_floor_setup(vorbis_info *vi,double s,int block,
   codec_setup_info *ci=vi->codec_setup;
 
   memcpy(f,in+x[is],sizeof(*f));
-  /* fill in the lowpass field, even if it's temporary */
-  f->n=ci->blocksizes[block]>>1;
 
   /* books */
   {
@@ -554,12 +552,20 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
 
     /* this res may by limited by the maximum pointlimit of the mode,
        not the lowpass. the floor is always lowpass limited. */
-    if(res->limit_type){
+    switch(res->limit_type){
+    case 1: /* point stereo limited */
       if(ci->hi.managed)
         freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS-1]*1000.;
       else
         freq=ci->psy_g_param.coupling_pkHz[PACKETBLOBS/2]*1000.;
       if(freq>nyq)freq=nyq;
+      break;
+    case 2: /* LFE channel; lowpass at ~ 250Hz */
+      freq=250;
+      break;
+    default:
+      /* already set */
+      break;
     }
 
     /* in the residue, we're constrained, physically, by partition
@@ -572,6 +578,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
     else
       r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
         r->grouping;
+    if(r->end==0)r->end=r->grouping; /* LFE channel */
   }
 }
 
@@ -672,7 +679,7 @@ static void get_setup_template(vorbis_info *vi,
 
 /* the final setup call */
 int vorbis_encode_setup_init(vorbis_info *vi){
-  int i0=0,singleblock=0;
+  int i,i0=0,singleblock=0;
   codec_setup_info *ci=vi->codec_setup;
   ve_setup_data_template *setup=NULL;
   highlevel_encode_setup *hi=&ci->hi;
@@ -705,16 +712,12 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   if(ci->blocksizes[0]==ci->blocksizes[1])singleblock=1;
 
   /* floor setup; choose proper floor params.  Allocated on the floor
-     stack in order; if we alloc only long floor, it's 0 */
-  vorbis_encode_floor_setup(vi,hi->short_setting,0,
-                            setup->floor_books,
-                            setup->floor_params,
-                            setup->floor_short_mapping);
-  if(!singleblock)
-    vorbis_encode_floor_setup(vi,hi->long_setting,1,
+     stack in order; if we alloc only a single long floor, it's 0 */
+  for(i=0;i<setup->floor_mappings;i++)
+    vorbis_encode_floor_setup(vi,hi->base_setting,
                               setup->floor_books,
                               setup->floor_params,
-                              setup->floor_long_mapping);
+                              setup->floor_mapping_list[i]);
 
   /* setup of [mostly] short block detection and stereo*/
   vorbis_encode_global_psych_setup(vi,hi->trigger_setting,
@@ -723,23 +726,23 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   vorbis_encode_global_stereo(vi,hi,setup->stereo_modes);
 
   /* basic psych setup and noise normalization */
-  vorbis_encode_psyset_setup(vi,hi->short_setting,
+  vorbis_encode_psyset_setup(vi,hi->base_setting,
                              setup->psy_noise_normal_start[0],
                              setup->psy_noise_normal_partition[0],
                              setup->psy_noise_normal_thresh,
                              0);
-  vorbis_encode_psyset_setup(vi,hi->short_setting,
+  vorbis_encode_psyset_setup(vi,hi->base_setting,
                              setup->psy_noise_normal_start[0],
                              setup->psy_noise_normal_partition[0],
                              setup->psy_noise_normal_thresh,
                              1);
   if(!singleblock){
-    vorbis_encode_psyset_setup(vi,hi->long_setting,
+    vorbis_encode_psyset_setup(vi,hi->base_setting,
                                setup->psy_noise_normal_start[1],
                                setup->psy_noise_normal_partition[1],
                                     setup->psy_noise_normal_thresh,
                                2);
-    vorbis_encode_psyset_setup(vi,hi->long_setting,
+    vorbis_encode_psyset_setup(vi,hi->base_setting,
                                setup->psy_noise_normal_start[1],
                                setup->psy_noise_normal_partition[1],
                                setup->psy_noise_normal_thresh,
@@ -869,9 +872,6 @@ static int vorbis_encode_setup_setting(vorbis_info *vi,
 
   is=hi->base_setting;
   ds=hi->base_setting-is;
-
-  hi->short_setting=hi->base_setting;
-  hi->long_setting=hi->base_setting;
 
   hi->managed=0;
 

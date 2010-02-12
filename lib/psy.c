@@ -931,7 +931,7 @@ static void couple_lossless(float A, float B,
   int test1=fabs(*qA)>fabs(*qB);
   test1-= fabs(*qA)<fabs(*qB);
 
-  if(!test1)test1=((fabs(A)>fabs(B))<<1)-1;
+  //if(!test1)test1=((fabs(A)>fabs(B))<<1)-1;
   if(test1==1){
     *qB=(*qA>0.f?*qA-*qB:*qB-*qA);
   }else{
@@ -1148,7 +1148,6 @@ void _vp_couple(int blobno,
     if(nonzero[vi->coupling_mag[i]] ||
        nonzero[vi->coupling_ang[i]]){
 
-
       float *rM=res[vi->coupling_mag[i]];
       float *rA=res[vi->coupling_ang[i]];
       float *qM=rM+n;
@@ -1159,7 +1158,6 @@ void _vp_couple(int blobno,
       float postpoint=stereo_threshholds[g->coupling_postpointamp[blobno]];
       int partition=(p->vi->normal_point_p?p->vi->normal_partition:p->n);
       int limit=g->coupling_pointlimit[p->vi->blockflag][blobno];
-      int pointlimit=limit;
 
       nonzero[vi->coupling_mag[i]]=1;
       nonzero[vi->coupling_ang[i]]=1;
@@ -1178,7 +1176,6 @@ void _vp_couple(int blobno,
             if((l>=limit && fabs(rM[l])<postpoint && fabs(rA[l])<postpoint) ||
                (fabs(rM[l])<prepoint && fabs(rA[l])<prepoint)){
 
-
               precomputed_couple_point(mag_memo[i][l],
                                        floorM[l],floorA[l],
                                        qM+l,qA+l);
@@ -1196,7 +1193,7 @@ void _vp_couple(int blobno,
         if(p->vi->normal_point_p){
           for(k=0;k<partition && acc>=p->vi->normal_thresh;k++){
             int l=mag_sort[i][j+k];
-            if(l<sliding_lowpass && l>=pointlimit && rint(qM[l])==0.f){
+            if(l<sliding_lowpass && l>=limit && rint(qM[l])==0.f){
               qM[l]=unitnorm(qM[l]);
               acc-=1.f;
             }

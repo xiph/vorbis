@@ -47,11 +47,17 @@ static const double _global_mapping_44[12]={
  0., 1., 1., 1.5, 2., 2., 2.5, 2.7, 3.0, 3.7, 4., 4.
 };
 
-static const int _floor_short_mapping_44[11]={
+static const int _floor_mapping_44a[11]={
   1,0,0,2,2,4,5,5,5,5,5
 };
-static const int _floor_long_mapping_44[11]={
+
+static const int _floor_mapping_44b[11]={
   8,7,7,7,7,7,7,7,7,7,7
+};
+
+static const int *_floor_mapping_44[]={
+  _floor_mapping_44a,
+  _floor_mapping_44b,
 };
 
 static const ve_setup_data_template ve_setup_44_stereo={
@@ -99,8 +105,8 @@ static const ve_setup_data_template ve_setup_44_stereo={
 
   _floor_books,
   _floor,
-  _floor_short_mapping_44,
-  _floor_long_mapping_44,
+  2,
+  _floor_mapping_44,
 
   _mapres_template_44_stereo
 };

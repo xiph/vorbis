@@ -65,8 +65,8 @@ static const ve_setup_data_template ve_setup_X_stereo={
 
   _floor_books,
   _floor,
-  _floor_short_mapping_44,
-  _floor_long_mapping_44,
+  2,
+  _floor_mapping_44,
 
   _mapres_template_44_stereo
 };
@@ -116,8 +116,8 @@ static const ve_setup_data_template ve_setup_X_uncoupled={
 
   _floor_books,
   _floor,
-  _floor_short_mapping_44,
-  _floor_long_mapping_44,
+  2,
+  _floor_mapping_44,
 
   _mapres_template_44_uncoupled
 };
@@ -167,8 +167,8 @@ static const ve_setup_data_template ve_setup_XX_stereo={
 
   _floor_books,
   _floor,
+  1,
   _floor_mapping_8,
-  NULL,
 
   _mapres_template_8_stereo
 };
@@ -218,8 +218,8 @@ static const ve_setup_data_template ve_setup_XX_uncoupled={
 
   _floor_books,
   _floor,
+  1,
   _floor_mapping_8,
-  NULL,
 
   _mapres_template_8_uncoupled
 };
