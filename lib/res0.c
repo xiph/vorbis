@@ -389,7 +389,7 @@ static int _encodepart(oggpack_buffer *opb,float *vec, int n,
     int entry=local_book_besterror(book,vec+i*dim);
 
 #ifdef TRAIN_RES
-    if(entry>0)
+    if(entry>=0)
       acc[entry]++;
 #endif
 
@@ -544,7 +544,7 @@ static int _01forward(oggpack_buffer *opb,
 
 #ifdef TRAIN_RES
   for(i=0;i<ch;i++)
-    for(j=info->begin;j<end;j++){
+    for(j=info->begin;j<info->end;j++){
       if(in[i][j]>look->tmax)look->tmax=in[i][j];
       if(in[i][j]<look->tmin)look->tmin=in[i][j];
     }
