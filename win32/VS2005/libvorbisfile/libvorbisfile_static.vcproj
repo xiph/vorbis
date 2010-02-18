@@ -13,7 +13,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool"/>
-			<Tool Name="VCCLCompilerTool" Optimization="0" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" MinimalRebuild="true" BasicRuntimeChecks="3" RuntimeLibrary="3" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="4"/>
+			<Tool Name="VCCLCompilerTool" Optimization="0" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" MinimalRebuild="true" BasicRuntimeChecks="3" RuntimeLibrary="3" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="4" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
@@ -30,7 +30,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TargetEnvironment="3"/>
-			<Tool Name="VCCLCompilerTool" Optimization="0" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" MinimalRebuild="true" BasicRuntimeChecks="3" RuntimeLibrary="3" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3"/>
+			<Tool Name="VCCLCompilerTool" Optimization="0" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" MinimalRebuild="true" BasicRuntimeChecks="3" RuntimeLibrary="3" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
@@ -47,7 +47,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool"/>
-			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3"/>
+			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
@@ -64,75 +64,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TargetEnvironment="3"/>
-			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3"/>
-			<Tool Name="VCManagedResourceCompilerTool"/>
-			<Tool Name="VCResourceCompilerTool"/>
-			<Tool Name="VCPreLinkEventTool"/>
-			<Tool Name="VCLibrarianTool" OutputFile="$(OutDir)\$(ProjectName)_static.lib"/>
-			<Tool Name="VCALinkTool"/>
-			<Tool Name="VCXDCMakeTool"/>
-			<Tool Name="VCBscMakeTool"/>
-			<Tool Name="VCFxCopTool"/>
-			<Tool Name="VCPostBuildEventTool"/>
-		</Configuration>
-		<Configuration Name="Release_SSE|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)" ConfigurationType="4" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\libogg.vsprops" CharacterSet="1">
-			<Tool Name="VCPreBuildEventTool"/>
-			<Tool Name="VCCustomBuildTool"/>
-			<Tool Name="VCXMLDataGeneratorTool"/>
-			<Tool Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool Name="VCMIDLTool"/>
-			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" EnableEnhancedInstructionSet="1" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3"/>
-			<Tool Name="VCManagedResourceCompilerTool"/>
-			<Tool Name="VCResourceCompilerTool"/>
-			<Tool Name="VCPreLinkEventTool"/>
-			<Tool Name="VCLibrarianTool" OutputFile="$(OutDir)\$(ProjectName)_static.lib"/>
-			<Tool Name="VCALinkTool"/>
-			<Tool Name="VCXDCMakeTool"/>
-			<Tool Name="VCBscMakeTool"/>
-			<Tool Name="VCFxCopTool"/>
-			<Tool Name="VCPostBuildEventTool"/>
-		</Configuration>
-		<Configuration Name="Release_SSE|x64" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)" ConfigurationType="4" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\libogg.vsprops" CharacterSet="1">
-			<Tool Name="VCPreBuildEventTool"/>
-			<Tool Name="VCCustomBuildTool"/>
-			<Tool Name="VCXMLDataGeneratorTool"/>
-			<Tool Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool Name="VCMIDLTool" TargetEnvironment="3"/>
-			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" EnableEnhancedInstructionSet="1" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3"/>
-			<Tool Name="VCManagedResourceCompilerTool"/>
-			<Tool Name="VCResourceCompilerTool"/>
-			<Tool Name="VCPreLinkEventTool"/>
-			<Tool Name="VCLibrarianTool" OutputFile="$(OutDir)\$(ProjectName)_static.lib"/>
-			<Tool Name="VCALinkTool"/>
-			<Tool Name="VCXDCMakeTool"/>
-			<Tool Name="VCBscMakeTool"/>
-			<Tool Name="VCFxCopTool"/>
-			<Tool Name="VCPostBuildEventTool"/>
-		</Configuration>
-		<Configuration Name="Release_SSE2|Win32" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)" ConfigurationType="4" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\libogg.vsprops" CharacterSet="1">
-			<Tool Name="VCPreBuildEventTool"/>
-			<Tool Name="VCCustomBuildTool"/>
-			<Tool Name="VCXMLDataGeneratorTool"/>
-			<Tool Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool Name="VCMIDLTool"/>
-			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" EnableEnhancedInstructionSet="2" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3"/>
-			<Tool Name="VCManagedResourceCompilerTool"/>
-			<Tool Name="VCResourceCompilerTool"/>
-			<Tool Name="VCPreLinkEventTool"/>
-			<Tool Name="VCLibrarianTool" OutputFile="$(OutDir)\$(ProjectName)_static.lib"/>
-			<Tool Name="VCALinkTool"/>
-			<Tool Name="VCXDCMakeTool"/>
-			<Tool Name="VCBscMakeTool"/>
-			<Tool Name="VCFxCopTool"/>
-			<Tool Name="VCPostBuildEventTool"/>
-		</Configuration>
-		<Configuration Name="Release_SSE2|x64" OutputDirectory="$(SolutionDir)$(PlatformName)\$(ConfigurationName)" IntermediateDirectory="$(PlatformName)\$(ConfigurationName)" ConfigurationType="4" InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops;..\libogg.vsprops" CharacterSet="1">
-			<Tool Name="VCPreBuildEventTool"/>
-			<Tool Name="VCCustomBuildTool"/>
-			<Tool Name="VCXMLDataGeneratorTool"/>
-			<Tool Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool Name="VCMIDLTool" TargetEnvironment="3"/>
-			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" EnableEnhancedInstructionSet="2" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3"/>
+			<Tool Name="VCCLCompilerTool" WholeProgramOptimization="false" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBISFILE_EXPORTS" RuntimeLibrary="2" UsePrecompiledHeader="0" WarningLevel="3" Detect64BitPortabilityProblems="false" DebugInformationFormat="3" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
