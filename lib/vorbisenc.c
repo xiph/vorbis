@@ -486,11 +486,6 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
   }
   ci->residue_type[number]=res->res_type;
 
-  /* to be adjusted by lowpass/pointlimit later */
-  n=r->end=ci->blocksizes[block]>>1;
-  if(res->res_type==2)
-    n=r->end*=vi->channels;
-
   /* fill in all the books */
   {
     int booklist=0,k;
@@ -572,7 +567,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
        boundaries.  We still lowpass 'wherever', but we have to round up
        here to next boundary, or the vorbis spec will round it *down* to
        previous boundary in encode/decode */
-    if(ci->residue_type[block]==2)
+    if(ci->residue_type[number]==2)
       r->end=(int)((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
         r->grouping;
     else
