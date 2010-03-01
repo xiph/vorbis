@@ -93,7 +93,7 @@ typedef struct{
   void (*free_info)    (vorbis_info_residue *);
   void (*free_look)    (vorbis_look_residue *);
   long **(*class)      (struct vorbis_block *,vorbis_look_residue *,
-                        float **,int *,int);
+                        int **,int *,int);
   int  (*forward)      (oggpack_buffer *,struct vorbis_block *,
                         vorbis_look_residue *,
                         int **,int *,int,long **);
@@ -114,8 +114,8 @@ typedef struct vorbis_info_residue0{
   int    secondstages[64]; /* expanded out to pointers in lookup */
   int    booklist[512];    /* list of second stage books */
 
-  const float classmetric1[64];
-  const float classmetric2[64];
+  const int classmetric1[64];
+  const int classmetric2[64];
 } vorbis_info_residue0;
 
 /* Mapping backend generic *****************************************/

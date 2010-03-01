@@ -407,7 +407,7 @@ static int _encodepart(oggpack_buffer *opb,int *vec, int n,
 }
 
 static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
-                       float **in,int ch){
+                       int **in,int ch){
   long i,j,k;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
@@ -433,17 +433,17 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
   for(i=0;i<partvals;i++){
     int offset=i*samples_per_partition+info->begin;
     for(j=0;j<ch;j++){
-      float max=0.;
-      float ent=0.;
+      int max=0;
+      int ent=0;
       for(k=0;k<samples_per_partition;k++){
-        if(fabs(in[j][offset+k])>max)max=fabs(in[j][offset+k]);
-        ent+=fabs(rint(in[j][offset+k]));
+        if(abs(in[j][offset+k])>max)max=abs(in[j][offset+k]);
+        ent+=abs(in[j][offset+k]);
       }
       ent*=scale;
 
       for(k=0;k<possible_partitions-1;k++)
         if(max<=info->classmetric1[k] &&
-           (info->classmetric2[k]<0 || (int)ent<info->classmetric2[k]))
+           (info->classmetric2[k]<0 || ent<info->classmetric2[k]))
           break;
 
       partword[j][i]=k;
@@ -473,7 +473,7 @@ static long **_01class(vorbis_block *vb,vorbis_look_residue *vl,
 /* designed for stereo or other modes where the partition size is an
    integer multiple of the number of channels encoded in the current
    submap */
-static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
+static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,int **in,
                       int ch){
   long i,j,k,l;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
@@ -496,12 +496,12 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,float **in,
   memset(partword[0],0,n*ch/samples_per_partition*sizeof(*partword[0]));
 
   for(i=0,l=info->begin/ch;i<partvals;i++){
-    float magmax=0.f;
-    float angmax=0.f;
+    int magmax=0.f;
+    int angmax=0.f;
     for(j=0;j<samples_per_partition;j+=ch){
-      if(fabs(in[0][l])>magmax)magmax=fabs(in[0][l]);
+      if(abs(in[0][l])>magmax)magmax=abs(in[0][l]);
       for(k=1;k<ch;k++)
-        if(fabs(in[k][l])>angmax)angmax=fabs(in[k][l]);
+        if(abs(in[k][l])>angmax)angmax=abs(in[k][l]);
         l++;
     }
 
@@ -731,7 +731,7 @@ int res1_forward(oggpack_buffer *opb,vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 long **res1_class(vorbis_block *vb,vorbis_look_residue *vl,
-                  float **in,int *nonzero,int ch){
+                  int **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
     if(nonzero[i])
@@ -755,7 +755,7 @@ int res1_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
-                  float **in,int *nonzero,int ch){
+                  int **in,int *nonzero,int ch){
   int i,used=0;
   for(i=0;i<ch;i++)
     if(nonzero[i])used++;

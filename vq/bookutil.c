@@ -22,6 +22,70 @@
 #include <errno.h>
 #include "bookutil.h"
 
+
+/* as of current encoder, only centered, integer val, maptype 1 is in
+   use */
+int _best(codebook *book, int *a, int step){
+  int dim=book->dim;
+  int k,o;
+  int del=book->delta;
+  int qv=book->quantvals;
+  int ze=(qv>>1);
+
+  if(delta!=1){
+    for(k=0,o=step*(dim-1);k<dim;k++,o-=step){
+      int v = (a[o]-minval+(delta>>1))/delta;
+      int m = (v<ze ? ((ze-v)<<1)-1 : ((v-ze)<<1));
+      index = index*qv+ (m<0?0:(m>=qv?qv-1:m));
+    }
+  }else{
+    for(k=0,o=step*(dim-1);k<dim;k++,o-=step){
+      int v = a[o]-minval;
+      int m = (v<ze ? ((ze-v)<<1)-1 : ((v-ze)<<1));
+      index = index*qv+ (m<0?0:(m>=qv?qv-1:m));
+    }
+  }
+
+  /* did the direct lookup find a used entry? */
+  if(book->c->lengthlist[index]>0)
+      return(index);
+
+  /* brute force it */
+  {
+    const static_codebook *c=book->c;
+    int i,besti=-1;
+    float best=0.f;
+    float *e=book->valuelist;
+    for(i=0;i<book->entries;i++){
+      if(c->lengthlist[i]>0){
+        float this=_dist(dim,e,a,step);
+        if(besti==-1 || this<best){
+          best=this;
+          besti=i;
+        }
+      }
+      e+=dim;
+    }
+
+    /*if(savebest!=-1 && savebest!=besti){
+      fprintf(stderr,"brute force/pigeonhole disagreement:\n"
+              "original:");
+      for(i=0;i<dim*step;i+=step)fprintf(stderr,"%g,",a[i]);
+      fprintf(stderr,"\n"
+              "pigeonhole (entry %d, err %g):",savebest,saverr);
+      for(i=0;i<dim;i++)fprintf(stderr,"%g,",
+                                (book->valuelist+savebest*dim)[i]);
+      fprintf(stderr,"\n"
+              "bruteforce (entry %d, err %g):",besti,best);
+      for(i=0;i<dim;i++)fprintf(stderr,"%g,",
+                                (book->valuelist+besti*dim)[i]);
+      fprintf(stderr,"\n");
+      }*/
+    return(besti);
+  }
+}
+
+
 /* A few little utils for reading files */
 /* read a line.  Use global, persistent buffering */
 static char *linebuffer=NULL;

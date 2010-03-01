@@ -598,8 +598,7 @@ static int mapping0_forward(vorbis_block *vb){
   /* iterate over the many masking curve fits we've created */
 
   {
-    float **res_bundle=alloca(sizeof(*res_bundle)*vi->channels);
-    float **couple_bundle=alloca(sizeof(*couple_bundle)*vi->channels);
+    int **couple_bundle=alloca(sizeof(*couple_bundle)*vi->channels);
     int *zerobundle=alloca(sizeof(*zerobundle)*vi->channels);
     int **sortindex=alloca(sizeof(*sortindex)*vi->channels);
     float **mag_memo=NULL;
@@ -709,6 +708,12 @@ static int mapping0_forward(vorbis_block *vb){
                    nonzero,
                    ci->psy_g_param.sliding_lowpass[vb->W][k]);
       }
+      for(j=0;j<vi->channels;j++){
+        int *ires = iwork[j];
+        float *res = vb->pcm[j]+n/2;
+        for(i=0;i<n/2;i++)
+          ires[i] = (int)rint(res[i]);
+      }
 
       /* classify and encode by submap */
       for(i=0;i<info->submaps;i++){
@@ -720,8 +725,7 @@ static int mapping0_forward(vorbis_block *vb){
           if(info->chmuxlist[j]==i){
             zerobundle[ch_in_bundle]=0;
             if(nonzero[j])zerobundle[ch_in_bundle]=1;
-            res_bundle[ch_in_bundle]=vb->pcm[j];
-            couple_bundle[ch_in_bundle++]=vb->pcm[j]+n/2;
+            couple_bundle[ch_in_bundle++]=iwork[j];
           }
         }
 
@@ -730,18 +734,12 @@ static int mapping0_forward(vorbis_block *vb){
 
         ch_in_bundle=0;
         for(j=0;j<vi->channels;j++)
-          if(info->chmuxlist[j]==i){
-            /* move from float to int vector; temporary until new coupling lands */
-            float *res=vb->pcm[j]+n/2;
-            int *ires=iwork[ch_in_bundle++];
-            int k;
-            for(k=0;k<n/2;k++)
-              ires[k]=(int)rint(res[k]);
-          }
+          if(info->chmuxlist[j]==i)
+            couple_bundle[ch_in_bundle++]=iwork[j];
 
         _residue_P[ci->residue_type[resnum]]->
           forward(opb,vb,b->residue[resnum],
-                  iwork,zerobundle,ch_in_bundle,classifications);
+                  couple_bundle,zerobundle,ch_in_bundle,classifications);
       }
 
       /* ok, done encoding.  Next protopacket. */
