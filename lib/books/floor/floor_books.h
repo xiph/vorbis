@@ -26,9 +26,6 @@ static const static_codebook _huff_book_line_256x7_0sub1 = {
         (long *)_huff_lengthlist_line_256x7_0sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -41,9 +38,6 @@ static const static_codebook _huff_book_line_256x7_0sub2 = {
         1, 25,
         (long *)_huff_lengthlist_line_256x7_0sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -60,9 +54,6 @@ static const static_codebook _huff_book_line_256x7_0sub3 = {
         (long *)_huff_lengthlist_line_256x7_0sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -74,9 +65,6 @@ static const static_codebook _huff_book_line_256x7_1sub1 = {
         1, 9,
         (long *)_huff_lengthlist_line_256x7_1sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -90,9 +78,6 @@ static const static_codebook _huff_book_line_256x7_1sub2 = {
         1, 25,
         (long *)_huff_lengthlist_line_256x7_1sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -109,9 +94,6 @@ static const static_codebook _huff_book_line_256x7_1sub3 = {
         (long *)_huff_lengthlist_line_256x7_1sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -126,9 +108,6 @@ static const static_codebook _huff_book_line_256x7_class0 = {
         1, 64,
         (long *)_huff_lengthlist_line_256x7_class0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -157,9 +136,6 @@ static const static_codebook _huff_book_line_256x7_class1 = {
         (long *)_huff_lengthlist_line_256x7_class1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -179,9 +155,6 @@ static const static_codebook _huff_book_line_512x17_0sub0 = {
         (long *)_huff_lengthlist_line_512x17_0sub0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -194,9 +167,6 @@ static const static_codebook _huff_book_line_512x17_1sub0 = {
         1, 32,
         (long *)_huff_lengthlist_line_512x17_1sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -217,9 +187,6 @@ static const static_codebook _huff_book_line_512x17_1sub1 = {
         (long *)_huff_lengthlist_line_512x17_1sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -232,9 +199,6 @@ static const static_codebook _huff_book_line_512x17_2sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_512x17_2sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -250,9 +214,6 @@ static const static_codebook _huff_book_line_512x17_2sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_512x17_2sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -273,9 +234,6 @@ static const static_codebook _huff_book_line_512x17_2sub3 = {
         (long *)_huff_lengthlist_line_512x17_2sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -288,9 +246,6 @@ static const static_codebook _huff_book_line_512x17_3sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_512x17_3sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -306,9 +261,6 @@ static const static_codebook _huff_book_line_512x17_3sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_512x17_3sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -329,9 +281,6 @@ static const static_codebook _huff_book_line_512x17_3sub3 = {
         (long *)_huff_lengthlist_line_512x17_3sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -343,9 +292,6 @@ static const static_codebook _huff_book_line_512x17_class1 = {
         1, 8,
         (long *)_huff_lengthlist_line_512x17_class1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -362,9 +308,6 @@ static const static_codebook _huff_book_line_512x17_class2 = {
         (long *)_huff_lengthlist_line_512x17_class2,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -379,9 +322,6 @@ static const static_codebook _huff_book_line_512x17_class3 = {
         1, 64,
         (long *)_huff_lengthlist_line_512x17_class3,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -410,9 +350,6 @@ static const static_codebook _huff_book_line_128x4_class0 = {
         (long *)_huff_lengthlist_line_128x4_class0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -424,9 +361,6 @@ static const static_codebook _huff_book_line_128x4_0sub0 = {
         1, 4,
         (long *)_huff_lengthlist_line_128x4_0sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -440,9 +374,6 @@ static const static_codebook _huff_book_line_128x4_0sub1 = {
         (long *)_huff_lengthlist_line_128x4_0sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -455,9 +386,6 @@ static const static_codebook _huff_book_line_128x4_0sub2 = {
         1, 25,
         (long *)_huff_lengthlist_line_128x4_0sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -473,9 +401,6 @@ static const static_codebook _huff_book_line_128x4_0sub3 = {
         1, 64,
         (long *)_huff_lengthlist_line_128x4_0sub3,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -504,9 +429,6 @@ static const static_codebook _huff_book_line_256x4_class0 = {
         (long *)_huff_lengthlist_line_256x4_class0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -518,9 +440,6 @@ static const static_codebook _huff_book_line_256x4_0sub0 = {
         1, 4,
         (long *)_huff_lengthlist_line_256x4_0sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -534,9 +453,6 @@ static const static_codebook _huff_book_line_256x4_0sub1 = {
         (long *)_huff_lengthlist_line_256x4_0sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -549,9 +465,6 @@ static const static_codebook _huff_book_line_256x4_0sub2 = {
         1, 25,
         (long *)_huff_lengthlist_line_256x4_0sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -568,9 +481,6 @@ static const static_codebook _huff_book_line_256x4_0sub3 = {
         (long *)_huff_lengthlist_line_256x4_0sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -585,9 +495,6 @@ static const static_codebook _huff_book_line_128x7_class0 = {
         1, 64,
         (long *)_huff_lengthlist_line_128x7_class0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -616,9 +523,6 @@ static const static_codebook _huff_book_line_128x7_class1 = {
         (long *)_huff_lengthlist_line_128x7_class1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -630,9 +534,6 @@ static const static_codebook _huff_book_line_128x7_0sub1 = {
         1, 9,
         (long *)_huff_lengthlist_line_128x7_0sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -646,9 +547,6 @@ static const static_codebook _huff_book_line_128x7_0sub2 = {
         1, 25,
         (long *)_huff_lengthlist_line_128x7_0sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -665,9 +563,6 @@ static const static_codebook _huff_book_line_128x7_0sub3 = {
         (long *)_huff_lengthlist_line_128x7_0sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -679,9 +574,6 @@ static const static_codebook _huff_book_line_128x7_1sub1 = {
         1, 9,
         (long *)_huff_lengthlist_line_128x7_1sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -695,9 +587,6 @@ static const static_codebook _huff_book_line_128x7_1sub2 = {
         1, 25,
         (long *)_huff_lengthlist_line_128x7_1sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -714,9 +603,6 @@ static const static_codebook _huff_book_line_128x7_1sub3 = {
         (long *)_huff_lengthlist_line_128x7_1sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -728,9 +614,6 @@ static const static_codebook _huff_book_line_128x11_class1 = {
         1, 8,
         (long *)_huff_lengthlist_line_128x11_class1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -747,9 +630,6 @@ static const static_codebook _huff_book_line_128x11_class2 = {
         (long *)_huff_lengthlist_line_128x11_class2,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -764,9 +644,6 @@ static const static_codebook _huff_book_line_128x11_class3 = {
         1, 64,
         (long *)_huff_lengthlist_line_128x11_class3,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -787,9 +664,6 @@ static const static_codebook _huff_book_line_128x11_0sub0 = {
         (long *)_huff_lengthlist_line_128x11_0sub0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -802,9 +676,6 @@ static const static_codebook _huff_book_line_128x11_1sub0 = {
         1, 32,
         (long *)_huff_lengthlist_line_128x11_1sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -825,9 +696,6 @@ static const static_codebook _huff_book_line_128x11_1sub1 = {
         (long *)_huff_lengthlist_line_128x11_1sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -840,9 +708,6 @@ static const static_codebook _huff_book_line_128x11_2sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_128x11_2sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -858,9 +723,6 @@ static const static_codebook _huff_book_line_128x11_2sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_128x11_2sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -881,9 +743,6 @@ static const static_codebook _huff_book_line_128x11_2sub3 = {
         (long *)_huff_lengthlist_line_128x11_2sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -896,9 +755,6 @@ static const static_codebook _huff_book_line_128x11_3sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_128x11_3sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -914,9 +770,6 @@ static const static_codebook _huff_book_line_128x11_3sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_128x11_3sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -937,9 +790,6 @@ static const static_codebook _huff_book_line_128x11_3sub3 = {
         (long *)_huff_lengthlist_line_128x11_3sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -951,9 +801,6 @@ static const static_codebook _huff_book_line_128x17_class1 = {
         1, 8,
         (long *)_huff_lengthlist_line_128x17_class1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -970,9 +817,6 @@ static const static_codebook _huff_book_line_128x17_class2 = {
         (long *)_huff_lengthlist_line_128x17_class2,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -987,9 +831,6 @@ static const static_codebook _huff_book_line_128x17_class3 = {
         1, 64,
         (long *)_huff_lengthlist_line_128x17_class3,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1010,9 +851,6 @@ static const static_codebook _huff_book_line_128x17_0sub0 = {
         (long *)_huff_lengthlist_line_128x17_0sub0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1025,9 +863,6 @@ static const static_codebook _huff_book_line_128x17_1sub0 = {
         1, 32,
         (long *)_huff_lengthlist_line_128x17_1sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1048,9 +883,6 @@ static const static_codebook _huff_book_line_128x17_1sub1 = {
         (long *)_huff_lengthlist_line_128x17_1sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1063,9 +895,6 @@ static const static_codebook _huff_book_line_128x17_2sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_128x17_2sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1081,9 +910,6 @@ static const static_codebook _huff_book_line_128x17_2sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_128x17_2sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1104,9 +930,6 @@ static const static_codebook _huff_book_line_128x17_2sub3 = {
         (long *)_huff_lengthlist_line_128x17_2sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1119,9 +942,6 @@ static const static_codebook _huff_book_line_128x17_3sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_128x17_3sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1137,9 +957,6 @@ static const static_codebook _huff_book_line_128x17_3sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_128x17_3sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1160,9 +977,6 @@ static const static_codebook _huff_book_line_128x17_3sub3 = {
         (long *)_huff_lengthlist_line_128x17_3sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1175,9 +989,6 @@ static const static_codebook _huff_book_line_1024x27_class1 = {
         (long *)_huff_lengthlist_line_1024x27_class1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1189,9 +1000,6 @@ static const static_codebook _huff_book_line_1024x27_class2 = {
         1, 8,
         (long *)_huff_lengthlist_line_1024x27_class2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1220,9 +1028,6 @@ static const static_codebook _huff_book_line_1024x27_class3 = {
         (long *)_huff_lengthlist_line_1024x27_class3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1237,9 +1042,6 @@ static const static_codebook _huff_book_line_1024x27_class4 = {
         1, 64,
         (long *)_huff_lengthlist_line_1024x27_class4,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1260,9 +1062,6 @@ static const static_codebook _huff_book_line_1024x27_0sub0 = {
         (long *)_huff_lengthlist_line_1024x27_0sub0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1275,9 +1074,6 @@ static const static_codebook _huff_book_line_1024x27_1sub0 = {
         1, 32,
         (long *)_huff_lengthlist_line_1024x27_1sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1298,9 +1094,6 @@ static const static_codebook _huff_book_line_1024x27_1sub1 = {
         (long *)_huff_lengthlist_line_1024x27_1sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1313,9 +1106,6 @@ static const static_codebook _huff_book_line_1024x27_2sub0 = {
         1, 32,
         (long *)_huff_lengthlist_line_1024x27_2sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1336,9 +1126,6 @@ static const static_codebook _huff_book_line_1024x27_2sub1 = {
         (long *)_huff_lengthlist_line_1024x27_2sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1351,9 +1138,6 @@ static const static_codebook _huff_book_line_1024x27_3sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_1024x27_3sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1369,9 +1153,6 @@ static const static_codebook _huff_book_line_1024x27_3sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_1024x27_3sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1392,9 +1173,6 @@ static const static_codebook _huff_book_line_1024x27_3sub3 = {
         (long *)_huff_lengthlist_line_1024x27_3sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1407,9 +1185,6 @@ static const static_codebook _huff_book_line_1024x27_4sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_1024x27_4sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1425,9 +1200,6 @@ static const static_codebook _huff_book_line_1024x27_4sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_1024x27_4sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1448,9 +1220,6 @@ static const static_codebook _huff_book_line_1024x27_4sub3 = {
         (long *)_huff_lengthlist_line_1024x27_4sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1463,9 +1232,6 @@ static const static_codebook _huff_book_line_2048x27_class1 = {
         (long *)_huff_lengthlist_line_2048x27_class1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1477,9 +1243,6 @@ static const static_codebook _huff_book_line_2048x27_class2 = {
         1, 8,
         (long *)_huff_lengthlist_line_2048x27_class2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1508,9 +1271,6 @@ static const static_codebook _huff_book_line_2048x27_class3 = {
         (long *)_huff_lengthlist_line_2048x27_class3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1525,9 +1285,6 @@ static const static_codebook _huff_book_line_2048x27_class4 = {
         1, 64,
         (long *)_huff_lengthlist_line_2048x27_class4,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1548,9 +1305,6 @@ static const static_codebook _huff_book_line_2048x27_0sub0 = {
         (long *)_huff_lengthlist_line_2048x27_0sub0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1563,9 +1317,6 @@ static const static_codebook _huff_book_line_2048x27_1sub0 = {
         1, 32,
         (long *)_huff_lengthlist_line_2048x27_1sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1586,9 +1337,6 @@ static const static_codebook _huff_book_line_2048x27_1sub1 = {
         (long *)_huff_lengthlist_line_2048x27_1sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1601,9 +1349,6 @@ static const static_codebook _huff_book_line_2048x27_2sub0 = {
         1, 32,
         (long *)_huff_lengthlist_line_2048x27_2sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1624,9 +1369,6 @@ static const static_codebook _huff_book_line_2048x27_2sub1 = {
         (long *)_huff_lengthlist_line_2048x27_2sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1639,9 +1381,6 @@ static const static_codebook _huff_book_line_2048x27_3sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_2048x27_3sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1657,9 +1396,6 @@ static const static_codebook _huff_book_line_2048x27_3sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_2048x27_3sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1680,9 +1416,6 @@ static const static_codebook _huff_book_line_2048x27_3sub3 = {
         (long *)_huff_lengthlist_line_2048x27_3sub3,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1695,9 +1428,6 @@ static const static_codebook _huff_book_line_2048x27_4sub1 = {
         1, 18,
         (long *)_huff_lengthlist_line_2048x27_4sub1,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1713,9 +1443,6 @@ static const static_codebook _huff_book_line_2048x27_4sub2 = {
         1, 50,
         (long *)_huff_lengthlist_line_2048x27_4sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1735,9 +1462,6 @@ static const static_codebook _huff_book_line_2048x27_4sub3 = {
         1, 128,
         (long *)_huff_lengthlist_line_2048x27_4sub3,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1766,9 +1490,6 @@ static const static_codebook _huff_book_line_256x4low_class0 = {
         (long *)_huff_lengthlist_line_256x4low_class0,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1780,9 +1501,6 @@ static const static_codebook _huff_book_line_256x4low_0sub0 = {
         1, 4,
         (long *)_huff_lengthlist_line_256x4low_0sub0,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1796,9 +1514,6 @@ static const static_codebook _huff_book_line_256x4low_0sub1 = {
         (long *)_huff_lengthlist_line_256x4low_0sub1,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1811,9 +1526,6 @@ static const static_codebook _huff_book_line_256x4low_0sub2 = {
         1, 25,
         (long *)_huff_lengthlist_line_256x4low_0sub2,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1829,9 +1541,6 @@ static const static_codebook _huff_book_line_256x4low_0sub3 = {
         1, 64,
         (long *)_huff_lengthlist_line_256x4low_0sub3,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };

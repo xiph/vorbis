@@ -31,29 +31,11 @@ static const long _vq_lengthlist__16u0__p1_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__16u0__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__16u0__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p1_0 = {
-        (float *)_vq_quantthresh__16u0__p1_0,
-        (long *)_vq_quantmap__16u0__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _16u0__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u0__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__16u0__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p1_0,
-        NULL,
         0
 };
 
@@ -72,29 +54,11 @@ static const long _vq_lengthlist__16u0__p2_0[] = {
          8,
 };
 
-static const float _vq_quantthresh__16u0__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__16u0__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p2_0 = {
-        (float *)_vq_quantthresh__16u0__p2_0,
-        (long *)_vq_quantmap__16u0__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _16u0__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u0__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__16u0__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p2_0,
-        NULL,
         0
 };
 
@@ -149,29 +113,11 @@ static const long _vq_lengthlist__16u0__p3_0[] = {
         18,
 };
 
-static const float _vq_quantthresh__16u0__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__16u0__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p3_0 = {
-        (float *)_vq_quantthresh__16u0__p3_0,
-        (long *)_vq_quantmap__16u0__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _16u0__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__16u0__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__16u0__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p3_0,
-        NULL,
         0
 };
 
@@ -226,29 +172,11 @@ static const long _vq_lengthlist__16u0__p4_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__16u0__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__16u0__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p4_0 = {
-        (float *)_vq_quantthresh__16u0__p4_0,
-        (long *)_vq_quantmap__16u0__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _16u0__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__16u0__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__16u0__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p4_0,
-        NULL,
         0
 };
 
@@ -273,30 +201,11 @@ static const long _vq_lengthlist__16u0__p5_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__16u0__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__16u0__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p5_0 = {
-        (float *)_vq_quantthresh__16u0__p5_0,
-        (long *)_vq_quantmap__16u0__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _16u0__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__16u0__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u0__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p5_0,
-        NULL,
         0
 };
 
@@ -330,31 +239,11 @@ static const long _vq_lengthlist__16u0__p6_0[] = {
         18, 0,19, 0, 0, 0, 0, 0, 0,
 };
 
-static const float _vq_quantthresh__16u0__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__16u0__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p6_0 = {
-        (float *)_vq_quantthresh__16u0__p6_0,
-        (long *)_vq_quantmap__16u0__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _16u0__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__16u0__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__16u0__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p6_0,
-        NULL,
         0
 };
 
@@ -371,29 +260,11 @@ static const long _vq_lengthlist__16u0__p6_1[] = {
          6, 6, 7, 7, 6, 6, 6, 7, 7,
 };
 
-static const float _vq_quantthresh__16u0__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__16u0__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p6_1 = {
-        (float *)_vq_quantthresh__16u0__p6_1,
-        (long *)_vq_quantmap__16u0__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _16u0__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__16u0__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__16u0__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p6_1,
-        NULL,
         0
 };
 
@@ -412,29 +283,11 @@ static const long _vq_lengthlist__16u0__p7_0[] = {
          7,
 };
 
-static const float _vq_quantthresh__16u0__p7_0[] = {
-        -157.5, 157.5, 
-};
-
-static const long _vq_quantmap__16u0__p7_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p7_0 = {
-        (float *)_vq_quantthresh__16u0__p7_0,
-        (long *)_vq_quantmap__16u0__p7_0,
-        3,
-        3
-};
-
 static const static_codebook _16u0__p7_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u0__p7_0,
         1, -518803456, 1628680192, 2, 0,
         (long *)_vq_quantlist__16u0__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p7_0,
-        NULL,
         0
 };
 
@@ -474,31 +327,11 @@ static const long _vq_lengthlist__16u0__p7_1[] = {
         10,
 };
 
-static const float _vq_quantthresh__16u0__p7_1[] = {
-        -136.5, -115.5, -94.5, -73.5, -52.5, -31.5, -10.5, 10.5, 
-        31.5, 52.5, 73.5, 94.5, 115.5, 136.5, 
-};
-
-static const long _vq_quantmap__16u0__p7_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p7_1 = {
-        (float *)_vq_quantthresh__16u0__p7_1,
-        (long *)_vq_quantmap__16u0__p7_1,
-        15,
-        15
-};
-
 static const static_codebook _16u0__p7_1 = {
         2, 225,
         (long *)_vq_lengthlist__16u0__p7_1,
         1, -520986624, 1620377600, 4, 0,
         (long *)_vq_quantlist__16u0__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p7_1,
-        NULL,
         0
 };
 
@@ -557,33 +390,11 @@ static const long _vq_lengthlist__16u0__p7_2[] = {
         10,10,12,11,10,11,11,11,10,
 };
 
-static const float _vq_quantthresh__16u0__p7_2[] = {
-        -9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, 
-        -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 
-        6.5, 7.5, 8.5, 9.5, 
-};
-
-static const long _vq_quantmap__16u0__p7_2[] = {
-           19,   17,   15,   13,   11,    9,    7,    5,
-            3,    1,    0,    2,    4,    6,    8,   10,
-           12,   14,   16,   18,   20,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u0__p7_2 = {
-        (float *)_vq_quantthresh__16u0__p7_2,
-        (long *)_vq_quantmap__16u0__p7_2,
-        21,
-        21
-};
-
 static const static_codebook _16u0__p7_2 = {
         2, 441,
         (long *)_vq_lengthlist__16u0__p7_2,
         1, -529268736, 1611661312, 5, 0,
         (long *)_vq_quantlist__16u0__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u0__p7_2,
-        NULL,
         0
 };
 
@@ -598,9 +409,6 @@ static const static_codebook _huff_book__16u0__single = {
         2, 64,
         (long *)_huff_lengthlist__16u0__single,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -620,9 +428,6 @@ static const static_codebook _huff_book__16u1__long = {
         (long *)_huff_lengthlist__16u1__long,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -641,29 +446,11 @@ static const long _vq_lengthlist__16u1__p1_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__16u1__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__16u1__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p1_0 = {
-        (float *)_vq_quantthresh__16u1__p1_0,
-        (long *)_vq_quantmap__16u1__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _16u1__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u1__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__16u1__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p1_0,
-        NULL,
         0
 };
 
@@ -682,29 +469,11 @@ static const long _vq_lengthlist__16u1__p2_0[] = {
          8,
 };
 
-static const float _vq_quantthresh__16u1__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__16u1__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p2_0 = {
-        (float *)_vq_quantthresh__16u1__p2_0,
-        (long *)_vq_quantmap__16u1__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _16u1__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u1__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__16u1__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p2_0,
-        NULL,
         0
 };
 
@@ -759,29 +528,11 @@ static const long _vq_lengthlist__16u1__p3_0[] = {
         16,
 };
 
-static const float _vq_quantthresh__16u1__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__16u1__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p3_0 = {
-        (float *)_vq_quantthresh__16u1__p3_0,
-        (long *)_vq_quantmap__16u1__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _16u1__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__16u1__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__16u1__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p3_0,
-        NULL,
         0
 };
 
@@ -836,29 +587,11 @@ static const long _vq_lengthlist__16u1__p4_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__16u1__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__16u1__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p4_0 = {
-        (float *)_vq_quantthresh__16u1__p4_0,
-        (long *)_vq_quantmap__16u1__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _16u1__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__16u1__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__16u1__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p4_0,
-        NULL,
         0
 };
 
@@ -883,30 +616,11 @@ static const long _vq_lengthlist__16u1__p5_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__16u1__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__16u1__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p5_0 = {
-        (float *)_vq_quantthresh__16u1__p5_0,
-        (long *)_vq_quantmap__16u1__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _16u1__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__16u1__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u1__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p5_0,
-        NULL,
         0
 };
 
@@ -931,30 +645,11 @@ static const long _vq_lengthlist__16u1__p6_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__16u1__p6_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__16u1__p6_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p6_0 = {
-        (float *)_vq_quantthresh__16u1__p6_0,
-        (long *)_vq_quantmap__16u1__p6_0,
-        9,
-        9
-};
-
 static const static_codebook _16u1__p6_0 = {
         2, 81,
         (long *)_vq_lengthlist__16u1__p6_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u1__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p6_0,
-        NULL,
         0
 };
 
@@ -973,29 +668,11 @@ static const long _vq_lengthlist__16u1__p7_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__16u1__p7_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__16u1__p7_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p7_0 = {
-        (float *)_vq_quantthresh__16u1__p7_0,
-        (long *)_vq_quantmap__16u1__p7_0,
-        3,
-        3
-};
-
 static const static_codebook _16u1__p7_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u1__p7_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__16u1__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p7_0,
-        NULL,
         0
 };
 
@@ -1024,31 +701,11 @@ static const long _vq_lengthlist__16u1__p7_1[] = {
          8, 9, 9,10,10,10,10,10,10,
 };
 
-static const float _vq_quantthresh__16u1__p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__16u1__p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p7_1 = {
-        (float *)_vq_quantthresh__16u1__p7_1,
-        (long *)_vq_quantmap__16u1__p7_1,
-        11,
-        11
-};
-
 static const static_codebook _16u1__p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__16u1__p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u1__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p7_1,
-        NULL,
         0
 };
 
@@ -1077,31 +734,11 @@ static const long _vq_lengthlist__16u1__p8_0[] = {
         13,14,14,15,15,16,16,15,16,
 };
 
-static const float _vq_quantthresh__16u1__p8_0[] = {
-        -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 27.5, 
-        38.5, 49.5, 
-};
-
-static const long _vq_quantmap__16u1__p8_0[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p8_0 = {
-        (float *)_vq_quantthresh__16u1__p8_0,
-        (long *)_vq_quantmap__16u1__p8_0,
-        11,
-        11
-};
-
 static const static_codebook _16u1__p8_0 = {
         2, 121,
         (long *)_vq_lengthlist__16u1__p8_0,
         1, -524582912, 1618345984, 4, 0,
         (long *)_vq_quantlist__16u1__p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p8_0,
-        NULL,
         0
 };
 
@@ -1130,31 +767,11 @@ static const long _vq_lengthlist__16u1__p8_1[] = {
          8, 9, 9, 9, 9, 9, 9, 9, 9,
 };
 
-static const float _vq_quantthresh__16u1__p8_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__16u1__p8_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p8_1 = {
-        (float *)_vq_quantthresh__16u1__p8_1,
-        (long *)_vq_quantmap__16u1__p8_1,
-        11,
-        11
-};
-
 static const static_codebook _16u1__p8_1 = {
         2, 121,
         (long *)_vq_lengthlist__16u1__p8_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u1__p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p8_1,
-        NULL,
         0
 };
 
@@ -1194,31 +811,11 @@ static const long _vq_lengthlist__16u1__p9_0[] = {
          8,
 };
 
-static const float _vq_quantthresh__16u1__p9_0[] = {
-        -1657.5, -1402.5, -1147.5, -892.5, -637.5, -382.5, -127.5, 127.5, 
-        382.5, 637.5, 892.5, 1147.5, 1402.5, 1657.5, 
-};
-
-static const long _vq_quantmap__16u1__p9_0[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p9_0 = {
-        (float *)_vq_quantthresh__16u1__p9_0,
-        (long *)_vq_quantmap__16u1__p9_0,
-        15,
-        15
-};
-
 static const static_codebook _16u1__p9_0 = {
         2, 225,
         (long *)_vq_lengthlist__16u1__p9_0,
         1, -514071552, 1627381760, 4, 0,
         (long *)_vq_quantlist__16u1__p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p9_0,
-        NULL,
         0
 };
 
@@ -1258,31 +855,11 @@ static const long _vq_lengthlist__16u1__p9_1[] = {
          9,
 };
 
-static const float _vq_quantthresh__16u1__p9_1[] = {
-        -110.5, -93.5, -76.5, -59.5, -42.5, -25.5, -8.5, 8.5, 
-        25.5, 42.5, 59.5, 76.5, 93.5, 110.5, 
-};
-
-static const long _vq_quantmap__16u1__p9_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p9_1 = {
-        (float *)_vq_quantthresh__16u1__p9_1,
-        (long *)_vq_quantmap__16u1__p9_1,
-        15,
-        15
-};
-
 static const static_codebook _16u1__p9_1 = {
         2, 225,
         (long *)_vq_lengthlist__16u1__p9_1,
         1, -522338304, 1620115456, 4, 0,
         (long *)_vq_quantlist__16u1__p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p9_1,
-        NULL,
         0
 };
 
@@ -1328,32 +905,11 @@ static const long _vq_lengthlist__16u1__p9_2[] = {
         10,
 };
 
-static const float _vq_quantthresh__16u1__p9_2[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__16u1__p9_2[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u1__p9_2 = {
-        (float *)_vq_quantthresh__16u1__p9_2,
-        (long *)_vq_quantmap__16u1__p9_2,
-        17,
-        17
-};
-
 static const static_codebook _16u1__p9_2 = {
         2, 289,
         (long *)_vq_lengthlist__16u1__p9_2,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__16u1__p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u1__p9_2,
-        NULL,
         0
 };
 
@@ -1371,9 +927,6 @@ static const static_codebook _huff_book__16u1__short = {
         2, 100,
         (long *)_huff_lengthlist__16u1__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1393,9 +946,6 @@ static const static_codebook _huff_book__16u2__long = {
         (long *)_huff_lengthlist__16u2__long,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -1413,9 +963,6 @@ static const static_codebook _huff_book__16u2__short = {
         2, 100,
         (long *)_huff_lengthlist__16u2__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -1435,29 +982,11 @@ static const long _vq_lengthlist__16u2_p1_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__16u2_p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__16u2_p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p1_0 = {
-        (float *)_vq_quantthresh__16u2_p1_0,
-        (long *)_vq_quantmap__16u2_p1_0,
-        3,
-        3
-};
-
 static const static_codebook _16u2_p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u2_p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__16u2_p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p1_0,
-        NULL,
         0
 };
 
@@ -1512,29 +1041,11 @@ static const long _vq_lengthlist__16u2_p2_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__16u2_p2_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__16u2_p2_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p2_0 = {
-        (float *)_vq_quantthresh__16u2_p2_0,
-        (long *)_vq_quantmap__16u2_p2_0,
-        5,
-        5
-};
-
 static const static_codebook _16u2_p2_0 = {
         4, 625,
         (long *)_vq_lengthlist__16u2_p2_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__16u2_p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p2_0,
-        NULL,
         0
 };
 
@@ -1559,30 +1070,11 @@ static const long _vq_lengthlist__16u2_p3_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__16u2_p3_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__16u2_p3_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p3_0 = {
-        (float *)_vq_quantthresh__16u2_p3_0,
-        (long *)_vq_quantmap__16u2_p3_0,
-        9,
-        9
-};
-
 static const static_codebook _16u2_p3_0 = {
         2, 81,
         (long *)_vq_lengthlist__16u2_p3_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u2_p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p3_0,
-        NULL,
         0
 };
 
@@ -1628,32 +1120,11 @@ static const long _vq_lengthlist__16u2_p4_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__16u2_p4_0[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__16u2_p4_0[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p4_0 = {
-        (float *)_vq_quantthresh__16u2_p4_0,
-        (long *)_vq_quantmap__16u2_p4_0,
-        17,
-        17
-};
-
 static const static_codebook _16u2_p4_0 = {
         2, 289,
         (long *)_vq_lengthlist__16u2_p4_0,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__16u2_p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p4_0,
-        NULL,
         0
 };
 
@@ -1672,29 +1143,11 @@ static const long _vq_lengthlist__16u2_p5_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__16u2_p5_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__16u2_p5_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p5_0 = {
-        (float *)_vq_quantthresh__16u2_p5_0,
-        (long *)_vq_quantmap__16u2_p5_0,
-        3,
-        3
-};
-
 static const static_codebook _16u2_p5_0 = {
         4, 81,
         (long *)_vq_lengthlist__16u2_p5_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__16u2_p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p5_0,
-        NULL,
         0
 };
 
@@ -1723,31 +1176,11 @@ static const long _vq_lengthlist__16u2_p5_1[] = {
          8, 8, 8, 9, 9, 9, 9, 9, 9,
 };
 
-static const float _vq_quantthresh__16u2_p5_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__16u2_p5_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p5_1 = {
-        (float *)_vq_quantthresh__16u2_p5_1,
-        (long *)_vq_quantmap__16u2_p5_1,
-        11,
-        11
-};
-
 static const static_codebook _16u2_p5_1 = {
         2, 121,
         (long *)_vq_lengthlist__16u2_p5_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u2_p5_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p5_1,
-        NULL,
         0
 };
 
@@ -1781,31 +1214,11 @@ static const long _vq_lengthlist__16u2_p6_0[] = {
         12,13,13,14,14,14,14,15,15,
 };
 
-static const float _vq_quantthresh__16u2_p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__16u2_p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p6_0 = {
-        (float *)_vq_quantthresh__16u2_p6_0,
-        (long *)_vq_quantmap__16u2_p6_0,
-        13,
-        13
-};
-
 static const static_codebook _16u2_p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__16u2_p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__16u2_p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p6_0,
-        NULL,
         0
 };
 
@@ -1822,29 +1235,11 @@ static const long _vq_lengthlist__16u2_p6_1[] = {
          5, 5, 6, 6, 5, 5, 5, 6, 6,
 };
 
-static const float _vq_quantthresh__16u2_p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__16u2_p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p6_1 = {
-        (float *)_vq_quantthresh__16u2_p6_1,
-        (long *)_vq_quantmap__16u2_p6_1,
-        5,
-        5
-};
-
 static const static_codebook _16u2_p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__16u2_p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__16u2_p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p6_1,
-        NULL,
         0
 };
 
@@ -1878,31 +1273,11 @@ static const long _vq_lengthlist__16u2_p7_0[] = {
         12,13,13,13,14,14,14,15,14,
 };
 
-static const float _vq_quantthresh__16u2_p7_0[] = {
-        -60.5, -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 
-        27.5, 38.5, 49.5, 60.5, 
-};
-
-static const long _vq_quantmap__16u2_p7_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p7_0 = {
-        (float *)_vq_quantthresh__16u2_p7_0,
-        (long *)_vq_quantmap__16u2_p7_0,
-        13,
-        13
-};
-
 static const static_codebook _16u2_p7_0 = {
         2, 169,
         (long *)_vq_lengthlist__16u2_p7_0,
         1, -523206656, 1618345984, 4, 0,
         (long *)_vq_quantlist__16u2_p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p7_0,
-        NULL,
         0
 };
 
@@ -1931,31 +1306,11 @@ static const long _vq_lengthlist__16u2_p7_1[] = {
          8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-static const float _vq_quantthresh__16u2_p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__16u2_p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p7_1 = {
-        (float *)_vq_quantthresh__16u2_p7_1,
-        (long *)_vq_quantmap__16u2_p7_1,
-        11,
-        11
-};
-
 static const static_codebook _16u2_p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__16u2_p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__16u2_p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p7_1,
-        NULL,
         0
 };
 
@@ -1995,31 +1350,11 @@ static const long _vq_lengthlist__16u2_p8_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__16u2_p8_0[] = {
-        -136.5, -115.5, -94.5, -73.5, -52.5, -31.5, -10.5, 10.5, 
-        31.5, 52.5, 73.5, 94.5, 115.5, 136.5, 
-};
-
-static const long _vq_quantmap__16u2_p8_0[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p8_0 = {
-        (float *)_vq_quantthresh__16u2_p8_0,
-        (long *)_vq_quantmap__16u2_p8_0,
-        15,
-        15
-};
-
 static const static_codebook _16u2_p8_0 = {
         2, 225,
         (long *)_vq_lengthlist__16u2_p8_0,
         1, -520986624, 1620377600, 4, 0,
         (long *)_vq_quantlist__16u2_p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p8_0,
-        NULL,
         0
 };
 
@@ -2078,33 +1413,11 @@ static const long _vq_lengthlist__16u2_p8_1[] = {
         11,11,10,11,11,11,10,11,11,
 };
 
-static const float _vq_quantthresh__16u2_p8_1[] = {
-        -9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, 
-        -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 
-        6.5, 7.5, 8.5, 9.5, 
-};
-
-static const long _vq_quantmap__16u2_p8_1[] = {
-           19,   17,   15,   13,   11,    9,    7,    5,
-            3,    1,    0,    2,    4,    6,    8,   10,
-           12,   14,   16,   18,   20,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p8_1 = {
-        (float *)_vq_quantthresh__16u2_p8_1,
-        (long *)_vq_quantmap__16u2_p8_1,
-        21,
-        21
-};
-
 static const static_codebook _16u2_p8_1 = {
         2, 441,
         (long *)_vq_lengthlist__16u2_p8_1,
         1, -529268736, 1611661312, 5, 0,
         (long *)_vq_quantlist__16u2_p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p8_1,
-        NULL,
         0
 };
 
@@ -2144,31 +1457,11 @@ static const long _vq_lengthlist__16u2_p9_0[] = {
          5,
 };
 
-static const float _vq_quantthresh__16u2_p9_0[] = {
-        -5120.5, -4189.5, -3258.5, -2327.5, -1396.5, -498, -32.5, 32.5, 
-        498, 1396.5, 2327.5, 3258.5, 4189.5, 5120.5, 
-};
-
-static const long _vq_quantmap__16u2_p9_0[] = {
-           11,    9,    7,    5,    3,    1,   13,    0,
-           14,    2,    4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p9_0 = {
-        (float *)_vq_quantthresh__16u2_p9_0,
-        (long *)_vq_quantmap__16u2_p9_0,
-        15,
-        15
-};
-
 static const static_codebook _16u2_p9_0 = {
         2, 225,
         (long *)_vq_lengthlist__16u2_p9_0,
         1, -510275072, 1611661312, 14, 0,
         (long *)_vq_quantlist__16u2_p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p9_0,
-        NULL,
         0
 };
 
@@ -2220,33 +1513,11 @@ static const long _vq_lengthlist__16u2_p9_1[] = {
         11,11,11,11,11,11,11, 5, 4,
 };
 
-static const float _vq_quantthresh__16u2_p9_1[] = {
-        -367.5, -318.5, -269.5, -220.5, -171.5, -122.5, -73.5, -26.5, 
-        -2, 2, 26.5, 73.5, 122.5, 171.5, 220.5, 269.5, 
-        318.5, 367.5, 
-};
-
-static const long _vq_quantmap__16u2_p9_1[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-           17,    0,   18,    2,    4,    6,    8,   10,
-           12,   14,   16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p9_1 = {
-        (float *)_vq_quantthresh__16u2_p9_1,
-        (long *)_vq_quantmap__16u2_p9_1,
-        19,
-        19
-};
-
 static const static_codebook _16u2_p9_1 = {
         2, 361,
         (long *)_vq_lengthlist__16u2_p9_1,
         1, -518488064, 1611661312, 10, 0,
         (long *)_vq_quantlist__16u2_p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p9_1,
-        NULL,
         0
 };
 
@@ -2309,40 +1580,11 @@ static const long _vq_lengthlist__16u2_p9_2[] = {
         11,
 };
 
-static const float _vq_quantthresh__16u2_p9_2[] = {
-        -23.5, -22.5, -21.5, -20.5, -19.5, -18.5, -17.5, -16.5, 
-        -15.5, -14.5, -13.5, -12.5, -11.5, -10.5, -9.5, -8.5, 
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-        8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5, 
-        16.5, 17.5, 18.5, 19.5, 20.5, 21.5, 22.5, 23.5, 
-};
-
-static const long _vq_quantmap__16u2_p9_2[] = {
-           47,   45,   43,   41,   39,   37,   35,   33,
-           31,   29,   27,   25,   23,   21,   19,   17,
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,   18,   20,   22,   24,   26,   28,   30,
-           32,   34,   36,   38,   40,   42,   44,   46,
-           48,
-};
-
-static const encode_aux_threshmatch _vq_auxt__16u2_p9_2 = {
-        (float *)_vq_quantthresh__16u2_p9_2,
-        (long *)_vq_quantmap__16u2_p9_2,
-        49,
-        49
-};
-
 static const static_codebook _16u2_p9_2 = {
         1, 49,
         (long *)_vq_lengthlist__16u2_p9_2,
         1, -526909440, 1611661312, 6, 0,
         (long *)_vq_quantlist__16u2_p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__16u2_p9_2,
-        NULL,
         0
 };
 
@@ -2361,29 +1603,11 @@ static const long _vq_lengthlist__8u0__p1_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__8u0__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__8u0__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p1_0 = {
-        (float *)_vq_quantthresh__8u0__p1_0,
-        (long *)_vq_quantmap__8u0__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _8u0__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__8u0__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__8u0__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p1_0,
-        NULL,
         0
 };
 
@@ -2402,29 +1626,11 @@ static const long _vq_lengthlist__8u0__p2_0[] = {
          8,
 };
 
-static const float _vq_quantthresh__8u0__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__8u0__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p2_0 = {
-        (float *)_vq_quantthresh__8u0__p2_0,
-        (long *)_vq_quantmap__8u0__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _8u0__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__8u0__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__8u0__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p2_0,
-        NULL,
         0
 };
 
@@ -2479,29 +1685,11 @@ static const long _vq_lengthlist__8u0__p3_0[] = {
         16,
 };
 
-static const float _vq_quantthresh__8u0__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__8u0__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p3_0 = {
-        (float *)_vq_quantthresh__8u0__p3_0,
-        (long *)_vq_quantmap__8u0__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _8u0__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__8u0__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__8u0__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p3_0,
-        NULL,
         0
 };
 
@@ -2556,29 +1744,11 @@ static const long _vq_lengthlist__8u0__p4_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__8u0__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__8u0__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p4_0 = {
-        (float *)_vq_quantthresh__8u0__p4_0,
-        (long *)_vq_quantmap__8u0__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _8u0__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__8u0__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__8u0__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p4_0,
-        NULL,
         0
 };
 
@@ -2603,30 +1773,11 @@ static const long _vq_lengthlist__8u0__p5_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__8u0__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__8u0__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p5_0 = {
-        (float *)_vq_quantthresh__8u0__p5_0,
-        (long *)_vq_quantmap__8u0__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _8u0__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__8u0__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__8u0__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p5_0,
-        NULL,
         0
 };
 
@@ -2660,31 +1811,11 @@ static const long _vq_lengthlist__8u0__p6_0[] = {
         16, 0,15, 0,17, 0, 0, 0, 0,
 };
 
-static const float _vq_quantthresh__8u0__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__8u0__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p6_0 = {
-        (float *)_vq_quantthresh__8u0__p6_0,
-        (long *)_vq_quantmap__8u0__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _8u0__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__8u0__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__8u0__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p6_0,
-        NULL,
         0
 };
 
@@ -2701,29 +1832,11 @@ static const long _vq_lengthlist__8u0__p6_1[] = {
          7, 7, 7, 7, 6, 7, 7, 7, 7,
 };
 
-static const float _vq_quantthresh__8u0__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__8u0__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p6_1 = {
-        (float *)_vq_quantthresh__8u0__p6_1,
-        (long *)_vq_quantmap__8u0__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _8u0__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__8u0__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__8u0__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p6_1,
-        NULL,
         0
 };
 
@@ -2742,29 +1855,11 @@ static const long _vq_lengthlist__8u0__p7_0[] = {
          7,
 };
 
-static const float _vq_quantthresh__8u0__p7_0[] = {
-        -157.5, 157.5, 
-};
-
-static const long _vq_quantmap__8u0__p7_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p7_0 = {
-        (float *)_vq_quantthresh__8u0__p7_0,
-        (long *)_vq_quantmap__8u0__p7_0,
-        3,
-        3
-};
-
 static const static_codebook _8u0__p7_0 = {
         4, 81,
         (long *)_vq_lengthlist__8u0__p7_0,
         1, -518803456, 1628680192, 2, 0,
         (long *)_vq_quantlist__8u0__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p7_0,
-        NULL,
         0
 };
 
@@ -2804,31 +1899,11 @@ static const long _vq_lengthlist__8u0__p7_1[] = {
         10,
 };
 
-static const float _vq_quantthresh__8u0__p7_1[] = {
-        -136.5, -115.5, -94.5, -73.5, -52.5, -31.5, -10.5, 10.5, 
-        31.5, 52.5, 73.5, 94.5, 115.5, 136.5, 
-};
-
-static const long _vq_quantmap__8u0__p7_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p7_1 = {
-        (float *)_vq_quantthresh__8u0__p7_1,
-        (long *)_vq_quantmap__8u0__p7_1,
-        15,
-        15
-};
-
 static const static_codebook _8u0__p7_1 = {
         2, 225,
         (long *)_vq_lengthlist__8u0__p7_1,
         1, -520986624, 1620377600, 4, 0,
         (long *)_vq_quantlist__8u0__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p7_1,
-        NULL,
         0
 };
 
@@ -2887,33 +1962,11 @@ static const long _vq_lengthlist__8u0__p7_2[] = {
         11,12,11,11,11,10,10,11,11,
 };
 
-static const float _vq_quantthresh__8u0__p7_2[] = {
-        -9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, 
-        -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 
-        6.5, 7.5, 8.5, 9.5, 
-};
-
-static const long _vq_quantmap__8u0__p7_2[] = {
-           19,   17,   15,   13,   11,    9,    7,    5,
-            3,    1,    0,    2,    4,    6,    8,   10,
-           12,   14,   16,   18,   20,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u0__p7_2 = {
-        (float *)_vq_quantthresh__8u0__p7_2,
-        (long *)_vq_quantmap__8u0__p7_2,
-        21,
-        21
-};
-
 static const static_codebook _8u0__p7_2 = {
         2, 441,
         (long *)_vq_lengthlist__8u0__p7_2,
         1, -529268736, 1611661312, 5, 0,
         (long *)_vq_quantlist__8u0__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u0__p7_2,
-        NULL,
         0
 };
 
@@ -2928,9 +1981,6 @@ static const static_codebook _huff_book__8u0__single = {
         2, 64,
         (long *)_huff_lengthlist__8u0__single,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -2950,29 +2000,11 @@ static const long _vq_lengthlist__8u1__p1_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__8u1__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__8u1__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p1_0 = {
-        (float *)_vq_quantthresh__8u1__p1_0,
-        (long *)_vq_quantmap__8u1__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _8u1__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__8u1__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__8u1__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p1_0,
-        NULL,
         0
 };
 
@@ -2991,29 +2023,11 @@ static const long _vq_lengthlist__8u1__p2_0[] = {
          7,
 };
 
-static const float _vq_quantthresh__8u1__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__8u1__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p2_0 = {
-        (float *)_vq_quantthresh__8u1__p2_0,
-        (long *)_vq_quantmap__8u1__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _8u1__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__8u1__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__8u1__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p2_0,
-        NULL,
         0
 };
 
@@ -3068,29 +2082,11 @@ static const long _vq_lengthlist__8u1__p3_0[] = {
         16,
 };
 
-static const float _vq_quantthresh__8u1__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__8u1__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p3_0 = {
-        (float *)_vq_quantthresh__8u1__p3_0,
-        (long *)_vq_quantmap__8u1__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _8u1__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__8u1__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__8u1__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p3_0,
-        NULL,
         0
 };
 
@@ -3145,29 +2141,11 @@ static const long _vq_lengthlist__8u1__p4_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__8u1__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__8u1__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p4_0 = {
-        (float *)_vq_quantthresh__8u1__p4_0,
-        (long *)_vq_quantmap__8u1__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _8u1__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__8u1__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__8u1__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p4_0,
-        NULL,
         0
 };
 
@@ -3192,30 +2170,11 @@ static const long _vq_lengthlist__8u1__p5_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__8u1__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__8u1__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p5_0 = {
-        (float *)_vq_quantthresh__8u1__p5_0,
-        (long *)_vq_quantmap__8u1__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _8u1__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__8u1__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__8u1__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p5_0,
-        NULL,
         0
 };
 
@@ -3240,30 +2199,11 @@ static const long _vq_lengthlist__8u1__p6_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__8u1__p6_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__8u1__p6_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p6_0 = {
-        (float *)_vq_quantthresh__8u1__p6_0,
-        (long *)_vq_quantmap__8u1__p6_0,
-        9,
-        9
-};
-
 static const static_codebook _8u1__p6_0 = {
         2, 81,
         (long *)_vq_lengthlist__8u1__p6_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__8u1__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p6_0,
-        NULL,
         0
 };
 
@@ -3282,29 +2222,11 @@ static const long _vq_lengthlist__8u1__p7_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__8u1__p7_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__8u1__p7_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p7_0 = {
-        (float *)_vq_quantthresh__8u1__p7_0,
-        (long *)_vq_quantmap__8u1__p7_0,
-        3,
-        3
-};
-
 static const static_codebook _8u1__p7_0 = {
         4, 81,
         (long *)_vq_lengthlist__8u1__p7_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__8u1__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p7_0,
-        NULL,
         0
 };
 
@@ -3333,31 +2255,11 @@ static const long _vq_lengthlist__8u1__p7_1[] = {
          9, 9, 9, 9, 9,10,10,10,10,
 };
 
-static const float _vq_quantthresh__8u1__p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__8u1__p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p7_1 = {
-        (float *)_vq_quantthresh__8u1__p7_1,
-        (long *)_vq_quantmap__8u1__p7_1,
-        11,
-        11
-};
-
 static const static_codebook _8u1__p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__8u1__p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__8u1__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p7_1,
-        NULL,
         0
 };
 
@@ -3386,31 +2288,11 @@ static const long _vq_lengthlist__8u1__p8_0[] = {
         12,13,13,14,14,15,15,15,15,
 };
 
-static const float _vq_quantthresh__8u1__p8_0[] = {
-        -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 27.5, 
-        38.5, 49.5, 
-};
-
-static const long _vq_quantmap__8u1__p8_0[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p8_0 = {
-        (float *)_vq_quantthresh__8u1__p8_0,
-        (long *)_vq_quantmap__8u1__p8_0,
-        11,
-        11
-};
-
 static const static_codebook _8u1__p8_0 = {
         2, 121,
         (long *)_vq_lengthlist__8u1__p8_0,
         1, -524582912, 1618345984, 4, 0,
         (long *)_vq_quantlist__8u1__p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p8_0,
-        NULL,
         0
 };
 
@@ -3439,31 +2321,11 @@ static const long _vq_lengthlist__8u1__p8_1[] = {
          8, 8, 8, 8, 8, 9, 9, 9, 9,
 };
 
-static const float _vq_quantthresh__8u1__p8_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__8u1__p8_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p8_1 = {
-        (float *)_vq_quantthresh__8u1__p8_1,
-        (long *)_vq_quantmap__8u1__p8_1,
-        11,
-        11
-};
-
 static const static_codebook _8u1__p8_1 = {
         2, 121,
         (long *)_vq_lengthlist__8u1__p8_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__8u1__p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p8_1,
-        NULL,
         0
 };
 
@@ -3503,31 +2365,11 @@ static const long _vq_lengthlist__8u1__p9_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__8u1__p9_0[] = {
-        -1657.5, -1402.5, -1147.5, -892.5, -637.5, -382.5, -127.5, 127.5, 
-        382.5, 637.5, 892.5, 1147.5, 1402.5, 1657.5, 
-};
-
-static const long _vq_quantmap__8u1__p9_0[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p9_0 = {
-        (float *)_vq_quantthresh__8u1__p9_0,
-        (long *)_vq_quantmap__8u1__p9_0,
-        15,
-        15
-};
-
 static const static_codebook _8u1__p9_0 = {
         2, 225,
         (long *)_vq_lengthlist__8u1__p9_0,
         1, -514071552, 1627381760, 4, 0,
         (long *)_vq_quantlist__8u1__p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p9_0,
-        NULL,
         0
 };
 
@@ -3567,31 +2409,11 @@ static const long _vq_lengthlist__8u1__p9_1[] = {
         13,
 };
 
-static const float _vq_quantthresh__8u1__p9_1[] = {
-        -110.5, -93.5, -76.5, -59.5, -42.5, -25.5, -8.5, 8.5, 
-        25.5, 42.5, 59.5, 76.5, 93.5, 110.5, 
-};
-
-static const long _vq_quantmap__8u1__p9_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p9_1 = {
-        (float *)_vq_quantthresh__8u1__p9_1,
-        (long *)_vq_quantmap__8u1__p9_1,
-        15,
-        15
-};
-
 static const static_codebook _8u1__p9_1 = {
         2, 225,
         (long *)_vq_lengthlist__8u1__p9_1,
         1, -522338304, 1620115456, 4, 0,
         (long *)_vq_quantlist__8u1__p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p9_1,
-        NULL,
         0
 };
 
@@ -3637,32 +2459,11 @@ static const long _vq_lengthlist__8u1__p9_2[] = {
         10,
 };
 
-static const float _vq_quantthresh__8u1__p9_2[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__8u1__p9_2[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__8u1__p9_2 = {
-        (float *)_vq_quantthresh__8u1__p9_2,
-        (long *)_vq_quantmap__8u1__p9_2,
-        17,
-        17
-};
-
 static const static_codebook _8u1__p9_2 = {
         2, 289,
         (long *)_vq_lengthlist__8u1__p9_2,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__8u1__p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__8u1__p9_2,
-        NULL,
         0
 };
 
@@ -3681,9 +2482,6 @@ static const static_codebook _huff_book__8u1__single = {
         (long *)_huff_lengthlist__8u1__single,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -3698,9 +2496,6 @@ static const static_codebook _huff_book__44u0__long = {
         2, 64,
         (long *)_huff_lengthlist__44u0__long,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -3720,29 +2515,11 @@ static const long _vq_lengthlist__44u0__p1_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u0__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u0__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p1_0 = {
-        (float *)_vq_quantthresh__44u0__p1_0,
-        (long *)_vq_quantmap__44u0__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u0__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u0__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u0__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p1_0,
-        NULL,
         0
 };
 
@@ -3761,29 +2538,11 @@ static const long _vq_lengthlist__44u0__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u0__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u0__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p2_0 = {
-        (float *)_vq_quantthresh__44u0__p2_0,
-        (long *)_vq_quantmap__44u0__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u0__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u0__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u0__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p2_0,
-        NULL,
         0
 };
 
@@ -3838,29 +2597,11 @@ static const long _vq_lengthlist__44u0__p3_0[] = {
         19,
 };
 
-static const float _vq_quantthresh__44u0__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u0__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p3_0 = {
-        (float *)_vq_quantthresh__44u0__p3_0,
-        (long *)_vq_quantmap__44u0__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u0__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u0__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u0__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p3_0,
-        NULL,
         0
 };
 
@@ -3915,29 +2656,11 @@ static const long _vq_lengthlist__44u0__p4_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u0__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u0__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p4_0 = {
-        (float *)_vq_quantthresh__44u0__p4_0,
-        (long *)_vq_quantmap__44u0__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u0__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u0__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u0__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p4_0,
-        NULL,
         0
 };
 
@@ -3962,30 +2685,11 @@ static const long _vq_lengthlist__44u0__p5_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u0__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u0__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p5_0 = {
-        (float *)_vq_quantthresh__44u0__p5_0,
-        (long *)_vq_quantmap__44u0__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u0__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u0__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u0__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p5_0,
-        NULL,
         0
 };
 
@@ -4019,31 +2723,11 @@ static const long _vq_lengthlist__44u0__p6_0[] = {
         15,17,16,17,18,17,17,18, 0,
 };
 
-static const float _vq_quantthresh__44u0__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44u0__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p6_0 = {
-        (float *)_vq_quantthresh__44u0__p6_0,
-        (long *)_vq_quantmap__44u0__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44u0__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u0__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44u0__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p6_0,
-        NULL,
         0
 };
 
@@ -4060,29 +2744,11 @@ static const long _vq_lengthlist__44u0__p6_1[] = {
          6, 6, 6, 6, 5, 6, 6, 6, 6,
 };
 
-static const float _vq_quantthresh__44u0__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u0__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p6_1 = {
-        (float *)_vq_quantthresh__44u0__p6_1,
-        (long *)_vq_quantmap__44u0__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44u0__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44u0__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u0__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p6_1,
-        NULL,
         0
 };
 
@@ -4137,29 +2803,11 @@ static const long _vq_lengthlist__44u0__p7_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u0__p7_0[] = {
-        -253.5, -84.5, 84.5, 253.5, 
-};
-
-static const long _vq_quantmap__44u0__p7_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p7_0 = {
-        (float *)_vq_quantthresh__44u0__p7_0,
-        (long *)_vq_quantmap__44u0__p7_0,
-        5,
-        5
-};
-
 static const static_codebook _44u0__p7_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u0__p7_0,
         1, -518709248, 1626677248, 3, 0,
         (long *)_vq_quantlist__44u0__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p7_0,
-        NULL,
         0
 };
 
@@ -4193,31 +2841,11 @@ static const long _vq_lengthlist__44u0__p7_1[] = {
         15,15,15,15,15,15,15,15,15,
 };
 
-static const float _vq_quantthresh__44u0__p7_1[] = {
-        -71.5, -58.5, -45.5, -32.5, -19.5, -6.5, 6.5, 19.5, 
-        32.5, 45.5, 58.5, 71.5, 
-};
-
-static const long _vq_quantmap__44u0__p7_1[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p7_1 = {
-        (float *)_vq_quantthresh__44u0__p7_1,
-        (long *)_vq_quantmap__44u0__p7_1,
-        13,
-        13
-};
-
 static const static_codebook _44u0__p7_1 = {
         2, 169,
         (long *)_vq_lengthlist__44u0__p7_1,
         1, -523010048, 1618608128, 4, 0,
         (long *)_vq_quantlist__44u0__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p7_1,
-        NULL,
         0
 };
 
@@ -4251,31 +2879,11 @@ static const long _vq_lengthlist__44u0__p7_2[] = {
          9, 9, 9,10, 9, 9,10,10, 9,
 };
 
-static const float _vq_quantthresh__44u0__p7_2[] = {
-        -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 
-        2.5, 3.5, 4.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u0__p7_2[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u0__p7_2 = {
-        (float *)_vq_quantthresh__44u0__p7_2,
-        (long *)_vq_quantmap__44u0__p7_2,
-        13,
-        13
-};
-
 static const static_codebook _44u0__p7_2 = {
         2, 169,
         (long *)_vq_lengthlist__44u0__p7_2,
         1, -531103744, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u0__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u0__p7_2,
-        NULL,
         0
 };
 
@@ -4291,9 +2899,6 @@ static const static_codebook _huff_book__44u0__short = {
         (long *)_huff_lengthlist__44u0__short,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -4308,9 +2913,6 @@ static const static_codebook _huff_book__44u1__long = {
         2, 64,
         (long *)_huff_lengthlist__44u1__long,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -4330,29 +2932,11 @@ static const long _vq_lengthlist__44u1__p1_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u1__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u1__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p1_0 = {
-        (float *)_vq_quantthresh__44u1__p1_0,
-        (long *)_vq_quantmap__44u1__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u1__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u1__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u1__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p1_0,
-        NULL,
         0
 };
 
@@ -4371,29 +2955,11 @@ static const long _vq_lengthlist__44u1__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u1__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u1__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p2_0 = {
-        (float *)_vq_quantthresh__44u1__p2_0,
-        (long *)_vq_quantmap__44u1__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u1__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u1__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u1__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p2_0,
-        NULL,
         0
 };
 
@@ -4448,29 +3014,11 @@ static const long _vq_lengthlist__44u1__p3_0[] = {
         19,
 };
 
-static const float _vq_quantthresh__44u1__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u1__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p3_0 = {
-        (float *)_vq_quantthresh__44u1__p3_0,
-        (long *)_vq_quantmap__44u1__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u1__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u1__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u1__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p3_0,
-        NULL,
         0
 };
 
@@ -4525,29 +3073,11 @@ static const long _vq_lengthlist__44u1__p4_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u1__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u1__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p4_0 = {
-        (float *)_vq_quantthresh__44u1__p4_0,
-        (long *)_vq_quantmap__44u1__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u1__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u1__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u1__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p4_0,
-        NULL,
         0
 };
 
@@ -4572,30 +3102,11 @@ static const long _vq_lengthlist__44u1__p5_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u1__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u1__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p5_0 = {
-        (float *)_vq_quantthresh__44u1__p5_0,
-        (long *)_vq_quantmap__44u1__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u1__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u1__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u1__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p5_0,
-        NULL,
         0
 };
 
@@ -4629,31 +3140,11 @@ static const long _vq_lengthlist__44u1__p6_0[] = {
         15,17,16,17,18,17,17,18, 0,
 };
 
-static const float _vq_quantthresh__44u1__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44u1__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p6_0 = {
-        (float *)_vq_quantthresh__44u1__p6_0,
-        (long *)_vq_quantmap__44u1__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44u1__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u1__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44u1__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p6_0,
-        NULL,
         0
 };
 
@@ -4670,29 +3161,11 @@ static const long _vq_lengthlist__44u1__p6_1[] = {
          6, 6, 6, 6, 5, 6, 6, 6, 6,
 };
 
-static const float _vq_quantthresh__44u1__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u1__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p6_1 = {
-        (float *)_vq_quantthresh__44u1__p6_1,
-        (long *)_vq_quantmap__44u1__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44u1__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44u1__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u1__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p6_1,
-        NULL,
         0
 };
 
@@ -4713,29 +3186,11 @@ static const long _vq_lengthlist__44u1__p7_0[] = {
          8,
 };
 
-static const float _vq_quantthresh__44u1__p7_0[] = {
-        -422.5, -253.5, -84.5, 84.5, 253.5, 422.5, 
-};
-
-static const long _vq_quantmap__44u1__p7_0[] = {
-            5,    3,    1,    0,    2,    4,    6,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p7_0 = {
-        (float *)_vq_quantthresh__44u1__p7_0,
-        (long *)_vq_quantmap__44u1__p7_0,
-        7,
-        7
-};
-
 static const static_codebook _44u1__p7_0 = {
         2, 49,
         (long *)_vq_lengthlist__44u1__p7_0,
         1, -518017024, 1626677248, 3, 0,
         (long *)_vq_quantlist__44u1__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p7_0,
-        NULL,
         0
 };
 
@@ -4769,31 +3224,11 @@ static const long _vq_lengthlist__44u1__p7_1[] = {
         15,15,15,15,15,15,15,15,15,
 };
 
-static const float _vq_quantthresh__44u1__p7_1[] = {
-        -71.5, -58.5, -45.5, -32.5, -19.5, -6.5, 6.5, 19.5, 
-        32.5, 45.5, 58.5, 71.5, 
-};
-
-static const long _vq_quantmap__44u1__p7_1[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p7_1 = {
-        (float *)_vq_quantthresh__44u1__p7_1,
-        (long *)_vq_quantmap__44u1__p7_1,
-        13,
-        13
-};
-
 static const static_codebook _44u1__p7_1 = {
         2, 169,
         (long *)_vq_lengthlist__44u1__p7_1,
         1, -523010048, 1618608128, 4, 0,
         (long *)_vq_quantlist__44u1__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p7_1,
-        NULL,
         0
 };
 
@@ -4827,31 +3262,11 @@ static const long _vq_lengthlist__44u1__p7_2[] = {
          9, 9, 9,10, 9, 9,10,10, 9,
 };
 
-static const float _vq_quantthresh__44u1__p7_2[] = {
-        -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 
-        2.5, 3.5, 4.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u1__p7_2[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u1__p7_2 = {
-        (float *)_vq_quantthresh__44u1__p7_2,
-        (long *)_vq_quantmap__44u1__p7_2,
-        13,
-        13
-};
-
 static const static_codebook _44u1__p7_2 = {
         2, 169,
         (long *)_vq_lengthlist__44u1__p7_2,
         1, -531103744, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u1__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u1__p7_2,
-        NULL,
         0
 };
 
@@ -4867,9 +3282,6 @@ static const static_codebook _huff_book__44u1__short = {
         (long *)_huff_lengthlist__44u1__short,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -4884,9 +3296,6 @@ static const static_codebook _huff_book__44u2__long = {
         2, 64,
         (long *)_huff_lengthlist__44u2__long,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -4906,29 +3315,11 @@ static const long _vq_lengthlist__44u2__p1_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u2__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u2__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p1_0 = {
-        (float *)_vq_quantthresh__44u2__p1_0,
-        (long *)_vq_quantmap__44u2__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u2__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u2__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u2__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p1_0,
-        NULL,
         0
 };
 
@@ -4947,29 +3338,11 @@ static const long _vq_lengthlist__44u2__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u2__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u2__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p2_0 = {
-        (float *)_vq_quantthresh__44u2__p2_0,
-        (long *)_vq_quantmap__44u2__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u2__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u2__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u2__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p2_0,
-        NULL,
         0
 };
 
@@ -5024,29 +3397,11 @@ static const long _vq_lengthlist__44u2__p3_0[] = {
          0,
 };
 
-static const float _vq_quantthresh__44u2__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u2__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p3_0 = {
-        (float *)_vq_quantthresh__44u2__p3_0,
-        (long *)_vq_quantmap__44u2__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u2__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u2__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u2__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p3_0,
-        NULL,
         0
 };
 
@@ -5101,29 +3456,11 @@ static const long _vq_lengthlist__44u2__p4_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u2__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u2__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p4_0 = {
-        (float *)_vq_quantthresh__44u2__p4_0,
-        (long *)_vq_quantmap__44u2__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u2__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u2__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u2__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p4_0,
-        NULL,
         0
 };
 
@@ -5148,30 +3485,11 @@ static const long _vq_lengthlist__44u2__p5_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u2__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u2__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p5_0 = {
-        (float *)_vq_quantthresh__44u2__p5_0,
-        (long *)_vq_quantmap__44u2__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u2__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u2__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u2__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p5_0,
-        NULL,
         0
 };
 
@@ -5205,31 +3523,11 @@ static const long _vq_lengthlist__44u2__p6_0[] = {
         15,17,17,16,18,17,18, 0, 0,
 };
 
-static const float _vq_quantthresh__44u2__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44u2__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p6_0 = {
-        (float *)_vq_quantthresh__44u2__p6_0,
-        (long *)_vq_quantmap__44u2__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44u2__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u2__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44u2__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p6_0,
-        NULL,
         0
 };
 
@@ -5246,29 +3544,11 @@ static const long _vq_lengthlist__44u2__p6_1[] = {
          6, 5, 6, 6, 5, 5, 6, 6, 6,
 };
 
-static const float _vq_quantthresh__44u2__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u2__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p6_1 = {
-        (float *)_vq_quantthresh__44u2__p6_1,
-        (long *)_vq_quantmap__44u2__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44u2__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44u2__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u2__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p6_1,
-        NULL,
         0
 };
 
@@ -5293,30 +3573,11 @@ static const long _vq_lengthlist__44u2__p7_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__44u2__p7_0[] = {
-        -591.5, -422.5, -253.5, -84.5, 84.5, 253.5, 422.5, 591.5, 
-};
-
-static const long _vq_quantmap__44u2__p7_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p7_0 = {
-        (float *)_vq_quantthresh__44u2__p7_0,
-        (long *)_vq_quantmap__44u2__p7_0,
-        9,
-        9
-};
-
 static const static_codebook _44u2__p7_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u2__p7_0,
         1, -516612096, 1626677248, 4, 0,
         (long *)_vq_quantlist__44u2__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p7_0,
-        NULL,
         0
 };
 
@@ -5350,31 +3611,11 @@ static const long _vq_lengthlist__44u2__p7_1[] = {
         14,14,14,17,15,17,17,17,17,
 };
 
-static const float _vq_quantthresh__44u2__p7_1[] = {
-        -71.5, -58.5, -45.5, -32.5, -19.5, -6.5, 6.5, 19.5, 
-        32.5, 45.5, 58.5, 71.5, 
-};
-
-static const long _vq_quantmap__44u2__p7_1[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p7_1 = {
-        (float *)_vq_quantthresh__44u2__p7_1,
-        (long *)_vq_quantmap__44u2__p7_1,
-        13,
-        13
-};
-
 static const static_codebook _44u2__p7_1 = {
         2, 169,
         (long *)_vq_lengthlist__44u2__p7_1,
         1, -523010048, 1618608128, 4, 0,
         (long *)_vq_quantlist__44u2__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p7_1,
-        NULL,
         0
 };
 
@@ -5408,31 +3649,11 @@ static const long _vq_lengthlist__44u2__p7_2[] = {
          9, 9, 9, 9, 9, 9, 9, 9, 9,
 };
 
-static const float _vq_quantthresh__44u2__p7_2[] = {
-        -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 
-        2.5, 3.5, 4.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u2__p7_2[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u2__p7_2 = {
-        (float *)_vq_quantthresh__44u2__p7_2,
-        (long *)_vq_quantmap__44u2__p7_2,
-        13,
-        13
-};
-
 static const static_codebook _44u2__p7_2 = {
         2, 169,
         (long *)_vq_lengthlist__44u2__p7_2,
         1, -531103744, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u2__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u2__p7_2,
-        NULL,
         0
 };
 
@@ -5448,9 +3669,6 @@ static const static_codebook _huff_book__44u2__short = {
         (long *)_huff_lengthlist__44u2__short,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -5465,9 +3683,6 @@ static const static_codebook _huff_book__44u3__long = {
         2, 64,
         (long *)_huff_lengthlist__44u3__long,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -5487,29 +3702,11 @@ static const long _vq_lengthlist__44u3__p1_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u3__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u3__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p1_0 = {
-        (float *)_vq_quantthresh__44u3__p1_0,
-        (long *)_vq_quantmap__44u3__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u3__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u3__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u3__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p1_0,
-        NULL,
         0
 };
 
@@ -5528,29 +3725,11 @@ static const long _vq_lengthlist__44u3__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u3__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u3__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p2_0 = {
-        (float *)_vq_quantthresh__44u3__p2_0,
-        (long *)_vq_quantmap__44u3__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u3__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u3__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u3__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p2_0,
-        NULL,
         0
 };
 
@@ -5605,29 +3784,11 @@ static const long _vq_lengthlist__44u3__p3_0[] = {
          0,
 };
 
-static const float _vq_quantthresh__44u3__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u3__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p3_0 = {
-        (float *)_vq_quantthresh__44u3__p3_0,
-        (long *)_vq_quantmap__44u3__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u3__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u3__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u3__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p3_0,
-        NULL,
         0
 };
 
@@ -5682,29 +3843,11 @@ static const long _vq_lengthlist__44u3__p4_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u3__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u3__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p4_0 = {
-        (float *)_vq_quantthresh__44u3__p4_0,
-        (long *)_vq_quantmap__44u3__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u3__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u3__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u3__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p4_0,
-        NULL,
         0
 };
 
@@ -5729,30 +3872,11 @@ static const long _vq_lengthlist__44u3__p5_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u3__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u3__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p5_0 = {
-        (float *)_vq_quantthresh__44u3__p5_0,
-        (long *)_vq_quantmap__44u3__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u3__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u3__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u3__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p5_0,
-        NULL,
         0
 };
 
@@ -5786,31 +3910,11 @@ static const long _vq_lengthlist__44u3__p6_0[] = {
         15,16,16,16,17,18,16,20,18,
 };
 
-static const float _vq_quantthresh__44u3__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44u3__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p6_0 = {
-        (float *)_vq_quantthresh__44u3__p6_0,
-        (long *)_vq_quantmap__44u3__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44u3__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u3__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44u3__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p6_0,
-        NULL,
         0
 };
 
@@ -5827,29 +3931,11 @@ static const long _vq_lengthlist__44u3__p6_1[] = {
          6, 5, 6, 6, 5, 5, 6, 6, 6,
 };
 
-static const float _vq_quantthresh__44u3__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u3__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p6_1 = {
-        (float *)_vq_quantthresh__44u3__p6_1,
-        (long *)_vq_quantmap__44u3__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44u3__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44u3__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u3__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p6_1,
-        NULL,
         0
 };
 
@@ -5874,30 +3960,11 @@ static const long _vq_lengthlist__44u3__p7_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u3__p7_0[] = {
-        -892.5, -637.5, -382.5, -127.5, 127.5, 382.5, 637.5, 892.5, 
-};
-
-static const long _vq_quantmap__44u3__p7_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p7_0 = {
-        (float *)_vq_quantthresh__44u3__p7_0,
-        (long *)_vq_quantmap__44u3__p7_0,
-        9,
-        9
-};
-
 static const static_codebook _44u3__p7_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u3__p7_0,
         1, -515907584, 1627381760, 4, 0,
         (long *)_vq_quantlist__44u3__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p7_0,
-        NULL,
         0
 };
 
@@ -5937,31 +4004,11 @@ static const long _vq_lengthlist__44u3__p7_1[] = {
         17,
 };
 
-static const float _vq_quantthresh__44u3__p7_1[] = {
-        -110.5, -93.5, -76.5, -59.5, -42.5, -25.5, -8.5, 8.5, 
-        25.5, 42.5, 59.5, 76.5, 93.5, 110.5, 
-};
-
-static const long _vq_quantmap__44u3__p7_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p7_1 = {
-        (float *)_vq_quantthresh__44u3__p7_1,
-        (long *)_vq_quantmap__44u3__p7_1,
-        15,
-        15
-};
-
 static const static_codebook _44u3__p7_1 = {
         2, 225,
         (long *)_vq_lengthlist__44u3__p7_1,
         1, -522338304, 1620115456, 4, 0,
         (long *)_vq_quantlist__44u3__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p7_1,
-        NULL,
         0
 };
 
@@ -6007,32 +4054,11 @@ static const long _vq_lengthlist__44u3__p7_2[] = {
         11,
 };
 
-static const float _vq_quantthresh__44u3__p7_2[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__44u3__p7_2[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u3__p7_2 = {
-        (float *)_vq_quantthresh__44u3__p7_2,
-        (long *)_vq_quantmap__44u3__p7_2,
-        17,
-        17
-};
-
 static const static_codebook _44u3__p7_2 = {
         2, 289,
         (long *)_vq_lengthlist__44u3__p7_2,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u3__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u3__p7_2,
-        NULL,
         0
 };
 
@@ -6048,9 +4074,6 @@ static const static_codebook _huff_book__44u3__short = {
         (long *)_huff_lengthlist__44u3__short,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -6065,9 +4088,6 @@ static const static_codebook _huff_book__44u4__long = {
         2, 64,
         (long *)_huff_lengthlist__44u4__long,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -6087,29 +4107,11 @@ static const long _vq_lengthlist__44u4__p1_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u4__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u4__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p1_0 = {
-        (float *)_vq_quantthresh__44u4__p1_0,
-        (long *)_vq_quantmap__44u4__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u4__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u4__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u4__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p1_0,
-        NULL,
         0
 };
 
@@ -6128,29 +4130,11 @@ static const long _vq_lengthlist__44u4__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u4__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u4__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p2_0 = {
-        (float *)_vq_quantthresh__44u4__p2_0,
-        (long *)_vq_quantmap__44u4__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u4__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u4__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u4__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p2_0,
-        NULL,
         0
 };
 
@@ -6205,29 +4189,11 @@ static const long _vq_lengthlist__44u4__p3_0[] = {
          0,
 };
 
-static const float _vq_quantthresh__44u4__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u4__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p3_0 = {
-        (float *)_vq_quantthresh__44u4__p3_0,
-        (long *)_vq_quantmap__44u4__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u4__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u4__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u4__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p3_0,
-        NULL,
         0
 };
 
@@ -6282,29 +4248,11 @@ static const long _vq_lengthlist__44u4__p4_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u4__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u4__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p4_0 = {
-        (float *)_vq_quantthresh__44u4__p4_0,
-        (long *)_vq_quantmap__44u4__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u4__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u4__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u4__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p4_0,
-        NULL,
         0
 };
 
@@ -6329,30 +4277,11 @@ static const long _vq_lengthlist__44u4__p5_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u4__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u4__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p5_0 = {
-        (float *)_vq_quantthresh__44u4__p5_0,
-        (long *)_vq_quantmap__44u4__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u4__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u4__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u4__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p5_0,
-        NULL,
         0
 };
 
@@ -6386,31 +4315,11 @@ static const long _vq_lengthlist__44u4__p6_0[] = {
         16,16,16,17,17,18,17,20,21,
 };
 
-static const float _vq_quantthresh__44u4__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44u4__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p6_0 = {
-        (float *)_vq_quantthresh__44u4__p6_0,
-        (long *)_vq_quantmap__44u4__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44u4__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u4__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44u4__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p6_0,
-        NULL,
         0
 };
 
@@ -6427,29 +4336,11 @@ static const long _vq_lengthlist__44u4__p6_1[] = {
          6, 5, 6, 6, 5, 5, 6, 6, 6,
 };
 
-static const float _vq_quantthresh__44u4__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u4__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p6_1 = {
-        (float *)_vq_quantthresh__44u4__p6_1,
-        (long *)_vq_quantmap__44u4__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44u4__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44u4__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u4__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p6_1,
-        NULL,
         0
 };
 
@@ -6483,31 +4374,11 @@ static const long _vq_lengthlist__44u4__p7_0[] = {
         11,11,11,11,11,11,11,11,11,
 };
 
-static const float _vq_quantthresh__44u4__p7_0[] = {
-        -1402.5, -1147.5, -892.5, -637.5, -382.5, -127.5, 127.5, 382.5, 
-        637.5, 892.5, 1147.5, 1402.5, 
-};
-
-static const long _vq_quantmap__44u4__p7_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p7_0 = {
-        (float *)_vq_quantthresh__44u4__p7_0,
-        (long *)_vq_quantmap__44u4__p7_0,
-        13,
-        13
-};
-
 static const static_codebook _44u4__p7_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u4__p7_0,
         1, -514332672, 1627381760, 4, 0,
         (long *)_vq_quantlist__44u4__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p7_0,
-        NULL,
         0
 };
 
@@ -6547,31 +4418,11 @@ static const long _vq_lengthlist__44u4__p7_1[] = {
         16,
 };
 
-static const float _vq_quantthresh__44u4__p7_1[] = {
-        -110.5, -93.5, -76.5, -59.5, -42.5, -25.5, -8.5, 8.5, 
-        25.5, 42.5, 59.5, 76.5, 93.5, 110.5, 
-};
-
-static const long _vq_quantmap__44u4__p7_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p7_1 = {
-        (float *)_vq_quantthresh__44u4__p7_1,
-        (long *)_vq_quantmap__44u4__p7_1,
-        15,
-        15
-};
-
 static const static_codebook _44u4__p7_1 = {
         2, 225,
         (long *)_vq_lengthlist__44u4__p7_1,
         1, -522338304, 1620115456, 4, 0,
         (long *)_vq_quantlist__44u4__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p7_1,
-        NULL,
         0
 };
 
@@ -6617,32 +4468,11 @@ static const long _vq_lengthlist__44u4__p7_2[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u4__p7_2[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__44u4__p7_2[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u4__p7_2 = {
-        (float *)_vq_quantthresh__44u4__p7_2,
-        (long *)_vq_quantmap__44u4__p7_2,
-        17,
-        17
-};
-
 static const static_codebook _44u4__p7_2 = {
         2, 289,
         (long *)_vq_lengthlist__44u4__p7_2,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u4__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u4__p7_2,
-        NULL,
         0
 };
 
@@ -6657,9 +4487,6 @@ static const static_codebook _huff_book__44u4__short = {
         2, 64,
         (long *)_huff_lengthlist__44u4__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -6679,9 +4506,6 @@ static const static_codebook _huff_book__44u5__long = {
         (long *)_huff_lengthlist__44u5__long,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -6700,29 +4524,11 @@ static const long _vq_lengthlist__44u5__p1_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u5__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u5__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p1_0 = {
-        (float *)_vq_quantthresh__44u5__p1_0,
-        (long *)_vq_quantmap__44u5__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u5__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u5__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u5__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p1_0,
-        NULL,
         0
 };
 
@@ -6741,29 +4547,11 @@ static const long _vq_lengthlist__44u5__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u5__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u5__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p2_0 = {
-        (float *)_vq_quantthresh__44u5__p2_0,
-        (long *)_vq_quantmap__44u5__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u5__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u5__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u5__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p2_0,
-        NULL,
         0
 };
 
@@ -6818,29 +4606,11 @@ static const long _vq_lengthlist__44u5__p3_0[] = {
          0,
 };
 
-static const float _vq_quantthresh__44u5__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u5__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p3_0 = {
-        (float *)_vq_quantthresh__44u5__p3_0,
-        (long *)_vq_quantmap__44u5__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u5__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u5__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u5__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p3_0,
-        NULL,
         0
 };
 
@@ -6895,29 +4665,11 @@ static const long _vq_lengthlist__44u5__p4_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u5__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u5__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p4_0 = {
-        (float *)_vq_quantthresh__44u5__p4_0,
-        (long *)_vq_quantmap__44u5__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u5__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u5__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u5__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p4_0,
-        NULL,
         0
 };
 
@@ -6942,30 +4694,11 @@ static const long _vq_lengthlist__44u5__p5_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u5__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u5__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p5_0 = {
-        (float *)_vq_quantthresh__44u5__p5_0,
-        (long *)_vq_quantmap__44u5__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u5__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u5__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u5__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p5_0,
-        NULL,
         0
 };
 
@@ -6990,30 +4723,11 @@ static const long _vq_lengthlist__44u5__p6_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__44u5__p6_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u5__p6_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p6_0 = {
-        (float *)_vq_quantthresh__44u5__p6_0,
-        (long *)_vq_quantmap__44u5__p6_0,
-        9,
-        9
-};
-
 static const static_codebook _44u5__p6_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u5__p6_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u5__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p6_0,
-        NULL,
         0
 };
 
@@ -7032,29 +4746,11 @@ static const long _vq_lengthlist__44u5__p7_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u5__p7_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u5__p7_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p7_0 = {
-        (float *)_vq_quantthresh__44u5__p7_0,
-        (long *)_vq_quantmap__44u5__p7_0,
-        3,
-        3
-};
-
 static const static_codebook _44u5__p7_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u5__p7_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__44u5__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p7_0,
-        NULL,
         0
 };
 
@@ -7083,31 +4779,11 @@ static const long _vq_lengthlist__44u5__p7_1[] = {
          9, 9, 9, 9, 9,10,10,10,10,
 };
 
-static const float _vq_quantthresh__44u5__p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u5__p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p7_1 = {
-        (float *)_vq_quantthresh__44u5__p7_1,
-        (long *)_vq_quantmap__44u5__p7_1,
-        11,
-        11
-};
-
 static const static_codebook _44u5__p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u5__p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u5__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p7_1,
-        NULL,
         0
 };
 
@@ -7136,31 +4812,11 @@ static const long _vq_lengthlist__44u5__p8_0[] = {
         12,13,13,14,14,14,14,15,15,
 };
 
-static const float _vq_quantthresh__44u5__p8_0[] = {
-        -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 27.5, 
-        38.5, 49.5, 
-};
-
-static const long _vq_quantmap__44u5__p8_0[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p8_0 = {
-        (float *)_vq_quantthresh__44u5__p8_0,
-        (long *)_vq_quantmap__44u5__p8_0,
-        11,
-        11
-};
-
 static const static_codebook _44u5__p8_0 = {
         2, 121,
         (long *)_vq_lengthlist__44u5__p8_0,
         1, -524582912, 1618345984, 4, 0,
         (long *)_vq_quantlist__44u5__p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p8_0,
-        NULL,
         0
 };
 
@@ -7189,31 +4845,11 @@ static const long _vq_lengthlist__44u5__p8_1[] = {
          8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-static const float _vq_quantthresh__44u5__p8_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u5__p8_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p8_1 = {
-        (float *)_vq_quantthresh__44u5__p8_1,
-        (long *)_vq_quantmap__44u5__p8_1,
-        11,
-        11
-};
-
 static const static_codebook _44u5__p8_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u5__p8_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u5__p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p8_1,
-        NULL,
         0
 };
 
@@ -7247,31 +4883,11 @@ static const long _vq_lengthlist__44u5__p9_0[] = {
         12,12,12,12,12,12,12,12,12,
 };
 
-static const float _vq_quantthresh__44u5__p9_0[] = {
-        -1402.5, -1147.5, -892.5, -637.5, -382.5, -127.5, 127.5, 382.5, 
-        637.5, 892.5, 1147.5, 1402.5, 
-};
-
-static const long _vq_quantmap__44u5__p9_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p9_0 = {
-        (float *)_vq_quantthresh__44u5__p9_0,
-        (long *)_vq_quantmap__44u5__p9_0,
-        13,
-        13
-};
-
 static const static_codebook _44u5__p9_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u5__p9_0,
         1, -514332672, 1627381760, 4, 0,
         (long *)_vq_quantlist__44u5__p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p9_0,
-        NULL,
         0
 };
 
@@ -7311,31 +4927,11 @@ static const long _vq_lengthlist__44u5__p9_1[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u5__p9_1[] = {
-        -110.5, -93.5, -76.5, -59.5, -42.5, -25.5, -8.5, 8.5, 
-        25.5, 42.5, 59.5, 76.5, 93.5, 110.5, 
-};
-
-static const long _vq_quantmap__44u5__p9_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p9_1 = {
-        (float *)_vq_quantthresh__44u5__p9_1,
-        (long *)_vq_quantmap__44u5__p9_1,
-        15,
-        15
-};
-
 static const static_codebook _44u5__p9_1 = {
         2, 225,
         (long *)_vq_lengthlist__44u5__p9_1,
         1, -522338304, 1620115456, 4, 0,
         (long *)_vq_quantlist__44u5__p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p9_1,
-        NULL,
         0
 };
 
@@ -7381,32 +4977,11 @@ static const long _vq_lengthlist__44u5__p9_2[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u5__p9_2[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__44u5__p9_2[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u5__p9_2 = {
-        (float *)_vq_quantthresh__44u5__p9_2,
-        (long *)_vq_quantmap__44u5__p9_2,
-        17,
-        17
-};
-
 static const static_codebook _44u5__p9_2 = {
         2, 289,
         (long *)_vq_lengthlist__44u5__p9_2,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u5__p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u5__p9_2,
-        NULL,
         0
 };
 
@@ -7424,9 +4999,6 @@ static const static_codebook _huff_book__44u5__short = {
         2, 100,
         (long *)_huff_lengthlist__44u5__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -7446,9 +5018,6 @@ static const static_codebook _huff_book__44u6__long = {
         (long *)_huff_lengthlist__44u6__long,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -7467,29 +5036,11 @@ static const long _vq_lengthlist__44u6__p1_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u6__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u6__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p1_0 = {
-        (float *)_vq_quantthresh__44u6__p1_0,
-        (long *)_vq_quantmap__44u6__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u6__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u6__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u6__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p1_0,
-        NULL,
         0
 };
 
@@ -7508,29 +5059,11 @@ static const long _vq_lengthlist__44u6__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u6__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u6__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p2_0 = {
-        (float *)_vq_quantthresh__44u6__p2_0,
-        (long *)_vq_quantmap__44u6__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u6__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u6__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u6__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p2_0,
-        NULL,
         0
 };
 
@@ -7585,29 +5118,11 @@ static const long _vq_lengthlist__44u6__p3_0[] = {
         19,
 };
 
-static const float _vq_quantthresh__44u6__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u6__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p3_0 = {
-        (float *)_vq_quantthresh__44u6__p3_0,
-        (long *)_vq_quantmap__44u6__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u6__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u6__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u6__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p3_0,
-        NULL,
         0
 };
 
@@ -7662,29 +5177,11 @@ static const long _vq_lengthlist__44u6__p4_0[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u6__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u6__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p4_0 = {
-        (float *)_vq_quantthresh__44u6__p4_0,
-        (long *)_vq_quantmap__44u6__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u6__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u6__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u6__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p4_0,
-        NULL,
         0
 };
 
@@ -7709,30 +5206,11 @@ static const long _vq_lengthlist__44u6__p5_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u6__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u6__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p5_0 = {
-        (float *)_vq_quantthresh__44u6__p5_0,
-        (long *)_vq_quantmap__44u6__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u6__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u6__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u6__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p5_0,
-        NULL,
         0
 };
 
@@ -7757,30 +5235,11 @@ static const long _vq_lengthlist__44u6__p6_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u6__p6_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u6__p6_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p6_0 = {
-        (float *)_vq_quantthresh__44u6__p6_0,
-        (long *)_vq_quantmap__44u6__p6_0,
-        9,
-        9
-};
-
 static const static_codebook _44u6__p6_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u6__p6_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u6__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p6_0,
-        NULL,
         0
 };
 
@@ -7799,29 +5258,11 @@ static const long _vq_lengthlist__44u6__p7_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u6__p7_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u6__p7_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p7_0 = {
-        (float *)_vq_quantthresh__44u6__p7_0,
-        (long *)_vq_quantmap__44u6__p7_0,
-        3,
-        3
-};
-
 static const static_codebook _44u6__p7_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u6__p7_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__44u6__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p7_0,
-        NULL,
         0
 };
 
@@ -7850,31 +5291,11 @@ static const long _vq_lengthlist__44u6__p7_1[] = {
          8, 8, 8, 9, 9, 9, 9, 9, 9,
 };
 
-static const float _vq_quantthresh__44u6__p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u6__p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p7_1 = {
-        (float *)_vq_quantthresh__44u6__p7_1,
-        (long *)_vq_quantmap__44u6__p7_1,
-        11,
-        11
-};
-
 static const static_codebook _44u6__p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u6__p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u6__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p7_1,
-        NULL,
         0
 };
 
@@ -7903,31 +5324,11 @@ static const long _vq_lengthlist__44u6__p8_0[] = {
         12,13,13,14,14,14,15,15,15,
 };
 
-static const float _vq_quantthresh__44u6__p8_0[] = {
-        -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 27.5, 
-        38.5, 49.5, 
-};
-
-static const long _vq_quantmap__44u6__p8_0[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p8_0 = {
-        (float *)_vq_quantthresh__44u6__p8_0,
-        (long *)_vq_quantmap__44u6__p8_0,
-        11,
-        11
-};
-
 static const static_codebook _44u6__p8_0 = {
         2, 121,
         (long *)_vq_lengthlist__44u6__p8_0,
         1, -524582912, 1618345984, 4, 0,
         (long *)_vq_quantlist__44u6__p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p8_0,
-        NULL,
         0
 };
 
@@ -7956,31 +5357,11 @@ static const long _vq_lengthlist__44u6__p8_1[] = {
          8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-static const float _vq_quantthresh__44u6__p8_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u6__p8_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p8_1 = {
-        (float *)_vq_quantthresh__44u6__p8_1,
-        (long *)_vq_quantmap__44u6__p8_1,
-        11,
-        11
-};
-
 static const static_codebook _44u6__p8_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u6__p8_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u6__p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p8_1,
-        NULL,
         0
 };
 
@@ -8020,31 +5401,11 @@ static const long _vq_lengthlist__44u6__p9_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u6__p9_0[] = {
-        -1657.5, -1402.5, -1147.5, -892.5, -637.5, -382.5, -127.5, 127.5, 
-        382.5, 637.5, 892.5, 1147.5, 1402.5, 1657.5, 
-};
-
-static const long _vq_quantmap__44u6__p9_0[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p9_0 = {
-        (float *)_vq_quantthresh__44u6__p9_0,
-        (long *)_vq_quantmap__44u6__p9_0,
-        15,
-        15
-};
-
 static const static_codebook _44u6__p9_0 = {
         2, 225,
         (long *)_vq_lengthlist__44u6__p9_0,
         1, -514071552, 1627381760, 4, 0,
         (long *)_vq_quantlist__44u6__p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p9_0,
-        NULL,
         0
 };
 
@@ -8084,31 +5445,11 @@ static const long _vq_lengthlist__44u6__p9_1[] = {
         13,
 };
 
-static const float _vq_quantthresh__44u6__p9_1[] = {
-        -110.5, -93.5, -76.5, -59.5, -42.5, -25.5, -8.5, 8.5, 
-        25.5, 42.5, 59.5, 76.5, 93.5, 110.5, 
-};
-
-static const long _vq_quantmap__44u6__p9_1[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p9_1 = {
-        (float *)_vq_quantthresh__44u6__p9_1,
-        (long *)_vq_quantmap__44u6__p9_1,
-        15,
-        15
-};
-
 static const static_codebook _44u6__p9_1 = {
         2, 225,
         (long *)_vq_lengthlist__44u6__p9_1,
         1, -522338304, 1620115456, 4, 0,
         (long *)_vq_quantlist__44u6__p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p9_1,
-        NULL,
         0
 };
 
@@ -8154,32 +5495,11 @@ static const long _vq_lengthlist__44u6__p9_2[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u6__p9_2[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__44u6__p9_2[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u6__p9_2 = {
-        (float *)_vq_quantthresh__44u6__p9_2,
-        (long *)_vq_quantmap__44u6__p9_2,
-        17,
-        17
-};
-
 static const static_codebook _44u6__p9_2 = {
         2, 289,
         (long *)_vq_lengthlist__44u6__p9_2,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u6__p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u6__p9_2,
-        NULL,
         0
 };
 
@@ -8197,9 +5517,6 @@ static const static_codebook _huff_book__44u6__short = {
         2, 100,
         (long *)_huff_lengthlist__44u6__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -8219,9 +5536,6 @@ static const static_codebook _huff_book__44u7__long = {
         (long *)_huff_lengthlist__44u7__long,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -8240,29 +5554,11 @@ static const long _vq_lengthlist__44u7__p1_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u7__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u7__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p1_0 = {
-        (float *)_vq_quantthresh__44u7__p1_0,
-        (long *)_vq_quantmap__44u7__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u7__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u7__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u7__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p1_0,
-        NULL,
         0
 };
 
@@ -8281,29 +5577,11 @@ static const long _vq_lengthlist__44u7__p2_0[] = {
          9,
 };
 
-static const float _vq_quantthresh__44u7__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u7__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p2_0 = {
-        (float *)_vq_quantthresh__44u7__p2_0,
-        (long *)_vq_quantmap__44u7__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44u7__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u7__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u7__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p2_0,
-        NULL,
         0
 };
 
@@ -8358,29 +5636,11 @@ static const long _vq_lengthlist__44u7__p3_0[] = {
          0,
 };
 
-static const float _vq_quantthresh__44u7__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u7__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p3_0 = {
-        (float *)_vq_quantthresh__44u7__p3_0,
-        (long *)_vq_quantmap__44u7__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44u7__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u7__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u7__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p3_0,
-        NULL,
         0
 };
 
@@ -8435,29 +5695,11 @@ static const long _vq_lengthlist__44u7__p4_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u7__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u7__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p4_0 = {
-        (float *)_vq_quantthresh__44u7__p4_0,
-        (long *)_vq_quantmap__44u7__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44u7__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u7__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u7__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p4_0,
-        NULL,
         0
 };
 
@@ -8482,30 +5724,11 @@ static const long _vq_lengthlist__44u7__p5_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u7__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u7__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p5_0 = {
-        (float *)_vq_quantthresh__44u7__p5_0,
-        (long *)_vq_quantmap__44u7__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44u7__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u7__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u7__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p5_0,
-        NULL,
         0
 };
 
@@ -8530,30 +5753,11 @@ static const long _vq_lengthlist__44u7__p6_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u7__p6_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u7__p6_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p6_0 = {
-        (float *)_vq_quantthresh__44u7__p6_0,
-        (long *)_vq_quantmap__44u7__p6_0,
-        9,
-        9
-};
-
 static const static_codebook _44u7__p6_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u7__p6_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u7__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p6_0,
-        NULL,
         0
 };
 
@@ -8572,29 +5776,11 @@ static const long _vq_lengthlist__44u7__p7_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u7__p7_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u7__p7_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p7_0 = {
-        (float *)_vq_quantthresh__44u7__p7_0,
-        (long *)_vq_quantmap__44u7__p7_0,
-        3,
-        3
-};
-
 static const static_codebook _44u7__p7_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u7__p7_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__44u7__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p7_0,
-        NULL,
         0
 };
 
@@ -8623,31 +5809,11 @@ static const long _vq_lengthlist__44u7__p7_1[] = {
          8, 9, 9, 9, 9, 9,10,10,10,
 };
 
-static const float _vq_quantthresh__44u7__p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u7__p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p7_1 = {
-        (float *)_vq_quantthresh__44u7__p7_1,
-        (long *)_vq_quantmap__44u7__p7_1,
-        11,
-        11
-};
-
 static const static_codebook _44u7__p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u7__p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u7__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p7_1,
-        NULL,
         0
 };
 
@@ -8676,31 +5842,11 @@ static const long _vq_lengthlist__44u7__p8_0[] = {
         12,13,13,14,14,15,15,15,16,
 };
 
-static const float _vq_quantthresh__44u7__p8_0[] = {
-        -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 27.5, 
-        38.5, 49.5, 
-};
-
-static const long _vq_quantmap__44u7__p8_0[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p8_0 = {
-        (float *)_vq_quantthresh__44u7__p8_0,
-        (long *)_vq_quantmap__44u7__p8_0,
-        11,
-        11
-};
-
 static const static_codebook _44u7__p8_0 = {
         2, 121,
         (long *)_vq_lengthlist__44u7__p8_0,
         1, -524582912, 1618345984, 4, 0,
         (long *)_vq_quantlist__44u7__p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p8_0,
-        NULL,
         0
 };
 
@@ -8729,31 +5875,11 @@ static const long _vq_lengthlist__44u7__p8_1[] = {
          7, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-static const float _vq_quantthresh__44u7__p8_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u7__p8_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p8_1 = {
-        (float *)_vq_quantthresh__44u7__p8_1,
-        (long *)_vq_quantmap__44u7__p8_1,
-        11,
-        11
-};
-
 static const static_codebook _44u7__p8_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u7__p8_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u7__p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p8_1,
-        NULL,
         0
 };
 
@@ -8782,31 +5908,11 @@ static const long _vq_lengthlist__44u7__p9_0[] = {
          9, 9, 9, 9, 9, 9, 9, 9, 9,
 };
 
-static const float _vq_quantthresh__44u7__p9_0[] = {
-        -2866.5, -2229.5, -1592.5, -955.5, -318.5, 318.5, 955.5, 1592.5, 
-        2229.5, 2866.5, 
-};
-
-static const long _vq_quantmap__44u7__p9_0[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p9_0 = {
-        (float *)_vq_quantthresh__44u7__p9_0,
-        (long *)_vq_quantmap__44u7__p9_0,
-        11,
-        11
-};
-
 static const static_codebook _44u7__p9_0 = {
         2, 121,
         (long *)_vq_lengthlist__44u7__p9_0,
         1, -512171520, 1630791680, 4, 0,
         (long *)_vq_quantlist__44u7__p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p9_0,
-        NULL,
         0
 };
 
@@ -8840,31 +5946,11 @@ static const long _vq_lengthlist__44u7__p9_1[] = {
         15,15,15,15,17,17,16,17,16,
 };
 
-static const float _vq_quantthresh__44u7__p9_1[] = {
-        -269.5, -220.5, -171.5, -122.5, -73.5, -24.5, 24.5, 73.5, 
-        122.5, 171.5, 220.5, 269.5, 
-};
-
-static const long _vq_quantmap__44u7__p9_1[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p9_1 = {
-        (float *)_vq_quantthresh__44u7__p9_1,
-        (long *)_vq_quantmap__44u7__p9_1,
-        13,
-        13
-};
-
 static const static_codebook _44u7__p9_1 = {
         2, 169,
         (long *)_vq_lengthlist__44u7__p9_1,
         1, -518889472, 1622704128, 4, 0,
         (long *)_vq_quantlist__44u7__p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p9_1,
-        NULL,
         0
 };
 
@@ -8927,40 +6013,11 @@ static const long _vq_lengthlist__44u7__p9_2[] = {
          8,
 };
 
-static const float _vq_quantthresh__44u7__p9_2[] = {
-        -23.5, -22.5, -21.5, -20.5, -19.5, -18.5, -17.5, -16.5, 
-        -15.5, -14.5, -13.5, -12.5, -11.5, -10.5, -9.5, -8.5, 
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-        8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5, 
-        16.5, 17.5, 18.5, 19.5, 20.5, 21.5, 22.5, 23.5, 
-};
-
-static const long _vq_quantmap__44u7__p9_2[] = {
-           47,   45,   43,   41,   39,   37,   35,   33,
-           31,   29,   27,   25,   23,   21,   19,   17,
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,   18,   20,   22,   24,   26,   28,   30,
-           32,   34,   36,   38,   40,   42,   44,   46,
-           48,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u7__p9_2 = {
-        (float *)_vq_quantthresh__44u7__p9_2,
-        (long *)_vq_quantmap__44u7__p9_2,
-        49,
-        49
-};
-
 static const static_codebook _44u7__p9_2 = {
         1, 49,
         (long *)_vq_lengthlist__44u7__p9_2,
         1, -526909440, 1611661312, 6, 0,
         (long *)_vq_quantlist__44u7__p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u7__p9_2,
-        NULL,
         0
 };
 
@@ -8978,9 +6035,6 @@ static const static_codebook _huff_book__44u7__short = {
         2, 100,
         (long *)_huff_lengthlist__44u7__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -9000,9 +6054,6 @@ static const static_codebook _huff_book__44u8__long = {
         (long *)_huff_lengthlist__44u8__long,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -9020,9 +6071,6 @@ static const static_codebook _huff_book__44u8__short = {
         2, 100,
         (long *)_huff_lengthlist__44u8__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -9042,29 +6090,11 @@ static const long _vq_lengthlist__44u8_p1_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u8_p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u8_p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p1_0 = {
-        (float *)_vq_quantthresh__44u8_p1_0,
-        (long *)_vq_quantmap__44u8_p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u8_p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u8_p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u8_p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p1_0,
-        NULL,
         0
 };
 
@@ -9119,29 +6149,11 @@ static const long _vq_lengthlist__44u8_p2_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u8_p2_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u8_p2_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p2_0 = {
-        (float *)_vq_quantthresh__44u8_p2_0,
-        (long *)_vq_quantmap__44u8_p2_0,
-        5,
-        5
-};
-
 static const static_codebook _44u8_p2_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u8_p2_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u8_p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p2_0,
-        NULL,
         0
 };
 
@@ -9166,30 +6178,11 @@ static const long _vq_lengthlist__44u8_p3_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44u8_p3_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u8_p3_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p3_0 = {
-        (float *)_vq_quantthresh__44u8_p3_0,
-        (long *)_vq_quantmap__44u8_p3_0,
-        9,
-        9
-};
-
 static const static_codebook _44u8_p3_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u8_p3_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u8_p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p3_0,
-        NULL,
         0
 };
 
@@ -9235,32 +6228,11 @@ static const long _vq_lengthlist__44u8_p4_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u8_p4_0[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__44u8_p4_0[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p4_0 = {
-        (float *)_vq_quantthresh__44u8_p4_0,
-        (long *)_vq_quantmap__44u8_p4_0,
-        17,
-        17
-};
-
 static const static_codebook _44u8_p4_0 = {
         2, 289,
         (long *)_vq_lengthlist__44u8_p4_0,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u8_p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p4_0,
-        NULL,
         0
 };
 
@@ -9279,29 +6251,11 @@ static const long _vq_lengthlist__44u8_p5_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u8_p5_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u8_p5_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p5_0 = {
-        (float *)_vq_quantthresh__44u8_p5_0,
-        (long *)_vq_quantmap__44u8_p5_0,
-        3,
-        3
-};
-
 static const static_codebook _44u8_p5_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u8_p5_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__44u8_p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p5_0,
-        NULL,
         0
 };
 
@@ -9330,31 +6284,11 @@ static const long _vq_lengthlist__44u8_p5_1[] = {
          8, 8, 8, 8, 8, 8, 8, 9, 9,
 };
 
-static const float _vq_quantthresh__44u8_p5_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u8_p5_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p5_1 = {
-        (float *)_vq_quantthresh__44u8_p5_1,
-        (long *)_vq_quantmap__44u8_p5_1,
-        11,
-        11
-};
-
 static const static_codebook _44u8_p5_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u8_p5_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u8_p5_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p5_1,
-        NULL,
         0
 };
 
@@ -9388,31 +6322,11 @@ static const long _vq_lengthlist__44u8_p6_0[] = {
         11,11,11,11,11,12,11,12,12,
 };
 
-static const float _vq_quantthresh__44u8_p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44u8_p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p6_0 = {
-        (float *)_vq_quantthresh__44u8_p6_0,
-        (long *)_vq_quantmap__44u8_p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44u8_p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u8_p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44u8_p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p6_0,
-        NULL,
         0
 };
 
@@ -9429,29 +6343,11 @@ static const long _vq_lengthlist__44u8_p6_1[] = {
          5, 5, 5, 5, 5, 5, 5, 5, 5,
 };
 
-static const float _vq_quantthresh__44u8_p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u8_p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p6_1 = {
-        (float *)_vq_quantthresh__44u8_p6_1,
-        (long *)_vq_quantmap__44u8_p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44u8_p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44u8_p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u8_p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p6_1,
-        NULL,
         0
 };
 
@@ -9485,31 +6381,11 @@ static const long _vq_lengthlist__44u8_p7_0[] = {
         13,13,14,14,14,15,15,15,16,
 };
 
-static const float _vq_quantthresh__44u8_p7_0[] = {
-        -60.5, -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 
-        27.5, 38.5, 49.5, 60.5, 
-};
-
-static const long _vq_quantmap__44u8_p7_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p7_0 = {
-        (float *)_vq_quantthresh__44u8_p7_0,
-        (long *)_vq_quantmap__44u8_p7_0,
-        13,
-        13
-};
-
 static const static_codebook _44u8_p7_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u8_p7_0,
         1, -523206656, 1618345984, 4, 0,
         (long *)_vq_quantlist__44u8_p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p7_0,
-        NULL,
         0
 };
 
@@ -9538,31 +6414,11 @@ static const long _vq_lengthlist__44u8_p7_1[] = {
          7, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-static const float _vq_quantthresh__44u8_p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u8_p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p7_1 = {
-        (float *)_vq_quantthresh__44u8_p7_1,
-        (long *)_vq_quantmap__44u8_p7_1,
-        11,
-        11
-};
-
 static const static_codebook _44u8_p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u8_p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u8_p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p7_1,
-        NULL,
         0
 };
 
@@ -9602,31 +6458,11 @@ static const long _vq_lengthlist__44u8_p8_0[] = {
         17,
 };
 
-static const float _vq_quantthresh__44u8_p8_0[] = {
-        -136.5, -115.5, -94.5, -73.5, -52.5, -31.5, -10.5, 10.5, 
-        31.5, 52.5, 73.5, 94.5, 115.5, 136.5, 
-};
-
-static const long _vq_quantmap__44u8_p8_0[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p8_0 = {
-        (float *)_vq_quantthresh__44u8_p8_0,
-        (long *)_vq_quantmap__44u8_p8_0,
-        15,
-        15
-};
-
 static const static_codebook _44u8_p8_0 = {
         2, 225,
         (long *)_vq_lengthlist__44u8_p8_0,
         1, -520986624, 1620377600, 4, 0,
         (long *)_vq_quantlist__44u8_p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p8_0,
-        NULL,
         0
 };
 
@@ -9685,33 +6521,11 @@ static const long _vq_lengthlist__44u8_p8_1[] = {
         10,10,10,10,10,10,10,10,10,
 };
 
-static const float _vq_quantthresh__44u8_p8_1[] = {
-        -9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, 
-        -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 
-        6.5, 7.5, 8.5, 9.5, 
-};
-
-static const long _vq_quantmap__44u8_p8_1[] = {
-           19,   17,   15,   13,   11,    9,    7,    5,
-            3,    1,    0,    2,    4,    6,    8,   10,
-           12,   14,   16,   18,   20,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p8_1 = {
-        (float *)_vq_quantthresh__44u8_p8_1,
-        (long *)_vq_quantmap__44u8_p8_1,
-        21,
-        21
-};
-
 static const static_codebook _44u8_p8_1 = {
         2, 441,
         (long *)_vq_lengthlist__44u8_p8_1,
         1, -529268736, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u8_p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p8_1,
-        NULL,
         0
 };
 
@@ -9736,30 +6550,11 @@ static const long _vq_lengthlist__44u8_p9_0[] = {
          8,
 };
 
-static const float _vq_quantthresh__44u8_p9_0[] = {
-        -3258.5, -2327.5, -1396.5, -465.5, 465.5, 1396.5, 2327.5, 3258.5, 
-};
-
-static const long _vq_quantmap__44u8_p9_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p9_0 = {
-        (float *)_vq_quantthresh__44u8_p9_0,
-        (long *)_vq_quantmap__44u8_p9_0,
-        9,
-        9
-};
-
 static const static_codebook _44u8_p9_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u8_p9_0,
         1, -511895552, 1631393792, 4, 0,
         (long *)_vq_quantlist__44u8_p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p9_0,
-        NULL,
         0
 };
 
@@ -9811,33 +6606,11 @@ static const long _vq_lengthlist__44u8_p9_1[] = {
         16,15,16,16,16,16,16,16,16,
 };
 
-static const float _vq_quantthresh__44u8_p9_1[] = {
-        -416.5, -367.5, -318.5, -269.5, -220.5, -171.5, -122.5, -73.5, 
-        -24.5, 24.5, 73.5, 122.5, 171.5, 220.5, 269.5, 318.5, 
-        367.5, 416.5, 
-};
-
-static const long _vq_quantmap__44u8_p9_1[] = {
-           17,   15,   13,   11,    9,    7,    5,    3,
-            1,    0,    2,    4,    6,    8,   10,   12,
-           14,   16,   18,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p9_1 = {
-        (float *)_vq_quantthresh__44u8_p9_1,
-        (long *)_vq_quantmap__44u8_p9_1,
-        19,
-        19
-};
-
 static const static_codebook _44u8_p9_1 = {
         2, 361,
         (long *)_vq_lengthlist__44u8_p9_1,
         1, -518287360, 1622704128, 5, 0,
         (long *)_vq_quantlist__44u8_p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p9_1,
-        NULL,
         0
 };
 
@@ -9900,40 +6673,11 @@ static const long _vq_lengthlist__44u8_p9_2[] = {
          7,
 };
 
-static const float _vq_quantthresh__44u8_p9_2[] = {
-        -23.5, -22.5, -21.5, -20.5, -19.5, -18.5, -17.5, -16.5, 
-        -15.5, -14.5, -13.5, -12.5, -11.5, -10.5, -9.5, -8.5, 
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-        8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5, 
-        16.5, 17.5, 18.5, 19.5, 20.5, 21.5, 22.5, 23.5, 
-};
-
-static const long _vq_quantmap__44u8_p9_2[] = {
-           47,   45,   43,   41,   39,   37,   35,   33,
-           31,   29,   27,   25,   23,   21,   19,   17,
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,   18,   20,   22,   24,   26,   28,   30,
-           32,   34,   36,   38,   40,   42,   44,   46,
-           48,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u8_p9_2 = {
-        (float *)_vq_quantthresh__44u8_p9_2,
-        (long *)_vq_quantmap__44u8_p9_2,
-        49,
-        49
-};
-
 static const static_codebook _44u8_p9_2 = {
         1, 49,
         (long *)_vq_lengthlist__44u8_p9_2,
         1, -526909440, 1611661312, 6, 0,
         (long *)_vq_quantlist__44u8_p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u8_p9_2,
-        NULL,
         0
 };
 
@@ -9951,9 +6695,6 @@ static const static_codebook _huff_book__44u9__long = {
         2, 100,
         (long *)_huff_lengthlist__44u9__long,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -9973,9 +6714,6 @@ static const static_codebook _huff_book__44u9__short = {
         (long *)_huff_lengthlist__44u9__short,
         0, 0, 0, 0, 0,
         NULL,
-        NULL,
-        NULL,
-        NULL,
         0
 };
 
@@ -9994,29 +6732,11 @@ static const long _vq_lengthlist__44u9_p1_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u9_p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44u9_p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p1_0 = {
-        (float *)_vq_quantthresh__44u9_p1_0,
-        (long *)_vq_quantmap__44u9_p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44u9_p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u9_p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44u9_p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p1_0,
-        NULL,
         0
 };
 
@@ -10071,29 +6791,11 @@ static const long _vq_lengthlist__44u9_p2_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u9_p2_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u9_p2_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p2_0 = {
-        (float *)_vq_quantthresh__44u9_p2_0,
-        (long *)_vq_quantmap__44u9_p2_0,
-        5,
-        5
-};
-
 static const static_codebook _44u9_p2_0 = {
         4, 625,
         (long *)_vq_lengthlist__44u9_p2_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u9_p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p2_0,
-        NULL,
         0
 };
 
@@ -10118,30 +6820,11 @@ static const long _vq_lengthlist__44u9_p3_0[] = {
         11,
 };
 
-static const float _vq_quantthresh__44u9_p3_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44u9_p3_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p3_0 = {
-        (float *)_vq_quantthresh__44u9_p3_0,
-        (long *)_vq_quantmap__44u9_p3_0,
-        9,
-        9
-};
-
 static const static_codebook _44u9_p3_0 = {
         2, 81,
         (long *)_vq_lengthlist__44u9_p3_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u9_p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p3_0,
-        NULL,
         0
 };
 
@@ -10187,32 +6870,11 @@ static const long _vq_lengthlist__44u9_p4_0[] = {
         14,
 };
 
-static const float _vq_quantthresh__44u9_p4_0[] = {
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-};
-
-static const long _vq_quantmap__44u9_p4_0[] = {
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p4_0 = {
-        (float *)_vq_quantthresh__44u9_p4_0,
-        (long *)_vq_quantmap__44u9_p4_0,
-        17,
-        17
-};
-
 static const static_codebook _44u9_p4_0 = {
         2, 289,
         (long *)_vq_lengthlist__44u9_p4_0,
         1, -529530880, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u9_p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p4_0,
-        NULL,
         0
 };
 
@@ -10231,29 +6893,11 @@ static const long _vq_lengthlist__44u9_p5_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u9_p5_0[] = {
-        -5.5, 5.5, 
-};
-
-static const long _vq_quantmap__44u9_p5_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p5_0 = {
-        (float *)_vq_quantthresh__44u9_p5_0,
-        (long *)_vq_quantmap__44u9_p5_0,
-        3,
-        3
-};
-
 static const static_codebook _44u9_p5_0 = {
         4, 81,
         (long *)_vq_lengthlist__44u9_p5_0,
         1, -529137664, 1618345984, 2, 0,
         (long *)_vq_quantlist__44u9_p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p5_0,
-        NULL,
         0
 };
 
@@ -10282,31 +6926,11 @@ static const long _vq_lengthlist__44u9_p5_1[] = {
          8, 8, 8, 8, 8, 8, 8, 8, 8,
 };
 
-static const float _vq_quantthresh__44u9_p5_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u9_p5_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p5_1 = {
-        (float *)_vq_quantthresh__44u9_p5_1,
-        (long *)_vq_quantmap__44u9_p5_1,
-        11,
-        11
-};
-
 static const static_codebook _44u9_p5_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u9_p5_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u9_p5_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p5_1,
-        NULL,
         0
 };
 
@@ -10340,31 +6964,11 @@ static const long _vq_lengthlist__44u9_p6_0[] = {
         10,11,11,11,11,12,11,12,12,
 };
 
-static const float _vq_quantthresh__44u9_p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44u9_p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p6_0 = {
-        (float *)_vq_quantthresh__44u9_p6_0,
-        (long *)_vq_quantmap__44u9_p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44u9_p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u9_p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44u9_p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p6_0,
-        NULL,
         0
 };
 
@@ -10381,29 +6985,11 @@ static const long _vq_lengthlist__44u9_p6_1[] = {
          5, 5, 5, 5, 5, 5, 5, 5, 5,
 };
 
-static const float _vq_quantthresh__44u9_p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44u9_p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p6_1 = {
-        (float *)_vq_quantthresh__44u9_p6_1,
-        (long *)_vq_quantmap__44u9_p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44u9_p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44u9_p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44u9_p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p6_1,
-        NULL,
         0
 };
 
@@ -10437,31 +7023,11 @@ static const long _vq_lengthlist__44u9_p7_0[] = {
         12,13,13,14,14,14,15,15,15,
 };
 
-static const float _vq_quantthresh__44u9_p7_0[] = {
-        -60.5, -49.5, -38.5, -27.5, -16.5, -5.5, 5.5, 16.5, 
-        27.5, 38.5, 49.5, 60.5, 
-};
-
-static const long _vq_quantmap__44u9_p7_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p7_0 = {
-        (float *)_vq_quantthresh__44u9_p7_0,
-        (long *)_vq_quantmap__44u9_p7_0,
-        13,
-        13
-};
-
 static const static_codebook _44u9_p7_0 = {
         2, 169,
         (long *)_vq_lengthlist__44u9_p7_0,
         1, -523206656, 1618345984, 4, 0,
         (long *)_vq_quantlist__44u9_p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p7_0,
-        NULL,
         0
 };
 
@@ -10490,31 +7056,11 @@ static const long _vq_lengthlist__44u9_p7_1[] = {
          7, 7, 7, 7, 7, 8, 8, 8, 8,
 };
 
-static const float _vq_quantthresh__44u9_p7_1[] = {
-        -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 
-        3.5, 4.5, 
-};
-
-static const long _vq_quantmap__44u9_p7_1[] = {
-            9,    7,    5,    3,    1,    0,    2,    4,
-            6,    8,   10,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p7_1 = {
-        (float *)_vq_quantthresh__44u9_p7_1,
-        (long *)_vq_quantmap__44u9_p7_1,
-        11,
-        11
-};
-
 static const static_codebook _44u9_p7_1 = {
         2, 121,
         (long *)_vq_lengthlist__44u9_p7_1,
         1, -531365888, 1611661312, 4, 0,
         (long *)_vq_quantlist__44u9_p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p7_1,
-        NULL,
         0
 };
 
@@ -10554,31 +7100,11 @@ static const long _vq_lengthlist__44u9_p8_0[] = {
         15,
 };
 
-static const float _vq_quantthresh__44u9_p8_0[] = {
-        -136.5, -115.5, -94.5, -73.5, -52.5, -31.5, -10.5, 10.5, 
-        31.5, 52.5, 73.5, 94.5, 115.5, 136.5, 
-};
-
-static const long _vq_quantmap__44u9_p8_0[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p8_0 = {
-        (float *)_vq_quantthresh__44u9_p8_0,
-        (long *)_vq_quantmap__44u9_p8_0,
-        15,
-        15
-};
-
 static const static_codebook _44u9_p8_0 = {
         2, 225,
         (long *)_vq_lengthlist__44u9_p8_0,
         1, -520986624, 1620377600, 4, 0,
         (long *)_vq_quantlist__44u9_p8_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p8_0,
-        NULL,
         0
 };
 
@@ -10637,33 +7163,11 @@ static const long _vq_lengthlist__44u9_p8_1[] = {
         10,10,10,10,10,10,10,10,10,
 };
 
-static const float _vq_quantthresh__44u9_p8_1[] = {
-        -9.5, -8.5, -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, 
-        -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 
-        6.5, 7.5, 8.5, 9.5, 
-};
-
-static const long _vq_quantmap__44u9_p8_1[] = {
-           19,   17,   15,   13,   11,    9,    7,    5,
-            3,    1,    0,    2,    4,    6,    8,   10,
-           12,   14,   16,   18,   20,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p8_1 = {
-        (float *)_vq_quantthresh__44u9_p8_1,
-        (long *)_vq_quantmap__44u9_p8_1,
-        21,
-        21
-};
-
 static const static_codebook _44u9_p8_1 = {
         2, 441,
         (long *)_vq_lengthlist__44u9_p8_1,
         1, -529268736, 1611661312, 5, 0,
         (long *)_vq_quantlist__44u9_p8_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p8_1,
-        NULL,
         0
 };
 
@@ -10703,31 +7207,11 @@ static const long _vq_lengthlist__44u9_p9_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44u9_p9_0[] = {
-        -6051.5, -5120.5, -4189.5, -3258.5, -2327.5, -1396.5, -465.5, 465.5, 
-        1396.5, 2327.5, 3258.5, 4189.5, 5120.5, 6051.5, 
-};
-
-static const long _vq_quantmap__44u9_p9_0[] = {
-           13,   11,    9,    7,    5,    3,    1,    0,
-            2,    4,    6,    8,   10,   12,   14,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p9_0 = {
-        (float *)_vq_quantthresh__44u9_p9_0,
-        (long *)_vq_quantmap__44u9_p9_0,
-        15,
-        15
-};
-
 static const static_codebook _44u9_p9_0 = {
         2, 225,
         (long *)_vq_lengthlist__44u9_p9_0,
         1, -510036736, 1631393792, 4, 0,
         (long *)_vq_quantlist__44u9_p9_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p9_0,
-        NULL,
         0
 };
 
@@ -10779,33 +7263,11 @@ static const long _vq_lengthlist__44u9_p9_1[] = {
         17,17,15,17,15,17,16,16,17,
 };
 
-static const float _vq_quantthresh__44u9_p9_1[] = {
-        -416.5, -367.5, -318.5, -269.5, -220.5, -171.5, -122.5, -73.5, 
-        -24.5, 24.5, 73.5, 122.5, 171.5, 220.5, 269.5, 318.5, 
-        367.5, 416.5, 
-};
-
-static const long _vq_quantmap__44u9_p9_1[] = {
-           17,   15,   13,   11,    9,    7,    5,    3,
-            1,    0,    2,    4,    6,    8,   10,   12,
-           14,   16,   18,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p9_1 = {
-        (float *)_vq_quantthresh__44u9_p9_1,
-        (long *)_vq_quantmap__44u9_p9_1,
-        19,
-        19
-};
-
 static const static_codebook _44u9_p9_1 = {
         2, 361,
         (long *)_vq_lengthlist__44u9_p9_1,
         1, -518287360, 1622704128, 5, 0,
         (long *)_vq_quantlist__44u9_p9_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p9_1,
-        NULL,
         0
 };
 
@@ -10868,40 +7330,11 @@ static const long _vq_lengthlist__44u9_p9_2[] = {
          7,
 };
 
-static const float _vq_quantthresh__44u9_p9_2[] = {
-        -23.5, -22.5, -21.5, -20.5, -19.5, -18.5, -17.5, -16.5, 
-        -15.5, -14.5, -13.5, -12.5, -11.5, -10.5, -9.5, -8.5, 
-        -7.5, -6.5, -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 
-        0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 
-        8.5, 9.5, 10.5, 11.5, 12.5, 13.5, 14.5, 15.5, 
-        16.5, 17.5, 18.5, 19.5, 20.5, 21.5, 22.5, 23.5, 
-};
-
-static const long _vq_quantmap__44u9_p9_2[] = {
-           47,   45,   43,   41,   39,   37,   35,   33,
-           31,   29,   27,   25,   23,   21,   19,   17,
-           15,   13,   11,    9,    7,    5,    3,    1,
-            0,    2,    4,    6,    8,   10,   12,   14,
-           16,   18,   20,   22,   24,   26,   28,   30,
-           32,   34,   36,   38,   40,   42,   44,   46,
-           48,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44u9_p9_2 = {
-        (float *)_vq_quantthresh__44u9_p9_2,
-        (long *)_vq_quantmap__44u9_p9_2,
-        49,
-        49
-};
-
 static const static_codebook _44u9_p9_2 = {
         1, 49,
         (long *)_vq_lengthlist__44u9_p9_2,
         1, -526909440, 1611661312, 6, 0,
         (long *)_vq_quantlist__44u9_p9_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44u9_p9_2,
-        NULL,
         0
 };
 
@@ -10916,9 +7349,6 @@ static const static_codebook _huff_book__44un1__long = {
         2, 64,
         (long *)_huff_lengthlist__44un1__long,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };
@@ -10938,29 +7368,11 @@ static const long _vq_lengthlist__44un1__p1_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44un1__p1_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44un1__p1_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p1_0 = {
-        (float *)_vq_quantthresh__44un1__p1_0,
-        (long *)_vq_quantmap__44un1__p1_0,
-        3,
-        3
-};
-
 static const static_codebook _44un1__p1_0 = {
         4, 81,
         (long *)_vq_lengthlist__44un1__p1_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44un1__p1_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p1_0,
-        NULL,
         0
 };
 
@@ -10979,29 +7391,11 @@ static const long _vq_lengthlist__44un1__p2_0[] = {
          8,
 };
 
-static const float _vq_quantthresh__44un1__p2_0[] = {
-        -0.5, 0.5, 
-};
-
-static const long _vq_quantmap__44un1__p2_0[] = {
-            1,    0,    2,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p2_0 = {
-        (float *)_vq_quantthresh__44un1__p2_0,
-        (long *)_vq_quantmap__44un1__p2_0,
-        3,
-        3
-};
-
 static const static_codebook _44un1__p2_0 = {
         4, 81,
         (long *)_vq_lengthlist__44un1__p2_0,
         1, -535822336, 1611661312, 2, 0,
         (long *)_vq_quantlist__44un1__p2_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p2_0,
-        NULL,
         0
 };
 
@@ -11056,29 +7450,11 @@ static const long _vq_lengthlist__44un1__p3_0[] = {
         17,
 };
 
-static const float _vq_quantthresh__44un1__p3_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44un1__p3_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p3_0 = {
-        (float *)_vq_quantthresh__44un1__p3_0,
-        (long *)_vq_quantmap__44un1__p3_0,
-        5,
-        5
-};
-
 static const static_codebook _44un1__p3_0 = {
         4, 625,
         (long *)_vq_lengthlist__44un1__p3_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44un1__p3_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p3_0,
-        NULL,
         0
 };
 
@@ -11133,29 +7509,11 @@ static const long _vq_lengthlist__44un1__p4_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44un1__p4_0[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44un1__p4_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p4_0 = {
-        (float *)_vq_quantthresh__44un1__p4_0,
-        (long *)_vq_quantmap__44un1__p4_0,
-        5,
-        5
-};
-
 static const static_codebook _44un1__p4_0 = {
         4, 625,
         (long *)_vq_lengthlist__44un1__p4_0,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44un1__p4_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p4_0,
-        NULL,
         0
 };
 
@@ -11180,30 +7538,11 @@ static const long _vq_lengthlist__44un1__p5_0[] = {
         12,
 };
 
-static const float _vq_quantthresh__44un1__p5_0[] = {
-        -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 2.5, 3.5, 
-};
-
-static const long _vq_quantmap__44un1__p5_0[] = {
-            7,    5,    3,    1,    0,    2,    4,    6,
-            8,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p5_0 = {
-        (float *)_vq_quantthresh__44un1__p5_0,
-        (long *)_vq_quantmap__44un1__p5_0,
-        9,
-        9
-};
-
 static const static_codebook _44un1__p5_0 = {
         2, 81,
         (long *)_vq_lengthlist__44un1__p5_0,
         1, -531628032, 1611661312, 4, 0,
         (long *)_vq_quantlist__44un1__p5_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p5_0,
-        NULL,
         0
 };
 
@@ -11237,31 +7576,11 @@ static const long _vq_lengthlist__44un1__p6_0[] = {
         16, 0,15,18,18, 0,16, 0, 0,
 };
 
-static const float _vq_quantthresh__44un1__p6_0[] = {
-        -27.5, -22.5, -17.5, -12.5, -7.5, -2.5, 2.5, 7.5, 
-        12.5, 17.5, 22.5, 27.5, 
-};
-
-static const long _vq_quantmap__44un1__p6_0[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p6_0 = {
-        (float *)_vq_quantthresh__44un1__p6_0,
-        (long *)_vq_quantmap__44un1__p6_0,
-        13,
-        13
-};
-
 static const static_codebook _44un1__p6_0 = {
         2, 169,
         (long *)_vq_lengthlist__44un1__p6_0,
         1, -526516224, 1616117760, 4, 0,
         (long *)_vq_quantlist__44un1__p6_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p6_0,
-        NULL,
         0
 };
 
@@ -11278,29 +7597,11 @@ static const long _vq_lengthlist__44un1__p6_1[] = {
          6, 5, 6, 6, 5, 6, 6, 6, 6,
 };
 
-static const float _vq_quantthresh__44un1__p6_1[] = {
-        -1.5, -0.5, 0.5, 1.5, 
-};
-
-static const long _vq_quantmap__44un1__p6_1[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p6_1 = {
-        (float *)_vq_quantthresh__44un1__p6_1,
-        (long *)_vq_quantmap__44un1__p6_1,
-        5,
-        5
-};
-
 static const static_codebook _44un1__p6_1 = {
         2, 25,
         (long *)_vq_lengthlist__44un1__p6_1,
         1, -533725184, 1611661312, 3, 0,
         (long *)_vq_quantlist__44un1__p6_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p6_1,
-        NULL,
         0
 };
 
@@ -11355,29 +7656,11 @@ static const long _vq_lengthlist__44un1__p7_0[] = {
         10,
 };
 
-static const float _vq_quantthresh__44un1__p7_0[] = {
-        -253.5, -84.5, 84.5, 253.5, 
-};
-
-static const long _vq_quantmap__44un1__p7_0[] = {
-            3,    1,    0,    2,    4,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p7_0 = {
-        (float *)_vq_quantthresh__44un1__p7_0,
-        (long *)_vq_quantmap__44un1__p7_0,
-        5,
-        5
-};
-
 static const static_codebook _44un1__p7_0 = {
         4, 625,
         (long *)_vq_lengthlist__44un1__p7_0,
         1, -518709248, 1626677248, 3, 0,
         (long *)_vq_quantlist__44un1__p7_0,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p7_0,
-        NULL,
         0
 };
 
@@ -11411,31 +7694,11 @@ static const long _vq_lengthlist__44un1__p7_1[] = {
         12,13,13,12,13,13,14,14,14,
 };
 
-static const float _vq_quantthresh__44un1__p7_1[] = {
-        -71.5, -58.5, -45.5, -32.5, -19.5, -6.5, 6.5, 19.5, 
-        32.5, 45.5, 58.5, 71.5, 
-};
-
-static const long _vq_quantmap__44un1__p7_1[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p7_1 = {
-        (float *)_vq_quantthresh__44un1__p7_1,
-        (long *)_vq_quantmap__44un1__p7_1,
-        13,
-        13
-};
-
 static const static_codebook _44un1__p7_1 = {
         2, 169,
         (long *)_vq_lengthlist__44un1__p7_1,
         1, -523010048, 1618608128, 4, 0,
         (long *)_vq_quantlist__44un1__p7_1,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p7_1,
-        NULL,
         0
 };
 
@@ -11469,31 +7732,11 @@ static const long _vq_lengthlist__44un1__p7_2[] = {
          9, 9, 9,10,10,10,10,10,10,
 };
 
-static const float _vq_quantthresh__44un1__p7_2[] = {
-        -5.5, -4.5, -3.5, -2.5, -1.5, -0.5, 0.5, 1.5, 
-        2.5, 3.5, 4.5, 5.5, 
-};
-
-static const long _vq_quantmap__44un1__p7_2[] = {
-           11,    9,    7,    5,    3,    1,    0,    2,
-            4,    6,    8,   10,   12,
-};
-
-static const encode_aux_threshmatch _vq_auxt__44un1__p7_2 = {
-        (float *)_vq_quantthresh__44un1__p7_2,
-        (long *)_vq_quantmap__44un1__p7_2,
-        13,
-        13
-};
-
 static const static_codebook _44un1__p7_2 = {
         2, 169,
         (long *)_vq_lengthlist__44un1__p7_2,
         1, -531103744, 1611661312, 4, 0,
         (long *)_vq_quantlist__44un1__p7_2,
-        NULL,
-        (encode_aux_threshmatch *)&_vq_auxt__44un1__p7_2,
-        NULL,
         0
 };
 
@@ -11508,9 +7751,6 @@ static const static_codebook _huff_book__44un1__short = {
         2, 64,
         (long *)_huff_lengthlist__44un1__short,
         0, 0, 0, 0, 0,
-        NULL,
-        NULL,
-        NULL,
         NULL,
         0
 };

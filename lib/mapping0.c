@@ -246,7 +246,7 @@ static int mapping0_forward(vorbis_block *vb){
 
   int    *nonzero    = alloca(sizeof(*nonzero)*vi->channels);
   float  **gmdct     = _vorbis_block_alloc(vb,vi->channels*sizeof(*gmdct));
-  int    **ilogmaskch= _vorbis_block_alloc(vb,vi->channels*sizeof(*ilogmaskch));
+  int    **iwork      = _vorbis_block_alloc(vb,vi->channels*sizeof(*iwork));
   int ***floor_posts = _vorbis_block_alloc(vb,vi->channels*sizeof(*floor_posts));
 
   float global_ampmax=vbi->ampmax;
@@ -628,6 +628,7 @@ static int mapping0_forward(vorbis_block *vb){
       for(i=0;i<vi->channels;i++){
         float *mdct    =gmdct[i];
         sortindex[i]=alloca(sizeof(**sortindex)*n/2);
+        iwork[i]=_vorbis_block_alloc(vb,n/2*sizeof(**iwork));
         _vp_noise_normalize_sort(psy_look,mdct,sortindex[i]);
       }
     }
@@ -653,8 +654,7 @@ static int mapping0_forward(vorbis_block *vb){
         int submap=info->chmuxlist[i];
         float *mdct    =gmdct[i];
         float *res     =vb->pcm[i];
-        int   *ilogmask=ilogmaskch[i]=
-          _vorbis_block_alloc(vb,n/2*sizeof(**gmdct));
+        int   *ilogmask=iwork[i];
 
         nonzero[i]=floor1_encode(opb,vb,b->flr[info->floorsubmap[submap]],
                                  floor_posts[i][k],
@@ -665,7 +665,7 @@ static int mapping0_forward(vorbis_block *vb){
           sprintf(buf,"maskI%c%d",i?'R':'L',k);
           float work[n/2];
           for(j=0;j<n/2;j++)
-            work[j]=FLOOR1_fromdB_LOOKUP[ilogmask[j]];
+            work[j]=FLOOR1_fromdB_LOOKUP[iwork[j]];
           _analysis_output(buf,seq,work,n/2,1,1,0);
         }
 #endif
@@ -683,7 +683,7 @@ static int mapping0_forward(vorbis_block *vb){
           char buf[80];
           float work[n/2];
           for(j=0;j<n/2;j++)
-            work[j]=FLOOR1_fromdB_LOOKUP[ilogmask[j]]*(res+n/2)[j];
+            work[j]=FLOOR1_fromdB_LOOKUP[iwork[j]]*(res+n/2)[j];
           sprintf(buf,"resI%c%d",i?'R':'L',k);
           _analysis_output(buf,seq,work,n/2,1,1,0);
 
@@ -705,7 +705,7 @@ static int mapping0_forward(vorbis_block *vb){
                    vb->pcm,
                    mag_memo,
                    mag_sort,
-                   ilogmaskch,
+                   iwork,
                    nonzero,
                    ci->psy_g_param.sliding_lowpass[vb->W][k]);
       }
@@ -728,17 +728,20 @@ static int mapping0_forward(vorbis_block *vb){
         classifications=_residue_P[ci->residue_type[resnum]]->
           class(vb,b->residue[resnum],couple_bundle,zerobundle,ch_in_bundle);
 
-        /* couple_bundle is destructively overwritten by
-           the class function if some but not all of the channels are
-           marked as silence; build a fresh copy */
         ch_in_bundle=0;
         for(j=0;j<vi->channels;j++)
-          if(info->chmuxlist[j]==i)
-            couple_bundle[ch_in_bundle++]=vb->pcm[j]+n/2;
+          if(info->chmuxlist[j]==i){
+            /* move from float to int vector; temporary until new coupling lands */
+            float *res=vb->pcm[j]+n/2;
+            int *ires=iwork[ch_in_bundle++];
+            int k;
+            for(k=0;k<n/2;k++)
+              ires[k]=(int)rint(res[k]);
+          }
 
         _residue_P[ci->residue_type[resnum]]->
           forward(opb,vb,b->residue[resnum],
-                  couple_bundle,NULL,zerobundle,ch_in_bundle,classifications);
+                  iwork,zerobundle,ch_in_bundle,classifications);
       }
 
       /* ok, done encoding.  Next protopacket. */

@@ -96,7 +96,7 @@ typedef struct{
                         float **,int *,int);
   int  (*forward)      (oggpack_buffer *,struct vorbis_block *,
                         vorbis_look_residue *,
-                        float **,float **,int *,int,long **);
+                        int **,int *,int,long **);
   int  (*inverse)      (struct vorbis_block *,vorbis_look_residue *,
                         float **,int *,int);
 } vorbis_func_residue;
