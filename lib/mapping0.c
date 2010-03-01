@@ -255,8 +255,7 @@ static int mapping0_forward(vorbis_block *vb){
 
   int modenumber=vb->W;
   vorbis_info_mapping0 *info=ci->map_param[modenumber];
-  vorbis_look_psy *psy_look=
-    b->psy+blocktype+(vb->W?2:0);
+  vorbis_look_psy *psy_look=b->psy+blocktype+(vb->W?2:0);
 
   vb->mode=modenumber;
 
@@ -267,6 +266,7 @@ static int mapping0_forward(vorbis_block *vb){
     float *pcm     =vb->pcm[i];
     float *logfft  =pcm;
 
+    iwork[i]=_vorbis_block_alloc(vb,n/2*sizeof(**iwork));
     gmdct[i]=_vorbis_block_alloc(vb,n/2*sizeof(**gmdct));
 
     scale_dB=todB(&scale) + .345; /* + .345 is a hack; the original
@@ -627,7 +627,6 @@ static int mapping0_forward(vorbis_block *vb){
       for(i=0;i<vi->channels;i++){
         float *mdct    =gmdct[i];
         sortindex[i]=alloca(sizeof(**sortindex)*n/2);
-        iwork[i]=_vorbis_block_alloc(vb,n/2*sizeof(**iwork));
         _vp_noise_normalize_sort(psy_look,mdct,sortindex[i]);
       }
     }
