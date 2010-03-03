@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2010             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -31,8 +31,8 @@
 #include "misc.h"
 #include "os.h"
 
-#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.2.3"
-#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20090709"
+#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.3.0pre"
+#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20100303pre (Everywhere)"
 
 /* helpers */
 static int ilog2(unsigned int v){

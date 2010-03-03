@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2009             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2010             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -600,36 +600,6 @@ static int mapping0_forward(vorbis_block *vb){
   {
     int **couple_bundle=alloca(sizeof(*couple_bundle)*vi->channels);
     int *zerobundle=alloca(sizeof(*zerobundle)*vi->channels);
-    int **sortindex=alloca(sizeof(*sortindex)*vi->channels);
-    float **mag_memo=NULL;
-    int **mag_sort=NULL;
-
-    if(info->coupling_steps){
-      mag_memo=_vp_quantize_couple_memo(vb,
-                                        &ci->psy_g_param,
-                                        psy_look,
-                                        info,
-                                        gmdct);
-
-      mag_sort=_vp_quantize_couple_sort(vb,
-                                        psy_look,
-                                        info,
-                                        mag_memo);
-
-      hf_reduction(&ci->psy_g_param,
-                   psy_look,
-                   info,
-                   mag_memo);
-    }
-
-    memset(sortindex,0,sizeof(*sortindex)*vi->channels);
-    if(psy_look->vi->normal_channel_p){
-      for(i=0;i<vi->channels;i++){
-        float *mdct    =gmdct[i];
-        sortindex[i]=alloca(sizeof(**sortindex)*n/2);
-        _vp_noise_normalize_sort(psy_look,mdct,sortindex[i]);
-      }
-    }
 
     for(k=(vorbis_bitrate_managed(vb)?0:PACKETBLOBS/2);
         k<=(vorbis_bitrate_managed(vb)?PACKETBLOBS-1:PACKETBLOBS/2);
@@ -650,9 +620,7 @@ static int mapping0_forward(vorbis_block *vb){
       /* encode floor, compute masking curve, sep out residue */
       for(i=0;i<vi->channels;i++){
         int submap=info->chmuxlist[i];
-        float *mdct    =gmdct[i];
-        float *res     =vb->pcm[i];
-        int   *ilogmask=iwork[i];
+        int *ilogmask=iwork[i];
 
         nonzero[i]=floor1_encode(opb,vb,b->flr[info->floorsubmap[submap]],
                                  floor_posts[i][k],
@@ -663,28 +631,8 @@ static int mapping0_forward(vorbis_block *vb){
           sprintf(buf,"maskI%c%d",i?'R':'L',k);
           float work[n/2];
           for(j=0;j<n/2;j++)
-            work[j]=FLOOR1_fromdB_LOOKUP[iwork[j]];
+            work[j]=FLOOR1_fromdB_LOOKUP[iwork[i][j]];
           _analysis_output(buf,seq,work,n/2,1,1,0);
-        }
-#endif
-        _vp_remove_floor(psy_look,
-                         mdct,
-                         ilogmask,
-                         res,
-                         ci->psy_g_param.sliding_lowpass[vb->W][k]);
-
-        _vp_noise_normalize(psy_look,res,res+n/2,sortindex[i]);
-
-
-#if 0
-        {
-          char buf[80];
-          float work[n/2];
-          for(j=0;j<n/2;j++)
-            work[j]=FLOOR1_fromdB_LOOKUP[iwork[j]]*(res+n/2)[j];
-          sprintf(buf,"resI%c%d",i?'R':'L',k);
-          _analysis_output(buf,seq,work,n/2,1,1,0);
-
         }
 #endif
       }
@@ -695,24 +643,26 @@ static int mapping0_forward(vorbis_block *vb){
       /* quantize/couple */
       /* incomplete implementation that assumes the tree is all depth
          one, or no tree at all */
-      if(info->coupling_steps){
-        _vp_couple(k,
-                   &ci->psy_g_param,
-                   psy_look,
-                   info,
-                   vb->pcm,
-                   mag_memo,
-                   mag_sort,
-                   iwork,
-                   nonzero,
-                   ci->psy_g_param.sliding_lowpass[vb->W][k]);
+      _vp_couple_quantize_normalize(k,
+                                    &ci->psy_g_param,
+                                    psy_look,
+                                    info,
+                                    gmdct,
+                                    iwork,
+                                    nonzero,
+                                    ci->psy_g_param.sliding_lowpass[vb->W][k],
+                                    vi->channels);
+
+#if 0
+      for(i=0;i<vi->channels;i++){
+        char buf[80];
+        sprintf(buf,"resI%c%d",i?'R':'L',k);
+        float work[n/2];
+        for(j=0;j<n/2;j++)
+          work[j]=iwork[i][j];
+        _analysis_output(buf,seq,work,n/2,0,0,0);
       }
-      for(j=0;j<vi->channels;j++){
-        int *ires = iwork[j];
-        float *res = vb->pcm[j]+n/2;
-        for(i=0;i<n/2;i++)
-          ires[i] = (int)rint(res[i]);
-      }
+#endif
 
       /* classify and encode by submap */
       for(i=0;i<info->submaps;i++){

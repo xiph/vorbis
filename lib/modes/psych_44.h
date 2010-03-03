@@ -500,8 +500,8 @@ static const vorbis_info_psy _psy_info_template={
   1,          -0.f,           .5f, .5f,         0,0,0,
   /* noiseoffset*3, noisecompand, max_curve_dB */
   {{-1},{-1},{-1}},{-1},105.f,
-  /* noise normalization - channel_p, point_p, start, partition, thresh. */
-  0,0,-1,-1,0.,
+  /* noise normalization - noise_p, start, partition, thresh. */
+  0,-1,-1,0.,
 };
 
 /* ath ****************/

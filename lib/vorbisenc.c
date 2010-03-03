@@ -331,8 +331,7 @@ static void vorbis_encode_psyset_setup(vorbis_info *vi,double s,
   p->blockflag=block>>1;
 
   if(hi->noise_normalize_p){
-    p->normal_channel_p=1;
-    p->normal_point_p=1;
+    p->normal_p=1;
     p->normal_start=nn_start[is];
     p->normal_partition=nn_partition[is];
     p->normal_thresh=nn_thresh[is];
