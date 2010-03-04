@@ -1062,7 +1062,7 @@ void _vp_couple_quantize_normalize(int blobno,
     int k,j,jn = partition > n-i ? n-i : partition;
     int step,track = 0;
 
-    memcpy(nz,nonzero,sizeof(nz));
+    memcpy(nz,nonzero,sizeof(*nz)*ch);
 
     /* prefill */
     memset(flag[0],0,ch*partition*sizeof(**flag));
@@ -1077,7 +1077,7 @@ void _vp_couple_quantize_normalize(int blobno,
 
         for(j=0;j<jn;j++){
           quant[k][j] = raw[k][j] = mdct[k][i+j]*mdct[k][i+j];
-          if(mdct[k][i+j]<0) raw[k][j]*=-1.f;
+          if(mdct[k][i+j]<0.f) raw[k][j]*=-1.f;
           floor[k][j]*=floor[k][j];
         }
 
@@ -1085,7 +1085,7 @@ void _vp_couple_quantize_normalize(int blobno,
 
       }else{
         for(j=0;j<jn;j++){
-          floor[k][j] = 0.f;
+          floor[k][j] = 1e-10f;
           raw[k][j] = 0.f;
           quant[k][j] = 0.f;
           flag[k][j] = 0;
@@ -1129,19 +1129,23 @@ void _vp_couple_quantize_normalize(int blobno,
                 int A = iM[j];
                 int B = iA[j];
 
-                iA[j]=(A>abs(B)||B>abs(A) ? A-B : B-A);
-                if(abs(B)>abs(A))iM[j]=B;
+                if(abs(A)>abs(B)){
+                  iA[j]=(A>0?A-B:B-A);
+                }else{
+                  iA[j]=(B>0?A-B:B-A);
+                  iM[j]=B;
+                }
 
                 /* collapse two equivalent tuples to one */
-                if(abs(iM[j])*2==iA[j]){
+                if(iA[j]>=abs(iM[j])*2){
                   iA[j]= -iA[j];
                   iM[j]= -iM[j];
                 }
+
               }
 
             }else{
               /* lossy (point) coupling */
-
               if(j<limit-i){
                 /* dipole */
                 reM[j] += reA[j];
@@ -1173,6 +1177,16 @@ void _vp_couple_quantize_normalize(int blobno,
         acc[track]=noise_normalize(p,limit,raw[Mi],quant[Mi],floor[Mi],flag[Mi],acc[track],i,jn,iM);
         track++;
       }
+    }
+  }
+
+  for(i=0;i<vi->coupling_steps;i++){
+    /* make sure coupling a zero and a nonzero channel results in two
+       nonzero channels. */
+    if(nonzero[vi->coupling_mag[i]] ||
+       nonzero[vi->coupling_ang[i]]){
+      nonzero[vi->coupling_mag[i]]=1;
+      nonzero[vi->coupling_ang[i]]=1;
     }
   }
 }
