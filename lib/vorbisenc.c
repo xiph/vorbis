@@ -467,7 +467,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
                                         const vorbis_residue_template *res){
 
   codec_setup_info *ci=vi->codec_setup;
-  int i,n;
+  int i;
 
   vorbis_info_residue0 *r=ci->residue_param[number]=
     _ogg_malloc(sizeof(*r));
@@ -566,10 +566,25 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
        boundaries.  We still lowpass 'wherever', but we have to round up
        here to next boundary, or the vorbis spec will round it *down* to
        previous boundary in encode/decode */
-    if(ci->residue_type[number]==2)
-      r->end=(int)((freq/nyq*blocksize*2)/r->grouping+.9)* /* round up only if we're well past */
+    if(ci->residue_type[number]==2){
+      /* residue 2 bundles together multiple channels; used by stereo
+         and surround.  Count the channels in use */
+      /* Multiple maps/submaps can point to the same residue.  In the case
+         of residue 2, they all better have the same number of
+         channels/samples. */
+      int j,k,ch=0;
+      for(i=0;i<ci->maps&&ch==0;i++){
+        vorbis_info_mapping0 *mi=(vorbis_info_mapping0 *)ci->map_param[i];
+        for(j=0;j<mi->submaps && ch==0;j++)
+          if(mi->residuesubmap[j]==number) /* we found a submap referencing theis residue backend */
+            for(k=0;k<vi->channels;k++)
+              if(mi->chmuxlist[k]==j) /* this channel belongs to the submap */
+                ch++;
+      }
+
+      r->end=(int)((freq/nyq*blocksize*ch)/r->grouping+.9)* /* round up only if we're well past */
         r->grouping;
-    else
+    }else
       r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
         r->grouping;
     if(r->end==0)r->end=r->grouping; /* LFE channel */
