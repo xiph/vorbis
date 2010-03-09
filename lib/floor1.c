@@ -381,7 +381,7 @@ static void render_line(int n, int x0,int x1,int y0,int y1,float *d){
   }
 }
 
-static void render_line0(int x0,int x1,int y0,int y1,int *d){
+static void render_line0(int n, int x0,int x1,int y0,int y1,int *d){
   int dy=y1-y0;
   int adx=x1-x0;
   int ady=abs(dy);
@@ -393,8 +393,12 @@ static void render_line0(int x0,int x1,int y0,int y1,int *d){
 
   ady-=abs(base*adx);
 
-  d[x]=y;
-  while(++x<x1){
+  if(n>x1)n=x1;
+
+  if(x<n)
+    d[x]=y;
+
+  while(++x<n){
     err=err+ady;
     if(err>=adx){
       err-=adx;
@@ -945,6 +949,8 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
       int hx=0;
       int lx=0;
       int ly=post[0]*info->mult;
+      int n=ci->blocksizes[vb->W]/2;
+
       for(j=1;j<look->posts;j++){
         int current=look->forward_index[j];
         int hy=post[current]&0x7fff;
@@ -953,7 +959,7 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
           hy*=info->mult;
           hx=info->postlist[current];
 
-          render_line0(lx,hx,ly,hy,ilogmask);
+          render_line0(n,lx,hx,ly,hy,ilogmask);
 
           lx=hx;
           ly=hy;
