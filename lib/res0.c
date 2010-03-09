@@ -358,7 +358,7 @@ static int local_book_besterror(codebook *book,int *a){
       if(c->lengthlist[i]>0){
         int this=0;
         for(j=0;j<dim;j++){
-          float val=(e[j]-a[j]);
+          int val=(e[j]-a[j]);
           this+=val*val;
         }
         if(best==-1 || this<best){
