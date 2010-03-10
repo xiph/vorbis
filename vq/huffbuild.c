@@ -178,9 +178,6 @@ int main(int argc, char *argv[]){
     fprintf(file,"\t0, 0, 0, 0, 0,\n");
     fprintf(file,"\tNULL,\n");
 
-    fprintf(file,"\tNULL,\n");
-    fprintf(file,"\tNULL,\n");
-    fprintf(file,"\tNULL,\n");
     fprintf(file,"\t0\n};\n\n");
     
     fclose(file);
