@@ -145,7 +145,10 @@ static const static_codebook*const _floor_512x17_books[]={
   &_huff_book_line_512x17_3sub3,
 };
 
-static const static_codebook*const *const _floor_books[10]={
+static const static_codebook*const _floor_Xx0_books[]={
+};
+
+static const static_codebook*const *const _floor_books[11]={
   _floor_128x4_books,
   _floor_256x4_books,
   _floor_128x7_books,
@@ -156,10 +159,11 @@ static const static_codebook*const *const _floor_books[10]={
   _floor_1024x27_books,
   _floor_2048x27_books,
   _floor_512x17_books,
+  _floor_Xx0_books,
 };
 
-static const vorbis_info_floor1 _floor[10]={
-  /* 128 x 4 */
+static const vorbis_info_floor1 _floor[11]={
+  /* 0: 128 x 4 */
   {
     1,{0},{4},{2},{0},
     {{1,2,3,4}},
@@ -167,7 +171,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,   1.,18.,  128
   },
-  /* 256 x 4 */
+  /* 1: 256 x 4 */
   {
     1,{0},{4},{2},{0},
     {{1,2,3,4}},
@@ -175,7 +179,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,   1.,18.,  256
   },
-  /* 128 x 7 */
+  /* 2: 128 x 7 */
   {
     2,{0,1},{3,4},{2,2},{0,1},
     {{-1,2,3,4},{-1,5,6,7}},
@@ -183,7 +187,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,   1.,18.,  128
   },
-  /* 256 x 7 */
+  /* 3: 256 x 7 */
   {
     2,{0,1},{3,4},{2,2},{0,1},
     {{-1,2,3,4},{-1,5,6,7}},
@@ -191,7 +195,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,   1.,18.,  256
   },
-  /* 128 x 11 */
+  /* 4: 128 x 11 */
   {
     4,{0,1,2,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
     {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
@@ -200,7 +204,7 @@ static const vorbis_info_floor1 _floor[10]={
 
      60,30,500,   1,18.,  128
   },
-  /* 128 x 17 */
+  /* 5: 128 x 17 */
   {
     6,{0,1,1,2,3,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
     {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
@@ -208,7 +212,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,    1,18.,  128
   },
-  /* 256 x 4 (low bitrate version) */
+  /* 6: 256 x 4 (low bitrate version) */
   {
     1,{0},{4},{2},{0},
     {{1,2,3,4}},
@@ -216,7 +220,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,   1.,18.,  256
   },
-  /* 1024 x 27 */
+  /* 7: 1024 x 27 */
   {
     8,{0,1,2,2,3,3,4,4},{3,4,3,4,3},{0,1,1,2,2},{-1,0,1,2,3},
     {{4},{5,6},{7,8},{-1,9,10,11},{-1,12,13,14}},
@@ -225,7 +229,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,    3,18.,  1024
   },
-  /* 2048 x 27 */
+  /* 8: 2048 x 27 */
   {
     8,{0,1,2,2,3,3,4,4},{3,4,3,4,3},{0,1,1,2,2},{-1,0,1,2,3},
     {{4},{5,6},{7,8},{-1,9,10,11},{-1,12,13,14}},
@@ -234,7 +238,7 @@ static const vorbis_info_floor1 _floor[10]={
 
     60,30,500,    3,18.,  2048
   },
-  /* 512 x 17 */
+  /* 9: 512 x 17 */
   {
     6,{0,1,1,2,3,3},{2,3,3,3},{0,1,2,2},{-1,0,1,2},
     {{3},{4,5},{-1,6,7,8},{-1,9,10,11}},
@@ -242,6 +246,14 @@ static const vorbis_info_floor1 _floor[10]={
        7,23,39,  55,79,110,  156,232,360},
 
     60,30,500,    1,18.,  512
+  },
+
+  /* 10: X x 0 (LFE floor; edge posts only) */
+  {
+    0,{0}, {0},{0},{-1},
+    {{-1}},
+    2,{0,12},
+    60,30,500,   1.,18.,  10
   },
 
 };

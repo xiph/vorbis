@@ -688,7 +688,7 @@ static int mapping0_forward(vorbis_block *vb){
 
         _residue_P[ci->residue_type[resnum]]->
           forward(opb,vb,b->residue[resnum],
-                  couple_bundle,zerobundle,ch_in_bundle,classifications);
+                  couple_bundle,zerobundle,ch_in_bundle,classifications,i);
       }
 
       /* ok, done encoding.  Next protopacket. */

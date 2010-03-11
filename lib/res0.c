@@ -31,6 +31,9 @@
 #include "misc.h"
 #include "os.h"
 
+//#define TRAIN_RES 1
+//#define TRAIN_RESAUX 1
+
 #if defined(TRAIN_RES) || defined (TRAIN_RESAUX)
 #include <stdio.h>
 #endif
@@ -58,6 +61,7 @@ typedef struct {
   float      training_min[8][64];
   float     tmin;
   float     tmax;
+  int       submap;
 #endif
 
 } vorbis_look_residue0;
@@ -88,7 +92,7 @@ void res0_free_look(vorbis_look_residue *i){
             codebook *statebook=look->partbooks[j][k];
 
             /* long and short into the same bucket by current convention */
-            sprintf(buffer,"res_part%d_pass%d.vqd",j,k);
+            sprintf(buffer,"res_sub%d_part%d_pass%d.vqd",look->submap,j,k);
             of=fopen(buffer,"a");
 
             for(l=0;l<statebook->entries;l++)
@@ -492,17 +496,17 @@ static long **_2class(vorbis_block *vb,vorbis_look_residue *vl,int **in,
   char buffer[80];
 #endif
 
-  partword[0]=_vorbis_block_alloc(vb,n*ch/samples_per_partition*sizeof(*partword[0]));
-  memset(partword[0],0,n*ch/samples_per_partition*sizeof(*partword[0]));
+  partword[0]=_vorbis_block_alloc(vb,partvals*sizeof(*partword[0]));
+  memset(partword[0],0,partvals*sizeof(*partword[0]));
 
   for(i=0,l=info->begin/ch;i<partvals;i++){
-    int magmax=0.f;
-    int angmax=0.f;
+    int magmax=0;
+    int angmax=0;
     for(j=0;j<samples_per_partition;j+=ch){
       if(abs(in[0][l])>magmax)magmax=abs(in[0][l]);
       for(k=1;k<ch;k++)
         if(abs(in[k][l])>angmax)angmax=abs(in[k][l]);
-        l++;
+      l++;
     }
 
     for(j=0;j<possible_partitions-1;j++)
@@ -533,10 +537,15 @@ static int _01forward(oggpack_buffer *opb,
                       int **in,int ch,
                       long **partword,
                       int (*encode)(oggpack_buffer *,int *,int,
-                                    codebook *,long *)){
+                                    codebook *,long *),
+                      int submap){
   long i,j,k,s;
   vorbis_look_residue0 *look=(vorbis_look_residue0 *)vl;
   vorbis_info_residue0 *info=look->info;
+
+#ifdef TRAIN_RES
+  look->submap=submap;
+#endif
 
   /* move all this setup out later */
   int samples_per_partition=info->grouping;
@@ -605,7 +614,7 @@ static int _01forward(oggpack_buffer *opb,
               accumulator=look->training_data[s][partword[j][i]];
               {
                 int l;
-                float *samples=in[j]+offset;
+                int *samples=in[j]+offset;
                 for(l=0;l<samples_per_partition;l++){
                   if(samples[l]<look->training_min[s][partword[j][i]])
                     look->training_min[s][partword[j][i]]=samples[l];
@@ -717,14 +726,14 @@ int res0_inverse(vorbis_block *vb,vorbis_look_residue *vl,
 }
 
 int res1_forward(oggpack_buffer *opb,vorbis_block *vb,vorbis_look_residue *vl,
-                 int **in,int *nonzero,int ch, long **partword){
+                 int **in,int *nonzero,int ch, long **partword, int submap){
   int i,used=0;
   for(i=0;i<ch;i++)
     if(nonzero[i])
       in[used++]=in[i];
 
   if(used){
-    return _01forward(opb,vb,vl,in,used,partword,_encodepart);
+    return _01forward(opb,vb,vl,in,used,partword,_encodepart,submap);
   }else{
     return(0);
   }
@@ -770,7 +779,7 @@ long **res2_class(vorbis_block *vb,vorbis_look_residue *vl,
 
 int res2_forward(oggpack_buffer *opb,
                  vorbis_block *vb,vorbis_look_residue *vl,
-                 int **in,int *nonzero,int ch, long **partword){
+                 int **in,int *nonzero,int ch, long **partword,int submap){
   long i,j,k,n=vb->pcmend/2,used=0;
 
   /* don't duplicate the code; use a working vector hack for now and
@@ -785,7 +794,7 @@ int res2_forward(oggpack_buffer *opb,
   }
 
   if(used){
-    return _01forward(opb,vb,vl,&work,1,partword,_encodepart);
+    return _01forward(opb,vb,vl,&work,1,partword,_encodepart,submap);
   }else{
     return(0);
   }

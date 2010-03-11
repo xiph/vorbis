@@ -32,12 +32,13 @@
    with > 12 partition types, or a different division of iteration,
    this needs to be updated. */
 typedef struct {
-  const static_codebook *books[12][3];
+  const static_codebook *books[12][4];
 } static_bookblock;
 
 typedef struct {
   int res_type;
   int limit_type; /* 0 lowpass limited, 1 point stereo limited */
+  int grouping;
   const vorbis_info_residue0 *res;
   const static_codebook  *book_aux;
   const static_codebook  *book_aux_managed;
@@ -153,6 +154,7 @@ static const vorbis_info_mapping0 _map_nominal[2]={
 
 #include "modes/setup_44.h"
 #include "modes/setup_44u.h"
+#include "modes/setup_44p51.h"
 #include "modes/setup_32.h"
 #include "modes/setup_8.h"
 #include "modes/setup_11.h"
@@ -162,6 +164,7 @@ static const vorbis_info_mapping0 _map_nominal[2]={
 
 static const ve_setup_data_template *const setup_list[]={
   &ve_setup_44_stereo,
+  &ve_setup_44_51,
   &ve_setup_44_uncoupled,
 
   &ve_setup_32_stereo,
@@ -461,7 +464,7 @@ static void vorbis_encode_blocksize_setup(vorbis_info *vi,double s,
   ci->blocksizes[1]=blocklong;
 
 }
-
+#include<stdio.h>
 static void vorbis_encode_residue_setup(vorbis_info *vi,
                                         int number, int block,
                                         const vorbis_residue_template *res){
@@ -475,14 +478,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
   memcpy(r,res->res,sizeof(*r));
   if(ci->residues<=number)ci->residues=number+1;
 
-  switch(ci->blocksizes[block]){
-  case 64:case 128:case 256:
-    r->grouping=16;
-    break;
-  default:
-    r->grouping=32;
-    break;
-  }
+  r->grouping=res->grouping;
   ci->residue_type[number]=res->res_type;
 
   /* fill in all the books */
@@ -491,7 +487,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
 
     if(ci->hi.managed){
       for(i=0;i<r->partitions;i++)
-        for(k=0;k<3;k++)
+        for(k=0;k<4;k++)
           if(res->books_base_managed->books[i][k])
             r->secondstages[i]|=(1<<k);
 
@@ -499,7 +495,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
       ci->book_param[r->groupbook]=(static_codebook *)res->book_aux_managed;
 
       for(i=0;i<r->partitions;i++){
-        for(k=0;k<3;k++){
+        for(k=0;k<4;k++){
           if(res->books_base_managed->books[i][k]){
             int bookid=book_dup_or_new(ci,res->books_base_managed->books[i][k]);
             r->booklist[booklist++]=bookid;
@@ -511,7 +507,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
     }else{
 
       for(i=0;i<r->partitions;i++)
-        for(k=0;k<3;k++)
+        for(k=0;k<4;k++)
           if(res->books_base->books[i][k])
             r->secondstages[i]|=(1<<k);
 
@@ -519,7 +515,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
       ci->book_param[r->groupbook]=(static_codebook *)res->book_aux;
 
       for(i=0;i<r->partitions;i++){
-        for(k=0;k<3;k++){
+        for(k=0;k<4;k++){
           if(res->books_base->books[i][k]){
             int bookid=book_dup_or_new(ci,res->books_base->books[i][k]);
             r->booklist[booklist++]=bookid;
@@ -584,10 +580,20 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
 
       r->end=(int)((freq/nyq*blocksize*ch)/r->grouping+.9)* /* round up only if we're well past */
         r->grouping;
-    }else
+      /* the blocksize and grouping may disagree at the end */
+      if(r->end>blocksize*ch)r->end=blocksize*ch/r->grouping*r->grouping;
+
+    }else{
+
       r->end=(int)((freq/nyq*blocksize)/r->grouping+.9)* /* round up only if we're well past */
         r->grouping;
+      /* the blocksize and grouping may disagree at the end */
+      if(r->end>blocksize)r->end=blocksize/r->grouping*r->grouping;
+
+    }
+
     if(r->end==0)r->end=r->grouping; /* LFE channel */
+
   }
 }
 

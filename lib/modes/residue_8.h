@@ -50,12 +50,12 @@ static const static_bookblock _resbook_8s_1={
 };
 
 static const vorbis_residue_template _res_8s_0[]={
-  {2,0,  &_residue_44_mid,
+  {2,0,32,  &_residue_44_mid,
    &_huff_book__8c0_s_single,&_huff_book__8c0_s_single,
    &_resbook_8s_0,&_resbook_8s_0},
 };
 static const vorbis_residue_template _res_8s_1[]={
-  {2,0,  &_residue_44_mid,
+  {2,0,32,  &_residue_44_mid,
    &_huff_book__8c1_s_single,&_huff_book__8c1_s_single,
    &_resbook_8s_1,&_resbook_8s_1},
 };
@@ -93,12 +93,12 @@ static const static_bookblock _resbook_8u_1={
 };
 
 static const vorbis_residue_template _res_8u_0[]={
-  {1,0,  &_residue_44_low_un,
+  {1,0,32,  &_residue_44_low_un,
    &_huff_book__8u0__single,&_huff_book__8u0__single,
    &_resbook_8u_0,&_resbook_8u_0},
 };
 static const vorbis_residue_template _res_8u_1[]={
-  {1,0,  &_residue_44_mid_un,
+  {1,0,32,  &_residue_44_mid_un,
    &_huff_book__8u1__single,&_huff_book__8u1__single,
    &_resbook_8u_1,&_resbook_8u_1},
 };

@@ -177,102 +177,102 @@ static const static_bookblock _resbook_44s_9={
 };
 
 static const vorbis_residue_template _res_44s_n1[]={
-  {2,0,  &_residue_44_low,
+  {2,0,32,  &_residue_44_low,
    &_huff_book__44cn1_s_short,&_huff_book__44cn1_sm_short,
    &_resbook_44s_n1,&_resbook_44sm_n1},
 
-  {2,0,  &_residue_44_low,
+  {2,0,32,  &_residue_44_low,
    &_huff_book__44cn1_s_long,&_huff_book__44cn1_sm_long,
    &_resbook_44s_n1,&_resbook_44sm_n1}
 };
 static const vorbis_residue_template _res_44s_0[]={
-  {2,0,  &_residue_44_low,
+  {2,0,16,  &_residue_44_low,
    &_huff_book__44c0_s_short,&_huff_book__44c0_sm_short,
    &_resbook_44s_0,&_resbook_44sm_0},
 
-  {2,0,  &_residue_44_low,
+  {2,0,32,  &_residue_44_low,
    &_huff_book__44c0_s_long,&_huff_book__44c0_sm_long,
    &_resbook_44s_0,&_resbook_44sm_0}
 };
 static const vorbis_residue_template _res_44s_1[]={
-  {2,0,  &_residue_44_low,
+  {2,0,16,  &_residue_44_low,
    &_huff_book__44c1_s_short,&_huff_book__44c1_sm_short,
    &_resbook_44s_1,&_resbook_44sm_1},
 
-  {2,0,  &_residue_44_low,
+  {2,0,32,  &_residue_44_low,
    &_huff_book__44c1_s_long,&_huff_book__44c1_sm_long,
    &_resbook_44s_1,&_resbook_44sm_1}
 };
 
 static const vorbis_residue_template _res_44s_2[]={
-  {2,0,  &_residue_44_mid,
+  {2,0,16,  &_residue_44_mid,
    &_huff_book__44c2_s_short,&_huff_book__44c2_s_short,
    &_resbook_44s_2,&_resbook_44s_2},
 
-  {2,0,  &_residue_44_mid,
+  {2,0,32,  &_residue_44_mid,
    &_huff_book__44c2_s_long,&_huff_book__44c2_s_long,
    &_resbook_44s_2,&_resbook_44s_2}
 };
 static const vorbis_residue_template _res_44s_3[]={
-  {2,0,  &_residue_44_mid,
+  {2,0,16,  &_residue_44_mid,
    &_huff_book__44c3_s_short,&_huff_book__44c3_s_short,
    &_resbook_44s_3,&_resbook_44s_3},
 
-  {2,0,  &_residue_44_mid,
+  {2,0,32,  &_residue_44_mid,
    &_huff_book__44c3_s_long,&_huff_book__44c3_s_long,
    &_resbook_44s_3,&_resbook_44s_3}
 };
 static const vorbis_residue_template _res_44s_4[]={
-  {2,0,  &_residue_44_mid,
+  {2,0,16,  &_residue_44_mid,
    &_huff_book__44c4_s_short,&_huff_book__44c4_s_short,
    &_resbook_44s_4,&_resbook_44s_4},
 
-  {2,0,  &_residue_44_mid,
+  {2,0,32,  &_residue_44_mid,
    &_huff_book__44c4_s_long,&_huff_book__44c4_s_long,
    &_resbook_44s_4,&_resbook_44s_4}
 };
 static const vorbis_residue_template _res_44s_5[]={
-  {2,0,  &_residue_44_mid,
+  {2,0,16,  &_residue_44_mid,
    &_huff_book__44c5_s_short,&_huff_book__44c5_s_short,
    &_resbook_44s_5,&_resbook_44s_5},
 
-  {2,0,  &_residue_44_mid,
+  {2,0,32,  &_residue_44_mid,
    &_huff_book__44c5_s_long,&_huff_book__44c5_s_long,
    &_resbook_44s_5,&_resbook_44s_5}
 };
 static const vorbis_residue_template _res_44s_6[]={
-  {2,0,  &_residue_44_high,
+  {2,0,16,  &_residue_44_high,
    &_huff_book__44c6_s_short,&_huff_book__44c6_s_short,
    &_resbook_44s_6,&_resbook_44s_6},
 
-  {2,0,  &_residue_44_high,
+  {2,0,32,  &_residue_44_high,
    &_huff_book__44c6_s_long,&_huff_book__44c6_s_long,
    &_resbook_44s_6,&_resbook_44s_6}
 };
 static const vorbis_residue_template _res_44s_7[]={
-  {2,0,  &_residue_44_high,
+  {2,0,16,  &_residue_44_high,
    &_huff_book__44c7_s_short,&_huff_book__44c7_s_short,
    &_resbook_44s_7,&_resbook_44s_7},
 
-  {2,0,  &_residue_44_high,
+  {2,0,32,  &_residue_44_high,
    &_huff_book__44c7_s_long,&_huff_book__44c7_s_long,
    &_resbook_44s_7,&_resbook_44s_7}
 };
 static const vorbis_residue_template _res_44s_8[]={
-  {2,0,  &_residue_44_high,
+  {2,0,16,  &_residue_44_high,
    &_huff_book__44c8_s_short,&_huff_book__44c8_s_short,
    &_resbook_44s_8,&_resbook_44s_8},
 
-  {2,0,  &_residue_44_high,
+  {2,0,32,  &_residue_44_high,
    &_huff_book__44c8_s_long,&_huff_book__44c8_s_long,
    &_resbook_44s_8,&_resbook_44s_8}
 };
 static const vorbis_residue_template _res_44s_9[]={
-  {2,0,  &_residue_44_high,
+  {2,0,16,  &_residue_44_high,
    &_huff_book__44c9_s_short,&_huff_book__44c9_s_short,
    &_resbook_44s_9,&_resbook_44s_9},
 
-  {2,0,  &_residue_44_high,
+  {2,0,32,  &_residue_44_high,
    &_huff_book__44c9_s_long,&_huff_book__44c9_s_long,
    &_resbook_44s_9,&_resbook_44s_9}
 };
