@@ -187,18 +187,6 @@ static const ve_setup_data_template *const setup_list[]={
   0
 };
 
-static int vorbis_encode_toplevel_setup(vorbis_info *vi,int ch,long rate){
-  if(vi && vi->codec_setup){
-
-    vi->version=0;
-    vi->channels=ch;
-    vi->rate=rate;
-
-    return(0);
-  }
-  return(OV_EINVAL);
-}
-
 static void vorbis_encode_floor_setup(vorbis_info *vi,int s,
                                      const static_codebook *const *const *const books,
                                      const vorbis_info_floor1 *in,
@@ -642,12 +630,10 @@ static double setting_to_approx_bitrate(vorbis_info *vi){
   return((r[is]*(1.-ds)+r[is+1]*ds)*ch);
 }
 
-static void get_setup_template(vorbis_info *vi,
-                               long ch,long srate,
-                               double req,int q_or_bitrate){
+static const void *get_setup_template(long ch,long srate,
+                                      double req,int q_or_bitrate,
+                                      double *base_setting){
   int i=0,j;
-  codec_setup_info *ci=vi->codec_setup;
-  highlevel_encode_setup *hi=&ci->hi;
   if(q_or_bitrate)req/=ch;
 
   while(setup_list[i]){
@@ -667,23 +653,22 @@ static void get_setup_template(vorbis_info *vi,
         for(j=0;j<mappings;j++)
           if(req>=map[j] && req<map[j+1])break;
         /* an all-points match */
-        hi->setup=setup_list[i];
         if(j==mappings)
-          hi->base_setting=j-.001;
+          *base_setting=j-.001;
         else{
           float low=map[j];
           float high=map[j+1];
           float del=(req-low)/(high-low);
-          hi->base_setting=j+del;
+          *base_setting=j+del;
         }
 
-        return;
+        return(setup_list[i]);
       }
     }
     i++;
   }
 
-  hi->setup=NULL;
+  return NULL;
 }
 
 /* encoders will need to use vorbis_info_init beforehand and call
@@ -873,29 +858,30 @@ int vorbis_encode_setup_init(vorbis_info *vi){
 
 }
 
-static int vorbis_encode_setup_setting(vorbis_info *vi,
+static void vorbis_encode_setup_setting(vorbis_info *vi,
                                        long  channels,
                                        long  rate){
-  int ret=0,i,is;
+  int i,is;
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
   const ve_setup_data_template *setup=hi->setup;
   double ds;
 
-  ret=vorbis_encode_toplevel_setup(vi,channels,rate);
-  if(ret)return(ret);
-
-  is=hi->base_setting;
-  ds=hi->base_setting-is;
-
-  hi->managed=0;
+  vi->version=0;
+  vi->channels=channels;
+  vi->rate=rate;
 
   hi->impulse_block_p=1;
   hi->noise_normalize_p=1;
 
+  is=hi->base_setting;
+  ds=hi->base_setting-is;
+
   hi->stereo_point_setting=hi->base_setting;
-  hi->lowpass_kHz=
-    setup->psy_lowpass[is]*(1.-ds)+setup->psy_lowpass[is+1]*ds;
+
+  if(!hi->lowpass_altered)
+    hi->lowpass_kHz=
+      setup->psy_lowpass[is]*(1.-ds)+setup->psy_lowpass[is+1]*ds;
 
   hi->ath_floating_dB=setup->psy_ath_float[is]*(1.-ds)+
     setup->psy_ath_float[is+1]*ds;
@@ -911,8 +897,6 @@ static int vorbis_encode_setup_setting(vorbis_info *vi,
     hi->block[i].noise_bias_setting=hi->base_setting;
     hi->block[i].noise_compand_setting=hi->base_setting;
   }
-
-  return(ret);
 }
 
 int vorbis_encode_setup_vbr(vorbis_info *vi,
@@ -925,10 +909,15 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
   quality+=.0000001;
   if(quality>=1.)quality=.9999;
 
-  get_setup_template(vi,channels,rate,quality,0);
+  hi->req=quality;
+  hi->setup=get_setup_template(channels,rate,quality,0,&hi->base_setting);
   if(!hi->setup)return OV_EIMPL;
 
-  return vorbis_encode_setup_setting(vi,channels,rate);
+  vorbis_encode_setup_setting(vi,channels,rate);
+  hi->managed=0;
+  hi->coupling_p=1;
+
+  return 0;
 }
 
 int vorbis_encode_init_vbr(vorbis_info *vi,
@@ -962,7 +951,6 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
   codec_setup_info *ci=vi->codec_setup;
   highlevel_encode_setup *hi=&ci->hi;
   double tnominal=nominal_bitrate;
-  int ret=0;
 
   if(nominal_bitrate<=0.){
     if(max_bitrate>0.){
@@ -979,16 +967,14 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
     }
   }
 
-  get_setup_template(vi,channels,rate,nominal_bitrate,1);
+  hi->req=nominal_bitrate;
+  hi->setup=get_setup_template(channels,rate,nominal_bitrate,1,&hi->base_setting);
   if(!hi->setup)return OV_EIMPL;
 
-  ret=vorbis_encode_setup_setting(vi,channels,rate);
-  if(ret){
-    vorbis_info_clear(vi);
-    return ret;
-  }
+  vorbis_encode_setup_setting(vi,channels,rate);
 
   /* initialize management with sane defaults */
+  hi->coupling_p=1;
   hi->managed=1;
   hi->bitrate_min=min_bitrate;
   hi->bitrate_max=max_bitrate;
@@ -997,7 +983,7 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
   hi->bitrate_reservoir=nominal_bitrate*2;
   hi->bitrate_reservoir_bias=.1; /* bias toward hoarding bits */
 
-  return(ret);
+  return(0);
 
 }
 
@@ -1174,6 +1160,7 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
 
         if(hi->lowpass_kHz<2.)hi->lowpass_kHz=2.;
         if(hi->lowpass_kHz>99.)hi->lowpass_kHz=99.;
+        hi->lowpass_altered=1;
       }
       return(0);
     case OV_ECTL_IBLOCK_GET:
@@ -1191,9 +1178,37 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
         if(hi->impulse_noisetune<-15.)hi->impulse_noisetune=-15.;
       }
       return(0);
+    case OV_ECTL_COUPLING_GET:
+      {
+        int *iarg=(int *)arg;
+        *iarg=hi->coupling_p;
+      }
+      return(0);
+    case OV_ECTL_COUPLING_SET:
+      {
+        void *new_template;
+        double new_base;
+        int *iarg=(int *)arg;
+        hi->coupling_p=((*iarg)!=0);
+
+        /* Fetching a new template can alter the base_setting, which
+           many other parameters are based on.  Right now, the only
+           parameter drawn from the base_setting that can be altered
+           by an encctl is the lowpass, so that is explictly flagged
+           to not be overwritten when we fetch a new template and
+           recompute the dependant settings */
+        new_template = get_setup_template(hi->coupling_p?vi->channels:-1,
+                                          vi->rate,
+                                          hi->req,
+                                          hi->managed,
+                                          &new_base);
+        if(!hi->setup)return OV_EIMPL;
+        hi->setup=new_template;
+        hi->base_setting=new_base;
+        vorbis_encode_setup_setting(vi,vi->channels,vi->rate);
+      }
+      return(0);
     }
-
-
     return(OV_EIMPL);
   }
   return(OV_EINVAL);

@@ -92,6 +92,20 @@ is -15.0 to 0.0 [default].  A negative impulse block bias will direct
 to encoder to use more bits when incoding short blocks that contain
 strong impulses, thus improving the accuracy of impulse encoding.</dd><p>
 
+<dt><i>OV_ECTL_COUPLING_GET</i></dt>
+<dd><b>Argument: int *</b><br>
+Returns the current encoder coupling enabled/disabled 
+setting in the int pointed to by arg.
+</dd><p>
+
+<dt><i>OV_ECTL_COUPLING_SET</i></dt> 
+<dd><b>Argument: int *</b><br>
+Enables/disables channel coupling in multichannel encoding according to arg.
+*arg of zero disables all channel coupling, nonzero allows the encoder to use
+coupling if a coupled mode is available for the input.  At present, coupling 
+is available for stereo and 5.1 input modes.
+</dd><p>
+
 <dt><i>OV_ECTL_RATEMANAGE_GET [deprecated]</i></dt>
 <dd>
 

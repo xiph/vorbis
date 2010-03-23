@@ -358,6 +358,26 @@ struct ovectl_ratemanage2_arg {
  */
 #define OV_ECTL_IBLOCK_SET           0x31
 
+/**
+ *  Returns the current encoder coupling setting in the int pointed
+ *  to by arg.
+ *
+ * Argument: <tt>int *</tt>
+*/
+#define OV_ECTL_COUPLING_GET         0x40
+
+/**
+ *  Enables/disables channel coupling in multichannel encoding according to arg.
+ *
+ * Argument: <tt>int *</tt>
+ *
+ *  Zero disables channel coupling for multichannel inputs, nonzer enables
+ *  channel coupling.  Setting has no effect on monophonic encoding or
+ *  multichannel counts that do not offer coupling.  At present, coupling is
+ *  available for stereo and 5.1 encoding.
+ */
+#define OV_ECTL_COUPLING_SET         0x41
+
   /* deprecated rate management supported only for compatability */
 
 /**
