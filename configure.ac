@@ -172,6 +172,10 @@ else
   		CFLAGS=${OPT}" -D__NO_MATH_INLINES"
   		PROFILE=${PROFILE}" -D__NO_MATH_INLINES"
   		fi;;
+        powerpc-*-linux*spe) 
+ 	        DEBUG="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES" 
+ 	        CFLAGS="-O3 -Wall -Wextra -ffast-math -mfused-madd -D_REENTRANT" 
+ 	        PROFILE="-pg -g -O3 -ffast-math -mfused-madd -D_REENTRANT";; 
 	powerpc-*-linux*)
 		DEBUG="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES"
 		CFLAGS="-O3 -Wall -Wextra -ffast-math -mfused-madd -mcpu=750 -D_REENTRANT"
