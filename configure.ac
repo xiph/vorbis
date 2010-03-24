@@ -89,6 +89,11 @@ fi
 
 AM_CONDITIONAL(BUILD_DOCS, [test "x$enable_docs" = xyes])
 
+AC_ARG_ENABLE(examples, 
+  AS_HELP_STRING([--enable-examples], [build the examples])) 
+ 	
+AM_CONDITIONAL(BUILD_EXAMPLES, [test "x$enable_examples" = xyes]) 
+
 dnl --------------------------------------------------
 dnl Set build flags based on environment
 dnl --------------------------------------------------

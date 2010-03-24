@@ -2,7 +2,11 @@
 
 AUTOMAKE_OPTIONS = 1.6 foreign dist-zip dist-bzip2
 
-SUBDIRS = m4 include vq lib examples test doc
+SUBDIRS = m4 include vq lib test doc
+
+if BUILD_EXAMPLES 
+SUBDIRS += examples 
+endif 
 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = vorbis.m4
