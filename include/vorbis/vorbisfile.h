@@ -47,7 +47,7 @@ typedef struct {
 
 /* a few sets of convenient callbacks, especially for use under
  * Windows where ov_open_callbacks() should always be used instead of
- * ov_open() to avoid problems with incompatable crt.o version linking
+ * ov_open() to avoid problems with incompatible crt.o version linking
  * issues. */
 
 static int _ov_header_fseek_wrap(FILE *f,ogg_int64_t off,int whence){
@@ -122,7 +122,7 @@ typedef struct OggVorbis_File {
   ogg_int64_t     *dataoffsets;
   long            *serialnos;
   ogg_int64_t     *pcmlengths; /* overloaded to maintain binary
-                                  compatability; x2 size, stores both
+                                  compatibility; x2 size, stores both
                                   beginning and end values */
   vorbis_info     *vi;
   vorbis_comment  *vc;

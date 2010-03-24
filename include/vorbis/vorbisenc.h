@@ -378,7 +378,7 @@ struct ovectl_ratemanage2_arg {
  */
 #define OV_ECTL_COUPLING_SET         0x41
 
-  /* deprecated rate management supported only for compatability */
+  /* deprecated rate management supported only for compatibility */
 
 /**
  * Old interface to querying bitrate management settings.

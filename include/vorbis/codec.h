@@ -121,7 +121,7 @@ typedef struct vorbis_block{
 
 /* vorbis_block is a single block of data to be processed as part of
 the analysis/synthesis stream; it belongs to a specific logical
-bitstream, but is independant from other vorbis_blocks belonging to
+bitstream, but is independent from other vorbis_blocks belonging to
 that logical bitstream. *************************************************/
 
 struct alloc_chain{
