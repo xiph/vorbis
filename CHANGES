@@ -5,8 +5,8 @@ libvorbis 1.2.3 (2009-07-09) -- "Xiph.Org libVorbis I 20090709"
    single page
  * Additional decode setup hardening against malicious streams
  * Add 'OV_EXCLUDE_STATIC_CALLBACKS' define for developers who 
-   wish to avoid avoid unused symbol warnings from the static
-   callbacks defined in vorbisfile.h
+   wish to avoid unused symbol warnings from the static callbacks 
+   defined in vorbisfile.h
 
 libvorbis 1.2.2 (2009-06-24) -- "Xiph.Org libVorbis I 20090624"
 
