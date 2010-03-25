@@ -1186,8 +1186,8 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
       return(0);
     case OV_ECTL_COUPLING_SET:
       {
-        void *new_template;
-        double new_base;
+        const void *new_template;
+        double new_base=0.;
         int *iarg=(int *)arg;
         hi->coupling_p=((*iarg)!=0);
 
