@@ -146,9 +146,9 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
 
 /* unpacks a codebook from the packet buffer into the codebook struct,
    readies the codebook auxiliary structures for decode *************/
-int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
+static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
   long i,j;
-  memset(s,0,sizeof(*s));
+  static_codebook *s=_ogg_calloc(1,sizeof(*s));
   s->allocedp=1;
 
   /* make sure alignment is correct */
@@ -207,7 +207,7 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
     break;
   default:
     /* EOF */
-    return(-1);
+    goto _eofout;
   }
 
   /* Do we have a mapping to unpack? */
@@ -249,12 +249,12 @@ int vorbis_staticbook_unpack(oggpack_buffer *opb,static_codebook *s){
   }
 
   /* all set */
-  return(0);
+  return(s);
 
  _errout:
  _eofout:
-  vorbis_staticbook_clear(s);
-  return(-1);
+  vorbis_staticbook_destroy(s);
+  return(NULL);
 }
 
 /* returns the number of bits ************************************************/

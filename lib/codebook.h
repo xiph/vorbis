@@ -79,7 +79,6 @@ typedef struct codebook{
   int           delta;
 } codebook;
 
-extern void vorbis_staticbook_clear(static_codebook *b);
 extern void vorbis_staticbook_destroy(static_codebook *b);
 extern int vorbis_book_init_encode(codebook *dest,const static_codebook *source);
 extern int vorbis_book_init_decode(codebook *dest,const static_codebook *source);
@@ -100,7 +99,7 @@ extern long vorbis_book_codelen(codebook *book,int entry);
 
 
 extern int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *b);
-extern int vorbis_staticbook_unpack(oggpack_buffer *b,static_codebook *c);
+extern static_codebook *vorbis_staticbook_unpack(oggpack_buffer *b);
 
 extern int vorbis_book_encode(codebook *book, int a, oggpack_buffer *b);
 

@@ -258,19 +258,13 @@ float *_book_unquantize(const static_codebook *b,int n,int *sparsemap){
   return(NULL);
 }
 
-void vorbis_staticbook_clear(static_codebook *b){
+void vorbis_staticbook_destroy(static_codebook *b){
   if(b->allocedp){
     if(b->quantlist)_ogg_free(b->quantlist);
     if(b->lengthlist)_ogg_free(b->lengthlist);
     memset(b,0,sizeof(*b));
-  }
-}
-
-void vorbis_staticbook_destroy(static_codebook *b){
-  if(b->allocedp){
-    vorbis_staticbook_clear(b);
     _ogg_free(b);
-  }
+  } /* otherwise, it is in static memory */
 }
 
 void vorbis_book_clear(codebook *b){

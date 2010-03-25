@@ -279,7 +279,7 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   if(ci->books<=0)goto err_out;
   for(i=0;i<ci->books;i++){
     ci->book_param[i]=_ogg_calloc(1,sizeof(*ci->book_param[i]));
-    if(vorbis_staticbook_unpack(opb,ci->book_param[i]))goto err_out;
+    if(!ci->book_param[i])goto err_out;
   }
 
   /* time backend settings; hooks are unused */
