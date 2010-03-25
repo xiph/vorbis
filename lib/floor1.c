@@ -31,15 +31,22 @@
 #define floor1_rangedB 140 /* floor 1 fixed at -140dB to 0dB range */
 
 typedef struct lsfit_acc{
-  long x0;
-  long x1;
+  int x0;
+  int x1;
 
-  long xa;
-  long ya;
-  long x2a;
-  long y2a;
-  long xya;
-  long an;
+  int xa;
+  int ya;
+  int x2a;
+  int y2a;
+  int xya;
+  int an;
+
+  int xb;
+  int yb;
+  int x2b;
+  int y2b;
+  int xyb;
+  int bn;
 } lsfit_acc;
 
 /***********************************************/
@@ -416,7 +423,7 @@ static int accumulate_fit(const float *flr,const float *mdct,
                           int n,vorbis_info_floor1 *info){
   long i;
 
-  long xa=0,ya=0,x2a=0,y2a=0,xya=0,na=0, xb=0,yb=0,x2b=0,y2b=0,xyb=0,nb=0;
+  int xa=0,ya=0,x2a=0,y2a=0,xya=0,na=0, xb=0,yb=0,x2b=0,y2b=0,xyb=0,nb=0;
 
   memset(a,0,sizeof(*a));
   a->x0=x0;
@@ -444,72 +451,80 @@ static int accumulate_fit(const float *flr,const float *mdct,
     }
   }
 
-  xb+=xa;
-  yb+=ya;
-  x2b+=x2a;
-  y2b+=y2a;
-  xyb+=xya;
-  nb+=na;
+  a->xa=xa;
+  a->ya=ya;
+  a->x2a=x2a;
+  a->y2a=y2a;
+  a->xya=xya;
+  a->an=na;
 
-  /* weight toward the actually used frequencies if we meet the threshhold */
-  {
-    int weight=nb*info->twofitweight/(na+1);
-
-    a->xa=xa*weight+xb;
-    a->ya=ya*weight+yb;
-    a->x2a=x2a*weight+x2b;
-    a->y2a=y2a*weight+y2b;
-    a->xya=xya*weight+xyb;
-    a->an=na*weight+nb;
-  }
+  a->xb=xb;
+  a->yb=yb;
+  a->x2b=x2b;
+  a->y2b=y2b;
+  a->xyb=xyb;
+  a->bn=nb;
 
   return(na);
 }
 
-static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
-  long x=0,y=0,x2=0,y2=0,xy=0,an=0,i;
-  long x0=a[0].x0;
-  long x1=a[fits-1].x1;
+static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1,
+                    vorbis_info_floor1 *info){
+  double weight;
+  double xa=0,ya=0,x2a=0,y2a=0,xya=0,an=0;
+  double xb=0,yb=0,x2b=0,y2b=0,xyb=0,bn=0;
+  int i;
+  int x0=a[0].x0;
+  int x1=a[fits-1].x1;
 
   for(i=0;i<fits;i++){
-    x+=a[i].xa;
-    y+=a[i].ya;
-    x2+=a[i].x2a;
-    y2+=a[i].y2a;
-    xy+=a[i].xya;
+    xa+=a[i].xa;
+    ya+=a[i].ya;
+    x2a+=a[i].x2a;
+    y2a+=a[i].y2a;
+    xya+=a[i].xya;
     an+=a[i].an;
+
+    xb+=a[i].xb;
+    yb+=a[i].yb;
+    x2b+=a[i].x2b;
+    y2b+=a[i].y2b;
+    xyb+=a[i].xyb;
+    bn+=a[i].bn;
   }
 
   if(*y0>=0){
-    x+=   x0;
-    y+=  *y0;
-    x2+=  x0 *  x0;
-    y2+= *y0 * *y0;
-    xy+= *y0 *  x0;
-    an++;
+    xb+=   x0;
+    yb+=  *y0;
+    x2b+=  x0 *  x0;
+    y2b+= *y0 * *y0;
+    xyb+= *y0 *  x0;
+    bn++;
   }
 
   if(*y1>=0){
-    x+=   x1;
-    y+=  *y1;
-    x2+=  x1 *  x1;
-    y2+= *y1 * *y1;
-    xy+= *y1 *  x1;
-    an++;
+    xb+=   x1;
+    yb+=  *y1;
+    x2b+=  x1 *  x1;
+    y2b+= *y1 * *y1;
+    xyb+= *y1 *  x1;
+    bn++;
   }
 
+  weight = bn*info->twofitweight/(an+1);
+  xb += xa * weight;
+  yb += ya * weight;
+  x2b += x2a * weight;
+  y2b += y2a * weight;
+  xyb += xya * weight;
+  bn += an * weight;
+
   {
-    /* need 64 bit multiplies, which C doesn't give portably as int */
-    double fx=x;
-    double fx2=x2;
-    double denom=(an*fx2-fx*fx);
+    double denom=(bn*x2b-xb*xb);
 
     if(denom>0.){
-      double fy=y;
-      double fxy=xy;
-
-      double a=(fy*fx2-fxy*fx)/denom;
-      double b=(an*fxy-fx*fy)/denom;
+      double a=(yb*x2b-xyb*xb)/denom;
+      double b=(bn*xyb-xb*yb)/denom;
       *y0=rint(a+b*x0);
       *y1=rint(a+b*x1);
 
@@ -527,16 +542,6 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1){
     }
   }
 }
-
-/*static void fit_line_point(lsfit_acc *a,int fits,int *y0,int *y1){
-  long y=0;
-  int i;
-
-  for(i=0;i<fits && y==0;i++)
-    y+=a[i].ya;
-
-  *y0=*y1=y;
-  }*/
 
 static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
                          const float *mdct,
@@ -636,7 +641,7 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
     /* start by fitting the implicit base case.... */
     int y0=-200;
     int y1=-200;
-    fit_line(fits,posts-1,&y0,&y1);
+    fit_line(fits,posts-1,&y0,&y1,info);
 
     fit_valueA[0]=y0;
     fit_valueB[0]=y0;
@@ -676,8 +681,8 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
             int ly1=-200;
             int hy0=-200;
             int hy1=-200;
-            int ret0=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1);
-            int ret1=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1);
+            int ret0=fit_line(fits+lsortpos,sortpos-lsortpos,&ly0,&ly1,info);
+            int ret1=fit_line(fits+sortpos,hsortpos-sortpos,&hy0,&hy1,info);
 
             if(ret0){
               ly0=ly;
