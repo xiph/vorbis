@@ -38,32 +38,36 @@ main(void){
   int sample_rates [] = { 44100, 48000, 32000, 22050, 16000, 96000 } ;
   unsigned k ;
   int errors = 0 ;
-  float q=-.05;
+  int ch;
 
   gen_windowed_sine (data_out, ARRAY_LEN (data_out), 0.95);
 
-  while(q<1.){
-    for (k = 0 ; k < ARRAY_LEN (sample_rates); k ++) {
-      char filename [64] ;
-      snprintf (filename, sizeof (filename), "vorbis_q%.1f_%u.ogg", q*10,sample_rates [k]);
+  for(ch=1;ch<=8;ch++){
+    float q=-.05;
+    printf("\nTesting %d channel%s\n\n",ch,ch==1?"":"s");
+    while(q<1.){
+      for (k = 0 ; k < ARRAY_LEN (sample_rates); k ++) {
+        char filename [64] ;
+        snprintf (filename, sizeof (filename), "vorbis_%dch_q%.1f_%u.ogg", ch,q*10,sample_rates [k]);
 
-      printf ("    %-20s : ", filename);
-      fflush (stdout);
+        printf ("    %-20s : ", filename);
+        fflush (stdout);
 
-      /* Set to know value. */
-      set_data_in (data_in, ARRAY_LEN (data_in), 3.141);
+        /* Set to know value. */
+        set_data_in (data_in, ARRAY_LEN (data_in), 3.141);
 
-      write_vorbis_data_or_die (filename, sample_rates [k], q, data_out, ARRAY_LEN (data_out));
-      read_vorbis_data_or_die (filename, sample_rates [k], data_in, ARRAY_LEN (data_in));
+        write_vorbis_data_or_die (filename, sample_rates [k], q, data_out, ARRAY_LEN (data_out),ch);
+        read_vorbis_data_or_die (filename, sample_rates [k], data_in, ARRAY_LEN (data_in));
 
-      if (check_output (data_in, ARRAY_LEN (data_in), (.15f - .1f*q)) != 0)
-        errors ++ ;
-      else {
-        puts ("ok");
-        remove (filename);
+        if (check_output (data_in, ARRAY_LEN (data_in), (.15f - .1f*q)) != 0)
+          errors ++ ;
+        else {
+          puts ("ok");
+          remove (filename);
+        }
       }
+      q+=.1;
     }
-    q+=.1;
   }
 
   if (errors)
