@@ -17,7 +17,7 @@
 
 /* Write supplied data to an Ogg/Vorbis file with specified filename at
  * specified sample rate. Assumes a single channel of audio. */
-void write_vorbis_data_or_die (const char *filename, int srate,
+void write_vorbis_data_or_die (const char *filename, int srate, float q,
                         const float * data, int count) ;
 
 /* Read given Ogg/Vorbis file into data specified data array. This

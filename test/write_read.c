@@ -29,7 +29,7 @@
 /* The following function is basically a hacked version of the code in
  * examples/encoder_example.c */
 void
-write_vorbis_data_or_die (const char *filename, int srate, const float * data, int count)
+write_vorbis_data_or_die (const char *filename, int srate, float q, const float * data, int count)
 {
   FILE * file ;
   ogg_stream_state os;
@@ -51,7 +51,7 @@ write_vorbis_data_or_die (const char *filename, int srate, const float * data, i
 
   vorbis_info_init (&vi);
 
-  ret = vorbis_encode_init_vbr (&vi,1,srate,0.8);
+  ret = vorbis_encode_init_vbr (&vi,1,srate,q);
   if (ret) {
     printf ("vorbis_encode_init_vbr return %d\n", ret) ;
     exit (1) ;
