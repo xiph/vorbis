@@ -656,11 +656,11 @@ static int mapping0_forward(vorbis_block *vb){
 #if 0
       for(i=0;i<vi->channels;i++){
         char buf[80];
-        sprintf(buf,"resI%c%d",i?'R':'L',k);
+        sprintf(buf,"res%c%d",i?'R':'L',k);
         float work[n/2];
         for(j=0;j<n/2;j++)
           work[j]=iwork[i][j];
-        _analysis_output(buf,seq,work,n/2,0,0,0);
+        _analysis_output(buf,seq,work,n/2,1,0,0);
       }
 #endif
 

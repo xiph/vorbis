@@ -452,7 +452,7 @@ static void vorbis_encode_blocksize_setup(vorbis_info *vi,double s,
   ci->blocksizes[1]=blocklong;
 
 }
-#include<stdio.h>
+
 static void vorbis_encode_residue_setup(vorbis_info *vi,
                                         int number, int block,
                                         const vorbis_residue_template *res){
