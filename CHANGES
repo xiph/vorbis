@@ -1,3 +1,14 @@
+libvorbis 1.3.0 (2010-02-25) -- "Xiph.Org libVorbis I 20100325 (Everywhere)"
+
+ * Optimized surround support for 5.1 encoding at 44.1/48kHz
+ * Added encoder control call to disable channel coupling
+ * Correct an overflow bug in very low-bitrate encoding on 32 bit 
+   machines that caused inflated bitrates
+ * Numerous API hardening, leak and build fixes 
+ * Correct bug in 22kHz compand setup that could cause a crash
+ * Correct bug in 16kHz codebooks that could cause unstable pure 
+   tones at high bitrates
+
 libvorbis 1.2.3 (2009-07-09) -- "Xiph.Org libVorbis I 20090709"
 
  * correct a vorbisfile bug that prevented proper playback of
