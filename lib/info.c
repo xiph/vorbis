@@ -31,7 +31,7 @@
 #include "misc.h"
 #include "os.h"
 
-#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.3.0"
+#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.3.1"
 #define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20100325 (Everywhere)"
 
 /* helpers */
