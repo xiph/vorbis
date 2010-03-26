@@ -146,6 +146,7 @@ static const static_codebook*const _floor_512x17_books[]={
 };
 
 static const static_codebook*const _floor_Xx0_books[]={
+  0
 };
 
 static const static_codebook*const *const _floor_books[11]={
