@@ -511,7 +511,7 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1,
     bn++;
   }
 
-  weight = bn*info->twofitweight/(an+1);
+  weight = (bn*an)*info->twofitweight/(an+1)+1.;
   xb += xa * weight;
   yb += ya * weight;
   x2b += x2a * weight;
