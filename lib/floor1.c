@@ -470,27 +470,20 @@ static int accumulate_fit(const float *flr,const float *mdct,
 
 static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1,
                     vorbis_info_floor1 *info){
-  double weight;
-  double xa=0,ya=0,x2a=0,y2a=0,xya=0,an=0;
   double xb=0,yb=0,x2b=0,y2b=0,xyb=0,bn=0;
   int i;
   int x0=a[0].x0;
   int x1=a[fits-1].x1;
 
   for(i=0;i<fits;i++){
-    xa+=a[i].xa;
-    ya+=a[i].ya;
-    x2a+=a[i].x2a;
-    y2a+=a[i].y2a;
-    xya+=a[i].xya;
-    an+=a[i].an;
+    double weight = (a[i].bn+a[i].an)*info->twofitweight/(a[i].an+1)+1.;
 
-    xb+=a[i].xb;
-    yb+=a[i].yb;
-    x2b+=a[i].x2b;
-    y2b+=a[i].y2b;
-    xyb+=a[i].xyb;
-    bn+=a[i].bn;
+    xb+=a[i].xb + a[i].xa * weight;
+    yb+=a[i].yb + a[i].ya * weight;
+    x2b+=a[i].x2b + a[i].x2a * weight;
+    y2b+=a[i].y2b + a[i].y2a * weight;
+    xyb+=a[i].xyb + a[i].xya * weight;
+    bn+=a[i].bn + a[i].an * weight;
   }
 
   if(*y0>=0){
@@ -510,14 +503,6 @@ static int fit_line(lsfit_acc *a,int fits,int *y0,int *y1,
     xyb+= *y1 *  x1;
     bn++;
   }
-
-  weight = (bn+an)*info->twofitweight/(an+1)+1.;
-  xb += xa * weight;
-  yb += ya * weight;
-  x2b += x2a * weight;
-  y2b += y2a * weight;
-  xyb += xya * weight;
-  bn += an * weight;
 
   {
     double denom=(bn*x2b-xb*xb);
