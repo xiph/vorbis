@@ -939,6 +939,9 @@ static float noise_normalize(vorbis_look_psy *p, int limit, float *r, float *q, 
   int start = (vi->normal_p ? vi->normal_start-i : n);
   if(start>n)start=n;
 
+  /* force classic behavior where only energy in the current band is considered */
+  acc=0.f;
+
   /* still responsible for populating *out where noise norm not in
      effect.  There's no need to [re]populate *q in these areas */
   for(j=0;j<start;j++){
