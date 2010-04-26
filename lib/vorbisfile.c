@@ -533,8 +533,10 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
         bisect=(searched+endsearched)/2;
       }
 
-      ret=_seek_helper(vf,bisect);
-      if(ret)return(ret);
+      if(bisect != vf->offset){
+        ret=_seek_helper(vf,bisect);
+        if(ret)return(ret);
+      }
 
       last=_get_next_page(vf,&og,-1);
       if(last==OV_EREAD)return(OV_EREAD);
@@ -542,7 +544,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
         endsearched=bisect;
         if(last>=0)next=last;
       }else{
-        searched=last+og.header_len+og.body_len;
+        searched=vf->offset;
       }
     }
 
@@ -1226,6 +1228,12 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
 
   if(pos<0 || pos>vf->end)return(OV_EINVAL);
 
+  /* is the seek position outside our current link [if any]? */
+  if(vf->ready_state>=STREAMSET){
+    if(pos<vf->offsets[vf->current_link] || pos>=vf->offsets[vf->current_link+1])
+      _decode_clear(vf); /* clear out stream state */
+  }
+
   /* don't yet clear out decoding machine (if it's initialized), in
      the case we're in the same link.  Restart the decode lapping, and
      let _fetch_and_process_packet deal with a potential bitstream
@@ -1427,12 +1435,13 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
         bisect=begin +
           (ogg_int64_t)((double)(target-begintime)*(end-begin)/(endtime-begintime))
           - CHUNKSIZE;
-        if(bisect>begin+CHUNKSIZE){
-          result=_seek_helper(vf,bisect);
-          if(result) goto seek_error;
-        }else{
+        if(bisect<begin+CHUNKSIZE)
           bisect=begin;
-        }
+      }
+
+      if(bisect!=vf->offset){
+        result=_seek_helper(vf,bisect);
+        if(result) goto seek_error;
       }
 
       while(begin<end){
