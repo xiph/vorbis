@@ -1293,7 +1293,7 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
               /* We can't get a guaranteed correct pcm position out of the
                  last page in a stream because it might have a 'short'
                  granpos, which can only be detected in the presence of a
-                 preceeding page.  However, if the last page is also the first
+                 preceding page.  However, if the last page is also the first
                  page, the granpos rules of a first page take precedence.  Not
                  only that, but for first==last, the EOS page must be treated
                  as if its a normal first page for the stream to open/play. */
@@ -1390,7 +1390,7 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
 /* Page granularity seek (faster than sample granularity because we
    don't do the last bit of decode to find a specific sample).
 
-   Seek to the last [granule marked] page preceeding the specified pos
+   Seek to the last [granule marked] page preceding the specified pos
    location, such that decoding past the returned point will quickly
    arrive at the requested position. */
 int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
@@ -1410,7 +1410,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
   }
 
   /* search within the logical bitstream for the page with the highest
-     pcm_pos preceeding (or equal to) pos.  There is a danger here;
+     pcm_pos preceding (or equal to) pos.  There is a danger here;
      missing pages or incorrect frame number information in the
      bitstream could make our task impossible.  Account for that (it
      would be an error condition) */
@@ -1495,7 +1495,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
     }
 
     /* found our page. seek to it, update pcm offset. Easier case than
-       raw_seek, don't keep packets preceeding granulepos. */
+       raw_seek, don't keep packets preceding granulepos. */
     {
       ogg_page og;
       ogg_packet op;
@@ -1527,7 +1527,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
         result=ogg_stream_packetpeek(&vf->os,&op);
         if(result==0){
           /* !!! the packet finishing this page originated on a
-             preceeding page. Keep fetching previous pages until we
+             preceding page. Keep fetching previous pages until we
              get one with a granulepos or without the 'continued' flag
              set.  Then just use raw_seek for simplicity. */
 

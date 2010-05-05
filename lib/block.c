@@ -862,7 +862,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
            then spec says the end is cut, not beginning */
         if(vb->eofflag){
           /* trim the end */
-          /* no preceeding granulepos; assume we started at zero (we'd
+          /* no preceding granulepos; assume we started at zero (we'd
              have to in a short single-page stream) */
           /* granulepos could be -1 due to a seek, but that would result
              in a long count, not short count */

@@ -46,7 +46,7 @@
    implementation.  The float lookup is likely the optimal choice on
    any machine with an FPU.  The integer implementation is *not* fixed
    point (due to the need for a large dynamic range and thus a
-   seperately tracked exponent) and thus much more complex than the
+   separately tracked exponent) and thus much more complex than the
    relatively simple float implementations. It's mostly for future
    work on a fully fixed point implementation for processors like the
    ARM family. */
