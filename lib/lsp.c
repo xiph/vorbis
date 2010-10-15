@@ -81,11 +81,11 @@ void vorbis_lsp_to_curve(float *curve,int *map,int n,int ln,float *lsp,int m,
     float *ftmp=lsp;
     int c=m>>1;
 
-    do{
+    while(c--){
       q*=ftmp[0]-w;
       p*=ftmp[1]-w;
       ftmp+=2;
-    }while(--c);
+    }
 
     if(m&1){
       /* odd order filter; slightly assymetric */
