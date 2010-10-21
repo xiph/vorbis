@@ -91,6 +91,7 @@ static vorbis_info_floor *floor0_unpack (vorbis_info *vi,oggpack_buffer *opb){
   for(j=0;j<info->numbooks;j++){
     info->books[j]=oggpack_read(opb,8);
     if(info->books[j]<0 || info->books[j]>=ci->books)goto err_out;
+    if(ci->book_param[info->books[j]]->maptype==0)goto err_out;
   }
   return(info);
 
