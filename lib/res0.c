@@ -250,6 +250,7 @@ vorbis_info_residue *res0_unpack(vorbis_info *vi,oggpack_buffer *opb){
     int entries = ci->book_param[info->groupbook]->entries;
     int dim = ci->book_param[info->groupbook]->dim;
     int partvals = 1;
+    if (dim<1) goto errout;
     while(dim>0){
       partvals *= info->partitions;
       if(partvals > entries) goto errout;
