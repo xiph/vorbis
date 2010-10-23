@@ -61,13 +61,13 @@ void _verify(OggVorbis_File *ov,
   bread=ov_read(ov,buffer,4096,1,1,1,&dummy);
   for(j=0;j<bread;j++){
     if(buffer[j]!=bigassbuffer[j+((pos>>hs)*2)]){
-      fprintf(stderr,"data after seek doesn't match declared pcm position %lld\n",pos);
+      fprintf(stderr,"data after seek doesn't match declared pcm position %ld\n",(long)pos);
 
       for(i=0;i<(pcmlength>>hs)*2-bread;i++){
         for(j=0;j<bread;j++)
           if(buffer[j] != bigassbuffer[i+j])break;
         if(j==bread){
-          fprintf(stderr,"data after seek appears to match position %lld\n",(i/2)<<hs);
+          fprintf(stderr,"data after seek appears to match position %ld\n",(long)((i/2)<<hs));
         }
       }
       {
