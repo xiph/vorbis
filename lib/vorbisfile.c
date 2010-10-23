@@ -689,6 +689,8 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
     /* process a packet if we can. */
 
     if(vf->ready_state==INITSET){
+      int hs=vorbis_synthesis_halfrate_p(vf->vi);
+
       while(1) {
               ogg_packet op;
               ogg_packet *op_ptr=(op_in?op_in:&op);
@@ -716,7 +718,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
               if(oldsamples)return(OV_EFAULT);
 
               vorbis_synthesis_blockin(&vf->vd,&vf->vb);
-              vf->samptrack+=vorbis_synthesis_pcmout(&vf->vd,NULL)-oldsamples;
+              vf->samptrack+=(vorbis_synthesis_pcmout(&vf->vd,NULL)<<hs);
               vf->bittrack+=op_ptr->bytes*8;
             }
 
@@ -745,7 +747,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
                                                here unless the stream
                                                is very broken */
 
-              samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
+              samples=(vorbis_synthesis_pcmout(&vf->vd,NULL)<<hs);
 
               granulepos-=samples;
               for(i=0;i<link;i++)
@@ -1022,17 +1024,22 @@ int ov_fopen(const char *path,OggVorbis_File *vf){
 int ov_halfrate(OggVorbis_File *vf,int flag){
   int i;
   if(vf->vi==NULL)return OV_EINVAL;
-  if(!vf->seekable)return OV_EINVAL;
-  if(vf->ready_state>=STREAMSET)
-    _decode_clear(vf); /* clear out stream state; later on libvorbis
-                          will be able to swap this on the fly, but
-                          for now dumping the decode machine is needed
-                          to reinit the MDCT lookups.  1.1 libvorbis
-                          is planned to be able to switch on the fly */
+  if(vf->ready_state>STREAMSET){
+    /* clear out stream state; dumping the decode machine is needed to
+       reinit the MDCT lookups. */
+    vorbis_dsp_clear(&vf->vd);
+    vorbis_block_clear(&vf->vb);
+    vf->ready_state=STREAMSET;
+    if(vf->pcm_offset>=0){
+      ogg_int64_t pos=vf->pcm_offset;
+      vf->pcm_offset=-1; /* make sure the pos is dumped if unseekable */
+      ov_pcm_seek(vf,pos);
+    }
+  }
 
   for(i=0;i<vf->links;i++){
     if(vorbis_synthesis_halfrate(vf->vi+i,flag)){
-      ov_halfrate(vf,0);
+      if(flag) ov_halfrate(vf,0);
       return OV_EINVAL;
     }
   }
@@ -1657,17 +1664,22 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   vf->samptrack=0.f;
   /* discard samples until we reach the desired position. Crossing a
      logical bitstream boundary with abandon is OK. */
-  while(vf->pcm_offset<pos){
-    ogg_int64_t target=pos-vf->pcm_offset;
-    long samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
+  {
+    /* note that halfrate could be set differently in each link, but
+       vorbisfile encoforces all links are set or unset */
+    int hs=vorbis_synthesis_halfrate_p(vf->vi);
+    while(vf->pcm_offset<((pos>>hs)<<hs)){
+      ogg_int64_t target=(pos-vf->pcm_offset)>>hs;
+      long samples=vorbis_synthesis_pcmout(&vf->vd,NULL);
 
-    if(samples>target)samples=target;
-    vorbis_synthesis_read(&vf->vd,samples);
-    vf->pcm_offset+=samples;
+      if(samples>target)samples=target;
+      vorbis_synthesis_read(&vf->vd,samples);
+      vf->pcm_offset+=samples<<hs;
 
-    if(samples<target)
-      if(_fetch_and_process_packet(vf,NULL,1,1)<=0)
-        vf->pcm_offset=ov_pcm_total(vf,-1); /* eof */
+      if(samples<target)
+        if(_fetch_and_process_packet(vf,NULL,1,1)<=0)
+          vf->pcm_offset=ov_pcm_total(vf,-1); /* eof */
+    }
   }
   return 0;
 }
@@ -1858,6 +1870,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
                     void (*filter)(float **pcm,long channels,long samples,void *filter_param),void *filter_param){
   int i,j;
   int host_endian = host_is_big_endian();
+  int hs;
 
   float **pcm;
   long samples;
@@ -1981,7 +1994,8 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
     }
 
     vorbis_synthesis_read(&vf->vd,samples);
-    vf->pcm_offset+=samples;
+    hs=vorbis_synthesis_halfrate_p(vf->vi);
+    vf->pcm_offset+=(samples<<hs);
     if(bitstream)*bitstream=vf->current_link;
     return(samples*bytespersample);
   }else{
@@ -2018,10 +2032,11 @@ long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int length,
       float **pcm;
       long samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
       if(samples){
+        int hs=vorbis_synthesis_halfrate_p(vf->vi);
         if(pcm_channels)*pcm_channels=pcm;
         if(samples>length)samples=length;
         vorbis_synthesis_read(&vf->vd,samples);
-        vf->pcm_offset+=samples;
+        vf->pcm_offset+=samples<<hs;
         if(bitstream)*bitstream=vf->current_link;
         return samples;
 
