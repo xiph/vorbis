@@ -451,8 +451,9 @@ static ogg_int64_t _initial_pcmoffset(OggVorbis_File *vf, vorbis_info *vi){
     }
   }
 
-  /* less than zero?  This is a stream with samples trimmed off
-     the beginning, a normal occurrence; set the offset to zero */
+  /* less than zero?  Either a corrupt file or a stream with samples
+     trimmed off the beginning, a normal occurrence; in both cases set
+     the offset to zero */
   if(accumulated<0)accumulated=0;
 
   return accumulated;
@@ -513,7 +514,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
 
     vf->offsets[m+1]=end;
     vf->offsets[m]=begin;
-    vf->pcmlengths[m*2+1]=endgran;
+    vf->pcmlengths[m*2+1]=(endgran<0?0:endgran);
 
   }else{
 
@@ -590,7 +591,7 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
     vf->pcmlengths[m*2+1]=searchgran;
     vf->pcmlengths[m*2+2]=pcmoffset;
     vf->pcmlengths[m*2+3]-=pcmoffset;
-
+    if(vf->pcmlengths[m*2+3]<0)vf->pcmlengths[m*2+3]=0;
   }
   return(0);
 }
@@ -649,6 +650,7 @@ static int _open_seekable2(OggVorbis_File *vf){
   vf->dataoffsets[0]=dataoffset;
   vf->pcmlengths[0]=pcmoffset;
   vf->pcmlengths[1]-=pcmoffset;
+  if(vf->pcmlengths[1]<0)vf->pcmlengths[1]=0;
 
   return(ov_raw_seek(vf,dataoffset));
 }
