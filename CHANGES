@@ -1,3 +1,29 @@
+libvorbis 1.3.2 (2010-11-01) -- "Xiph.Org libVorbis I 20101101 (Schaufenugget)"
+
+ * vorbis: additional proofing against invalid/malicious 
+   streams in floor, residue, and bos/eos packet trimming 
+   code (see SVN for details). 
+ * vorbis: Added programming documentation tree for the 
+   low-level calls
+ * vorbisfile: Correct handling of serial numbers array 
+   element [0] on non-seekable streams
+ * vorbisenc: Back out an [old] AoTuV HF weighting that was 
+   first enabled in 1.3.0; there are a few samples where I 
+   really don't like the effect it causes.
+ * vorbis: return correct timestamp for granule positions 
+   with high bit set.
+ * vorbisfile: the [undocumented] half-rate decode api made no 
+   attempt to keep the pcm offset tracking consistent in seeks. 
+   Fix and add a testing mode to seeking_example.c to torture 
+   test seeking in halfrate mode.  Also remove requirement that 
+   halfrate mode only work with seekable files.
+ * vorbisfile:  Fix a chaining bug in raw_seeks where seeking 
+   out of the current link would fail due to not 
+   reinitializing the decode machinery.  
+ * vorbisfile: improve seeking strategy. Reduces the 
+   necessary number of seek callbacks in an open or seek 
+   operation by well over 2/3.
+
 libvorbis 1.3.1 (2010-02-26) -- "Xiph.Org libVorbis I 20100325 (Everywhere)"
 
  * tweak + minor arithmetic fix in floor1 fit
