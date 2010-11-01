@@ -18,14 +18,14 @@
 <p><i>declared in "vorbis/vorbisenc.h";</i></p>
 
 <p>This is the primary function within libvorbisenc for setting up variable bitrate ("quality" based) modes.
-<p>Before this function is called, the <a href="vorbis_info.html">vorbis_info</a> struct should be initialized by using vorbis_info_init() from the libvorbis API.  After encoding, vorbis_info_clear should be called.
+<p>Before this function is called, the <a href="../libvorbis/vorbis_info.html">vorbis_info</a> struct should be initialized by using vorbis_info_init() from the libvorbis API.  After encoding, vorbis_info_clear should be called.
 <p>
 <br><br>
 <table border=0 color=black cellspacing=0 cellpadding=7>
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>
-extern int vorbis_encode_init_vbr(<a href="vorbis_info.html">vorbis_info</a> *vi,
+extern int vorbis_encode_init_vbr(<a href="../libvorbis/vorbis_info.html">vorbis_info</a> *vi,
 			      long channels,
 			      long rate,
 			      
@@ -39,7 +39,7 @@ extern int vorbis_encode_init_vbr(<a href="vorbis_info.html">vorbis_info</a> *vi
 <h3>Parameters</h3>
 <dl>
 <dt><i>vi</i></dt>
-<dd>Pointer to an initialized <a href="vorbis_info.html">vorbis_info</a> struct.</dd>
+<dd>Pointer to an initialized <a href="../libvorbis/vorbis_info.html">vorbis_info</a> struct.</dd>
 <dt><i>channels</i></dt>
 <dd>The number of channels to be encoded.</dd>
 <dt><i>rate</i></dt>

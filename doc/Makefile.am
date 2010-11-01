@@ -1,6 +1,6 @@
 ## Process this with automake to create Makefile.in
 
-SUBDIRS = vorbisfile vorbisenc
+SUBDIRS = libvorbis vorbisfile vorbisenc
 
 docdir = $(datadir)/doc/$(PACKAGE)-$(VERSION)
 

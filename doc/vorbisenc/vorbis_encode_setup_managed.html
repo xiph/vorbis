@@ -27,7 +27,7 @@ href="vorbis_encode_setup_init.html">vorbis_encode_setup_init()</a> to
 complete the setup process.
 
 <p>Before this function is called, the <a
-href="vorbis_info.html">vorbis_info</a> struct should be initialized
+href="../libvorbis/vorbis_info.html">vorbis_info</a> struct should be initialized
 by using vorbis_info_init() from the libvorbis API.  After encoding,
 vorbis_info_clear should be called.
 
@@ -40,7 +40,7 @@ settings to select the appropriate encoding mode and set it up.
 <tr bgcolor=#cccccc>
 	<td>
 <pre><b>
-extern int vorbis_encode_init(<a href="vorbis_info.html">vorbis_info</a> *vi,
+extern int vorbis_encode_init(<a href="../libvorbis/vorbis_info.html">vorbis_info</a> *vi,
 			      long channels,
 			      long rate,
 			      
@@ -56,7 +56,7 @@ extern int vorbis_encode_init(<a href="vorbis_info.html">vorbis_info</a> *vi,
 <h3>Parameters</h3>
 <dl>
 <dt><i>vi</i></dt>
-<dd>Pointer to an initialized <a href="vorbis_info.html">vorbis_info</a> struct.</dd>
+<dd>Pointer to an initialized <a href="../libvorbis/vorbis_info.html">vorbis_info</a> struct.</dd>
 <dt><i>channels</i></dt>
 <dd>The number of channels to be encoded.</dd>
 <dt><i>rate</i></dt>

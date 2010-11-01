@@ -281,7 +281,7 @@ lib/books/Makefile
 lib/books/coupled/Makefile
 lib/books/uncoupled/Makefile
 lib/books/floor/Makefile
-doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile
+doc/Makefile doc/vorbisfile/Makefile doc/vorbisenc/Makefile doc/libvorbis/Makefile
 doc/Doxyfile
 include/Makefile include/vorbis/Makefile
 examples/Makefile

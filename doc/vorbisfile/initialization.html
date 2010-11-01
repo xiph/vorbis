@@ -19,7 +19,7 @@ initialized before decoding and cleared when decoding is finished.
 The simplest possible case is to use <a
 href="ov_fopen.html">ov_fopen()</a> to open the file for access, check
 it for Vorbis content, and prepare it for playback.  A successful <a
-href="return.html">return code</a> from <a
+href="../libvorbis/return.html">return code</a> from <a
 href="ov_fopen.html">ov_fopen()</a> indicates the file is ready for use.
 Once the file is no longer needed, <a
 href="ov_clear.html">ov_clear()</a> is used to close the file and
@@ -69,7 +69,7 @@ All libvorbisfile initialization and deallocation routines are declared in "vorb
 is an Ogg Vorbis file or not.  A successful return indicates that the
 file appears to be an Ogg Vorbis file, but the <a
 href="OggVorbis_File.html">OggVorbis_File</a> struct is not yet fully
-initialized for actual decoding.  After a <a href="return.html">successful return</a>, the file
+initialized for actual decoding.  After a <a href="../libvorbis/return.html">successful return</a>, the file
 may be closed using <a href="ov_clear.html">ov_clear()</a> or fully
 opened for decoding using <a
 href="ov_test_open.html">ov_test_open()</a>.<p> This call is intended to
