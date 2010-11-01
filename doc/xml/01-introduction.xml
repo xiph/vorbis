@@ -269,7 +269,7 @@ less expensive to decode than floor 0.</para>
 
 <para>
 Floor 0 is not to be considered deprecated, but it is of limited
-modern use.  No known Vorbis encoder past Xiph.org's own beta 4 makes
+modern use.  No known Vorbis encoder past Xiph.Org's own beta 4 makes
 use of floor 0.</para>
 
 <para>

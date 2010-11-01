@@ -8,7 +8,7 @@
 <article>
 <articleinfo>
   <title>Vorbis I specification</title>
-  <corpauthor>Xiph.org Foundation</corpauthor>
+  <corpauthor>Xiph.Org Foundation</corpauthor>
 </articleinfo>
 
  <xi:include href="01-introduction.xml"  xmlns:xi="http://www.w3.org/2001/XInclude"/> 

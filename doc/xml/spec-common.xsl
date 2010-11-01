@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <xsl:stylesheet  xmlns:xsl="http://www.w3.org/1999/XSL/Transform"  version="1.0">
-<!--  elements of customization for Xiph.org specs
+<!--  elements of customization for Xiph.Org specs
       common to all docbook output formats
 
       this file is included by the format-specific stylesheets
