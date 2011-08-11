@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
 <!-- html --> 
 <meta name="src" content="Vorbis_I_spec.tex"> 
-<meta name="date" content="2011-08-11 03:03:00"> 
+<meta name="date" content="2011-08-11 03:29:00"> 
 <link rel="stylesheet" type="text/css" href="Vorbis_I_spec.css"> 
 </head><body 
 >
@@ -136,7 +136,7 @@ href="#x1-770004.3.6" id="QQ2-1-83">dot product</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >4.3.7 <a 
 href="#x1-780004.3.7" id="QQ2-1-84">inverse MDCT</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >4.3.8 <a 
-href="#x1-790004.3.8" id="QQ2-1-85">overlap&#x02D9;add</a></span>
+href="#x1-790004.3.8" id="QQ2-1-85">overlap_add</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >4.3.9 <a 
 href="#x1-800004.3.9" id="QQ2-1-86">output channel order</a></span>
 <br />&#x00A0;<span class="sectionToc" >5 <a 
@@ -209,17 +209,17 @@ href="#x1-1160009.2" id="QQ2-1-128">Functions</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >9.2.1 <a 
 href="#x1-1170009.2.1" id="QQ2-1-129">ilog</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >9.2.2 <a 
-href="#x1-1180009.2.2" id="QQ2-1-130">float32&#x02D9;unpack</a></span>
+href="#x1-1180009.2.2" id="QQ2-1-130">float32_unpack</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >9.2.3 <a 
-href="#x1-1190009.2.3" id="QQ2-1-131">lookup1&#x02D9;values</a></span>
+href="#x1-1190009.2.3" id="QQ2-1-131">lookup1_values</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >9.2.4 <a 
-href="#x1-1200009.2.4" id="QQ2-1-132">low&#x02D9;neighbor</a></span>
+href="#x1-1200009.2.4" id="QQ2-1-132">low_neighbor</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >9.2.5 <a 
-href="#x1-1210009.2.5" id="QQ2-1-133">high&#x02D9;neighbor</a></span>
+href="#x1-1210009.2.5" id="QQ2-1-133">high_neighbor</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >9.2.6 <a 
-href="#x1-1220009.2.6" id="QQ2-1-134">render&#x02D9;point</a></span>
+href="#x1-1220009.2.6" id="QQ2-1-134">render_point</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >9.2.7 <a 
-href="#x1-1230009.2.7" id="QQ2-1-135">render&#x02D9;line</a></span>
+href="#x1-1230009.2.7" id="QQ2-1-135">render_line</a></span>
 <br />&#x00A0;<span class="sectionToc" >10 <a 
 href="#x1-12400010" id="QQ2-1-136">Tables</a></span>
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >10.1 <a 
@@ -3060,43 +3060,43 @@ Unpacking the VQ lookup table vectors relies on the following values:
 class="cmr-6">1</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;the</span><span 
-class="cmtt-8">&#x00A0;[codebook_multiplicands]</span><span 
+class="cmtt-8">&#x00A0;[codebook\_multiplicands]</span><span 
 class="cmtt-8">&#x00A0;array</span>
 <br class="fancyvrb" /><a 
  id="x1-54004r2"></a><span 
 class="cmr-6">2</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;[codebook_minimum_value]</span>
+class="cmtt-8">&#x00A0;[codebook\_minimum\_value]</span>
 <br class="fancyvrb" /><a 
  id="x1-54006r3"></a><span 
 class="cmr-6">3</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;[codebook_delta_value]</span>
+class="cmtt-8">&#x00A0;[codebook\_delta\_value]</span>
 <br class="fancyvrb" /><a 
  id="x1-54008r4"></a><span 
 class="cmr-6">4</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;[codebook_sequence_p]</span>
+class="cmtt-8">&#x00A0;[codebook\_sequence\_p]</span>
 <br class="fancyvrb" /><a 
  id="x1-54010r5"></a><span 
 class="cmr-6">5</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;[codebook_lookup_type]</span>
+class="cmtt-8">&#x00A0;[codebook\_lookup\_type]</span>
 <br class="fancyvrb" /><a 
  id="x1-54012r6"></a><span 
 class="cmr-6">6</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;[codebook_entries]</span>
+class="cmtt-8">&#x00A0;[codebook\_entries]</span>
 <br class="fancyvrb" /><a 
  id="x1-54014r7"></a><span 
 class="cmr-6">7</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;[codebook_dimensions]</span>
+class="cmtt-8">&#x00A0;[codebook\_dimensions]</span>
 <br class="fancyvrb" /><a 
  id="x1-54016r8"></a><span 
 class="cmr-6">8</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;[codebook_lookup_values]</span>
+class="cmtt-8">&#x00A0;[codebook\_lookup\_values]</span>
 </div>
 <!--l. 297--><p class="noindent" >Decoding (unpacking) a specific vector in the vector lookup table proceeds according to
 <span 
@@ -4199,7 +4199,7 @@ class="cmtt-12">[packet_type]</span>; check that packet type is 0 (audio)
       </li>
       <li 
   class="enumerate" id="x1-72004x2">read <a 
-href="#x1-1170009.2.1">ilog</a>([vorbis&#x02D9;mode&#x02D9;count]-1) bits <span 
+href="#x1-1170009.2.1">ilog</a>([vorbis_mode_count]-1) bits <span 
 class="cmtt-12">[mode_number]</span>
       </li>
       <li 
@@ -4436,12 +4436,12 @@ class="cmtt-12">[audio_channels]</span>
       <li 
   class="enumerate" id="x1-73002x1"><span 
 class="cmtt-12">[submap_number] </span>= element <span 
-class="cmtt-12">[i] </span>of vector [vorbis&#x02D9;mapping&#x02D9;mux]
+class="cmtt-12">[i] </span>of vector [vorbis_mapping_mux]
       </li>
       <li 
   class="enumerate" id="x1-73004x2"><span 
 class="cmtt-12">[floor_number] </span>= element <span 
-class="cmtt-12">[submap_number] </span>of vector [vorbis&#x02D9;submap&#x02D9;floor]
+class="cmtt-12">[submap_number] </span>of vector [vorbis_submap_floor]
       </li>
       <li 
   class="enumerate" id="x1-73006x3">if          the          floor          type          of          this          floor          (vector
@@ -4755,7 +4755,7 @@ href="#XSporer/Brandenburg/Edler">1</a>]</span>. The window function used for th
 earlier.
 <!--l. 576--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">4.3.8  </span> <a 
- id="x1-790004.3.8"></a>overlap&#x02D9;add</h5>
+ id="x1-790004.3.8"></a>overlap_add</h5>
 <!--l. 578--><p class="noindent" >Windowed MDCT output is overlapped and added with the right hand data of the previous
 window such that the 3/4 point of the previous window is aligned with the 1/4 point of the
 current window (as illustrated in <a 
@@ -4775,7 +4775,7 @@ is:
  id="x1-79002r1"></a><span 
 class="cmr-6">1</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;window_blocksize(previous_window)/4+window_blocksize(current_window)/4</span>
+class="cmtt-8">&#x00A0;window\_blocksize(previous\_window)/4+window\_blocksize(current\_window)/4</span>
 </div>
 <!--l. 596--><p class="noindent" >from the center (element windowsize/2) of the previous window to the center (element
 windowsize/2-1, inclusive) of the current window.
@@ -4900,7 +4900,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;1)</span><span 
-class="cmtt-8">&#x00A0;[vendor_length]</span><span 
+class="cmtt-8">&#x00A0;[vendor\_length]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;an</span><span 
@@ -4916,14 +4916,14 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;2)</span><span 
-class="cmtt-8">&#x00A0;[vendor_string]</span><span 
+class="cmtt-8">&#x00A0;[vendor\_string]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;a</span><span 
 class="cmtt-8">&#x00A0;UTF-8</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
 class="cmtt-8">&#x00A0;as</span><span 
-class="cmtt-8">&#x00A0;[vendor_length]</span><span 
+class="cmtt-8">&#x00A0;[vendor\_length]</span><span 
 class="cmtt-8">&#x00A0;octets</span>
 <br class="fancyvrb" /><a 
  id="x1-84006r3"></a><span 
@@ -4932,7 +4932,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;3)</span><span 
-class="cmtt-8">&#x00A0;[user_comment_list_length]</span><span 
+class="cmtt-8">&#x00A0;[user\_comment\_list\_length]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;an</span><span 
@@ -4949,7 +4949,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;4)</span><span 
 class="cmtt-8">&#x00A0;iterate</span><span 
-class="cmtt-8">&#x00A0;[user_comment_list_length]</span><span 
+class="cmtt-8">&#x00A0;[user\_comment\_list\_length]</span><span 
 class="cmtt-8">&#x00A0;times</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
@@ -5014,7 +5014,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;7)</span><span 
-class="cmtt-8">&#x00A0;[framing_bit]</span><span 
+class="cmtt-8">&#x00A0;[framing\_bit]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;a</span><span 
@@ -5031,7 +5031,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;8)</span><span 
 class="cmtt-8">&#x00A0;if</span><span 
 class="cmtt-8">&#x00A0;(</span><span 
-class="cmtt-8">&#x00A0;[framing_bit]</span><span 
+class="cmtt-8">&#x00A0;[framing\_bit]</span><span 
 class="cmtt-8">&#x00A0;unset</span><span 
 class="cmtt-8">&#x00A0;or</span><span 
 class="cmtt-8">&#x00A0;end-of-packet</span><span 
@@ -5132,7 +5132,7 @@ class="description">License information, eg, &#8217;All Rights Reserved&#8217;, 
       a                license                such                as                a                Creative
       Commons license (&#8221;www.creativecommons.org/blahblah/license.html&#8221;) or the EFF
       Open Audio License (&#8217;distributed under the terms of the Open Audio License. see
-      http://www.eff.org/IP/Open&#x02D9;licenses/eff&#x02D9;oal.html for details&#8217;), etc.
+      http://www.eff.org/IP/Open_licenses/eff_oal.html for details&#8217;), etc.
       </dd><dt class="description">
 <span 
 class="cmssbx-10x-x-120">ORGANIZATION</span> </dt><dd 
@@ -6633,7 +6633,7 @@ class="cmtt-12">[floor1_class_masterbooks] </span>or
 <span 
 class="cmtt-12">[floor1_subclass_books] </span>scalar element greater than the highest numbered codebook
 configured in this stream is an error condition that renders the stream undecodable. All vector
-[floor1&#x02D9;x&#x02D9;list] element values must be unique within the vector; a non-unique value renders the
+[floor1_x_list] element values must be unique within the vector; a non-unique value renders the
 stream undecodable.
 <!--l. 167--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-1000007.2.2"></a><span 
@@ -8543,7 +8543,7 @@ class="cmtt-12">[n] </span>is provided by
 class="cmtt-12">[floor1_X_list]</span>, <span 
 class="cmtt-12">[floor1_final_Y] </span>and <span 
 class="cmtt-12">[floor1_step2_flag] </span>vectors, as well as
-      [floor1&#x02D9;multiplier] and [floor1&#x02D9;values] values.
+      [floor1_multiplier] and [floor1_values] values.
                                                                                         
 
                                                                                         
@@ -8559,8 +8559,8 @@ class="cmtt-12">[floor1_step2_flag]&#8217; </span>according to ascending sort or
       <span 
 class="cmtt-12">[floor1_X_list]</span>. That is, sort the values of <span 
 class="cmtt-12">[floor1_X_list] </span>and then apply the same
-      permutation to elements of the other two vectors so that the X, Y and step2&#x02D9;flag values still
-      match.
+      permutation to elements of the other two vectors so that the X, Y and step2_flag values
+      still match.
       <!--l. 355--><p class="noindent" >Then compute the final curve in one pass:
       <!--l. 357--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb32">
@@ -9002,20 +9002,26 @@ the moment exactly how a partition is encoded and simply trusting that it is, is
 follows:
       <ul class="itemize1">
       <li class="itemize">Each vector is partitioned into multiple equal sized chunks according to configuration
-      specified. If we have a vector size of <span 
-class="cmti-12">n</span>, a partition size <span 
-class="cmti-12">residue&#x02D9;partition&#x02D9;size</span>, and
-      a  total  of  <span 
-class="cmti-12">ch  </span>residue  vectors,  the  total  number  of  partitioned  chunks  coded  is
+      specified.  If  we  have  a  vector  size  of  <span 
+class="cmti-12">n</span>,  a  partition  size  <span 
+class="cmti-12">residue</span><span 
+class="cmti-12">_partition</span><span 
+class="cmti-12">_size</span>,
+      and a total of <span 
+class="cmti-12">ch  </span>residue vectors, the total number of partitioned chunks coded
                                                                                         
 
                                                                                         
-      <span 
+      is  <span 
 class="cmti-12">n</span>/<span 
-class="cmti-12">residue&#x02D9;partition&#x02D9;size</span>*<span 
-class="cmti-12">ch</span>. It is important to note that the integer division truncates.
-      In the below example, we assume an example <span 
-class="cmti-12">residue&#x02D9;partition&#x02D9;size </span>of 8.
+class="cmti-12">residue</span><span 
+class="cmti-12">_partition</span><span 
+class="cmti-12">_size</span>*<span 
+class="cmti-12">ch</span>.  It  is  important  to  note  that  the  integer  division
+      truncates. In the below example, we assume an example <span 
+class="cmti-12">residue</span><span 
+class="cmti-12">_partition</span><span 
+class="cmti-12">_size </span>of 8.
       </li>
       <li class="itemize">Each partition in each vector has a classification number that specifies which of
       multiple configured VQ codebook setups are used to decode that partition. The
@@ -9446,7 +9452,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;1)</span><span 
-class="cmtt-8">&#x00A0;[residue_begin]</span><span 
+class="cmtt-8">&#x00A0;[residue\_begin]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;24</span><span 
@@ -9461,7 +9467,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;2)</span><span 
-class="cmtt-8">&#x00A0;[residue_end]</span><span 
+class="cmtt-8">&#x00A0;[residue\_end]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;24</span><span 
@@ -9476,7 +9482,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;3)</span><span 
-class="cmtt-8">&#x00A0;[residue_partition_size]</span><span 
+class="cmtt-8">&#x00A0;[residue\_partition\_size]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;24</span><span 
@@ -9494,7 +9500,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;4)</span><span 
-class="cmtt-8">&#x00A0;[residue_classifications]</span><span 
+class="cmtt-8">&#x00A0;[residue\_classifications]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;6</span><span 
@@ -9515,7 +9521,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;5)</span><span 
-class="cmtt-8">&#x00A0;[residue_classbook]</span><span 
+class="cmtt-8">&#x00A0;[residue\_classbook]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;8</span><span 
@@ -9570,7 +9576,7 @@ class="cmtt-8">&#x00A0;the</span><span
 class="cmtt-8">&#x00A0;range</span><span 
 class="cmtt-8">&#x00A0;0</span><span 
 class="cmtt-8">&#x00A0;...</span><span 
-class="cmtt-8">&#x00A0;[residue_classifications]-1</span><span 
+class="cmtt-8">&#x00A0;[residue\_classifications]-1</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
  id="x1-109014r2"></a><span 
@@ -9589,7 +9595,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;2)</span><span 
-class="cmtt-8">&#x00A0;[high_bits]</span><span 
+class="cmtt-8">&#x00A0;[high\_bits]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;0</span>
 <br class="fancyvrb" /><a 
@@ -9604,7 +9610,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;3)</span><span 
-class="cmtt-8">&#x00A0;[low_bits]</span><span 
+class="cmtt-8">&#x00A0;[low\_bits]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;3</span><span 
@@ -9650,7 +9656,7 @@ class="cmtt-8">&#x00A0;is</span><span
 class="cmtt-8">&#x00A0;set</span><span 
 class="cmtt-8">&#x00A0;)</span><span 
 class="cmtt-8">&#x00A0;then</span><span 
-class="cmtt-8">&#x00A0;[high_bits]</span><span 
+class="cmtt-8">&#x00A0;[high\_bits]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;five</span><span 
@@ -9671,15 +9677,15 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;6)</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
-class="cmtt-8">&#x00A0;[residue_cascade]</span><span 
+class="cmtt-8">&#x00A0;[residue\_cascade]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
 class="cmtt-8">&#x00A0;[i]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
-class="cmtt-8">&#x00A0;[high_bits]</span><span 
+class="cmtt-8">&#x00A0;[high\_bits]</span><span 
 class="cmtt-8">&#x00A0;*</span><span 
 class="cmtt-8">&#x00A0;8</span><span 
 class="cmtt-8">&#x00A0;+</span><span 
-class="cmtt-8">&#x00A0;[low_bits]</span>
+class="cmtt-8">&#x00A0;[low\_bits]</span>
 <br class="fancyvrb" /><a 
  id="x1-109026r8"></a><span 
 class="cmr-6">8</span><span 
@@ -9719,7 +9725,7 @@ class="cmtt-8">&#x00A0;the</span><span
 class="cmtt-8">&#x00A0;range</span><span 
 class="cmtt-8">&#x00A0;0</span><span 
 class="cmtt-8">&#x00A0;...</span><span 
-class="cmtt-8">&#x00A0;[residue_classifications]-1</span><span 
+class="cmtt-8">&#x00A0;[residue\_classifications]-1</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
  id="x1-109032r2"></a><span 
@@ -9772,7 +9778,7 @@ class="cmtt-8">&#x00A0;3)</span><span
 class="cmtt-8">&#x00A0;if</span><span 
 class="cmtt-8">&#x00A0;(</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
-class="cmtt-8">&#x00A0;[residue_cascade]</span><span 
+class="cmtt-8">&#x00A0;[residue\_cascade]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
 class="cmtt-8">&#x00A0;[i]</span><span 
 class="cmtt-8">&#x00A0;bit</span><span 
@@ -9809,7 +9815,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;4)</span><span 
 class="cmtt-8">&#x00A0;array</span><span 
-class="cmtt-8">&#x00A0;[residue_books]</span><span 
+class="cmtt-8">&#x00A0;[residue\_books]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
 class="cmtt-8">&#x00A0;[i][j]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
@@ -9877,7 +9883,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;5)</span><span 
 class="cmtt-8">&#x00A0;array</span><span 
-class="cmtt-8">&#x00A0;[residue_books]</span><span 
+class="cmtt-8">&#x00A0;[residue\_books]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
 class="cmtt-8">&#x00A0;[i][j]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
@@ -9950,8 +9956,8 @@ class="cmtt-8">&#x00A0;done</span>
 <!--l. 231--><p class="noindent" >An end-of-packet condition at any point in header decode renders the stream undecodable.
 In addition, any codebook number greater than the maximum numbered codebook
 set up in this stream also renders the stream undecodable. All codebooks in array
-[residue&#x02D9;books] are required to have a value mapping. The presence of codebook in array
-[residue&#x02D9;books] without a value mapping (maptype equals zero) renders the stream
+[residue_books] are required to have a value mapping. The presence of codebook in array
+[residue_books] without a value mapping (maptype equals zero) renders the stream
 undecodable.
 <!--l. 241--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">8.6.2  </span> <a 
@@ -9988,7 +9994,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;1)</span><span 
-class="cmtt-8">&#x00A0;[actual_size]</span><span 
+class="cmtt-8">&#x00A0;[actual\_size]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;current</span><span 
 class="cmtt-8">&#x00A0;blocksize/2;</span>
@@ -10017,9 +10023,9 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;3)</span><span 
-class="cmtt-8">&#x00A0;[actual_size]</span><span 
+class="cmtt-8">&#x00A0;[actual\_size]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
-class="cmtt-8">&#x00A0;[actual_size]</span><span 
+class="cmtt-8">&#x00A0;[actual\_size]</span><span 
 class="cmtt-8">&#x00A0;*</span><span 
 class="cmtt-8">&#x00A0;[ch];</span>
                                                                                         
@@ -10032,11 +10038,11 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;4)</span><span 
-class="cmtt-8">&#x00A0;[limit_residue_begin]</span><span 
+class="cmtt-8">&#x00A0;[limit\_residue\_begin]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;maximum</span><span 
 class="cmtt-8">&#x00A0;of</span><span 
-class="cmtt-8">&#x00A0;([residue_begin],[actual_size]);</span>
+class="cmtt-8">&#x00A0;([residue\_begin],[actual\_size]);</span>
 <br class="fancyvrb" /><a 
  id="x1-110010r5"></a><span 
 class="cmr-6">5</span><span 
@@ -10044,11 +10050,11 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;5)</span><span 
-class="cmtt-8">&#x00A0;[limit_residue_end]</span><span 
+class="cmtt-8">&#x00A0;[limit\_residue\_end]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;maximum</span><span 
 class="cmtt-8">&#x00A0;of</span><span 
-class="cmtt-8">&#x00A0;([residue_end],[actual_size]);</span>
+class="cmtt-8">&#x00A0;([residue\_end],[actual\_size]);</span>
 </div>
 <!--l. 277--><p class="noindent" >The following convenience values are conceptually useful to clarifying the decode process:
 <!--l. 280--><p class="noindent" >
@@ -10060,13 +10066,13 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;1)</span><span 
-class="cmtt-8">&#x00A0;[classwords_per_codeword]</span><span 
+class="cmtt-8">&#x00A0;[classwords\_per\_codeword]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
-class="cmtt-8">&#x00A0;[codebook_dimensions]</span><span 
+class="cmtt-8">&#x00A0;[codebook\_dimensions]</span><span 
 class="cmtt-8">&#x00A0;value</span><span 
 class="cmtt-8">&#x00A0;of</span><span 
 class="cmtt-8">&#x00A0;codebook</span><span 
-class="cmtt-8">&#x00A0;[residue_classbook]</span>
+class="cmtt-8">&#x00A0;[residue\_classbook]</span>
 <br class="fancyvrb" /><a 
  id="x1-110014r2"></a><span 
 class="cmr-6">2</span><span 
@@ -10074,11 +10080,11 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;2)</span><span 
-class="cmtt-8">&#x00A0;[n_to_read]</span><span 
+class="cmtt-8">&#x00A0;[n\_to\_read]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
-class="cmtt-8">&#x00A0;[limit_residue_end]</span><span 
+class="cmtt-8">&#x00A0;[limit\_residue\_end]</span><span 
 class="cmtt-8">&#x00A0;-</span><span 
-class="cmtt-8">&#x00A0;[limit_residue_begin]</span>
+class="cmtt-8">&#x00A0;[limit\_residue\_begin]</span>
 <br class="fancyvrb" /><a 
  id="x1-110016r3"></a><span 
 class="cmr-6">3</span><span 
@@ -10086,11 +10092,11 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;3)</span><span 
-class="cmtt-8">&#x00A0;[partitions_to_read]</span><span 
+class="cmtt-8">&#x00A0;[partitions\_to\_read]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
-class="cmtt-8">&#x00A0;[n_to_read]</span><span 
+class="cmtt-8">&#x00A0;[n\_to\_read]</span><span 
 class="cmtt-8">&#x00A0;/</span><span 
-class="cmtt-8">&#x00A0;[residue_partition_size]</span>
+class="cmtt-8">&#x00A0;[residue\_partition\_size]</span>
 </div>
 <!--l. 286--><p class="noindent" >Packet decode proceeds as follows, matching the description offered earlier in the document.
 <div class="fancyvrb" id="fancyvrb40">
@@ -10118,7 +10124,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;2)</span><span 
 class="cmtt-8">&#x00A0;if</span><span 
-class="cmtt-8">&#x00A0;([n_to_read]</span><span 
+class="cmtt-8">&#x00A0;([n\_to\_read]</span><span 
 class="cmtt-8">&#x00A0;is</span><span 
 class="cmtt-8">&#x00A0;zero),</span><span 
 class="cmtt-8">&#x00A0;stop;</span><span 
@@ -10161,7 +10167,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;4)</span><span 
-class="cmtt-8">&#x00A0;[partition_count]</span><span 
+class="cmtt-8">&#x00A0;[partition\_count]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;0</span>
 <br class="fancyvrb" /><a 
@@ -10182,11 +10188,11 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;5)</span><span 
 class="cmtt-8">&#x00A0;while</span><span 
-class="cmtt-8">&#x00A0;[partition_count]</span><span 
+class="cmtt-8">&#x00A0;[partition\_count]</span><span 
 class="cmtt-8">&#x00A0;is</span><span 
 class="cmtt-8">&#x00A0;less</span><span 
 class="cmtt-8">&#x00A0;than</span><span 
-class="cmtt-8">&#x00A0;[partitions_to_read]</span>
+class="cmtt-8">&#x00A0;[partitions\_to\_read]</span>
 <br class="fancyvrb" /><a 
  id="x1-110032r8"></a><span 
 class="cmr-6">8</span><span 
@@ -10336,7 +10342,7 @@ class="cmtt-8">&#x00A0;from</span><span
 class="cmtt-8">&#x00A0;packet</span><span 
 class="cmtt-8">&#x00A0;using</span><span 
 class="cmtt-8">&#x00A0;codebook</span><span 
-class="cmtt-8">&#x00A0;[residue_classbook]</span><span 
+class="cmtt-8">&#x00A0;[residue\_classbook]</span><span 
 class="cmtt-8">&#x00A0;in</span><span 
 class="cmtt-8">&#x00A0;scalar</span><span 
 class="cmtt-8">&#x00A0;context</span>
@@ -10377,7 +10383,7 @@ class="cmtt-8">&#x00A0;descending</span><span
 class="cmtt-8">&#x00A0;over</span><span 
 class="cmtt-8">&#x00A0;the</span><span 
 class="cmtt-8">&#x00A0;range</span><span 
-class="cmtt-8">&#x00A0;[classwords_per_codeword]-1</span><span 
+class="cmtt-8">&#x00A0;[classwords\_per\_codeword]-1</span><span 
 class="cmtt-8">&#x00A0;...</span><span 
 class="cmtt-8">&#x00A0;0</span><span 
 class="cmtt-8">&#x00A0;{</span>
@@ -10425,7 +10431,7 @@ class="cmtt-8">&#x00A0;11)</span><span
 class="cmtt-8">&#x00A0;array</span><span 
 class="cmtt-8">&#x00A0;[classifications]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
-class="cmtt-8">&#x00A0;[j],([i]+[partition_count])</span><span 
+class="cmtt-8">&#x00A0;[j],([i]+[partition\_count])</span><span 
 class="cmtt-8">&#x00A0;=</span>
 <br class="fancyvrb" /><a 
  id="x1-110054r19"></a><span 
@@ -10469,7 +10475,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;[temp]</span><span 
 class="cmtt-8">&#x00A0;integer</span><span 
 class="cmtt-8">&#x00A0;modulo</span><span 
-class="cmtt-8">&#x00A0;[residue_classifications]</span>
+class="cmtt-8">&#x00A0;[residue\_classifications]</span>
 <br class="fancyvrb" /><a 
  id="x1-110056r20"></a><span 
 class="cmr-6">20</span><span 
@@ -10510,7 +10516,7 @@ class="cmtt-8">&#x00A0;[temp]</span><span
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;[temp]</span><span 
 class="cmtt-8">&#x00A0;/</span><span 
-class="cmtt-8">&#x00A0;[residue_classifications]</span><span 
+class="cmtt-8">&#x00A0;[residue\_classifications]</span><span 
 class="cmtt-8">&#x00A0;using</span><span 
 class="cmtt-8">&#x00A0;integer</span><span 
 class="cmtt-8">&#x00A0;division</span>
@@ -10672,11 +10678,11 @@ class="cmtt-8">&#x00A0;the</span><span
 class="cmtt-8">&#x00A0;range</span><span 
 class="cmtt-8">&#x00A0;0</span><span 
 class="cmtt-8">&#x00A0;..</span><span 
-class="cmtt-8">&#x00A0;([classwords_per_codeword]</span><span 
+class="cmtt-8">&#x00A0;([classwords\_per\_codeword]</span><span 
 class="cmtt-8">&#x00A0;-</span><span 
 class="cmtt-8">&#x00A0;1)</span><span 
 class="cmtt-8">&#x00A0;while</span><span 
-class="cmtt-8">&#x00A0;[partition_count]</span>
+class="cmtt-8">&#x00A0;[partition\_count]</span>
 <br class="fancyvrb" /><a 
  id="x1-110078r31"></a><span 
 class="cmr-6">31</span><span 
@@ -10700,7 +10706,7 @@ class="cmtt-8">&#x00A0;is</span><span
 class="cmtt-8">&#x00A0;also</span><span 
 class="cmtt-8">&#x00A0;less</span><span 
 class="cmtt-8">&#x00A0;than</span><span 
-class="cmtt-8">&#x00A0;[partitions_to_read]</span><span 
+class="cmtt-8">&#x00A0;[partitions\_to\_read]</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
  id="x1-110080r32"></a><span 
@@ -10822,7 +10828,7 @@ class="cmtt-8">&#x00A0;=</span><span
 class="cmtt-8">&#x00A0;array</span><span 
 class="cmtt-8">&#x00A0;[classifications]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
-class="cmtt-8">&#x00A0;[j],[partition_count]</span>
+class="cmtt-8">&#x00A0;[j],[partition\_count]</span>
 <br class="fancyvrb" /><a 
  id="x1-110092r38"></a><span 
 class="cmr-6">38</span><span 
@@ -10858,7 +10864,7 @@ class="cmtt-8">&#x00A0;17)</span><span
 class="cmtt-8">&#x00A0;[vqbook]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;array</span><span 
-class="cmtt-8">&#x00A0;[residue_books]</span><span 
+class="cmtt-8">&#x00A0;[residue\_books]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
 class="cmtt-8">&#x00A0;[vqclass],[pass]</span>
 <br class="fancyvrb" /><a 
@@ -10992,7 +10998,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;offset</span><span 
-class="cmtt-8">&#x00A0;[limit_residue_begin]+[partition_count]*[residue_partition_size]</span><span 
+class="cmtt-8">&#x00A0;[limit\_residue\_begin]+[partition\_count]*[residue\_partition\_size]</span><span 
 class="cmtt-8">&#x00A0;using</span>
 <br class="fancyvrb" /><a 
  id="x1-110102r43"></a><span 
@@ -11128,7 +11134,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;20)</span><span 
 class="cmtt-8">&#x00A0;increment</span><span 
-class="cmtt-8">&#x00A0;[partition_count]</span><span 
+class="cmtt-8">&#x00A0;[partition\_count]</span><span 
 class="cmtt-8">&#x00A0;by</span><span 
 class="cmtt-8">&#x00A0;one</span>
 <br class="fancyvrb" /><a 
@@ -11228,7 +11234,7 @@ class="cmtt-8">&#x00A0;[step]</span><span
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;[n]</span><span 
 class="cmtt-8">&#x00A0;/</span><span 
-class="cmtt-8">&#x00A0;[codebook_dimensions]</span>
+class="cmtt-8">&#x00A0;[codebook\_dimensions]</span>
 <br class="fancyvrb" /><a 
  id="x1-111004r2"></a><span 
 class="cmr-6">2</span><span 
@@ -11261,7 +11267,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;3)</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
-class="cmtt-8">&#x00A0;[entry_temp]</span><span 
+class="cmtt-8">&#x00A0;[entry\_temp]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
@@ -11291,7 +11297,7 @@ class="cmtt-8">&#x00A0;the</span><span
 class="cmtt-8">&#x00A0;range</span><span 
 class="cmtt-8">&#x00A0;0</span><span 
 class="cmtt-8">&#x00A0;...</span><span 
-class="cmtt-8">&#x00A0;[codebook_dimensions]-1</span><span 
+class="cmtt-8">&#x00A0;[codebook\_dimensions]-1</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
  id="x1-111012r6"></a><span 
@@ -11357,7 +11363,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
-class="cmtt-8">&#x00A0;[entry_temp]</span><span 
+class="cmtt-8">&#x00A0;[entry\_temp]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
 class="cmtt-8">&#x00A0;[j]</span>
 <br class="fancyvrb" /><a 
@@ -11448,7 +11454,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;2)</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
-class="cmtt-8">&#x00A0;[entry_temp]</span><span 
+class="cmtt-8">&#x00A0;[entry\_temp]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;read</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
@@ -11473,7 +11479,7 @@ class="cmtt-8">&#x00A0;the</span><span
 class="cmtt-8">&#x00A0;range</span><span 
 class="cmtt-8">&#x00A0;0</span><span 
 class="cmtt-8">&#x00A0;...</span><span 
-class="cmtt-8">&#x00A0;[codebook_dimensions]-1</span><span 
+class="cmtt-8">&#x00A0;[codebook\_dimensions]-1</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
  id="x1-112008r4"></a><span 
@@ -11522,7 +11528,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;vector</span><span 
-class="cmtt-8">&#x00A0;[entry_temp]</span><span 
+class="cmtt-8">&#x00A0;[entry\_temp]</span><span 
 class="cmtt-8">&#x00A0;element</span><span 
 class="cmtt-8">&#x00A0;[j]</span>
 <br class="fancyvrb" /><a 
@@ -11782,7 +11788,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;1)</span><span 
-class="cmtt-8">&#x00A0;[return_value]</span><span 
+class="cmtt-8">&#x00A0;[return\_value]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;0;</span>
 <br class="fancyvrb" /><a 
@@ -11819,7 +11825,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;3)</span><span 
 class="cmtt-8">&#x00A0;increment</span><span 
-class="cmtt-8">&#x00A0;[return_value];</span>
+class="cmtt-8">&#x00A0;[return\_value];</span>
 <br class="fancyvrb" /><a 
  id="x1-117010r5"></a><span 
 class="cmr-6">5</span><span 
@@ -11911,8 +11917,8 @@ class="cmtt-8">&#x00A0;done</span>
       <li class="itemize">ilog(negative number) = 0;</li></ul>
 <!--l. 48--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">9.2.2  </span> <a 
- id="x1-1180009.2.2"></a>float32&#x02D9;unpack</h5>
-<!--l. 50--><p class="noindent" >&#8221;float32&#x02D9;unpack(x)&#8221; is intended to translate the packed binary representation of a Vorbis
+ id="x1-1180009.2.2"></a>float32_unpack</h5>
+<!--l. 50--><p class="noindent" >&#8221;float32_unpack(x)&#8221; is intended to translate the packed binary representation of a Vorbis
 codebook float value into the representation used by the decoder for floating point numbers. For
 purposes of this example, we will unpack a Vorbis float32 into a host-native floating point
 number.
@@ -12009,10 +12015,11 @@ class="cmtt-8">&#x00A0;)</span>
                                                                                         
 <!--l. 66--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">9.2.3  </span> <a 
- id="x1-1190009.2.3"></a>lookup1&#x02D9;values</h5>
-<!--l. 68--><p class="noindent" >&#8221;lookup1&#x02D9;values(codebook&#x02D9;entries,codebook&#x02D9;dimensions)&#8221; is used to compute the correct length of
-the value index for a codebook VQ lookup table of lookup type 1. The values on this list are
-permuted to construct the VQ vector lookup table of size <span 
+ id="x1-1190009.2.3"></a>lookup1_values</h5>
+<!--l. 68--><p class="noindent" >&#8221;lookup1_values(codebook_entries,codebook_dimensions)&#8221; is used to compute the
+correct length of the value index for a codebook VQ lookup table of lookup type 1.
+The values on this list are permuted to construct the VQ vector lookup table of size
+<span 
 class="cmtt-12">[codebook_entries]</span>.
 <!--l. 74--><p class="noindent" >The return value for this function is defined to be &#8217;the greatest integer value for which
 <span 
@@ -12022,8 +12029,8 @@ class="cmtt-12">[codebook_dimensions] </span>is less than or equal to
 class="cmtt-12">[codebook_entries]</span>&#8217;.
 <!--l. 81--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">9.2.4  </span> <a 
- id="x1-1200009.2.4"></a>low&#x02D9;neighbor</h5>
-<!--l. 83--><p class="noindent" >&#8221;low&#x02D9;neighbor(v,x)&#8221; finds the position <span 
+ id="x1-1200009.2.4"></a>low_neighbor</h5>
+<!--l. 83--><p class="noindent" >&#8221;low_neighbor(v,x)&#8221; finds the position <span 
 class="cmtt-12">n </span>in vector <span 
 class="cmtt-12">[v] </span>of the greatest value scalar element for
 which <span 
@@ -12036,8 +12043,8 @@ class="cmtt-12">[v] </span>element
 class="cmtt-12">[x]</span>.
 <!--l. 88--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">9.2.5  </span> <a 
- id="x1-1210009.2.5"></a>high&#x02D9;neighbor</h5>
-<!--l. 90--><p class="noindent" >&#8221;high&#x02D9;neighbor(v,x)&#8221; finds the position <span 
+ id="x1-1210009.2.5"></a>high_neighbor</h5>
+<!--l. 90--><p class="noindent" >&#8221;high_neighbor(v,x)&#8221; finds the position <span 
 class="cmtt-12">n </span>in vector [v] of the lowest value scalar element for
 which <span 
 class="cmtt-12">n </span>is less than <span 
@@ -12049,14 +12056,14 @@ class="cmtt-12">[v] </span>element
 class="cmtt-12">[x]</span>.
 <!--l. 97--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">9.2.6  </span> <a 
- id="x1-1220009.2.6"></a>render&#x02D9;point</h5>
-<!--l. 99--><p class="noindent" >&#8221;render&#x02D9;point(x0,y0,x1,y1,X)&#8221; is used to find the Y value at point X along the line specified by
+ id="x1-1220009.2.6"></a>render_point</h5>
+<!--l. 99--><p class="noindent" >&#8221;render_point(x0,y0,x1,y1,X)&#8221; is used to find the Y value at point X along the line specified by
 x0, x1, y0 and y1. This function uses an integer algorithm to solve for the point directly without
 calculating intervening values along the line.
-<!--l. 104--><p class="noindent" >
                                                                                         
 
                                                                                         
+<!--l. 104--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb46">
 <a 
  id="x1-122002r1"></a><span 
@@ -12233,8 +12240,8 @@ class="cmtt-8">&#x00A0;done</span>
 </div>
 <!--l. 125--><p class="noindent" >
 <h5 class="subsubsectionHead"><span class="titlemark">9.2.7  </span> <a 
- id="x1-1230009.2.7"></a>render&#x02D9;line</h5>
-<!--l. 127--><p class="noindent" >Floor decode type one uses the integer line drawing algorithm of &#8221;render&#x02D9;line(x0, y0, x1, y1, v)&#8221;
+ id="x1-1230009.2.7"></a>render_line</h5>
+<!--l. 127--><p class="noindent" >Floor decode type one uses the integer line drawing algorithm of &#8221;render_line(x0, y0, x1, y1, v)&#8221;
 to construct an integer floor curve for contiguous piecewise line segments. Note that it has not
 been relevant elsewhere, but here we must define integer division as rounding division of both
 positive and negative numbers toward zero.
@@ -12484,6 +12491,9 @@ class="cmtt-8">&#x00A0;[x0]+1</span><span
 class="cmtt-8">&#x00A0;...</span><span 
 class="cmtt-8">&#x00A0;[x1]-1</span><span 
 class="cmtt-8">&#x00A0;{</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-123046r23"></a><span 
 class="cmr-6">23</span><span 
@@ -12506,9 +12516,6 @@ class="cmtt-8">&#x00A0;=</span><span
 class="cmtt-8">&#x00A0;[err]</span><span 
 class="cmtt-8">&#x00A0;+</span><span 
 class="cmtt-8">&#x00A0;[ady];</span>
-                                                                                        
-
-                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-123050r25"></a><span 
 class="cmr-6">25</span><span 
