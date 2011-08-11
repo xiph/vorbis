@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
 <!-- html --> 
 <meta name="src" content="Vorbis_I_spec.tex"> 
-<meta name="date" content="2011-08-11 03:29:00"> 
+<meta name="date" content="2011-08-11 12:29:00"> 
 <link rel="stylesheet" type="text/css" href="Vorbis_I_spec.css"> 
 </head><body 
 >
@@ -21,8 +21,7 @@
 
 <h2 class="titleHead">Vorbis I specification</h2>
 <div class="author" ><span 
-class="cmr-17">Xiph.Org Foundation</span></div>
-<br />
+class="cmr-17">Xiph.Org Foundation</span></div><br />
 <div class="date" ><span 
 class="cmr-17">August 11, 2011</span></div>
 </div>
@@ -51,11 +50,11 @@ href="#x1-110001.2" id="QQ2-1-11">Decoder Configuration</a></span>
 href="#x1-120001.2.1" id="QQ2-1-13">Global Config</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >1.2.2 <a 
 href="#x1-130001.2.2" id="QQ2-1-14">Mode</a></span>
+<br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >1.2.3 <a 
+href="#x1-140001.2.3" id="QQ2-1-15">Mapping</a></span>
                                                                                         
 
                                                                                         
-<br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >1.2.3 <a 
-href="#x1-140001.2.3" id="QQ2-1-15">Mapping</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >1.2.4 <a 
 href="#x1-150001.2.4" id="QQ2-1-16">Floor</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >1.2.5 <a 
@@ -112,11 +111,11 @@ href="#x1-600004.2" id="QQ2-1-65">Header decode and decode setup</a></span>
 href="#x1-610004.2.1" id="QQ2-1-66">Common header decode</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >4.2.2 <a 
 href="#x1-620004.2.2" id="QQ2-1-67">Identification header</a></span>
+<br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >4.2.3 <a 
+href="#x1-630004.2.3" id="QQ2-1-68">Comment header</a></span>
                                                                                         
 
                                                                                         
-<br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >4.2.3 <a 
-href="#x1-630004.2.3" id="QQ2-1-68">Comment header</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >4.2.4 <a 
 href="#x1-640004.2.4" id="QQ2-1-69">Setup header</a></span>
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >4.3 <a 
@@ -173,11 +172,11 @@ href="#x1-970007.2" id="QQ2-1-103">Floor 1 format</a></span>
 href="#x1-980007.2.1" id="QQ2-1-104">model</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >7.2.2 <a 
 href="#x1-990007.2.2" id="QQ2-1-109">header decode</a></span>
+<br />&#x00A0;<span class="sectionToc" >8 <a 
+href="#x1-1020008" id="QQ2-1-112">Residue setup and decode</a></span>
                                                                                         
 
                                                                                         
-<br />&#x00A0;<span class="sectionToc" >8 <a 
-href="#x1-1020008" id="QQ2-1-112">Residue setup and decode</a></span>
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >8.1 <a 
 href="#x1-1030008.1" id="QQ2-1-113">Overview</a></span>
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >8.2 <a 
@@ -234,19 +233,19 @@ href="#x1-128000A.1.1" id="QQ2-1-140">Restrictions</a></span>
 href="#x1-129000A.1.2" id="QQ2-1-141">MIME type</a></span>
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >A.2 <a 
 href="#x1-130000A.2" id="QQ2-1-142">Encapsulation</a></span>
+<br />&#x00A0;<span class="sectionToc" >B <a 
+href="#x1-132000B" id="QQ2-1-144">Vorbis encapsulation in RTP</a></span>
                                                                                         
 
                                                                                         
-<br />&#x00A0;<span class="sectionToc" >B <a 
-href="#x1-132000B" id="QQ2-1-144">Vorbis encapsulation in RTP</a></span>
 </div>
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">1  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">1.  </span> <a 
  id="x1-20001"></a>Introduction and Description</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">1.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">1.1.  </span> <a 
  id="x1-30001.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >This document provides a high level description of the Vorbis codec&#8217;s construction. A bit-by-bit
 specification appears beginning in <a 
@@ -255,7 +254,7 @@ href="#x1-580004">Codec Setup and Packet Decode<!--tex4ht:ref: vorbis:spec:codec
 sections assume a high-level understanding of the Vorbis decode process, which is provided
 here.
 <!--l. 15--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.1.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.1.1.  </span> <a 
  id="x1-40001.1.1"></a>Application</h5>
 <!--l. 16--><p class="noindent" >Vorbis is a general purpose perceptual audio CODEC intended to allow maximum encoder
 flexibility, thus allowing it to scale competitively over an exceptionally wide range of bitrates. At
@@ -266,7 +265,7 @@ and higher sample rates (from 8kHz telephony to 192kHz digital masters) and a ra
 representations (monaural, polyphonic, stereo, quadraphonic, 5.1, ambisonic, or up to 255
 discrete channels).
 <!--l. 29--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.1.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.1.2.  </span> <a 
  id="x1-50001.1.2"></a>Classification</h5>
 <!--l. 30--><p class="noindent" >Vorbis I is a forward-adaptive monolithic transform CODEC based on the Modified Discrete
 Cosine Transform. The codec is structured to allow addition of a hybrid wavelet filterbank in
@@ -276,7 +275,7 @@ localized time events.
 
                                                                                         
 <!--l. 37--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.1.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.1.3.  </span> <a 
  id="x1-60001.1.3"></a>Assumptions</h5>
 <!--l. 39--><p class="noindent" >The Vorbis CODEC design assumes a complex, psychoacoustically-aware encoder and simple,
 low-complexity decoder. Vorbis decode is computationally simpler than mp3, although it does
@@ -307,7 +306,7 @@ href="#x1-126000A">Section&#x00A0;A</a>,
 &#8220;<a 
 href="#x1-126000A">Embedding Vorbis into an Ogg stream<!--tex4ht:ref: vorbis:over:ogg --></a>&#8221;.
 <!--l. 77--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.1.4  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.1.4.  </span> <a 
  id="x1-70001.1.4"></a>Codec Setup and Probability Model</h5>
 <!--l. 79--><p class="noindent" >Vorbis&#8217; heritage is as a research CODEC and its current design reflects a desire to allow multiple
 decades of continuous encoder improvement before running out of room within the codec
@@ -337,7 +336,7 @@ against current design trends (and also points out limitations in some existing 
 designs, such as Windows&#8217; ACM codec framework). However, we find that it does not
 fundamentally limit Vorbis&#8217; suitable application space.
 <!--l. 115--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.1.5  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.1.5.  </span> <a 
  id="x1-90001.1.5"></a>Format Specification</h5>
 <!--l. 116--><p class="noindent" >The Vorbis format is well-defined by its decode specification; any encoder that produces packets
 that are correctly decoded by the reference Vorbis decoder described below may be considered
@@ -345,7 +344,7 @@ a proper Vorbis encoder. A decoder must faithfully and completely implement the
 specification defined below (except where noted) to be considered a proper Vorbis
 decoder.
 <!--l. 123--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.1.6  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.1.6.  </span> <a 
  id="x1-100001.1.6"></a>Hardware Profile</h5>
                                                                                         
 
@@ -355,7 +354,7 @@ embedded design. For this reason, embedded designs are allowed to deviate in lim
 the &#8216;full&#8217; decode specification yet still be certified compliant. These optional omissions are
 labelled in the spec where relevant.
 <!--l. 131--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">1.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">1.2.  </span> <a 
  id="x1-110001.2"></a>Decoder Configuration</h4>
 <!--l. 133--><p class="noindent" >Decoder setup consists of configuration of multiple, self-contained component abstractions that
 perform specific functions in the decode pipeline. Each different component instance of a specific
@@ -374,13 +373,13 @@ src="components.png" alt="PIC"
 class="content">decoder pipeline configuration</span></div><!--tex4ht:label?: x1-110011 -->
 </div>
 <!--l. 146--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.2.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.2.1.  </span> <a 
  id="x1-120001.2.1"></a>Global Config</h5>
 <!--l. 147--><p class="noindent" >Global codec configuration consists of a few audio related fields (sample rate, channels), Vorbis
 version (always &#8217;0&#8217; in Vorbis I), bitrate hints, and the lists of component instances. All other
 configuration is in the context of specific components.
 <!--l. 152--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.2.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.2.2.  </span> <a 
  id="x1-130001.2.2"></a>Mode</h5>
                                                                                         
 
@@ -397,7 +396,7 @@ window, in Vorbis I), transform type (always type 0, the MDCT, in Vorbis I) and 
 number. The mapping number specifies which mapping configuration instance to use for low-level
 packet decode and synthesis.
 <!--l. 171--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.2.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.2.3.  </span> <a 
  id="x1-140001.2.3"></a>Mapping</h5>
 <!--l. 173--><p class="noindent" >A mapping contains a channel coupling description and a list of &#8217;submaps&#8217; that bundle sets
 of channel vectors together for grouped encoding and decoding. These submaps are
@@ -421,7 +420,7 @@ uses a bass-only representation.
 
                                                                                         
 <!--l. 199--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.2.4  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.2.4.  </span> <a 
  id="x1-150001.2.4"></a>Floor</h5>
 <!--l. 201--><p class="noindent" >Vorbis encodes a spectral &#8217;floor&#8217; vector for each PCM channel. This vector is a low-resolution
 representation of the audio spectrum for the given channel in the current frame, generally used
@@ -442,7 +441,7 @@ codebooks in the codebook component list. Entropy coding is thus provided as an
 abstraction, and each floor instance may choose from any and all available codebooks when
 coding/decoding.
 <!--l. 230--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.2.5  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.2.5.  </span> <a 
  id="x1-160001.2.5"></a>Residue</h5>
 <!--l. 231--><p class="noindent" >The spectral residue is the fine structure of the audio spectrum once the floor curve has been
 subtracted out. In simplest terms, it is coded in the bitstream using cascaded (multi-pass) vector
@@ -455,7 +454,7 @@ codebooks.
                                                                                         
 
                                                                                         
-<h5 class="subsubsectionHead"><span class="titlemark">1.2.6  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.2.6.  </span> <a 
  id="x1-170001.2.6"></a>Codebooks</h5>
 <!--l. 243--><p class="noindent" >Codebooks are a self-contained abstraction that perform entropy decoding and, optionally, use
 the entropy-decoded integer value as an offset into an index of output value vectors, returning
@@ -467,10 +466,10 @@ codeword lengths are ordered or unordered, or the tree is sparse.
 the vector index is encoded as a single list of values of possible values that are then permuted
 into a list of n-dimensional rows (lattice VQ).
 <!--l. 260--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">1.3  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">1.3.  </span> <a 
  id="x1-180001.3"></a>High-level Decode Process</h4>
 <!--l. 262--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.3.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.3.1.  </span> <a 
  id="x1-190001.3.1"></a>Decode Setup</h5>
 <!--l. 264--><p class="noindent" >Before decoding can begin, a decoder must initialize using the bitstream headers matching the
 stream to be decoded. Vorbis uses three header packets; all are required, in-order, by
@@ -501,49 +500,49 @@ class="cmbx-12">Setup Header</span></span>
 The setup header includes extensive CODEC setup information as well as the complete VQ and
 Huffman codebooks needed for decode.
 <!--l. 289--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">1.3.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">1.3.2.  </span> <a 
  id="x1-230001.3.2"></a>Decode Procedure</h5>
 <!--l. 291--><p class="noindent" >The decoding and synthesis procedure for all audio packets is fundamentally the same.
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-23002x1">decode packet type flag
-      </li>
-      <li 
-  class="enumerate" id="x1-23004x2">decode mode number
-      </li>
-      <li 
-  class="enumerate" id="x1-23006x3">decode window shape (long windows only)
-      </li>
-      <li 
-  class="enumerate" id="x1-23008x4">decode floor
-      </li>
-      <li 
-  class="enumerate" id="x1-23010x5">decode residue into residue vectors
-      </li>
-      <li 
-  class="enumerate" id="x1-23012x6">inverse channel coupling of residue vectors
-      </li>
-      <li 
-  class="enumerate" id="x1-23014x7">generate floor curve from decoded floor data
-      </li>
-      <li 
-  class="enumerate" id="x1-23016x8">compute dot product of floor and residue, producing audio spectrum vector
-      </li>
-      <li 
-  class="enumerate" id="x1-23018x9">inverse monolithic transform of audio spectrum vector, always an MDCT in Vorbis
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem">decode packet type flag
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">decode mode number
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">decode window shape (long windows only)
+      </dd><dt class="enumerate-enumitem">
+   4. </dt><dd 
+class="enumerate-enumitem">decode floor
+      </dd><dt class="enumerate-enumitem">
+   5. </dt><dd 
+class="enumerate-enumitem">decode residue into residue vectors
+      </dd><dt class="enumerate-enumitem">
+   6. </dt><dd 
+class="enumerate-enumitem">inverse channel coupling of residue vectors
+      </dd><dt class="enumerate-enumitem">
+   7. </dt><dd 
+class="enumerate-enumitem">generate floor curve from decoded floor data
+      </dd><dt class="enumerate-enumitem">
+   8. </dt><dd 
+class="enumerate-enumitem">compute dot product of floor and residue, producing audio spectrum vector
+      </dd><dt class="enumerate-enumitem">
+   9. </dt><dd 
+class="enumerate-enumitem">inverse monolithic transform of audio spectrum vector, always an MDCT in Vorbis
       I
                                                                                         
 
                                                                                         
-      </li>
-      <li 
-  class="enumerate" id="x1-23020x10">overlap/add left-hand output of transform with right-hand output of previous frame
-      </li>
-      <li 
-  class="enumerate" id="x1-23022x11">store right hand-data from transform of current frame for future lapping
-      </li>
-      <li 
-  class="enumerate" id="x1-23024x12">if not first frame, return results of overlap/add as audio result of current frame</li></ol>
+      </dd><dt class="enumerate-enumitem">
+  10. </dt><dd 
+class="enumerate-enumitem">overlap/add left-hand output of transform with right-hand output of previous frame
+      </dd><dt class="enumerate-enumitem">
+  11. </dt><dd 
+class="enumerate-enumitem">store right hand-data from transform of current frame for future lapping
+      </dd><dt class="enumerate-enumitem">
+  12. </dt><dd 
+class="enumerate-enumitem">if not first frame, return results of overlap/add as audio result of current frame</dd></dl>
 <!--l. 308--><p class="noindent" >Note that clever rearrangement of the synthesis arithmetic is possible; as an example, one can
 take advantage of symmetries in the MDCT to store the right-hand transform data of a partial
 MDCT for a 50% inter-frame buffer space savings, and then complete the transform later before
@@ -756,10 +755,10 @@ PCM output offset is &#8217;0&#8217; (as no data has been returned yet).
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">2  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">2.  </span> <a 
  id="x1-360002"></a>Bitpacking Convention</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">2.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">2.1.  </span> <a 
  id="x1-370002.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >The Vorbis codec uses relatively unstructured raw packets containing arbitrary-width binary
 integer fields. Logically, these packets are a bitstream in which bits are coded one-by-one by the
@@ -769,7 +768,7 @@ Most current binary storage arrangements group bits into a native word size of e
 bitpacking convention specifies the correct mapping of the logical packet bitstream into an actual
 representation in fixed-width words.
 <!--l. 19--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.1.  </span> <a 
  id="x1-380002.1.1"></a>octets, bytes and words</h5>
 <!--l. 21--><p class="noindent" >In most contemporary architectures, a &#8217;byte&#8217; is synonymous with an &#8217;octet&#8217;, that is, eight bits.
 This has not always been the case; seven, ten, eleven and sixteen bit &#8217;bytes&#8217; have been used.
@@ -788,7 +787,7 @@ of example.
                                                                                         
 
                                                                                         
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.2.  </span> <a 
  id="x1-390002.1.2"></a>bit order</h5>
 <!--l. 41--><p class="noindent" >A byte has a well-defined &#8217;least significant&#8217; bit (LSb), which is the only bit set when the byte is
 storing the two&#8217;s complement integer value +1. A byte&#8217;s &#8217;most significant&#8217; bit (MSb) is at the
@@ -797,7 +796,7 @@ class="cmmi-12">n </span>(<span
 class="cmmi-12">n </span>= 7 in an
 octet) for the MSb.
 <!--l. 50--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.3.  </span> <a 
  id="x1-400002.1.3"></a>byte order</h5>
 <!--l. 52--><p class="noindent" >Words are native groupings of multiple bytes. Several byte orderings are possible in a word; the
 common ones are 3-2-1-0 (&#8217;big endian&#8217; or &#8217;most significant byte first&#8217; in which the
@@ -811,7 +810,7 @@ Logically, bytes are always coded and decoded in order from byte zero through by
 <span 
 class="cmmi-12">n</span>.
 <!--l. 68--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.4  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.4.  </span> <a 
  id="x1-410002.1.4"></a>coding bits into byte sequences</h5>
 <!--l. 70--><p class="noindent" >The Vorbis codec has need to code arbitrary bit-width integers, from zero to 32 bits
 wide, into packets. These integer fields are not aligned to the boundaries of the byte
@@ -831,7 +830,7 @@ the next bit into the bit position 0 of that byte. Decoding follows the same pro
 as encoding, but by reading bits from the byte stream and reassembling them into
 integers.
 <!--l. 90--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.5  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.5.  </span> <a 
  id="x1-420002.1.5"></a>signedness</h5>
 <!--l. 92--><p class="noindent" >The signedness of a specific number resulting from decode is to be interpreted by the decoder
 given decode context. That is, the three bit binary pattern &#8217;b111&#8217; can be taken to represent
@@ -839,7 +838,7 @@ either &#8217;seven&#8217; as an unsigned integer, or &#8217;-1&#8217; as a sign
 encoder and decoder are responsible for knowing if fields are to be treated as signed or
 unsigned.
 <!--l. 101--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.6  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.6.  </span> <a 
  id="x1-430002.1.6"></a>coding example</h5>
 <!--l. 103--><p class="noindent" >Code the 4 bit integer value &#8217;12&#8217; [b1100] into an empty bytestream. Bytestream result:
 <!--l. 106--><p class="noindent" >
@@ -1621,7 +1620,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span>
 </div>
 <!--l. 173--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.7  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.7.  </span> <a 
  id="x1-440002.1.7"></a>decoding example</h5>
 <!--l. 175--><p class="noindent" >Reading from the beginning of the bytestream encoded in the above example:
 <!--l. 177--><p class="noindent" >
@@ -1789,7 +1788,7 @@ are worth noting here:
       either as the unsigned value &#8217;3&#8217;, or the signed value &#8217;-1&#8217;. Signedness is dependent on
       decode context.</li></ul>
 <!--l. 208--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.8  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.8.  </span> <a 
  id="x1-450002.1.8"></a>end-of-packet alignment</h5>
 <!--l. 210--><p class="noindent" >The typical use of bitpacking is to produce many independent byte-aligned packets which are
 embedded into a larger byte-aligned container structure, such as an Ogg transport bitstream.
@@ -1808,7 +1807,7 @@ also return &#8217;end-of-packet&#8217;.
 
                                                                                         
 <!--l. 233--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">2.1.9  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">2.1.9.  </span> <a 
  id="x1-460002.1.9"></a>reading zero bits</h5>
 <!--l. 235--><p class="noindent" >Reading a zero-bit-wide integer returns the value &#8217;0&#8217; and does not increment the stream cursor.
 Reading to the end of the packet (but not past, such that an &#8217;end-of-packet&#8217; condition has not
@@ -1821,10 +1820,10 @@ shall also fail with &#8217;end-of-packet&#8217;.
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">3  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">3.  </span> <a 
  id="x1-470003"></a>Probability Model and Codebooks</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">3.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">3.1.  </span> <a 
  id="x1-480003.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >Unlike practically every other mainstream audio codec, Vorbis has no statically configured
 probability model, instead packing all entropy decoding configuration, VQ and Huffman, into the
@@ -1834,7 +1833,7 @@ compressed codewords as well as an optional lookup table of output vector values
 decoded Huffman value is applied as an offset, generating the final decoded output corresponding
 to a given compressed codeword.
 <!--l. 18--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">3.1.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">3.1.1.  </span> <a 
  id="x1-490003.1.1"></a>Bitwise operation</h5>
 <!--l. 19--><p class="noindent" >The codebook mechanism is built on top of the vorbis bitpacker. Both the codebooks themselves
 and the codewords they decode are unrolled from a packet as a series of arbitrary-width values
@@ -1842,7 +1841,7 @@ read from the stream according to <a
 href="#x1-360002">Section&#x00A0;2</a>, &#8220;<a 
 href="#x1-360002">Bitpacking Convention<!--tex4ht:ref: vorbis:spec:bitpacking --></a>&#8221;.
 <!--l. 27--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">3.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">3.2.  </span> <a 
  id="x1-500003.2"></a>Packed codebook format</h4>
 <!--l. 29--><p class="noindent" >For purposes of the examples below, we assume that the storage system&#8217;s native byte width is
 eight bits. This is not universally true; see <a 
@@ -1853,7 +1852,7 @@ relating to non-eight-bit bytes.
 
                                                                                         
 <!--l. 34--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">3.2.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">3.2.1.  </span> <a 
  id="x1-510003.2.1"></a>codebook decode</h5>
 <!--l. 36--><p class="noindent" >A codebook begins with a 24 bit sync pattern, 0x564342:
 <!--l. 38--><p class="noindent" >
@@ -2580,19 +2579,19 @@ class="cmtt-8">&#x00A0;done.</span>
       </li></ul>
 <!--l. 136--><p class="noindent" >After all codeword lengths have been decoded, the decoder reads the vector lookup table. Vorbis
 I supports three lookup types:
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-51098x1">No lookup
-      </li>
-      <li 
-  class="enumerate" id="x1-51100x2">Implicitly populated value mapping (lattice VQ)
-      </li>
-      <li 
-  class="enumerate" id="x1-51102x3">Explicitly populated value mapping (tessellated or &#8217;foam&#8217; VQ)</li></ol>
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem">No lookup
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">Implicitly populated value mapping (lattice VQ)
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">Explicitly populated value mapping (tessellated or &#8217;foam&#8217; VQ)</dd></dl>
 <!--l. 149--><p class="noindent" >The lookup table type is read as a four bit unsigned integer:
 <div class="fancyvrb" id="fancyvrb13">
 <a 
- id="x1-51104r1"></a><span 
+ id="x1-51101r1"></a><span 
 class="cmr-6">1</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2623,7 +2622,7 @@ class="cmtt-12">[codebook_dimensions] </span>scalars. Lookup
       <!--l. 168--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb14">
 <a 
- id="x1-51106r1"></a><span 
+ id="x1-51103r1"></a><span 
 class="cmr-6">1</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2643,7 +2642,7 @@ class="cmtt-8">&#x00A0;an</span><span
 class="cmtt-8">&#x00A0;unsigned</span><span 
 class="cmtt-8">&#x00A0;integer)</span>
 <br class="fancyvrb" /><a 
- id="x1-51108r2"></a><span 
+ id="x1-51105r2"></a><span 
 class="cmr-6">2</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2663,7 +2662,7 @@ class="cmtt-8">&#x00A0;an</span><span
 class="cmtt-8">&#x00A0;unsigned</span><span 
 class="cmtt-8">&#x00A0;integer)</span>
 <br class="fancyvrb" /><a 
- id="x1-51110r3"></a><span 
+ id="x1-51107r3"></a><span 
 class="cmr-6">3</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2682,7 +2681,7 @@ class="cmtt-8">&#x00A0;and</span><span
 class="cmtt-8">&#x00A0;add</span><span 
 class="cmtt-8">&#x00A0;1</span>
 <br class="fancyvrb" /><a 
- id="x1-51112r4"></a><span 
+ id="x1-51109r4"></a><span 
 class="cmr-6">4</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2698,12 +2697,12 @@ class="cmtt-8">&#x00A0;a</span><span
 class="cmtt-8">&#x00A0;boolean</span><span 
 class="cmtt-8">&#x00A0;flag</span>
 <br class="fancyvrb" /><a 
- id="x1-51114r5"></a><span 
+ id="x1-51111r5"></a><span 
 class="cmr-6">5</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-51116r6"></a><span 
+ id="x1-51113r6"></a><span 
 class="cmr-6">6</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2717,12 +2716,12 @@ class="cmtt-8">&#x00A0;)</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmsy-8">{</span>
 <br class="fancyvrb" /><a 
- id="x1-51118r7"></a><span 
+ id="x1-51115r7"></a><span 
 class="cmr-6">7</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-51120r8"></a><span 
+ id="x1-51117r8"></a><span 
 class="cmr-6">8</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2740,12 +2739,12 @@ class="cmtt-8">([codebook_entries],</span><span
 class="cmtt-8">&#x00A0;[codebook_dimensions]</span><span 
 class="cmtt-8">&#x00A0;)</span>
 <br class="fancyvrb" /><a 
- id="x1-51122r9"></a><span 
+ id="x1-51119r9"></a><span 
 class="cmr-6">9</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-51124r10"></a><span 
+ id="x1-51121r10"></a><span 
 class="cmr-6">10</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2756,12 +2755,12 @@ class="cmtt-8">&#x00A0;else</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmsy-8">{</span>
 <br class="fancyvrb" /><a 
- id="x1-51126r11"></a><span 
+ id="x1-51123r11"></a><span 
 class="cmr-6">11</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-51128r12"></a><span 
+ id="x1-51125r12"></a><span 
 class="cmr-6">12</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2776,12 +2775,12 @@ class="cmtt-8">&#x00A0;[codebook_entries]</span><span
 class="cmtt-8">&#x00A0;*</span><span 
 class="cmtt-8">&#x00A0;[codebook_dimensions]</span>
 <br class="fancyvrb" /><a 
- id="x1-51130r13"></a><span 
+ id="x1-51127r13"></a><span 
 class="cmr-6">13</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-51132r14"></a><span 
+ id="x1-51129r14"></a><span 
 class="cmr-6">14</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2789,12 +2788,12 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmsy-8">}</span>
 <br class="fancyvrb" /><a 
- id="x1-51134r15"></a><span 
+ id="x1-51131r15"></a><span 
 class="cmr-6">15</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-51136r16"></a><span 
+ id="x1-51133r16"></a><span 
 class="cmr-6">16</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -2814,7 +2813,7 @@ class="cmtt-8">&#x00A0;each;</span>
 
                                                                                         
 <br class="fancyvrb" /><a 
- id="x1-51138r17"></a><span 
+ id="x1-51135r17"></a><span 
 class="cmr-6">17</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -3573,7 +3572,7 @@ class="cmtt-8">&#x00A0;calculation</span><span
 class="cmtt-8">&#x00A0;completed.</span>
 </div>
 <!--l. 370--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">3.3  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">3.3.  </span> <a 
  id="x1-570003.3"></a>Use of the codebook abstraction</h4>
 <!--l. 372--><p class="noindent" >The decoder uses the codebook abstraction much as it does the bit-unpacking convention; a
 specific codebook reads a codeword from the bitstream, decoding it into an entry number, and
@@ -3610,10 +3609,10 @@ offset.
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">4  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">4.  </span> <a 
  id="x1-580004"></a>Codec Setup and Packet Decode</h3>
 <!--l. 7--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">4.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">4.1.  </span> <a 
  id="x1-590004.1"></a>Overview</h4>
 <!--l. 9--><p class="noindent" >This document serves as the top-level reference document for the bit-by-bit decode specification
 of Vorbis I. This document assumes a high-level understanding of the Vorbis decode
@@ -3625,7 +3624,7 @@ href="#x1-360002">Section&#x00A0;2</a>,
 href="#x1-360002">Bitpacking Convention<!--tex4ht:ref: vorbis:spec:bitpacking --></a>&#8221; covers reading and writing bit fields from and to bitstream
 packets.
 <!--l. 17--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">4.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">4.2.  </span> <a 
  id="x1-600004.2"></a>Header decode and decode setup</h4>
 <!--l. 19--><p class="noindent" >A Vorbis bitstream begins with three header packets. The header packets are, in order, the
 identification header, the comments header, and the setup header. All are required for decode
@@ -3633,7 +3632,7 @@ compliance. An end-of-packet condition during decoding the first or third header
 the stream undecodable. End-of-packet decoding the comment header is a non-fatal error
 condition.
 <!--l. 26--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.2.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.2.1.  </span> <a 
  id="x1-610004.2.1"></a>Common header decode</h5>
 <!--l. 28--><p class="noindent" >Each header packet begins with the same header fields.
 <!--l. 31--><p class="noindent" >
@@ -3678,7 +3677,7 @@ header type 3 and the setup header type 5 (these types are all odd as a packet w
 single bit of &#8217;0&#8217; is an audio packet). The packets must occur in the order of identification,
 comment, setup.
 <!--l. 44--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.2.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.2.2.  </span> <a 
  id="x1-620004.2.2"></a>Identification header</h5>
 <!--l. 46--><p class="noindent" >The identification header is a short header of only a few fields used to declare the stream
 definitively as Vorbis, and provide a few externally relevant pieces of information about the audio
@@ -3839,14 +3838,14 @@ zero.
       </li>
       <li class="itemize">None set indicates the encoder does not care to speculate.</li></ul>
 <!--l. 85--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.2.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.2.3.  </span> <a 
  id="x1-630004.2.3"></a>Comment header</h5>
 <!--l. 86--><p class="noindent" >Comment header decode and data specification is covered in <a 
 href="#x1-810005">Section&#x00A0;5</a>, &#8220;<a 
 href="#x1-810005">comment field and
 header specification<!--tex4ht:ref: vorbis:spec:comment --></a>&#8221;.
 <!--l. 90--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.2.4  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.2.4.  </span> <a 
  id="x1-640004.2.4"></a>Setup header</h5>
 <!--l. 92--><p class="noindent" >Vorbis codec setup is configurable to an extreme degree:
 <div class="center" 
@@ -3871,58 +3870,58 @@ class="cmbx-12">Codebooks</span></span>
                                                                                         
 
                                                                                         
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-65002x1"><span 
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_codebook_count] </span>= read eight bits as unsigned integer and add one
-      </li>
-      <li 
-  class="enumerate" id="x1-65004x2">Decode  <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">Decode  <span 
 class="cmtt-12">[vorbis_codebook_count] </span>codebooks  in  order  as  defined  in  <a 
 href="#x1-470003">Section&#x00A0;3</a>,
       &#8220;<a 
 href="#x1-470003">Probability Model and Codebooks<!--tex4ht:ref: vorbis:spec:codebook --></a>&#8221;. Save each configuration, in order, in an array
       of codebook configurations <span 
-class="cmtt-12">[vorbis_codebook_configurations]</span>.</li></ol>
+class="cmtt-12">[vorbis_codebook_configurations]</span>.</dd></dl>
 <!--l. 120--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-660004.2.4"></a><span 
 class="cmbx-12">Time domain transforms</span></span>
 These hooks are placeholders in Vorbis I. Nevertheless, the configuration placeholder values must
 be read to maintain bitstream sync.
-<!--l. 126--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-66002x1"><span 
+<!--l. 127--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_time_count] </span>= read 6 bits as unsigned integer and add one
-      </li>
-      <li 
-  class="enumerate" id="x1-66004x2">read <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">read <span 
 class="cmtt-12">[vorbis_time_count] </span>16 bit values; each value should be zero. If any value is
-      nonzero, this is an error condition and the stream is undecodable.</li></ol>
+      nonzero, this is an error condition and the stream is undecodable.</dd></dl>
 <!--l. 133--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-670004.2.4"></a><span 
 class="cmbx-12">Floors</span></span>
 Vorbis uses two floor types; header decode is handed to the decode abstraction of the appropriate
 type.
-<!--l. 138--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-67002x1"><span 
+<!--l. 139--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_floor_count] </span>= read 6 bits as unsigned integer and add one
-      </li>
-      <li 
-  class="enumerate" id="x1-67004x2">For each <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">For each <span 
 class="cmtt-12">[i] </span>of <span 
 class="cmtt-12">[vorbis_floor_count] </span>floor numbers:
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-67006x1">read the floor type: vector <span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">read the floor type: vector <span 
 class="cmtt-12">[vorbis_floor_types] </span>element <span 
 class="cmtt-12">[i] </span>= read 16 bits
            as unsigned integer
-           </li>
-           <li 
-  class="enumerate" id="x1-67008x2">If the floor type is zero, decode the floor configuration as defined in <a 
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem">If the floor type is zero, decode the floor configuration as defined in <a 
 href="#x1-890006">Section&#x00A0;6</a>,
            &#8220;<a 
 href="#x1-890006">Floor type 0 setup and decode<!--tex4ht:ref: vorbis:spec:floor0 --></a>&#8221;; save this configuration in slot <span 
@@ -3932,53 +3931,53 @@ class="cmtt-12">[vorbis_floor_configurations]</span>.
                                                                                         
 
                                                                                         
-           </li>
-           <li 
-  class="enumerate" id="x1-67010x3">If the floor type is one, decode the floor configuration as defined in <a 
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem">If the floor type is one, decode the floor configuration as defined in <a 
 href="#x1-950007">Section&#x00A0;7</a>,
            &#8220;<a 
 href="#x1-950007">Floor type 1 setup and decode<!--tex4ht:ref: vorbis:spec:floor1 --></a>&#8221;; save this configuration in slot <span 
 class="cmtt-12">[i] </span>of the floor
            configuration array <span 
 class="cmtt-12">[vorbis_floor_configurations]</span>.
-           </li>
-           <li 
-  class="enumerate" id="x1-67012x4">If the the floor type is greater than one, this stream is undecodable; ERROR
-           CONDITION</li></ol>
-      </li></ol>
+           </dd><dt class="enumerate-enumitem">
+       d) </dt><dd 
+class="enumerate-enumitem">If the the floor type is greater than one, this stream is undecodable; ERROR
+           CONDITION</dd></dl>
+      </dd></dl>
 <!--l. 157--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-680004.2.4"></a><span 
 class="cmbx-12">Residues</span></span>
 Vorbis uses three residue types; header decode of each type is identical.
-<!--l. 162--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-68002x1"><span 
+<!--l. 163--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_residue_count] </span>= read 6 bits as unsigned integer and add one
-      </li>
-      <li 
-  class="enumerate" id="x1-68004x2">For each of <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">For each of <span 
 class="cmtt-12">[vorbis_residue_count] </span>residue numbers:
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-68006x1">read the residue type; vector <span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">read the residue type; vector <span 
 class="cmtt-12">[vorbis_residue_types] </span>element <span 
 class="cmtt-12">[i] </span>= read 16
            bits as unsigned integer
-           </li>
-           <li 
-  class="enumerate" id="x1-68008x2">If the residue type is zero, one or two, decode the residue configuration as defined
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem">If the residue type is zero, one or two, decode the residue configuration as defined
            in <a 
 href="#x1-1020008">Section&#x00A0;8</a>, &#8220;<a 
 href="#x1-1020008">Residue setup and decode<!--tex4ht:ref: vorbis:spec:residue --></a>&#8221;; save this configuration in slot <span 
 class="cmtt-12">[i] </span>of
            the residue configuration array <span 
 class="cmtt-12">[vorbis_residue_configurations]</span>.
-           </li>
-           <li 
-  class="enumerate" id="x1-68010x3">If the the residue type is greater than two, this stream is undecodable; ERROR
-           CONDITION</li></ol>
-      </li></ol>
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem">If the the residue type is greater than two, this stream is undecodable; ERROR
+           CONDITION</dd></dl>
+      </dd></dl>
 <!--l. 177--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-690004.2.4"></a><span 
 class="cmbx-12">Mappings</span></span>
@@ -3988,44 +3987,44 @@ channel mappings.
                                                                                         
 
                                                                                         
-<!--l. 187--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-69002x1"><span 
+<!--l. 188--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_mapping_count] </span>= read 6 bits as unsigned integer and add one
-      </li>
-      <li 
-  class="enumerate" id="x1-69004x2">For each <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">For each <span 
 class="cmtt-12">[i] </span>of <span 
 class="cmtt-12">[vorbis_mapping_count] </span>mapping numbers:
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-69006x1">read the mapping type: 16 bits as unsigned integer. There&#8217;s no reason to save
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">read the mapping type: 16 bits as unsigned integer. There&#8217;s no reason to save
            the mapping type in Vorbis I.
-           </li>
-           <li 
-  class="enumerate" id="x1-69008x2">If the mapping type is nonzero, the stream is undecodable
-           </li>
-           <li 
-  class="enumerate" id="x1-69010x3">If the mapping type is zero:
-               <ol  class="enumerate3" >
-               <li 
-  class="enumerate" id="x1-69012x1">read 1 bit as a boolean flag
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-69014x1">if set, <span 
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem">If the mapping type is nonzero, the stream is undecodable
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem">If the mapping type is zero:
+               <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+            i. </dt><dd 
+class="enumerate-enumitem">read 1 bit as a boolean flag
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem">if set, <span 
 class="cmtt-12">[vorbis_mapping_submaps] </span>= read 4 bits as unsigned integer
                    and add one
-                   </li>
-                   <li 
-  class="enumerate" id="x1-69016x2">if unset, <span 
-class="cmtt-12">[vorbis_mapping_submaps] </span>= 1</li></ol>
-               </li>
-               <li 
-  class="enumerate" id="x1-69018x2">read 1 bit as a boolean flag
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-69020x1">if set, square polar channel mapping is in use:
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem">if unset, <span 
+class="cmtt-12">[vorbis_mapping_submaps] </span>= 1</dd></dl>
+               </dd><dt class="enumerate-enumitem">
+            ii. </dt><dd 
+class="enumerate-enumitem">read 1 bit as a boolean flag
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem">if set, square polar channel mapping is in use:
                      <ul class="itemize1">
                      <li class="itemize"><span 
 class="cmtt-12">[vorbis_mapping_coupling_steps] </span>=  read  8  bits  as  unsigned
@@ -4062,124 +4061,124 @@ class="cmtt-12">[audio_channels]</span>-1, or
 class="cmtt-12">[audio_channels]</span>-1, the stream
                        is undecodable.</li></ul>
                      </li></ul>
-                   </li>
-                   <li 
-  class="enumerate" id="x1-69022x2">if unset, <span 
-class="cmtt-12">[vorbis_mapping_coupling_steps] </span>= 0</li></ol>
-               </li>
-               <li 
-  class="enumerate" id="x1-69024x3">read 2 bits (reserved field); if the value is nonzero, the stream is undecodable
-               </li>
-               <li 
-  class="enumerate" id="x1-69026x4">if <span 
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem">if unset, <span 
+class="cmtt-12">[vorbis_mapping_coupling_steps] </span>= 0</dd></dl>
+               </dd><dt class="enumerate-enumitem">
+           iii. </dt><dd 
+class="enumerate-enumitem">read 2 bits (reserved field); if the value is nonzero, the stream is undecodable
+               </dd><dt class="enumerate-enumitem">
+           iv. </dt><dd 
+class="enumerate-enumitem">if <span 
 class="cmtt-12">[vorbis_mapping_submaps] </span>is greater than one, we read channel multiplex
                settings. For each <span 
 class="cmtt-12">[j] </span>of <span 
 class="cmtt-12">[audio_channels] </span>channels:
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-69028x1">vector <span 
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem">vector <span 
 class="cmtt-12">[vorbis_mapping_mux] </span>element <span 
 class="cmtt-12">[j] </span>= read 4 bits as unsigned
                    integer
-                   </li>
-                   <li 
-  class="enumerate" id="x1-69030x2">if   the   value   is   greater   than   the   highest   numbered   submap
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem">if   the   value   is   greater   than   the   highest   numbered   submap
                    (<span 
 class="cmtt-12">[vorbis_mapping_submaps] </span>- 1), this in an error condition rendering
-                   the stream undecodable</li></ol>
-               </li>
-               <li 
-  class="enumerate" id="x1-69032x5">for each submap <span 
+                   the stream undecodable</dd></dl>
+               </dd><dt class="enumerate-enumitem">
+            v. </dt><dd 
+class="enumerate-enumitem">for each submap <span 
 class="cmtt-12">[j] </span>of <span 
 class="cmtt-12">[vorbis_mapping_submaps] </span>submaps, read the floor and
                residue numbers for use in decoding that submap:
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-69034x1">read and discard 8 bits (the unused time configuration placeholder)
-                   </li>
-                   <li 
-  class="enumerate" id="x1-69036x2">read 8 bits as unsigned integer for the floor number; save in vector
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem">read and discard 8 bits (the unused time configuration placeholder)
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem">read 8 bits as unsigned integer for the floor number; save in vector
                    <span 
 class="cmtt-12">[vorbis_mapping_submap_floor] </span>element <span 
 class="cmtt-12">[j]</span>
-                   </li>
-                   <li 
-  class="enumerate" id="x1-69038x3">verify the floor number is not greater than the highest number floor
+                   </dd><dt class="enumerate-enumitem">
+               C. </dt><dd 
+class="enumerate-enumitem">verify the floor number is not greater than the highest number floor
                    configured for the bitstream. If it is, the bitstream is undecodable
-                   </li>
-                   <li 
-  class="enumerate" id="x1-69040x4">read 8 bits as unsigned integer for the residue number; save in vector
+                   </dd><dt class="enumerate-enumitem">
+               D. </dt><dd 
+class="enumerate-enumitem">read 8 bits as unsigned integer for the residue number; save in vector
                    <span 
 class="cmtt-12">[vorbis_mapping_submap_residue] </span>element <span 
 class="cmtt-12">[j]</span>
                                                                                         
 
                                                                                         
-                   </li>
-                   <li 
-  class="enumerate" id="x1-69042x5">verify the residue number is not greater than the highest number residue
-                   configured for the bitstream. If it is, the bitstream is undecodable</li></ol>
-               </li>
-               <li 
-  class="enumerate" id="x1-69044x6">save this mapping configuration in slot <span 
+                   </dd><dt class="enumerate-enumitem">
+               E. </dt><dd 
+class="enumerate-enumitem">verify the residue number is not greater than the highest number residue
+                   configured for the bitstream. If it is, the bitstream is undecodable</dd></dl>
+               </dd><dt class="enumerate-enumitem">
+           vi. </dt><dd 
+class="enumerate-enumitem">save this mapping configuration in slot <span 
 class="cmtt-12">[i] </span>of the mapping configuration array
                <span 
-class="cmtt-12">[vorbis_mapping_configurations]</span>.</li></ol>
-           </li></ol>
-      </li></ol>
+class="cmtt-12">[vorbis_mapping_configurations]</span>.</dd></dl>
+           </dd></dl>
+      </dd></dl>
 <!--l. 247--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-700004.2.4"></a><span 
 class="cmbx-12">Modes</span></span>
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-70002x1"><span 
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_mode_count] </span>= read 6 bits as unsigned integer and add one
-      </li>
-      <li 
-  class="enumerate" id="x1-70004x2">For each of <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">For each of <span 
 class="cmtt-12">[vorbis_mode_count] </span>mode numbers:
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-70006x1"><span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_mode_blockflag] </span>= read 1 bit
-           </li>
-           <li 
-  class="enumerate" id="x1-70008x2"><span 
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_mode_windowtype] </span>= read 16 bits as unsigned integer
-           </li>
-           <li 
-  class="enumerate" id="x1-70010x3"><span 
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_mode_transformtype] </span>= read 16 bits as unsigned integer
-           </li>
-           <li 
-  class="enumerate" id="x1-70012x4"><span 
+           </dd><dt class="enumerate-enumitem">
+       d) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[vorbis_mode_mapping] </span>= read 8 bits as unsigned integer
-           </li>
-           <li 
-  class="enumerate" id="x1-70014x5">verify       ranges;       zero       is       the       only       legal       value       in
+           </dd><dt class="enumerate-enumitem">
+        e) </dt><dd 
+class="enumerate-enumitem">verify       ranges;       zero       is       the       only       legal       value       in
            Vorbis I for <span 
 class="cmtt-12">[vorbis_mode_windowtype] </span>and <span 
 class="cmtt-12">[vorbis_mode_transformtype]</span>.
            <span 
 class="cmtt-12">[vorbis_mode_mapping] </span>must not be greater than the highest number mapping
            in use. Any illegal values render the stream undecodable.
-           </li>
-           <li 
-  class="enumerate" id="x1-70016x6">save  this  mode  configuration  in  slot  <span 
+           </dd><dt class="enumerate-enumitem">
+        f) </dt><dd 
+class="enumerate-enumitem">save  this  mode  configuration  in  slot  <span 
 class="cmtt-12">[i] </span>of  the  mode  configuration  array
            <span 
-class="cmtt-12">[vorbis_mode_configurations]</span>.</li></ol>
-      </li>
-      <li 
-  class="enumerate" id="x1-70018x3">read 1 bit as a framing flag. If unset, a framing error occurred and the stream is not
-      decodable.</li></ol>
+class="cmtt-12">[vorbis_mode_configurations]</span>.</dd></dl>
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">read 1 bit as a framing flag. If unset, a framing error occurred and the stream is not
+      decodable.</dd></dl>
                                                                                         
 
                                                                                         
 <!--l. 268--><p class="noindent" >After reading mode descriptions, setup header decode is complete.
 <!--l. 277--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">4.3  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">4.3.  </span> <a 
  id="x1-710004.3"></a>Audio packet decode and synthesis</h4>
 <!--l. 279--><p class="noindent" >Following the three header packets, all packets in a Vorbis I stream are audio. The first step of
 audio packet decode is to read and verify the packet type. <span 
@@ -4189,50 +4188,50 @@ class="cmti-12">expected indicates stream corruption or a non-compliant stream. 
 <span 
 class="cmti-12">packet and not attempt decoding it to audio</span>.
 <!--l. 286--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.1.  </span> <a 
  id="x1-720004.3.1"></a>packet type, mode and window decode</h5>
-<!--l. 288--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-72002x1">read 1 bit <span 
+<!--l. 289--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem">read 1 bit <span 
 class="cmtt-12">[packet_type]</span>; check that packet type is 0 (audio)
-      </li>
-      <li 
-  class="enumerate" id="x1-72004x2">read <a 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">read <a 
 href="#x1-1170009.2.1">ilog</a>([vorbis_mode_count]-1) bits <span 
 class="cmtt-12">[mode_number]</span>
-      </li>
-      <li 
-  class="enumerate" id="x1-72006x3">decode blocksize <span 
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">decode blocksize <span 
 class="cmtt-12">[n] </span>is equal to <span 
 class="cmtt-12">[blocksize_0] </span>if <span 
 class="cmtt-12">[vorbis_mode_blockflag] </span>is 0,
       else <span 
 class="cmtt-12">[n] </span>is equal to <span 
 class="cmtt-12">[blocksize_1]</span>.
-      </li>
-      <li 
-  class="enumerate" id="x1-72008x4">perform window selection and setup; this window is used later by the inverse
+      </dd><dt class="enumerate-enumitem">
+   4. </dt><dd 
+class="enumerate-enumitem">perform window selection and setup; this window is used later by the inverse
       MDCT:
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-72010x1">if this is a long window (the <span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">if this is a long window (the <span 
 class="cmtt-12">[vorbis_mode_blockflag] </span>flag of this mode is
            set):
-               <ol  class="enumerate3" >
-               <li 
-  class="enumerate" id="x1-72012x1">read 1 bit for <span 
+               <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+            i. </dt><dd 
+class="enumerate-enumitem">read 1 bit for <span 
 class="cmtt-12">[previous_window_flag]</span>
-               </li>
-               <li 
-  class="enumerate" id="x1-72014x2">read 1 bit for <span 
+               </dd><dt class="enumerate-enumitem">
+            ii. </dt><dd 
+class="enumerate-enumitem">read 1 bit for <span 
 class="cmtt-12">[next_window_flag]</span>
                                                                                         
 
                                                                                         
-               </li>
-               <li 
-  class="enumerate" id="x1-72016x3">if  <span 
+               </dd><dt class="enumerate-enumitem">
+           iii. </dt><dd 
+class="enumerate-enumitem">if  <span 
 class="cmtt-12">[previous_window_flag] </span>is not set, the left half of the window will
                be a hybrid window for lapping with a short block. See <a 
 href="#paragraph.1" >paragraph&#x00A0;<a 
@@ -4241,21 +4240,21 @@ href="#x1-260001.3.2">1.3.2</a></a>,
 href="#x1-260001.3.2">Window  shape  decode  (long  windows  only)<!--tex4ht:ref: vorbis:spec:window --></a>&#8221;  for  an  illustration  of
                overlapping dissimilar windows. Else, the left half window will have normal
                long shape.
-               </li>
-               <li 
-  class="enumerate" id="x1-72018x4">if  <span 
+               </dd><dt class="enumerate-enumitem">
+           iv. </dt><dd 
+class="enumerate-enumitem">if  <span 
 class="cmtt-12">[next_window_flag] </span>is not set, the right half of the window will be
                a  hybrid  window  for  lapping  with  a  short  block.  See  <a 
 href="#x1-260001.3.2">paragraph&#x00A0;1.3.2</a>,
                &#8220;<a 
 href="#x1-260001.3.2">Window  shape  decode  (long  windows  only)<!--tex4ht:ref: vorbis:spec:window --></a>&#8221;  for  an  illustration  of
                overlapping dissimilar windows. Else, the left right window will have normal
-               long shape.</li></ol>
-           </li>
-           <li 
-  class="enumerate" id="x1-72020x2">if this is a short window, the window is always the same short-window
-           shape.</li></ol>
-      </li></ol>
+               long shape.</dd></dl>
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem">if this is a short window, the window is always the same short-window
+           shape.</dd></dl>
+      </dd></dl>
 <!--l. 321--><p class="noindent" >Vorbis windows all use the slope function <span 
 class="cmmi-12">y </span>= sin(<img 
 src="Vorbis_I_spec1x.png" alt="&pi;2"  class="frac" align="middle"> <span 
@@ -4273,98 +4272,98 @@ class="cmmi-12">&hellip;</span><span
 class="cmmi-12">n</span><span 
 class="cmsy-10x-x-120">&minus; </span>1, but dissimilar lapping requirements can affect overall shape. Window
 generation proceeds as follows:
-<!--l. 326--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-72022x1"><span 
+<!--l. 327--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[window_center] </span>= <span 
 class="cmtt-12">[n] </span>/ 2
-      </li>
-      <li 
-  class="enumerate" id="x1-72024x2">if (<span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">if (<span 
 class="cmtt-12">[vorbis_mode_blockflag] </span>is set and <span 
 class="cmtt-12">[previous_window_flag] </span>is not set)
       then
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-72026x1"><span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[left_window_start] </span>= <span 
 class="cmtt-12">[n]</span>/4 - <span 
 class="cmtt-12">[blocksize_0]</span>/4
-           </li>
-           <li 
-  class="enumerate" id="x1-72028x2"><span 
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[left_window_end] </span>= <span 
 class="cmtt-12">[n]</span>/4 + <span 
 class="cmtt-12">[blocksize_0]</span>/4
-           </li>
-           <li 
-  class="enumerate" id="x1-72030x3"><span 
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[left_n] </span>= <span 
-class="cmtt-12">[blocksize_0]</span>/2</li></ol>
+class="cmtt-12">[blocksize_0]</span>/2</dd></dl>
       <!--l. 336--><p class="noindent" >else
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-72032x1"><span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[left_window_start] </span>= 0
-           </li>
-           <li 
-  class="enumerate" id="x1-72034x2"><span 
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[left_window_end] </span>= <span 
 class="cmtt-12">[window_center]</span>
                                                                                         
 
                                                                                         
-           </li>
-           <li 
-  class="enumerate" id="x1-72036x3"><span 
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[left_n] </span>= <span 
-class="cmtt-12">[n]</span>/2</li></ol>
-      </li>
-      <li 
-  class="enumerate" id="x1-72038x3">if (<span 
+class="cmtt-12">[n]</span>/2</dd></dl>
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">if (<span 
 class="cmtt-12">[vorbis_mode_blockflag] </span>is set and <span 
 class="cmtt-12">[next_window_flag] </span>is not set) then
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-72040x1"><span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[right_window_start] </span>= <span 
 class="cmtt-12">[n]*3</span>/4 - <span 
 class="cmtt-12">[blocksize_0]</span>/4
-           </li>
-           <li 
-  class="enumerate" id="x1-72042x2"><span 
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[right_window_end] </span>= <span 
 class="cmtt-12">[n]*3</span>/4 + <span 
 class="cmtt-12">[blocksize_0]</span>/4
-           </li>
-           <li 
-  class="enumerate" id="x1-72044x3"><span 
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[right_n] </span>= <span 
-class="cmtt-12">[blocksize_0]</span>/2</li></ol>
+class="cmtt-12">[blocksize_0]</span>/2</dd></dl>
       <!--l. 352--><p class="noindent" >else
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-72046x1"><span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[right_window_start] </span>= <span 
 class="cmtt-12">[window_center]</span>
-           </li>
-           <li 
-  class="enumerate" id="x1-72048x2"><span 
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[right_window_end] </span>= <span 
 class="cmtt-12">[n]</span>
-           </li>
-           <li 
-  class="enumerate" id="x1-72050x3"><span 
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[right_n] </span>= <span 
-class="cmtt-12">[n]</span>/2</li></ol>
-      </li>
-      <li 
-  class="enumerate" id="x1-72052x4">window from range 0 ... <span 
+class="cmtt-12">[n]</span>/2</dd></dl>
+      </dd><dt class="enumerate-enumitem">
+   4. </dt><dd 
+class="enumerate-enumitem">window from range 0 ... <span 
 class="cmtt-12">[left_window_start]</span>-1 inclusive is zero
-      </li>
-      <li 
-  class="enumerate" id="x1-72054x5">for <span 
+      </dd><dt class="enumerate-enumitem">
+   5. </dt><dd 
+class="enumerate-enumitem">for <span 
 class="cmtt-12">[i] </span>in range <span 
 class="cmtt-12">[left_window_start] </span>... <span 
 class="cmtt-12">[left_window_end]</span>-1, window(<span 
@@ -4380,15 +4379,15 @@ class="cmtt-12">[left_n] </span><span
 class="cmsy-10x-x-120">&lowast;</span><img 
 src="Vorbis_I_spec3x.png" alt="&pi;
 2"  class="frac" align="middle">) )
-      </li>
-      <li 
-  class="enumerate" id="x1-72056x6">window from range <span 
+      </dd><dt class="enumerate-enumitem">
+   6. </dt><dd 
+class="enumerate-enumitem">window from range <span 
 class="cmtt-12">[left_window_end] </span>... <span 
 class="cmtt-12">[right_window_start]</span>-1 inclusive is
       one
-      </li>
-      <li 
-  class="enumerate" id="x1-72058x7">for <span 
+      </dd><dt class="enumerate-enumitem">
+   7. </dt><dd 
+class="enumerate-enumitem">for <span 
 class="cmtt-12">[i] </span>in range <span 
 class="cmtt-12">[right_window_start] </span>... <span 
 class="cmtt-12">[right_window_end]</span>-1, window(<span 
@@ -4406,11 +4405,11 @@ src="Vorbis_I_spec5x.png" alt="&pi;
 2"  class="frac" align="middle"> + <img 
 src="Vorbis_I_spec6x.png" alt="&pi;
 2"  class="frac" align="middle">) )
-      </li>
-      <li 
-  class="enumerate" id="x1-72060x8">window from range <span 
+      </dd><dt class="enumerate-enumitem">
+   8. </dt><dd 
+class="enumerate-enumitem">window from range <span 
 class="cmtt-12">[right_window_start] </span>... <span 
-class="cmtt-12">[n]</span>-1 is zero</li></ol>
+class="cmtt-12">[n]</span>-1 is zero</dd></dl>
 <!--l. 368--><p class="noindent" >An end-of-packet condition up to this point should be considered an error that discards this
 packet from the stream. An end of packet condition past this point is to be considered a possible
 nominal occurrence.
@@ -4418,7 +4417,7 @@ nominal occurrence.
 
                                                                                         
 <!--l. 375--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.2.  </span> <a 
  id="x1-730004.3.2"></a>floor curve decode</h5>
 <!--l. 377--><p class="noindent" >From this point on, we assume out decode context is using mode number <span 
 class="cmtt-12">[mode_number]</span>
@@ -4432,19 +4431,19 @@ class="cmtt-12">[vorbis_mapping_configurations]</span>.
 <!--l. 386--><p class="noindent" >For each floor <span 
 class="cmtt-12">[i] </span>of <span 
 class="cmtt-12">[audio_channels]</span>
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-73002x1"><span 
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[submap_number] </span>= element <span 
 class="cmtt-12">[i] </span>of vector [vorbis_mapping_mux]
-      </li>
-      <li 
-  class="enumerate" id="x1-73004x2"><span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[floor_number] </span>= element <span 
 class="cmtt-12">[submap_number] </span>of vector [vorbis_submap_floor]
-      </li>
-      <li 
-  class="enumerate" id="x1-73006x3">if          the          floor          type          of          this          floor          (vector
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">if          the          floor          type          of          this          floor          (vector
       <span 
 class="cmtt-12">[vorbis_floor_types] </span>element <span 
 class="cmtt-12">[floor_number]</span>) is zero then decode the floor for
@@ -4452,28 +4451,28 @@ class="cmtt-12">[floor_number]</span>) is zero then decode the floor for
 class="cmtt-12">[i] </span>according to the <a 
 href="#x1-930006.2.2">subsubsection&#x00A0;6.2.2</a>, &#8220;<a 
 href="#x1-930006.2.2">packet decode<!--tex4ht:ref: vorbis:spec:floor0-decode --></a>&#8221;
-      </li>
-      <li 
-  class="enumerate" id="x1-73008x4">if the type of this floor is one then decode the floor for channel <span 
+      </dd><dt class="enumerate-enumitem">
+   4. </dt><dd 
+class="enumerate-enumitem">if the type of this floor is one then decode the floor for channel <span 
 class="cmtt-12">[i] </span>according to the
       <a 
 href="#x1-1000007.2.2">paragraph&#x00A0;7.2.2</a>, &#8220;<a 
 href="#x1-1000007.2.2">packet decode<!--tex4ht:ref: vorbis:spec:floor1-decode --></a>&#8221;
-      </li>
-      <li 
-  class="enumerate" id="x1-73010x5">save the needed decoded floor information for channel for later synthesis
-      </li>
-      <li 
-  class="enumerate" id="x1-73012x6">if the decoded floor returned &#8217;unused&#8217;, set vector <span 
+      </dd><dt class="enumerate-enumitem">
+   5. </dt><dd 
+class="enumerate-enumitem">save the needed decoded floor information for channel for later synthesis
+      </dd><dt class="enumerate-enumitem">
+   6. </dt><dd 
+class="enumerate-enumitem">if the decoded floor returned &#8217;unused&#8217;, set vector <span 
 class="cmtt-12">[no_residue] </span>element <span 
 class="cmtt-12">[i] </span>to true,
       else set vector <span 
 class="cmtt-12">[no_residue] </span>element <span 
-class="cmtt-12">[i] </span>to false</li></ol>
+class="cmtt-12">[i] </span>to false</dd></dl>
 <!--l. 406--><p class="noindent" >An end-of-packet condition during floor decode shall result in packet decode zeroing all channel
 output vectors and skipping to the add/overlap output stage.
 <!--l. 412--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.3.  </span> <a 
  id="x1-740004.3.3"></a>nonzero vector propagate</h5>
 <!--l. 414--><p class="noindent" >A possible result of floor decode is that a specific vector is marked &#8217;unused&#8217; which indicates that
 that final output vector is all-zero values (and the floor is zero). The residue for that vector is not
@@ -4486,10 +4485,10 @@ vectors.
 <!--l. 421--><p class="noindent" >for each <span 
 class="cmtt-12">[i] </span>from 0 ... <span 
 class="cmtt-12">[vorbis_mapping_coupling_steps]</span>-1
-<!--l. 423--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-74002x1">if either <span 
+<!--l. 424--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem">if either <span 
 class="cmtt-12">[no_residue] </span>entry for channel (<span 
 class="cmtt-12">[vorbis_mapping_magnitude] </span>element
       <span 
@@ -4497,73 +4496,73 @@ class="cmtt-12">[i]</span>) or channel (<span
 class="cmtt-12">[vorbis_mapping_angle] </span>element <span 
 class="cmtt-12">[i]</span>) are set to false, then both
       must be set to false. Note that an &#8217;unused&#8217; floor has no decoded floor information; it
-      is important that this is remembered at floor curve synthesis time.</li></ol>
+      is important that this is remembered at floor curve synthesis time.</dd></dl>
 <!--l. 436--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.4  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.4.  </span> <a 
  id="x1-750004.3.4"></a>residue decode</h5>
 <!--l. 438--><p class="noindent" >Unlike floors, which are decoded in channel order, the residue vectors are decoded in submap
 order.
 <!--l. 441--><p class="noindent" >for each submap <span 
 class="cmtt-12">[i] </span>in order from 0 ... <span 
 class="cmtt-12">[vorbis_mapping_submaps]</span>-1
-<!--l. 443--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-75002x1"><span 
+<!--l. 444--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[ch] </span>= 0
-      </li>
-      <li 
-  class="enumerate" id="x1-75004x2">for each channel <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">for each channel <span 
 class="cmtt-12">[j] </span>in order from 0 ... <span 
 class="cmtt-12">[audio_channels] </span>- 1
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-75006x1">if channel <span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">if channel <span 
 class="cmtt-12">[j] </span>in submap <span 
 class="cmtt-12">[i] </span>(vector <span 
 class="cmtt-12">[vorbis_mapping_mux] </span>element <span 
 class="cmtt-12">[j] </span>is equal to
            <span 
 class="cmtt-12">[i]</span>)
-               <ol  class="enumerate3" >
-               <li 
-  class="enumerate" id="x1-75008x1">if vector <span 
+               <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+            i. </dt><dd 
+class="enumerate-enumitem">if vector <span 
 class="cmtt-12">[no_residue] </span>element <span 
 class="cmtt-12">[j] </span>is true
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-75010x1">vector <span 
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem">vector <span 
 class="cmtt-12">[do_not_decode_flag] </span>element <span 
-class="cmtt-12">[ch] </span>is set</li></ol>
+class="cmtt-12">[ch] </span>is set</dd></dl>
                <!--l. 453--><p class="noindent" >else
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-75012x1">vector <span 
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem">vector <span 
 class="cmtt-12">[do_not_decode_flag] </span>element <span 
-class="cmtt-12">[ch] </span>is unset</li></ol>
-               </li>
-               <li 
-  class="enumerate" id="x1-75014x2">increment <span 
-class="cmtt-12">[ch]</span></li></ol>
+class="cmtt-12">[ch] </span>is unset</dd></dl>
+               </dd><dt class="enumerate-enumitem">
+            ii. </dt><dd 
+class="enumerate-enumitem">increment <span 
+class="cmtt-12">[ch]</span></dd></dl>
                                                                                         
 
                                                                                         
-           </li></ol>
-      </li>
-      <li 
-  class="enumerate" id="x1-75016x3"><span 
+           </dd></dl>
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[residue_number] </span>= vector <span 
 class="cmtt-12">[vorbis_mapping_submap_residue] </span>element <span 
 class="cmtt-12">[i]</span>
-      </li>
-      <li 
-  class="enumerate" id="x1-75018x4"><span 
+      </dd><dt class="enumerate-enumitem">
+   4. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[residue_type] </span>= vector <span 
 class="cmtt-12">[vorbis_residue_types] </span>element <span 
 class="cmtt-12">[residue_number]</span>
-      </li>
-      <li 
-  class="enumerate" id="x1-75020x5">decode <span 
+      </dd><dt class="enumerate-enumitem">
+   5. </dt><dd 
+class="enumerate-enumitem">decode <span 
 class="cmtt-12">[ch] </span>vectors using residue <span 
 class="cmtt-12">[residue_number]</span>, according to type <span 
 class="cmtt-12">[residue_type]</span>,
@@ -4571,52 +4570,52 @@ class="cmtt-12">[residue_type]</span>,
 class="cmtt-12">[do_not_decode_flag] </span>to indicate which vectors in the bundle should
       not be decoded. Correct per-vector decode length is <span 
 class="cmtt-12">[n]</span>/2.
-      </li>
-      <li 
-  class="enumerate" id="x1-75022x6"><span 
+      </dd><dt class="enumerate-enumitem">
+   6. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[ch] </span>= 0
-      </li>
-      <li 
-  class="enumerate" id="x1-75024x7">for each channel <span 
+      </dd><dt class="enumerate-enumitem">
+   7. </dt><dd 
+class="enumerate-enumitem">for each channel <span 
 class="cmtt-12">[j] </span>in order from 0 ... <span 
 class="cmtt-12">[audio_channels]</span>
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-75026x1">if channel <span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">if channel <span 
 class="cmtt-12">[j] </span>is in submap <span 
 class="cmtt-12">[i] </span>(vector <span 
 class="cmtt-12">[vorbis_mapping_mux] </span>element <span 
 class="cmtt-12">[j] </span>is equal
            to <span 
 class="cmtt-12">[i]</span>)
-               <ol  class="enumerate3" >
-               <li 
-  class="enumerate" id="x1-75028x1">residue vector for channel <span 
+               <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+            i. </dt><dd 
+class="enumerate-enumitem">residue vector for channel <span 
 class="cmtt-12">[j] </span>is set to decoded residue vector <span 
 class="cmtt-12">[ch]</span>
-               </li>
-               <li 
-  class="enumerate" id="x1-75030x2">increment <span 
-class="cmtt-12">[ch]</span></li></ol>
-           </li></ol>
-      </li></ol>
+               </dd><dt class="enumerate-enumitem">
+            ii. </dt><dd 
+class="enumerate-enumitem">increment <span 
+class="cmtt-12">[ch]</span></dd></dl>
+           </dd></dl>
+      </dd></dl>
 <!--l. 480--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.5  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.5.  </span> <a 
  id="x1-760004.3.5"></a>inverse coupling</h5>
 <!--l. 482--><p class="noindent" >for each <span 
 class="cmtt-12">[i] </span>from <span 
 class="cmtt-12">[vorbis_mapping_coupling_steps]</span>-1 descending to 0
-<!--l. 484--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-76002x1"><span 
+<!--l. 485--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[magnitude_vector]   </span>=     the     residue     vector     for     channel     (vector
       <span 
 class="cmtt-12">[vorbis_mapping_magnitude] </span>element <span 
 class="cmtt-12">[i]</span>)
-      </li>
-      <li 
-  class="enumerate" id="x1-76004x2"><span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[angle_vector] </span>= the residue vector for channel (vector <span 
 class="cmtt-12">[vorbis_mapping_angle]</span>
                                                                                         
@@ -4624,93 +4623,93 @@ class="cmtt-12">[vorbis_mapping_angle]</span>
                                                                                         
       element <span 
 class="cmtt-12">[i]</span>)
-      </li>
-      <li 
-  class="enumerate" id="x1-76006x3">for each scalar value <span 
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">for each scalar value <span 
 class="cmtt-12">[M] </span>in vector <span 
 class="cmtt-12">[magnitude_vector] </span>and the corresponding scalar value
       <span 
 class="cmtt-12">[A] </span>in vector <span 
 class="cmtt-12">[angle_vector]</span>:
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-76008x1">if (<span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">if (<span 
 class="cmtt-12">[M] </span>is greater than zero)
-               <ol  class="enumerate3" >
-               <li 
-  class="enumerate" id="x1-76010x1">if (<span 
+               <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+            i. </dt><dd 
+class="enumerate-enumitem">if (<span 
 class="cmtt-12">[A] </span>is greater than zero)
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-76012x1"><span 
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_M] </span>= <span 
 class="cmtt-12">[M]</span>
-                   </li>
-                   <li 
-  class="enumerate" id="x1-76014x2"><span 
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_A] </span>= <span 
 class="cmtt-12">[M]</span>-<span 
-class="cmtt-12">[A]</span></li></ol>
+class="cmtt-12">[A]</span></dd></dl>
                <!--l. 498--><p class="noindent" >else
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-76016x1"><span 
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_A] </span>= <span 
 class="cmtt-12">[M]</span>
-                   </li>
-                   <li 
-  class="enumerate" id="x1-76018x2"><span 
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_M] </span>= <span 
 class="cmtt-12">[M]</span>+<span 
-class="cmtt-12">[A]</span></li></ol>
-               </li></ol>
+class="cmtt-12">[A]</span></dd></dl>
+               </dd></dl>
            <!--l. 505--><p class="noindent" >else
-               <ol  class="enumerate3" >
-               <li 
-  class="enumerate" id="x1-76020x1">if (<span 
+               <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+            i. </dt><dd 
+class="enumerate-enumitem">if (<span 
 class="cmtt-12">[A] </span>is greater than zero)
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-76022x1"><span 
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_M] </span>= <span 
 class="cmtt-12">[M]</span>
-                   </li>
-                   <li 
-  class="enumerate" id="x1-76024x2"><span 
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_A] </span>= <span 
 class="cmtt-12">[M]</span>+<span 
-class="cmtt-12">[A]</span></li></ol>
+class="cmtt-12">[A]</span></dd></dl>
                <!--l. 512--><p class="noindent" >else
-                   <ol  class="enumerate4" >
-                   <li 
-  class="enumerate" id="x1-76026x1"><span 
+                   <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+               A. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_A] </span>= <span 
 class="cmtt-12">[M]</span>
-                   </li>
-                   <li 
-  class="enumerate" id="x1-76028x2"><span 
+                   </dd><dt class="enumerate-enumitem">
+               B. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[new_M] </span>= <span 
 class="cmtt-12">[M]</span>-<span 
-class="cmtt-12">[A]</span></li></ol>
-               </li></ol>
-           </li>
-           <li 
-  class="enumerate" id="x1-76030x2">set scalar value <span 
+class="cmtt-12">[A]</span></dd></dl>
+               </dd></dl>
+           </dd><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem">set scalar value <span 
 class="cmtt-12">[M] </span>in vector <span 
 class="cmtt-12">[magnitude_vector] </span>to <span 
 class="cmtt-12">[new_M]</span>
                                                                                         
 
                                                                                         
-           </li>
-           <li 
-  class="enumerate" id="x1-76032x3">set scalar value <span 
+           </dd><dt class="enumerate-enumitem">
+        c) </dt><dd 
+class="enumerate-enumitem">set scalar value <span 
 class="cmtt-12">[A] </span>in vector <span 
 class="cmtt-12">[angle_vector] </span>to <span 
-class="cmtt-12">[new_A]</span></li></ol>
-      </li></ol>
+class="cmtt-12">[new_A]</span></dd></dl>
+      </dd></dl>
 <!--l. 529--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.6  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.6.  </span> <a 
  id="x1-770004.3.6"></a>dot product</h5>
 <!--l. 531--><p class="noindent" >For each channel, synthesize the floor curve from the decoded floor information, according to
 packet type. Note that the vector synthesis length for floor computation is <span 
@@ -4743,7 +4742,7 @@ be able to handle an effective 48 bit times 24 bit multiplication. This range ma
 achieved using large (64 bit or larger) integers, or implementing a movable binary point
 representation.
 <!--l. 567--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.7  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.7.  </span> <a 
  id="x1-780004.3.7"></a>inverse MDCT</h5>
 <!--l. 569--><p class="noindent" >Convert the audio spectrum vector of each channel back into time domain PCM audio via an
                                                                                         
@@ -4754,7 +4753,7 @@ available in <span class="cite">[<a
 href="#XSporer/Brandenburg/Edler">1</a>]</span>. The window function used for the MDCT is the function described
 earlier.
 <!--l. 576--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.8  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.8.  </span> <a 
  id="x1-790004.3.8"></a>overlap_add</h5>
 <!--l. 578--><p class="noindent" >Windowed MDCT output is overlapped and added with the right hand data of the previous
 window such that the 3/4 point of the previous window is aligned with the 1/4 point of the
@@ -4783,7 +4782,7 @@ windowsize/2-1, inclusive) of the current window.
 encoder accounts for this priming when calculating PCM offsets; after the first frame, the proper
 PCM output offset is &#8217;0&#8217; (as no data has been returned yet).
 <!--l. 606--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">4.3.9  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">4.3.9.  </span> <a 
  id="x1-800004.3.9"></a>output channel order</h5>
 <!--l. 608--><p class="noindent" >Vorbis I specifies only a channel mapping type 0. In mapping type 0, channel mapping is
 implicitly defined as follows for standard audio applications. As of revision 16781 (20100113), the
@@ -4795,7 +4794,7 @@ greater-than-eight channels remains &#8217;left to the implementation&#8217;.
 <!--l. 614--><p class="noindent" >These channel orderings refer to order within the encoded stream. It is naturally possible for a
 decoder to produce output with channels in any order. Any such decoder should explicitly
 document channel reordering behavior.
-<!--l. 619--><p class="noindent" >
+<!--l. 620--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
 class="cmssbx-10x-x-120">one channel</span> </dt><dd 
@@ -4848,10 +4847,10 @@ mappings other than mapping 0.
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">5  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">5.  </span> <a 
  id="x1-810005"></a>comment field and header specification</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">5.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">5.1.  </span> <a 
  id="x1-820005.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >The Vorbis text comment header is the second (of three) header packets that begin a Vorbis
 bitstream. It is meant for short text comments, not arbitrary metadata; arbitrary metadata
@@ -4868,10 +4867,10 @@ eg:
 class="cmti-12">&#8220;I&#8217;m Still Around&#8221;</span>, opening
       for Moxy Früvous, 1997.</div>
 <!--l. 29--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">5.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">5.2.  </span> <a 
  id="x1-830005.2"></a>Comment encoding</h4>
 <!--l. 31--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">5.2.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">5.2.1.  </span> <a 
  id="x1-840005.2.1"></a>Structure</h5>
 <!--l. 33--><p class="noindent" >The comment header is logically a list of eight-bit-clean vectors; the number of vectors is
 bounded to 2<sup><span 
@@ -5048,7 +5047,7 @@ class="cmtt-8">&#x00A0;9)</span><span
 class="cmtt-8">&#x00A0;done.</span>
 </div>
 <!--l. 64--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">5.2.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">5.2.2.  </span> <a 
  id="x1-850005.2.2"></a>Content vector format</h5>
 <!--l. 66--><p class="noindent" >The comment vectors are structured similarly to a UNIX environment variable. That is,
 comment fields consist of a field name and a corresponding value and look like:
@@ -5087,7 +5086,7 @@ class="cmbx-12">Field names</span></span>
 Below is a proposed, minimal list of standard field names with a description of intended use. No
 single or group of field names is mandatory; a comment header may contain one, all or none of
 the names in this list.
-<!--l. 98--><p class="noindent" >
+<!--l. 99--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
 class="cmssbx-10x-x-120">TITLE</span> </dt><dd 
@@ -5213,7 +5212,7 @@ class="cmtt-8">&#x00A0;Stitt</span>
 </div>
       </div>
 <!--l. 197--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">5.2.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">5.2.3.  </span> <a 
  id="x1-880005.2.3"></a>Encoding</h5>
 <!--l. 199--><p class="noindent" >The comment header comprises the entirety of the second bitstream header packet. Unlike the
 first bitstream header packet, it is not generally the only packet on the second page and may not
@@ -5223,34 +5222,34 @@ bitstream even if it is effectively empty.
 <!--l. 207--><p class="noindent" >The comment header is encoded as follows (as per Ogg&#8217;s standard bitstream mapping which
 renders least-significant-bit of the word to be coded into the least significant available bit of the
 current bitstream octet first):
-<!--l. 212--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-88002x1">Vendor string length (32 bit unsigned quantity specifying number of octets)
-      </li>
-      <li 
-  class="enumerate" id="x1-88004x2">Vendor string ([vendor string length] octets coded from beginning of string to end of
+<!--l. 213--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem">Vendor string length (32 bit unsigned quantity specifying number of octets)
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">Vendor string ([vendor string length] octets coded from beginning of string to end of
       string, not null terminated)
                                                                                         
 
                                                                                         
-      </li>
-      <li 
-  class="enumerate" id="x1-88006x3">Number of comment fields (32 bit unsigned quantity specifying number of fields)
-      </li>
-      <li 
-  class="enumerate" id="x1-88008x4">Comment field 0 length (if [Number of comment fields] <span 
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">Number of comment fields (32 bit unsigned quantity specifying number of fields)
+      </dd><dt class="enumerate-enumitem">
+   4. </dt><dd 
+class="enumerate-enumitem">Comment field 0 length (if [Number of comment fields] <span 
 class="cmmi-12">&#x003E; </span>0; 32 bit unsigned quantity
       specifying number of octets)
-      </li>
-      <li 
-  class="enumerate" id="x1-88010x5">Comment field 0 ([Comment field 0 length] octets coded from beginning of string to
+      </dd><dt class="enumerate-enumitem">
+   5. </dt><dd 
+class="enumerate-enumitem">Comment field 0 ([Comment field 0 length] octets coded from beginning of string to
       end of string, not null terminated)
-      </li>
-      <li 
-  class="enumerate" id="x1-88012x6">Comment field 1 length (if [Number of comment fields] <span 
+      </dd><dt class="enumerate-enumitem">
+   6. </dt><dd 
+class="enumerate-enumitem">Comment field 1 length (if [Number of comment fields] <span 
 class="cmmi-12">&#x003E; </span>1...)...
-      </li></ol>
+      </dd></dl>
 <!--l. 234--><p class="noindent" >This is actually somewhat easier to describe in code; implementation of the above can be found
 in <span 
 class="cmtt-12">vorbis/lib/info.c</span>, <span 
@@ -5262,10 +5261,10 @@ class="cmtt-12">_vorbis_unpack_comment()</span>.
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">6  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">6.  </span> <a 
  id="x1-890006"></a>Floor type 0 setup and decode</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">6.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">6.1.  </span> <a 
  id="x1-900006.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >Vorbis floor type zero uses Line Spectral Pair (LSP, also alternately known as Line Spectral
 Frequency or LSF) representation to encode a smooth spectral envelope curve as the frequency
@@ -5273,12 +5272,12 @@ response of the LSP filter. This representation is equivalent to a traditional a
 impulse response filter as would be used in linear predictive coding; LSP representation may be
 converted to LPC representation and vice-versa.
 <!--l. 18--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">6.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">6.2.  </span> <a 
  id="x1-910006.2"></a>Floor 0 format</h4>
 <!--l. 20--><p class="noindent" >Floor zero configuration consists of six integer fields and a list of VQ codebooks for use in
 coding/decoding the LSP filter coefficient values used by each frame.
 <!--l. 24--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">6.2.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">6.2.1.  </span> <a 
  id="x1-920006.2.1"></a>header decode</h5>
 <!--l. 26--><p class="noindent" >Configuration information for instances of floor zero decodes from the codec setup header (third
 packet). configuration decode proceeds as follows:
@@ -5414,7 +5413,7 @@ class="cmtt-12">[floor0_book_list] </span>that is greater than the maximum
 codebook number for this bitstream is an error condition that also renders the stream
 undecodable.
 <!--l. 48--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">6.2.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">6.2.2.  </span> <a 
  id="x1-930006.2.2"></a>packet decode</h5>
 <!--l. 50--><p class="noindent" >Extracting a floor0 curve from an audio packet consists of first decoding the curve
 amplitude and <span 
@@ -5731,7 +5730,7 @@ class="cmtt-12">[coefficients] </span>is to to read a total of twelve scalars
       be taken not to allow a buffer overflow in decode. The extra values are not used and
       may be ignored or discarded.</li></ul>
 <!--l. 104--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">6.2.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">6.2.3.  </span> <a 
  id="x1-940006.2.3"></a>curve computation</h5>
 <!--l. 106--><p class="noindent" >Given an <span 
 class="cmtt-12">[amplitude] </span>integer and <span 
@@ -5775,27 +5774,27 @@ result to a linear-scale frequency axis. Similarly, the below calculation synthe
 LSP curve <span 
 class="cmtt-12">[output] </span>on a log (dB) amplitude scale, mapping it to linear amplitude in the last
 step:
-<!--l. 150--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-94002x1"><span 
+<!--l. 151--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[i] </span>= 0
-      </li>
-      <li 
-  class="enumerate" id="x1-94004x2"><span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[</span><span 
 class="cmmi-12">&omega;</span><span 
 class="cmtt-12">] </span>= <span 
 class="cmmi-12">&pi; </span>* map element <span 
 class="cmtt-12">[i] </span>/ <span 
 class="cmtt-12">[floor0_bark_map_size]</span>
-      </li>
-      <li 
-  class="enumerate" id="x1-94006x3">if ( <span 
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">if ( <span 
 class="cmtt-12">[floor0_order] </span>is odd )
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-94008x1">calculate <span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       a) </dt><dd 
+class="enumerate-enumitem">calculate <span 
 class="cmtt-12">[p] </span>and <span 
 class="cmtt-12">[q] </span>according to: <div class="eqnarray">
            <center class="math-display" >
@@ -5812,12 +5811,12 @@ q  =   --          4(cos([coefficients  ]2j) &minus; cos&omega; )2
                                                                                         
            " class="math-display" ></center>
            </div>
-           </li></ol>
+           </dd></dl>
       <!--l. 162--><p class="noindent" >else <span 
 class="cmtt-12">[floor0_order] </span>is even
-           <ol  class="enumerate2" >
-           <li 
-  class="enumerate" id="x1-94011x1">calculate <span 
+           <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+       b) </dt><dd 
+class="enumerate-enumitem">calculate <span 
 class="cmtt-12">[p] </span>and <span 
 class="cmtt-12">[q] </span>according to: <div class="eqnarray">
            <center class="math-display" >
@@ -5831,10 +5830,10 @@ q  =   (1-+-cos&omega;-)           4(cos([coefficients  ]2j) &minus; cos &omega;
             2         j=0
            " class="math-display" ></center>
            </div>
-           </li></ol>
-      </li>
-      <li 
-  class="enumerate" id="x1-94014x4">calculate <span 
+           </dd></dl>
+      </dd><dt class="enumerate-enumitem">
+   4. </dt><dd 
+class="enumerate-enumitem">calculate <span 
 class="cmtt-12">[linear_floor_value] </span>according to:
       <center class="math-display" >
       <img 
@@ -5843,58 +5842,58 @@ exp   .11512925   amplitude---&sdot; floor0_amplitute_&radic;offset---&minus;  f
                      (2floor0_amplitude_bits &minus; 1)  p + q
       " class="math-display" ></center>
       <!--l. 177--><p class="nopar" >
-      </li>
-      <li 
-  class="enumerate" id="x1-94016x5"><span 
+      </dd><dt class="enumerate-enumitem">
+   5. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[iteration_condition] </span>= map element <span 
 class="cmtt-12">[i]</span>
                                                                                         
 
                                                                                         
-      </li>
-      <li 
-  class="enumerate" id="x1-94018x6"><span 
+      </dd><dt class="enumerate-enumitem">
+   6. </dt><dd 
+class="enumerate-enumitem"><span 
 class="cmtt-12">[output] </span>element <span 
 class="cmtt-12">[i] </span>= <span 
 class="cmtt-12">[linear_floor_value]</span>
-      </li>
-      <li 
-  class="enumerate" id="x1-94020x7">increment <span 
+      </dd><dt class="enumerate-enumitem">
+   7. </dt><dd 
+class="enumerate-enumitem">increment <span 
 class="cmtt-12">[i]</span>
-      </li>
-      <li 
-  class="enumerate" id="x1-94022x8">if ( map element <span 
+      </dd><dt class="enumerate-enumitem">
+   8. </dt><dd 
+class="enumerate-enumitem">if ( map element <span 
 class="cmtt-12">[i] </span>is equal to <span 
 class="cmtt-12">[iteration_condition] </span>) continue at step
       5
-      </li>
-      <li 
-  class="enumerate" id="x1-94024x9">if ( <span 
+      </dd><dt class="enumerate-enumitem">
+   9. </dt><dd 
+class="enumerate-enumitem">if ( <span 
 class="cmtt-12">[i] </span>is less than <span 
 class="cmtt-12">[n] </span>) continue at step 2
-      </li>
-      <li 
-  class="enumerate" id="x1-94026x10">done</li></ol>
+      </dd><dt class="enumerate-enumitem">
+  10. </dt><dd 
+class="enumerate-enumitem">done</dd></dl>
                                                                                         
 
                                                                                         
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">7  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">7.  </span> <a 
  id="x1-950007"></a>Floor type 1 setup and decode</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">7.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">7.1.  </span> <a 
  id="x1-960007.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >Vorbis floor type one uses a piecewise straight-line representation to encode a spectral envelope
 curve. The representation plots this curve mechanically on a linear frequency axis and a
 logarithmic (dB) amplitude axis. The integer plotting algorithm used is similar to Bresenham&#8217;s
 algorithm.
 <!--l. 16--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">7.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">7.2.  </span> <a 
  id="x1-970007.2"></a>Floor 1 format</h4>
 <!--l. 18--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">7.2.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">7.2.1.  </span> <a 
  id="x1-980007.2.1"></a>model</h5>
 <!--l. 20--><p class="noindent" >Floor type one represents a spectral curve as a series of line segments. Synthesis constructs a
 floor curve using iterative prediction in a process roughly equivalent to the following simplified
@@ -5984,7 +5983,7 @@ decode, as described later. The actual algorithm splits Y value computation and 
 into two steps with modifications to the above algorithm to eliminate noise accumulation
 through integer roundoff/truncation.
 <!--l. 94--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">7.2.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">7.2.2.  </span> <a 
  id="x1-990007.2.2"></a>header decode</h5>
 <!--l. 96--><p class="noindent" >A list of floor X values is stored in the packet header in interleaved format (used in list order
 during packet decode and synthesis). This list is split into partitions, and each partition is
@@ -7293,7 +7292,7 @@ fit.
 <!--l. 247--><p class="noindent" >Although some aspects of the below algorithm look like inconsequential optimizations,
 implementors are warned to follow the details closely. Deviation from implementing a strictly
 equivalent algorithm can result in serious decoding errors.
-<!--l. 252--><p class="noindent" >
+<!--l. 253--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
 class="cmssbx-10x-x-120">step 1: amplitude value synthesis</span> </dt><dd 
@@ -8974,10 +8973,10 @@ class="cmtt-8">&#x00A0;</span>
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">8  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">8.  </span> <a 
  id="x1-1020008"></a>Residue setup and decode</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">8.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">8.1.  </span> <a 
  id="x1-1030008.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >A residue vector represents the fine detail of the audio spectrum of one channel in an audio frame
 after the encoder subtracts the floor curve and performs any channel coupling. A residue vector
@@ -8989,7 +8988,7 @@ bitstream packet, and then reconstructs the vectors during decode. Vorbis makes 
 different encoding variants (numbered 0, 1 and 2) of the same basic vector encoding
 abstraction.
 <!--l. 23--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">8.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">8.2.  </span> <a 
  id="x1-1040008.2"></a>Residue format</h4>
 <!--l. 25--><p class="noindent" >Residue format partitions each vector in the vector bundle into chunks, classifies each
 chunk, encodes the chunk classifications and finally encodes the chunks themselves
@@ -9051,7 +9050,7 @@ src="residue-pack.png" alt="PIC"
 class="content">illustration of residue vector format</span></div><!--tex4ht:label?: x1-10400111 -->
 </div>
 <!--l. 77--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">8.3  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">8.3.  </span> <a 
  id="x1-1050008.3"></a>residue 0</h4>
 <!--l. 79--><p class="noindent" >Residue 0 and 1 differ only in the way the values within a residue partition are interleaved during
 partition encoding (visually treated as a black box&#8211;or cyan box or brown box&#8211;in the above
@@ -9236,7 +9235,7 @@ class="cmtt-8">&#x00A0;</span>
 <!--l. 106--><p class="noindent" >It is worth mentioning at this point that no configurable value in the residue coding setup is
 restricted to a power of two.
 <!--l. 111--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">8.4  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">8.4.  </span> <a 
  id="x1-1060008.4"></a>residue 1</h4>
 <!--l. 113--><p class="noindent" >Residue 1 does not interleave VQ encoding. It represents partition vector scalars in order. As
 with residue 0, however, partition length must be an integer multiple of the codebook dimension,
@@ -9415,7 +9414,7 @@ class="cmtt-8">&#x00A0;</span>
                                                                                         
 </div>
 <!--l. 137--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">8.5  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">8.5.  </span> <a 
  id="x1-1070008.5"></a>residue 2</h4>
 <!--l. 139--><p class="noindent" >Residue type two can be thought of as a variant of residue type 1. Rather than encoding multiple
 passed-in vectors as in residue type 1, the <span 
@@ -9438,10 +9437,10 @@ src="residue2.png" alt="PIC"
 class="content">illustration of residue type 2</span></div><!--tex4ht:label?: x1-10700112 -->
 </div>
 <!--l. 153--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">8.6  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">8.6.  </span> <a 
  id="x1-1080008.6"></a>Residue decode</h4>
 <!--l. 155--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">8.6.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">8.6.1.  </span> <a 
  id="x1-1090008.6.1"></a>header decode</h5>
 <!--l. 157--><p class="noindent" >Header decode for all three residue types is identical.
 <div class="fancyvrb" id="fancyvrb35">
@@ -9960,7 +9959,7 @@ set up in this stream also renders the stream undecodable. All codebooks in arra
 [residue_books] without a value mapping (maptype equals zero) renders the stream
 undecodable.
 <!--l. 241--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">8.6.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">8.6.2.  </span> <a 
  id="x1-1100008.6.2"></a>packet decode</h5>
 <!--l. 243--><p class="noindent" >Format 0 and 1 packet decode is identical except for specific partition interleave. Format 2 packet
 decode can be built out of the format 1 decode process. Thus we describe first the decode
@@ -11208,7 +11207,7 @@ class="cmtt-8">&#x00A0;</span>
 <!--l. 344--><p class="noindent" >An end-of-packet condition during packet decode is to be considered a nominal occurrence.
 Decode returns the result of vector decode up to that point.
 <!--l. 350--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">8.6.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">8.6.3.  </span> <a 
  id="x1-1110008.6.3"></a>format 0 specifics</h5>
 <!--l. 352--><p class="noindent" >Format zero decodes partitions exactly as described earlier in the &#8217;Residue Format: residue 0&#8217;
 section. The following pseudocode presents the same algorithm. Assume:
@@ -11422,7 +11421,7 @@ class="cmtt-8">&#x00A0;</span>
                                                                                         
 </div>
 <!--l. 384--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">8.6.4  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">8.6.4.  </span> <a 
  id="x1-1120008.6.4"></a>format 1 specifics</h5>
 <!--l. 386--><p class="noindent" >Format 1 decodes partitions exactly as described earlier in the &#8217;Residue Format: residue 1&#8217;
 section. The following pseudocode presents the same algorithm. Assume:
@@ -11592,7 +11591,7 @@ class="cmtt-8">&#x00A0;7)</span><span
 class="cmtt-8">&#x00A0;done</span>
 </div>
 <!--l. 416--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">8.6.5  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">8.6.5.  </span> <a 
  id="x1-1130008.6.5"></a>format 2 specifics</h5>
 <!--l. 418--><p class="noindent" >Format 2 is reducible to format 1. It may be implemented as an additional step prior to and an
 additional post-decode step after a normal format 1 decode.
@@ -11605,33 +11604,33 @@ the vectors are decoded. We then request normal format 1 to decode a single vect
 representing all output channels, rather than a vector for each channel. After decode,
 deinterleave the vector into independent vectors, one for each output channel. That
 is:
-<!--l. 428--><p class="noindent" >
-      <ol  class="enumerate1" >
-      <li 
-  class="enumerate" id="x1-113002x1">If all vectors 0 through <span 
+<!--l. 429--><p class="noindent" >
+      <dl class="enumerate-enumitem"><dt class="enumerate-enumitem">
+   1. </dt><dd 
+class="enumerate-enumitem">If all vectors 0 through <span 
 class="cmti-12">ch</span>-1 are marked &#8217;do not decode&#8217;, allocate and clear a single
       vector <span 
 class="cmtt-12">[v]</span>of length <span 
 class="cmti-12">ch*n </span>and skip step 2 below; proceed directly to the post-decode
       step.
-      </li>
-      <li 
-  class="enumerate" id="x1-113004x2">Rather than performing format 1 decode to produce <span 
+      </dd><dt class="enumerate-enumitem">
+   2. </dt><dd 
+class="enumerate-enumitem">Rather than performing format 1 decode to produce <span 
 class="cmti-12">ch </span>vectors of length <span 
 class="cmti-12">n </span>each, call
       format 1 decode to produce a single vector <span 
 class="cmtt-12">[v] </span>of length <span 
 class="cmti-12">ch*n</span>.
-      </li>
-      <li 
-  class="enumerate" id="x1-113006x3">Post decode: Deinterleave the single vector <span 
+      </dd><dt class="enumerate-enumitem">
+   3. </dt><dd 
+class="enumerate-enumitem">Post decode: Deinterleave the single vector <span 
 class="cmtt-12">[v] </span>returned by format 1 decode as
       described above into <span 
 class="cmti-12">ch </span>independent vectors, one for each outputchannel, according
       to:
       <div class="fancyvrb" id="fancyvrb43">
 <a 
- id="x1-113008r1"></a><span 
+ id="x1-113005r1"></a><span 
 class="cmr-6">1</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -11647,12 +11646,12 @@ class="cmtt-8">&#x00A0;...</span><span
 class="cmtt-8">&#x00A0;[n]-1</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
- id="x1-113010r2"></a><span 
+ id="x1-113007r2"></a><span 
 class="cmr-6">2</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-113012r3"></a><span 
+ id="x1-113009r3"></a><span 
 class="cmr-6">3</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -11673,12 +11672,12 @@ class="cmtt-8">&#x00A0;...</span><span
 class="cmtt-8">&#x00A0;[ch]-1</span><span 
 class="cmtt-8">&#x00A0;{</span>
 <br class="fancyvrb" /><a 
- id="x1-113014r4"></a><span 
+ id="x1-113011r4"></a><span 
 class="cmr-6">4</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-113016r5"></a><span 
+ id="x1-113013r5"></a><span 
 class="cmr-6">5</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -11710,12 +11709,12 @@ class="cmtt-8">&#x00A0;[ch]</span><span
 class="cmtt-8">&#x00A0;+</span><span 
 class="cmtt-8">&#x00A0;[j])</span>
 <br class="fancyvrb" /><a 
- id="x1-113018r6"></a><span 
+ id="x1-113015r6"></a><span 
 class="cmr-6">6</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-113020r7"></a><span 
+ id="x1-113017r7"></a><span 
 class="cmr-6">7</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -11730,7 +11729,7 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;}</span>
 <br class="fancyvrb" /><a 
- id="x1-113022r8"></a><span 
+ id="x1-113019r8"></a><span 
 class="cmr-6">8</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -11740,12 +11739,12 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;}</span>
 <br class="fancyvrb" /><a 
- id="x1-113024r9"></a><span 
+ id="x1-113021r9"></a><span 
 class="cmr-6">9</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
 <br class="fancyvrb" /><a 
- id="x1-113026r10"></a><span 
+ id="x1-113023r10"></a><span 
 class="cmr-6">10</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
@@ -11753,26 +11752,26 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;4)</span><span 
 class="cmtt-8">&#x00A0;done</span>
 </div>
-      </li></ol>
+      </dd></dl>
                                                                                         
 
                                                                                         
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">9  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">9.  </span> <a 
  id="x1-1140009"></a>Helper equations</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">9.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">9.1.  </span> <a 
  id="x1-1150009.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >The equations below are used in multiple places by the Vorbis codec specification. Rather than
 cluttering up the main specification documents, they are defined here and referenced where
 appropriate.
 <!--l. 13--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">9.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">9.2.  </span> <a 
  id="x1-1160009.2"></a>Functions</h4>
 <!--l. 15--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">9.2.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">9.2.1.  </span> <a 
  id="x1-1170009.2.1"></a>ilog</h5>
 <!--l. 17--><p class="noindent" >The &#8221;ilog(x)&#8221; function returns the position number (1 through n) of the highest set bit in the
 two&#8217;s complement integer value <span 
@@ -11916,7 +11915,7 @@ class="cmtt-8">&#x00A0;done</span>
       </li>
       <li class="itemize">ilog(negative number) = 0;</li></ul>
 <!--l. 48--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">9.2.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">9.2.2.  </span> <a 
  id="x1-1180009.2.2"></a>float32_unpack</h5>
 <!--l. 50--><p class="noindent" >&#8221;float32_unpack(x)&#8221; is intended to translate the packed binary representation of a Vorbis
 codebook float value into the representation used by the decoder for floating point numbers. For
@@ -12014,7 +12013,7 @@ class="cmtt-8">&#x00A0;)</span>
 
                                                                                         
 <!--l. 66--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">9.2.3  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">9.2.3.  </span> <a 
  id="x1-1190009.2.3"></a>lookup1_values</h5>
 <!--l. 68--><p class="noindent" >&#8221;lookup1_values(codebook_entries,codebook_dimensions)&#8221; is used to compute the
 correct length of the value index for a codebook VQ lookup table of lookup type 1.
@@ -12028,7 +12027,7 @@ class="cmtt-12">[codebook_dimensions] </span>is less than or equal to
 <span 
 class="cmtt-12">[codebook_entries]</span>&#8217;.
 <!--l. 81--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">9.2.4  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">9.2.4.  </span> <a 
  id="x1-1200009.2.4"></a>low_neighbor</h5>
 <!--l. 83--><p class="noindent" >&#8221;low_neighbor(v,x)&#8221; finds the position <span 
 class="cmtt-12">n </span>in vector <span 
@@ -12042,7 +12041,7 @@ class="cmtt-12">[v] </span>element
 <span 
 class="cmtt-12">[x]</span>.
 <!--l. 88--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">9.2.5  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">9.2.5.  </span> <a 
  id="x1-1210009.2.5"></a>high_neighbor</h5>
 <!--l. 90--><p class="noindent" >&#8221;high_neighbor(v,x)&#8221; finds the position <span 
 class="cmtt-12">n </span>in vector [v] of the lowest value scalar element for
@@ -12055,7 +12054,7 @@ class="cmtt-12">[v] </span>element
 <span 
 class="cmtt-12">[x]</span>.
 <!--l. 97--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">9.2.6  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">9.2.6.  </span> <a 
  id="x1-1220009.2.6"></a>render_point</h5>
 <!--l. 99--><p class="noindent" >&#8221;render_point(x0,y0,x1,y1,X)&#8221; is used to find the Y value at point X along the line specified by
 x0, x1, y0 and y1. This function uses an integer algorithm to solve for the point directly without
@@ -12239,7 +12238,7 @@ class="cmtt-8">&#x00A0;9)</span><span
 class="cmtt-8">&#x00A0;done</span>
 </div>
 <!--l. 125--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">9.2.7  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">9.2.7.  </span> <a 
  id="x1-1230009.2.7"></a>render_line</h5>
 <!--l. 127--><p class="noindent" >Floor decode type one uses the integer line drawing algorithm of &#8221;render_line(x0, y0, x1, y1, v)&#8221;
 to construct an integer floor curve for contiguous piecewise line segments. Note that it has not
@@ -12705,10 +12704,10 @@ class="cmtt-8">&#x00A0;}</span>
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">10  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">10.  </span> <a 
  id="x1-12400010"></a>Tables</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">10.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">10.1.  </span> <a 
  id="x1-12500010.1"></a>floor1_inverse_dB_table</h4>
 <!--l. 8--><p class="noindent" >The vector <span 
 class="cmtt-12">[floor1_inverse_dB_table] </span>is a 256 element static lookup table consiting of the
@@ -13531,10 +13530,10 @@ class="cmtt-8">&#x00A0;1.</span>
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">A  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">A.  </span> <a 
  id="x1-126000A"></a>Embedding Vorbis into an Ogg stream</h3>
 <!--l. 6--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">A.1  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">A.1.  </span> <a 
  id="x1-127000A.1"></a>Overview</h4>
 <!--l. 8--><p class="noindent" >This document describes using Ogg logical and physical transport streams to encapsulate Vorbis
 compressed audio packet data into file form.
@@ -13549,7 +13548,7 @@ descriptions of Ogg transport streams. This specification document assumes a wor
 knowledge of the concepts covered in these named backround documents. Please read them
 first.
 <!--l. 22--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">A.1.1  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">A.1.1.  </span> <a 
  id="x1-128000A.1.1"></a>Restrictions</h5>
 <!--l. 24--><p class="noindent" >The Ogg/Vorbis I specification currently dictates that Ogg/Vorbis streams use Ogg transport
 streams in degenerate, unmultiplexed form only. That is:
@@ -13574,7 +13573,7 @@ implement Ogg support beyond the specific support of Vorbis within a degenrate O
 stream (naturally, application authors are encouraged to support full multiplexed Ogg
 handling).
 <!--l. 55--><p class="noindent" >
-<h5 class="subsubsectionHead"><span class="titlemark">A.1.2  </span> <a 
+<h5 class="subsubsectionHead"><span class="titlemark">A.1.2.  </span> <a 
  id="x1-129000A.1.2"></a>MIME type</h5>
 <!--l. 57--><p class="noindent" >The MIME type of Ogg files depend on the context. Specifically, complex multimedia and
 applications should use <span 
@@ -13586,7 +13585,7 @@ encapsulated Vorbis should use <span
 class="cmtt-12">audio/vorbis </span>+ <span 
 class="cmtt-12">audio/vorbis-config</span>.
 <!--l. 65--><p class="noindent" >
-<h4 class="subsectionHead"><span class="titlemark">A.2  </span> <a 
+<h4 class="subsectionHead"><span class="titlemark">A.2.  </span> <a 
  id="x1-130000A.2"></a>Encapsulation</h4>
 <!--l. 67--><p class="noindent" >Ogg encapsulation of a Vorbis packet stream is straightforward.
       <ul class="itemize1">
@@ -13670,7 +13669,7 @@ class="cmbx-12">Note:</span></span> Failure to do so should, at worst, cause a d
                                                                                         
 
                                                                                         
-<h3 class="sectionHead"><span class="titlemark">B  </span> <a 
+<h3 class="sectionHead"><span class="titlemark">B.  </span> <a 
  id="x1-132000B"></a>Vorbis encapsulation in RTP</h3>
 <!--l. 8--><p class="noindent" >Please consult RFC 5215 <span 
 class="cmti-12">&#8220;RTP Payload Format for Vorbis Encoded Audio&#8221; </span>for description of
@@ -13710,7 +13709,7 @@ class="E">E</span>X</span></span>.
                                                                                         
 <h3 class="likesectionHead"><a 
  id="x1-134000B"></a>References</h3>
-<!--l. 123--><p class="noindent" >
+<!--l. 124--><p class="noindent" >
      <div class="thebibliography">
      <p class="bibitem" ><span class="biblabel">
   [1]<span class="bibsp">&#x00A0;&#x00A0;&#x00A0;</span></span><a 

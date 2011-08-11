@@ -134,5 +134,6 @@ div.abstract {width:100%;}
 span.footnote-mark sup.textsuperscript, span.footnote-mark a sup.textsuperscript{ font-size:80%; }
 .figure img.graphics {margin-left:10%;}
 P.fancyvrb {white-space: nowrap; margin:0em;}
+dt.enumerate-enumitem{float:left; clear:left; margin-left:1em; margin-right:1em;}
 /* end css.sty */
 
