@@ -212,8 +212,8 @@ Similarly, the below calculation synthesizes the output LSP curve <varname>[outp
 	  <textobject role="tex"><phrase>
 	   <![CDATA[
            \begin{eqnarray*}
-             p & = & \frac{(1 - \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j+1} - \cos \omega)^2 \\
-             q & = & \frac{(1 + \cos^2\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2
+             p & = & \frac{(1 - \cos\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j+1} - \cos \omega)^2 \\
+             q & = & \frac{(1 + \cos\omega)}{2} \prod_{j=0}^{(\mathtt{order}-2)/2} 4 (\cos c_{2j} - \cos \omega)^2
            \end{eqnarray*}
 	   ]]>
           </phrase></textobject>
