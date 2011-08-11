@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
 <!-- html --> 
 <meta name="src" content="Vorbis_I_spec.tex"> 
-<meta name="date" content="2011-08-11 02:26:00"> 
+<meta name="date" content="2011-08-11 03:03:00"> 
 <link rel="stylesheet" type="text/css" href="Vorbis_I_spec.css"> 
 </head><body 
 >
@@ -5735,9 +5735,9 @@ class="cmtt-12">[coefficients] </span>is to to read a total of twelve scalars
  id="x1-940006.2.3"></a>curve computation</h5>
 <!--l. 106--><p class="noindent" >Given an <span 
 class="cmtt-12">[amplitude] </span>integer and <span 
-class="cmtt-12">[coefficients] </span>vector from packet decode as well
-as the [floor0&#x02D9;order], [floor0&#x02D9;rate], [floor0&#x02D9;bark&#x02D9;map&#x02D9;size], [floor0&#x02D9;amplitude&#x02D9;bits] and
-[floor0&#x02D9;amplitude&#x02D9;offset] values from floor setup, and an output vector size <span 
+class="cmtt-12">[coefficients] </span>vector from packet decode as well as
+the [floor0_order], [floor0_rate], [floor0_bark_map_size], [floor0_amplitude_bits] and
+[floor0_amplitude_offset] values from floor setup, and an output vector size <span 
 class="cmtt-12">[n] </span>specified by the
 decode process, we compute a floor output vector.
 <!--l. 113--><p class="noindent" >If the value <span 
@@ -5748,7 +5748,7 @@ synthesized:
 <center class="par-math-display" >
 <img 
 src="Vorbis_I_spec7x.png" alt="        {
-          min (floor0xbarkxmapxsize    &minus; 1,foobar )  for i &isin; [0,n &minus; 1 ]
+          min (floor0_bark_map_size    &minus; 1,foobar )  for i &isin; [0,n &minus; 1 ]
 mapi =    &minus; 1                                        for i = n
 " class="par-math-display" ></center>
 <!--l. 128--><p class="nopar" >
@@ -5756,8 +5756,8 @@ mapi =    &minus; 1                                        for i = n
 <center class="par-math-display" >
 <img 
 src="Vorbis_I_spec8x.png" alt="          &lfloor;                                                 &rfloor;
-                (floor0xrate   &sdot; i) floor0xbarkxmapxsize
-foobar =   bark  -------2n-------  &sdot;-bark(.5 &sdot; floor0xrate-)
+                (floor0_rate   &sdot; i) floor0_bark_map_size
+foobar =   bark  -------2n-------  &sdot;-bark(.5 &sdot; floor0_rate-)
 " class="par-math-display" ></center>
                                                                                         
 
@@ -5800,12 +5800,12 @@ class="cmtt-12">[p] </span>and <span
 class="cmtt-12">[q] </span>according to: <div class="eqnarray">
            <center class="math-display" >
            <img 
-src="Vorbis_I_spec10x.png" alt="                   floor0xorder&minus;3
+src="Vorbis_I_spec10x.png" alt="                   floor0_order&minus;3
                2      &prod;2                                       2
 p  =   (1 &minus; cos &omega;)           4(cos([coefficients  ]2j+1) &minus; cos&omega; )
-                      j=0
-         floor0x&prod;or2der&minus;1
-q  =   1-          4(cos([coefficients  ]2j) &minus; cos&omega; )2
+         floor0_order&minus;1   j=0
+       1 ----&prod;2----
+q  =   --          4(cos([coefficients  ]2j) &minus; cos&omega; )2
        4    j=0
                                                                                         
 
@@ -5822,13 +5822,13 @@ class="cmtt-12">[p] </span>and <span
 class="cmtt-12">[q] </span>according to: <div class="eqnarray">
            <center class="math-display" >
            <img 
-src="Vorbis_I_spec11x.png" alt="                   floor0xorder&minus;2
-       (1 &minus; cos&omega; )    &prod;2                                       2
-p  =   -----2-----           4(cos([coefficients   ]2j+1) &minus; cos&omega;)
+src="Vorbis_I_spec11x.png" alt="                   floor0_order&minus;2
+       (1-&minus;-cos&omega;-)    &prod;2                                       2
+p  =        2                4(cos([coefficients   ]2j+1) &minus; cos&omega;)
                       j=0
-                   floor0xo2rder&minus;-2
-q  =   (1-+-cos&omega;-)    &prod;      4(cos([coefficients  ]  ) &minus; cos &omega;)2
-            2         j=0                         2j
+                   floor0_&prod;o2rder&minus;-2
+q  =   (1-+-cos&omega;-)           4(cos([coefficients  ]2j) &minus; cos &omega;)2
+            2         j=0
            " class="math-display" ></center>
            </div>
            </li></ol>
@@ -5839,8 +5839,8 @@ class="cmtt-12">[linear_floor_value] </span>according to:
       <center class="math-display" >
       <img 
 src="Vorbis_I_spec12x.png" alt="    (           (                                                                      ))
-                 amplitude---&sdot; floor0xamplitutexoffset---
-exp   .11512925       (2floor0xamplitudexbits &minus; 1)&radic; p + q     &minus; floor0xamplitudexoffset
+exp   .11512925   amplitude---&sdot; floor0_amplitute_&radic;offset---&minus;  floor0_amplitude_offset
+                     (2floor0_amplitude_bits &minus; 1)  p + q
       " class="math-display" ></center>
       <!--l. 177--><p class="nopar" >
       </li>
