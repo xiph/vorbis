@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
 <!-- html --> 
 <meta name="src" content="Vorbis_I_spec.tex"> 
-<meta name="date" content="2011-08-11 12:59:00"> 
+<meta name="date" content="2012-01-20 02:49:00"> 
 <link rel="stylesheet" type="text/css" href="Vorbis_I_spec.css"> 
 </head><body 
 >
@@ -23,7 +23,7 @@
 <div class="author" ><span 
 class="cmr-17">Xiph.Org Foundation</span></div><br />
 <div class="date" ><span 
-class="cmr-17">August 11, 2011</span></div>
+class="cmr-17">January 20, 2012</span></div>
 </div>
 <h3 class="likesectionHead"><a 
  id="x1-1000"></a>Contents</h3>
@@ -6631,18 +6631,20 @@ setup renders a stream undecodable. In addition, a <span
 class="cmtt-12">[floor1_class_masterbooks] </span>or
 <span 
 class="cmtt-12">[floor1_subclass_books] </span>scalar element greater than the highest numbered codebook
-configured in this stream is an error condition that renders the stream undecodable. All vector
-[floor1_x_list] element values must be unique within the vector; a non-unique value renders the
-stream undecodable.
-<!--l. 167--><p class="noindent" ><span class="paragraphHead"><a 
- id="x1-1000007.2.2"></a><span 
-class="cmbx-12">packet decode</span></span>
+configured in this stream is an error condition that renders the stream undecodable. Vector
+[floor1_x_list] is limited to a maximum length of 65 elements; a setup indicating more than 65
+total elements (including elements 0 and 1 set prior to the read loop) renders the stream
+undecodable. All vector [floor1_x_list] element values must be unique within the vector; a
+non-unique value renders the stream undecodable.
                                                                                         
 
                                                                                         
+<!--l. 170--><p class="noindent" ><span class="paragraphHead"><a 
+ id="x1-1000007.2.2"></a><span 
+class="cmbx-12">packet decode</span></span>
 Packet decode begins by checking the <span 
 class="cmtt-12">[nonzero] </span>flag:
-<!--l. 171--><p class="noindent" >
+<!--l. 174--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb29">
 <a 
  id="x1-100002r1"></a><span 
@@ -6659,15 +6661,15 @@ class="cmtt-8">&#x00A0;bit</span><span
 class="cmtt-8">&#x00A0;as</span><span 
 class="cmtt-8">&#x00A0;boolean</span>
 </div>
-<!--l. 175--><p class="noindent" >If <span 
+<!--l. 178--><p class="noindent" >If <span 
 class="cmtt-12">[nonzero] </span>is unset, that indicates this channel contained no audio energy in this frame.
 Decode immediately returns a status indicating this floor curve (and thus this channel) is unused
 this frame. (A return status of &#8217;unused&#8217; is different from decoding a floor that has all
 points set to minimum representation amplitude, which happens to be approximately
 -140dB).
-<!--l. 183--><p class="noindent" >Assuming <span 
+<!--l. 186--><p class="noindent" >Assuming <span 
 class="cmtt-12">[nonzero] </span>is set, decode proceeds as follows:
-<!--l. 185--><p class="noindent" >
+<!--l. 188--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb30">
 <a 
  id="x1-100004r1"></a><span 
@@ -7270,17 +7272,17 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;20)</span><span 
 class="cmtt-8">&#x00A0;done</span>
-</div>
                                                                                         
 
                                                                                         
-<!--l. 226--><p class="noindent" >An end-of-packet condition during curve decode should be considered a nominal occurrence; if
+</div>
+<!--l. 229--><p class="noindent" >An end-of-packet condition during curve decode should be considered a nominal occurrence; if
 end-of-packet is reached during any read operation above, floor decode is to return &#8217;unused&#8217;
 status as if the <span 
 class="cmtt-12">[nonzero] </span>flag had been unset at the beginning of decode.
-<!--l. 232--><p class="noindent" >Vector <span 
+<!--l. 235--><p class="noindent" >Vector <span 
 class="cmtt-12">[floor1_Y] </span>contains the values from packet decode needed for floor 1 synthesis.
-<!--l. 237--><p class="noindent" ><span class="paragraphHead"><a 
+<!--l. 240--><p class="noindent" ><span class="paragraphHead"><a 
  id="x1-1010007.2.2"></a><span 
 class="cmbx-12">curve computation</span></span>
 Curve computation is split into two logical steps; the first step derives final Y amplitude values
@@ -7289,17 +7291,17 @@ plots the curve lines. Also, although zero-difference values are used in the ite
 prediction to find final Y values, these points are conditionally skipped during final
 line computation in step two. Skipping zero-difference values allows a smoother line
 fit.
-<!--l. 247--><p class="noindent" >Although some aspects of the below algorithm look like inconsequential optimizations,
+<!--l. 250--><p class="noindent" >Although some aspects of the below algorithm look like inconsequential optimizations,
 implementors are warned to follow the details closely. Deviation from implementing a strictly
 equivalent algorithm can result in serious decoding errors.
-<!--l. 253--><p class="noindent" >
+<!--l. 256--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
 class="cmssbx-10x-x-120">step 1: amplitude value synthesis</span> </dt><dd 
 class="description">
-      <!--l. 255--><p class="noindent" >Unwrap the always-positive-or-zero values read from the packet into +/- difference
+      <!--l. 258--><p class="noindent" >Unwrap the always-positive-or-zero values read from the packet into +/- difference
       values, then apply to line prediction.
-      <!--l. 258--><p class="noindent" >
+      <!--l. 261--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb31">
 <a 
  id="x1-101002r1"></a><span 
@@ -7659,6 +7661,9 @@ class="cmtt-8">&#x00A0;[lowroom]</span><span
 class="cmtt-8">&#x00A0;)</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmsy-8">{</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-101042r21"></a><span 
 class="cmr-6">21</span><span 
@@ -7686,9 +7691,6 @@ class="cmtt-8">&#x00A0;=</span><span
 class="cmtt-8">&#x00A0;[highroom]</span><span 
 class="cmtt-8">&#x00A0;*</span><span 
 class="cmtt-8">&#x00A0;2</span>
-                                                                                        
-
-                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-101046r23"></a><span 
 class="cmr-6">23</span><span 
@@ -8533,7 +8535,7 @@ class="cmtt-8">&#x00A0;</span>
 <span 
 class="cmssbx-10x-x-120">step 2: curve synthesis</span> </dt><dd 
 class="description">
-      <!--l. 338--><p class="noindent" >Curve synthesis generates a return vector <span 
+      <!--l. 341--><p class="noindent" >Curve synthesis generates a return vector <span 
 class="cmtt-12">[floor] </span>of length <span 
 class="cmtt-12">[n] </span>(where <span 
 class="cmtt-12">[n] </span>is provided by
@@ -8542,11 +8544,11 @@ class="cmtt-12">[n] </span>is provided by
 class="cmtt-12">[floor1_X_list]</span>, <span 
 class="cmtt-12">[floor1_final_Y] </span>and <span 
 class="cmtt-12">[floor1_step2_flag] </span>vectors, as well as
-      [floor1_multiplier] and [floor1_values] values.
                                                                                         
 
                                                                                         
-      <!--l. 345--><p class="noindent" >Decode begins by sorting the scalars from vectors <span 
+      [floor1_multiplier] and [floor1_values] values.
+      <!--l. 348--><p class="noindent" >Decode begins by sorting the scalars from vectors <span 
 class="cmtt-12">[floor1_X_list]</span>, <span 
 class="cmtt-12">[floor1_final_Y] </span>and
       <span 
@@ -8560,8 +8562,8 @@ class="cmtt-12">[floor1_X_list]</span>. That is, sort the values of <span
 class="cmtt-12">[floor1_X_list] </span>and then apply the same
       permutation to elements of the other two vectors so that the X, Y and step2_flag values
       still match.
-      <!--l. 355--><p class="noindent" >Then compute the final curve in one pass:
-      <!--l. 357--><p class="noindent" >
+      <!--l. 358--><p class="noindent" >Then compute the final curve in one pass:
+      <!--l. 360--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb32">
 <a 
  id="x1-101148r1"></a><span 
