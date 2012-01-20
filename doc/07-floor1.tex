@@ -160,9 +160,12 @@ configuration during setup renders a stream undecodable.  In addition,
 a \varname{[floor1\_class\_masterbooks]} or
 \varname{[floor1\_subclass\_books]} scalar element greater than the
 highest numbered codebook configured in this stream is an error
-condition that renders the stream undecodable.  All vector
-[floor1\_x\_list] element values must be unique within the vector; a
-non-unique value renders the stream undecodable.
+condition that renders the stream undecodable.  Vector
+[floor1\_x\_list] is limited to a maximum length of 65 elements; a
+setup indicating more than 65 total elements (including elements 0 and
+1 set prior to the read loop) renders the stream undecodable.  All
+vector [floor1\_x\_list] element values must be unique within the
+vector; a non-unique value renders the stream undecodable.
 
 \paragraph{packet decode} \label{vorbis:spec:floor1-decode}
 
