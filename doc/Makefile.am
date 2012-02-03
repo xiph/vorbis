@@ -44,7 +44,6 @@ SPEC_PNG = \
 	hufftree-under.png \
 	residue-pack.png \
 	residue2.png \
-	white-xifish.png \
 	window1.png \
 	window2.png
 SPEC_PDF = xifish.pdf
