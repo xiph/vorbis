@@ -252,6 +252,16 @@ optimizations, implementors are warned to follow the details closely.
 Deviation from implementing a strictly equivalent algorithm can result
 in serious decoding errors.
 
+{\em Additional note:} Although predicted values in the prediction
+loop and at the end of step 1 (that is, the values in vector
+\varname{[floor1\_final\_Y]} are inherently limited by the prediction
+algorithm to \[0, \varname{[range]}\), it is possible to abuse the
+setup and codebook machinery to produce negative or over-range
+results.  We suggest that decoder implementations guard the values in
+vector \varname{[floor1\_final\_Y]} by clamping each element to \[0,
+\varname{[range]}\) after step 1.  Variants of this suggestion are
+acceptable as valid floor1 setups cannot produce out of range values.
+
 \begin{description}
 \item[step 1: amplitude value synthesis]
 
@@ -307,7 +317,7 @@ Unwrap the always-positive-or-zero values read from the packet into
 
                 \} else [val] is less than [room] \{
 
-		  24) if ([val] is odd) \{
+                    24) if ([val] is odd) \{
 
                         25) vector [floor1\_final\_Y] element [i] =
                             [predicted] - (([val] + 1) divided by  2 using integer division)
