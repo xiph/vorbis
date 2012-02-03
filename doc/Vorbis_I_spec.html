@@ -7,7 +7,7 @@
 <meta name="originator" content="TeX4ht (http://www.cse.ohio-state.edu/~gurari/TeX4ht/)"> 
 <!-- html --> 
 <meta name="src" content="Vorbis_I_spec.tex"> 
-<meta name="date" content="2012-01-20 02:49:00"> 
+<meta name="date" content="2012-02-03 14:55:00"> 
 <link rel="stylesheet" type="text/css" href="Vorbis_I_spec.css"> 
 </head><body 
 >
@@ -23,7 +23,7 @@
 <div class="author" ><span 
 class="cmr-17">Xiph.Org Foundation</span></div><br />
 <div class="date" ><span 
-class="cmr-17">January 20, 2012</span></div>
+class="cmr-17">February 3, 2012</span></div>
 </div>
 <h3 class="likesectionHead"><a 
  id="x1-1000"></a>Contents</h3>
@@ -172,11 +172,15 @@ href="#x1-970007.2" id="QQ2-1-103">Floor 1 format</a></span>
 href="#x1-980007.2.1" id="QQ2-1-104">model</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >7.2.2 <a 
 href="#x1-990007.2.2" id="QQ2-1-109">header decode</a></span>
-<br />&#x00A0;<span class="sectionToc" >8 <a 
-href="#x1-1020008" id="QQ2-1-112">Residue setup and decode</a></span>
+<br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >7.2.3 <a 
+href="#x1-1000007.2.3" id="QQ2-1-110">packet decode</a></span>
                                                                                         
 
                                                                                         
+<br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >7.2.4 <a 
+href="#x1-1010007.2.4" id="QQ2-1-111">curve computation</a></span>
+<br />&#x00A0;<span class="sectionToc" >8 <a 
+href="#x1-1020008" id="QQ2-1-112">Residue setup and decode</a></span>
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >8.1 <a 
 href="#x1-1030008.1" id="QQ2-1-113">Overview</a></span>
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >8.2 <a 
@@ -231,13 +235,13 @@ href="#x1-127000A.1" id="QQ2-1-139">Overview</a></span>
 href="#x1-128000A.1.1" id="QQ2-1-140">Restrictions</a></span>
 <br />&#x00A0;&#x00A0;&#x00A0;<span class="subsubsectionToc" >A.1.2 <a 
 href="#x1-129000A.1.2" id="QQ2-1-141">MIME type</a></span>
+                                                                                        
+
+                                                                                        
 <br />&#x00A0;&#x00A0;<span class="subsectionToc" >A.2 <a 
 href="#x1-130000A.2" id="QQ2-1-142">Encapsulation</a></span>
 <br />&#x00A0;<span class="sectionToc" >B <a 
 href="#x1-132000B" id="QQ2-1-144">Vorbis encapsulation in RTP</a></span>
-                                                                                        
-
-                                                                                        
 </div>
                                                                                         
 
@@ -4456,8 +4460,8 @@ href="#x1-930006.2.2">packet decode<!--tex4ht:ref: vorbis:spec:floor0-decode -->
 class="enumerate-enumitem">if the type of this floor is one then decode the floor for channel <span 
 class="cmtt-12">[i] </span>according to the
       <a 
-href="#x1-1000007.2.2">paragraph&#x00A0;7.2.2</a>, &#8220;<a 
-href="#x1-1000007.2.2">packet decode<!--tex4ht:ref: vorbis:spec:floor1-decode --></a>&#8221;
+href="#x1-1000007.2.3">subsubsection&#x00A0;7.2.3</a>, &#8220;<a 
+href="#x1-1000007.2.3">packet decode<!--tex4ht:ref: vorbis:spec:floor1-decode --></a>&#8221;
       </dd><dt class="enumerate-enumitem">
    5. </dt><dd 
 class="enumerate-enumitem">save the needed decoded floor information for channel for later synthesis
@@ -6639,10 +6643,10 @@ non-unique value renders the stream undecodable.
                                                                                         
 
                                                                                         
-<!--l. 170--><p class="noindent" ><span class="paragraphHead"><a 
- id="x1-1000007.2.2"></a><span 
-class="cmbx-12">packet decode</span></span>
-Packet decode begins by checking the <span 
+<!--l. 170--><p class="noindent" >
+<h5 class="subsubsectionHead"><span class="titlemark">7.2.3.  </span> <a 
+ id="x1-1000007.2.3"></a>packet decode</h5>
+<!--l. 172--><p class="noindent" >Packet decode begins by checking the <span 
 class="cmtt-12">[nonzero] </span>flag:
 <!--l. 174--><p class="noindent" >
 <div class="fancyvrb" id="fancyvrb29">
@@ -7244,6 +7248,9 @@ class="cmtt-8">&#x00A0;=</span><span
 class="cmtt-8">&#x00A0;[offset]</span><span 
 class="cmtt-8">&#x00A0;+</span><span 
 class="cmtt-8">&#x00A0;[cdim]</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-100072r35"></a><span 
 class="cmr-6">35</span><span 
@@ -7272,9 +7279,6 @@ class="cmtt-8">&#x00A0;</span><span
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;20)</span><span 
 class="cmtt-8">&#x00A0;done</span>
-                                                                                        
-
-                                                                                        
 </div>
 <!--l. 229--><p class="noindent" >An end-of-packet condition during curve decode should be considered a nominal occurrence; if
 end-of-packet is reached during any read operation above, floor decode is to return &#8217;unused&#8217;
@@ -7282,10 +7286,10 @@ status as if the <span
 class="cmtt-12">[nonzero] </span>flag had been unset at the beginning of decode.
 <!--l. 235--><p class="noindent" >Vector <span 
 class="cmtt-12">[floor1_Y] </span>contains the values from packet decode needed for floor 1 synthesis.
-<!--l. 240--><p class="noindent" ><span class="paragraphHead"><a 
- id="x1-1010007.2.2"></a><span 
-class="cmbx-12">curve computation</span></span>
-Curve computation is split into two logical steps; the first step derives final Y amplitude values
+<!--l. 240--><p class="noindent" >
+<h5 class="subsubsectionHead"><span class="titlemark">7.2.4.  </span> <a 
+ id="x1-1010007.2.4"></a>curve computation</h5>
+<!--l. 242--><p class="noindent" >Curve computation is split into two logical steps; the first step derives final Y amplitude values
 from the encoded, wrapped difference values taken from the bitstream. The second step
 plots the curve lines. Also, although zero-difference values are used in the iterative
 prediction to find final Y values, these points are conditionally skipped during final
@@ -7294,15 +7298,29 @@ fit.
 <!--l. 250--><p class="noindent" >Although some aspects of the below algorithm look like inconsequential optimizations,
 implementors are warned to follow the details closely. Deviation from implementing a strictly
 equivalent algorithm can result in serious decoding errors.
-<!--l. 256--><p class="noindent" >
+<!--l. 255--><p class="noindent" ><span 
+class="cmti-12">Additional note: </span>Although <span 
+class="cmtt-12">[floor1_final_Y] </span>values in the prediction loop and at the end of
+step 1 are inherently limited by the prediction algorithm to [0, <span 
+class="cmtt-12">[range]</span>), it is possible to abuse
+the setup and codebook machinery to produce negative or over-range results. We suggest that
+decoder implementations guard the values in vector <span 
+class="cmtt-12">[floor1_final_Y] </span>by clamping each
+element to [0, <span 
+class="cmtt-12">[range]</span>) after step 1. Variants of this suggestion are acceptable as valid floor1
+setups cannot produce out of range values.
+<!--l. 266--><p class="noindent" >
       <dl class="description"><dt class="description">
 <span 
 class="cmssbx-10x-x-120">step 1: amplitude value synthesis</span> </dt><dd 
 class="description">
-      <!--l. 258--><p class="noindent" >Unwrap the always-positive-or-zero values read from the packet into +/- difference
+      <!--l. 268--><p class="noindent" >Unwrap the always-positive-or-zero values read from the packet into +/- difference
       values, then apply to line prediction.
-      <!--l. 261--><p class="noindent" >
+      <!--l. 271--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb31">
+                                                                                        
+
+                                                                                        
 <a 
  id="x1-101002r1"></a><span 
 class="cmr-6">1</span><span 
@@ -7661,9 +7679,6 @@ class="cmtt-8">&#x00A0;[lowroom]</span><span
 class="cmtt-8">&#x00A0;)</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmsy-8">{</span>
-                                                                                        
-
-                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-101042r21"></a><span 
 class="cmr-6">21</span><span 
@@ -8128,7 +8143,25 @@ class="cmtt-8">&#x00A0;</span>
  id="x1-101098r49"></a><span 
 class="cmr-6">49</span><span 
 class="cmtt-8">&#x00A0;</span><span 
-class="cmtt-8">&#x00A0;        </span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
+class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;24)</span><span 
 class="cmtt-8">&#x00A0;if</span><span 
@@ -8453,6 +8486,9 @@ class="cmtt-8">&#x00A0;element</span><span
 class="cmtt-8">&#x00A0;[i]</span><span 
 class="cmtt-8">&#x00A0;=</span><span 
 class="cmtt-8">&#x00A0;unset</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-101132r66"></a><span 
 class="cmr-6">66</span><span 
@@ -8535,7 +8571,7 @@ class="cmtt-8">&#x00A0;</span>
 <span 
 class="cmssbx-10x-x-120">step 2: curve synthesis</span> </dt><dd 
 class="description">
-      <!--l. 341--><p class="noindent" >Curve synthesis generates a return vector <span 
+      <!--l. 351--><p class="noindent" >Curve synthesis generates a return vector <span 
 class="cmtt-12">[floor] </span>of length <span 
 class="cmtt-12">[n] </span>(where <span 
 class="cmtt-12">[n] </span>is provided by
@@ -8544,11 +8580,8 @@ class="cmtt-12">[n] </span>is provided by
 class="cmtt-12">[floor1_X_list]</span>, <span 
 class="cmtt-12">[floor1_final_Y] </span>and <span 
 class="cmtt-12">[floor1_step2_flag] </span>vectors, as well as
-                                                                                        
-
-                                                                                        
       [floor1_multiplier] and [floor1_values] values.
-      <!--l. 348--><p class="noindent" >Decode begins by sorting the scalars from vectors <span 
+      <!--l. 358--><p class="noindent" >Decode begins by sorting the scalars from vectors <span 
 class="cmtt-12">[floor1_X_list]</span>, <span 
 class="cmtt-12">[floor1_final_Y] </span>and
       <span 
@@ -8562,8 +8595,8 @@ class="cmtt-12">[floor1_X_list]</span>. That is, sort the values of <span
 class="cmtt-12">[floor1_X_list] </span>and then apply the same
       permutation to elements of the other two vectors so that the X, Y and step2_flag values
       still match.
-      <!--l. 358--><p class="noindent" >Then compute the final curve in one pass:
-      <!--l. 360--><p class="noindent" >
+      <!--l. 368--><p class="noindent" >Then compute the final curve in one pass:
+      <!--l. 370--><p class="noindent" >
       <div class="fancyvrb" id="fancyvrb32">
 <a 
  id="x1-101148r1"></a><span 
@@ -8913,6 +8946,9 @@ class="cmsy-8">}</span>
 class="cmr-6">27</span><span 
 class="cmtt-8">&#x00A0;</span><span 
 class="cmtt-8">&#x00A0;</span>
+                                                                                        
+
+                                                                                        
 <br class="fancyvrb" /><a 
  id="x1-101202r28"></a><span 
 class="cmr-6">28</span><span 

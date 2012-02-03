@@ -167,7 +167,7 @@ setup indicating more than 65 total elements (including elements 0 and
 vector [floor1\_x\_list] element values must be unique within the
 vector; a non-unique value renders the stream undecodable.
 
-\paragraph{packet decode} \label{vorbis:spec:floor1-decode}
+\subsubsection{packet decode} \label{vorbis:spec:floor1-decode}
 
 Packet decode begins by checking the \varname{[nonzero]} flag:
 
@@ -237,7 +237,7 @@ needed for floor 1 synthesis.
 
 
 
-\paragraph{curve computation} \label{vorbis:spec:floor1-synth}
+\subsubsection{curve computation} \label{vorbis:spec:floor1-synth}
 
 Curve computation is split into two logical steps; the first step
 derives final Y amplitude values from the encoded, wrapped difference
@@ -252,15 +252,15 @@ optimizations, implementors are warned to follow the details closely.
 Deviation from implementing a strictly equivalent algorithm can result
 in serious decoding errors.
 
-{\em Additional note:} Although predicted values in the prediction
-loop and at the end of step 1 (that is, the values in vector
-\varname{[floor1\_final\_Y]} are inherently limited by the prediction
-algorithm to \[0, \varname{[range]}\), it is possible to abuse the
-setup and codebook machinery to produce negative or over-range
-results.  We suggest that decoder implementations guard the values in
-vector \varname{[floor1\_final\_Y]} by clamping each element to \[0,
-\varname{[range]}\) after step 1.  Variants of this suggestion are
-acceptable as valid floor1 setups cannot produce out of range values.
+{\em Additional note:} Although \varname{[floor1\_final\_Y]} values in
+the prediction loop and at the end of step 1 are inherently limited by
+the prediction algorithm to [0, \varname{[range]}), it is possible to
+  abuse the setup and codebook machinery to produce negative or
+  over-range results.  We suggest that decoder implementations guard
+  the values in vector \varname{[floor1\_final\_Y]} by clamping each
+  element to [0, \varname{[range]}) after step 1.  Variants of this
+    suggestion are acceptable as valid floor1 setups cannot produce
+    out of range values.
 
 \begin{description}
 \item[step 1: amplitude value synthesis]
