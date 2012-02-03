@@ -1,3 +1,14 @@
+libvorbis 1.3.3 (2012-02-03) -- "Xiph.Org libVorbis I 20120203 (Omnipresent)"
+
+* vorbis: additional proofing against invalid/malicious 
+  streams in decode (see SVN for details).  
+* vorbis: fix a memory leak in vorbis_commentheader_out().
+* updates, corrections and clarifications in the Vorbis I specification 
+  document
+* win32: fixed project configuration which referenced two CRT versions 
+  in output binaries.
+* build warning fixes
+
 libvorbis 1.3.2 (2010-11-01) -- "Xiph.Org libVorbis I 20101101 (Schaufenugget)"
 
  * vorbis: additional proofing against invalid/malicious 
