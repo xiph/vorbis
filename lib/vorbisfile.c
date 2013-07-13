@@ -1055,7 +1055,11 @@ int ov_halfrate_p(OggVorbis_File *vf){
 /* Only partially open the vorbis file; test for Vorbisness, and load
    the headers for the first chain.  Do not seek (although test for
    seekability).  Use ov_test_open to finish opening the file, else
-   ov_clear to close/free it. Same return codes as open. */
+   ov_clear to close/free it. Same return codes as open.
+
+   Note that vorbisfile does _not_ take ownership of the file if the
+   call fails; the calling applicaiton is responsible for closing the file
+   if this call returns an error. */
 
 int ov_test_callbacks(void *f,OggVorbis_File *vf,
     const char *initial,long ibytes,ov_callbacks callbacks)
