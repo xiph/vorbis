@@ -135,9 +135,11 @@ static __inline int vorbis_ftoi(double f){
 }
 
 static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
+  (void)fpu;
 }
 
 static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
+  (void)fpu;
 }
 
 #endif /* Special MSVC 32 bit implementation */
@@ -156,9 +158,11 @@ static __inline int vorbis_ftoi(double f){
 }
 
 static __inline void vorbis_fpu_setround(vorbis_fpu_control *fpu){
+  (void)fpu;
 }
 
 static __inline void vorbis_fpu_restore(vorbis_fpu_control fpu){
+  (void)fpu;
 }
 
 #endif /* Special MSVC x64 implementation */

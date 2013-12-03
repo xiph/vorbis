@@ -203,6 +203,8 @@ static vorbis_look_floor *floor1_look(vorbis_dsp_state *vd,
   vorbis_look_floor1 *look=_ogg_calloc(1,sizeof(*look));
   int i,j,n=0;
 
+  (void)vd;
+
   look->vi=info;
   look->n=info->postlist[1];
 

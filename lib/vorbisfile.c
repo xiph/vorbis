@@ -2058,14 +2058,14 @@ long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int length,
   }
 }
 
-extern float *vorbis_window(vorbis_dsp_state *v,int W);
+extern const float *vorbis_window(vorbis_dsp_state *v,int W);
 
 static void _ov_splice(float **pcm,float **lappcm,
                        int n1, int n2,
                        int ch1, int ch2,
-                       float *w1, float *w2){
+                       const float *w1, const float *w2){
   int i,j;
-  float *w=w1;
+  const float *w=w1;
   int n=n1;
 
   if(n1>n2){
@@ -2173,7 +2173,7 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
   vorbis_info *vi1,*vi2;
   float **lappcm;
   float **pcm;
-  float *w1,*w2;
+  const float *w1,*w2;
   int n1,n2,i,ret,hs1,hs2;
 
   if(vf1==vf2)return(0); /* degenerate case */
@@ -2227,7 +2227,7 @@ static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
   vorbis_info *vi;
   float **lappcm;
   float **pcm;
-  float *w1,*w2;
+  const float *w1,*w2;
   int n1,n2,ch1,ch2,hs;
   int i,ret;
 
@@ -2288,7 +2288,7 @@ static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
   vorbis_info *vi;
   float **lappcm;
   float **pcm;
-  float *w1,*w2;
+  const float *w1,*w2;
   int n1,n2,ch1,ch2,hs;
   int i,ret;
 
