@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2001             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2014             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
     
     /* first, the static vectors, then the book structure to tie it together. */
     /* lengthlist */
-    fprintf(file,"static const long _huff_lengthlist_%s[] = {\n",base);
+    fprintf(file,"static const char _huff_lengthlist_%s[] = {\n",base);
     for(j=0;j<vals;){
       fprintf(file,"\t");
       for(k=0;k<16 && j<vals;k++,j++)
@@ -174,7 +174,7 @@ int main(int argc, char *argv[]){
     /* the toplevel book */
     fprintf(file,"static const static_codebook _huff_book_%s = {\n",base);
     fprintf(file,"\t%d, %ld,\n",subn,vals);
-    fprintf(file,"\t(long *)_huff_lengthlist_%s,\n",base);
+    fprintf(file,"\t(char *)_huff_lengthlist_%s,\n",base);
     fprintf(file,"\t0, 0, 0, 0, 0,\n");
     fprintf(file,"\tNULL,\n");
 

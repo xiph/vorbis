@@ -5,7 +5,7 @@ dnl Initialization and Versioning
 dnl ------------------------------------------------
 
 
-AC_INIT([libvorbis],[1.3.3],[vorbis-dev@xiph.org])
+AC_INIT([libvorbis],[1.3.4],[vorbis-dev@xiph.org])
 
 AC_CONFIG_SRCDIR([lib/mdct.c])
 
@@ -24,15 +24,15 @@ dnl - interfaces added -> increment AGE
 dnl - interfaces removed -> AGE = 0
 
 V_LIB_CURRENT=4
-V_LIB_REVISION=6
+V_LIB_REVISION=7
 V_LIB_AGE=4
 
 VF_LIB_CURRENT=6
-VF_LIB_REVISION=5
+VF_LIB_REVISION=6
 VF_LIB_AGE=3
 
 VE_LIB_CURRENT=2
-VE_LIB_REVISION=9
+VE_LIB_REVISION=10
 VE_LIB_AGE=0
 
 AC_SUBST(V_LIB_CURRENT)

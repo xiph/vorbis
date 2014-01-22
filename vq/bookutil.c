@@ -5,7 +5,7 @@
  * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
  * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2010             *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2014             *
  * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
@@ -451,7 +451,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
   }
 
   /* lengthlist */
-  fprintf(out,"static const long _vq_lengthlist_%s[] = {\n",name);
+  fprintf(out,"static const char _vq_lengthlist_%s[] = {\n",name);
   for(j=0;j<c->entries;){
     fprintf(out,"\t");
     for(k=0;k<16 && j<c->entries;k++,j++)
@@ -465,7 +465,7 @@ void write_codebook(FILE *out,char *name,const static_codebook *c){
   fprintf(out,"static const static_codebook %s = {\n",name);
   
   fprintf(out,"\t%ld, %ld,\n",c->dim,c->entries);
-  fprintf(out,"\t(long *)_vq_lengthlist_%s,\n",name);
+  fprintf(out,"\t(char *)_vq_lengthlist_%s,\n",name);
   fprintf(out,"\t%d, %ld, %ld, %d, %d,\n",
           c->maptype,c->q_min,c->q_delta,c->q_quant,c->q_sequencep);
   if(c->quantlist)
