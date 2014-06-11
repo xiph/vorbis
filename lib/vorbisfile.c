@@ -1421,22 +1421,28 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
     if(pos>=total)break;
   }
 
-  /* search within the logical bitstream for the page with the highest
-     pcm_pos preceding (or equal to) pos.  There is a danger here;
-     missing pages or incorrect frame number information in the
-     bitstream could make our task impossible.  Account for that (it
-     would be an error condition) */
+  /* Search within the logical bitstream for the page with the highest
+     pcm_pos preceding pos.  If we're looking for a position on the
+     first page, bisection will halt without finding our position as
+     it's before the first explicit granulepos fencepost. That case is
+     handled separately below.
 
-  /* new search algorithm by HB (Nicholas Vinen) */
+     There is a danger here; missing pages or incorrect frame number
+     information in the bitstream could make our task impossible.
+     Account for that (it would be an error condition) */
+
+  /* new search algorithm originally by HB (Nicholas Vinen) */
+
   {
     ogg_int64_t end=vf->offsets[link+1];
-    ogg_int64_t begin=vf->offsets[link];
+    ogg_int64_t begin=vf->dataoffsets[link];
     ogg_int64_t begintime = vf->pcmlengths[link*2];
     ogg_int64_t endtime = vf->pcmlengths[link*2+1]+begintime;
     ogg_int64_t target=pos-total+begintime;
-    ogg_int64_t best=begin;
+    ogg_int64_t best=-1;
 
     ogg_page og;
+    /* bisection loop */
     while(begin<end){
       ogg_int64_t bisect;
 
@@ -1451,51 +1457,82 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
           bisect=begin;
       }
 
+      /* only seek if the file position isn't already there */
       if(bisect!=vf->offset){
         result=_seek_helper(vf,bisect);
         if(result) goto seek_error;
       }
 
+      /* read loop within the bisection loop */
       while(begin<end){
         result=_get_next_page(vf,&og,end-vf->offset);
         if(result==OV_EREAD) goto seek_error;
         if(result<0){
+          /* there is no next page! */
           if(bisect<=begin+1)
-            end=begin; /* found it */
+              /* No bisection left to perform.  We've either found the
+                 best candidate already or failed. Exit loop. */
+            end=begin;
           else{
+            /* We tried to load a fraction of the last page; back up a
+               bit and try to get the whole last page */
             if(bisect==0) goto seek_error;
             bisect-=CHUNKSIZE;
+
+            /* don't repeat/loop on a read we've already performed */
             if(bisect<=begin)bisect=begin+1;
+
+            /* seek and cntinue bisection */
             result=_seek_helper(vf,bisect);
             if(result) goto seek_error;
           }
         }else{
           ogg_int64_t granulepos;
 
+          /* got a page. analyze it */
+          /* only consider pages from primary vorbis stream */
           if(ogg_page_serialno(&og)!=vf->serialnos[link])
             continue;
 
+          /* only consider pages with the granulepos set */
           granulepos=ogg_page_granulepos(&og);
           if(granulepos==-1)continue;
 
           if(granulepos<target){
+            /* this page is a successful candidate! Set state */
+
             best=result;  /* raw offset of packet with granulepos */
             begin=vf->offset; /* raw offset of next page */
             begintime=granulepos;
 
+            /* if we're before our target but within a short distance,
+               don't bisect; read forward */
             if(target-begintime>44100)break;
-            bisect=begin; /* *not* begin + 1 */
+
+            bisect=begin; /* *not* begin + 1 as above */
           }else{
-            if(bisect<=begin+1)
-              end=begin;  /* found it */
-            else{
-              if(end==vf->offset){ /* we're pretty close - we'd be stuck in */
+
+            /* This is one of our pages, but the granpos is
+               post-target; it is not a bisection return
+               candidate. (The only way we'd use it is if it's the
+               first page in the stream; we handle that case later
+               outside the bisection) */
+            if(bisect<=begin+1){
+              /* No bisection left to perform.  We've either found the
+                 best candidate already or failed. Exit loop. */
+              end=begin;
+            }else{
+              if(end==vf->offset){
+                /* bisection read to the end; use the known page
+                   boundary (result) to update bisection, back up a
+                   little bit, and try again */
                 end=result;
-                bisect-=CHUNKSIZE; /* an endless loop otherwise. */
+                bisect-=CHUNKSIZE;
                 if(bisect<=begin)bisect=begin+1;
                 result=_seek_helper(vf,bisect);
                 if(result) goto seek_error;
               }else{
+                /* Normal bisection */
                 end=bisect;
                 endtime=granulepos;
                 break;
@@ -1506,9 +1543,46 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
       }
     }
 
-    /* found our page. seek to it, update pcm offset. Easier case than
-       raw_seek, don't keep packets preceding granulepos. */
-    {
+    /* Out of bisection: did it 'fail?' */
+    if(best == -1){
+
+      /* Check the 'looking for data in first page' special case;
+         bisection would 'fail' because our search target was before the
+         first PCM granule position fencepost. */
+
+      if(begin == vf->dataoffsets[link] &&
+         ogg_page_serialno(&og)==vf->serialnos[link]){
+
+        /* Yes, this is the beginning-of-stream case. We already have
+           our page, right at the beginning of PCM data.  Set state
+           and return. */
+
+        vf->offset=result;
+        vf->pcm_offset=total;
+
+        if(link!=vf->current_link){
+          /* Different link; dump entire decode machine */
+          _decode_clear(vf);
+
+          vf->current_link=link;
+          vf->current_serialno=vf->serialnos[link];
+          vf->ready_state=STREAMSET;
+
+        }else{
+          vorbis_synthesis_restart(&vf->vd);
+        }
+
+        ogg_stream_reset_serialno(&vf->os,vf->current_serialno);
+        ogg_stream_pagein(&vf->os,&og);
+
+      }else
+        goto seek_error;
+
+    }else{
+
+      /* Bisection found our page. seek to it, update pcm offset. Easier case than
+         raw_seek, don't keep packets preceding granulepos. */
+
       ogg_page og;
       ogg_packet op;
 
@@ -1538,15 +1612,19 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
       while(1){
         result=ogg_stream_packetpeek(&vf->os,&op);
         if(result==0){
-          /* !!! the packet finishing this page originated on a
-             preceding page. Keep fetching previous pages until we
-             get one with a granulepos or without the 'continued' flag
-             set.  Then just use raw_seek for simplicity. */
+          /* No packet returned; we exited the bisection with 'best'
+             pointing to a page with a granule position, so the packet
+             finishing this page ('best') originated on a preceding
+             page. Keep fetching previous pages until we get one with
+             a granulepos or without the 'continued' flag set.  Then
+             just use raw_seek for simplicity. */
 
           result=_seek_helper(vf,best);
           if(result<0) goto seek_error;
 
-          while(1){
+          /* Do not rewind past the beginning of link data; if we do,
+             it's either a bug or a broken stream */
+          while(result>vf->dataoffsets[link]){
             result=_get_prev_page(vf,&og);
             if(result<0) goto seek_error;
             if(ogg_page_serialno(&og)==vf->current_serialno &&
