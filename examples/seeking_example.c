@@ -127,7 +127,7 @@ int main(){
         exit(1);
       }
     }
-    
+
     /* because we want to do sample-level verification that the seek
        does what it claimed, decode the entire file into memory */
     pcmlength=ov_pcm_total(&ov,-1);
@@ -148,12 +148,12 @@ int main(){
       fprintf(stderr,"\rloading.... [%ld left]              ",
               (long)((pcmlength>>hs)*2-i));
     }
-    
+
     {
       ogg_int64_t length=ov.end;
       fprintf(stderr,"\rtesting raw seeking to random places in %ld bytes....\n",
              (long)length);
-    
+
       for(i=0;i<1000;i++){
         ogg_int64_t val=(double)rand()/RAND_MAX*length;
         fprintf(stderr,"\r\t%d [raw position %ld]...     ",i,(long)val);
@@ -172,9 +172,9 @@ int main(){
     {
       fprintf(stderr,"testing pcm page seeking to random places in %ld samples....\n",
              (long)pcmlength);
-    
+
       for(i=0;i<1000;i++){
-        ogg_int64_t val=(double)rand()/RAND_MAX*pcmlength;
+        ogg_int64_t val= i==0?(ogg_int64_t)0:(double)rand()/RAND_MAX*pcmlength;
         fprintf(stderr,"\r\t%d [pcm position %ld]...     ",i,(long)val);
         ret=ov_pcm_seek_page(&ov,val);
         if(ret<0){
@@ -189,11 +189,8 @@ int main(){
 
     fprintf(stderr,"\r");
     {
-      fprintf(stderr,"testing pcm exact seeking to random places in %ld samples....\n",
-             (long)pcmlength);
-    
       for(i=0;i<1000;i++){
-        ogg_int64_t val=(double)rand()/RAND_MAX*pcmlength;
+        ogg_int64_t val= i==0?(ogg_int64_t)0:(double)rand()/RAND_MAX*pcmlength;
         fprintf(stderr,"\r\t%d [pcm position %ld]...     ",i,(long)val);
         ret=ov_pcm_seek(&ov,val);
         if(ret<0){
