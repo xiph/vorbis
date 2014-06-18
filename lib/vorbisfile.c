@@ -1557,7 +1557,6 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
            our page, right at the beginning of PCM data.  Set state
            and return. */
 
-        vf->offset=result;
         vf->pcm_offset=total;
 
         if(link!=vf->current_link){

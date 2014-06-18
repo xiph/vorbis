@@ -189,6 +189,8 @@ int main(){
 
     fprintf(stderr,"\r");
     {
+      fprintf(stderr,"testing pcm exact seeking to random places in %f seconds....\n",
+             timelength);
       for(i=0;i<1000;i++){
         ogg_int64_t val= i==0?(ogg_int64_t)0:(double)rand()/RAND_MAX*pcmlength;
         fprintf(stderr,"\r\t%d [pcm position %ld]...     ",i,(long)val);
