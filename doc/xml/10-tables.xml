@@ -17,7 +17,7 @@
 
 <para>
 The vector <varname>[floor1_inverse_dB_table]</varname> is a 256 element static
-lookup table consiting of the following values (read left to right
+lookup table consisting of the following values (read left to right
 then top to bottom):</para>
 
 <screen>
