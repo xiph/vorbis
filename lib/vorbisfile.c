@@ -438,9 +438,11 @@ static ogg_int64_t _initial_pcmoffset(OggVorbis_File *vf, vorbis_info *vi){
     while((result=ogg_stream_packetout(&vf->os,&op))){
       if(result>0){ /* ignore holes */
         long thisblock=vorbis_packet_blocksize(vi,&op);
-        if(lastblock!=-1)
-          accumulated+=(lastblock+thisblock)>>2;
-        lastblock=thisblock;
+        if(thisblock>=0){
+          if(lastblock!=-1)
+            accumulated+=(lastblock+thisblock)>>2;
+          lastblock=thisblock;
+        }
       }
     }
 
