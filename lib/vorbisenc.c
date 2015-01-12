@@ -903,10 +903,12 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
                             long  channels,
                             long  rate,
                             float quality){
-  if(rate <= 0) return OV_EINVAL;
+  codec_setup_info *ci;
+  highlevel_encode_setup *hi;
+  if(rate<=0) return OV_EINVAL;
 
-  codec_setup_info *ci=vi->codec_setup;
-  highlevel_encode_setup *hi=&ci->hi;
+  ci=vi->codec_setup;
+  hi=&ci->hi;
 
   quality+=.0000001;
   if(quality>=1.)quality=.9999;
@@ -950,11 +952,14 @@ int vorbis_encode_setup_managed(vorbis_info *vi,
                                 long nominal_bitrate,
                                 long min_bitrate){
 
-  if(rate <= 0) return OV_EINVAL;
+  codec_setup_info *ci;
+  highlevel_encode_setup *hi;
+  double tnominal;
+  if(rate<=0) return OV_EINVAL;
 
-  codec_setup_info *ci=vi->codec_setup;
-  highlevel_encode_setup *hi=&ci->hi;
-  double tnominal=nominal_bitrate;
+  ci=vi->codec_setup;
+  hi=&ci->hi;
+  tnominal=nominal_bitrate;
 
   if(nominal_bitrate<=0.){
     if(max_bitrate>0.){
