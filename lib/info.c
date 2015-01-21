@@ -35,16 +35,6 @@
 #define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20150105 (⛄⛄⛄⛄)"
 
 /* helpers */
-static int ilog2(unsigned int v){
-  int ret=0;
-  if(v)--v;
-  while(v){
-    ret++;
-    v>>=1;
-  }
-  return(ret);
-}
-
 static void _v_writestring(oggpack_buffer *o,const char *s, int bytes){
 
   while(bytes--){
@@ -447,7 +437,11 @@ int vorbis_synthesis_headerin(vorbis_info *vi,vorbis_comment *vc,ogg_packet *op)
 
 static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
   codec_setup_info     *ci=vi->codec_setup;
-  if(!ci)return(OV_EFAULT);
+  if(!ci||
+     ci->blocksizes[0]<64||
+     ci->blocksizes[1]<ci->blocksizes[0]){
+    return(OV_EFAULT);
+  }
 
   /* preamble */
   oggpack_write(opb,0x01,8);
@@ -462,8 +456,8 @@ static int _vorbis_pack_info(oggpack_buffer *opb,vorbis_info *vi){
   oggpack_write(opb,vi->bitrate_nominal,32);
   oggpack_write(opb,vi->bitrate_lower,32);
 
-  oggpack_write(opb,ilog2(ci->blocksizes[0]),4);
-  oggpack_write(opb,ilog2(ci->blocksizes[1]),4);
+  oggpack_write(opb,ov_ilog(ci->blocksizes[0]-1),4);
+  oggpack_write(opb,ov_ilog(ci->blocksizes[1]-1),4);
   oggpack_write(opb,1,1);
 
   return(0);
@@ -589,7 +583,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   oggpack_buffer opb;
   private_state *b=v->backend_state;
 
-  if(!b){
+  if(!b||vi->channels<=0){
     ret=OV_EFAULT;
     goto err_out;
   }

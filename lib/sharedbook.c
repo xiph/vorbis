@@ -26,13 +26,11 @@
 #include "scales.h"
 
 /**** pack/unpack helpers ******************************************/
-int _ilog(unsigned int v){
-  int ret=0;
-  while(v){
-    ret++;
-    v>>=1;
-  }
-  return(ret);
+
+int ov_ilog(ogg_uint32_t v){
+  int ret;
+  for(ret=0;v;ret++)v>>=1;
+  return ret;
 }
 
 /* 32 bit float (not IEEE; nonnormalized mantissa +
@@ -374,7 +372,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
       if(s->lengthlist[i]>0)
         c->dec_codelengths[sortindex[n++]]=s->lengthlist[i];
 
-    c->dec_firsttablen=_ilog(c->used_entries)-4; /* this is magic */
+    c->dec_firsttablen=ov_ilog(c->used_entries)-4; /* this is magic */
     if(c->dec_firsttablen<5)c->dec_firsttablen=5;
     if(c->dec_firsttablen>8)c->dec_firsttablen=8;
 

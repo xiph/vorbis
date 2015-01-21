@@ -168,7 +168,7 @@ static void *floor0_inverse1(vorbis_block *vb,vorbis_look_floor *i){
   if(ampraw>0){ /* also handles the -1 out of data case */
     long maxval=(1<<info->ampbits)-1;
     float amp=(float)ampraw/maxval*info->ampdB;
-    int booknum=oggpack_read(&vb->opb,_ilog(info->numbooks));
+    int booknum=oggpack_read(&vb->opb,ov_ilog(info->numbooks));
 
     if(booknum!=-1 && booknum<info->numbooks){ /* be paranoid */
       codec_setup_info  *ci=vb->vd->vi->codec_setup;

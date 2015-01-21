@@ -57,12 +57,12 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
       char last=c->lengthlist[i-1];
       if(this>last){
         for(j=last;j<this;j++){
-          oggpack_write(opb,i-count,_ilog(c->entries-count));
+          oggpack_write(opb,i-count,ov_ilog(c->entries-count));
           count=i;
         }
       }
     }
-    oggpack_write(opb,i-count,_ilog(c->entries-count));
+    oggpack_write(opb,i-count,ov_ilog(c->entries-count));
 
   }else{
     /* length random.  Again, we don't code the codeword itself, just
@@ -159,7 +159,7 @@ static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
   s->entries=oggpack_read(opb,24);
   if(s->entries==-1)goto _eofout;
 
-  if(_ilog(s->dim)+_ilog(s->entries)>24)goto _eofout;
+  if(ov_ilog(s->dim)+ov_ilog(s->entries)>24)goto _eofout;
 
   /* codeword ordering.... length ordered or unordered? */
   switch((int)oggpack_read(opb,1)){
@@ -203,7 +203,7 @@ static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
       s->lengthlist=_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
 
       for(i=0;i<s->entries;){
-        long num=oggpack_read(opb,_ilog(s->entries-i));
+        long num=oggpack_read(opb,ov_ilog(s->entries-i));
         if(num==-1)goto _eofout;
         if(length>32 || num>s->entries-i ||
            (num>0 && (num-1)>>(length-1)>1)){

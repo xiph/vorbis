@@ -72,25 +72,6 @@ static void floor1_free_look(vorbis_look_floor *i){
   }
 }
 
-static int ilog(unsigned int v){
-  int ret=0;
-  while(v){
-    ret++;
-    v>>=1;
-  }
-  return(ret);
-}
-
-static int ilog2(unsigned int v){
-  int ret=0;
-  if(v)--v;
-  while(v){
-    ret++;
-    v>>=1;
-  }
-  return(ret);
-}
-
 static void floor1_pack (vorbis_info_floor *i,oggpack_buffer *opb){
   vorbis_info_floor1 *info=(vorbis_info_floor1 *)i;
   int j,k;
@@ -117,8 +98,10 @@ static void floor1_pack (vorbis_info_floor *i,oggpack_buffer *opb){
 
   /* save out the post list */
   oggpack_write(opb,info->mult-1,2);     /* only 1,2,3,4 legal now */
-  oggpack_write(opb,ilog2(maxposit),4);
-  rangebits=ilog2(maxposit);
+  /* maxposit cannot legally be less than 1; this is encode-side, we
+     can assume our setup is OK */
+  oggpack_write(opb,ov_ilog(maxposit-1),4);
+  rangebits=ov_ilog(maxposit-1);
 
   for(j=0,k=0;j<info->partitions;j++){
     count+=info->class_dim[info->partitionclass[j]];
@@ -854,9 +837,9 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
 
     /* beginning/end post */
     look->frames++;
-    look->postbits+=ilog(look->quant_q-1)*2;
-    oggpack_write(opb,out[0],ilog(look->quant_q-1));
-    oggpack_write(opb,out[1],ilog(look->quant_q-1));
+    look->postbits+=ov_ilog(look->quant_q-1)*2;
+    oggpack_write(opb,out[0],ov_ilog(look->quant_q-1));
+    oggpack_write(opb,out[1],ov_ilog(look->quant_q-1));
 
 
     /* partition by partition */
@@ -980,8 +963,8 @@ static void *floor1_inverse1(vorbis_block *vb,vorbis_look_floor *in){
   if(oggpack_read(&vb->opb,1)==1){
     int *fit_value=_vorbis_block_alloc(vb,(look->posts)*sizeof(*fit_value));
 
-    fit_value[0]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
-    fit_value[1]=oggpack_read(&vb->opb,ilog(look->quant_q-1));
+    fit_value[0]=oggpack_read(&vb->opb,ov_ilog(look->quant_q-1));
+    fit_value[1]=oggpack_read(&vb->opb,ov_ilog(look->quant_q-1));
 
     /* partition by partition */
     for(i=0,j=2;i<info->partitions;i++){
