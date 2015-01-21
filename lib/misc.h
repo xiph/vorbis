@@ -21,7 +21,7 @@
 
 extern void *_vorbis_block_alloc(vorbis_block *vb,long bytes);
 extern void _vorbis_block_ripcord(vorbis_block *vb);
-extern int ov_ilog(unsigned int v);
+extern int ov_ilog(ogg_uint32_t v);
 
 #ifdef ANALYSIS
 extern int analysis_noisy;
