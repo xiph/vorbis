@@ -28,8 +28,6 @@ static_docs = \
 	vorbis-clip.txt \
 	vorbis-errors.txt \
 	vorbis-fidelity.html \
-	vorbis.html \
-	vorbisword2.png \
 	wait.png
 
 # bits needed by the spec
