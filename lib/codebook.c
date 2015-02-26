@@ -312,6 +312,12 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
     hi=book->used_entries;
   }
 
+  /* Single entry codebooks use a firsttablen of 1 and a
+     dec_maxlength of 1.  If a single-entry codebook gets here (due to
+     failure to read one bit above), the next look attempt will also
+     fail and we'll correctly kick out instead of trying to walk the
+     underformed tree */
+
   lok = oggpack_look(b, read);
 
   while(lok<0 && read>1)
