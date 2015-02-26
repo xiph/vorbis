@@ -30,8 +30,7 @@ static_docs = \
 	vorbis-fidelity.html \
 	vorbis.html \
 	vorbisword2.png \
-	wait.png \
-	white-xifish.png
+	wait.png
 
 # bits needed by the spec
 SPEC_PNG = \
@@ -85,19 +84,16 @@ CLEANFILES = $(SPEC_TEX:%.tex=%.aux) \
 	     Vorbis_I_spec.out Vorbis_I_spec.tmp \
 	     Vorbis_I_spec.toc Vorbis_I_spec.xref \
 	     Vorbis_I_spec*.png \
-	     zzVorbis_I_spec.ps xifish.png
+	     zzVorbis_I_spec.ps
 DISTCLEANFILES = $(built_docs)
 
 
 # explicit rules for generating docs
 if BUILD_DOCS
-xifish.png: white-xifish.png
-	cp $< $@
-
-Vorbis_I_spec.html Vorbis_I_spec.css: $(SPEC_TEX) $(SPEC_PNG) xifish.png
+Vorbis_I_spec.html Vorbis_I_spec.css: $(SPEC_TEX) $(SPEC_PNG)
 	htlatex $<
 
-Vorbis_I_spec.pdf: $(SPEC_TEX) $(SPEC_PNG) xifish.png
+Vorbis_I_spec.pdf: $(SPEC_TEX) $(SPEC_PNG)
 	pdflatex $<
 	pdflatex $<
 	pdflatex $<
