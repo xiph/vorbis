@@ -36,6 +36,7 @@ static_docs = \
 # bits needed by the spec
 SPEC_PNG = \
 	components.png \
+	fish_xiph_org.png \
 	floor1-1.png \
 	floor1-2.png \
 	floor1-3.png \
@@ -46,10 +47,6 @@ SPEC_PNG = \
 	residue2.png \
 	window1.png \
 	window2.png
-SPEC_PDF = xifish.pdf
-
-# FIXME: also needed here
-#	white-xifish.png 
 
 SPEC_TEX = \
 	Vorbis_I_spec.tex \
