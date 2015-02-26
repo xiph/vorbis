@@ -27,8 +27,7 @@ static_docs = \
 	v-comment.html \
 	vorbis-clip.txt \
 	vorbis-errors.txt \
-	vorbis-fidelity.html \
-	wait.png
+	vorbis-fidelity.html
 
 # bits needed by the spec
 SPEC_PNG = \
