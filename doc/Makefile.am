@@ -9,7 +9,6 @@ static_docs = \
 	rfc5215.xml \
 	rfc5215.txt \
 	eightphase.png \
-	evenlsp.png \
 	fish_xiph_org.png \
 	floor1_inverse_dB_table.html \
 	floorval.png \
@@ -17,8 +16,6 @@ static_docs = \
 	framing.html \
 	helper.html \
 	index.html \
-	lspmap.png \
-	oddlsp.png \
 	oggstream.html \
 	programming.html \
 	squarepolar.png \
