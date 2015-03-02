@@ -855,7 +855,9 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
 
       /* generate the partition's first stage cascade value */
       if(csubbits){
-        int maxval[8];
+        int maxval[8]={0,0,0,0,0,0,0,0}; /* gcc's static analysis
+                                            issues a warning without
+                                            initialization */
         for(k=0;k<csub;k++){
           int booknum=info->class_subbook[class][k];
           if(booknum<0){
