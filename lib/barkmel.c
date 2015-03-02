@@ -59,14 +59,6 @@ int main(){
               j,i,fromBARK(i),(int)(fromBARK(i)/22050.*128.));
     }
   }
-  {
-    float i;
-    int j;
-    for(i=0.,j=0;i<28;i+=1,j++){
-      fprintf(stderr,"(%d) bark=%f -> %gHz -> %g bark\n",
-              j,i,fromBARK(i),toBARK(fromBARK(i)));
-    }
-  }
   return(0);
 }
 
