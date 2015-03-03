@@ -9,5 +9,6 @@ libvorbis release checklist.
   svn cp https://svn.xiph.org/trunk/vorbis https://svn.xiph.org/tags/vorbis/libvorbis-x.y.z
 - Copy source packages to a checkout of https://svn.xiph.org/releases/vorbis/
 - Add them to the repo and update checksum files there.
-- Update download links on xiph.org.
+- Update https://xiph.org/downloads/
+- Post announcement to https://xiph.org/press/ and link from front page.
 - Announce new release to mailing list.
