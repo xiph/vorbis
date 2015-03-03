@@ -1,4 +1,4 @@
-libvorbis 1.3.5 (unreleased) -- "Xiph.Org libVorbis I 20150105 (⛄⛄⛄⛄)"
+libvorbis 1.3.5 (2015-03-03) -- "Xiph.Org libVorbis I 20150105 (⛄⛄⛄⛄)"
 
 * Tolerate single-entry codebooks.
 * Fix decoder crash with invalid input.
