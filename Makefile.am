@@ -1,7 +1,8 @@
 ## Process this file with automake to produce Makefile.in
 
-#AUTOMAKE_OPTIONS = 1.7 foreign dist-zip dist-bzip2
 AUTOMAKE_OPTIONS = foreign 1.11 dist-zip dist-xz
+
+ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS = m4 include vq lib test doc
 
