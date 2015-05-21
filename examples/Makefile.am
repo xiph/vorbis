@@ -2,12 +2,12 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-INCLUDES = -I$(top_srcdir)/include @OGG_CFLAGS@
-
 noinst_PROGRAMS = decoder_example encoder_example chaining_example\
 		vorbisfile_example seeking_example
 
 EXTRA_DIST = frameview.pl
+
+AM_CPPFLAGS = -I$(top_srcdir)/include @OGG_CFLAGS@
 
 # uncomment to build static executables from the example code
 #LDFLAGS = -all-static 

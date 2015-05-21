@@ -16,6 +16,7 @@ AM_MAINTAINER_MODE
 
 dnl Add parameters for aclocal
 AC_SUBST(ACLOCAL_AMFLAGS, "-I m4")
+AC_CONFIG_MACRO_DIRS([m4])
 
 dnl Library versioning
 dnl - library source changed -> increment REVISION
