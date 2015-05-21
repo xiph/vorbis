@@ -17,7 +17,7 @@ pkgconfig_DATA = vorbis.pc vorbisenc.pc vorbisfile.pc
 
 EXTRA_DIST = \
 	CHANGES COPYING \
-	todo.txt autogen.sh \
+	autogen.sh \
 	libvorbis.spec libvorbis.spec.in \
 	vorbis.m4 \
 	vorbis.pc.in vorbisenc.pc.in vorbisfile.pc.in \
@@ -25,7 +25,7 @@ EXTRA_DIST = \
 	vorbisenc-uninstalled.pc.in \
 	vorbisfile-uninstalled.pc.in \
 	symbian \
-	macos macosx win32
+	macosx win32
 
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-docs
