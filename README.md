@@ -16,7 +16,7 @@ This package contains:
 
 - libvorbis, a BSD-style license software implementation of
   the Vorbis specification by the Xiph.Org Foundation
-  (http://www.xiph.org/)
+  (https://www.xiph.org/)
 
 - libvorbisfile, a BSD-style license convenience library
   built on Vorbis designed to simplify common uses
@@ -57,8 +57,8 @@ Directory:
 
 ## Contact ##
 
-The Ogg homepage is located at 'http://www.xiph.org/ogg/'.
-Vorbis's homepage is located at 'http://www.xiph.org/vorbis/'.
+The Ogg homepage is located at 'https://www.xiph.org/ogg/'.
+Vorbis's homepage is located at 'https://www.xiph.org/vorbis/'.
 Up to date technical documents, contact information, source code and
 pre-built utilities may be found there.
 
