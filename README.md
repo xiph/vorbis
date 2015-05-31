@@ -9,20 +9,20 @@ MPEG audio layer 3. Unlike the MPEG sponsored formats (and other
 proprietary formats such as RealAudio G2 and Windows' flavor of the
 month), the Vorbis CODEC specification belongs to the public domain.
 All the technical details are published and documented, and any
-software entity may make full use of the format without license 
+software entity may make full use of the format without license
 fee, royalty or patent concerns.
 
 This package contains:
 
 - libvorbis, a BSD-style license software implementation of
-  the Vorbis specification by the Xiph.Org Foundation 
-  (http://www.xiph.org/) 
+  the Vorbis specification by the Xiph.Org Foundation
+  (http://www.xiph.org/)
 
 - libvorbisfile, a BSD-style license convenience library
   built on Vorbis designed to simplify common uses
 
 - libvorbisenc, a BSD-style license library that provides a simple,
-  programmatic encoding setup interface 
+  programmatic encoding setup interface
 
 - example code making use of libogg, libvorbis, libvorbisfile and
   libvorbisenc
@@ -68,8 +68,8 @@ The user website for Ogg Vorbis software and audio is http://vorbis.com/
 
 #### Building from master ####
 
-Development source is under git revision control at 
-https://git.xiph.org/vorbis.git. You will also need the 
+Development source is under git revision control at
+https://git.xiph.org/vorbis.git. You will also need the
 newest versions of autoconf, automake, libtool and pkg-config in
 order to compile Vorbis from development source. A configure script
 is provided for you in the source tarball distributions.
@@ -113,6 +113,3 @@ IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.
 
 THE OggVorbis SOURCE CODE IS COPYRIGHT (C) 1994-2015
 by the Xiph.Org Foundation https://www.xiph.org/
-
-
-
