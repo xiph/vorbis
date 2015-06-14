@@ -104,6 +104,39 @@ after normal configuring:
     make dist
     rpm -ta libvorbis-<version>.tar.gz
 
+## Building with CMake ##
+
+Ogg supports building using [CMake](http://www.cmake.org/). CMake is a meta build system that generates native projects for each platform.
+To generate projects just run cmake replacing `YOUR-PROJECT-GENERATOR` with a proper generator from a list [here](http://www.cmake.org/cmake/help/v3.2/manual/cmake-generators.7.html):
+
+    cmake -G YOUR-PROJECT-GENERATOR .
+
+Note that by default cmake generates projects that will build static libraries.
+To generate projects that will build dynamic library use `BUILD_SHARED_LIBS` option like this:
+
+    cmake -G YOUR-PROJECT-GENERATOR -DBUILD_SHARED_LIBS=1 .
+
+After projects are generated use them as usual
+
+#### Building on Windows ####
+
+Use proper generator for your Visual Studio version like:
+
+    cmake -G "Visual Studio 12 2013" .
+
+#### Building on Mac OS X ####
+
+Use Xcode generator. To build framework run:
+
+    cmake -G Xcode -DBUILD_FRAMEWORK=1 .
+
+#### Building on Linux ####
+
+Use Makefile generator which is default one.
+
+    cmake .
+    make
+
 ## License ##
 
 THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.
