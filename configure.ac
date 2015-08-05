@@ -7,6 +7,8 @@ dnl ------------------------------------------------
 
 AC_INIT([libvorbis],[1.3.5],[vorbis-dev@xiph.org])
 
+AC_CONFIG_MACRO_DIR([m4])
+
 AC_CONFIG_SRCDIR([lib/mdct.c])
 
 AC_CANONICAL_TARGET([])
@@ -45,9 +47,9 @@ AC_SUBST(VE_LIB_CURRENT)
 AC_SUBST(VE_LIB_REVISION)
 AC_SUBST(VE_LIB_AGE)
 
-dnl --------------------------------------------------  
+dnl --------------------------------------------------
 dnl Check for programs
-dnl --------------------------------------------------  
+dnl --------------------------------------------------
 
 dnl save $CFLAGS since AC_PROG_CC likes to insert "-g -O2"
 dnl if $CFLAGS is blank
@@ -88,10 +90,10 @@ fi
 
 AM_CONDITIONAL(BUILD_DOCS, [test "x$enable_docs" = xyes])
 
-AC_ARG_ENABLE(examples, 
-  AS_HELP_STRING([--enable-examples], [build the examples])) 
- 	
-AM_CONDITIONAL(BUILD_EXAMPLES, [test "x$enable_examples" = xyes]) 
+AC_ARG_ENABLE(examples,
+  AS_HELP_STRING([--enable-examples], [build the examples]))
+
+AM_CONDITIONAL(BUILD_EXAMPLES, [test "x$enable_examples" = xyes])
 
 dnl --------------------------------------------------
 dnl Set build flags based on environment
@@ -101,14 +103,14 @@ dnl Set some target options
 
 cflags_save="$CFLAGS"
 if test -z "$GCC"; then
-	case $host in 
+	case $host in
 	*-*-irix*)
-		dnl If we're on IRIX, we wanna use cc even if gcc 
+		dnl If we're on IRIX, we wanna use cc even if gcc
 		dnl is there (unless the user has overriden us)...
 		if test -z "$CC"; then
 			CC=cc
 		fi
-		DEBUG="-g -signed" 
+		DEBUG="-g -signed"
 		CFLAGS="-O2 -w -signed"
 		PROFILE="-p -g3 -O2 -signed" ;;
 	sparc-sun-solaris*)
@@ -125,7 +127,7 @@ else
 	AC_MSG_CHECKING([GCC version])
 	GCC_VERSION=`$CC -dumpversion`
 	AC_MSG_RESULT([$GCC_VERSION])
-	case $host in 
+	case $host in
 	*86-*-linux*)
 		DEBUG="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
 		CFLAGS="-O3 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char"
@@ -171,10 +173,10 @@ else
   		CFLAGS=${OPT}" -D__NO_MATH_INLINES"
   		PROFILE=${PROFILE}" -D__NO_MATH_INLINES"
   		fi;;
-        powerpc-*-linux*spe) 
- 	        DEBUG="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES" 
- 	        CFLAGS="-O3 -Wall -Wextra -ffast-math -mfused-madd -D_REENTRANT" 
- 	        PROFILE="-pg -g -O3 -ffast-math -mfused-madd -D_REENTRANT";; 
+        powerpc-*-linux*spe)
+ 	        DEBUG="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES"
+ 	        CFLAGS="-O3 -Wall -Wextra -ffast-math -mfused-madd -D_REENTRANT"
+ 	        PROFILE="-pg -g -O3 -ffast-math -mfused-madd -D_REENTRANT";;
 	powerpc-*-linux*)
 		DEBUG="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES"
 		CFLAGS="-O3 -Wall -Wextra -ffast-math -mfused-madd -mcpu=750 -D_REENTRANT"
