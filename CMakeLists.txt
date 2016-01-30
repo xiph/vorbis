@@ -53,10 +53,15 @@ endfunction()
 message(STATUS "Configuring ${PROJECT_NAME} ${PROJECT_VERSION}")
 
 # Find ogg dependency
-find_package(PkgConfig QUIET)
-pkg_check_modules(PC_OGG QUIET ogg)
-find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${PC_OGG_INCLUDE_DIRS} PATH_SUFFIXES ogg)
-find_library(OGG_LIBRARIES NAMES ogg HINTS ${PC_OGG_LIBRARY_DIRS})
+if(NOT OGG_ROOT)
+    find_package(PkgConfig QUIET)
+    pkg_check_modules(PC_OGG QUIET ogg)
+    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${PC_OGG_INCLUDE_DIRS} PATH_SUFFIXES ogg)
+    find_library(OGG_LIBRARIES NAMES ogg HINTS ${PC_OGG_LIBRARY_DIRS})
+else()
+    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${OGG_ROOT}/include PATH_SUFFIXES ogg)
+    find_library(OGG_LIBRARIES NAMES ogg HINTS ${OGG_ROOT}/lib ${OGG_ROOT}/lib64)
+endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OGG DEFAULT_MSG OGG_INCLUDE_DIRS OGG_LIBRARIES)
 
@@ -66,4 +71,11 @@ configure_pkg_config_file(vorbis.pc.in)
 configure_pkg_config_file(vorbisenc.pc.in)
 configure_pkg_config_file(vorbisfile.pc.in)
 
-install(FILES vorbis.pc vorbisenc.pc vorbisfile.pc DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+install(
+    FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/vorbis.pc
+    ${CMAKE_CURRENT_BINARY_DIR}/vorbisenc.pc
+    ${CMAKE_CURRENT_BINARY_DIR}/vorbisfile.pc
+    DESTINATION
+    ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
