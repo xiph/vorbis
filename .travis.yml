@@ -12,4 +12,4 @@ addons:
 script:
   - ./autogen.sh
   - ./configure
-  - make distcheck
+  - make -j2 distcheck
