@@ -1,6 +1,6 @@
 # Vorbis
 
-[![Travis Build Status](https://travis-ci.org/xiph/vorbis.png?branch=master)](https://travis-ci.org/xiph/vorbis)
+[![Travis Build Status](https://travis-ci.org/xiph/vorbis.svg?branch=master)](https://travis-ci.org/xiph/vorbis)
 [![Jenkins Build Status](https://mf4.xiph.org/jenkins/job/libvorbis/badge/icon)](https://mf4.xiph.org/jenkins/job/libvorbis/)
 
 Vorbis is a general purpose audio and music encoding format
