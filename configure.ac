@@ -133,7 +133,7 @@ else
 	case $host in
 	*86-*-linux*)
 		DEBUG="-g -Wall -Wextra -D_REENTRANT -D__NO_MATH_INLINES -fsigned-char"
-		CFLAGS="-O3 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char"
+		CFLAGS="-O3 -Wall -Wextra -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char"
 #              	PROFILE="-Wall -Wextra -pg -g -O3 -ffast-math -D_REENTRANT -fsigned-char -fno-inline -static"
 		PROFILE="-Wall -Wextra -pg -g -O3 -ffast-math -mno-ieee-fp -D_REENTRANT -fsigned-char -fno-inline"
 
