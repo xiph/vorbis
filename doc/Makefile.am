@@ -107,7 +107,7 @@ doxygen-build.stamp: Doxyfile $(top_srcdir)/include/vorbis/*.h
 	touch doxygen-build.stamp
 else
 doxygen-build.stamp:
-	echo "*** Warning: Doxygen not found; documentation will not be built."
+	echo "*** Warning: Documentation build is disabled."
 	touch doxygen-build.stamp
 endif
 
