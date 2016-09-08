@@ -1,0 +1,15 @@
+image: Visual Studio 2015
+configuration:
+- Debug
+
+platform:
+- Win32
+
+install:
+- git clone -q https://github.com/xiph/ogg.git %APPVEYOR_BUILD_FOLDER%\..\libogg
+- msbuild "%APPVEYOR_BUILD_FOLDER%\..\libogg\win32\VS2015\libogg_static.sln" /m /v:minimal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /property:Configuration=%CONFIGURATION%;Platform=%PLATFORM%
+
+build:
+  project: win32\VS2010\vorbis_dynamic.sln
+  parallel: true
+  verbosity: minimal
