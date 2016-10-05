@@ -6,6 +6,11 @@ compiler:
 
 env:
   - BUILD_SYSTEM=AUTOTOOLS
+  - BUILD_SYSTEM=CMAKE
+
+matrix:
+  allow_failures:
+    - env: BUILD_SYSTEM=CMAKE
 
 addons:
   apt:
@@ -16,3 +21,8 @@ script:
   - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./autogen.sh ; fi
   - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./configure ; fi
   - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then make -j2 V=1 distcheck ; fi
+  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then mkdir build ; fi
+  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then pushd build ; fi
+  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release .. ; fi
+  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then cmake --build . ; fi
+  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then popd ; fi
