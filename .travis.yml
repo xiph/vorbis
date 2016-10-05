@@ -4,12 +4,15 @@ compiler:
   - gcc
   - clang
 
+env:
+  - BUILD_SYSTEM=AUTOTOOLS
+
 addons:
   apt:
     packages:
     - libogg-dev
 
 script:
-  - ./autogen.sh
-  - ./configure
-  - make -j2 V=1 distcheck
+  - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./autogen.sh ; fi
+  - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./configure ; fi
+  - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then make -j2 V=1 distcheck ; fi
