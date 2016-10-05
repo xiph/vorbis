@@ -19,14 +19,14 @@ install:
 - if "%BUILD_SYSTEM%"=="MSVC" msbuild "%APPVEYOR_BUILD_FOLDER%\..\libogg\win32\VS2015\libogg_static.sln" /m /v:minimal /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" /property:Configuration=%CONFIGURATION%;Platform=%PLATFORM%
 - if "%BUILD_SYSTEM%"=="CMAKE" mkdir "%APPVEYOR_BUILD_FOLDER%\..\libogg\build"
 - if "%BUILD_SYSTEM%"=="CMAKE" pushd "%APPVEYOR_BUILD_FOLDER%\..\libogg\build"
-- if "%BUILD_SYSTEM%"=="CMAKE" cmake -A "%PLATFORM%" -G "Visual Studio 14 2015" ..
+- if "%BUILD_SYSTEM%"=="CMAKE" cmake -A "%PLATFORM%" -G "Visual Studio 14 2015" -DCMAKE_INSTALL_PREFIX="%APPVEYOR_BUILD_FOLDER%\..\libogg\install" ..
 - if "%BUILD_SYSTEM%"=="CMAKE" cmake --build . --config "%CONFIGURATION%" --target install -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 - if "%BUILD_SYSTEM%"=="CMAKE" popd
 
 before_build:
 - if "%BUILD_SYSTEM%" == "CMAKE" mkdir "%APPVEYOR_BUILD_FOLDER%\build"
 - if "%BUILD_SYSTEM%" == "CMAKE" pushd "%APPVEYOR_BUILD_FOLDER%\build"
-- if "%BUILD_SYSTEM%" == "CMAKE" cmake -A "%PLATFORM%" -G "Visual Studio 14 2015" -DOGG_ROOT="%PROGRAMFILES%\libogg" ..
+- if "%BUILD_SYSTEM%" == "CMAKE" cmake -A "%PLATFORM%" -G "Visual Studio 14 2015" -DOGG_ROOT=%APPVEYOR_BUILD_FOLDER%\..\libogg\install ..
 - if "%BUILD_SYSTEM%" == "CMAKE" popd
 
 build_script:
