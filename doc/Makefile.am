@@ -39,7 +39,22 @@ SPEC_PNG = \
 	residue-pack.png \
 	residue2.png \
 	window1.png \
-	window2.png
+	window2.png \
+	Vorbis_I_spec0x.png \
+	Vorbis_I_spec1x.png \
+	Vorbis_I_spec2x.png \
+	Vorbis_I_spec3x.png \
+	Vorbis_I_spec4x.png \
+	Vorbis_I_spec5x.png \
+	Vorbis_I_spec6x.png \
+	Vorbis_I_spec7x.png \
+	Vorbis_I_spec8x.png \
+	Vorbis_I_spec9x.png \
+	Vorbis_I_spec10x.png \
+	Vorbis_I_spec11x.png \
+	Vorbis_I_spec12x.png \
+	Vorbis_I_spec13x.png \
+	Vorbis_I_spec14x.png
 
 SPEC_TEX = \
 	Vorbis_I_spec.tex \
