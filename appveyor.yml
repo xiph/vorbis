@@ -26,7 +26,7 @@ install:
 before_build:
 - if "%BUILD_SYSTEM%" == "CMAKE" mkdir "%APPVEYOR_BUILD_FOLDER%\build"
 - if "%BUILD_SYSTEM%" == "CMAKE" pushd "%APPVEYOR_BUILD_FOLDER%\build"
-- if "%BUILD_SYSTEM%" == "CMAKE" cmake -A "%PLATFORM%" -G "Visual Studio 14 2015" ..
+- if "%BUILD_SYSTEM%" == "CMAKE" cmake -A "%PLATFORM%" -G "Visual Studio 14 2015" -DOGG_ROOT="%PROGRAMFILES%\libogg" ..
 - if "%BUILD_SYSTEM%" == "CMAKE" popd
 
 build_script:
