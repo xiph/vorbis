@@ -20,7 +20,7 @@ install:
 - if "%BUILD_SYSTEM%"=="CMAKE" mkdir "%APPVEYOR_BUILD_FOLDER%\..\libogg\build"
 - if "%BUILD_SYSTEM%"=="CMAKE" pushd "%APPVEYOR_BUILD_FOLDER%\..\libogg\build"
 - if "%BUILD_SYSTEM%"=="CMAKE" cmake -A "%PLATFORM%" -G "Visual Studio 14 2015" ..
-- if "%BUILD_SYSTEM%"=="CMAKE" cmake --build . --config "%CONFIGURATION%" -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
+- if "%BUILD_SYSTEM%"=="CMAKE" cmake --build . --config "%CONFIGURATION%" --target install -- /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll"
 - if "%BUILD_SYSTEM%"=="CMAKE" popd
 
 before_build:
