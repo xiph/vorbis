@@ -29,7 +29,6 @@ static_docs = \
 # bits needed by the spec
 SPEC_PNG = \
 	components.png \
-	fish_xiph_org.png \
 	floor1-1.png \
 	floor1-2.png \
 	floor1-3.png \
@@ -98,7 +97,7 @@ DISTCLEANFILES = $(built_docs)
 
 # explicit rules for generating docs
 if BUILD_DOCS
-Vorbis_I_spec.html Vorbis_I_spec.css: $(SPEC_TEX) $(SPEC_PNG)
+Vorbis_I_spec.html Vorbis_I_spec.css: $(SPEC_TEX) $(SPEC_PNG) fish_xiph_org.png
 	htlatex $<
 
 Vorbis_I_spec.pdf: $(SPEC_TEX) $(SPEC_PNG)
