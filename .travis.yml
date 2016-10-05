@@ -8,10 +8,6 @@ env:
   - BUILD_SYSTEM=AUTOTOOLS
   - BUILD_SYSTEM=CMAKE
 
-matrix:
-  allow_failures:
-    - env: BUILD_SYSTEM=CMAKE
-
 addons:
   apt:
     packages:
