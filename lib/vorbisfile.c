@@ -1230,7 +1230,6 @@ double ov_time_total(OggVorbis_File *vf,int i){
 
 int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
   ogg_stream_state work_os;
-  int ret;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
   if(!vf->seekable)
@@ -1253,8 +1252,12 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
                             vf->current_serialno); /* must set serialno */
   vorbis_synthesis_restart(&vf->vd);
 
-  ret=_seek_helper(vf,pos);
-  if(ret)goto seek_error;
+  if(_seek_helper(vf,pos)) {
+    /* dump the machine so we're in a known state */
+    vf->pcm_offset=-1;
+    _decode_clear(vf);
+    return OV_EBADLINK;
+  }
 
   /* we need to make sure the pcm_offset is set, but we don't want to
      advance the raw cursor past good packets just to get to the first
@@ -1388,13 +1391,6 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
   vf->bittrack=0.f;
   vf->samptrack=0.f;
   return(0);
-
- seek_error:
-  /* dump the machine so we're in a known state */
-  vf->pcm_offset=-1;
-  ogg_stream_clear(&work_os);
-  _decode_clear(vf);
-  return OV_EBADLINK;
 }
 
 /* Page granularity seek (faster than sample granularity because we
