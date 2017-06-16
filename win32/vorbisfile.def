@@ -1,7 +1,4 @@
-;
 ; vorbisfile.def
-;
-; last modified: $Id$
 ;
 LIBRARY
 EXPORTS

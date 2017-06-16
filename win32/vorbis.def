@@ -1,5 +1,4 @@
-;
-; $Id$
+; vorbis.def
 ; 
 LIBRARY
 EXPORTS

@@ -12,7 +12,6 @@
 
  function: utility main for setting entropy encoding parameters
            for lattice codebooks
- last mod: $Id$
 
  ********************************************************************/
 

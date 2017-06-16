@@ -12,7 +12,6 @@
 
  function: simple utility that runs audio through the psychoacoustics
            without encoding
- last mod: $Id$
 
  ********************************************************************/
 

@@ -11,7 +11,6 @@
  ********************************************************************
 
  function: utility main for building codebooks from lattice descriptions
- last mod: $Id$
 
  ********************************************************************/
 

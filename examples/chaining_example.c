@@ -11,7 +11,6 @@
  ********************************************************************
 
  function: illustrate simple use of chained bitstream and vorbisfile.a
- last mod: $Id$
 
  ********************************************************************/
 
