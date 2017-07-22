@@ -213,7 +213,7 @@ int main(){
     {
       fprintf(stderr,"testing time page seeking to random places in %f seconds....\n",
              timelength);
-    
+
       for(i=0;i<1000;i++){
         double val=(double)rand()/RAND_MAX*timelength;
         fprintf(stderr,"\r\t%d [time position %f]...     ",i,val);
@@ -232,7 +232,7 @@ int main(){
     {
       fprintf(stderr,"testing time exact seeking to random places in %f seconds....\n",
              timelength);
-    
+
       for(i=0;i<1000;i++){
         double val=(double)rand()/RAND_MAX*timelength;
         fprintf(stderr,"\r\t%d [time position %f]...     ",i,val);
@@ -251,7 +251,7 @@ int main(){
 
       }
     }
-    
+
     fprintf(stderr,"\r                                           \nOK.\n\n");
 
 
