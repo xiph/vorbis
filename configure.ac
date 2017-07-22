@@ -5,7 +5,7 @@ dnl Initialization and Versioning
 dnl ------------------------------------------------
 
 
-AC_INIT([libvorbis],[1.3.5],[vorbis-dev@xiph.org])
+AC_INIT([libvorbis],[1.3.6],[vorbis-dev@xiph.org])
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -29,7 +29,7 @@ dnl - interfaces added -> increment AGE
 dnl - interfaces removed -> AGE = 0
 
 V_LIB_CURRENT=4
-V_LIB_REVISION=8
+V_LIB_REVISION=9
 V_LIB_AGE=4
 
 VF_LIB_CURRENT=6
