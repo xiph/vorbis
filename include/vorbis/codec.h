@@ -168,6 +168,9 @@ extern void     vorbis_comment_init(vorbis_comment *vc);
 extern void     vorbis_comment_add(vorbis_comment *vc, const char *comment);
 extern void     vorbis_comment_add_tag(vorbis_comment *vc,
                                        const char *tag, const char *contents);
+extern void     vorbis_comment_rm(vorbis_comment *vc, const char *comment);
+extern void     vorbis_comment_rm_tag(vorbis_comment *vc,
+                                       const char *tag, const char *contents);
 extern char    *vorbis_comment_query(vorbis_comment *vc, const char *tag, int count);
 extern int      vorbis_comment_query_count(vorbis_comment *vc, const char *tag);
 extern void     vorbis_comment_clear(vorbis_comment *vc);

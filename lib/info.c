@@ -85,6 +85,78 @@ static int tagcompare(const char *s1, const char *s2, int n){
   return 0;
 }
 
+void vorbis_comment_rm(vorbis_comment *vc, const char *comment){
+  long i;
+  size_t taglen;
+  const char *eq;
+
+  eq = strchr(comment, '=');
+  if (eq) {
+    eq++; /* Move to what is behind '='. */
+    taglen = eq - comment;
+  } else {
+    taglen = strlen(comment);
+  }
+
+  for(i=0;i<vc->comments;i++){
+    if (tagcompare(vc->user_comments[i], comment, taglen)) {
+      /* Tag name does not match -> try next comment. */
+      continue;
+    }
+
+    if (eq) {
+      /* As we already know that we share the same tag name it is safe to asume
+       * the comment is at least taglen long ('\0' not counted). */
+      if (strcmp(vc->user_comments[i] + taglen, eq)) {
+        /* Tag value does not match -> try next comment. */
+        continue;
+      }
+    }
+
+    /* At this point we found a matching tag. Now let's remove it. */
+    _ogg_free(vc->user_comments[i]);
+    memmove(&(vc->user_comments[i]), &(vc->user_comments[i+1]),
+            sizeof(vc->user_comments[i])*(vc->comments - i - 1));
+    vc->comments--;
+    return;
+  }
+}
+
+void vorbis_comment_rm_tag(vorbis_comment *vc, const char *tag, const char *contents){
+  long i;
+  size_t taglen = strlen(tag);
+
+  for(i=0;i<vc->comments;i++){
+    if (tagcompare(vc->user_comments[i], tag, taglen)) {
+      /* Tag name does not match -> try next comment. */
+      continue;
+    }
+
+    /* As we already know that we share the same tag name it is safe to asume
+     * the comment is at least taglen long ('\0' not counted). */
+
+    if (vc->user_comments[i][taglen] != '=') {
+      /* The tag in our comment does not end at the same position as
+       * the provided tag does -> try next comment. */
+      continue;
+    }
+
+    if (contents) {
+      if (strcmp(vc->user_comments[i] + taglen + 1, contents)) {
+        /* Tag value does not match -> try next comment. */
+        continue;
+      }
+    }
+
+    /* At this point we found a matching tag. Now let's remove it. */
+    _ogg_free(vc->user_comments[i]);
+    memmove(&(vc->user_comments[i]), &(vc->user_comments[i+1]),
+            sizeof(vc->user_comments[i])*(vc->comments - i - 1));
+    vc->comments--;
+    return;
+  }
+}
+
 char *vorbis_comment_query(vorbis_comment *vc, const char *tag, int count){
   long i;
   int found = 0;
