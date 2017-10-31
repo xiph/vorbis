@@ -415,20 +415,28 @@ long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
         switch((int)book->dim){
         case 8:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 7:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 6:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 5:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 4:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 3:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 2:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 1:
           a[i++]+=t[j++];
+          /* FALLTHRU */
         case 0:
           break;
         }
