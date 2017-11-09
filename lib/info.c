@@ -647,7 +647,7 @@ int vorbis_analysis_headerout(vorbis_dsp_state *v,
   memset(op_code,0,sizeof(*op_code));
 
   if(b){
-    oggpack_writeclear(&opb);
+    if(vi->channels>0)oggpack_writeclear(&opb);
     if(b->header)_ogg_free(b->header);
     if(b->header1)_ogg_free(b->header1);
     if(b->header2)_ogg_free(b->header2);
