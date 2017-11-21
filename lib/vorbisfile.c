@@ -68,8 +68,8 @@ static long _get_data(OggVorbis_File *vf){
   errno=0;
   if(!(vf->callbacks.read_func))return(-1);
   if(vf->datasource){
-    char *buffer=ogg_sync_buffer(&vf->oy,READSIZE);
-    long bytes=(vf->callbacks.read_func)(buffer,1,READSIZE,vf->datasource);
+    char *buffer=ogg_sync_buffer(&vf->oy,vf->read_size);
+    long bytes=(vf->callbacks.read_func)(buffer,1,vf->read_size,vf->datasource);
     if(bytes>0)ogg_sync_wrote(&vf->oy,bytes);
     if(bytes==0 && errno)return(-1);
     return(bytes);
@@ -884,6 +884,7 @@ static int _ov_open1(void *f,OggVorbis_File *vf,const char *initial,
   memset(vf,0,sizeof(*vf));
   vf->datasource=f;
   vf->callbacks = callbacks;
+  vf->read_size = READSIZE;
 
   /* init the framing state */
   ogg_sync_init(&vf->oy);
@@ -1909,6 +1910,10 @@ vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
   }else{
     return vf->vc;
   }
+}
+
+void ov_set_read_size(OggVorbis_File *vf,int read_size) {
+  vf->read_size = read_size;
 }
 
 static int host_is_big_endian() {
