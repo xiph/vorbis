@@ -1,5 +1,9 @@
 language: c
 
+os:
+  - linux
+  - osx
+
 compiler:
   - gcc
   - clang
@@ -13,12 +17,9 @@ addons:
     packages:
     - libogg-dev
 
+install:
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew bundle; fi
+
 script:
-  - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./autogen.sh ; fi
-  - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./configure ; fi
-  - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then make -j2 V=1 distcheck ; fi
-  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then mkdir build ; fi
-  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then pushd build ; fi
-  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release .. ; fi
-  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then cmake --build . ; fi
-  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then popd ; fi
+  - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./autogen.sh && ./configure && make -j2 V=1 distcheck; fi
+  - if [[ "$BUILD_SYSTEM" == "CMAKE" ]] ; then mkdir build && pushd build && cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release .. && cmake --build . && popd; fi
