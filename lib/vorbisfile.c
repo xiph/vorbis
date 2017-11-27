@@ -1916,6 +1916,10 @@ void ov_set_read_size(OggVorbis_File *vf,int read_size) {
   vf->read_size = MAX(1, MIN(read_size, CHUNKSIZE));
 }
 
+int ov_get_read_size(OggVorbis_File *vf) {
+  return vf->read_size;
+}
+
 static int host_is_big_endian() {
   ogg_int32_t pattern = 0xfeedface; /* deadbeef */
   unsigned char *bytewise = (unsigned char *)&pattern;
