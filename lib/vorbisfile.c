@@ -1913,7 +1913,9 @@ vorbis_comment *ov_comment(OggVorbis_File *vf,int link){
 }
 
 void ov_set_read_size(OggVorbis_File *vf,int read_size) {
-  vf->read_size = MAX(1, MIN(read_size, CHUNKSIZE));
+  read_size = read_size > CHUNKSIZE ? CHUNKSIZE : read_size;
+  read_size = read_size < 1 ? 1 : read_size;
+  vf->read_size = read_size;
 }
 
 int ov_get_read_size(OggVorbis_File *vf) {
