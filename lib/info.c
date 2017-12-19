@@ -30,8 +30,8 @@
 #include "misc.h"
 #include "os.h"
 
-#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.3.5"
-#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20150105 (⛄⛄⛄⛄)"
+#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.3.6"
+#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20170724 (Nothing to see)"
 
 /* helpers */
 static void _v_writestring(oggpack_buffer *o,const char *s, int bytes){

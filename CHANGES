@@ -1,3 +1,11 @@
+libvorbis 1.3.6 (2017-07-24) -- "Xiph.Org libvorbis I 20170724 (Nothing to see)"
+
+* Fix overflow with high-dimension codebooks.
+* Fix crash when comment temporaries exceeded the stack limit.
+* Fix problem reading bitrate header fields.
+* CMake build description.
+* Other build system updates.
+
 libvorbis 1.3.5 (2015-03-03) -- "Xiph.Org libVorbis I 20150105 (⛄⛄⛄⛄)"
 
 * Tolerate single-entry codebooks.
