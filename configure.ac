@@ -5,7 +5,7 @@ dnl Initialization and Versioning
 dnl ------------------------------------------------
 
 
-AC_INIT([libvorbis],[1.3.5],[vorbis-dev@xiph.org])
+AC_INIT([libvorbis],[1.3.6],[vorbis-dev@xiph.org])
 
 AC_CONFIG_MACRO_DIR([m4])
 
