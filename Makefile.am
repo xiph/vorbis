@@ -26,7 +26,7 @@ EXTRA_DIST = \
 	vorbisenc-uninstalled.pc.in \
 	vorbisfile-uninstalled.pc.in \
 	symbian \
-	macosx win32
+	macosx win32 CMakeLists.txt
 
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-docs
