@@ -1210,7 +1210,7 @@ int vorbis_encode_ctl(vorbis_info *vi,int number,void *arg){
                                           hi->req,
                                           hi->managed,
                                           &new_base);
-        if(!hi->setup)return OV_EIMPL;
+        if(!new_template)return OV_EIMPL;
         hi->setup=new_template;
         hi->base_setting=new_base;
         vorbis_encode_setup_setting(vi,vi->channels,vi->rate);
