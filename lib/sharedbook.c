@@ -62,7 +62,15 @@ float _float32_unpack(long val){
   int    sign=val&0x80000000;
   long   exp =(val&0x7fe00000L)>>VQ_FMAN;
   if(sign)mant= -mant;
-  return(ldexp(mant,exp-(VQ_FMAN-1)-VQ_FEXP_BIAS));
+  exp=exp-(VQ_FMAN-1)-VQ_FEXP_BIAS;
+  /* clamp excessive exponent values */
+  if (exp>63){
+    exp=63;
+  }
+  if (exp<-63){
+    exp-63;
+  }
+  return(ldexp(mant,exp));
 }
 
 /* given a list of word lengths, generate a list of codewords.  Works
