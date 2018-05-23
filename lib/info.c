@@ -203,6 +203,7 @@ void vorbis_info_clear(vorbis_info *vi){
 
 static int _vorbis_unpack_info(vorbis_info *vi,oggpack_buffer *opb){
   codec_setup_info     *ci=vi->codec_setup;
+  int bs;
   if(!ci)return(OV_EFAULT);
 
   vi->version=oggpack_read(opb,32);
@@ -215,8 +216,12 @@ static int _vorbis_unpack_info(vorbis_info *vi,oggpack_buffer *opb){
   vi->bitrate_nominal=(ogg_int32_t)oggpack_read(opb,32);
   vi->bitrate_lower=(ogg_int32_t)oggpack_read(opb,32);
 
-  ci->blocksizes[0]=1<<oggpack_read(opb,4);
-  ci->blocksizes[1]=1<<oggpack_read(opb,4);
+  bs = oggpack_read(opb,4);
+  if(bs<0)goto err_out;
+  ci->blocksizes[0]=1<<bs;
+  bs = oggpack_read(opb,4);
+  if(bs<0)goto err_out;
+  ci->blocksizes[1]=1<<bs;
 
   if(vi->rate<1)goto err_out;
   if(vi->channels<1)goto err_out;
