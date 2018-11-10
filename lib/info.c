@@ -19,7 +19,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 #include <ogg/ogg.h>
 #include "vorbis/codec.h"
 #include "codec_internal.h"
@@ -45,6 +44,10 @@ static void _v_readstring(oggpack_buffer *o,char *buf,int bytes){
   while(bytes--){
     *buf++=oggpack_read(o,8);
   }
+}
+
+static int _v_toupper(int c) {
+  return (c >= 'a' && c <= 'z') ? (c & ~('a' - 'A')) : c;
 }
 
 void vorbis_comment_init(vorbis_comment *vc){
@@ -78,7 +81,7 @@ void vorbis_comment_add_tag(vorbis_comment *vc, const char *tag, const char *con
 static int tagcompare(const char *s1, const char *s2, int n){
   int c=0;
   while(c < n){
-    if(toupper(s1[c]) != toupper(s2[c]))
+    if(_v_toupper(s1[c]) != _v_toupper(s2[c]))
       return !0;
     c++;
   }
