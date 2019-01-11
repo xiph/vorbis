@@ -68,7 +68,7 @@ float _float32_unpack(long val){
     exp=63;
   }
   if (exp<-63){
-    exp-63;
+    exp=-63;
   }
   return(ldexp(mant,exp));
 }
