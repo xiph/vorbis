@@ -264,6 +264,10 @@ static ogg_int64_t _get_prev_page_serial(OggVorbis_File *vf, ogg_int64_t begin,
         }
       }
     }
+    /*We started from the beginning of the stream and found nothing.
+      This should be impossible unless the contents of the stream changed out
+      from under us after we read from it.*/
+    if(!begin&&vf->offset<0)return OV_EBADLINK;
   }
 
   /* we're not interested in the page... just the serialno and granpos. */
