@@ -581,6 +581,7 @@ void run_test(static_codebook *b,float *comp){
       exit(1);
     }
   }
+  free(out);
 }
 
 int main(){
