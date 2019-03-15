@@ -52,7 +52,7 @@ void mdct_init(mdct_lookup *lookup,int n){
   int   *bitrev=_ogg_malloc(sizeof(*bitrev)*(n/4));
   DATA_TYPE *T=_ogg_malloc(sizeof(*T)*(n+n/4));
 
-  int i;
+  int i, j;
   int n2=n>>1;
   int log2n=lookup->log2n=rint(log((float)n)/log(2.f));
   lookup->n=n;
@@ -75,7 +75,7 @@ void mdct_init(mdct_lookup *lookup,int n){
   /* bitreverse lookup... */
 
   {
-    int mask=(1<<(log2n-1))-1,i,j;
+    int mask=(1<<(log2n-1))-1;
     int msb=1<<(log2n-2);
     for(i=0;i<n/8;i++){
       int acc=0;
@@ -436,7 +436,7 @@ void mdct_backward(mdct_lookup *init, DATA_TYPE *in, DATA_TYPE *out){
   {
     DATA_TYPE *oX1=out+n2+n4;
     DATA_TYPE *oX2=out+n2+n4;
-    DATA_TYPE *iX =out;
+    iX            =out;
     T             =init->trig+n2;
 
     do{

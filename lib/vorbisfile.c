@@ -1110,10 +1110,10 @@ long ov_bitrate(OggVorbis_File *vf,int i){
   if(!vf->seekable && i!=0)return(ov_bitrate(vf,0));
   if(i<0){
     ogg_int64_t bits=0;
-    int i;
+    int j;
     float br;
-    for(i=0;i<vf->links;i++)
-      bits+=(vf->offsets[i+1]-vf->dataoffsets[i])*8;
+    for(j=0;j<vf->links;j++)
+      bits+=(vf->offsets[j+1]-vf->dataoffsets[j])*8;
     /* This once read: return(rint(bits/ov_time_total(vf,-1)));
      * gcc 3.x on x86 miscompiled this at optimisation level 2 and above,
      * so this is slightly transformed to make it work.
@@ -1178,9 +1178,9 @@ ogg_int64_t ov_raw_total(OggVorbis_File *vf,int i){
   if(!vf->seekable || i>=vf->links)return(OV_EINVAL);
   if(i<0){
     ogg_int64_t acc=0;
-    int i;
-    for(i=0;i<vf->links;i++)
-      acc+=ov_raw_total(vf,i);
+    int j;
+    for(j=0;j<vf->links;j++)
+      acc+=ov_raw_total(vf,j);
     return(acc);
   }else{
     return(vf->offsets[i+1]-vf->offsets[i]);
@@ -1197,9 +1197,9 @@ ogg_int64_t ov_pcm_total(OggVorbis_File *vf,int i){
   if(!vf->seekable || i>=vf->links)return(OV_EINVAL);
   if(i<0){
     ogg_int64_t acc=0;
-    int i;
-    for(i=0;i<vf->links;i++)
-      acc+=ov_pcm_total(vf,i);
+    int j;
+    for(j=0;j<vf->links;j++)
+      acc+=ov_pcm_total(vf,j);
     return(acc);
   }else{
     return(vf->pcmlengths[i*2+1]);
@@ -1216,9 +1216,9 @@ double ov_time_total(OggVorbis_File *vf,int i){
   if(!vf->seekable || i>=vf->links)return(OV_EINVAL);
   if(i<0){
     double acc=0;
-    int i;
-    for(i=0;i<vf->links;i++)
-      acc+=ov_time_total(vf,i);
+    int j;
+    for(j=0;j<vf->links;j++)
+      acc+=ov_time_total(vf,j);
     return(acc);
   }else{
     return((double)(vf->pcmlengths[i*2+1])/vf->vi[i].rate);
@@ -1592,7 +1592,6 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
       /* Bisection found our page. seek to it, update pcm offset. Easier case than
          raw_seek, don't keep packets preceding granulepos. */
 
-      ogg_page og;
       ogg_packet op;
 
       /* seek */
@@ -1687,7 +1686,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
     ogg_packet op;
     ogg_page og;
 
-    int ret=ogg_stream_packetpeek(&vf->os,&op);
+    ret=ogg_stream_packetpeek(&vf->os,&op);
     if(ret>0){
       thisblock=vorbis_packet_blocksize(vf->vi+vf->current_link,&op);
       if(thisblock<0){
@@ -2064,7 +2063,6 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
           vorbis_fpu_restore(fpu);
 
         }else{
-          int val;
           vorbis_fpu_setround(&fpu);
           for(j=0;j<samples;j++)
             for(i=0;i<channels;i++){
