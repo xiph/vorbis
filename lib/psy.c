@@ -285,9 +285,9 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
 
   /* AoTuV HF weighting */
   p->m_val = 1.;
-  if(rate < 26000) p->m_val = 0;
-  else if(rate < 38000) p->m_val = .94;   /* 32kHz */
-  else if(rate > 46000) p->m_val = 1.275; /* 48kHz */
+  if(rate < 26000) p->m_val = 0.0f;
+  else if(rate < 38000) p->m_val = 0.94f;   /* 32kHz */
+  else if(rate > 46000) p->m_val = 1.275f; /* 48kHz */
 
   /* set up the lookups for a given blocksize and sample rate */
 
@@ -798,7 +798,7 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
     */
 
     if(offset_select == 1) {
-      coeffi = -17.2;       /* coeffi is a -17.2dB threshold */
+      coeffi = -17.2f;       /* coeffi is a -17.2dB threshold */
       val = val - logmdct[i];  /* val == mdct line value relative to floor in dB */
 
       if(val > coeffi){
@@ -811,7 +811,7 @@ void _vp_offset_and_mix(vorbis_look_psy *p,
            -1.64 dB boost if mdct value is +17.2dB (relative to floor)
            etc... */
 
-        if(de < 0) de = 0.0001;
+        if(de < 0) de = 0.0001f;
       }else
         /* mdct value is <= -17.2 dB below floor */
 

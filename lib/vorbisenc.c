@@ -910,8 +910,8 @@ int vorbis_encode_setup_vbr(vorbis_info *vi,
   ci=vi->codec_setup;
   hi=&ci->hi;
 
-  quality+=.0000001;
-  if(quality>=1.)quality=.9999;
+  quality+=0.0000001f;
+  if(quality>=1.0f)quality=0.9999f;
 
   hi->req=quality;
   hi->setup=get_setup_template(channels,rate,quality,0,&hi->base_setting);

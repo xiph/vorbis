@@ -124,7 +124,7 @@ int main(){
 
    *********************************************************************/
 
-  ret=vorbis_encode_init_vbr(&vi,2,44100,0.1);
+  ret=vorbis_encode_init_vbr(&vi,2,44100,0.1f);
 
   /* do not continue if setup failed; this can happen if we ask for a
      mode that libVorbis does not support (eg, too low a bitrate, etc,
@@ -177,7 +177,6 @@ int main(){
   }
 
   while(!eos){
-    long i;
     long bytes=fread(readbuffer,1,READ*4,stdin); /* stereo hardwired here */
 
     if(bytes==0){
