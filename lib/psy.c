@@ -459,7 +459,7 @@ static void seed_chase(float *seeds, int linesper, long n){
       posstack[stack]=i;
       ampstack[stack++]=seeds[i];
     }else{
-      while(1){
+      for(;;){
         if(seeds[i]<ampstack[stack-1]){
           posstack[stack]=i;
           ampstack[stack++]=seeds[i];

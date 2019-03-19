@@ -315,7 +315,7 @@ static int Laguerre_With_Deflation(float *a,int ord,float *r){
     double new=0.f,delta;
 
     /* iterate a root */
-    while(1){
+    for(;;){
       double p=defl[m],pp=0.f,ppp=0.f,denom;
 
       /* eval the polynomial and its first two derivatives */

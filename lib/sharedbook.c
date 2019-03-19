@@ -180,7 +180,7 @@ long _book_maptype1_quantvals(const static_codebook *b){
   if(vals<1){
     vals=1;
   }
-  while(1){
+  for(;;){
     long acc=1;
     long acc1=1;
     int i;

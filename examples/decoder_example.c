@@ -75,7 +75,7 @@ int main(){
 
   ogg_sync_init(&oy); /* Now we can read pages */
 
-  while(1){ /* we repeat if the bitstream is chained */
+  for(;;){ /* we repeat if the bitstream is chained */
     int eos=0;
     int i;
 
@@ -215,7 +215,7 @@ int main(){
           }else{
             ogg_stream_pagein(&os,&og); /* can safely ignore errors at
                                            this point */
-            while(1){
+            for(;;){
               result=ogg_stream_packetout(&os,&op);
 
               if(result==0)break; /* need more data */
