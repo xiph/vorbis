@@ -42,8 +42,8 @@ int vorbis_analysis(vorbis_block *vb, ogg_packet *op){
   /* we only have one mapping type (0), and we let the mapping code
      itself figure out what soft mode to use.  This allows easier
      bitrate management */
-
-  if((ret=_mapping_P[0]->forward(vb)))
+  ret = _mapping_P[0]->forward(vb);
+  if(ret)
     return(ret);
 
   if(op){

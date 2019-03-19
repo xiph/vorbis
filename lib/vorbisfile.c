@@ -327,7 +327,8 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
          vorbis_synthesis_idheader(&op)){
         /* vorbis header; continue setup */
         vf->ready_state=STREAMSET;
-        if((ret=vorbis_synthesis_headerin(vi,vc,&op))){
+		ret = vorbis_synthesis_headerin(vi, vc, &op);
+        if(ret){
           ret=OV_EBADHEADER;
           goto bail_header;
         }
@@ -374,7 +375,8 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
           goto bail_header;
         }
 
-        if((ret=vorbis_synthesis_headerin(vi,vc,&op)))
+		ret = vorbis_synthesis_headerin(vi, vc, &op);
+        if(ret)
           goto bail_header;
 
         i++;
@@ -438,7 +440,9 @@ static ogg_int64_t _initial_pcmoffset(OggVorbis_File *vf, vorbis_info *vi){
 
     /* count blocksizes of all frames in the page */
     ogg_stream_pagein(&vf->os,&og);
-    while((result=ogg_stream_packetout(&vf->os,&op))){
+   next_packet:
+    result=ogg_stream_packetout(&vf->os,&op);
+    if(result){
       if(result>0){ /* ignore holes */
         long thisblock=vorbis_packet_blocksize(vi,&op);
         if(thisblock>=0){
@@ -447,6 +451,7 @@ static ogg_int64_t _initial_pcmoffset(OggVorbis_File *vf, vorbis_info *vi){
           lastblock=thisblock;
         }
       }
+      goto next_packet;
     }
 
     if(ogg_page_granulepos(&og)!=-1){
@@ -1677,7 +1682,8 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   int thisblock,lastblock=0;
   int ret=ov_pcm_seek_page(vf,pos);
   if(ret<0)return(ret);
-  if((ret=_make_decode_ready(vf)))return ret;
+  ret = _make_decode_ready(vf);
+  if(ret)return ret;
 
   /* discard leading packets we don't need for the lapping of the
      position we want; don't decode them */
