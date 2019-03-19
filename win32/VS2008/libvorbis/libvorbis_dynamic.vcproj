@@ -113,7 +113,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool"/>
-			<Tool Name="VCCLCompilerTool" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" Detect64BitPortabilityProblems="false" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4305;4127;4706" CallingConvention="0"/>
+			<Tool Name="VCCLCompilerTool" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" Detect64BitPortabilityProblems="false" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4127" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
@@ -133,7 +133,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TargetEnvironment="3"/>
-			<Tool Name="VCCLCompilerTool" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" Detect64BitPortabilityProblems="false" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4305;4127;4706" CallingConvention="0"/>
+			<Tool Name="VCCLCompilerTool" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" Detect64BitPortabilityProblems="false" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4127" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
@@ -153,7 +153,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TargetEnvironment="1"/>
-			<Tool Name="VCCLCompilerTool" ExecutionBucket="7" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;$(ARCHFAM);$(_ARCHFAM_)" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4305;4127;4706" CallingConvention="0"/>
+			<Tool Name="VCCLCompilerTool" ExecutionBucket="7" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;$(ARCHFAM);$(_ARCHFAM_)" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4127" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
@@ -172,7 +172,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TargetEnvironment="1"/>
-			<Tool Name="VCCLCompilerTool" ExecutionBucket="7" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;$(ARCHFAM);$(_ARCHFAM_)" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4305;4127;4706" CallingConvention="0"/>
+			<Tool Name="VCCLCompilerTool" ExecutionBucket="7" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;$(ARCHFAM);$(_ARCHFAM_)" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4127" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
@@ -191,7 +191,7 @@
 			<Tool Name="VCXMLDataGeneratorTool"/>
 			<Tool Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool Name="VCMIDLTool" TargetEnvironment="1"/>
-			<Tool Name="VCCLCompilerTool" ExecutionBucket="7" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;$(ARCHFAM);$(_ARCHFAM_)" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4305;4127;4706" CallingConvention="0"/>
+			<Tool Name="VCCLCompilerTool" ExecutionBucket="7" Optimization="3" InlineFunctionExpansion="2" EnableIntrinsicFunctions="true" FavorSizeOrSpeed="1" AdditionalIncludeDirectories="..\..\..\include;..\..\..\..\libogg\include" PreprocessorDefinitions="NDEBUG;_WINDOWS;_USRDLL;LIBVORBIS_EXPORTS;_WIN32_WCE=$(CEVER);UNDER_CE;WINCE;$(ARCHFAM);$(_ARCHFAM_)" StringPooling="true" ExceptionHandling="0" RuntimeLibrary="2" BufferSecurityCheck="false" UsePrecompiledHeader="0" WarningLevel="4" DebugInformationFormat="3" CompileAs="1" DisableSpecificWarnings="4244;4100;4267;4189;4127" CallingConvention="0"/>
 			<Tool Name="VCManagedResourceCompilerTool"/>
 			<Tool Name="VCResourceCompilerTool"/>
 			<Tool Name="VCPreLinkEventTool"/>
