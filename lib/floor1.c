@@ -710,10 +710,8 @@ int *floor1_fit(vorbis_block *vb,vorbis_look_floor1 *look,
       int hn=look->hineighbor[i-2];
       int x0=info->postlist[ln];
       int x1=info->postlist[hn];
-      y0    =output[ln];
-      y1    =output[hn];
 
-      int predicted=render_point(x0,x1,y0,y1,info->postlist[i]);
+      int predicted=render_point(x0,x1,output[ln],output[hn],info->postlist[i]);
       int vx=post_Y(fit_valueA,fit_valueB,i);
 
       if(vx>=0 && predicted!=vx){
