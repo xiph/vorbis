@@ -110,7 +110,7 @@ static int _seek_helper(OggVorbis_File *vf,ogg_int64_t offset){
 static ogg_int64_t _get_next_page(OggVorbis_File *vf,ogg_page *og,
                                   ogg_int64_t boundary){
   if(boundary>0)boundary+=vf->offset;
-  while(1){
+  for(;;){
     long more;
 
     if(boundary>0 && vf->offset>=boundary)return(OV_FALSE);
@@ -361,7 +361,7 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
     goto bail_header;
   }
 
-  while(1){
+  for(;;){
 
     i=0;
     while(i<2){ /* get a page loop */
@@ -430,7 +430,7 @@ static ogg_int64_t _initial_pcmoffset(OggVorbis_File *vf, vorbis_info *vi){
   int         result;
   int         serialno = vf->os.serialno;
 
-  while(1){
+  for(;;){
     ogg_packet op;
     if(_get_next_page(vf,&og,-1)<0)
       break; /* should not be possible unless the file is truncated/mangled */
@@ -688,7 +688,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
 
   /* handle one packet.  Try to fetch it from current stream state */
   /* extract packets from page */
-  while(1){
+  for(;;){
 
     if(vf->ready_state==STREAMSET){
       int ret=_make_decode_ready(vf);
@@ -700,7 +700,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
     if(vf->ready_state==INITSET){
       int hs=vorbis_synthesis_halfrate_p(vf->vi);
 
-      while(1) {
+      for(;;) {
               ogg_packet op;
               ogg_packet *op_ptr=(op_in?op_in:&op);
         int result=ogg_stream_packetout(&vf->os,op_ptr);
@@ -774,7 +774,7 @@ static int _fetch_and_process_packet(OggVorbis_File *vf,
     if(vf->ready_state>=OPENED){
       ogg_int64_t ret;
 
-      while(1){
+      for(;;){
         /* the loop is not strictly necessary, but there's no sense in
            doing the extra checks of the larger loop for the common
            case in a multiplexed bistream where the page is simply
@@ -1298,7 +1298,7 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
                                    return from not necessarily
                                    starting from the beginning */
 
-    while(1){
+    for(;;){
       if(vf->ready_state>=STREAMSET){
         /* snarf/scan a packet if we can */
         int result=ogg_stream_packetout(&work_os,&op);
@@ -1622,7 +1622,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
       ogg_stream_pagein(&vf->os,&og);
 
       /* pull out all but last packet; the one with granulepos */
-      while(1){
+      for(;;){
         result=ogg_stream_packetpeek(&vf->os,&op);
         if(result==0){
           /* No packet returned; we exited the bisection with 'best'
@@ -1688,7 +1688,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
   /* discard leading packets we don't need for the lapping of the
      position we want; don't decode them */
 
-  while(1){
+  for(;;){
     ogg_packet op;
     ogg_page og;
 
@@ -1970,7 +1970,7 @@ long ov_read_filter(OggVorbis_File *vf,char *buffer,int length,
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
 
-  while(1){
+  for(;;){
     if(vf->ready_state==INITSET){
       samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
       if(samples)break;
@@ -2119,7 +2119,7 @@ long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int length,
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
 
-  while(1){
+  for(;;){
     if(vf->ready_state==INITSET){
       float **pcm;
       long samples=vorbis_synthesis_pcmout(&vf->vd,&pcm);
@@ -2184,7 +2184,7 @@ static void _ov_splice(float **pcm,float **lappcm,
 
 /* make sure vf is INITSET */
 static int _ov_initset(OggVorbis_File *vf){
-  while(1){
+  for(;;){
     if(vf->ready_state==INITSET)break;
     /* suck in another packet */
     {
@@ -2200,7 +2200,7 @@ static int _ov_initset(OggVorbis_File *vf){
    sure we're sanity checking against the right stream information */
 static int _ov_initprime(OggVorbis_File *vf){
   vorbis_dsp_state *vd=&vf->vd;
-  while(1){
+  for(;;){
     if(vf->ready_state==INITSET)
       if(vorbis_synthesis_pcmout(vd,NULL))break;
 
