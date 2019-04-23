@@ -1,9 +1,12 @@
-cmake_minimum_required(VERSION 2.8.7)
+cmake_minimum_required(VERSION 2.8.12)
 project(vorbis)
+
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Required modules
 include(GNUInstallDirs)
 include(CheckIncludeFiles)
+include(CheckLibraryExists)
 
 # Build options
 option(BUILD_SHARED_LIBS "Build shared library" OFF)
@@ -14,6 +17,8 @@ endif()
 if(BUILD_FRAMEWORK)
 	set(BUILD_SHARED_LIBS TRUE)
 endif()
+
+option(INSTALL_CMAKE_PACKAGE_MODULE "Install CMake package configiguration module" ON)
 
 # Extract project version from configure.ac
 file(READ configure.ac CONFIGURE_AC_CONTENTS)
@@ -52,18 +57,12 @@ endfunction()
 
 message(STATUS "Configuring ${PROJECT_NAME} ${PROJECT_VERSION}")
 
+# Find math library
+
+check_library_exists(m floor "" HAVE_LIBM)
+
 # Find ogg dependency
-if(NOT OGG_ROOT)
-    find_package(PkgConfig QUIET)
-    pkg_check_modules(PC_OGG QUIET ogg)
-    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${PC_OGG_INCLUDE_DIRS} PATH_SUFFIXES ogg)
-    find_library(OGG_LIBRARIES NAMES ogg HINTS ${PC_OGG_LIBRARY_DIRS})
-else()
-    find_path(OGG_INCLUDE_DIRS NAMES ogg/ogg.h HINTS ${OGG_ROOT}/include PATH_SUFFIXES ogg)
-    find_library(OGG_LIBRARIES NAMES ogg HINTS ${OGG_ROOT}/lib ${OGG_ROOT}/lib64)
-endif()
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(OGG DEFAULT_MSG OGG_INCLUDE_DIRS OGG_LIBRARIES)
+find_package(Ogg REQUIRED)
 
 add_subdirectory(lib)
 
