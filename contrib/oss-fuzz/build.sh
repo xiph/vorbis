@@ -20,4 +20,4 @@ make clean
 make -j$(nproc)
 make install
 
-$CXX $CXXFLAGS $SRC/vorbis/contrib/oss-fuzz/decode_fuzzer.cc -o $OUT/decode_fuzzer -L"$WORK/lib" -I"$WORK/include" -lFuzzingEngine -lvorbisfile -lvorbis -logg
+$CXX $CXXFLAGS $SRC/vorbis/contrib/oss-fuzz/decode_fuzzer.cc -o $OUT/decode_fuzzer -L"$WORK/lib" -I"$WORK/include" $LIB_FUZZING_ENGINE -lvorbisfile -lvorbis -logg
