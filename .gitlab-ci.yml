@@ -1,0 +1,19 @@
+# Image from https://hub.docker.com/_/gcc/ based on Debian
+image: gcc
+
+build:
+  stage: build
+  before_script:
+    - apt-get update &&
+      apt-get install -y libogg-dev zip doxygen
+  script:
+    - ./autogen.sh
+    - ./configure
+    - make
+    - make distcheck
+  cache:
+    paths:
+      - "lib/*.o"
+      - "lib/.libs/*.o"
+  tags:
+    - docker
