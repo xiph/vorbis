@@ -106,7 +106,7 @@ if (NOT BUILD_FRAMEWORK)
     target_link_libraries(vorbisenc PUBLIC vorbis)
     target_link_libraries(vorbisfile PUBLIC vorbis)
 
-    install(FILES ${VORBIS_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/Vorbis)
+    install(FILES ${VORBIS_PUBLIC_HEADERS} DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/vorbis)
 
     install(TARGETS vorbis vorbisenc vorbisfile
         EXPORT VorbisTargets
