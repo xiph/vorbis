@@ -67,6 +67,12 @@ if(WIN32)
     list(APPEND VORBISFILE_SOURCES ../win32/vorbisfile.def)
 endif()
 
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+    add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
+    add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
+endif()
+
 if (NOT BUILD_FRAMEWORK)
     add_library(vorbis ${VORBIS_HEADERS} ${VORBIS_SOURCES})
     add_library(vorbisenc ${VORBISENC_SOURCES})
