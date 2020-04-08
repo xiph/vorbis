@@ -4,6 +4,8 @@ os:
   - linux
   - osx
 
+osx_image: xcode11
+
 compiler:
   - gcc
   - clang
@@ -16,9 +18,9 @@ addons:
   apt:
     packages:
     - libogg-dev
-
-install:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update && brew bundle; fi
+  homebrew:
+    brewfile: true
+    update: true
 
 script:
   - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./autogen.sh && ./configure && make -j2 V=1 distcheck; fi
