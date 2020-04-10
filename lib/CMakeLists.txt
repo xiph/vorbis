@@ -58,11 +58,8 @@ set(VORBISENC_SOURCES
 )
 
 if(WIN32)
-    list(APPEND VORBIS_SOURCES vorbisenc.c)
-endif()
-
-if(WIN32)
-    list(APPEND VORBIS_SOURCES ../win32/vorbis.def)
+    # win32/vorbis.def exports vorbisenc functions, we don't use it
+    list(APPEND VORBIS_SOURCES ../cmake/vorbis.def)
     list(APPEND VORBISENC_SOURCES ../win32/vorbisenc.def)
     list(APPEND VORBISFILE_SOURCES ../win32/vorbisfile.def)
 endif()
