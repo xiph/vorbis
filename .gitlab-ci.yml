@@ -1,7 +1,7 @@
 # Image from https://hub.docker.com/_/gcc/ based on Debian
 image: gcc
 
-build:
+autoconf:
   stage: build
   before_script:
     - apt-get update &&
@@ -15,5 +15,18 @@ build:
     paths:
       - "lib/*.o"
       - "lib/.libs/*.o"
+  tags:
+    - docker
+
+cmake:
+  stage: build
+  before_script:
+    - apt-get update &&
+      apt-get install -y libogg-dev zip doxygen
+        cmake ninja-build
+  script:
+    - mkdir build
+    - cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
+    - cmake --build build
   tags:
     - docker
