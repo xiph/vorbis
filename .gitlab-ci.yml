@@ -14,10 +14,6 @@ autoconf:
     - ./configure
     - make
     - make distcheck
-  cache:
-    paths:
-      - "lib/*.o"
-      - "lib/.libs/*.o"
 
 cmake:
   stage: build
