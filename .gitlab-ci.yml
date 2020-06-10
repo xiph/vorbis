@@ -1,5 +1,8 @@
-# Image from https://hub.docker.com/_/gcc/ based on Debian
-image: gcc
+default:
+  tags:
+    - docker
+  # Image from https://hub.docker.com/_/gcc/ based on Debian
+  image: gcc
 
 autoconf:
   stage: build
@@ -15,8 +18,6 @@ autoconf:
     paths:
       - "lib/*.o"
       - "lib/.libs/*.o"
-  tags:
-    - docker
 
 cmake:
   stage: build
@@ -28,5 +29,3 @@ cmake:
     - mkdir build
     - cmake -S . -B build -G "Ninja" -DCMAKE_BUILD_TYPE=Release
     - cmake --build build
-  tags:
-    - docker
