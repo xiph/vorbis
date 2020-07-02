@@ -29,8 +29,8 @@
 #include "misc.h"
 #include "os.h"
 
-#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.3.6"
-#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20180316 (Now 100% fewer shells)"
+#define GENERAL_VENDOR_STRING "Xiph.Org libVorbis 1.3.7"
+#define ENCODE_VENDOR_STRING "Xiph.Org libVorbis I 20200704 (Reducing Environment)"
 
 /* helpers */
 static void _v_writestring(oggpack_buffer *o,const char *s, int bytes){
