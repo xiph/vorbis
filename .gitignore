@@ -36,6 +36,11 @@ vorbisfile-uninstalled.pc
 vorbisfile.pc
 doc/Doxyfile
 doc/doxygen-build.stamp
+examples/chaining_example
+examples/decoder_example
+examples/encoder_example
+examples/seeking_example
+examples/vorbisfile_example
 lib/test_sharedbook
 test/test
 
