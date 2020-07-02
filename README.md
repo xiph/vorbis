@@ -63,8 +63,6 @@ Vorbis's homepage is located at 'https://www.xiph.org/vorbis/'.
 Up to date technical documents, contact information, source code and
 pre-built utilities may be found there.
 
-The user website for Ogg Vorbis software and audio is http://vorbis.com/
-
 ## Building ##
 
 #### Building from master ####
