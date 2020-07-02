@@ -107,8 +107,8 @@ after normal configuring:
 
 ## Building with CMake ##
 
-Ogg supports building using [CMake](http://www.cmake.org/). CMake is a meta build system that generates native projects for each platform.
-To generate projects just run cmake replacing `YOUR-PROJECT-GENERATOR` with a proper generator from a list [here](http://www.cmake.org/cmake/help/v3.2/manual/cmake-generators.7.html):
+Ogg supports building using [CMake](https://cmake.org/). CMake is a meta build system that generates native projects for each platform.
+To generate projects just run cmake replacing `YOUR-PROJECT-GENERATOR` with a proper generator from a list [here](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html):
 
     cmake -G YOUR-PROJECT-GENERATOR .
 
