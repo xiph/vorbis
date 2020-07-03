@@ -1,7 +1,7 @@
 # Vorbis
 
+[![GitLab Build Status](https://gitlab.xiph.org/xiph/vorbis/badges/master/pipeline.svg)](https://gitlab.xiph.org/xiph/vorbis/-/pipelines)
 [![Travis Build Status](https://travis-ci.org/xiph/vorbis.svg?branch=master)](https://travis-ci.org/xiph/vorbis)
-[![Jenkins Build Status](https://mf4.xiph.org/jenkins/job/libvorbis/badge/icon)](https://mf4.xiph.org/jenkins/job/libvorbis/)
 [![AppVeyor Build status](https://ci.appveyor.com/api/projects/status/github/xiph/vorbis?branch=master&svg=true)](https://ci.appveyor.com/project/rillian/vorbis)
 
 Vorbis is a general purpose audio and music encoding format
@@ -68,7 +68,7 @@ pre-built utilities may be found there.
 #### Building from master ####
 
 Development source is under git revision control at
-https://git.xiph.org/vorbis.git. You will also need the
+https://gitlab.xiph.org/xiph/vorbis.git. You will also need the
 newest versions of autoconf, automake, libtool and pkg-config in
 order to compile Vorbis from development source. A configure script
 is provided for you in the source tarball distributions.
