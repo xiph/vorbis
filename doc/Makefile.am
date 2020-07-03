@@ -91,6 +91,7 @@ CLEANFILES = $(SPEC_TEX:%.tex=%.aux) \
 	     Vorbis_I_spec.lg  Vorbis_I_spec.log \
 	     Vorbis_I_spec.out Vorbis_I_spec.tmp \
 	     Vorbis_I_spec.toc Vorbis_I_spec.xref \
+	     Vorbis_I_spec.out.ps \
 	     zzVorbis_I_spec.ps
 DISTCLEANFILES = $(built_docs)
 
