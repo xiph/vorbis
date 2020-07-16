@@ -11,6 +11,8 @@ libvorbis release checklist.
 - Copy source packages to a checkout of https://svn.xiph.org/releases/vorbis/
 - Add the packages to the repo and update checksum files there.
 - Update https://xiph.org/downloads/
+- Attach source packages and release notes to the tag on gitlab.xiph.org and github.
 - Update topic in the #vorbis irc channel on freenode.net.
 - Post announcement to https://xiph.org/press/ and link from front page.
 - Announce new release to mailing list.
+- Update releases.sha2 with the source package checksums for future reference.
