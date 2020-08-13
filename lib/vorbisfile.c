@@ -1440,8 +1440,12 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
     ogg_int64_t best=-1;
     int         got_page=0;
 
+    ogg_int64_t initialBegin;
     ogg_page og;
-
+      
+    if (pos < begin) begin = pos;
+    initialBegin = begin;
+      
     /* if we have only one page, there will be no bisection.  Grab the page here */
     if(begin==end){
       result=_seek_helper(vf,begin);
@@ -1560,7 +1564,7 @@ int ov_pcm_seek_page(OggVorbis_File *vf,ogg_int64_t pos){
          first PCM granule position fencepost. */
 
       if(got_page &&
-         begin == vf->dataoffsets[link] &&
+         begin == initialBegin &&
          ogg_page_serialno(&og)==vf->serialnos[link]){
 
         /* Yes, this is the beginning-of-stream case. We already have
