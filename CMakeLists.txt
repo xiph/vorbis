@@ -60,6 +60,9 @@ message(STATUS "Configuring ${PROJECT_NAME} ${PROJECT_VERSION}")
 # Find math library
 
 check_library_exists(m floor "" HAVE_LIBM)
+if(HAVE_LIBM)
+    set(VORBIS_LIBS "-lm")
+endif()
 
 # Find ogg dependency
 find_package(Ogg REQUIRED)
