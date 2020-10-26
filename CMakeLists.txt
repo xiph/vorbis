@@ -62,7 +62,9 @@ message(STATUS "Configuring ${PROJECT_NAME} ${PROJECT_VERSION}")
 check_library_exists(m floor "" HAVE_LIBM)
 
 # Find ogg dependency
-find_package(Ogg REQUIRED)
+if(NOT TARGET Ogg::ogg)
+    find_package(Ogg REQUIRED)
+endif()
 
 add_subdirectory(lib)
 

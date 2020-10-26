@@ -78,6 +78,10 @@ if (NOT BUILD_FRAMEWORK)
     add_library(vorbisenc ${VORBISENC_SOURCES})
     add_library(vorbisfile ${VORBISFILE_SOURCES})
 
+    add_library(Vorbis::vorbis ALIAS vorbis)
+    add_library(Vorbis::vorbisenc ALIAS vorbisenc)
+    add_library(Vorbis::vorbisfile ALIAS vorbisfile)
+
     get_version_info(VORBIS_VERSION_INFO "V_LIB_CURRENT" "V_LIB_AGE" "V_LIB_REVISION")
     set_target_properties(vorbis PROPERTIES SOVERSION ${VORBIS_VERSION_INFO})
     get_version_info(VORBISENC_VERSION_INFO "VE_LIB_CURRENT" "VE_LIB_AGE" "VE_LIB_REVISION")
@@ -121,6 +125,7 @@ if (NOT BUILD_FRAMEWORK)
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         FRAMEWORK DESTINATION ${CMAKE_INSTALL_LIBDIR}
     )
+    export(EXPORT VorbisTargets NAMESPACE Vorbis:: FILE VorbisTargets.cmake)
 
     if(INSTALL_CMAKE_PACKAGE_MODULE)
 
@@ -134,15 +139,15 @@ if (NOT BUILD_FRAMEWORK)
 
         include(CMakePackageConfigHelpers)
 
-        configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/VorbisConfig.cmake.in ${PROJECT_BINARY_DIR}/VorbisConfig.cmake
+        configure_package_config_file(${PROJECT_SOURCE_DIR}/cmake/VorbisConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/VorbisConfig.cmake
             INSTALL_DESTINATION ${CMAKE_INSTALL_CONFIGDIR}
         )
 
-        write_basic_package_version_file(${PROJECT_BINARY_DIR}/VorbisConfigVersion.cmake
+        write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/VorbisConfigVersion.cmake
             COMPATIBILITY SameMajorVersion
         )
 
-        install(FILES ${PROJECT_BINARY_DIR}/VorbisConfig.cmake ${PROJECT_BINARY_DIR}/VorbisConfigVersion.cmake
+        install(FILES ${CMAKE_CURRENT_BINARY_DIR}/VorbisConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/VorbisConfigVersion.cmake
             DESTINATION ${CMAKE_INSTALL_CONFIGDIR}
         )
 
