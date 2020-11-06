@@ -20,7 +20,6 @@ addons:
     - libogg-dev
   homebrew:
     brewfile: true
-    update: true
 
 script:
   - if [[ "$BUILD_SYSTEM" == "AUTOTOOLS" ]] ; then ./autogen.sh && ./configure && make -j2 V=1 distcheck; fi
