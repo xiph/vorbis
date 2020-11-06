@@ -12,6 +12,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/include @OGG_CFLAGS@
 test_SOURCES = util.c util.h write_read.c write_read.h test.c
 test_LDADD = ../lib/libvorbisenc.la ../lib/libvorbis.la @OGG_LIBS@ @VORBIS_LIBS@
 
+EXTRA_DIST = CMakeLists.txt
+
 debug:
 	$(MAKE) check CFLAGS="@DEBUG@"
 

@@ -4,6 +4,7 @@ project(vorbis)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 # Required modules
+include(CTest)
 include(GNUInstallDirs)
 include(CheckIncludeFiles)
 include(CheckLibraryExists)
@@ -70,6 +71,10 @@ if(NOT TARGET Ogg::ogg)
 endif()
 
 add_subdirectory(lib)
+
+if(BUILD_TESTING)
+    add_subdirectory(test)
+endif()
 
 configure_pkg_config_file(vorbis.pc.in)
 configure_pkg_config_file(vorbisenc.pc.in)
