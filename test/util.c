@@ -14,6 +14,10 @@
 
  ********************************************************************/
 
+#ifdef _WIN32
+#define _USE_MATH_DEFINES 1
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
