@@ -25,6 +25,10 @@
 
 #include "util.h"
 
+#ifndef M_PI
+#  define M_PI (3.1415926536f)
+#endif
+
 void
 gen_windowed_sine (float *data, int len, float maximum)
 {    int k ;
