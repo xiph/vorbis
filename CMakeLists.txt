@@ -19,7 +19,7 @@ if(BUILD_FRAMEWORK)
 	set(BUILD_SHARED_LIBS TRUE)
 endif()
 
-option(INSTALL_CMAKE_PACKAGE_MODULE "Install CMake package configiguration module" ON)
+option(INSTALL_CMAKE_PACKAGE_MODULE "Install CMake package configuration module" ON)
 
 # Extract project version from configure.ac
 file(READ configure.ac CONFIGURE_AC_CONTENTS)
