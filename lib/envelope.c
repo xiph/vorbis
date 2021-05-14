@@ -106,7 +106,7 @@ static int _ve_amp(envelope_lookup *ve,
   /* stretch is used to gradually lengthen the number of windows
      considered prevoius-to-potential-trigger */
   int stretch=max(VE_MINSTRETCH,ve->stretch/2);
-  float penalty=gi->stretch_penalty-(ve->stretch/2-VE_MINSTRETCH);
+  float penalty=gi->stretch_penalty-((float)(ve->stretch)/2-VE_MINSTRETCH);
   if(penalty<0.f)penalty=0.f;
   if(penalty>gi->stretch_penalty)penalty=gi->stretch_penalty;
 

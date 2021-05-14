@@ -560,7 +560,7 @@ static int inspect_error(int x0,int x1,int y0,int y1,const float *mask,
 
   if(info->maxover*info->maxover/n>info->maxerr)return(0);
   if(info->maxunder*info->maxunder/n>info->maxerr)return(0);
-  if(mse/n>info->maxerr)return(1);
+  if((float)(mse)/n>info->maxerr)return(1);
   return(0);
 }
 
