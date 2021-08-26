@@ -142,6 +142,9 @@ typedef struct OggVorbis_File {
 
   ov_callbacks callbacks;
 
+  /* The read size of the vorbis file */
+  int             read_size;
+
 } OggVorbis_File;
 
 
@@ -184,6 +187,8 @@ extern double ov_time_tell(OggVorbis_File *vf);
 
 extern vorbis_info *ov_info(OggVorbis_File *vf,int link);
 extern vorbis_comment *ov_comment(OggVorbis_File *vf,int link);
+extern void ov_set_read_size(OggVorbis_File *vf,int read_size);
+extern int ov_get_read_size(OggVorbis_File *vf);
 
 extern long ov_read_float(OggVorbis_File *vf,float ***pcm_channels,int samples,
                           int *bitstream);
