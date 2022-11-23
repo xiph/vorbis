@@ -67,7 +67,7 @@ dnl
 #include <vorbis/codec.h>
 #include <vorbis/vorbisenc.h>
 
-int main ()
+int main (void)
 {
     vorbis_block 	vb;
     vorbis_dsp_state	vd;
