@@ -82,12 +82,12 @@ if (NOT BUILD_FRAMEWORK)
     add_library(Vorbis::vorbisenc ALIAS vorbisenc)
     add_library(Vorbis::vorbisfile ALIAS vorbisfile)
 
-    get_version_info(VORBIS_VERSION_INFO "V_LIB_CURRENT" "V_LIB_AGE" "V_LIB_REVISION")
-    set_target_properties(vorbis PROPERTIES SOVERSION ${VORBIS_VERSION_INFO})
-    get_version_info(VORBISENC_VERSION_INFO "VE_LIB_CURRENT" "VE_LIB_AGE" "VE_LIB_REVISION")
-    set_target_properties(vorbisenc PROPERTIES SOVERSION ${VORBISENC_VERSION_INFO})
-    get_version_info(VORBISFILE_VERSION_INFO "VF_LIB_CURRENT" "VF_LIB_AGE" "VF_LIB_REVISION")
-    set_target_properties(vorbisfile PROPERTIES SOVERSION ${VORBISFILE_VERSION_INFO})
+    get_lib_versions(VORBIS_VERSION VORBIS_SOVERSION "V_LIB_CURRENT" "V_LIB_AGE" "V_LIB_REVISION")
+    set_target_properties(vorbis PROPERTIES VERSION ${VORBIS_VERSION} SOVERSION ${VORBIS_SOVERSION})
+    get_lib_versions(VORBISENC_VERSION VORBISENC_SOVERSION "VE_LIB_CURRENT" "VE_LIB_AGE" "VE_LIB_REVISION")
+    set_target_properties(vorbisenc PROPERTIES VERSION ${VORBISENC_VERSION} SOVERSION ${VORBISENC_SOVERSION})
+    get_lib_versions(VORBISFILE_VERSION VORBISFILE_SOVERSION "VF_LIB_CURRENT" "VF_LIB_AGE" "VF_LIB_REVISION")
+    set_target_properties(vorbisfile PROPERTIES VERSION ${VORBISFILE_VERSION} SOVERSION ${VORBISFILE_SOVERSION})
 
     target_include_directories(vorbis
         PUBLIC
