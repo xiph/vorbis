@@ -83,7 +83,8 @@ static const vorbis_residue_template _res_16s_2[]={
    &_resbook_16s_2,&_resbook_16s_2}
 };
 
-static const vorbis_mapping_template _mapres_template_16_stereo[3]={
+static const vorbis_mapping_template _mapres_template_16_stereo[]={
+  { _map_nominal, _res_16s_0 }, /* -1 */
   { _map_nominal, _res_16s_0 }, /* 0 */
   { _map_nominal, _res_16s_1 }, /* 1 */
   { _map_nominal, _res_16s_2 }, /* 2 */
@@ -155,7 +156,8 @@ static const vorbis_residue_template _res_16u_2[]={
 };
 
 
-static const vorbis_mapping_template _mapres_template_16_uncoupled[3]={
+static const vorbis_mapping_template _mapres_template_16_uncoupled[]={
+  { _map_nominal_u, _res_16u_0 }, /* -1 */
   { _map_nominal_u, _res_16u_0 }, /* 0 */
   { _map_nominal_u, _res_16u_1 }, /* 1 */
   { _map_nominal_u, _res_16u_2 }, /* 2 */

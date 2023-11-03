@@ -154,7 +154,7 @@ static vorbis_info_mapping *mapping0_unpack(vorbis_info *vi,oggpack_buffer *opb)
 #include "psy.h"
 #include "scales.h"
 
-#if 0
+#ifdef ANALYSIS
 static long seq=0;
 static ogg_int64_t total=0;
 static float FLOOR1_fromdB_LOOKUP[256]={
@@ -233,12 +233,16 @@ static int mapping0_forward(vorbis_block *vb){
   codec_setup_info      *ci=vi->codec_setup;
   private_state         *b=vb->vd->backend_state;
   vorbis_block_internal *vbi=(vorbis_block_internal *)vb->internal;
+  vorbis_info_floor1    *vif=ci->floor_param[vb->W];
   int                    n=vb->pcmend;
   int i,j,k;
 
   int    *nonzero    = alloca(sizeof(*nonzero)*vi->channels);
+  float  *poste      = alloca(sizeof(*poste)*vi->channels);
   float  **gmdct     = _vorbis_block_alloc(vb,vi->channels*sizeof(*gmdct));
-  int    **iwork      = _vorbis_block_alloc(vb,vi->channels*sizeof(*iwork));
+  float  **epeak     = _vorbis_block_alloc(vb,vi->channels*sizeof(*epeak));
+  float  **npeak     = _vorbis_block_alloc(vb,vi->channels*sizeof(*npeak));
+  int    **iwork     = _vorbis_block_alloc(vb,vi->channels*sizeof(*iwork));
   int ***floor_posts = _vorbis_block_alloc(vb,vi->channels*sizeof(*floor_posts));
 
   float global_ampmax=vbi->ampmax;
@@ -246,10 +250,27 @@ static int mapping0_forward(vorbis_block *vb){
   int blocktype=vbi->blocktype;
 
   int modenumber=vb->W;
+  int block_mode;
+  int lowpass_residue;
   vorbis_info_mapping0 *info=ci->map_param[modenumber];
   vorbis_look_psy *psy_look=b->psy+blocktype+(vb->W?2:0);
+  int partition=(psy_look->vi->normal_p ? psy_look->vi->normal_partition : 16);
 
   vb->mode=modenumber;
+  
+  /* set modenumber+blocktype
+     0=Impulse
+     1=Padding
+     2=Transition
+     3=Long             */
+  block_mode=blocktype;
+  block_mode|=(modenumber << 1);
+  
+  /* prepare lowpass filter of residue */
+  if(modenumber)lowpass_residue=ci->block_lowpassr[1];
+  else lowpass_residue=ci->block_lowpassr[0];
+  if(lowpass_residue % psy_look->vi->normal_partition)
+   lowpass_residue=(lowpass_residue/psy_look->vi->normal_partition+1) * psy_look->vi->normal_partition;
 
   for(i=0;i<vi->channels;i++){
     float scale=4.f/n;
@@ -260,6 +281,8 @@ static int mapping0_forward(vorbis_block *vb){
 
     iwork[i]=_vorbis_block_alloc(vb,n/2*sizeof(**iwork));
     gmdct[i]=_vorbis_block_alloc(vb,n/2*sizeof(**gmdct));
+    epeak[i]=_vorbis_block_alloc(vb,n/2*sizeof(**epeak));
+    npeak[i]=_vorbis_block_alloc(vb,n/2/partition*sizeof(**npeak));
 
     scale_dB=todB(&scale) + .345; /* + .345 is a hack; the original
                                      todB estimation used on IEEE 754
@@ -286,6 +309,9 @@ static int mapping0_forward(vorbis_block *vb){
       _analysis_output("pcm",seq,pcm,n,0,0,total-n/2);
     }
 #endif
+
+    /* set postnoise flag */
+    poste[i] = _postnoise_detection(pcm, n, block_mode, b->lW_block_mode);
 
     /* window the PCM data */
     _vorbis_apply_window(pcm,b->window,ci->blocksizes,vb->lW,vb->W,vb->nW);
@@ -375,6 +401,13 @@ static int mapping0_forward(vorbis_block *vb){
 
       float *logmdct =logfft+n/2;
       float *logmask =logfft;
+      float *enpeak  =epeak[i];
+      float *nepeak  =npeak[i];
+
+      float *lastmdct = b->mblock+i*2048; // 2048 is max block size (n/2)
+      float *tempmdct = b->tblock+i*256;  // 256 is max block size (n/2) for aoTuV M3
+
+      float *lowcomp = b->lownoise_compand_level+i;
 
       vb->mode=modenumber;
 
@@ -414,10 +447,38 @@ static int mapping0_forward(vorbis_block *vb){
          us a tonality estimate (the larger the value in the
          'noise_depth' vector, the more tonal that area is) */
 
+      *lowcomp=
+        lb_loudnoise_fix(psy_look,
+                         *lowcomp,
+                         logmdct,
+                         block_mode,
+                         b->lW_block_mode);
+
       _vp_noisemask(psy_look,
+                    *lowcomp,
                     logmdct,
-                    noise); /* noise does not have by-frequency offset
+                    lastmdct,
+                    enpeak,
+                    nepeak,
+                    noise, /* noise does not have by-frequency offset
                                bias applied yet */
+                    poste[i],
+                    block_mode);
+
+
+// for _vp_noisemask
+#if 0
+      if(vi->channels==2){
+        if(i==0)
+          _analysis_output("enpeakL",seq,enpeak,n/2,1,0,0);
+        else
+          _analysis_output("enpeakR",seq,enpeak,n/2,1,0,0);
+      }else{
+        _analysis_output("enpeak",seq,enpeak,n/2,1,0,0);
+      }
+#endif
+
+
 #if 0
       if(vi->channels==2){
         if(i==0)
@@ -464,9 +525,18 @@ static int mapping0_forward(vorbis_block *vb){
                            noise,
                            tone,
                            1,
+                           vorbis_bitrate_managed(vb),
                            logmask,
                            mdct,
-                           logmdct);
+                           logmdct,
+                           lastmdct, tempmdct,
+                           *lowcomp,
+                           nepeak,
+                           vif->n,
+                           block_mode,
+                           vb->nW,
+                           b->lW_block_mode,
+                           b->lW_no, b->impadnum);
 
 #if 0
         if(vi->channels==2){
@@ -511,9 +581,18 @@ static int mapping0_forward(vorbis_block *vb){
                            noise,
                            tone,
                            2,
+                           vorbis_bitrate_managed(vb),
                            logmask,
                            mdct,
-                           logmdct);
+                           logmdct,
+                           lastmdct, tempmdct,
+                           *lowcomp,
+                           nepeak,
+                           vif->n,
+                           block_mode,
+                           vb->nW,
+                           b->lW_block_mode,
+                           b->lW_no, b->impadnum);
 
 #if 0
         if(vi->channels==2){
@@ -536,9 +615,18 @@ static int mapping0_forward(vorbis_block *vb){
                            noise,
                            tone,
                            0,
+                           vorbis_bitrate_managed(vb),
                            logmask,
                            mdct,
-                           logmdct);
+                           logmdct,
+                           lastmdct, tempmdct,
+                           *lowcomp,
+                           nepeak,
+                           vif->n,
+                           block_mode,
+                           vb->nW,
+                           b->lW_block_mode,
+                           b->lW_no, b->impadnum);
 
 #if 0
         if(vi->channels==2){
@@ -640,10 +728,13 @@ static int mapping0_forward(vorbis_block *vb){
                                     psy_look,
                                     info,
                                     gmdct,
+                                    epeak,
+                                    npeak,
                                     iwork,
                                     nonzero,
                                     ci->psy_g_param.sliding_lowpass[vb->W][k],
-                                    vi->channels);
+                                    vi->channels,
+                                    lowpass_residue);
 
 #if 0
       for(i=0;i<vi->channels;i++){
@@ -683,12 +774,27 @@ static int mapping0_forward(vorbis_block *vb){
                   couple_bundle,zerobundle,ch_in_bundle,classifications,i);
       }
 
+      // if (present window == (long or trans.) ) impadnum=0 [reset]
+      if(block_mode>=2) b->impadnum=0;
+      // if (last window == impulse) && (present window == padding) impadnum=1
+      if((!b->lW_block_mode) && (block_mode==1)) b->impadnum=1;
+      else if(b->impadnum && b->impadnum<8) b->impadnum++;
+      // if (current block type == last block type) lW_no++
+      if(b->lW_block_mode==block_mode) b->lW_no++;
+      else b->lW_no = 1;
+      b->lW_block_mode = block_mode;
       /* ok, done encoding.  Next protopacket. */
+
+      // check block type
+      /*if(modenumber && blocktype)printf("[L]\n");
+      else if(modenumber && !blocktype)printf("[T]\n");
+      else if(!modenumber && blocktype)printf("[P]\n");
+      else if(!modenumber && !blocktype)printf("[I]\n");*/
     }
 
   }
 
-#if 0
+#ifdef ANALYSIS
   seq++;
   total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;
 #endif

@@ -92,6 +92,7 @@ typedef struct {
   int      mappings;
   const double  *rate_mapping;
   const double  *quality_mapping;
+  const float   *pre_amp;
   int      coupling_restriction;
   long     samplerate_min_restriction;
   long     samplerate_max_restriction;
@@ -162,8 +163,10 @@ static const vorbis_info_mapping0 _map_nominal[2]={
 #include "modes/setup_X.h"
 
 static const ve_setup_data_template *const setup_list[]={
-  &ve_setup_44_stereo,
   &ve_setup_44_51,
+  &ve_setup_48_stereo,
+  &ve_setup_44_stereo,
+  &ve_setup_48_uncoupled,
   &ve_setup_44_uncoupled,
 
   &ve_setup_32_stereo,
@@ -357,12 +360,22 @@ static void vorbis_encode_tonemask_setup(vorbis_info *vi,double s,int block,
 
 static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
                                         const compandblock *in,
-                                        const double *x){
-  int i,is=s;
-  double ds=s-is;
+                                        const double *x,
+                                        int mappings){
+  int i,is=s, ishcm;
+  double ds=s-is, dshcm;
+  int hcm_stop=5; // high compander limit
+  
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy *p=ci->psy_param[block];
-
+  
+  /* check mapping limit */
+  if(hcm_stop > mappings)hcm_stop=mappings;
+  
+  /* the place was borrowed...  */
+  p->flacint=ds;
+  
+  /* interpolate the compander mapping */
   ds=x[is]*(1.-ds)+x[is+1]*ds;
   is=(int)ds;
   ds-=is;
@@ -370,10 +383,34 @@ static void vorbis_encode_compand_setup(vorbis_info *vi,double s,int block,
     is--;
     ds=1.;
   }
-
+  
+  /* high compander setup */
+  ishcm = is;
+  dshcm = ds+.3;
+  if(dshcm > 1.0){
+    ishcm++;
+    dshcm=dshcm-1;
+  }
+  if(x[hcm_stop] < ((double)ishcm+dshcm)){
+    ishcm = x[hcm_stop];
+    dshcm = x[hcm_stop]-ishcm;
+    if( ((double)ishcm+dshcm) < ((double)is+ds)){
+      ishcm=is;
+      dshcm=ds;
+    }
+  }
+  if(dshcm==0 && ishcm>0){ // the same
+    ishcm--;
+    dshcm=1.;
+  }
+  
   /* interpolate the compander settings */
   for(i=0;i<NOISE_COMPAND_LEVELS;i++)
     p->noisecompand[i]=in[is].data[i]*(1.-ds)+in[is+1].data[i]*ds;
+  /* interpolate the high compander settings */
+  for(i=0;i<NOISE_COMPAND_LEVELS;i++)
+    p->noisecompand_high[i]=in[ishcm].data[i]*(1.-dshcm)+in[ishcm+1].data[i]*dshcm;
+
   return;
 }
 
@@ -452,6 +489,7 @@ static void vorbis_encode_blocksize_setup(vorbis_info *vi,double s,
 
 }
 
+#define LFE_FRQLIMIT 250 /* limit frequency for LFE channel */
 static void vorbis_encode_residue_setup(vorbis_info *vi,
                                         int number, int block,
                                         const vorbis_residue_template *res){
@@ -538,7 +576,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
       if(freq>nyq)freq=nyq;
       break;
     case 2: /* LFE channel; lowpass at ~ 250Hz */
-      freq=250;
+      freq=LFE_FRQLIMIT;
       break;
     default:
       /* already set */
@@ -569,6 +607,7 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
         r->grouping;
       /* the blocksize and grouping may disagree at the end */
       if(r->end>blocksize*ch)r->end=blocksize*ch/r->grouping*r->grouping;
+      if(freq!=LFE_FRQLIMIT)ci->block_lowpassr[block]=r->end/ch; /* lowpass (residue) */
 
     }else{
 
@@ -576,10 +615,13 @@ static void vorbis_encode_residue_setup(vorbis_info *vi,
         r->grouping;
       /* the blocksize and grouping may disagree at the end */
       if(r->end>blocksize)r->end=blocksize/r->grouping*r->grouping;
+      if(freq!=LFE_FRQLIMIT)ci->block_lowpassr[block]=r->end; /* lowpass (residue) */
 
     }
 
-    if(r->end==0)r->end=r->grouping; /* LFE channel */
+    if(r->end==0){   /* LFE channel */
+      r->end=r->grouping;
+    }
 
   }
 }
@@ -772,17 +814,21 @@ int vorbis_encode_setup_init(vorbis_info *vi){
   /* noise companding setup */
   vorbis_encode_compand_setup(vi,hi->block[i0].noise_compand_setting,0,
                               setup->psy_noise_compand,
-                              setup->psy_noise_compand_short_mapping);
+                              setup->psy_noise_compand_short_mapping,
+                              setup->mappings);
   vorbis_encode_compand_setup(vi,hi->block[1].noise_compand_setting,1,
                               setup->psy_noise_compand,
-                              setup->psy_noise_compand_short_mapping);
+                              setup->psy_noise_compand_short_mapping,
+                              setup->mappings);
   if(!singleblock){
     vorbis_encode_compand_setup(vi,hi->block[2].noise_compand_setting,2,
-                                setup->psy_noise_compand,
-                                setup->psy_noise_compand_long_mapping);
+                              setup->psy_noise_compand,
+                              setup->psy_noise_compand_long_mapping,
+                              setup->mappings);
     vorbis_encode_compand_setup(vi,hi->block[3].noise_compand_setting,3,
-                                setup->psy_noise_compand,
-                                setup->psy_noise_compand_long_mapping);
+                              setup->psy_noise_compand,
+                              setup->psy_noise_compand_long_mapping,
+                              setup->mappings);
   }
 
   /* peak guarding setup  */
@@ -882,6 +928,10 @@ static void vorbis_encode_setup_setting(vorbis_info *vi,
   if(!hi->lowpass_altered)
     hi->lowpass_kHz=
       setup->psy_lowpass[is]*(1.-ds)+setup->psy_lowpass[is+1]*ds;
+
+  /*  preamp  */
+  hi->pre_amplitude=
+    setup->pre_amp[is]*(1.-ds)+setup->pre_amp[is+1]*ds;
 
   hi->ath_floating_dB=setup->psy_ath_float[is]*(1.-ds)+
     setup->psy_ath_float[is+1]*ds;

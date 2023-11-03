@@ -52,6 +52,8 @@ typedef struct highlevel_encode_setup {
   double amplitude_track_dBpersec;
   double trigger_setting;
 
+  float pre_amplitude;
+  
   highlevel_byblocktype block[4]; /* padding, impulse, transition, long */
 
 } highlevel_encode_setup;

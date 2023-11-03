@@ -299,6 +299,12 @@ int vorbis_analysis_init(vorbis_dsp_state *v,vorbis_info *vi){
   b=v->backend_state;
   b->psy_g_look=_vp_global_look(vi);
 
+  /* Init (added by aoyumi) */
+  b->mblock = _ogg_calloc((2048*vi->channels), sizeof(*b->mblock));
+  b->tblock = _ogg_calloc((256*vi->channels), sizeof(*b->tblock));
+  b->lownoise_compand_level = _ogg_calloc(vi->channels, sizeof(*b->lownoise_compand_level));
+  b->impadnum = 0;
+
   /* Initialize the envelope state storage */
   b->ve=_ogg_calloc(1,sizeof(*b->ve));
   _ve_envelope_init(b->ve,vi);
@@ -363,6 +369,11 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
 
       drft_clear(&b->fft_look[0]);
       drft_clear(&b->fft_look[1]);
+
+      /* added by aoyumi */
+      if(b->mblock) _ogg_free(b->mblock);
+      if(b->tblock) _ogg_free(b->tblock);
+      if(b->lownoise_compand_level) _ogg_free(b->lownoise_compand_level);
 
     }
 
@@ -460,7 +471,18 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
 int vorbis_analysis_wrote(vorbis_dsp_state *v, int vals){
   vorbis_info *vi=v->vi;
   codec_setup_info *ci=vi->codec_setup;
+  highlevel_encode_setup *hi=&(ci->hi);
 
+  /* pre-amplitude */
+  {
+    int i,j;
+    for(i=0;i<vals;i++){
+      for(j=0;j<vi->channels;j++){
+        v->pcmret[j][i]*=hi->pre_amplitude;
+      }
+    }
+  }
+  
   if(vals<=0){
     int order=32;
     int i;

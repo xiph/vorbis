@@ -59,7 +59,8 @@ static const vorbis_residue_template _res_8s_1[]={
    &_resbook_8s_1,&_resbook_8s_1},
 };
 
-static const vorbis_mapping_template _mapres_template_8_stereo[2]={
+static const vorbis_mapping_template _mapres_template_8_stereo[]={
+  { _map_nominal, _res_8s_0 }, /* -1 */
   { _map_nominal, _res_8s_0 }, /* 0 */
   { _map_nominal, _res_8s_1 }, /* 1 */
 };
@@ -102,7 +103,8 @@ static const vorbis_residue_template _res_8u_1[]={
    &_resbook_8u_1,&_resbook_8u_1},
 };
 
-static const vorbis_mapping_template _mapres_template_8_uncoupled[2]={
+static const vorbis_mapping_template _mapres_template_8_uncoupled[]={
+  { _map_nominal_u, _res_8u_0 }, /* -1 */
   { _map_nominal_u, _res_8u_0 }, /* 0 */
   { _map_nominal_u, _res_8u_1 }, /* 1 */
 };

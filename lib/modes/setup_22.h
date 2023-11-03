@@ -10,24 +10,32 @@
  *                                                                  *
  ********************************************************************
 
- function: 22kHz settings
+ function: 22kHz settings 
 
  ********************************************************************/
 
-static const double rate_mapping_22[4]={
-  15000.,20000.,44000.,86000.
+static const float preamp_22[5]={
+0.848, 0.850, 0.910, 0.963, 0.995
 };
 
-static const double rate_mapping_22_uncoupled[4]={
-  16000.,28000.,50000.,90000.
+static const double rate_mapping_22[5]={
+//  15000.,20000.,44000.,86000.
+  14000.,16000.,20000.,44000.,86000.
 };
 
-static const double _psy_lowpass_22[4]={9.5,11.,30.,99.};
+static const double rate_mapping_22_uncoupled[5]={
+//  16000.,28000.,50000.,90000.
+  22000.,24000.,28000.,50000.,90000.
+};
+
+static const double _psy_lowpass_22[5]={8.5,9.5,11.,30.,99.};
 
 static const ve_setup_data_template ve_setup_22_stereo={
-  3,
+//  3,
+  4,
   rate_mapping_22,
   quality_mapping_16,
+  preamp_22,
   2,
   19000,
   26000,
@@ -76,9 +84,11 @@ static const ve_setup_data_template ve_setup_22_stereo={
 };
 
 static const ve_setup_data_template ve_setup_22_uncoupled={
-  3,
+//  3,
+  4,
   rate_mapping_22_uncoupled,
   quality_mapping_16,
+  preamp_22,
   -1,
   19000,
   26000,
