@@ -1,0 +1,336 @@
+aoTuV beta6.03 (2020) technical information
+
+This version is based on Xiph.org's libvorbis 1.3.7.
+The part related to sound quality is not changed from previous version.
+
+2021/03/20
+Aoyumi
+
+----------------------------------------------------------------------------
+aoTuV beta6.03 (2018) technical information
+
+This version is based on Xiph.org's libvorbis 1.3.6.
+The part related to sound quality is not changed from previous version.
+
+2018/04/18
+Aoyumi
+
+----------------------------------------------------------------------------
+aoTuV beta6.03 (2015) technical information
+
+This version is based on Xiph.org's libvorbis 1.3.5.
+The part related to sound quality is not changed from previous version.
+
+2014/08/08
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta6.03 (2014) technical information
+
+This version is based on Xiph.org's libvorbis 1.3.4.
+The part related to sound quality is not changed from previous version.
+
+2014/04/29
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta6.03 technical information
+
+The differences from the aoTuV beta 6.02...
+
+  1.  Fixed some causes that 5.1 channel coupling didn't work normally. And
+  tuning of lossy coupling is included in it.
+
+
+2011/04/24
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta6.02 technical information
+
+The differences from the aoTuV beta 6.01...
+
+  1.  When a change of the volume is very big, that a bit allotment became
+  superabundant was revised. It caused overflow. [M3]
+
+
+2011/02/27
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta6.01 technical information
+
+The differences from the aoTuV beta 6...
+
+  1.  When short blocks continued, that a bit allotment became superabundant
+  was revised. It caused overflow in the extreme case. [M3]
+
+
+2011/02/23
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta6 technical information
+
+The differences from the aoTuV beta 5.7...
+
+  1.  "libvorbis 1.3.2" was merged.
+
+  2.  A lot of bits are assigned in the part which strong post-echo produce.
+  [New M2]
+
+  3.  The search range of envelope is expanded. As a result, pre-echo by the
+  specific pattern was improved. [envelope.c]
+
+  4.  In the case that the strong tone and impulse ingredient coexisted, a
+  bit allotment to the tone ingredient was improved. [M7]
+
+  5.  The calculation method of dynamic thresholds of the stereo mode was 
+  changed.  This is more effective than former method. [New M6 & M9]
+
+  6.  The quantity of noise normalization is gained by a property of 
+  frequency signal domain. This reduces ringing by zero energy. [M8]
+
+  7.  M4 was revised. As for this change, more correct audio energy control
+  is formed in the low bitrate. [M4]
+
+
+In addition, some small revisions and tune up parameters are included.
+
+
+2011/02/21
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta5.7 technical information
+
+The differences from the aoTuV beta 5.61...
+
+  1.  Fixed the problem of floating point exception. (from xiph.org's libvorbis)
+
+  2.  "libvorbis SVN-Revision 15533" was merged. Some revisions are included
+  in it.
+
+  3.  The process of the frequency band without the need is omitted now.  
+  And the case that speed becomes fast occurs.  This change doesn't influence
+  the encoding result.
+
+  4.  Fixed the problem of a memory access violation. (beta5-M6 afterward)
+
+
+2009/03/03
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta5.61 technical information
+
+The differences from the aoTuV beta 5.6...
+
+  1.  Fixed the problem of floating point exception. (beta5.5-M3 afterward)
+
+
+2008/12/15
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta5.6 technical information
+
+The differences from the aoTuV beta 5.5...
+
+  1.  "libvorbis SVN-Revision 15530" was merged.  The revisions of the 
+  security problem are included in it. Therefore this update is important.
+
+  2.  The pre-amplitude processing was added newly.  This is the function 
+  to adjustment the volume of sources beforehand.Å@All the initial values 
+  are set now. 
+
+  3.  The part of M3 code was fixed.  This is bugfix of the beta5.5.
+
+...and I tune up a few parameters. 
+
+
+2008/12/09
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta5.5 technical information
+
+
+The differences from the aoTuV beta 5...
+
+  1.  The frequency domain width of M6 was revised.
+
+  2.  For q-1/-2, a pre-echo reduction code was applied (M3).  In addition,
+  the M3 code was improved.
+
+  3.  The floor setup parameters in the low bit-rate were changed.
+
+  4.  The part including bug of noise normalization was rewritten.
+
+  5.  "libvorbis 1.2.0" was merged. Furthermore, the revisions of Bug #300 and
+  #1229 were applied.
+
+  6.  The ATH curve of the high frequency area (more than 32kHz) was revised. 
+
+...and I tune up many parameters. 
+
+
+2008/03/30
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta5 technical information
+
+
+The differences from the aoTuV beta 4.51...
+
+  1.   In order to work noise normalization correctly, the value of tone 
+  masking is compressed under certain conditions. A floor curve approaches 
+  the original audio spectrum line as a result.  [New M4] 
+
+  2.   In order to cut down the bitrate, a part of M2 code of beta4 was 
+  deleted. 
+
+Å@3.   The ATH curve was changed slightly. 
+
+  4.   Pre-echo decreased slightly. This is based on change of M3 code. 
+
+  5.   In order to decrease artifact by collapse of audio energy, noise 
+  normalization processing of point stereo was extended. [32/44.1/48kHz only] 
+
+  6.   The threshold of channel coupling (lossless <=> point) is changed 
+  dynamically. This is a method based on a certain idea. [M6] 
+
+...and I tune up many parameters. 
+
+
+2006/10/24
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta4.51 technical information
+
+
+The differences from the aoTuV beta 4.5...
+
+  1.  The changed part of "scale.h" of Xiph.Org SVN was reflected in aoTuV. 
+  This will solve the problem of the compile by gcc4. 
+
+  2.  A part of portion added by beta4.5 had caused memory access violation. 
+  Depending on environment, a problem arises in qualiy-1/-2. This problem was 
+  corrected. 
+
+
+2005/11/17
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta4.5 technical information
+
+
+The differences from the aoTuV beta 4...
+
+  1.  M4 code of beta3 was deleted. M5 is added as what is replaced with it. 
+  The advantage of this method is that the result stabilized more is obtained. 
+  Instead, the change width of the bit rate becomes large rather than before. 
+  [32/44.1/48kHz only] 
+
+  2.  New M4 was added. There is this for the same purpose as M1. However, 
+  it is tuned up only in the low bit rate region according to work and 
+  individual parameters. [32/44.1/48kHz only] 
+
+  3.  M2 code was extended. This decreases a specific noise problem.  
+  [32/44.1/48kHz only] 
+
+...and I mainly tune up tone/noise masking and noise normalization parameters. 
+
+The above change is applied below quality3. 
+
+
+2005/11/05
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta4 technical information
+
+
+The differences from the aoTuV beta 3...
+
+  1.  Adoption of new hypot (point stereo). This works in general better than
+  dipole/round hypot. And when residue is likely to decrease greatly at the
+  time of a reverse phase, added code is made to increase the ratio of lossless.
+
+  2.  Change of ATH curve. This is not a big change. 
+
+  3.  Residue used for threshold calculation of channel coupling is changed.
+  This one seems to be good selection. 
+
+  4.  HF reduction code of beta3 was deleted. Now, this is not required. 
+
+  5.  The energy deficit of M4 code of beta3 -- correction of a bug Now.
+
+  6.  The code for pulling downward floor of the frequency range which can
+  be easy to be heard was added (New M2). This works by the low bit rate and
+  has a comparatively good trade-off. 
+
+  7.  Change of threshold calculation of noise normalization. Moreover, it
+  takes phase information into consideration. 
+
+
+...and I mainly tune up tone/noise masking and noise compander parameters. 
+
+
+2005/06/18
+Aoyumi
+
+----------------------------------------------------------------------------
+
+aoTuV beta3 technical information
+
+
+The differences from the aoTuV beta 2 and Vorbis 1.1...
+
+  1. Dynamic impulse block noise control(q0-10). [32/44.1/48kHz only] 
+  Conspicuous pre-echo is reduced.
+
+  2. New ATH curve. 
+
+  3. In order to cancel that a small sound becomes unstable, the noise level
+  of low frequency is lowered under specific conditions. (Only below q3) 
+  There is a greatest effect on a piano etc. [32/44.1/48kHz only]
+
+  4. The rate of lossless stereo is increased in specific conditions. This
+  improves many of conspicuous problems which a point stereo causes. (e.g 
+  drumus's hiss/voice, guitar and brass's distortion) [32/44.1/48kHz only]
+
+  5. The action of the noise normalization of point stereo is corrected. It
+  was set to one of the causes of distortion in a long tone (e.g 
+  strings/oboe/high tone voice). 
+
+  6. The HF reduction code was not working normally. This is corrected and
+  it retuned up according to the present condition. [32/44.1/48kHz only]
+
+  7. The q-2 mode was added in all sampling frequencies. And nominal bitrate
+  of q-1 are changed into a more nearly average value. Although nominal 
+  bitrate is more large at a low sampling frequency, average bitrate hardly
+  differs from the former version. 
+
+
+...and I mainly tune up tone/noise masking parameters. 
+
+
+2004/11/21
+Aoyumi

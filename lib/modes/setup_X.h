@@ -14,15 +14,17 @@
 
  ********************************************************************/
 
-static const double rate_mapping_X[12]={
-  -1.,-1.,-1.,-1.,-1.,-1.,
+static const double rate_mapping_X[13]={
+  -1.,-1.,-1.,-1.,-1.,-1.,-1.
   -1.,-1.,-1.,-1.,-1.,-1.
 };
 
 static const ve_setup_data_template ve_setup_X_stereo={
-  11,
+//  11,
+  12,
   rate_mapping_X,
   quality_mapping_44,
+  preamp_48,
   2,
   50000,
   200000,
@@ -71,9 +73,11 @@ static const ve_setup_data_template ve_setup_X_stereo={
 };
 
 static const ve_setup_data_template ve_setup_X_uncoupled={
-  11,
+//  11,
+  12,
   rate_mapping_X,
   quality_mapping_44,
+  preamp_48,
   -1,
   50000,
   200000,
@@ -122,9 +126,11 @@ static const ve_setup_data_template ve_setup_X_uncoupled={
 };
 
 static const ve_setup_data_template ve_setup_XX_stereo={
-  2,
+//  2,
+  3,
   rate_mapping_X,
   quality_mapping_8,
+  preamp_8,
   2,
   0,
   8000,
@@ -173,9 +179,11 @@ static const ve_setup_data_template ve_setup_XX_stereo={
 };
 
 static const ve_setup_data_template ve_setup_XX_uncoupled={
-  2,
+//  2,
+  3,
   rate_mapping_X,
   quality_mapping_8,
+  preamp_8,
   -1,
   0,
   8000,
@@ -222,3 +230,4 @@ static const ve_setup_data_template ve_setup_XX_uncoupled={
 
   _mapres_template_8_uncoupled
 };
+

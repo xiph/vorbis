@@ -24,7 +24,7 @@
 #define VE_POST   2
 #define VE_AMP    (VE_PRE+VE_POST-1)
 
-#define VE_BANDS  7
+#define VE_BANDS  12
 #define VE_NEARDC 15
 
 #define VE_MINSTRETCH 2   /* a bit less than short block */

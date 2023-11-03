@@ -10,45 +10,55 @@
  *                                                                  *
  ********************************************************************
 
- function: 8kHz settings
+ function: 8kHz settings 
 
  ********************************************************************/
 
 #include "psych_8.h"
 #include "residue_8.h"
 
-static const int blocksize_8[2]={
-  512,512
+static const float preamp_8[4]={
+0.965, 0.965, 0.965, 1.f
+};
+
+static const int blocksize_8[3]={
+  512,512,512
 };
 
 static const int _floor_mapping_8a[]={
-  6,6
+  6,6,6
 };
 
 static const int *_floor_mapping_8[]={
   _floor_mapping_8a
 };
 
-static const double rate_mapping_8[3]={
-  6000.,9000.,32000.,
+static const double rate_mapping_8[4]={
+//  6000.,9000.,32000.,
+  5000.,6000.,9000.,32000.,
 };
 
-static const double rate_mapping_8_uncoupled[3]={
-  8000.,14000.,42000.,
+static const double rate_mapping_8_uncoupled[4]={
+//  8000.,14000.,42000.,
+  8000.,10000.,14000.,42000.,
 };
 
-static const double quality_mapping_8[3]={
-  -.1,.0,1.
+static const double quality_mapping_8[4]={
+  -.2,-.1,.0,1.
 };
 
-static const double _psy_compand_8_mapping[3]={ 0., 1., 1.};
+//static const double _psy_compand_8_mapping[3]={ 0., 1., 1.};
+static const double _psy_compand_8_mapping[4]={ 0., 1., 2., 2.};
 
-static const double _global_mapping_8[3]={ 1., 2., 3. };
+//static const double _global_mapping_8[3]={ 1., 2., 3. };
+static const double _global_mapping_8[4]={ 2., 2., 3., 4. };
 
 static const ve_setup_data_template ve_setup_8_stereo={
-  2,
+//  2,
+  3,
   rate_mapping_8,
   quality_mapping_8,
+  preamp_8,
   2,
   8000,
   9000,
@@ -97,9 +107,11 @@ static const ve_setup_data_template ve_setup_8_stereo={
 };
 
 static const ve_setup_data_template ve_setup_8_uncoupled={
-  2,
+//  2,
+  3,
   rate_mapping_8_uncoupled,
   quality_mapping_8,
+  preamp_8,
   -1,
   8000,
   9000,

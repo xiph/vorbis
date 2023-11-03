@@ -81,6 +81,15 @@ typedef struct private_state {
   bitrate_manager_state bms;
 
   ogg_int64_t sample_count;
+
+  /* encode only
+     added by aoyumi */
+  float *lownoise_compand_level;
+  float *mblock; /* lW logmdct buffer */  
+  float *tblock; /* temporal masking buffer (impulse block) */
+  int lW_block_mode; /* last window blocktype, modenumber */
+  int lW_no; /* the number of continuous window blocks (last window) */
+  int impadnum; /* short block number (count after impulse->padding block) for M3 */
 } private_state;
 
 /* codec_setup_info contains all the setup information specific to the
@@ -127,6 +136,7 @@ typedef struct codec_setup_info {
                                 highly redundant structure, but
                                 improves clarity of program flow. */
   int         halfrate_flag; /* painless downsample for decode */
+  int         block_lowpassr[2];
 } codec_setup_info;
 
 extern vorbis_look_psy_global *_vp_global_look(vorbis_info *vi);

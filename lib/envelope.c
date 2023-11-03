@@ -28,6 +28,14 @@
 #include "mdct.h"
 #include "misc.h"
 
+/* Origianl band */
+// band_begin[VE_BANDS]= {2, 4, 6, 9,13,17,22};
+// band_end[VE_BANDS]=   {4, 5, 6, 8, 8, 8, 8};
+
+/* Mod band */
+static const int band_begin[VE_BANDS]= {2, 4, 6, 9,13,17,22, 12, 8, 3, 2, 1};
+static const int band_end[VE_BANDS]=   {4, 5, 6, 8, 8, 8, 8,  4, 4, 3, 2, 4};
+
 void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
   codec_setup_info *ci=vi->codec_setup;
   vorbis_info_psy_global *gi=&ci->psy_g_param;
@@ -48,14 +56,10 @@ void _ve_envelope_init(envelope_lookup *e,vorbis_info *vi){
     e->mdct_win[i]*=e->mdct_win[i];
   }
 
-  /* magic follows */
-  e->band[0].begin=2;  e->band[0].end=4;
-  e->band[1].begin=4;  e->band[1].end=5;
-  e->band[2].begin=6;  e->band[2].end=6;
-  e->band[3].begin=9;  e->band[3].end=8;
-  e->band[4].begin=13;  e->band[4].end=8;
-  e->band[5].begin=17;  e->band[5].end=8;
-  e->band[6].begin=22;  e->band[6].end=8;
+  for(i=0;i<VE_BANDS;i++){
+  	e->band[i].begin=band_begin[i];
+  	e->band[i].end=band_end[i];
+  }
 
   for(j=0;j<VE_BANDS;j++){
     n=e->band[j].end;

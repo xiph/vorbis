@@ -16,15 +16,16 @@
 
 #include "modes/residue_44p51.h"
 
-static const double rate_mapping_44p51[12]={
-  14000.,20000.,28000.,38000.,46000.,54000.,
+static const double rate_mapping_44p51[13]={
+  12000.,14000.,20000.,28000.,38000.,46000.,54000.,
   75000.,96000.,120000.,140000.,180000.,240001.
 };
 
 static const ve_setup_data_template ve_setup_44_51={
-  11,
+  12,
   rate_mapping_44p51,
   quality_mapping_44,
+  preamp_44,
   6,
   40000,
   70000,
