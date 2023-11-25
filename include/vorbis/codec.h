@@ -61,6 +61,7 @@ typedef struct vorbis_dsp_state{
 
   float **pcm;
   float **pcmret;
+  float *preextrapolate_work;
   int      pcm_storage;
   int      pcm_current;
   int      pcm_returned;
