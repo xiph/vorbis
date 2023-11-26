@@ -372,6 +372,7 @@ void vorbis_dsp_clear(vorbis_dsp_state *v){
           if(v->pcm[i])_ogg_free(v->pcm[i]);
       _ogg_free(v->pcm);
       if(v->pcmret)_ogg_free(v->pcmret);
+      if(v->preextrapolate_work)_ogg_free(v->preextrapolate_work);
     }
 
     if(b){
@@ -417,11 +418,18 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
   int i;
   int order=16;
   float *lpc=alloca(order*sizeof(*lpc));
-  float *work=alloca(v->pcm_current*sizeof(*work));
+  float *work;
+  int workbuf=v->pcm_current*sizeof(*work);
   long j;
   v->preextrapolate=1;
 
-  if(v->pcm_current-v->centerW>order*2){ /* safety */
+  if(workbuf<256*1024)
+    work=alloca(workbuf);
+  else
+    /* workbuf is too big to safely allocate on the stack */
+    work=v->preextrapolate_work=_ogg_realloc(v->preextrapolate_work,workbuf);
+
+  if(v->pcm_current-v->centerW>order*2 && work){ /* safety */
     for(i=0;i<v->vi->channels;i++){
       /* need to run the extrapolation in reverse! */
       for(j=0;j<v->pcm_current;j++)
