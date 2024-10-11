@@ -164,5 +164,22 @@ else()
         PUBLIC_HEADER "${VORBIS_PUBLIC_HEADERS}"
         OUTPUT_NAME Vorbis
     )
+
+    target_include_directories(vorbis
+        PUBLIC
+            $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+            $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        PRIVATE
+            ${CMAKE_CURRENT_SOURCE_DIR}
+    )
+
     target_link_libraries(vorbis ${OGG_LIBRARIES})
+
+    install(TARGETS vorbis
+        EXPORT VorbisTargets
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        FRAMEWORK DESTINATION ${CMAKE_INSTALL_PREFIX}
+    )
 endif()
