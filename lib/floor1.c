@@ -817,7 +817,7 @@ int floor1_encode(oggpack_buffer *opb,vorbis_block *vb,
           if(val<-headroom)
             val=headroom-val-1;
           else
-            val=-1-(val<<1);
+            val=-1-(val*2);
         else
           if(val>=headroom)
             val= val+headroom;
