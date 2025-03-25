@@ -49,8 +49,8 @@ returned data.
 
 <h3>Return Values</h3>
 <ul>
-<li>1 for success when more blocks are available.</li>
-<li>0 for success when this is the last block available from the current input.</li>
+<li>1 for success, with a block returned.</li>
+<li>0 if the last block available from the current input has already been returned.</li>
 <li>negative values for failure:
 <ul>
 <li>OV_EINVAL - Invalid parameters.</li> 
