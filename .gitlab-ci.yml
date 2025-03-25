@@ -68,6 +68,16 @@ autotools-mingw:
     INSTALL_COMPILER: gcc-mingw-w64
     CC: x86_64-w64-mingw32-gcc
 
+autotools-enable-gcc-sanitizers:
+  extends: .autotools
+  variables:
+    CONFIG_FLAGS: --enable-gcc-sanitizers
+
+autotools-enable-valgrind-testing:
+  extends: .autotools
+  variables:
+    CONFIG_FLAGS: --enable-valgrind-testing
+
 cmake:
   stage: build
   before_script:

@@ -44,8 +44,7 @@ vorbis_selftests = test_sharedbook
 
 noinst_PROGRAMS = $(vorbis_selftests)
 
-check: $(noinst_PROGRAMS)
-	./test_sharedbook$(EXEEXT)
+TESTS = test_sharedbook
 
 #test_codebook_SOURCES = codebook.c
 #test_codebook_CFLAGS = -D_V_SELFTEST

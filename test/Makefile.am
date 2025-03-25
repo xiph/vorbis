@@ -4,8 +4,11 @@ AUTOMAKE_OPTIONS = foreign
 
 check_PROGRAMS = test
 
-check: $(check_PROGRAMS)
-	./test$(EXEEXT)
+TEST_ENV = @TEST_ENV@
+
+LOG_COMPILER=$(LIBTOOL) --mode=execute $(VALGRIND) $(TEST_ENV)
+
+TESTS = test
 
 AM_CPPFLAGS = -I$(top_srcdir)/include @OGG_CFLAGS@
 
