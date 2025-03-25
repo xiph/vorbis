@@ -1,19 +1,72 @@
 default:
   tags:
     - docker
-  # Image from https://hub.docker.com/_/gcc/ based on Debian
-  image: gcc:9
+  # Image from https://hub.docker.com/_/gcc/ based on Debian.
+  image: gcc:14
 
-autoconf:
+.autotools:
   stage: build
   before_script:
     - apt-get update &&
-      apt-get install -y libogg-dev zip doxygen
+      apt-get install -y libogg-dev zip doxygen ${INSTALL_COMPILER} ${INSTALL_EXTRA}
   script:
     - ./autogen.sh
-    - ./configure
+    - ./configure ${CONFIG_FLAGS} || cat config.log
+    - make
+    - make check
+  variables:
+    INSTALL_COMPILER: gcc
+
+autotools-gcc:
+  extends: .autotools
+  script:
+    - ./autogen.sh
+    - ./configure ${CONFIG_FLAGS} || cat config.log
     - make
     - make distcheck
+  variables:
+    INSTALL_EXTRA: cmake
+  artifacts:
+    paths:
+     - libogg-*.tar.gz
+    expire_in: 2 week
+
+autotools-gcc-builddir:
+  extends: .autotools
+  script:
+    - ./autogen.sh
+    - mkdir build
+    - (cd build && ../configure ${CONFIG_FLAGS}) || cat config.log
+    - (cd build && make)
+    - (cd build && make check)
+
+autotools-clang:
+  extends: .autotools
+  script:
+    - ./autogen.sh
+    - ./configure ${CONFIG_FLAGS} || cat config.log
+    - make
+    - make distcheck
+  variables:
+    INSTALL_EXTRA: cmake
+    INSTALL_COMPILER: clang
+    CC: clang
+
+autotools-mingw:
+  extends: .autotools
+  script:
+    - mkdir build-mingw
+    - git clone https://gitlab.xiph.org/xiph/ogg.git build-mingw/ogg-mingw
+    - (cd build-mingw/ogg-mingw && ./autogen.sh)
+    - (cd build-mingw/ogg-mingw && ./configure ${CONFIG_FLAGS})
+    - (cd build-mingw/ogg-mingw && make)
+    - ./autogen.sh
+    - (cd build-mingw && CPPFLAGS=-I`pwd`/ogg-mingw/include LDFLAGS=-L`pwd`/ogg-mingw/src ../configure --disable-examples ${CONFIG_FLAGS})
+    - (cd build-mingw && make)
+  variables:
+    CONFIG_FLAGS: --disable-shared --host=x86_64-pc-linux-gnu
+    INSTALL_COMPILER: gcc-mingw-w64
+    CC: x86_64-w64-mingw32-gcc
 
 cmake:
   stage: build
