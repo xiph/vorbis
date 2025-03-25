@@ -316,7 +316,7 @@ void _vp_psy_init(vorbis_look_psy *p,vorbis_info_psy *vi,
     for(;hi<=n && (hi<i+vi->noisewindowhimin ||
           toBARK(rate/(2*n)*hi)<(bark+vi->noisewindowhi));hi++);
 
-    p->bark[i]=((lo-1)<<16)+(hi-1);
+    p->bark[i]=((lo-1)*(1<<16))+(hi-1);
 
   }
 
