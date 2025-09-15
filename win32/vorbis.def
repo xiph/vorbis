@@ -1,6 +1,6 @@
 ; vorbis.def
 ; 
-LIBRARY
+LIBRARY vorbis
 EXPORTS
 _floor_P
 _mapping_P
