@@ -423,7 +423,7 @@ static void _preextrapolate_helper(vorbis_dsp_state *v){
   long j;
   v->preextrapolate=1;
 
-  if(workbuf<256*1024)
+  if(workbuf<256*1024) /* 256 KiB */
     work=alloca(workbuf);
   else
     /* workbuf is too big to safely allocate on the stack */
