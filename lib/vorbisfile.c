@@ -2253,14 +2253,22 @@ static void _ov_getlap(OggVorbis_File *vf,vorbis_info *vi,vorbis_dsp_state *vd,
   }
 }
 
+/* For large channel counts and block sizes, the total lapping buffer
+   allocation can approach 4MB, which is larger than the typical stack size.
+   We somewhat arbitrarily pick a cutoff of 8 channels (32 kB with a
+   blocksize of 8192) for switching to a heap allocation, as that is the
+   largest channel count supported by the surround channel mappings. */
+#define LAPBUF_CHANNELS_CUTOFF (8)
+
 /* this sets up crosslapping of a sample by using trailing data from
    sample 1 and lapping it into the windowing buffer of sample 2 */
 int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
   vorbis_info *vi1,*vi2;
+  float *lapbuf;
   float **lappcm;
   float **pcm;
   const float *w1,*w2;
-  int n1,n2,i,ret,hs1,hs2;
+  int n1,n2,ch1,i,ret,hs1,hs2;
 
   if(vf1==vf2)return(0); /* degenerate case */
   if(vf1->ready_state<OPENED)return(OV_EINVAL);
@@ -2280,14 +2288,21 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
   hs1=ov_halfrate_p(vf1);
   hs2=ov_halfrate_p(vf2);
 
-  lappcm=alloca(sizeof(*lappcm)*vi1->channels);
+  ch1=vi1->channels;
+  lappcm=alloca(sizeof(*lappcm)*ch1);
   n1=vorbis_info_blocksize(vi1,0)>>(1+hs1);
   n2=vorbis_info_blocksize(vi2,0)>>(1+hs2);
   w1=vorbis_window(&vf1->vd,0);
   w2=vorbis_window(&vf2->vd,0);
 
-  for(i=0;i<vi1->channels;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+  if(ch1<=LAPBUF_CHANNELS_CUTOFF){
+    lapbuf=alloca(sizeof(*lapbuf)*n1*ch1);
+  }else{
+    lapbuf=_ogg_malloc(sizeof(*lapbuf)*n1*ch1);
+    if(lapbuf==NULL)return OV_EFAULT;
+  }
+  for(i=0;i<ch1;i++)
+    lappcm[i]=lapbuf+n1*i;
 
   _ov_getlap(vf1,vi1,&vf1->vd,lappcm,n1);
 
@@ -2302,7 +2317,40 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
 #endif
 
   /* splice */
-  _ov_splice(pcm,lappcm,n1,n2,vi1->channels,vi2->channels,w1,w2);
+  _ov_splice(pcm,lappcm,n1,n2,ch1,vi2->channels,w1,w2);
+  if(ch1>LAPBUF_CHANNELS_CUTOFF)_ogg_free(lapbuf);
+
+  /* done */
+  return(0);
+}
+
+static int _ov_64_seek_lap_finish(OggVorbis_File *vf,ogg_int64_t pos,
+                                  int (*localseek)(OggVorbis_File *,
+                                  ogg_int64_t),int hs,int n1, int ch1,
+                                  const float *w1,float **lappcm){
+  vorbis_info *vi;
+  float **pcm;
+  const float *w2;
+  int n2,ch2;
+  int ret;
+
+  /* have lapping data; seek and prime the buffer */
+  ret=localseek(vf,pos);
+  if(ret)return ret;
+  ret=_ov_initprime(vf);
+  if(ret)return(ret);
+
+  /* Guard against cross-link changes; they're perfectly legal */
+  vi=ov_info(vf,-1);
+  ch2=vi->channels;
+  n2=vorbis_info_blocksize(vi,0)>>(1+hs);
+  w2=vorbis_window(&vf->vd,0);
+
+  /* consolidate and expose the buffer. */
+  vorbis_synthesis_lapout(&vf->vd,&pcm);
+
+  /* splice */
+  _ov_splice(pcm,lappcm,n1,n2,ch1,ch2,w1,w2);
 
   /* done */
   return(0);
@@ -2311,10 +2359,10 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
 static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
                            int (*localseek)(OggVorbis_File *,ogg_int64_t)){
   vorbis_info *vi;
+  float *lapbuf;
   float **lappcm;
-  float **pcm;
-  const float *w1,*w2;
-  int n1,n2,ch1,ch2,hs;
+  const float *w1;
+  int n1,ch1,hs;
   int i,ret;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
@@ -2331,30 +2379,19 @@ static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
                                    window array continues to exist */
 
   lappcm=alloca(sizeof(*lappcm)*ch1);
+  if(ch1<=LAPBUF_CHANNELS_CUTOFF){
+    lapbuf=alloca(sizeof(*lapbuf)*n1*ch1);
+  }else{
+    lapbuf=_ogg_malloc(sizeof(*lapbuf)*n1*ch1);
+    if(lapbuf==NULL)return OV_EFAULT;
+  }
   for(i=0;i<ch1;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=lapbuf+n1*i;
   _ov_getlap(vf,vi,&vf->vd,lappcm,n1);
 
-  /* have lapping data; seek and prime the buffer */
-  ret=localseek(vf,pos);
-  if(ret)return ret;
-  ret=_ov_initprime(vf);
-  if(ret)return(ret);
-
- /* Guard against cross-link changes; they're perfectly legal */
-  vi=ov_info(vf,-1);
-  ch2=vi->channels;
-  n2=vorbis_info_blocksize(vi,0)>>(1+hs);
-  w2=vorbis_window(&vf->vd,0);
-
-  /* consolidate and expose the buffer. */
-  vorbis_synthesis_lapout(&vf->vd,&pcm);
-
-  /* splice */
-  _ov_splice(pcm,lappcm,n1,n2,ch1,ch2,w1,w2);
-
-  /* done */
-  return(0);
+  ret=_ov_64_seek_lap_finish(vf,pos,localseek,hs,n1,ch1,w1,lappcm);
+  if(ch1>LAPBUF_CHANNELS_CUTOFF)_ogg_free(lapbuf);
+  return(ret);
 }
 
 int ov_raw_seek_lap(OggVorbis_File *vf,ogg_int64_t pos){
@@ -2369,13 +2406,45 @@ int ov_pcm_seek_page_lap(OggVorbis_File *vf,ogg_int64_t pos){
   return _ov_64_seek_lap(vf,pos,ov_pcm_seek_page);
 }
 
+static int _ov_d_seek_lap_finish(OggVorbis_File *vf,double pos,
+                                 int (*localseek)(OggVorbis_File *,double),
+                                 int hs,int n1,int ch1,const float *w1,
+                                 float **lappcm){
+  vorbis_info *vi;
+  float **pcm;
+  const float *w2;
+  int n2,ch2;
+  int ret;
+
+  /* have lapping data; seek and prime the buffer */
+  ret=localseek(vf,pos);
+  if(ret)return ret;
+  ret=_ov_initprime(vf);
+  if(ret)return(ret);
+
+  /* Guard against cross-link changes; they're perfectly legal */
+  vi=ov_info(vf,-1);
+  ch2=vi->channels;
+  n2=vorbis_info_blocksize(vi,0)>>(1+hs);
+  w2=vorbis_window(&vf->vd,0);
+
+  /* consolidate and expose the buffer. */
+  vorbis_synthesis_lapout(&vf->vd,&pcm);
+
+  /* splice */
+  _ov_splice(pcm,lappcm,n1,n2,ch1,ch2,w1,w2);
+
+  /* done */
+  return(0);
+}
+
 static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
                            int (*localseek)(OggVorbis_File *,double)){
   vorbis_info *vi;
+  float *lapbuf;
   float **lappcm;
-  float **pcm;
-  const float *w1,*w2;
-  int n1,n2,ch1,ch2,hs;
+  const float *w1;
+  int n1,ch1,hs;
   int i,ret;
 
   if(vf->ready_state<OPENED)return(OV_EINVAL);
@@ -2392,30 +2461,19 @@ static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
                                    window array continues to exist */
 
   lappcm=alloca(sizeof(*lappcm)*ch1);
+  if(ch1<=LAPBUF_CHANNELS_CUTOFF){
+    lapbuf=alloca(sizeof(*lapbuf)*n1*ch1);
+  }else{
+    lapbuf=_ogg_malloc(sizeof(*lapbuf)*n1*ch1);
+    if(lapbuf==NULL)return OV_EFAULT;
+  }
   for(i=0;i<ch1;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=lapbuf+n1*i;
   _ov_getlap(vf,vi,&vf->vd,lappcm,n1);
 
-  /* have lapping data; seek and prime the buffer */
-  ret=localseek(vf,pos);
-  if(ret)return ret;
-  ret=_ov_initprime(vf);
-  if(ret)return(ret);
-
- /* Guard against cross-link changes; they're perfectly legal */
-  vi=ov_info(vf,-1);
-  ch2=vi->channels;
-  n2=vorbis_info_blocksize(vi,0)>>(1+hs);
-  w2=vorbis_window(&vf->vd,0);
-
-  /* consolidate and expose the buffer. */
-  vorbis_synthesis_lapout(&vf->vd,&pcm);
-
-  /* splice */
-  _ov_splice(pcm,lappcm,n1,n2,ch1,ch2,w1,w2);
-
-  /* done */
-  return(0);
+  ret=_ov_d_seek_lap_finish(vf,pos,localseek,hs,n1,ch1,w1,lappcm);
+  if(ch1>LAPBUF_CHANNELS_CUTOFF)_ogg_free(lapbuf);
+  return(ret);
 }
 
 int ov_time_seek_lap(OggVorbis_File *vf,double pos){
