@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <float.h>
 
 #include "vorbis/codec.h"
 #include "vorbis/vorbisenc.h"
@@ -658,7 +659,8 @@ static const void *get_setup_template(long ch,long srate,
           float low=map[j];
           float high=map[j+1];
           float del=(req-low)/(high-low);
-          *base_setting=j+del;
+          if(del>1-FLT_EPSILON)del=1-FLT_EPSILON;
+          *base_setting=j+(double)del;
         }
 
         return(setup_list[i]);
