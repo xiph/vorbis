@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.20)
 project(vorbis)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -10,7 +10,6 @@ include(CheckIncludeFiles)
 include(CheckLibraryExists)
 
 # Build options
-option(BUILD_SHARED_LIBS "Build shared library" OFF)
 if(APPLE)
     option(BUILD_FRAMEWORK "Build Framework bundle for OSX" OFF)
 endif()

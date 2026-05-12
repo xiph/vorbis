@@ -19,6 +19,7 @@
 #include <math.h>
 #include <string.h>
 #include <ogg/ogg.h>
+#include "stack_alloc.h"
 #include "os.h"
 #include "misc.h"
 #include "vorbis/codec.h"
@@ -352,9 +353,12 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
     /* perform sort */
     ogg_uint32_t *codes=_make_words(s->lengthlist,s->entries,c->used_entries);
-    ogg_uint32_t **codep=alloca(sizeof(*codep)*n);
+    ogg_uint32_t **codep=VORBIS_STACK_ALLOC(sizeof(*codep)*n);
 
-    if(codes==NULL)goto err_out;
+    if(codes==NULL){
+      VORBIS_STACK_FREE(codep);
+      goto err_out;
+    }
 
     for(i=0;i<n;i++){
       codes[i]=bitreverse(codes[i]);
@@ -363,13 +367,15 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
     qsort(codep,n,sizeof(*codep),sort32a);
 
-    sortindex=alloca(n*sizeof(*sortindex));
+    sortindex=VORBIS_STACK_ALLOC(n*sizeof(*sortindex));
     c->codelist=_ogg_malloc(n*sizeof(*c->codelist));
     /* the index is a reverse index */
     for(i=0;i<n;i++){
       int position=codep[i]-codes;
       sortindex[position]=i;
     }
+
+    VORBIS_STACK_FREE(codep);
 
     for(i=0;i<n;i++)
       c->codelist[sortindex[i]]=codes[i];
@@ -390,6 +396,8 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
         if(s->lengthlist[i]>c->dec_maxlength)
           c->dec_maxlength=s->lengthlist[i];
       }
+
+    VORBIS_STACK_FREE(sortindex);
 
     if(n==1 && c->dec_maxlength==1){
       /* special case the 'single entry codebook' with a single bit

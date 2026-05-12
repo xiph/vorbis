@@ -18,6 +18,7 @@
 #include <string.h>
 #include <math.h>
 #include <ogg/ogg.h>
+#include "stack_alloc.h"
 #include "vorbis/codec.h"
 #include "codebook.h"
 #include "scales.h"
@@ -376,18 +377,25 @@ long vorbis_book_decode(codebook *book, oggpack_buffer *b){
 long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
   if(book->used_entries>0){
     int step=n/book->dim;
-    long *entry = alloca(sizeof(*entry)*step);
-    float **t = alloca(sizeof(*t)*step);
+    long *entry = VORBIS_STACK_ALLOC(sizeof(*entry)*step);
+    float **t = VORBIS_STACK_ALLOC(sizeof(*t)*step);
     int i,j,o;
 
     for (i = 0; i < step; i++) {
       entry[i]=decode_packed_entry_number(book,b);
-      if(entry[i]==-1)return(-1);
+      if(entry[i]==-1) {
+        VORBIS_STACK_FREE(t);
+        VORBIS_STACK_FREE(entry);
+        return(-1);
+      }
       t[i] = book->valuelist+entry[i]*book->dim;
     }
     for(i=0,o=0;i<book->dim;i++,o+=step)
       for (j=0;o+j<n && j<step;j++)
         a[o+j]+=t[j][i];
+
+    VORBIS_STACK_FREE(t);
+    VORBIS_STACK_FREE(entry);
   }
   return(0);
 }

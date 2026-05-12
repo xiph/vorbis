@@ -19,6 +19,7 @@
 #include <string.h>
 #include <math.h>
 #include <ogg/ogg.h>
+#include "stack_alloc.h"
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "codebook.h"
@@ -236,13 +237,13 @@ static int mapping0_forward(vorbis_block *vb){
   int                    n=vb->pcmend;
   int i,j,k;
 
-  int    *nonzero    = alloca(sizeof(*nonzero)*vi->channels);
+  int    *nonzero    = VORBIS_STACK_ALLOC(sizeof(*nonzero)*vi->channels);
   float  **gmdct     = _vorbis_block_alloc(vb,vi->channels*sizeof(*gmdct));
   int    **iwork      = _vorbis_block_alloc(vb,vi->channels*sizeof(*iwork));
   int ***floor_posts = _vorbis_block_alloc(vb,vi->channels*sizeof(*floor_posts));
 
   float global_ampmax=vbi->ampmax;
-  float *local_ampmax=alloca(sizeof(*local_ampmax)*vi->channels);
+  float *local_ampmax=VORBIS_STACK_ALLOC(sizeof(*local_ampmax)*vi->channels);
   int blocktype=vbi->blocktype;
 
   int modenumber=vb->W;
@@ -495,7 +496,11 @@ static int mapping0_forward(vorbis_block *vb){
       /* this algorithm is hardwired to floor 1 for now; abort out if
          we're *not* floor1.  This won't happen unless someone has
          broken the encode setup lib.  Guard it anyway. */
-      if(ci->floor_type[info->floorsubmap[submap]]!=1)return(-1);
+      if(ci->floor_type[info->floorsubmap[submap]]!=1) {
+        VORBIS_STACK_FREE(local_ampmax);
+        VORBIS_STACK_FREE(nonzero);
+        return(-1);
+      }
 
       floor_posts[i][PACKETBLOBS/2]=
         floor1_fit(vb,b->flr[info->floorsubmap[submap]],
@@ -590,8 +595,8 @@ static int mapping0_forward(vorbis_block *vb){
   /* iterate over the many masking curve fits we've created */
 
   {
-    int **couple_bundle=alloca(sizeof(*couple_bundle)*vi->channels);
-    int *zerobundle=alloca(sizeof(*zerobundle)*vi->channels);
+    int **couple_bundle=VORBIS_STACK_ALLOC(sizeof(*couple_bundle)*vi->channels);
+    int *zerobundle=VORBIS_STACK_ALLOC(sizeof(*zerobundle)*vi->channels);
 
     for(k=(vorbis_bitrate_managed(vb)?0:PACKETBLOBS/2);
         k<=(vorbis_bitrate_managed(vb)?PACKETBLOBS-1:PACKETBLOBS/2);
@@ -686,12 +691,16 @@ static int mapping0_forward(vorbis_block *vb){
       /* ok, done encoding.  Next protopacket. */
     }
 
+    VORBIS_STACK_FREE(zerobundle);
+    VORBIS_STACK_FREE(couple_bundle);
   }
 
 #if 0
   seq++;
   total+=ci->blocksizes[vb->W]/4+ci->blocksizes[vb->nW]/4;
 #endif
+  VORBIS_STACK_FREE(local_ampmax);
+  VORBIS_STACK_FREE(nonzero);
   return(0);
 }
 
@@ -705,11 +714,11 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_info_mapping *l){
   int                   i,j;
   long                  n=vb->pcmend=ci->blocksizes[vb->W];
 
-  float **pcmbundle=alloca(sizeof(*pcmbundle)*vi->channels);
-  int    *zerobundle=alloca(sizeof(*zerobundle)*vi->channels);
+  float **pcmbundle=VORBIS_STACK_ALLOC(sizeof(*pcmbundle)*vi->channels);
+  int    *zerobundle=VORBIS_STACK_ALLOC(sizeof(*zerobundle)*vi->channels);
 
-  int   *nonzero  =alloca(sizeof(*nonzero)*vi->channels);
-  void **floormemo=alloca(sizeof(*floormemo)*vi->channels);
+  int   *nonzero  =VORBIS_STACK_ALLOC(sizeof(*nonzero)*vi->channels);
+  void **floormemo=VORBIS_STACK_ALLOC(sizeof(*floormemo)*vi->channels);
 
   /* recover the spectral envelope; store it in the PCM vector for now */
   for(i=0;i<vi->channels;i++){
@@ -793,6 +802,11 @@ static int mapping0_inverse(vorbis_block *vb,vorbis_info_mapping *l){
     float *pcm=vb->pcm[i];
     mdct_backward(b->transform[vb->W][0],pcm,pcm);
   }
+
+  VORBIS_STACK_FREE(floormemo);
+  VORBIS_STACK_FREE(nonzero);
+  VORBIS_STACK_FREE(zerobundle);
+  VORBIS_STACK_FREE(pcmbundle);
 
   /* all done! */
   return(0);

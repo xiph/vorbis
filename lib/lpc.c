@@ -45,6 +45,7 @@ Carsten Bormann
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include "stack_alloc.h"
 #include "os.h"
 #include "smallft.h"
 #include "lpc.h"
@@ -58,8 +59,8 @@ Carsten Bormann
    Output: m lpc coefficients, excitation energy */
 
 float vorbis_lpc_from_data(float *data,float *lpci,int n,int m){
-  double *aut=alloca(sizeof(*aut)*(m+1));
-  double *lpc=alloca(sizeof(*lpc)*(m));
+  double *aut=VORBIS_STACK_ALLOC(sizeof(*aut)*(m+1));
+  double *lpc=VORBIS_STACK_ALLOC(sizeof(*lpc)*(m));
   double error;
   double epsilon;
   int i,j;
@@ -126,6 +127,9 @@ float vorbis_lpc_from_data(float *data,float *lpci,int n,int m){
   /* we need the error value to know how big an impulse to hit the
      filter with later */
 
+  VORBIS_STACK_FREE(aut);
+  VORBIS_STACK_FREE(lpc);
+
   return error;
 }
 
@@ -138,7 +142,7 @@ void vorbis_lpc_predict(float *coeff,float *prime,int m,
 
   long i,j,o,p;
   float y;
-  float *work=alloca(sizeof(*work)*(m+n));
+  float *work=VORBIS_STACK_ALLOC(sizeof(*work)*(m+n));
 
   if(!prime)
     for(i=0;i<m;i++)
@@ -156,4 +160,6 @@ void vorbis_lpc_predict(float *coeff,float *prime,int m,
 
     data[i]=work[o]=y;
   }
+
+  VORBIS_STACK_FREE(work);
 }

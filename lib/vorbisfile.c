@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <string.h>
 #include <math.h>
+#include "stack_alloc.h"
 
 #include "vorbis/codec.h"
 
@@ -2280,14 +2281,14 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
   hs1=ov_halfrate_p(vf1);
   hs2=ov_halfrate_p(vf2);
 
-  lappcm=alloca(sizeof(*lappcm)*vi1->channels);
+  lappcm=VORBIS_STACK_ALLOC(sizeof(*lappcm)*vi1->channels);
   n1=vorbis_info_blocksize(vi1,0)>>(1+hs1);
   n2=vorbis_info_blocksize(vi2,0)>>(1+hs2);
   w1=vorbis_window(&vf1->vd,0);
   w2=vorbis_window(&vf2->vd,0);
 
   for(i=0;i<vi1->channels;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=VORBIS_STACK_ALLOC(sizeof(**lappcm)*n1);
 
   _ov_getlap(vf1,vi1,&vf1->vd,lappcm,n1);
 
@@ -2305,6 +2306,8 @@ int ov_crosslap(OggVorbis_File *vf1, OggVorbis_File *vf2){
   _ov_splice(pcm,lappcm,n1,n2,vi1->channels,vi2->channels,w1,w2);
 
   /* done */
+  for(i=vi1->channels-1;i>=0;i--)VORBIS_STACK_FREE(lappcm[i]);
+  VORBIS_STACK_FREE(lappcm);
   return(0);
 }
 
@@ -2330,16 +2333,24 @@ static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
                                    from this link gets dumped, this
                                    window array continues to exist */
 
-  lappcm=alloca(sizeof(*lappcm)*ch1);
+  lappcm=VORBIS_STACK_ALLOC(sizeof(*lappcm)*ch1);
   for(i=0;i<ch1;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=VORBIS_STACK_ALLOC(sizeof(**lappcm)*n1);
   _ov_getlap(vf,vi,&vf->vd,lappcm,n1);
 
   /* have lapping data; seek and prime the buffer */
   ret=localseek(vf,pos);
-  if(ret)return ret;
+  if(ret) {
+    for(i=ch1-1;i>=0;i--)VORBIS_STACK_FREE(lappcm[i]);
+    VORBIS_STACK_FREE(lappcm);
+    return ret;
+  }
   ret=_ov_initprime(vf);
-  if(ret)return(ret);
+  if(ret) {
+    for(i=ch1-1;i>=0;i--)VORBIS_STACK_FREE(lappcm[i]);
+    VORBIS_STACK_FREE(lappcm);
+    return(ret);
+  }
 
  /* Guard against cross-link changes; they're perfectly legal */
   vi=ov_info(vf,-1);
@@ -2354,6 +2365,8 @@ static int _ov_64_seek_lap(OggVorbis_File *vf,ogg_int64_t pos,
   _ov_splice(pcm,lappcm,n1,n2,ch1,ch2,w1,w2);
 
   /* done */
+  for(i=ch1-1;i>=0;i--)VORBIS_STACK_FREE(lappcm[i]);
+  VORBIS_STACK_FREE(lappcm);
   return(0);
 }
 
@@ -2391,16 +2404,24 @@ static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
                                    from this link gets dumped, this
                                    window array continues to exist */
 
-  lappcm=alloca(sizeof(*lappcm)*ch1);
+  lappcm=VORBIS_STACK_ALLOC(sizeof(*lappcm)*ch1);
   for(i=0;i<ch1;i++)
-    lappcm[i]=alloca(sizeof(**lappcm)*n1);
+    lappcm[i]=VORBIS_STACK_ALLOC(sizeof(**lappcm)*n1);
   _ov_getlap(vf,vi,&vf->vd,lappcm,n1);
 
   /* have lapping data; seek and prime the buffer */
   ret=localseek(vf,pos);
-  if(ret)return ret;
+  if(ret) {
+    for(i=ch1-1;i>=0;i--)VORBIS_STACK_FREE(lappcm[i]);
+    VORBIS_STACK_FREE(lappcm);
+    return ret;
+  }
   ret=_ov_initprime(vf);
-  if(ret)return(ret);
+  if(ret) {
+    for(i=ch1-1;i>=0;i--)VORBIS_STACK_FREE(lappcm[i]);
+    VORBIS_STACK_FREE(lappcm);
+    return ret;
+  }
 
  /* Guard against cross-link changes; they're perfectly legal */
   vi=ov_info(vf,-1);
@@ -2415,6 +2436,8 @@ static int _ov_d_seek_lap(OggVorbis_File *vf,double pos,
   _ov_splice(pcm,lappcm,n1,n2,ch1,ch2,w1,w2);
 
   /* done */
+  for(i=ch1-1;i>=0;i--)VORBIS_STACK_FREE(lappcm[i]);
+  VORBIS_STACK_FREE(lappcm);
   return(0);
 }
 

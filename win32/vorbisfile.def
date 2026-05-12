@@ -1,6 +1,6 @@
 ; vorbisfile.def
 ;
-LIBRARY
+LIBRARY vorbisfile
 EXPORTS
 ov_clear
 ov_open

@@ -23,6 +23,7 @@
 #include <string.h>
 #include <math.h>
 #include <ogg/ogg.h>
+#include "stack_alloc.h"
 #include "vorbis/codec.h"
 #include "codec_internal.h"
 #include "registry.h"
@@ -656,10 +657,11 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
   int end=(info->end<max?info->end:max);
   int n=end-info->begin;
 
+  int ***partword=NULL;
   if(n>0){
     int partvals=n/samples_per_partition;
     int partwords=(partvals+partitions_per_word-1)/partitions_per_word;
-    int ***partword=alloca(ch*sizeof(*partword));
+    partword=VORBIS_STACK_ALLOC(ch*sizeof(*partword));
 
     for(j=0;j<ch;j++)
       partword[j]=_vorbis_block_alloc(vb,partwords*sizeof(*partword[j]));
@@ -697,6 +699,7 @@ static int _01inverse(vorbis_block *vb,vorbis_look_residue *vl,
   }
  errout:
  eopbreak:
+  VORBIS_STACK_FREE(partword);
   return(0);
 }
 
