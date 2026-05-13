@@ -423,7 +423,11 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
         if(c->dec_codelengths[i]<=c->dec_firsttablen){
           ogg_uint32_t orig=bitreverse(c->codelist[i]);
           for(j=0;j<(1<<(c->dec_firsttablen-c->dec_codelengths[i]));j++)
-            c->dec_firsttable[orig|(j<<c->dec_codelengths[i])]=i+1;
+            /* pack the length into the table, too, to avoid an extra lookup.
+               This also guarantees the table value is non-zero, since the
+               length of any used entry is positive. */
+            c->dec_firsttable[orig|(j<<c->dec_codelengths[i])]=
+             i<<6|c->dec_codelengths[i];
         }
       }
 

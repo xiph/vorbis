@@ -303,8 +303,8 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
       lo=(entry>>15)&0x7fff;
       hi=book->used_entries-(entry&0x7fff);
     }else{
-      oggpack_adv(b, book->dec_codelengths[entry-1]);
-      return(entry-1);
+      oggpack_adv(b, (int)(entry&0x3f));
+      return(entry>>6);
     }
   }else{
     lo=0;
