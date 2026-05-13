@@ -189,9 +189,13 @@ void vorbis_info_clear(vorbis_info *vi){
       }
       if(ci->fullbooks)
         vorbis_book_clear(ci->fullbooks+i);
+      if(ci->decbooks)
+        vorbis_decbook_clear(ci->decbooks+i);
     }
     if(ci->fullbooks)
         _ogg_free(ci->fullbooks);
+    if(ci->decbooks)
+      _ogg_free(ci->decbooks);
 
     for(i=0;i<ci->psys;i++)
       _vi_psy_free(ci->psy_param[i]);
@@ -279,9 +283,10 @@ static int _vorbis_unpack_books(vorbis_info *vi,oggpack_buffer *opb){
   /* codebooks */
   ci->books=oggpack_read(opb,8)+1;
   if(ci->books<=0)goto err_out;
+  ci->decbooks=_ogg_calloc(ci->books,sizeof(*ci->decbooks));
+  if(ci->decbooks==NULL)goto err_out;
   for(i=0;i<ci->books;i++){
-    ci->book_param[i]=vorbis_staticbook_unpack(opb);
-    if(!ci->book_param[i])goto err_out;
+    if(vorbis_decbook_unpack(ci->decbooks+i,opb)<0)goto err_out;
   }
 
   /* time backend settings; hooks are unused */

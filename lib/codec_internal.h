@@ -118,6 +118,7 @@ typedef struct codec_setup_info {
   vorbis_info_residue    *residue_param[64];
   static_codebook        *book_param[256];
   codebook               *fullbooks;
+  dec_codebook           *decbooks;
 
   vorbis_info_psy        *psy_param[4]; /* encode only */
   vorbis_info_psy_global psy_g_param;

@@ -119,7 +119,7 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
       case 1:
         /* a single column of (c->entries/c->dim) quantized values for
            building a full value list algorithmically (square lattice) */
-        quantvals=_book_maptype1_quantvals(c);
+        quantvals=_book_maptype1_quantvals(c->dim, c->entries);
         break;
       case 2:
         /* every value (c->entries*c->dim total) specified explicitly */
@@ -143,22 +143,19 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
   return(0);
 }
 
-/* unpacks a codebook from the packet buffer into the codebook struct,
-   readies the codebook auxiliary structures for decode *************/
-static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
+/* unpacks a codebook from the packet buffer into the codebook struct */
+int vorbis_decbook_unpack(dec_codebook *c,oggpack_buffer *opb){
   long i,j;
-  static_codebook *s=_ogg_calloc(1,sizeof(*s));
-  s->allocedp=1;
 
   /* make sure alignment is correct */
   if(oggpack_read(opb,24)!=0x564342)goto _eofout;
 
   /* first the basic parameters */
-  s->dim=oggpack_read(opb,16);
-  s->entries=oggpack_read(opb,24);
-  if(s->entries==-1)goto _eofout;
+  c->dim=(signed char)oggpack_read(opb,16);
+  c->entries=(ogg_int32_t)oggpack_read(opb,24);
+  if(c->entries==-1)goto _eofout;
 
-  if(ov_ilog(s->dim)+ov_ilog(s->entries)>24)goto _eofout;
+  if(ov_ilog(c->dim)+ov_ilog(c->entries)>24)goto _eofout;
 
   /* codeword ordering.... length ordered or unordered? */
   switch((int)oggpack_read(opb,1)){
@@ -166,29 +163,30 @@ static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
     long unused;
     /* allocated but unused entries? */
     unused=oggpack_read(opb,1);
-    if((s->entries*(unused?1:5)+7)>>3>opb->storage-oggpack_bytes(opb))
+    if((c->entries*(unused?1:5)+7)>>3>opb->storage-oggpack_bytes(opb))
       goto _eofout;
     /* unordered */
-    s->lengthlist=_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
+    c->codelengths=_ogg_malloc(sizeof(*c->codelengths)*c->entries);
+    if(c->codelengths==NULL)goto _errout;
 
     /* allocated but unused entries? */
     if(unused){
       /* yes, unused entries */
 
-      for(i=0;i<s->entries;i++){
+      for(i=0;i<c->entries;i++){
         if(oggpack_read(opb,1)){
           long num=oggpack_read(opb,5);
           if(num==-1)goto _eofout;
-          s->lengthlist[i]=num+1;
+          c->codelengths[i]=(signed char)(num+1);
         }else
-          s->lengthlist[i]=0;
+          c->codelengths[i]=0;
       }
     }else{
       /* all entries used; no tagging */
-      for(i=0;i<s->entries;i++){
+      for(i=0;i<c->entries;i++){
         long num=oggpack_read(opb,5);
         if(num==-1)goto _eofout;
-        s->lengthlist[i]=num+1;
+        c->codelengths[i]=(signed char)(num+1);
       }
     }
 
@@ -199,18 +197,19 @@ static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
     {
       long length=oggpack_read(opb,5)+1;
       if(length==0)goto _eofout;
-      s->lengthlist=_ogg_malloc(sizeof(*s->lengthlist)*s->entries);
+      c->codelengths=_ogg_malloc(sizeof(*c->codelengths)*c->entries);
+      if(c->codelengths==NULL)goto _errout;
 
-      for(i=0;i<s->entries;){
-        long num=oggpack_read(opb,ov_ilog(s->entries-i));
+      for(i=0;i<c->entries;){
+        long num=oggpack_read(opb,ov_ilog(c->entries-i));
         if(num==-1)goto _eofout;
-        if(length>32 || num>s->entries-i ||
+        if(length>32 || num>c->entries-i ||
            (num>0 && (num-1)>>(length-1)>1)){
           goto _errout;
         }
         if(length>32)goto _errout;
         for(j=0;j<num;j++,i++)
-          s->lengthlist[i]=length;
+          c->codelengths[i]=(signed char)length;
         length++;
       }
     }
@@ -221,7 +220,7 @@ static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
   }
 
   /* Do we have a mapping to unpack? */
-  switch((s->maptype=oggpack_read(opb,4))){
+  switch((c->maptype=(signed char)oggpack_read(opb,4))){
   case 0:
     /* no mapping */
     break;
@@ -229,31 +228,35 @@ static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
     /* implicitly populated value mapping */
     /* explicitly populated value mapping */
 
-    s->q_min=oggpack_read(opb,32);
-    s->q_delta=oggpack_read(opb,32);
-    s->q_quant=oggpack_read(opb,4)+1;
-    s->q_sequencep=oggpack_read(opb,1);
-    if(s->q_sequencep==-1)goto _eofout;
+    c->q_min=(ogg_uint32_t)oggpack_read(opb,32);
+    c->q_delta=(ogg_uint32_t)oggpack_read(opb,32);
+    c->q_quant=(signed char)oggpack_read(opb,4)+1;
+    c->q_sequencep=(signed char)oggpack_read(opb,1);
+    if(c->q_sequencep==-1)goto _eofout;
 
     {
+      long q=0;
       int quantvals=0;
-      switch(s->maptype){
+      switch(c->maptype){
       case 1:
-        quantvals=(s->dim==0?0:_book_maptype1_quantvals(s));
+        quantvals=(c->dim==0?0:_book_maptype1_quantvals(c->dim, c->entries));
         break;
       case 2:
-        quantvals=s->entries*s->dim;
+        quantvals=c->entries*c->dim;
         break;
       }
 
       /* quantized values */
-      if(((quantvals*s->q_quant+7)>>3)>opb->storage-oggpack_bytes(opb))
+      if(((quantvals*c->q_quant+7)>>3)>opb->storage-oggpack_bytes(opb))
         goto _eofout;
-      s->quantlist=_ogg_malloc(sizeof(*s->quantlist)*quantvals);
-      for(i=0;i<quantvals;i++)
-        s->quantlist[i]=oggpack_read(opb,s->q_quant);
+      c->quantlist=_ogg_malloc(sizeof(*c->quantlist)*quantvals);
+      if(c->quantlist==NULL)goto _errout;
+      for(i=0;i<quantvals;i++){
+        q=oggpack_read(opb,c->q_quant);
+        c->quantlist[i]=(ogg_uint16_t)q;
+      }
 
-      if(quantvals&&s->quantlist[quantvals-1]==-1)goto _eofout;
+      if(q==-1)goto _eofout;
     }
     break;
   default:
@@ -261,12 +264,16 @@ static_codebook *vorbis_staticbook_unpack(oggpack_buffer *opb){
   }
 
   /* all set */
-  return(s);
+  /* we could finish initializing the decode tables here, but this was a
+     separate step back when we had a shared encoder/decoder codebook struct,
+     and deferring it ensures we continue to report the same kinds of errors
+     in the same places. */
+  return(0);
 
  _errout:
  _eofout:
-  vorbis_staticbook_destroy(s);
-  return(NULL);
+  /* our caller will clean up the partially constructed book */
+  return(-1);
 }
 
 /* returns the number of bits ************************************************/
@@ -292,13 +299,13 @@ static ogg_uint32_t bitreverse(ogg_uint32_t x){
   return((x>> 1)&0x55555555) | ((x<< 1)&0xaaaaaaaa);
 }
 
-STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
-  int  read=book->dec_maxlength;
+STIN long decode_packed_entry_number(dec_codebook *book, oggpack_buffer *b){
+  int  read=book->maxlength;
   long lo,hi;
-  long lok = oggpack_look(b,book->dec_firsttablen);
+  long lok = oggpack_look(b,book->firsttablen);
 
   if (lok >= 0) {
-    long entry = book->dec_firsttable[lok];
+    long entry = book->firsttable[lok];
     if(entry&0x80000000UL){
       lo=(entry>>15)&0x7fff;
       hi=book->used_entries-(entry&0x7fff);
@@ -334,8 +341,8 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
       hi-=p&(-test);
       }
 
-    if(book->dec_codelengths[lo]<=read){
-      oggpack_adv(b, book->dec_codelengths[lo]);
+    if(book->codelengths[lo]<=read){
+      oggpack_adv(b, book->codelengths[lo]);
       return(lo);
     }
   }
@@ -360,20 +367,21 @@ STIN long decode_packed_entry_number(codebook *book, oggpack_buffer *b){
    addmul==2 -> multiplicitive */
 
 /* returns the [original, not compacted] entry number or -1 on eof *********/
-long vorbis_book_decode(codebook *book, oggpack_buffer *b){
+long vorbis_book_decode(dec_codebook *book, oggpack_buffer *b){
   if(book->used_entries>0){
     long packed_entry=decode_packed_entry_number(book,b);
     if(packed_entry>=0)
-      return(book->dec_index[packed_entry]);
+      return(book->index[packed_entry]);
   }
 
-  /* if there's no dec_index, the codebook unpacking isn't collapsed */
+  /* if there's no index, the codebook unpacking isn't collapsed */
   return(-1);
 }
 
 /* returns 0 on OK or -1 on eof *************************************/
 /* decode vector / dim granularity gaurding is done in the upper layer */
-long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
+long vorbis_book_decodevs_add(dec_codebook *book,float *a,oggpack_buffer *b,
+                              int n){
   if(book->used_entries>0){
     int step=n/book->dim;
     long *entry = alloca(sizeof(*entry)*step);
@@ -393,7 +401,8 @@ long vorbis_book_decodevs_add(codebook *book,float *a,oggpack_buffer *b,int n){
 }
 
 /* decode vector / dim granularity gaurding is done in the upper layer */
-long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
+long vorbis_book_decodev_add(dec_codebook *book,float *a,oggpack_buffer *b,
+                             int n){
   if(book->used_entries>0){
     int i,j,entry;
     float *t;
@@ -412,7 +421,8 @@ long vorbis_book_decodev_add(codebook *book,float *a,oggpack_buffer *b,int n){
 /* unlike the others, we guard against n not being an integer number
    of <dim> internally rather than in the upper layer (called only by
    floor0) */
-long vorbis_book_decodev_set(codebook *book,float *a,oggpack_buffer *b,int n){
+long vorbis_book_decodev_set(dec_codebook *book,float *a,oggpack_buffer *b,
+                             int n){
   if(book->used_entries>0){
     int i,j,entry;
     float *t;
@@ -435,7 +445,7 @@ long vorbis_book_decodev_set(codebook *book,float *a,oggpack_buffer *b,int n){
   return(0);
 }
 
-long vorbis_book_decodevv_add(codebook *book,float **a,long offset,int ch,
+long vorbis_book_decodevv_add(dec_codebook *book,float **a,long offset,int ch,
                               oggpack_buffer *b,int n){
 
   long i,j,entry;

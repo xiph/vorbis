@@ -232,17 +232,11 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
     v->analysisp=1;
   }else{
     /* finish the codebooks */
-    if(!ci->fullbooks){
-      ci->fullbooks=_ogg_calloc(ci->books,sizeof(*ci->fullbooks));
-      for(i=0;i<ci->books;i++){
-        if(ci->book_param[i]==NULL)
-          goto abort_books;
-        if(vorbis_book_init_decode(ci->fullbooks+i,ci->book_param[i]))
-          goto abort_books;
-        /* decode codebooks are now standalone after init */
-        vorbis_staticbook_destroy(ci->book_param[i]);
-        ci->book_param[i]=NULL;
-      }
+    if(ci->decbooks==NULL)
+      goto abort_books;
+    for(i=0;i<ci->books;i++){
+      if(vorbis_book_init_decode(ci->decbooks+i))
+        goto abort_books;
     }
   }
 
@@ -286,6 +280,13 @@ static int _vds_shared_init(vorbis_dsp_state *v,vorbis_info *vi,int encp){
       vorbis_staticbook_destroy(ci->book_param[i]);
       ci->book_param[i]=NULL;
     }
+    if(ci->decbooks!=NULL){
+      vorbis_decbook_clear(ci->decbooks+i);
+    }
+  }
+  if(ci->decbooks!=NULL){
+    _ogg_free(ci->decbooks);
+    ci->decbooks=NULL;
   }
   vorbis_dsp_clear(v);
   return -1;

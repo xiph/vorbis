@@ -166,7 +166,7 @@ ogg_uint32_t *_make_words(char *l,long n,long sparsecount){
    entry numbers.  This is like the above, except that the codewords are MSb
    first and aligned to be 32-bits in size, and the lower 24 bits include the
    entry number the codeword corresponds to. */
-static ogg_int64_t *dec_make_words(char *l,long n,long sparsecount){
+static ogg_int64_t *dec_make_words(signed char *l,long n,long sparsecount){
   long i,j,count=0;
   ogg_uint32_t marker[33];
   ogg_int64_t *r=_ogg_malloc((sparsecount?sparsecount:n)*sizeof(*r));
@@ -240,17 +240,17 @@ static ogg_int64_t *dec_make_words(char *l,long n,long sparsecount){
 /* there might be a straightforward one-line way to do the below
    that's portable and totally safe against roundoff, but I haven't
    thought of it.  Therefore, we opt on the side of caution */
-long _book_maptype1_quantvals(const static_codebook *b){
+long _book_maptype1_quantvals(long dim, long entries){
   long vals;
-  if(b->entries<1){
+  if(entries<1){
     return(0);
   }
-  vals=floor(pow((float)b->entries,1.f/b->dim));
+  vals=floor(pow((float)entries,1.f/dim));
 
   /* the above *should* be reliable, but we'll not assume that FP is
      ever reliable when bitstream sync is at stake; verify via integer
      means that vals really is the greatest value of dim for which
-     vals^b->bim <= b->entries */
+     vals^dim <= entries */
   /* treat the above as an initial guess */
   if(vals<1){
     vals=1;
@@ -259,16 +259,16 @@ long _book_maptype1_quantvals(const static_codebook *b){
     long acc=1;
     long acc1=1;
     int i;
-    for(i=0;i<b->dim;i++){
-      if(b->entries/vals<acc)break;
+    for(i=0;i<dim;i++){
+      if(entries/vals<acc)break;
       acc*=vals;
       if(LONG_MAX/(vals+1)<acc1)acc1=LONG_MAX;
       else acc1*=vals+1;
     }
-    if(i>=b->dim && acc<=b->entries && acc1>b->entries){
+    if(i>=dim && acc<=entries && acc1>entries){
       return(vals);
     }else{
-      if(i<b->dim || acc>b->entries){
+      if(i<dim || acc>entries){
         vals--;
       }else{
         vals++;
@@ -277,18 +277,18 @@ long _book_maptype1_quantvals(const static_codebook *b){
   }
 }
 
-/* unpack the quantized list of values for encode/decode ***********/
+/* unpack the quantized list of values for decode ***********/
 /* we need to deal with two map types: in map type 1, the values are
    generated algorithmically (each column of the vector counts through
    the values in the quant vector). in map type 2, all the values came
    in in an explicit list.  Both value lists must be unpacked */
-float *_book_unquantize(const static_codebook *b,int n,ogg_int64_t *sparsemap){
-  long i,j,k;
+void _book_unquantize(float *r,const dec_codebook *b,ogg_int32_t n,
+                      ogg_int64_t *sparsemap){
+  ogg_int32_t i,j,k;
   if(b->maptype==1 || b->maptype==2){
-    int quantvals;
+    ogg_int32_t quantvals;
     float mindel=_float32_unpack(b->q_min);
     float delta=_float32_unpack(b->q_delta);
-    float *r=_ogg_calloc(n*b->dim,sizeof(*r));
 
     /* maptype 1 and 2 both use a quantized value vector, but
        different sizes */
@@ -301,13 +301,13 @@ float *_book_unquantize(const static_codebook *b,int n,ogg_int64_t *sparsemap){
          we'll have 'left over' entries; left over entries use zeroed
          values (and are wasted).  So don't generate codebooks like
          that */
-      quantvals=_book_maptype1_quantvals(b);
+      quantvals=(ogg_int32_t)_book_maptype1_quantvals(b->dim, b->entries);
       for(i=0;i<n;i++){
         float last=0.f;
         int indexdiv=1;
         j=(long)(sparsemap?sparsemap[i]&0xffffff:i);
         for(k=0;k<b->dim;k++){
-          int index=(j/indexdiv)%quantvals;
+          ogg_int32_t index=(j/indexdiv)%quantvals;
           float val=b->quantlist[index];
           val=fabs(val)*delta+mindel+last;
           if(b->q_sequencep)last=val;
@@ -319,7 +319,7 @@ float *_book_unquantize(const static_codebook *b,int n,ogg_int64_t *sparsemap){
     case 2:
       for(i=0;i<n;i++){
         float last=0.f;
-        j=(long)(sparsemap?sparsemap[i]&0xffffff:i);
+        j=(ogg_int32_t)(sparsemap?sparsemap[i]&0xffffff:i);
         for(k=0;k<b->dim;k++){
           float val=b->quantlist[j*b->dim+k];
           val=fabs(val)*delta+mindel+last;
@@ -330,9 +330,7 @@ float *_book_unquantize(const static_codebook *b,int n,ogg_int64_t *sparsemap){
       break;
     }
 
-    return(r);
   }
-  return(NULL);
 }
 
 void vorbis_staticbook_destroy(static_codebook *b){
@@ -350,10 +348,16 @@ void vorbis_book_clear(codebook *b){
   if(b->valuelist)_ogg_free(b->valuelist);
   if(b->codelist)_ogg_free(b->codelist);
 
-  if(b->dec_index)_ogg_free(b->dec_index);
-  if(b->dec_codelengths)_ogg_free(b->dec_codelengths);
-  if(b->dec_firsttable)_ogg_free(b->dec_firsttable);
+  memset(b,0,sizeof(*b));
+}
 
+void vorbis_decbook_clear(dec_codebook *b){
+  if(b->quantlist)_ogg_free(b->quantlist);
+  if(b->firsttable)_ogg_free(b->firsttable);
+  if(b->codelist)_ogg_free(b->codelist);
+  if(b->codelengths)_ogg_free(b->codelengths);
+  if(b->index)_ogg_free(b->index);
+  if(b->valuelist)_ogg_free(b->valuelist);
   memset(b,0,sizeof(*b));
 }
 
@@ -365,8 +369,7 @@ int vorbis_book_init_encode(codebook *c,const static_codebook *s){
   c->used_entries=s->entries;
   c->dim=s->dim;
   c->codelist=_make_words(s->lengthlist,s->entries,0);
-  /* c->valuelist=_book_unquantize(s,s->entries,NULL); */
-  c->quantvals=_book_maptype1_quantvals(s);
+  c->quantvals=_book_maptype1_quantvals(s->dim, s->entries);
   c->minval=(int)rint(_float32_unpack(s->q_min));
   c->delta=(int)rint(_float32_unpack(s->q_delta));
 
@@ -387,22 +390,23 @@ static int sort64a(const void *a,const void *b){
 }
 
 /* decode codebook arrangement is more heavily optimized than encode */
-int vorbis_book_init_decode(codebook *c,const static_codebook *s){
-  int i,j,n=0,tabn;
+int vorbis_book_init_decode(dec_codebook *c){
+  ogg_int32_t i,j,n=0;
+  int tabn;
   ogg_int64_t *codes=NULL;
 
-  memset(c,0,sizeof(*c));
+  /* only initialize once */
+  if(c->codelist)return(0);
 
   /* count actually used entries and find max length */
-  for(i=0;i<s->entries;i++)
-    if(s->lengthlist[i]>0)
+  for(i=0;i<c->entries;i++)
+    if(c->codelengths[i]>0)
       n++;
 
-  c->entries=s->entries;
   c->used_entries=n;
-  c->dim=s->dim;
 
   if(n>0){
+    signed char *codelengths;
     /* two different remappings go on here.
 
     First, we collapse the likely sparse codebook down only to
@@ -414,7 +418,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     by sorted bitreversed codeword to allow treeless decode. */
 
     /* perform sort */
-    codes=dec_make_words(s->lengthlist,s->entries,c->used_entries);
+    codes=dec_make_words(c->codelengths,c->entries,c->used_entries);
     if(codes==NULL)goto err_out;
 
     qsort(codes,n,sizeof(*codes),sort64a);
@@ -426,62 +430,70 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
       c->codelist[i]=(ogg_uint32_t)(codes[i]>>24);
     }
 
-    c->valuelist=_book_unquantize(s,n,codes);
-    c->dec_index=_ogg_malloc(n*sizeof(*c->dec_index));
-    if(c->dec_index==NULL)goto err_out;
-    c->dec_codelengths=_ogg_malloc(n*sizeof(*c->dec_codelengths));
-    if(c->dec_codelengths==NULL)goto err_out;
+    if(c->maptype==1 || c->maptype==2){
+      c->valuelist=_ogg_malloc(c->dim*n*sizeof(*c->valuelist));
+      if(c->valuelist==NULL)goto err_out;
+      _book_unquantize(c->valuelist,c,n,codes);
+      _ogg_free(c->quantlist);
+      c->quantlist=NULL;
+    }
+    c->index=_ogg_malloc(n*sizeof(*c->index));
+    if(c->index==NULL)goto err_out;
+    codelengths=_ogg_malloc(n*sizeof(*c->codelengths));
+    if(codelengths==NULL)goto err_out;
 
-    c->dec_maxlength=0;
+    c->maxlength=0;
     for(i=0;i<n;i++){
-      j=(int)(codes[i]&0xffffff);
-      c->dec_index[i]=j;
-      c->dec_codelengths[i]=s->lengthlist[j];
-      if(s->lengthlist[j]>c->dec_maxlength)
-        c->dec_maxlength=s->lengthlist[j];
+      j=(ogg_int32_t)(codes[i]&0xffffff);
+      c->index[i]=j;
+      codelengths[i]=c->codelengths[j];
+      if(codelengths[i]>c->maxlength)
+        c->maxlength=codelengths[i];
     }
     _ogg_free(codes);
     codes=NULL;
+    _ogg_free(c->codelengths);
+    c->codelengths=codelengths;
 
-    if(n==1 && c->dec_maxlength==1){
+    if(n==1 && c->maxlength==1){
       /* special case the 'single entry codebook' with a single bit
        fastpath table (that always returns entry 0 )in order to use
        unmodified decode paths. */
-      c->dec_firsttablen=1;
-      c->dec_firsttable=_ogg_calloc(2,sizeof(*c->dec_firsttable));
-      if(c->dec_firsttable==NULL)goto err_out;
-      c->dec_firsttable[0]=c->dec_firsttable[1]=1;
+      c->firsttablen=1;
+      c->firsttable=_ogg_calloc(2,sizeof(*c->firsttable));
+      if(c->firsttable==NULL)goto err_out;
+      c->firsttable[0]=c->firsttable[1]=1;
 
     }else{
-      c->dec_firsttablen=ov_ilog(c->used_entries)-4; /* this is magic */
-      if(c->dec_firsttablen<5)c->dec_firsttablen=5;
-      if(c->dec_firsttablen>8)c->dec_firsttablen=8;
+      c->firsttablen=(signed char)(ov_ilog(n)-4); /* this is magic */
+      if(c->firsttablen<5)c->firsttablen=5;
+      if(c->firsttablen>8)c->firsttablen=8;
 
-      tabn=1<<c->dec_firsttablen;
-      c->dec_firsttable=_ogg_calloc(tabn,sizeof(*c->dec_firsttable));
-      if(c->dec_firsttable==NULL)goto err_out;
+      tabn=1<<c->firsttablen;
+      c->firsttable=_ogg_calloc(tabn,sizeof(*c->firsttable));
+      if(c->firsttable==NULL)goto err_out;
 
       for(i=0;i<n;i++){
-        if(c->dec_codelengths[i]<=c->dec_firsttablen){
+        if(c->codelengths[i]<=c->firsttablen){
           ogg_uint32_t orig=bitreverse(c->codelist[i]);
-          for(j=0;j<(1<<(c->dec_firsttablen-c->dec_codelengths[i]));j++)
+          for(j=0;j<(1<<(c->firsttablen-c->codelengths[i]));j++)
             /* pack the length into the table, too, to avoid an extra lookup.
                This also guarantees the table value is non-zero, since the
                length of any used entry is positive. */
-            c->dec_firsttable[orig|(j<<c->dec_codelengths[i])]=
-             i<<6|c->dec_codelengths[i];
+            c->firsttable[orig|(j<<c->codelengths[i])]=
+             i<<6|c->codelengths[i];
         }
       }
 
       /* now fill in 'unused' entries in the firsttable with hi/lo search
          hints for the non-direct-hits */
       {
-        ogg_uint32_t mask=0xfffffffeUL<<(31-c->dec_firsttablen);
+        ogg_uint32_t mask=0xfffffffeUL<<(31-c->firsttablen);
         long lo=0,hi=0;
 
         for(i=0;i<tabn;i++){
-          ogg_uint32_t word=((ogg_uint32_t)i<<(32-c->dec_firsttablen));
-          if(c->dec_firsttable[bitreverse(word)]==0){
+          ogg_uint32_t word=((ogg_uint32_t)i<<(32-c->firsttablen));
+          if(c->firsttable[bitreverse(word)]==0){
             while((lo+1)<n && c->codelist[lo+1]<=word)lo++;
             while(    hi<n && word>=(c->codelist[hi]&mask))hi++;
 
@@ -494,7 +506,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
               if(loval>0x7fff)loval=0x7fff;
               if(hival>0x7fff)hival=0x7fff;
-              c->dec_firsttable[bitreverse(word)]=
+              c->firsttable[bitreverse(word)]=
                 0x80000000UL | (loval<<15) | hival;
             }
           }
@@ -506,7 +518,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   return(0);
  err_out:
   if(codes)_ogg_free(codes);
-  vorbis_book_clear(c);
+  /* our caller will clean up the partially initialized book */
   return(-1);
 }
 
@@ -542,50 +554,42 @@ long vorbis_book_codelen(codebook *book,int entry){
    sequential
 */
 
-static long full_quantlist1[]={0,1,2,3,    4,5,6,7, 8,3,6,1};
-static long partial_quantlist1[]={0,7,2};
+static ogg_uint16_t full_quantlist1[]={0,1,2,3,    4,5,6,7, 8,3,6,1};
+static ogg_uint16_t partial_quantlist1[]={0,7,2};
 
 /* no mapping */
-static_codebook test1={
-  4,16,
+dec_codebook test1={
+  4,0,0,16,0,
+  0,0,0,0,0,
   NULL,
-  0,
-  0,0,0,0,
-  NULL,
-  0
+  NULL,NULL,NULL,NULL,NULL
 };
 static float *test1_result=NULL;
 
 /* linear, full mapping, nonsequential */
-static_codebook test2={
-  4,3,
-  NULL,
-  2,
-  -533200896,1611661312,4,0,
+dec_codebook test2={
+  4,0,0,3,0,
+  2,4,0,3761766400U,1611661312,
   full_quantlist1,
-  0
+  NULL,NULL,NULL,NULL,NULL
 };
 static float test2_result[]={-3,-2,-1,0, 1,2,3,4, 5,0,3,-2};
 
 /* linear, full mapping, sequential */
-static_codebook test3={
-  4,3,
-  NULL,
-  2,
-  -533200896,1611661312,4,1,
+dec_codebook test3={
+  4,0,0,3,0,
+  2,4,1,3761766400U,1611661312,
   full_quantlist1,
-  0
+  NULL,NULL,NULL,NULL,NULL
 };
 static float test3_result[]={-3,-5,-6,-6, 1,3,6,10, 5,5,8,6};
 
 /* linear, algorithmic mapping, nonsequential */
-static_codebook test4={
-  3,27,
-  NULL,
-  1,
-  -533200896,1611661312,4,0,
+dec_codebook test4={
+  3,0,0,27,0,
+  1,4,0,3761766400U,1611661312,
   partial_quantlist1,
-  0
+  NULL,NULL,NULL,NULL,NULL
 };
 static float test4_result[]={-3,-3,-3, 4,-3,-3, -1,-3,-3,
                               -3, 4,-3, 4, 4,-3, -1, 4,-3,
@@ -598,13 +602,11 @@ static float test4_result[]={-3,-3,-3, 4,-3,-3, -1,-3,-3,
                               -3,-1,-1, 4,-1,-1, -1,-1,-1};
 
 /* linear, algorithmic mapping, sequential */
-static_codebook test5={
-  3,27,
-  NULL,
-  1,
-  -533200896,1611661312,4,1,
+dec_codebook test5={
+  3,0,0,27,0,
+  1,4,1,3761766400U,1611661312,
   partial_quantlist1,
-  0
+  NULL,NULL,NULL,NULL,NULL,
 };
 static float test5_result[]={-3,-6,-9, 4, 1,-2, -1,-4,-7,
                               -3, 1,-2, 4, 8, 5, -1, 3, 0,
@@ -616,16 +618,12 @@ static float test5_result[]={-3,-6,-9, 4, 1,-2, -1,-4,-7,
                               -3, 1, 0, 4, 8, 7, -1, 3, 2,
                               -3,-4,-5, 4, 3, 2, -1,-2,-3};
 
-void run_test(static_codebook *b,float *comp){
-  float *out=_book_unquantize(b,b->entries,NULL);
+void run_test(dec_codebook *b,float *comp){
+  float out[3*27];
   int i;
 
   if(comp){
-    if(!out){
-      fprintf(stderr,"_book_unquantize incorrectly returned NULL\n");
-      exit(1);
-    }
-
+    _book_unquantize(out,b,b->entries,NULL);
     for(i=0;i<b->entries*b->dim;i++)
       if(fabs(out[i]-comp[i])>.0001){
         fprintf(stderr,"disagreement in unquantized and reference data:\n"
@@ -633,14 +631,7 @@ void run_test(static_codebook *b,float *comp){
         exit(1);
       }
 
-  }else{
-    if(out){
-      fprintf(stderr,"_book_unquantize returned a value array: \n"
-              " correct result should have been NULL\n");
-      exit(1);
-    }
   }
-  _ogg_free(out);
 }
 
 int main(){
