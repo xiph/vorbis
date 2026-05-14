@@ -370,6 +370,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     if(sortindex==NULL)goto err_out;
 
     c->codelist=_ogg_malloc(n*sizeof(*c->codelist));
+    if(c->codelist==NULL)goto err_out;
     /* the index is a reverse index */
     for(i=0;i<n;i++){
       int position=codep[i]-codes;
@@ -383,12 +384,14 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
     c->valuelist=_book_unquantize(s,n,sortindex);
     c->dec_index=_ogg_malloc(n*sizeof(*c->dec_index));
+    if(c->dec_index==NULL)goto err_out;
 
     for(n=0,i=0;i<s->entries;i++)
       if(s->lengthlist[i]>0)
         c->dec_index[sortindex[n++]]=i;
 
     c->dec_codelengths=_ogg_malloc(n*sizeof(*c->dec_codelengths));
+    if(c->dec_codelengths==NULL)goto err_out;
     c->dec_maxlength=0;
     for(n=0,i=0;i<s->entries;i++)
       if(s->lengthlist[i]>0){
@@ -404,6 +407,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
        unmodified decode paths. */
       c->dec_firsttablen=1;
       c->dec_firsttable=_ogg_calloc(2,sizeof(*c->dec_firsttable));
+      if(c->dec_firsttable==NULL)goto err_out;
       c->dec_firsttable[0]=c->dec_firsttable[1]=1;
 
     }else{
@@ -413,6 +417,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
       tabn=1<<c->dec_firsttablen;
       c->dec_firsttable=_ogg_calloc(tabn,sizeof(*c->dec_firsttable));
+      if(c->dec_firsttable==NULL)goto err_out;
 
       for(i=0;i<n;i++){
         if(c->dec_codelengths[i]<=c->dec_firsttablen){
