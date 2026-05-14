@@ -391,70 +391,135 @@ static int sort64a(const void *a,const void *b){
 
 /* decode codebook arrangement is more heavily optimized than encode */
 int vorbis_book_init_decode(dec_codebook *c){
-  ogg_int32_t i,j,n=0;
-  int tabn;
+  ogg_int32_t i,j,n;
   ogg_int64_t *codes=NULL;
 
   /* only initialize once */
   if(c->codelist)return(0);
 
-  /* count actually used entries and find max length */
-  for(i=0;i<c->entries;i++)
-    if(c->codelengths[i]>0)
-      n++;
+  if(c->codelengths){
+    /* unordered codebook */
+    /* count actually used entries */
+    n=0;
+    for(i=0;i<c->entries;i++)
+      if(c->codelengths[i]>0)
+        n++;
 
-  c->used_entries=n;
+    if(n>0){
+      signed char *codelengths;
+      /* two different remappings go on here.
 
+      First, we collapse the likely sparse codebook down only to
+      actually represented values/words.  This collapsing needs to be
+      indexed as map-valueless books are used to encode original entry
+      positions as integers.
+
+      Second, we reorder all vectors, including the entry index above,
+      by sorted bitreversed codeword to allow treeless decode. */
+
+      /* perform sort */
+      codes=dec_make_words(c->codelengths,c->entries,n);
+      if(codes==NULL)goto err_out;
+
+      qsort(codes,n,sizeof(*codes),sort64a);
+
+      c->codelist=_ogg_malloc(n*sizeof(*c->codelist));
+      if(c->codelist==NULL)goto err_out;
+
+      for(i=0;i<n;i++){
+        c->codelist[i]=(ogg_uint32_t)(codes[i]>>24);
+      }
+
+      if(c->maptype==1 || c->maptype==2){
+        c->valuelist=_ogg_malloc(c->dim*n*sizeof(*c->valuelist));
+        if(c->valuelist==NULL)goto err_out;
+        _book_unquantize(c->valuelist,c,n,codes);
+        _ogg_free(c->quantlist);
+        c->quantlist=NULL;
+      }
+      c->index=_ogg_malloc(n*sizeof(*c->index));
+      if(c->index==NULL)goto err_out;
+      codelengths=_ogg_malloc(n*sizeof(*c->codelengths));
+      if(codelengths==NULL)goto err_out;
+
+      /* save the index of used entries, compact and reorder the codelengths,
+         and find min/max length */
+      c->minlength=32;
+      c->maxlength=0;
+      for(i=0;i<n;i++){
+        j=(ogg_int32_t)(codes[i]&0xffffff);
+        c->index[i]=j;
+        codelengths[i]=c->codelengths[j];
+        if(codelengths[i]<c->minlength)
+          c->minlength=codelengths[i];
+        if(codelengths[i]>c->maxlength)
+          c->maxlength=codelengths[i];
+      }
+      _ogg_free(codes);
+      codes=NULL;
+      _ogg_free(c->codelengths);
+      c->codelengths=codelengths;
+    }
+  }else{
+    /* ordered codebook:
+       we can avoid building an explicit list of codepoints, which can be a big
+       advantage as we approach the limits of the spec with upwards of 16
+       million codebook entries.  We follow the approach of Alistair Moffat and
+       Andrew Turpin: On the Implementation of Minimum Redundancy Prefix Codes,
+       IEEE Transactions on Communications, 45(10):1200--1207, October, 1997,
+       except modified to have codewords in order of increasing length, instead
+       of decreasing. */
+    n=c->entries;
+    if(n>0){
+      ogg_uint32_t prev_entry;
+      ogg_uint32_t code;
+      int nlengths;
+      int length;
+      int l;
+      nlengths=c->maxlength-c->minlength+1;
+      c->codelist=_ogg_malloc(nlengths*sizeof(*c->codelist));
+      if(c->codelist==NULL)goto err_out;
+      /* for this case, codelist[l] contains the last codeword of the l'th
+         length, left-aligned in a 32-bit word, with all remaining bits filled
+         with trailing 1's.  This ensures that 32 bits taken from the stream
+         will be <= codelist[l] if the codeword length is <= length l. */
+      prev_entry=0;
+      code=0;
+      length=c->minlength;
+      for(l=0;l<nlengths;l++,length++){
+        ogg_uint32_t nentries;
+        nentries=c->index[l]-prev_entry;
+        /* guard against an over-populated tree.  We do not check the last
+           length, because it should exactly use the remaining space, which
+           causes code to wrap to 0 (something this check prevents for any
+           earlier length).  We'll check it after the loop. */
+        if(l+1<nlengths && nentries>((0xffffffffUL-code)>>(32-length)))
+          goto err_out;
+        code+=nentries<<(32-length);
+        /* this requires that the first length have a non-zero number of
+           entries, or c->codelist[0] will wrap to 0xffffffff, making the list
+           non-monotonic. */
+        c->codelist[l]=code-1;
+        prev_entry=c->index[l];
+      }
+      /* for a complete tree, the last value will have all bits set, which
+         guarantees we will not walk past the end of the array during decode */
+      if(c->codelist[nlengths-1]!=0xffffffffUL){
+        /* reject over/underpopulated trees, with the exception of a
+           single-entry codebook. */
+        if(n!=1 || c->maxlength!=1)goto err_out;
+      }
+      if(c->maptype==1 || c->maptype==2){
+        c->valuelist=_ogg_malloc(c->dim*n*sizeof(*c->valuelist));
+        if(c->valuelist==NULL)goto err_out;
+        _book_unquantize(c->valuelist,c,n,NULL);
+        _ogg_free(c->quantlist);
+        c->quantlist=NULL;
+      }
+    }
+  }
+  /* build the fastpath lookup table */
   if(n>0){
-    signed char *codelengths;
-    /* two different remappings go on here.
-
-    First, we collapse the likely sparse codebook down only to
-    actually represented values/words.  This collapsing needs to be
-    indexed as map-valueless books are used to encode original entry
-    positions as integers.
-
-    Second, we reorder all vectors, including the entry index above,
-    by sorted bitreversed codeword to allow treeless decode. */
-
-    /* perform sort */
-    codes=dec_make_words(c->codelengths,c->entries,c->used_entries);
-    if(codes==NULL)goto err_out;
-
-    qsort(codes,n,sizeof(*codes),sort64a);
-
-    c->codelist=_ogg_malloc(n*sizeof(*c->codelist));
-    if(c->codelist==NULL)goto err_out;
-
-    for(i=0;i<n;i++){
-      c->codelist[i]=(ogg_uint32_t)(codes[i]>>24);
-    }
-
-    if(c->maptype==1 || c->maptype==2){
-      c->valuelist=_ogg_malloc(c->dim*n*sizeof(*c->valuelist));
-      if(c->valuelist==NULL)goto err_out;
-      _book_unquantize(c->valuelist,c,n,codes);
-      _ogg_free(c->quantlist);
-      c->quantlist=NULL;
-    }
-    c->index=_ogg_malloc(n*sizeof(*c->index));
-    if(c->index==NULL)goto err_out;
-    codelengths=_ogg_malloc(n*sizeof(*c->codelengths));
-    if(codelengths==NULL)goto err_out;
-
-    c->maxlength=0;
-    for(i=0;i<n;i++){
-      j=(ogg_int32_t)(codes[i]&0xffffff);
-      c->index[i]=j;
-      codelengths[i]=c->codelengths[j];
-      if(codelengths[i]>c->maxlength)
-        c->maxlength=codelengths[i];
-    }
-    _ogg_free(codes);
-    codes=NULL;
-    _ogg_free(c->codelengths);
-    c->codelengths=codelengths;
-
     if(n==1 && c->maxlength==1){
       /* special case the 'single entry codebook' with a single bit
        fastpath table (that always returns entry 0 )in order to use
@@ -465,51 +530,121 @@ int vorbis_book_init_decode(dec_codebook *c){
       c->firsttable[0]=c->firsttable[1]=1;
 
     }else{
+      int tabn;
       c->firsttablen=(signed char)(ov_ilog(n)-4); /* this is magic */
       if(c->firsttablen<5)c->firsttablen=5;
+      /* if the codewords all have similar lengths, we might wind up with a
+         table smaller than the shorter codes: increase the size or we could
+         take the slow path in a large fraction of cases */
+      if(c->firsttablen<c->minlength+1)
+        c->firsttablen=c->minlength+1;
+      /* also cap the table by the max length, or we are just wasting space */
+      if(c->firsttablen>c->maxlength)
+        c->firsttablen=c->maxlength;
+      /* if we have an ordered book with a very large minimum length, an 8-bit
+         table would be mostly wasted.  Instead, try to make one just large
+         enough to get a good guess for the codeword length. */
+      if(c->codelengths==NULL && c->minlength>8)
+        c->firsttablen=c->maxlength-c->minlength+1;
       if(c->firsttablen>8)c->firsttablen=8;
 
       tabn=1<<c->firsttablen;
       c->firsttable=_ogg_calloc(tabn,sizeof(*c->firsttable));
       if(c->firsttable==NULL)goto err_out;
 
-      for(i=0;i<n;i++){
-        if(c->codelengths[i]<=c->firsttablen){
-          ogg_uint32_t orig=bitreverse(c->codelist[i]);
-          for(j=0;j<(1<<(c->firsttablen-c->codelengths[i]));j++)
-            /* pack the length into the table, too, to avoid an extra lookup.
-               This also guarantees the table value is non-zero, since the
-               length of any used entry is positive. */
-            c->firsttable[orig|(j<<c->codelengths[i])]=
-             i<<6|c->codelengths[i];
+      if(c->codelengths!=NULL){
+        /* unordered codebook:
+           use the codewords for each entry to build the fastpath table */
+        for(i=0;i<n;i++){
+          if(c->codelengths[i]<=c->firsttablen){
+            ogg_uint32_t orig=bitreverse(c->codelist[i]);
+            for(j=0;j<(1<<(c->firsttablen-c->codelengths[i]));j++)
+              /* pack the length into the table, too, to avoid an extra lookup.
+                 This also guarantees the table value is non-zero, since the
+                 length of any used entry is positive. */
+              c->firsttable[orig|(j<<c->codelengths[i])]=
+               i<<6|c->codelengths[i];
+          }
         }
-      }
 
-      /* now fill in 'unused' entries in the firsttable with hi/lo search
-         hints for the non-direct-hits */
-      {
-        ogg_uint32_t mask=0xfffffffeUL<<(31-c->firsttablen);
-        long lo=0,hi=0;
+        /* now fill in 'unused' entries in the firsttable with hi/lo search
+           hints for the non-direct-hits */
+        {
+          ogg_uint32_t mask=0xfffffffeUL<<(31-c->firsttablen);
+          long lo=0,hi=0;
 
-        for(i=0;i<tabn;i++){
-          ogg_uint32_t word=((ogg_uint32_t)i<<(32-c->firsttablen));
-          if(c->firsttable[bitreverse(word)]==0){
-            while((lo+1)<n && c->codelist[lo+1]<=word)lo++;
-            while(    hi<n && word>=(c->codelist[hi]&mask))hi++;
+          c->hi_max=n;
+          for(i=0;i<tabn;i++){
+            ogg_uint32_t word=((ogg_uint32_t)i<<(32-c->firsttablen));
+            if(c->firsttable[bitreverse(word)]==0){
+              while((lo+1)<n && c->codelist[lo+1]<=word)lo++;
+              while(    hi<n && word>=(c->codelist[hi]&mask))hi++;
 
-            /* we only actually have 15 bits per hint to play with here.
-               In order to overflow gracefully (nothing breaks, efficiency
-               just drops), encode as the difference from the extremes. */
-            {
-              unsigned long loval=lo;
-              unsigned long hival=n-hi;
+              /* we only actually have 15 bits per hint to play with here.
+                 In order to overflow gracefully (nothing breaks, efficiency
+                 just drops), encode as the difference from the extremes. */
+              {
+                unsigned long loval=lo;
+                unsigned long hival=n-hi;
 
-              if(loval>0x7fff)loval=0x7fff;
-              if(hival>0x7fff)hival=0x7fff;
-              c->firsttable[bitreverse(word)]=
-                0x80000000UL | (loval<<15) | hival;
+                if(loval>0x7fff)loval=0x7fff;
+                if(hival>0x7fff)hival=0x7fff;
+                c->firsttable[bitreverse(word)]=
+                  0x80000000UL | (loval<<15) | hival;
+              }
             }
           }
+        }
+      }else{
+        ogg_uint32_t code;
+        int nlengths;
+        int length;
+        int l;
+        /* ordered codebook:
+           step through the code lengths to build the fastpath table */
+        nlengths=c->maxlength-c->minlength+1;
+        c->hi_max=nlengths-1;
+        length=c->minlength;
+        code=0;
+        for(i=l=0;length<=c->firsttablen;l++,length++){
+          for(;i<c->index[l];i++,code++){
+            ogg_uint32_t orig=bitreverse(code<<(32-length));
+            for(j=0;j<(1<<(c->firsttablen-length));j++){
+              /* pack the length into the table to avoid an extra lookup */
+              c->firsttable[(j<<length)|orig]=i<<6|length;
+            }
+          }
+          code<<=1;
+        }
+
+        /* now fill in 'unused' entries in the firsttable with length search
+           hints for the non-direct hits.  In this case, instead of storing the
+           hi/lo entry codewords in the table, we store the (index of) the
+           shortest and longest lengths of any codeword that starts with that
+           prefix. */
+        if(l<nlengths){
+          int lo=l;
+          do{
+            ogg_uint32_t nleft;
+            ogg_uint32_t slot_count;
+            /* how many more codes are left of this length? */
+            nleft=(c->codelist[l]>>(32-length))-code+1;
+            slot_count=(ogg_uint32_t)1<<(length-c->firsttablen);
+            if(nleft>=slot_count){
+              ogg_uint32_t word=code>>(length-c->firsttablen);
+              c->firsttable[bitreverse(word<<(32-c->firsttablen))]=
+               0x80000000UL | ((ogg_uint32_t)lo<<15) | (nlengths-1-l);
+              code+=slot_count;
+              lo=l;
+            }else{
+              /* not enough: consider longer codes */
+              l++;
+              length++;
+              code<<=1;
+              if(nleft==0)lo=l;
+            }
+          }
+          while(l<nlengths);
         }
       }
     }
@@ -559,7 +694,7 @@ static ogg_uint16_t partial_quantlist1[]={0,7,2};
 
 /* no mapping */
 dec_codebook test1={
-  4,0,0,16,0,
+  4,0,0,0,16,0,
   0,0,0,0,0,
   NULL,
   NULL,NULL,NULL,NULL,NULL
@@ -568,7 +703,7 @@ static float *test1_result=NULL;
 
 /* linear, full mapping, nonsequential */
 dec_codebook test2={
-  4,0,0,3,0,
+  4,0,0,0,3,0,
   2,4,0,3761766400U,1611661312,
   full_quantlist1,
   NULL,NULL,NULL,NULL,NULL
@@ -577,7 +712,7 @@ static float test2_result[]={-3,-2,-1,0, 1,2,3,4, 5,0,3,-2};
 
 /* linear, full mapping, sequential */
 dec_codebook test3={
-  4,0,0,3,0,
+  4,0,0,0,3,0,
   2,4,1,3761766400U,1611661312,
   full_quantlist1,
   NULL,NULL,NULL,NULL,NULL
@@ -586,7 +721,7 @@ static float test3_result[]={-3,-5,-6,-6, 1,3,6,10, 5,5,8,6};
 
 /* linear, algorithmic mapping, nonsequential */
 dec_codebook test4={
-  3,0,0,27,0,
+  3,0,0,0,27,0,
   1,4,0,3761766400U,1611661312,
   partial_quantlist1,
   NULL,NULL,NULL,NULL,NULL
@@ -603,7 +738,7 @@ static float test4_result[]={-3,-3,-3, 4,-3,-3, -1,-3,-3,
 
 /* linear, algorithmic mapping, sequential */
 dec_codebook test5={
-  3,0,0,27,0,
+  3,0,0,0,27,0,
   1,4,1,3761766400U,1611661312,
   partial_quantlist1,
   NULL,NULL,NULL,NULL,NULL,

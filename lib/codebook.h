@@ -72,10 +72,11 @@ typedef struct codebook{
 
 typedef struct dec_codebook{
   signed char   dim;           /* codebook dimensions (elements per vector) */
+  signed char   minlength;
   signed char   maxlength;
   signed char   firsttablen;   /* number of bits in decode fastpath table */
   ogg_int32_t   entries;       /* codebook entries */
-  ogg_int32_t   used_entries;  /* populated codebook entries */
+  ogg_int32_t   hi_max;        /* the maximum value of the fastpath hi hint */
 
   /* The below does a linear, single monotonic sequence mapping. */
   signed char   maptype;
@@ -92,9 +93,17 @@ typedef struct dec_codebook{
   ogg_uint32_t *firsttable; /* decode fastpath lookup table */
   /* the below are ordered by bitreversed codeword and only used entries are
      populated */
-  ogg_uint32_t *codelist;   /* list of bitstream codewords for each entry */
-  signed char  *codelengths;
-  ogg_int32_t  *index;
+  ogg_uint32_t *codelist;   /* unordered: list of codewords for each entry.
+                               ordered: sentinel value for each length as large
+                                as any codeword (of that length or shorter)
+                                with any trailing bits appended. */
+  signed char  *codelengths;/* unordered: length of each codeword.
+                               ordered: unused (NULL). */
+  ogg_int32_t  *index;      /* unordered: a mapping from codeword index (in the
+                               collapsed, sorted list in codelist) to the entry
+                               in the original (possibly-sparse) codebook.
+                               ordered: cumulative count of entries for each
+                               length (starting from the minimum length). */
   float        *valuelist;  /* list of dim*entries actual entry values */
 
 } dec_codebook;

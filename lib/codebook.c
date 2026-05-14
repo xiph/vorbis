@@ -145,7 +145,7 @@ int vorbis_staticbook_pack(const static_codebook *c,oggpack_buffer *opb){
 
 /* unpacks a codebook from the packet buffer into the codebook struct */
 int vorbis_decbook_unpack(dec_codebook *c,oggpack_buffer *opb){
-  long i,j;
+  long i;
 
   /* make sure alignment is correct */
   if(oggpack_read(opb,24)!=0x564342)goto _eofout;
@@ -195,23 +195,31 @@ int vorbis_decbook_unpack(dec_codebook *c,oggpack_buffer *opb){
   case 1:
     /* ordered */
     {
-      long length=oggpack_read(opb,5)+1;
-      if(length==0)goto _eofout;
-      c->codelengths=_ogg_malloc(sizeof(*c->codelengths)*c->entries);
-      if(c->codelengths==NULL)goto _errout;
-
-      for(i=0;i<c->entries;){
+      ogg_int32_t cum_entries[32];
+      long minlength=oggpack_read(opb,5)+1;
+      long maxlength;
+      long length;
+      if(minlength==0)goto _eofout;
+      maxlength=length=minlength;
+      for(i=0;i<c->entries;length++){
         long num=oggpack_read(opb,ov_ilog(c->entries-i));
         if(num==-1)goto _eofout;
         if(length>32 || num>c->entries-i ||
            (num>0 && (num-1)>>(length-1)>1)){
           goto _errout;
         }
-        if(length>32)goto _errout;
-        for(j=0;j<num;j++,i++)
-          c->codelengths[i]=(signed char)length;
-        length++;
+        i+=num;
+        cum_entries[length-minlength]=(ogg_int32_t)i;
+        /* skip lengths with 0 entries at the start, to avoid creating a
+           malformed codeword sentinel in vorbis_book_init_decode(). */
+        if(i==0)minlength++;
+        maxlength=length;
       }
+      c->minlength=(signed char)minlength;
+      c->maxlength=(signed char)maxlength;
+      c->index=_ogg_malloc((maxlength-minlength+1)*sizeof(*c->index));
+      if(c->index==NULL)goto _errout;
+      memcpy(c->index,cum_entries,(maxlength-minlength+1)*sizeof(*c->index));
     }
     break;
   default:
@@ -300,6 +308,7 @@ static ogg_uint32_t bitreverse(ogg_uint32_t x){
 }
 
 STIN long decode_packed_entry_number(dec_codebook *book, oggpack_buffer *b){
+  ogg_uint32_t testword;
   int  read=book->maxlength;
   long lo,hi;
   long lok = oggpack_look(b,book->firsttablen);
@@ -308,14 +317,14 @@ STIN long decode_packed_entry_number(dec_codebook *book, oggpack_buffer *b){
     long entry = book->firsttable[lok];
     if(entry&0x80000000UL){
       lo=(entry>>15)&0x7fff;
-      hi=book->used_entries-(entry&0x7fff);
+      hi=book->hi_max-(entry&0x7fff);
     }else{
       oggpack_adv(b, (int)(entry&0x3f));
       return(entry>>6);
     }
   }else{
     lo=0;
-    hi=book->used_entries;
+    hi=book->hi_max;
   }
 
   /* Single entry codebooks use a firsttablen of 1 and a
@@ -330,10 +339,20 @@ STIN long decode_packed_entry_number(dec_codebook *book, oggpack_buffer *b){
     lok = oggpack_look(b, --read);
   if(lok<0)return -1;
 
-  /* bisect search for the codeword in the ordered list */
-  {
-    ogg_uint32_t testword=bitreverse((ogg_uint32_t)lok);
-
+  testword=bitreverse((ogg_uint32_t)lok);
+  if(book->codelengths==NULL){
+    int length;
+    /* ordered codebook: search for the codeword length */
+    while(testword>book->codelist[lo])lo++;
+    length=(int)lo+book->minlength;
+    if(length<=read){
+      long entry=
+       book->index[lo]-(((book->codelist[lo]-testword)>>(32-length))+1);
+      oggpack_adv(b, length);
+      return(entry);
+    }
+  }else{
+    /* bisect search for the codeword in the ordered list */
     while(hi-lo>1){
       long p=(hi-lo)>>1;
       long test=book->codelist[lo+p]>testword;
@@ -368,13 +387,18 @@ STIN long decode_packed_entry_number(dec_codebook *book, oggpack_buffer *b){
 
 /* returns the [original, not compacted] entry number or -1 on eof *********/
 long vorbis_book_decode(dec_codebook *book, oggpack_buffer *b){
-  if(book->used_entries>0){
+  if(book->codelist){
     long packed_entry=decode_packed_entry_number(book,b);
-    if(packed_entry>=0)
-      return(book->index[packed_entry]);
+    if(packed_entry>=0){
+      /* if we have an unordered book, look up the original entry number */
+      if(book->codelengths)
+        return(book->index[packed_entry]);
+      /* if we have an ordered book, the packed_entry number is the original */
+      return(packed_entry);
+    }
   }
 
-  /* if there's no index, the codebook unpacking isn't collapsed */
+  /* if there's no codelist, the codebook hasn't been init'd */
   return(-1);
 }
 
@@ -382,7 +406,7 @@ long vorbis_book_decode(dec_codebook *book, oggpack_buffer *b){
 /* decode vector / dim granularity gaurding is done in the upper layer */
 long vorbis_book_decodevs_add(dec_codebook *book,float *a,oggpack_buffer *b,
                               int n){
-  if(book->used_entries>0){
+  if(book->codelist){
     int step=n/book->dim;
     long *entry = alloca(sizeof(*entry)*step);
     float **t = alloca(sizeof(*t)*step);
@@ -403,7 +427,7 @@ long vorbis_book_decodevs_add(dec_codebook *book,float *a,oggpack_buffer *b,
 /* decode vector / dim granularity gaurding is done in the upper layer */
 long vorbis_book_decodev_add(dec_codebook *book,float *a,oggpack_buffer *b,
                              int n){
-  if(book->used_entries>0){
+  if(book->codelist){
     int i,j,entry;
     float *t;
 
@@ -423,7 +447,7 @@ long vorbis_book_decodev_add(dec_codebook *book,float *a,oggpack_buffer *b,
    floor0) */
 long vorbis_book_decodev_set(dec_codebook *book,float *a,oggpack_buffer *b,
                              int n){
-  if(book->used_entries>0){
+  if(book->codelist){
     int i,j,entry;
     float *t;
 
@@ -450,7 +474,7 @@ long vorbis_book_decodevv_add(dec_codebook *book,float **a,long offset,int ch,
 
   long i,j,entry;
   int chptr=0;
-  if(book->used_entries>0){
+  if(book->codelist){
     int m=(offset+n)/ch;
     for(i=offset/ch;i<m;){
       entry = decode_packed_entry_number(book,b);
