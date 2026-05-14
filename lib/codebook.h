@@ -83,7 +83,8 @@ extern int vorbis_book_init_encode(codebook *dest,const static_codebook *source)
 extern int vorbis_book_init_decode(codebook *dest,const static_codebook *source);
 extern void vorbis_book_clear(codebook *b);
 
-extern float *_book_unquantize(const static_codebook *b,int n,int *map);
+extern float *_book_unquantize(const static_codebook *b,int n,
+                               ogg_int64_t *map);
 extern float *_book_logdist(const static_codebook *b,float *vals);
 extern float _float32_unpack(long val);
 extern long   _float32_pack(float val);

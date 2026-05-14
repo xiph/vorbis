@@ -162,6 +162,81 @@ ogg_uint32_t *_make_words(char *l,long n,long sparsecount){
   return(r);
 }
 
+/* given a list of word lengths, generate a list of packed MSb codewords and
+   entry numbers.  This is like the above, except that the codewords are MSb
+   first and aligned to be 32-bits in size, and the lower 24 bits include the
+   entry number the codeword corresponds to. */
+static ogg_int64_t *dec_make_words(char *l,long n,long sparsecount){
+  long i,j,count=0;
+  ogg_uint32_t marker[33];
+  ogg_int64_t *r=_ogg_malloc((sparsecount?sparsecount:n)*sizeof(*r));
+  if(r==NULL)return(NULL);
+  memset(marker,0,sizeof(marker));
+
+  for(i=0;i<n;i++){
+    long length=l[i];
+    if(length>0){
+      ogg_uint32_t entry=marker[length];
+
+      /* when we claim a node for an entry, we also claim the nodes
+         below it (pruning off the imagined tree that may have dangled
+         from it) as well as blocking the use of any nodes directly
+         above for leaves */
+
+      /* update ourself */
+      if(length<32 && (entry>>length)){
+        /* error condition; the lengths must specify an overpopulated tree */
+        _ogg_free(r);
+        return(NULL);
+      }
+      r[count++]=(ogg_int64_t)entry<<(32-l[i]+24)|i;
+
+      /* Look to see if the next shorter marker points to the node
+         above. if so, update it and repeat.  */
+      {
+        for(j=length;j>0;j--){
+
+          if(marker[j]&1){
+            /* have to jump branches */
+            if(j==1)
+              marker[1]++;
+            else
+              marker[j]=marker[j-1]<<1;
+            break; /* invariant says next upper marker would already
+                      have been moved if it was on the same path */
+          }
+          marker[j]++;
+        }
+      }
+
+      /* prune the tree; the implicit invariant says all the longer
+         markers were dangling from our just-taken node.  Dangle them
+         from our *new* node. */
+      for(j=length+1;j<33;j++)
+        if((marker[j]>>1) == entry){
+          entry=marker[j];
+          marker[j]=marker[j-1]<<1;
+        }else
+          break;
+    }else
+      if(sparsecount==0)count++;
+  }
+
+  /* any underpopulated tree must be rejected. */
+  /* Single-entry codebooks are a retconned extension to the spec.
+     They have a single codeword '0' of length 1 that results in an
+     underpopulated tree.  Shield that case from the underformed tree check. */
+  if(!(count==1 && marker[2]==2)){
+    for(i=1;i<33;i++)
+      if(marker[i] & (0xffffffffUL>>(32-i))){
+        _ogg_free(r);
+        return(NULL);
+      }
+  }
+
+  return(r);
+}
+
 /* there might be a straightforward one-line way to do the below
    that's portable and totally safe against roundoff, but I haven't
    thought of it.  Therefore, we opt on the side of caution */
@@ -207,8 +282,8 @@ long _book_maptype1_quantvals(const static_codebook *b){
    generated algorithmically (each column of the vector counts through
    the values in the quant vector). in map type 2, all the values came
    in in an explicit list.  Both value lists must be unpacked */
-float *_book_unquantize(const static_codebook *b,int n,int *sparsemap){
-  long j,k,count=0;
+float *_book_unquantize(const static_codebook *b,int n,ogg_int64_t *sparsemap){
+  long i,j,k;
   if(b->maptype==1 || b->maptype==2){
     int quantvals;
     float mindel=_float32_unpack(b->q_min);
@@ -227,41 +302,29 @@ float *_book_unquantize(const static_codebook *b,int n,int *sparsemap){
          values (and are wasted).  So don't generate codebooks like
          that */
       quantvals=_book_maptype1_quantvals(b);
-      for(j=0;j<b->entries;j++){
-        if((sparsemap && b->lengthlist[j]) || !sparsemap){
-          float last=0.f;
-          int indexdiv=1;
-          for(k=0;k<b->dim;k++){
-            int index= (j/indexdiv)%quantvals;
-            float val=b->quantlist[index];
-            val=fabs(val)*delta+mindel+last;
-            if(b->q_sequencep)last=val;
-            if(sparsemap)
-              r[sparsemap[count]*b->dim+k]=val;
-            else
-              r[count*b->dim+k]=val;
-            indexdiv*=quantvals;
-          }
-          count++;
+      for(i=0;i<n;i++){
+        float last=0.f;
+        int indexdiv=1;
+        j=(long)(sparsemap?sparsemap[i]&0xffffff:i);
+        for(k=0;k<b->dim;k++){
+          int index=(j/indexdiv)%quantvals;
+          float val=b->quantlist[index];
+          val=fabs(val)*delta+mindel+last;
+          if(b->q_sequencep)last=val;
+          r[i*b->dim+k]=val;
+          indexdiv*=quantvals;
         }
-
       }
       break;
     case 2:
-      for(j=0;j<b->entries;j++){
-        if((sparsemap && b->lengthlist[j]) || !sparsemap){
-          float last=0.f;
-
-          for(k=0;k<b->dim;k++){
-            float val=b->quantlist[j*b->dim+k];
-            val=fabs(val)*delta+mindel+last;
-            if(b->q_sequencep)last=val;
-            if(sparsemap)
-              r[sparsemap[count]*b->dim+k]=val;
-            else
-              r[count*b->dim+k]=val;
-          }
-          count++;
+      for(i=0;i<n;i++){
+        float last=0.f;
+        j=(long)(sparsemap?sparsemap[i]&0xffffff:i);
+        for(k=0;k<b->dim;k++){
+          float val=b->quantlist[j*b->dim+k];
+          val=fabs(val)*delta+mindel+last;
+          if(b->q_sequencep)last=val;
+          r[i*b->dim+k]=val;
         }
       }
       break;
@@ -318,17 +381,15 @@ static ogg_uint32_t bitreverse(ogg_uint32_t x){
   return((x>> 1)&0x55555555UL) | ((x<< 1)&0xaaaaaaaaUL);
 }
 
-static int sort32a(const void *a,const void *b){
-  return ( **(ogg_uint32_t **)a>**(ogg_uint32_t **)b)-
-    ( **(ogg_uint32_t **)a<**(ogg_uint32_t **)b);
+static int sort64a(const void *a,const void *b){
+  return ( *(ogg_int64_t *)a>*(ogg_int64_t *)b)-
+    ( *(ogg_int64_t *)a<*(ogg_int64_t *)b);
 }
 
 /* decode codebook arrangement is more heavily optimized than encode */
 int vorbis_book_init_decode(codebook *c,const static_codebook *s){
   int i,j,n=0,tabn;
-  int *sortindex=NULL;
-  ogg_uint32_t *codes=NULL;
-  ogg_uint32_t **codep=NULL;
+  ogg_int64_t *codes=NULL;
 
   memset(c,0,sizeof(*c));
 
@@ -353,53 +414,34 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
     by sorted bitreversed codeword to allow treeless decode. */
 
     /* perform sort */
-    codes=_make_words(s->lengthlist,s->entries,c->used_entries);
+    codes=dec_make_words(s->lengthlist,s->entries,c->used_entries);
     if(codes==NULL)goto err_out;
 
-    codep=_ogg_malloc(sizeof(*codep)*n);
-    if(codep==NULL)goto err_out;
-
-    for(i=0;i<n;i++){
-      codes[i]=bitreverse(codes[i]);
-      codep[i]=codes+i;
-    }
-
-    qsort(codep,n,sizeof(*codep),sort32a);
-
-    sortindex=_ogg_malloc(n*sizeof(*sortindex));
-    if(sortindex==NULL)goto err_out;
+    qsort(codes,n,sizeof(*codes),sort64a);
 
     c->codelist=_ogg_malloc(n*sizeof(*c->codelist));
     if(c->codelist==NULL)goto err_out;
-    /* the index is a reverse index */
+
     for(i=0;i<n;i++){
-      int position=codep[i]-codes;
-      sortindex[position]=i;
+      c->codelist[i]=(ogg_uint32_t)(codes[i]>>24);
     }
-    _ogg_free(codep); codep=NULL;
 
-    for(i=0;i<n;i++)
-      c->codelist[sortindex[i]]=codes[i];
-    _ogg_free(codes); codes=NULL;
-
-    c->valuelist=_book_unquantize(s,n,sortindex);
+    c->valuelist=_book_unquantize(s,n,codes);
     c->dec_index=_ogg_malloc(n*sizeof(*c->dec_index));
     if(c->dec_index==NULL)goto err_out;
-
-    for(n=0,i=0;i<s->entries;i++)
-      if(s->lengthlist[i]>0)
-        c->dec_index[sortindex[n++]]=i;
-
     c->dec_codelengths=_ogg_malloc(n*sizeof(*c->dec_codelengths));
     if(c->dec_codelengths==NULL)goto err_out;
+
     c->dec_maxlength=0;
-    for(n=0,i=0;i<s->entries;i++)
-      if(s->lengthlist[i]>0){
-        c->dec_codelengths[sortindex[n++]]=s->lengthlist[i];
-        if(s->lengthlist[i]>c->dec_maxlength)
-          c->dec_maxlength=s->lengthlist[i];
-      }
-    _ogg_free(sortindex); sortindex=NULL;
+    for(i=0;i<n;i++){
+      j=(int)(codes[i]&0xffffff);
+      c->dec_index[i]=j;
+      c->dec_codelengths[i]=s->lengthlist[j];
+      if(s->lengthlist[j]>c->dec_maxlength)
+        c->dec_maxlength=s->lengthlist[j];
+    }
+    _ogg_free(codes);
+    codes=NULL;
 
     if(n==1 && c->dec_maxlength==1){
       /* special case the 'single entry codebook' with a single bit
@@ -463,9 +505,7 @@ int vorbis_book_init_decode(codebook *c,const static_codebook *s){
 
   return(0);
  err_out:
-  _ogg_free(sortindex);
-  _ogg_free(codep);
-  _ogg_free(codes);
+  if(codes)_ogg_free(codes);
   vorbis_book_clear(c);
   return(-1);
 }
