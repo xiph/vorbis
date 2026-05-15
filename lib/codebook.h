@@ -77,6 +77,7 @@ typedef struct dec_codebook{
   signed char   firsttablen;   /* number of bits in decode fastpath table */
   ogg_int32_t   entries;       /* codebook entries */
   ogg_int32_t   hi_max;        /* the maximum value of the fastpath hi hint */
+  signed char   hint_shift;    /* the amount to shift the hints */
 
   /* The below does a linear, single monotonic sequence mapping. */
   signed char   maptype;

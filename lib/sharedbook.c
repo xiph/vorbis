@@ -530,8 +530,10 @@ int vorbis_book_init_decode(dec_codebook *c){
       c->firsttable[0]=c->firsttable[1]=1;
 
     }else{
+      int used_bits;
       int tabn;
-      c->firsttablen=(signed char)(ov_ilog(n)-4); /* this is magic */
+      used_bits=ov_ilog(n);
+      c->firsttablen=(signed char)(used_bits-4); /* this is magic */
       if(c->firsttablen<5)c->firsttablen=5;
       /* if the codewords all have similar lengths, we might wind up with a
          table smaller than the shorter codes: increase the size or we could
@@ -572,8 +574,11 @@ int vorbis_book_init_decode(dec_codebook *c){
         {
           ogg_uint32_t mask=0xfffffffeUL<<(31-c->firsttablen);
           long lo=0,hi=0;
+          int hint_shift;
 
           c->hi_max=n;
+          hint_shift=used_bits>15?used_bits-15:0;
+          c->hint_shift=(signed char)hint_shift;
           for(i=0;i<tabn;i++){
             ogg_uint32_t word=((ogg_uint32_t)i<<(32-c->firsttablen));
             if(c->firsttable[bitreverse(word)]==0){
@@ -582,10 +587,13 @@ int vorbis_book_init_decode(dec_codebook *c){
 
               /* we only actually have 15 bits per hint to play with here.
                  In order to overflow gracefully (nothing breaks, efficiency
-                 just drops), encode as the difference from the extremes. */
+                 just drops), shift the values down when the range gets too
+                 large.  We encode the hi value as a difference from the max so
+                 truncation error moves it upwards without risk of stepping
+                 past the end of the arrays. */
               {
-                unsigned long loval=lo;
-                unsigned long hival=n-hi;
+                unsigned long loval=lo>>hint_shift;
+                unsigned long hival=(n-hi)>>hint_shift;
 
                 if(loval>0x7fff)loval=0x7fff;
                 if(hival>0x7fff)hival=0x7fff;
@@ -604,6 +612,7 @@ int vorbis_book_init_decode(dec_codebook *c){
            step through the code lengths to build the fastpath table */
         nlengths=c->maxlength-c->minlength+1;
         c->hi_max=nlengths-1;
+        c->hint_shift=0;
         length=c->minlength;
         code=0;
         for(i=l=0;length<=c->firsttablen;l++,length++){
@@ -694,7 +703,7 @@ static ogg_uint16_t partial_quantlist1[]={0,7,2};
 
 /* no mapping */
 dec_codebook test1={
-  4,0,0,0,16,0,
+  4,0,0,0,16,0,0,
   0,0,0,0,0,
   NULL,
   NULL,NULL,NULL,NULL,NULL
@@ -703,7 +712,7 @@ static float *test1_result=NULL;
 
 /* linear, full mapping, nonsequential */
 dec_codebook test2={
-  4,0,0,0,3,0,
+  4,0,0,0,3,0,0,
   2,4,0,3761766400U,1611661312,
   full_quantlist1,
   NULL,NULL,NULL,NULL,NULL
@@ -712,7 +721,7 @@ static float test2_result[]={-3,-2,-1,0, 1,2,3,4, 5,0,3,-2};
 
 /* linear, full mapping, sequential */
 dec_codebook test3={
-  4,0,0,0,3,0,
+  4,0,0,0,3,0,0,
   2,4,1,3761766400U,1611661312,
   full_quantlist1,
   NULL,NULL,NULL,NULL,NULL
@@ -721,7 +730,7 @@ static float test3_result[]={-3,-5,-6,-6, 1,3,6,10, 5,5,8,6};
 
 /* linear, algorithmic mapping, nonsequential */
 dec_codebook test4={
-  3,0,0,0,27,0,
+  3,0,0,0,27,0,0,
   1,4,0,3761766400U,1611661312,
   partial_quantlist1,
   NULL,NULL,NULL,NULL,NULL
@@ -738,7 +747,7 @@ static float test4_result[]={-3,-3,-3, 4,-3,-3, -1,-3,-3,
 
 /* linear, algorithmic mapping, sequential */
 dec_codebook test5={
-  3,0,0,0,27,0,
+  3,0,0,0,27,0,0,
   1,4,1,3761766400U,1611661312,
   partial_quantlist1,
   NULL,NULL,NULL,NULL,NULL,

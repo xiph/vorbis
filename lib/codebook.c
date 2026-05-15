@@ -316,8 +316,8 @@ STIN long decode_packed_entry_number(dec_codebook *book, oggpack_buffer *b){
   if (lok >= 0) {
     long entry = book->firsttable[lok];
     if(entry&0x80000000UL){
-      lo=(entry>>15)&0x7fff;
-      hi=book->hi_max-(entry&0x7fff);
+      lo=((entry>>15)&0x7fff)<<book->hint_shift;
+      hi=book->hi_max-((entry&0x7fff)<<book->hint_shift);
     }else{
       oggpack_adv(b, (int)(entry&0x3f));
       return(entry>>6);
