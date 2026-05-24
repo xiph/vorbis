@@ -255,7 +255,7 @@ static void vorbis_encode_global_psych_setup(vorbis_info *vi,double s,
 static void vorbis_encode_global_stereo(vorbis_info *vi,
                                         const highlevel_encode_setup *const hi,
                                         const adj_stereo *p){
-  float s=hi->stereo_point_setting;
+  double s=hi->stereo_point_setting;
   int i,is=s;
   double ds=s-is;
   codec_setup_info *ci=vi->codec_setup;
