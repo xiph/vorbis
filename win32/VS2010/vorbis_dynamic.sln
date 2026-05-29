@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbisdec", "vorbisdec\vorb
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbisenc", "vorbisenc\vorbisenc_dynamic.vcxproj", "{E48B6A8B-F7FE-4DA8-8248-E64DBAC4F56C}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libvorbisenc", "libvorbisenc\libvorbisenc_dynamic.vcxproj", "{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -49,6 +51,14 @@ Global
 		{E48B6A8B-F7FE-4DA8-8248-E64DBAC4F56C}.Release|Win32.Build.0 = Release|Win32
 		{E48B6A8B-F7FE-4DA8-8248-E64DBAC4F56C}.Release|x64.ActiveCfg = Release|x64
 		{E48B6A8B-F7FE-4DA8-8248-E64DBAC4F56C}.Release|x64.Build.0 = Release|x64
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Debug|Win32.ActiveCfg = Debug|Win32
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Debug|Win32.Build.0 = Debug|Win32
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Debug|x64.ActiveCfg = Debug|x64
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Debug|x64.Build.0 = Debug|x64
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Release|Win32.ActiveCfg = Release|Win32
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Release|Win32.Build.0 = Release|Win32
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Release|x64.ActiveCfg = Release|x64
+		{FE83F3A3-6261-4E5D-8B2E-2295F255A2DA}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
