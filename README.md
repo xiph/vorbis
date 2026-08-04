@@ -25,6 +25,8 @@ This package contains:
 - libvorbisenc, a BSD-style license library that provides a simple,
   programmatic encoding setup interface
 
+- the generic scalar fallback used on non-x86 targets such as `riscv64`
+
 - example code making use of libogg, libvorbis, libvorbisfile and
   libvorbisenc
 
