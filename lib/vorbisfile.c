@@ -410,6 +410,11 @@ static int _fetch_headers(OggVorbis_File *vf,vorbis_info *vi,vorbis_comment *vc,
   }
 
  bail_header:
+  if(serialno_list && *serialno_list){
+    _ogg_free(*serialno_list);
+    *serialno_list=NULL;
+    if(serialno_n)*serialno_n=0;
+  }
   vorbis_info_clear(vi);
   vorbis_comment_clear(vc);
   vf->ready_state=OPENED;
@@ -579,7 +584,12 @@ static int _bisect_forward_serialno(OggVorbis_File *vf,
 
     ret=_bisect_forward_serialno(vf,next,vf->offset,end,endgran,endserial,
                                  next_serialno_list,next_serialnos,m+1);
-    if(ret)return(ret);
+    if(ret){
+      vorbis_info_clear(&vi);
+      vorbis_comment_clear(&vc);
+      if(next_serialno_list)_ogg_free(next_serialno_list);
+      return(ret);
+    }
 
     if(next_serialno_list)_ogg_free(next_serialno_list);
 
