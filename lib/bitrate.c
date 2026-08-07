@@ -42,7 +42,7 @@ void vorbis_bitrate_init(vorbis_info *vi,bitrate_manager_state *bm){
     bm->min_bitsper= rint(1.*bi->min_rate*halfsamples/ratesamples);
     bm->max_bitsper= rint(1.*bi->max_rate*halfsamples/ratesamples);
 
-    bm->avgfloat=PACKETBLOBS/2;
+    bm->avgfloat=(double)(PACKETBLOBS)/2;
 
     /* not a necessary fix, but one that leads to a more balanced
        typical initialization */
