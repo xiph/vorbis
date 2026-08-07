@@ -1,3 +1,3 @@
-brew 'doxygen'
-brew 'libogg'
-brew 'xz'
+brew install 'doxygen'
+brew install 'libogg'
+brew install 'xz'
