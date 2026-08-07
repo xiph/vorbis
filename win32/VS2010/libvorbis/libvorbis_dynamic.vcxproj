@@ -230,7 +230,6 @@
     <ClCompile Include="..\..\..\lib\sharedbook.c" />
     <ClCompile Include="..\..\..\lib\smallft.c" />
     <ClCompile Include="..\..\..\lib\synthesis.c" />
-    <ClCompile Include="..\..\..\lib\vorbisenc.c" />
     <ClCompile Include="..\..\..\lib\window.c" />
   </ItemGroup>
   <ItemGroup>
@@ -276,7 +275,6 @@
     <ClInclude Include="..\..\..\lib\modes\setup_8.h" />
     <ClInclude Include="..\..\..\lib\modes\setup_X.h" />
     <ClInclude Include="..\..\..\lib\smallft.h" />
-    <ClInclude Include="..\..\..\include\vorbis\vorbisenc.h" />
     <ClInclude Include="..\..\..\include\vorbis\vorbisfile.h" />
     <ClInclude Include="..\..\..\lib\window.h" />
   </ItemGroup>

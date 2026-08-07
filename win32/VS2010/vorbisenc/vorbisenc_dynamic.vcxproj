@@ -210,6 +210,9 @@
     <ProjectReference Include="..\libvorbis\libvorbis_dynamic.vcxproj">
       <Project>{3a214e06-b95e-4d61-a291-1f8df2ec10fd}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\libvorbisenc\libvorbisenc_dynamic.vcxproj">
+      <Project>{fe83f3a3-6261-4e5d-8b2e-2295f255a2da}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -58,10 +58,6 @@ set(VORBISENC_SOURCES
 )
 
 if(WIN32)
-    list(APPEND VORBIS_SOURCES vorbisenc.c)
-endif()
-
-if(WIN32)
     list(APPEND VORBIS_SOURCES ../win32/vorbis.def)
     list(APPEND VORBISENC_SOURCES ../win32/vorbisenc.def)
     list(APPEND VORBISFILE_SOURCES ../win32/vorbisfile.def)
