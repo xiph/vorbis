@@ -2248,9 +2248,9 @@ static void _ov_getlap(OggVorbis_File *vf,vorbis_info *vi,vorbis_dsp_state *vd,
        postextrapolation buffering, or the second half of the MDCT
        from the last packet */
     int samples=vorbis_synthesis_lapout(&vf->vd,&pcm);
-    if(samples==0){
+    if(samples<=0){
       for(i=0;i<vi->channels;i++)
-        memset(lappcm[i]+lapcount,0,sizeof(**pcm)*lapsize-lapcount);
+        memset(lappcm[i]+lapcount,0,sizeof(**pcm)*(lapsize-lapcount));
       lapcount=lapsize;
     }else{
       if(samples>lapsize-lapcount)samples=lapsize-lapcount;
