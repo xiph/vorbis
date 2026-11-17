@@ -1870,6 +1870,10 @@ double ov_time_tell(OggVorbis_File *vf){
       time_total-=ov_time_total(vf,link);
       if(vf->pcm_offset>=pcm_total)break;
     }
+   /* A failed seek leaves pcm_offset==-1, which is smaller than every
+   link boundary, so the loop above can exhaust without breaking;
+   clamp to the first link rather than indexing vi[-1] below. */
+   if(link<0)link=0;
   }
 
   return((double)time_total+(double)(vf->pcm_offset-pcm_total)/vf->vi[link].rate);
