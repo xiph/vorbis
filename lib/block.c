@@ -734,9 +734,17 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   private_state *b=v->backend_state;
   int hs=ci->halfrate_flag;
   int i,j;
+  ogg_int64_t granulepos;
 
   if(!vb)return(OV_EINVAL);
   if(v->pcm_current>v->pcm_returned  && v->pcm_returned!=-1)return(OV_EINVAL);
+
+  /* The granule position comes straight from the page header.  Treat
+     values so large that the arithmetic below could overflow as
+     unknown. */
+  granulepos=vb->granulepos;
+  if(granulepos>((ogg_int64_t)1<<61) || granulepos<-((ogg_int64_t)1<<61))
+    granulepos=-1;
 
   v->lW=v->W;
   v->W=vb->W;
@@ -862,15 +870,15 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
   }
 
   if(v->granulepos==-1){
-    if(vb->granulepos!=-1){ /* only set if we have a position to set to */
+    if(granulepos!=-1){ /* only set if we have a position to set to */
 
-      v->granulepos=vb->granulepos;
+      v->granulepos=granulepos;
 
       /* is this a short page? */
       if(b->sample_count>v->granulepos){
         /* corner case; if this is both the first and last audio page,
            then spec says the end is cut, not beginning */
-       long extra=b->sample_count-vb->granulepos;
+       long extra=b->sample_count-granulepos;
 
         /* we use ogg_int64_t for granule positions because a
            uint64 isn't universally available.  Unfortunately,
@@ -905,10 +913,10 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
     }
   }else{
     v->granulepos+=ci->blocksizes[v->lW]/4+ci->blocksizes[v->W]/4;
-    if(vb->granulepos!=-1 && v->granulepos!=vb->granulepos){
+    if(granulepos!=-1 && v->granulepos!=granulepos){
 
-      if(v->granulepos>vb->granulepos){
-        long extra=v->granulepos-vb->granulepos;
+      if(v->granulepos>granulepos){
+        long extra=v->granulepos-granulepos;
 
         if(extra)
           if(vb->eofflag){
@@ -932,7 +940,7 @@ int vorbis_synthesis_blockin(vorbis_dsp_state *v,vorbis_block *vb){
                spec.  Either way, believe the bitstream } */
       } /* else {Shouldn't happen *unless* the bitstream is out of
            spec.  Either way, believe the bitstream } */
-      v->granulepos=vb->granulepos;
+      v->granulepos=granulepos;
     }
   }
 
