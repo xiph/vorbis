@@ -1706,7 +1706,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
       if(lastblock)vf->pcm_offset+=(lastblock+thisblock)>>2;
 
       if(vf->pcm_offset+((thisblock+
-                          vorbis_info_blocksize(vf->vi,1))>>2)>=pos)break;
+                          vorbis_info_blocksize(vf->vi+vf->current_link,1))>>2)>=pos)break;
 
       /* remove the packet from packet queue and track its granulepos */
       ogg_stream_packetout(&vf->os,NULL);
