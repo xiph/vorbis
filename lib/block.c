@@ -1009,8 +1009,10 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
     v->centerW=0;
   }
 
-  /* solidify buffer into contiguous space */
-  if((v->lW^v->W)==1){
+  /* solidify buffer into contiguous space (it already is if only one
+     block was decoded so far, or lapout was already called; pcm_current
+     is then past the size of the overlap) */
+  if((v->lW^v->W)==1 && v->pcm_current<=(n1+n0)/2){
     /* long/short or short/long */
     for(j=0;j<vi->channels;j++){
       float *s=v->pcm[j];
@@ -1021,7 +1023,7 @@ int vorbis_synthesis_lapout(vorbis_dsp_state *v,float ***pcm){
     v->pcm_returned+=(n1-n0)/2;
     v->pcm_current+=(n1-n0)/2;
   }else{
-    if(v->lW==0){
+    if(v->lW==0 && v->pcm_current<=n0){
       /* short/short */
       for(j=0;j<vi->channels;j++){
         float *s=v->pcm[j];
