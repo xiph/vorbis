@@ -1361,7 +1361,7 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
           if(ogg_page_bos(&og)){
             /* we traversed */
             _decode_clear(vf); /* clear out stream state */
-            ogg_stream_clear(&work_os);
+            ogg_stream_reset(&work_os);
           } /* else, do nothing; next loop will scoop another page */
         }
       }
@@ -1381,8 +1381,9 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
         ogg_stream_reset_serialno(&vf->os,serialno);
         ogg_stream_reset_serialno(&work_os,serialno);
         vf->ready_state=STREAMSET;
-        firstflag=(pagepos<=vf->dataoffsets[link]);
+        firstflag=0;
       }
+      if(pagepos<=vf->dataoffsets[vf->current_link])firstflag=1;
 
       ogg_stream_pagein(&vf->os,&og);
       ogg_stream_pagein(&work_os,&og);
@@ -1705,7 +1706,7 @@ int ov_pcm_seek(OggVorbis_File *vf,ogg_int64_t pos){
       if(lastblock)vf->pcm_offset+=(lastblock+thisblock)>>2;
 
       if(vf->pcm_offset+((thisblock+
-                          vorbis_info_blocksize(vf->vi,1))>>2)>=pos)break;
+                          vorbis_info_blocksize(vf->vi+vf->current_link,1))>>2)>=pos)break;
 
       /* remove the packet from packet queue and track its granulepos */
       ogg_stream_packetout(&vf->os,NULL);
