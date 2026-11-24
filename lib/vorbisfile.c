@@ -1381,8 +1381,9 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
         ogg_stream_reset_serialno(&vf->os,serialno);
         ogg_stream_reset_serialno(&work_os,serialno);
         vf->ready_state=STREAMSET;
-        firstflag=(pagepos<=vf->dataoffsets[link]);
+        firstflag=0;
       }
+      if(pagepos<=vf->dataoffsets[vf->current_link])firstflag=1;
 
       ogg_stream_pagein(&vf->os,&og);
       ogg_stream_pagein(&work_os,&og);
