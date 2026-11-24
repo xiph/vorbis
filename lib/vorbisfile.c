@@ -1361,7 +1361,7 @@ int ov_raw_seek(OggVorbis_File *vf,ogg_int64_t pos){
           if(ogg_page_bos(&og)){
             /* we traversed */
             _decode_clear(vf); /* clear out stream state */
-            ogg_stream_clear(&work_os);
+            ogg_stream_reset(&work_os);
           } /* else, do nothing; next loop will scoop another page */
         }
       }
